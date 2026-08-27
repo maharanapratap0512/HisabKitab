@@ -51,7 +51,7 @@
                                     <ng-option *ngFor="let item of categories" [value]="item._id">
                                         {{item.category_hin}} : {{item.category_eng}}</ng-option>
                                 </ng-select>
-                                <app-item-dropdown class="mt-1" [items]="items"
+                                <app-item-dropdown class="mt-1"
                                     [(ngModel)]="filterBody.item_subitem_ids" [multiple]="true"
                                     placeholder="Select Items"></app-item-dropdown>
                             </div>

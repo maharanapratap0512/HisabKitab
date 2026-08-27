@@ -356,7 +356,7 @@
                     <td class="text-center align-middle">{{i+1}}</td>
 
                     <td>
-                      <app-item-dropdown size="sm" [items]="items | filterByDate:pfs.prastavForm.date"
+                      <app-item-dropdown size="sm" [filterObj]="{ date: pfs.prastavForm.date }"
                         [(itemId)]="line.item_id" [(subitemId)]="line.subitem_id" (change)="onItemChange(line)"
                         [required]="true" placeholder="Item - Subitem">
                       </app-item-dropdown>
@@ -456,7 +456,7 @@
                               </td>
 
                               <td class="align-middle">
-                                <app-item-dropdown size="sm" [items]="items | filterByDate:pfs.prastavForm.date"
+                                <app-item-dropdown size="sm" [filterObj]="{ date: pfs.prastavForm.date }"
                                   [(itemId)]="jw.item_id" [(subitemId)]="jw.subitem_id"
                                   (change)="onJawakItemChange(line, jw)" [required]="true" placeholder="Select Item">
                                 </app-item-dropdown>

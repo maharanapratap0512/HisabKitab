@@ -375,7 +375,8 @@
                                           <!-- single item-dropdown for item & subitem / variant -->
                                           <div class="col-8 mx-1">
                                              <app-item-dropdown class="custom-import" style="min-width: 250px;"
-                                                [items]="items" [(itemId)]="data.item_id" [(subitemId)]="data.subitem_id"
+                                                [filterObj]="{ category_id: cat }" [(itemId)]="data.item_id" [(subitemId)]="data.subitem_id"
+                                                (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                                 (change)="data.item_id = $event.item_id; data.subitem_id = $event.subitem_id; data.item = $event.item" appendTo="body">
                                              </app-item-dropdown>
                                           </div>

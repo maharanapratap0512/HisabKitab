@@ -24,7 +24,7 @@
         <!-- 0. Item Selection Section -->
         <div class="mb-3">
             <label class="form-label fw-semibold mb-1" style="font-size:12px;">Item</label>
-            <app-item-dropdown #itemDropdown [items]="items" [itemId]="selectedItem?._id"
+            <app-item-dropdown #itemDropdown [itemId]="selectedItem?._id"
                 (change)="onItemDropdownChange($event)" placeholder="Select Item...">
             </app-item-dropdown>
         </div>

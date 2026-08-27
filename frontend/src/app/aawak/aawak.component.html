@@ -217,7 +217,7 @@
                            <div class="col-md-3 mb-3">
                               <div class="form-group">
                                  <label class="form-label">Item & Subitem</label>
-                                 <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix" [multiple]="true"
+                                 <app-item-dropdown [(ngModel)]="selectedItemmix" [multiple]="true"
                                     [closeOnSelect]="false" name="item_id"></app-item-dropdown>
                                  <div class="form-check mt-1" id="tour-item-only-chk">
                                     <input type="checkbox" class="form-check-input" id="itemOnlyCheckawk"
@@ -602,7 +602,7 @@
                                     <div style="width: 280px;" class="p-1">
                                        <label class="form-label mb-1"><small class="fw-bold">Item &
                                              Subitem</small></label>
-                                       <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix"
+                                       <app-item-dropdown [(ngModel)]="selectedItemmix"
                                           (ngModelChange)="getFilteredAawakData()" [multiple]="true"
                                           [closeOnSelect]="false" name="hdr_item_mix"
                                           appendTo="body"></app-item-dropdown>

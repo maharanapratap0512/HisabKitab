@@ -1,5 +1,5 @@
 <ng-select class="item-dropdown" dropdownClass="item-dropdown-panel" [class.custom-sm]="size === 'sm'" [items]="options"
-  bindLabel="searchTags" [(ngModel)]="selectedValue" (change)="onSelectChange($event)" [placeholder]="placeholder"
+  bindLabel="searchTags" [(ngModel)]="selectedValue" (change)="onSelectChange($event)" (open)="open.emit()" (close)="close.emit()" [placeholder]="placeholder"
   [clearable]="true" [virtualScroll]="true" [appendTo]="appendTo" [readonly]="readonly" [required]="required"
   [searchFn]="customSearch" [multiple]="multiple" [closeOnSelect]="closeOnSelect" [compareWith]="compareById"
   dropdownPosition="auto">

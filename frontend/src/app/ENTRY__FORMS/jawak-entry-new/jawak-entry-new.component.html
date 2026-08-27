@@ -379,7 +379,7 @@
                                             <label class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">Item
                                                 - Subitem <span class="text-danger">*</span></label>
                                             <app-item-dropdown size="sm"
-                                                [items]="items | filterByDate:fs.jawakFormMain.date"
+                                                [filterObj]="{ date: fs.jawakFormMain.date }"
                                                 [(itemId)]="jwkForm.item_id" [(subitemId)]="jwkForm.subitem_id"
                                                 (change)="itemSubitemSelected($event, i)" [required]="true"
                                                 [readonly]="!!jwkForm.aawak_ref_id">
@@ -923,7 +923,7 @@
                                             </td>
                                             <td>
                                                 <app-item-dropdown size="sm"
-                                                    [items]="items | filterByDate:fs.jawakFormMain.date"
+                                                    [filterObj]="{ date: fs.jawakFormMain.date }"
                                                     [(itemId)]="jwkForm.item_id" [(subitemId)]="jwkForm.subitem_id"
                                                     (change)="itemSubitemSelected($event, i)" [required]="true"
                                                     [readonly]="!!jwkForm.aawak_ref_id">

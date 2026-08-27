@@ -1,9 +1,10 @@
-import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { GlobalService } from 'src/app/services/global.service';
-
 import { AuthService } from 'src/app/services/auth.service';
+import { Subscription } from 'rxjs';
+import { FilterByDatePipe } from 'src/app/pipe/filter-by-date.pipe';
 
 declare var $: any;
 
@@ -12,6 +13,7 @@ declare var $: any;
   templateUrl: './item-dropdown.component.html',
   styleUrls: ['./item-dropdown.component.scss'],
   providers: [
+    FilterByDatePipe,
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => ItemDropdownComponent),
@@ -19,11 +21,13 @@ declare var $: any;
     }
   ]
 })
-export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, OnDestroy {
+export class ItemDropdownComponent implements ControlValueAccessor, OnInit, OnChanges, OnDestroy {
   @ViewChild(NgSelectComponent) selectComponent: any;
 
   @Input() items: any[] = [];
   @Input() categoryIds: any[] = [];
+  @Input() date: any = null;
+  @Input() filterObj: any = {};
   @Input() placeholder: string = 'Select Item';
   @Input() appendTo: string = 'body';
   @Input() readonly: boolean = false;
@@ -54,6 +58,8 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
   @Output() itemIdChange = new EventEmitter<any>();
   @Output() subitemIdChange = new EventEmitter<any>();
   @Output() change = new EventEmitter<any>();
+  @Output() open = new EventEmitter<void>();
+  @Output() close = new EventEmitter<void>();
   @Output() addItem = new EventEmitter<void>();
   @Output() addSubitem = new EventEmitter<void>();
   @Output() addVariant = new EventEmitter<void>();
@@ -61,6 +67,8 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
 
   options: any[] = [];
   selectedValue: any = null;
+  internalItems: any[] = [];
+  private listSub?: Subscription;
 
   showModal: string = '';
   modalId: string = 'itemDropModal_' + Math.random().toString(36).substring(2, 9);
@@ -70,11 +78,21 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
 
   constructor(
     public gs: GlobalService,
-    public auth: AuthService
+    public auth: AuthService,
+    private filterByDatePipe: FilterByDatePipe
   ) { }
 
+  ngOnInit(): void {
+    this.listSub = this.gs.observeList().subscribe((result: any) => {
+      if (result && result.itemmix) {
+        this.internalItems = result.itemmix;
+        this.flattenItems();
+      }
+    });
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['items'] || changes['categoryIds']) {
+    if (changes['items'] || changes['categoryIds'] || changes['date'] || changes['filterObj']) {
       this.flattenItems();
     }
     if (changes['itemId'] || changes['subitemId']) {
@@ -84,62 +102,110 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
 
   flattenItems() {
     const flat: any[] = [];
-    if (!this.items) return;
+    const rawSource = (this.items && this.items.length > 0) ? this.items : (this.internalItems || []);
+    if (!rawSource || !Array.isArray(rawSource)) return;
 
-    this.items.forEach(it => {
+    // 1. Date Filter using project's FilterByDatePipe
+    const effectiveDate = this.date || this.filterObj?.date || this.filterObj?.date_from;
+    let dateFilteredSource = rawSource;
+    if (effectiveDate) {
+      dateFilteredSource = this.filterByDatePipe.transform(rawSource, effectiveDate);
+    }
+
+    // 2. Category Filter
+    const catSource = (this.categoryIds && this.categoryIds.length > 0)
+      ? this.categoryIds
+      : (this.filterObj?.category_id || this.filterObj?.categoryIds || this.filterObj?.categories || []);
+
+    const catArray = Array.isArray(catSource) ? catSource : (catSource ? [catSource] : []);
+
+    const activeCatIds = catArray
+      .map((c: any) => (c && typeof c === 'object') ? (c._id || c.category_id || c.id) : c)
+      .filter((c: any) => c !== null && c !== undefined && c !== '' && c !== 'null')
+      .map((c: any) => String(c));
+
+    const isCatFilterActive = activeCatIds.length > 0;
+
+    dateFilteredSource.forEach(it => {
+      if (!it) return;
+
+      const subitemsList: any[] = Array.isArray(it.subitems) ? it.subitems : [];
       let itemMatches = true;
-      let matchingSubitems = it.subitems || [];
+      let matchingSubitems = subitemsList;
 
-      if (this.categoryIds && this.categoryIds.length > 0) {
-        const itemCats = it.categories && Array.isArray(it.categories) ? it.categories.filter((c: any) => c && c._id) : [];
-        itemMatches = itemCats.some((c: any) => this.categoryIds.includes(c._id));
+      if (isCatFilterActive) {
+        const itemCats: string[] = [];
+        if (it.categories && Array.isArray(it.categories)) {
+          it.categories.forEach((c: any) => {
+            const cid = (c && typeof c === 'object') ? (c._id || c.category_id || c.id) : c;
+            if (cid !== null && cid !== undefined) itemCats.push(String(cid));
+          });
+        }
+        if (it.category_ids && Array.isArray(it.category_ids)) {
+          it.category_ids.forEach((c: any) => {
+            if (c !== null && c !== undefined) itemCats.push(String(c));
+          });
+        }
 
-        if (it.subitems && it.subitems.length > 0) {
-          matchingSubitems = it.subitems.filter((sub: any) => {
-            const subCats = sub.categories && Array.isArray(sub.categories) ? sub.categories.filter((c: any) => c && c._id) : [];
+        itemMatches = itemCats.some((id: string) => activeCatIds.includes(id));
+
+        if (subitemsList.length > 0) {
+          matchingSubitems = subitemsList.filter((sub: any) => {
+            const subCats: string[] = [];
+            if (sub.categories && Array.isArray(sub.categories)) {
+              sub.categories.forEach((c: any) => {
+                const cid = (c && typeof c === 'object') ? (c._id || c.category_id || c.id) : c;
+                if (cid !== null && cid !== undefined) subCats.push(String(cid));
+              });
+            }
             if (subCats.length > 0) {
-              return subCats.some((c: any) => this.categoryIds.includes(c._id));
+              return subCats.some((id: string) => activeCatIds.includes(id));
             }
             return itemMatches;
           });
         } else {
           matchingSubitems = [];
         }
-      }
 
-      if (this.categoryIds && this.categoryIds.length > 0 && !itemMatches && matchingSubitems.length === 0) {
-        return; // skip entirely
+        if (!itemMatches && matchingSubitems.length === 0) {
+          return;
+        }
       }
 
       // Parent item
-      const itemHin = it.item_hin ? it.item_hin.trim() : '';
-      const itemEng = it.item_eng ? it.item_eng.trim() : '';
+      const itemHin = it.item_hin ? String(it.item_hin).trim() : '';
+      const itemEng = it.item_eng ? String(it.item_eng).trim() : '';
+      const itemCode = it.item_code ? String(it.item_code).trim() : '';
+      const itemRoman = it.item_roman ? String(it.item_roman).trim() : '';
 
       let aliasTags = '';
       if (it.item_aliases && Array.isArray(it.item_aliases)) {
-        aliasTags = it.item_aliases.map((a: any) => a.alias).join(' ');
+        aliasTags = it.item_aliases.map((a: any) => a.alias || '').join(' ');
       }
 
-      if (!this.categoryIds || this.categoryIds.length === 0 || itemMatches) {
+      if (!isCatFilterActive || itemMatches) {
         flat.push({
           id: `${it._id}:`,
           item_id: it._id,
           subitem_id: null,
           item_hin: itemHin,
           item_eng: itemEng,
-          item_code: it.item_code,
-          item_roman: it.item_roman,
+          item_code: itemCode,
+          item_roman: itemRoman,
           item_aliases: it.item_aliases,
           isSubitem: false,
           item: it,
-          searchTags: `${itemHin} ${itemEng} ${it.item_code || ''} ${it.item_roman || ''} ${aliasTags}`.toLowerCase()
+          searchTags: `${itemHin} ${itemEng} ${itemCode} ${itemRoman} ${aliasTags}`.toLowerCase()
         });
       }
 
       if (matchingSubitems && matchingSubitems.length > 0) {
         matchingSubitems.forEach((sub: any) => {
+          if (!sub) return;
           const subitemHin = sub.subitem_hin ? String(sub.subitem_hin).trim() : '';
           const subitemEng = sub.subitem_eng ? String(sub.subitem_eng).trim() : '';
+          const subitemCode = sub.subitem_code ? String(sub.subitem_code).trim() : '';
+          const subitemRoman = sub.subitem_roman ? String(sub.subitem_roman).trim() : '';
 
           flat.push({
             id: `${it._id}:${sub._id}`,
@@ -149,12 +215,12 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
             item_eng: itemEng,
             subitem_hin: subitemHin,
             subitem_eng: subitemEng,
-            subitem_code: sub.subitem_code,
-            subitem_roman: sub.subitem_roman,
+            subitem_code: subitemCode,
+            subitem_roman: subitemRoman,
             item_aliases: it.item_aliases,
             isSubitem: true,
             item: it,
-            searchTags: `${subitemHin} ${itemHin} ${subitemEng} ${itemEng} ${sub.subitem_code || ''} ${sub.subitem_roman || ''} ${it.item_code || ''} ${aliasTags}`.toLowerCase()
+            searchTags: `${subitemHin} ${itemHin} ${subitemEng} ${itemEng} ${subitemCode} ${subitemRoman} ${itemCode} ${aliasTags}`.toLowerCase()
           });
         });
       }
@@ -209,14 +275,25 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
   }
 
   onSelectChange(event: any) {
-    this.selectedValue = event;
-
+    this.onTouched();
     if (!this.multiple) {
-      const selected = event; // event is the object now
-      const res = selected ? { item_id: selected.item_id, subitem_id: selected.subitem_id, item: selected.item } : { item_id: null, subitem_id: null, item: null };
+      const selected = event;
+      let res: any = null;
+      if (selected) {
+        res = {
+          item_id: selected.item_id,
+          subitem_id: selected.subitem_id,
+          item: selected.item,
+          raw: selected
+        };
+        this.itemId = selected.item_id;
+        this.subitemId = selected.subitem_id;
+      } else {
+        res = { item_id: null, subitem_id: null, item: null, raw: null };
+        this.itemId = null;
+        this.subitemId = null;
+      }
 
-      this.itemId = res.item_id;
-      this.subitemId = res.subitem_id;
       this.itemIdChange.emit(res.item_id);
       this.subitemIdChange.emit(res.subitem_id);
 
@@ -231,8 +308,10 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
   }
 
   customSearch(term: string, item: any) {
-    term = term.toLowerCase();
-    return item.searchTags.indexOf(term) > -1;
+    if (!term || !term.trim()) return true;
+    const words = term.toLowerCase().trim().split(/\s+/);
+    const tags = item.searchTags || '';
+    return words.every(w => tags.includes(w));
   }
 
   openSelfModal(type: string) {
@@ -275,8 +354,9 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
   }
 
   get selectedItemObj(): any {
+    const source = (this.items && this.items.length > 0) ? this.items : (this.internalItems || []);
     if (this.itemId) {
-      return (this.items || []).find((i: any) => i._id === this.itemId || i.id === this.itemId) || null;
+      return (source || []).find((i: any) => i._id === this.itemId || i.id === this.itemId) || null;
     }
     return null;
   }
@@ -292,7 +372,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
   refreshMasterList() {
     this.gs.observeList(true).subscribe((result: any) => {
       if (result && result.itemmix) {
-        this.items = result.itemmix;
+        this.internalItems = result.itemmix;
         this.flattenItems();
         this.syncSelectedValue();
         if (this.selectedValue) {
@@ -307,7 +387,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
       return;
     }
     if (this.gs.Lists && this.gs.Lists.itemmix) {
-      this.items = this.gs.Lists.itemmix;
+      this.internalItems = this.gs.Lists.itemmix;
     }
     this.flattenItems();
     if (ev && ev.closeModal !== false) {
@@ -317,12 +397,10 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
 
   onSelfItemCreated(ev: any) {
     if (ev && ev._id) {
-      if (!this.items) {
-        this.items = [];
-      }
-      const exists = this.items.some((it: any) => it._id === ev._id);
+      const source = (this.items && this.items.length > 0) ? this.items : this.internalItems;
+      const exists = source.some((it: any) => it._id === ev._id);
       if (!exists) {
-        this.items.push(ev);
+        source.push(ev);
       }
       this.flattenItems();
 
@@ -338,10 +416,8 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
 
   onSelfSubitemCreated(ev: any) {
     if (ev && ev._id) {
-      if (!this.items) {
-        this.items = [];
-      }
-      const parentItem = this.items.find((it: any) => it._id === ev.item_id);
+      const source = (this.items && this.items.length > 0) ? this.items : this.internalItems;
+      const parentItem = source.find((it: any) => it._id === ev.item_id);
       if (parentItem) {
         if (!parentItem.subitems) {
           parentItem.subitems = [];
@@ -377,6 +453,9 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
   }
 
   ngOnDestroy(): void {
+    if (this.listSub) {
+      this.listSub.unsubscribe();
+    }
     if (typeof $ !== 'undefined' && this.modalId) {
       $('#' + this.modalId).modal('hide');
       $('#' + this.modalId).remove();

@@ -192,7 +192,7 @@
                                     </td>
                                     <td colspan="2" style="min-width: 220px;">
                                         <app-item-dropdown size="sm"
-                                            [items]="items | filterByDate:fs.aawakFormMain.date"
+                                            [filterObj]="{ date: fs.aawakFormMain.date }"
                                             [(itemId)]="awkForm.item_id" [(subitemId)]="awkForm.subitem_id"
                                             (change)="itemSubitemSelected($event, i)" [required]="true">
                                         </app-item-dropdown>

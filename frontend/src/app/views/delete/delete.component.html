@@ -41,7 +41,7 @@
                                 <i class="uil uil-exchange"></i> Transfer to:
                             </span>
                             <ng-container *ngIf="Type === 'item' || Type === 'subitem'">
-                                <app-item-dropdown [items]="items" [(itemId)]="targetItem" [(subitemId)]="targetSubitem"
+                                <app-item-dropdown [(itemId)]="targetItem" [(subitemId)]="targetSubitem"
                                     [multiple]="false">
                                 </app-item-dropdown>
                             </ng-container>

@@ -127,7 +127,7 @@
                                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                                                     [isOpen]="filterBody.item_subitem_ids?.length > 0" (clear)="filterBody.item_subitem_ids = []; searchReports()"
                                                     triggerOn="click">
-                                                    <app-item-dropdown size="sm" [items]="items" [categoryIds]="filterBody.category_id" [(ngModel)]="filterBody.item_subitem_ids"
+                                                    <app-item-dropdown size="sm" [filterObj]="filterBody" [(ngModel)]="filterBody.item_subitem_ids"
                                                         [multiple]="true" (change)="searchReports()" placeholder="Select Item">
                                                     </app-item-dropdown>
                                                 </app-popover-filter>

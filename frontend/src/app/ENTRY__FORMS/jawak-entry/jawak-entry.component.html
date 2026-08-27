@@ -298,7 +298,7 @@
                                 {{ auth.isVariantMode ? '+ Variant' : '+ Subitem' }}
                             </a>
                         </div>
-                        <app-item-dropdown [items]="items" [itemId]="jawakForm.get('item_id')?.value"
+                        <app-item-dropdown [filterObj]="{ date: jawakForm.get('date')?.value }" [itemId]="jawakForm.get('item_id')?.value"
                             [subitemId]="jawakForm.get('subitem_id')?.value"
                             (change)="jawakForm.patchValue({item_id: $event.item_id, subitem_id: $event.subitem_id, aawak_ref_id: null}); itemSelected($event.item_id); subitemSelected($event.subitem_id)"
                             [readonly]="ref_id" [required]="true">

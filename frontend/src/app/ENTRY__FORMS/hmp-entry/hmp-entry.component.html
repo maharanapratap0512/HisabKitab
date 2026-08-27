@@ -122,7 +122,7 @@
                                     *ngFor="let row of fs.hmpBatchForm.inputs; let i = index; trackBy: trackByIndex">
                                     <td>{{i+1}}</td>
                                     <td>
-                                        <app-item-dropdown size="sm" [items]="items | filterByDate:fs.hmpBatchForm.date"
+                                        <app-item-dropdown size="sm" [filterObj]="{ date: fs.hmpBatchForm.date }"
                                             [(itemId)]="row.item_id" [(subitemId)]="row.subitem_id"
                                             (change)="itemSubitemSelected($event, i, 'inputs')" [required]="true"
                                             appendTo="#hmpEntryForm">
@@ -283,7 +283,7 @@
                                         <!-- Item Dropdown -->
                                         <td>
                                             <app-item-dropdown size="sm"
-                                                [items]="items | filterByDate:fs.hmpBatchForm.date"
+                                                [filterObj]="{ date: fs.hmpBatchForm.date }"
                                                 [(itemId)]="row.item_id" [(subitemId)]="row.subitem_id"
                                                 (change)="itemSubitemSelected($event, i, 'outputs')" [required]="true"
                                                 appendTo="#hmpEntryForm">
@@ -423,7 +423,7 @@
                             <!-- Select Item -->
                             <div class="col-md-2">
                                 <label class="form-label mb-1 fw-semibold"><small>Select Item</small></label>
-                                <app-item-dropdown size="sm" [items]="items | filterByDate:fs.hmpBatchForm.date"
+                                <app-item-dropdown size="sm" [filterObj]="{ date: fs.hmpBatchForm.date }"
                                     [(itemId)]="formModel.item_id" [(subitemId)]="formModel.subitem_id"
                                     (change)="commonFormItemSubitemSelected($event)" [required]="false"
                                     appendTo="#hmpEntryForm">

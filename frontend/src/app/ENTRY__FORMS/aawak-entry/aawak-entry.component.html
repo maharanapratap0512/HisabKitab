@@ -341,7 +341,7 @@
                         {{item.subitem_eng}}</ng-option>
                   </ng-select> -->
 
-                  <app-item-dropdown [items]="items" [(itemId)]="awkfg.item_id" [(subitemId)]="awkfg.subitem_id"
+                  <app-item-dropdown [filterObj]="{ date: awkfg.date }" [(itemId)]="awkfg.item_id" [(subitemId)]="awkfg.subitem_id"
                      (change)="itemSubitemSelected($event)" [ngClass]="{'validation' : (f.submitted && !awkfg.item_id)}"
                      [required]="true" appendTo="body">
                   </app-item-dropdown>
