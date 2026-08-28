@@ -17,8 +17,24 @@ export class IntegrityCheckupService {
     return this.http.get(this.api.getUrl('INTEGRITY') + 'tests');
   }
 
-  scan(testId?: string): Observable<any> {
-    return this.http.post(this.api.getUrl('INTEGRITY') + 'scan', { testId });
+  scan(testId?: string, selectedColumns?: string[]): Observable<any> {
+    return this.http.post(this.api.getUrl('INTEGRITY') + 'scan', { testId, selectedColumns });
+  }
+
+  scanStream(testId?: string, selectedColumns?: string[]): Promise<ReadableStream<Uint8Array> | null> {
+    const url = this.api.getUrl('INTEGRITY') + 'scan-stream';
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ testId, selectedColumns })
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.body;
+    });
   }
 
   resolveStream(mismatches: any[], testId?: string): Promise<ReadableStream<Uint8Array> | null> {

@@ -6,6 +6,11 @@ router.get('/tests', (req, res) => {
         success: true,
         tests: [
             {
+                id: 'duplicate-aj-assumption',
+                name: 'Duplicate Aawak & Jawak Assumption',
+                description: 'Detect potential duplicate Aawak and Jawak entries based on customizable comparison columns. Displays connected relation counts, streams findings in real-time, and provides inline Edit and Delete options.'
+            },
+            {
                 id: 'jawak-aawak-ref-mismatch',
                 name: 'Jawak Reference Mismatch',
                 description: 'Compare Jawak record columns (Main MM ID, Item ID, Subitem ID, Unit ID) against its referenced Aawak record via rel_aawak_jawak relation table. Displays mismatched rows and aligns Jawak columns to match the reference Aawak record.'
@@ -26,9 +31,11 @@ router.get('/tests', (req, res) => {
 
 router.post('/scan', async (req, res, next) => {
     try {
-        const { testId } = req.body;
+        const { testId, selectedColumns } = req.body;
         let mismatches = [];
-        if (testId === 'aawak-remaining-qty-mismatch') {
+        if (testId === 'duplicate-aj-assumption') {
+            mismatches = integrityService.scanDuplicateMismatches(selectedColumns);
+        } else if (testId === 'aawak-remaining-qty-mismatch') {
             mismatches = integrityService.scanRemainingQtyMismatches();
         } else if (testId === 'bachat-stock-mismatch') {
             mismatches = integrityService.scanBachatMismatches();
@@ -38,6 +45,39 @@ router.post('/scan', async (req, res, next) => {
         res.json({ success: true, result: mismatches });
     } catch (e) {
         next(e);
+    }
+});
+
+router.post('/scan-stream', async (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Transfer-Encoding', 'chunked');
+
+    const writeLog = (msg) => {
+        res.write(JSON.stringify({ type: 'log', message: msg }) + '\n');
+    };
+
+    const writeGroup = (groupObj) => {
+        res.write(JSON.stringify({ type: 'group', group: groupObj }) + '\n');
+    };
+
+    try {
+        const { testId, selectedColumns } = req.body;
+        if (testId === 'duplicate-aj-assumption') {
+            const results = integrityService.scanDuplicateMismatches(selectedColumns, writeGroup, writeLog);
+            res.write(JSON.stringify({ type: 'complete', count: results.length }) + '\n');
+        } else {
+            writeLog('[Notice] Legacy test scan started via stream...');
+            let mismatches = [];
+            if (testId === 'aawak-remaining-qty-mismatch') mismatches = integrityService.scanRemainingQtyMismatches();
+            else if (testId === 'bachat-stock-mismatch') mismatches = integrityService.scanBachatMismatches();
+            else mismatches = integrityService.scanMismatches();
+
+            res.write(JSON.stringify({ type: 'complete', count: mismatches.length, result: mismatches }) + '\n');
+        }
+        res.end();
+    } catch (err) {
+        writeLog(`[Error] Streaming scan failed: ${err.message}`);
+        res.end();
     }
 });
 

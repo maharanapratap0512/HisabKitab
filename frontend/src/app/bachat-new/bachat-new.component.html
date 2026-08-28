@@ -7,254 +7,328 @@
 <div class="wrapper">
    <div class="content-page">
       <div class="content">
-         <div class="container-fluid">
 
-            <!-- First Row -->
-            <!-- Add Button, Search Field, Filter button, Total Count -->
-            <div class="row" *ngIf="bachatData.length">
-               <div class="card-body">
-                  <div class="row d-flex justify-content-between">
-                     <div class="col-4">
-                        <div class="form-group">
-                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                              name="search">
-                        </div>
+         <!-- First Row -->
+         <!-- Add Button, Search Field, Filter button, Total Count -->
+         <div class="row">
+            <div class="card-body">
+               <div class="row d-flex justify-content-between">
+                  <div class="col-4">
+                     <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                           name="search">
                      </div>
-                     <div class="col-2">
-                        <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
-                           data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i
-                              class="uil-search-plus h4 icon-mx-2"></i> Advance Search
-                        </button>
-                     </div>
-                     <div class="col-2">
-                        <button class="file btn btn-success" style="font-weight: 700 !important;">
-                           <i class="uil uil-arrow-to-bottom"></i> Import Bachat
-                           <input type="file" class="inputtag"
-                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                              (change)="excelImport($event)" />
-                        </button>
-                        <!-- <button *ngIf="gs.importPending" class="file btn btn-success" (click)="openModal('import')"
+                  </div>
+                  <div class="col-2">
+                     <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i
+                           class="uil-search-plus h4 icon-mx-2"></i> Advance Search
+                     </button>
+                  </div>
+                  <div class="col-2">
+                     <button class="file btn btn-success" style="font-weight: 700 !important;">
+                        <i class="uil uil-arrow-to-bottom"></i> Import Bachat
+                        <input type="file" class="inputtag"
+                           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                           (change)="excelImport($event)" />
+                     </button>
+                     <!-- <button *ngIf="gs.importPending" class="file btn btn-success" (click)="openModal('import')"
                            style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                         </button> -->
-                     </div>
-
-                     <div class="col-2 d-flex flex-column align-items-center justify-content-center">
-                        <button type="button" class="btn btn-outline-success dropdown-toggle w-100 mb-1"
-                           data-bs-toggle="dropdown" aria-expanded="false"> Export </button>
-                        <div class="dropdown-menu">
-                           <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportBachatOnly()">Bachat Only</a>
-                           <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportSaar()">Saar</a>
-                           <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportFull()">Full Saar</a>
-                        </div>
-                        <div class="form-check mb-0">
-                           <input type="checkbox" class="form-check-input" id="ignoreDummyCheck" [(ngModel)]="ignoreDummy" name="ignoreDummy">
-                           <label class="form-check-label font-12" for="ignoreDummyCheck" style="white-space: nowrap; cursor: pointer;">Ignore Dummy</label>
-                        </div>
-                     </div>
-                     <div class="col-2">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">
-                           Total Count : {{bachatData.length}}
-                        </button>
-                     </div>
                   </div>
-               </div>
-            </div>
 
-            <!-- fliter collapse -->
-            <div class="collapse" id="collapseExample">
-               <div class="card card-body">
-                  <div class="row">
-                     <div class="card-body">
-                        <form #filterForm="ngForm">
-                           <div class="row">
-                              <div class="col-3">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select State"
-                                    [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)"
-                                    [(ngModel)]="filterBody.state_id" [ngModelOptions]="{standalone: true}">
-                                    <ng-option *ngFor="let item of states" [value]="item._id">
-                                       {{item.state_hin}}:{{item.state_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
-                              <div class="col-3">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
-                                    [clearable]="true" [virtualScroll]="true" (change)="filter()" [multiple]="true"
-                                    [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
-                                    <ng-option *ngFor="let item of mms" [value]="item._id">
-                                       {{item.mm_hin}}:{{item.mm_eng}}:{{item.mm_code}}</ng-option>
-                                 </ng-select>
-                              </div>
-                              <div class="col-3">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
-                                    [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)"
-                                    [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
-                                    <ng-option *ngFor="let item of categories" [value]="item._id">
-                                       {{item.category_hin}}:{{item.category_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
-                              <div class="col-3">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                    [multiple]="true" [clearable]="true" [virtualScroll]="true"
-                                    (change)="itemSelected($event)" [(ngModel)]="filterBody.item_id"
-                                    [ngModelOptions]="{standalone: true}">
-                                    <ng-option *ngFor="let item of items" [value]="item._id">
-                                       {{item.item_hin}}:{{item.item_eng}}:{{item.item_code}}</ng-option>
-                                 </ng-select>
-                              </div>
-                              <div class="col-3 mt-2">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem"
-                                    [multiple]="true" [clearable]="true" [virtualScroll]="true"
-                                    [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}"
-                                    (change)="filter()">
-                                    <ng-option *ngFor="let item of subitems" [value]="item._id">
-                                       {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
-                           </div>
-                        </form>
-                     </div>
-                  </div>
-               </div>
-            </div>
-
-
-
-            <div class="row">
-               <div class="col-md-2 mb-2">
-                  <div class="form-group">
-                     <label class="form-label">From Year-Month</label>
-                     <input type="month" class="form-control" [(ngModel)]="filterBody.from_year_month"
-                        name="from_year_month" [ngModelOptions]="{standalone: true}">
-                  </div>
-               </div>
-               <div class="col-md-2 mb-2">
-                  <div class="form-group">
-                     <label class="form-label">To Year-Month</label>
-                     <input type="month" class="form-control" [(ngModel)]="filterBody.to_year_month"
-                        name="to_year_month" [ngModelOptions]="{standalone: true}">
-                  </div>
-               </div>
-
-
-               <div class="col-md-2 mb-2" *ngIf="monthsSel.length > 0">
-                  <div class="form-group d-flex flex-column align-items-center">
-                     <label class="form-label mb-1"></label>
-                     <button type="button" class="form-control btn btn-outline-success dropdown-toggle mb-1"
+                  <div class="col-2 d-flex flex-column align-items-center justify-content-center">
+                     <button type="button" class="btn btn-outline-success dropdown-toggle w-100 mb-1"
                         data-bs-toggle="dropdown" aria-expanded="false"> Export </button>
                      <div class="dropdown-menu">
-                        <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportMonthlyMain()">Main Saar</a>
-                        <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportMonthlyConditionWise()">Condition Wise</a>
+                        <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportBachatOnly()">Bachat
+                           Only</a>
+                        <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportSaar()">Saar</a>
+                        <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportFull()">Full Saar</a>
                      </div>
                      <div class="form-check mb-0">
-                        <input type="checkbox" class="form-check-input" id="ignoreDummyMonthlyCheck" [(ngModel)]="ignoreDummy" name="ignoreDummy">
-                        <label class="form-check-label font-12" for="ignoreDummyMonthlyCheck" style="white-space: nowrap; cursor: pointer;">Ignore Dummy</label>
+                        <input type="checkbox" class="form-check-input" id="ignoreDummyCheck" [(ngModel)]="ignoreDummy"
+                           name="ignoreDummy">
+                        <label class="form-check-label font-12" for="ignoreDummyCheck"
+                           style="white-space: nowrap; cursor: pointer;">Ignore Dummy</label>
                      </div>
                   </div>
-               </div>
-               <div class="col-md-2 mb-2">
-                  <div class="form-group">
-                     <label class="form-label">.</label>
-                     <button class="btn btn-primary form-control" (click)="filter()">Submit</button>
+                  <div class="col-2">
+                     <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">
+                        Total Count : {{bachatData.length}}
+                     </button>
                   </div>
                </div>
             </div>
-            <div class="row" *ngIf="false">
-               <div class="col-md-2 mb-2">
-                  <div class="form-group">
-                     <label class="form-label">From Year</label>
-                     <ng-select class="custom" style="width: 100%;" placeholder="Select Year" [clearable]="true"
-                        [virtualScroll]="true" [(ngModel)]="filterBody.from_year" name="from_year"
-                        (change)="monthsFrom = gs.yearChangedGetMonth($event)">
-                        <ng-option selected="selected" disabled value="">Select Year
-                        </ng-option>
-                        <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
-                     </ng-select>
-                  </div>
-               </div>
-               <div class="col-md-2 mb-2">
-                  <div class="form-group">
-                     <label class="form-label">From Month</label>
-                     <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true"
-                        [virtualScroll]="true" [(ngModel)]="filterBody.from_month" name="month" [multiple]="false"
-                        [ngModalOptions]="{standalone: true}">
-                        <ng-option selected="selected" disabled value="">Select Month
-                        </ng-option>
-                        <ng-option *ngFor="let item of monthsFrom" [value]="item.m">{{item.name}}</ng-option>
-                     </ng-select>
-                  </div>
-               </div>
-               <div class="col-md-2 mb-2">
-                  <div class="form-group">
-                     <label class="form-label">To Year</label>
-                     <ng-select class="custom" style="width: 100%;" placeholder="Select Year" [clearable]="true"
-                        [virtualScroll]="true" [(ngModel)]="filterBody.to_year" name="to_year"
-                        (change)="monthsTo = gs.yearChangedGetMonth($event)">
-                        <ng-option selected="selected" disabled value="">Select Year
-                        </ng-option>
-                        <ng-option *ngFor="let item of getYearTo()" [value]="item">{{item}}</ng-option>
-                     </ng-select>
-                  </div>
-               </div>
-               <div class="col-md-2 mb-2">
-                  <div class="form-group">
-                     <label class="form-label">To Month</label>
-                     <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true"
-                        [virtualScroll]="true" [(ngModel)]="filterBody.to_month" name="to_month" [multiple]="false"
-                        [ngModalOptions]="{standalone: true}">
-                        <ng-option selected="selected" disabled value="">Select Month
-                        </ng-option>
-                        <ng-option *ngFor="let item of monthsTo" [value]="item.m">{{item.name}}</ng-option>
-                     </ng-select>
-                  </div>
-               </div>
+         </div>
 
-               <div class="col-md-2 mb-2" *ngIf="monthsSel.length > 0">
-                  <div class="form-group">
-                     <label class="form-label"></label>
-                     <button type="button" class="form-control btn btn-outline-success dropdown-toggle mx-2"
-                        data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
-                     <div class="dropdown-menu">
-                        <a class="dropdown-item" (click)="excelExportMonthlyMain()">Main Saar</a>
-                        <a class="dropdown-item" (click)="excelExportMonthlyConditionWise()">Condition Wise</a>
-                     </div>
-                  </div>
-
-               </div>
-               <div class="col-md-2 mb-2">
-                  <div class="form-group">
-                     <label class="form-label">.</label>
-                     <button class="btn btn-primary form-control" (click)="filter()">Submit</button>
+         <!-- fliter collapse -->
+         <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+               <div class="row">
+                  <div class="card-body">
+                     <form #filterForm="ngForm">
+                        <div class="row">
+                           <div class="col-3">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                 [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)"
+                                 [(ngModel)]="filterBody.state_id" [ngModelOptions]="{standalone: true}">
+                                 <ng-option *ngFor="let item of states" [value]="item._id">
+                                    {{item.state_hin}}:{{item.state_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                           <div class="col-3">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
+                                 [virtualScroll]="true" (change)="filter()" [multiple]="true"
+                                 [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
+                                 <ng-option *ngFor="let item of mms" [value]="item._id">
+                                    {{item.mm_hin}}:{{item.mm_eng}}:{{item.mm_code}}</ng-option>
+                              </ng-select>
+                           </div>
+                           <div class="col-3">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                                 [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)"
+                                 [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
+                                 <ng-option *ngFor="let item of categories" [value]="item._id">
+                                    {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                           <div class="col-3">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [multiple]="true"
+                                 [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
+                                 [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
+                                 <ng-option *ngFor="let item of items" [value]="item._id">
+                                    {{item.item_hin}}:{{item.item_eng}}:{{item.item_code}}</ng-option>
+                              </ng-select>
+                           </div>
+                           <div class="col-3 mt-2">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem"
+                                 [multiple]="true" [clearable]="true" [virtualScroll]="true"
+                                 [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}"
+                                 (change)="filter()">
+                                 <ng-option *ngFor="let item of subitems" [value]="item._id">
+                                    {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+                     </form>
                   </div>
                </div>
             </div>
+         </div>
 
-            <!-- <div class="row">
+
+
+         <div class="row">
+            <div class="col-md-2 mb-2">
+               <div class="form-group">
+                  <label class="form-label">From Year-Month</label>
+                  <input type="month" class="form-control" [(ngModel)]="filterBody.from_year_month"
+                     name="from_year_month" [ngModelOptions]="{standalone: true}">
+               </div>
+            </div>
+            <div class="col-md-2 mb-2">
+               <div class="form-group">
+                  <label class="form-label">To Year-Month</label>
+                  <input type="month" class="form-control" [(ngModel)]="filterBody.to_year_month" name="to_year_month"
+                     [ngModelOptions]="{standalone: true}">
+               </div>
+            </div>
+
+
+            <div class="col-md-2 mb-2" *ngIf="monthsSel.length > 0">
+               <div class="form-group d-flex flex-column align-items-center">
+                  <label class="form-label mb-1"></label>
+                  <button type="button" class="form-control btn btn-outline-success dropdown-toggle mb-1"
+                     data-bs-toggle="dropdown" aria-expanded="false"> Export </button>
+                  <div class="dropdown-menu">
+                     <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportMonthlyMain()">Main
+                        Saar</a>
+                     <a class="dropdown-item" style="cursor: pointer;"
+                        (click)="excelExportMonthlyConditionWise()">Condition Wise</a>
+                  </div>
+                  <div class="form-check mb-0">
+                     <input type="checkbox" class="form-check-input" id="ignoreDummyMonthlyCheck"
+                        [(ngModel)]="ignoreDummy" name="ignoreDummy">
+                     <label class="form-check-label font-12" for="ignoreDummyMonthlyCheck"
+                        style="white-space: nowrap; cursor: pointer;">Ignore Dummy</label>
+                  </div>
+               </div>
+            </div>
+            <div class="col-md-2 mb-2">
+               <div class="form-group">
+                  <label class="form-label">.</label>
+                  <button class="btn btn-primary form-control" (click)="filter()">Submit</button>
+               </div>
+            </div>
+         </div>
+         <div class="row" *ngIf="false">
+            <div class="col-md-2 mb-2">
+               <div class="form-group">
+                  <label class="form-label">From Year</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Year" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="filterBody.from_year" name="from_year"
+                     (change)="monthsFrom = gs.yearChangedGetMonth($event)">
+                     <ng-option selected="selected" disabled value="">Select Year
+                     </ng-option>
+                     <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-2 mb-2">
+               <div class="form-group">
+                  <label class="form-label">From Month</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="filterBody.from_month" name="month" [multiple]="false"
+                     [ngModalOptions]="{standalone: true}">
+                     <ng-option selected="selected" disabled value="">Select Month
+                     </ng-option>
+                     <ng-option *ngFor="let item of monthsFrom" [value]="item.m">{{item.name}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-2 mb-2">
+               <div class="form-group">
+                  <label class="form-label">To Year</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Year" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="filterBody.to_year" name="to_year"
+                     (change)="monthsTo = gs.yearChangedGetMonth($event)">
+                     <ng-option selected="selected" disabled value="">Select Year
+                     </ng-option>
+                     <ng-option *ngFor="let item of getYearTo()" [value]="item">{{item}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-2 mb-2">
+               <div class="form-group">
+                  <label class="form-label">To Month</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="filterBody.to_month" name="to_month" [multiple]="false"
+                     [ngModalOptions]="{standalone: true}">
+                     <ng-option selected="selected" disabled value="">Select Month
+                     </ng-option>
+                     <ng-option *ngFor="let item of monthsTo" [value]="item.m">{{item.name}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-2" *ngIf="monthsSel.length > 0">
+               <div class="form-group">
+                  <label class="form-label"></label>
+                  <button type="button" class="form-control btn btn-outline-success dropdown-toggle mx-2"
+                     data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                  <div class="dropdown-menu">
+                     <a class="dropdown-item" (click)="excelExportMonthlyMain()">Main Saar</a>
+                     <a class="dropdown-item" (click)="excelExportMonthlyConditionWise()">Condition Wise</a>
+                  </div>
+               </div>
+
+            </div>
+            <div class="col-md-2 mb-2">
+               <div class="form-group">
+                  <label class="form-label">.</label>
+                  <button class="btn btn-primary form-control" (click)="filter()">Submit</button>
+               </div>
+            </div>
+         </div>
+
+         <!-- <div class="row">
                Under Maintanace..... Comming soon with new featues.
             </div> -->
 
-            <div class="row">
-               <div class=" card-body" style="overflow: auto; flex-direction: column;">
-                  <div class="row align-items-center">
-                     <div class="col-6">
-                        <h4 class="card-title">Click Row to See More Details.</h4>
-                     </div>
-                     <div class="col-6 text-end">
-                        <pagination-controls (pageChange)="page = $event" [autoHide]="true"></pagination-controls>
-                     </div>
+         <div class="row">
+            <div class=" card-body" style="overflow: auto; flex-direction: column;">
+               <div class="row align-items-center">
+                  <div class="col-6">
+                     <h4 class="card-title">Click Row to See More Details.</h4>
                   </div>
-                  <div class="table-container">
-                     <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive">
-                        <thead>
-                           <tr *ngIf="monthsSel.length <= 0">
-                              <!-- <td>Image</td> -->
-                              <th style="width: 70px;">No.</th>
-                              <th style="width: 100px;">Department</th>
-                              <th style="width: 180px;">
+                  <div class="col-6 text-end">
+                     <pagination-controls (pageChange)="page = $event" [autoHide]="true"></pagination-controls>
+                  </div>
+               </div>
+               <div class="table-container">
+                  <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive">
+                     <thead>
+                        <tr *ngIf="monthsSel.length <= 0">
+                           <!-- <td>Image</td> -->
+                           <th style="width: 70px;">No.</th>
+                           <th style="width: 100px;">Department</th>
+                           <th style="width: 180px;">
+                              <div class="d-flex justify-content-between align-items-center">
+                                 <span>M M</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                    (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
+                                    [isOpen]="!!filterBody.mm_id.length" triggerOn="click">
+                                    <ng-select class="custom-sm" placeholder="Select MM" [multiple]="true"
+                                       [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
+                                       [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
+                                       <ng-option *ngFor="let item of mms" [value]="item._id">
+                                          {{item.mm_hin}} : {{item.mm_eng}}</ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th>
+                              <div class="d-flex justify-content-between align-items-center">
+                                 <span>Category</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                    (clear)="filterBody.category_id = null; onHeaderFilterChange()"
+                                    [isOpen]="!!filterBody.category_id" triggerOn="click">
+                                    <ng-select class="custom-sm" placeholder="Select Category" [clearable]="true"
+                                       [virtualScroll]="true" (change)="catSelected($event)"
+                                       [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
+                                       <ng-option *ngFor="let item of categories" [value]="item._id">
+                                          {{item.category_hin}} : {{item.category_eng}}</ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th>
+                              <div class="d-flex justify-content-between align-items-center">
+                                 <span>Item</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                    (clear)="filterBody.item_id = []; onHeaderFilterChange()"
+                                    [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)" triggerOn="click">
+                                    <ng-select class="custom-sm" placeholder="Select Item" [multiple]="true"
+                                       [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
+                                       [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
+                                       <ng-option *ngFor="let item of items" [value]="item._id">
+                                          {{item.item_hin}} : {{item.item_eng}}</ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th>Total Aawak</th>
+                           <th>Used</th>
+                           <th>Other Jawak</th>
+                           <th>
+                              Bachat <br />
+                              <div class="form-check mb-2">
+                                 <input type="checkbox" class="form-check-input" id="customCheckcolor1"
+                                    (change)="hideBachatZero($event.target)">
+                                 <label class="form-check-label fs-6" for="customCheckcolor1">Hide 0</label>
+                              </div>
+                           </th>
+                           <th>
+                              Difference <br />
+                              <div class="form-check mb-2">
+                                 <input type="checkbox" class="form-check-input" id="customCheckcolor2"
+                                    (change)="hideDifferenceZero($event.target)">
+                                 <label class="form-check-label fs-6" for="customCheckcolor2">Hide 0</label>
+                              </div>
+                           </th>
+                        </tr>
+                        <ng-container *ngIf="monthsSel.length > 0">
+                           <tr>
+                              <th rowspan="2" style="width: 70px;">No.</th>
+                              <th rowspan="2" style="width: 100px;">Department</th>
+                              <th rowspan="2" style="width: 180px;">
                                  <div class="d-flex justify-content-between align-items-center">
-                                    <span>M M</span>
+                                    <span>Mini_Madhuban</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                        (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
-                                       [isOpen]="!!filterBody.mm_id.length" triggerOn="click">
+                                       [isOpen]="!!(filterBody.mm_id && filterBody.mm_id.length)" triggerOn="click">
                                        <ng-select class="custom-sm" placeholder="Select MM" [multiple]="true"
                                           [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
                                           [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
@@ -264,7 +338,7 @@
                                     </app-popover-filter>
                                  </div>
                               </th>
-                              <th>
+                              <th rowspan="2" style="width: 150px;">
                                  <div class="d-flex justify-content-between align-items-center">
                                     <span>Category</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
@@ -279,362 +353,291 @@
                                     </app-popover-filter>
                                  </div>
                               </th>
-                              <th>
+                              <th rowspan="2" style="width: 200px;">
                                  <div class="d-flex justify-content-between align-items-center">
-                                    <span>Item</span>
+                                    <span>Item_Subitem_Name</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                        (clear)="filterBody.item_id = []; onHeaderFilterChange()"
                                        [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)" triggerOn="click">
-                                       <ng-select class="custom-sm" placeholder="Select Item" [multiple]="true"
-                                          [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
-                                          [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
+                                       <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
+                                          [multiple]="true" [clearable]="true" [virtualScroll]="true"
+                                          (change)="itemSelected($event)" [(ngModel)]="filterBody.item_id"
+                                          [ngModelOptions]="{standalone: true}">
                                           <ng-option *ngFor="let item of items" [value]="item._id">
                                              {{item.item_hin}} : {{item.item_eng}}</ng-option>
                                        </ng-select>
                                     </app-popover-filter>
                                  </div>
                               </th>
-                              <th>Total Aawak</th>
-                              <th>Used</th>
-                              <th>Other Jawak</th>
-                              <th>
-                                 Bachat <br />
-                                 <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input" id="customCheckcolor1"
-                                       (change)="hideBachatZero($event.target)">
-                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide 0</label>
-                                 </div>
-                              </th>
-                              <th>
-                                 Difference <br />
-                                 <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input" id="customCheckcolor2"
-                                       (change)="hideDifferenceZero($event.target)">
-                                    <label class="form-check-label fs-6" for="customCheckcolor2">Hide 0</label>
-                                 </div>
-                              </th>
+                              <th rowspan="2" *ngIf="monthsSel.length > 0">Condition</th>
+                              <th rowspan="2">पिछला बचत</th>
+                              <th colspan="5" class="center-header partition" *ngFor="let row of monthsSel">{{
+                                 row.name
+                                 +
+                                 " - " + row.year }}</th>
                            </tr>
-                           <ng-container *ngIf="monthsSel.length > 0">
-                              <tr>
-                                 <th rowspan="2" style="width: 70px;">No.</th>
-                                 <th rowspan="2" style="width: 100px;">Department</th>
-                                 <th rowspan="2" style="width: 180px;">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                       <span>Mini_Madhuban</span>
-                                       <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                          (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
-                                          [isOpen]="!!(filterBody.mm_id && filterBody.mm_id.length)" triggerOn="click">
-                                          <ng-select class="custom-sm" placeholder="Select MM" [multiple]="true"
-                                             [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
-                                             [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
-                                             <ng-option *ngFor="let item of mms" [value]="item._id">
-                                                {{item.mm_hin}} : {{item.mm_eng}}</ng-option>
-                                          </ng-select>
-                                       </app-popover-filter>
-                                    </div>
-                                 </th>
-                                 <th rowspan="2" style="width: 150px;">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                       <span>Category</span>
-                                       <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                          (clear)="filterBody.category_id = null; onHeaderFilterChange()"
-                                          [isOpen]="!!filterBody.category_id" triggerOn="click">
-                                          <ng-select class="custom-sm" placeholder="Select Category" [clearable]="true"
-                                             [virtualScroll]="true" (change)="catSelected($event)"
-                                             [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
-                                             <ng-option *ngFor="let item of categories" [value]="item._id">
-                                                {{item.category_hin}} : {{item.category_eng}}</ng-option>
-                                          </ng-select>
-                                       </app-popover-filter>
-                                    </div>
-                                 </th>
-                                 <th rowspan="2" style="width: 200px;">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                       <span>Item_Subitem_Name</span>
-                                       <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                          (clear)="filterBody.item_id = []; onHeaderFilterChange()"
-                                          [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)"
-                                          triggerOn="click">
-                                          <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
-                                             [multiple]="true" [clearable]="true" [virtualScroll]="true"
-                                             (change)="itemSelected($event)" [(ngModel)]="filterBody.item_id"
-                                             [ngModelOptions]="{standalone: true}">
-                                             <ng-option *ngFor="let item of items" [value]="item._id">
-                                                {{item.item_hin}} : {{item.item_eng}}</ng-option>
-                                          </ng-select>
-                                       </app-popover-filter>
-                                    </div>
-                                 </th>
-                                 <th rowspan="2" *ngIf="monthsSel.length > 0">Condition</th>
-                                 <th rowspan="2">पिछला बचत</th>
-                                 <th colspan="5" class="center-header partition" *ngFor="let row of monthsSel">{{
-                                    row.name
-                                    +
-                                    " - " + row.year }}</th>
-                              </tr>
-                              <tr>
-                                 <ng-container *ngFor="let row of monthsSel">
-                                    <th class="partition">Total Aawak</th>
-                                    <th>Used</th>
-                                    <th>Other Jawak</th>
-                                    <th>Bachat</th>
-                                    <th>Difference</th>
-                                 </ng-container>
-                              </tr>
-                           </ng-container>
-                        </thead>
-                        <tbody class="accordion" id="accordionExample">
-                           <ng-container
-                              *ngFor="let data of bachatData | search:term | paginate: { itemsPerPage: itemsPerPage, currentPage: page }; let i=index"
-                              class="accordion-item">
-                               <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i"
-                                  aria-expanded="true" [attr.aria-controls]="'#collapse-' + i"
-                                  (click)="rowClicked(data)" (contextmenu)="setImages(data); $event.preventDefault()">
-                                 <!-- <td>
+                           <tr>
+                              <ng-container *ngFor="let row of monthsSel">
+                                 <th class="partition">Total Aawak</th>
+                                 <th>Used</th>
+                                 <th>Other Jawak</th>
+                                 <th>Bachat</th>
+                                 <th>Difference</th>
+                              </ng-container>
+                           </tr>
+                        </ng-container>
+                     </thead>
+                     <tbody class="accordion" id="accordionExample">
+                        <ng-container
+                           *ngFor="let data of bachatData | search:term | paginate: { itemsPerPage: itemsPerPage, currentPage: page }; let i=index"
+                           class="accordion-item">
+                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
+                              [attr.aria-controls]="'#collapse-' + i" (click)="rowClicked(data)"
+                              (contextmenu)="setImages(data); $event.preventDefault()">
+                              <!-- <td>
                                     <div> 
                                        <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
                                        style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}"  />
                                     </div>
                                  </td> -->
-                                 <td>{{(page - 1) * itemsPerPage + i + 1}}</td>
-                                 <td>
-                                    {{data.dept_hin}} {{data.dept_code ? "(" + data.dept_code + ")" : ''}}
-                                 </td>
-                                 <td>
-                                    <div>
-                                       <span>{{data.mm_hin}} ({{data.state_hin}})</span> <br />
-                                       <small class="text-muted">{{data.mm_eng}} ({{data.state_eng}})</small>
+                              <td>{{(page - 1) * itemsPerPage + i + 1}}</td>
+                              <td>
+                                 {{data.dept_hin}} {{data.dept_code ? "(" + data.dept_code + ")" : ''}}
+                              </td>
+                              <td>
+                                 <div>
+                                    <span>{{data.mm_hin}} ({{data.state_hin}})</span> <br />
+                                    <small class="text-muted">{{data.mm_eng}} ({{data.state_eng}})</small>
+                                 </div>
+                              </td>
+                              <td>
+                                 <ng-container
+                                    *ngIf="(data.arr_scategories?.length > 0 ? data.arr_scategories : data.arr_icategories) as activeCats">
+                                    <div *ngIf="activeCats?.length > 0; else noCat">
+                                       <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                       <br />
+                                       <small class="text-muted">{{ activeCats | joinObj:'category_eng'
+                                          }}</small>
                                     </div>
-                                 </td>
-                                 <td>
-                                    <ng-container
-                                       *ngIf="(data.arr_scategories?.length > 0 ? data.arr_scategories : data.arr_icategories) as activeCats">
-                                       <div *ngIf="activeCats?.length > 0; else noCat">
-                                          <span>{{ activeCats | joinObj:'category_hin' }}</span>
-                                          <br />
-                                          <small class="text-muted">{{ activeCats | joinObj:'category_eng'
-                                             }}</small>
-                                       </div>
-                                       <ng-template #noCat>-</ng-template>
-                                    </ng-container>
-                                 <td>
-                                    <div>
-                                       <span>{{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin :
-                                          ""}}</span> <br />
-                                       <small class="text-muted">{{data.item_eng}} {{data.subitem_eng ? " : " +
-                                          data.subitem_eng : ""}}</small>
-                                    </div>
-                                 </td>
-                                 <ng-container *ngIf="monthsSel.length <= 0">
-                                    <td>
-                                       <span [ngClass]="{'error': data.total_aawak_all < 0}">
-                                          {{data.total_aawak_all + " " + data.unit_short}}
-                                       </span>
-                                    </td>
-                                    <td>
-                                       <span [ngClass]="{'error': data.total_used_all < 0}">
-                                          {{data.total_used_all + " " + data.unit_short}}
-                                       </span>
-                                    </td>
-                                    <td>
-                                       <span [ngClass]="{'error': data.total_jawak_all < 0}">
-                                          {{data.total_jawak_all + " "+ data.unit_short}}
-                                       </span>
-                                    </td>
-                                    <td>
-                                       <span class="px-1"
-                                          [ngClass]="{'error': data.total_bachat_all < 0, 'stock':data.total_bachat_all > 0}">
-                                          {{data.total_bachat_all + " " + data.unit_short}}
-                                       </span>
-                                    </td>
-                                    <td>
-                                       <span class="px-1" [ngClass]="{'error': data.total_difference_all != 0}">
-                                          {{data.total_difference_all ? data.total_difference_all + " " +
-                                          data.unit_short :
-                                          '--'}}
-                                       </span>
-                                    </td>
+                                    <ng-template #noCat>-</ng-template>
                                  </ng-container>
-                                 <ng-container *ngIf="monthsSel.length > 0">
-                                    <td>
-                                       <div>
-                                          <span>{{data.condition_hin ? data.condition_hin : 'N/A'}}</span> <br />
-                                          <small class="text-muted">{{data.condition_eng ? data.condition_eng :
-                                             ''}}</small>
-                                       </div>
-                                    </td>
-                                    <td>{{data.past_bachat + " " + data.unit_short}}</td>
+                              <td>
+                                 <div>
+                                    <span>{{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin :
+                                       ""}}</span> <br />
+                                    <small class="text-muted">{{data.item_eng}} {{data.subitem_eng ? " : " +
+                                       data.subitem_eng : ""}}</small>
+                                 </div>
+                              </td>
+                              <ng-container *ngIf="monthsSel.length <= 0">
+                                 <td>
+                                    <span [ngClass]="{'error': data.total_aawak_all < 0}">
+                                       {{data.total_aawak_all + " " + data.unit_short}}
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <span [ngClass]="{'error': data.total_used_all < 0}">
+                                       {{data.total_used_all + " " + data.unit_short}}
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <span [ngClass]="{'error': data.total_jawak_all < 0}">
+                                       {{data.total_jawak_all + " "+ data.unit_short}}
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <span class="px-1"
+                                       [ngClass]="{'error': data.total_bachat_all < 0, 'stock':data.total_bachat_all > 0}">
+                                       {{data.total_bachat_all + " " + data.unit_short}}
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <span class="px-1" [ngClass]="{'error': data.total_difference_all != 0}">
+                                       {{data.total_difference_all ? data.total_difference_all + " " +
+                                       data.unit_short :
+                                       '--'}}
+                                    </span>
+                                 </td>
+                              </ng-container>
+                              <ng-container *ngIf="monthsSel.length > 0">
+                                 <td>
+                                    <div>
+                                       <span>{{data.condition_hin ? data.condition_hin : 'N/A'}}</span> <br />
+                                       <small class="text-muted">{{data.condition_eng ? data.condition_eng :
+                                          ''}}</small>
+                                    </div>
+                                 </td>
+                                 <td>{{data.past_bachat + " " + data.unit_short}}</td>
 
-                                    <ng-container *ngFor="let row of monthsSel; let m = index;">
-                                       <td (mouseenter)="data.showTooltip[m] = true"
-                                          (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(m, data, 'main_row')" class="partition comment"
-                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
-                                             [ngClass]="{'error': data.arr_sum_aawak[m] < 0}">{{data.arr_sum_aawak[m]}}</span>
-                                       </td>
-                                       <td (mouseenter)="data.showTooltip[m] = true"
-                                          (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(m, data, 'main_row')" class="comment"
-                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
-                                             [ngClass]="{'error': data.arr_sum_used[m] < 0}">{{data.arr_sum_used[m]}}</span>
-                                       </td>
-                                       <td (mouseenter)="data.showTooltip[m] = true"
-                                          (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(m, data, 'main_row')" class="comment"
-                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
-                                             [ngClass]="{'error': data.arr_sum_jawak[m] < 0}">{{data.arr_sum_jawak[m]}}</span>
-                                       </td>
-                                       <td (mouseenter)="data.showTooltip[m] = true"
-                                          (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(m, data, 'main_row')" class="comment"
-                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
-                                             [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">{{data.arr_sum_bachat[m]}}</span>
-                                       </td>
-                                       <td (mouseenter)="data.showTooltip[m] = true"
-                                          (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(m, data, 'main_row')" class="comment-cell"
-                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}">
-                                          <div class="cell-content"
-                                             [ngClass]="{'error': data.arr_difference_bachat && data.arr_difference_bachat[m] != 0}">
-                                             {{data.arr_difference_bachat ? data.arr_difference_bachat[m] : ''}}</div>
-                                          <div [ngClass]="{'comment-indicator':data.arr_comment[m]}">
-                                          </div>
-                                          <div class="comment-tooltip"
-                                             [hidden]="!data.showTooltip[m] || !data.arr_comment[m]">
-                                             {{data.arr_comment[m]}}
-                                             <!-- <textarea [(ngModel)]="data.arr_comment[m]" (blur)="toggleEditMode(i, m)"
+                                 <ng-container *ngFor="let row of monthsSel; let m = index;">
+                                    <td (mouseenter)="data.showTooltip[m] = true"
+                                       (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(m, data, 'main_row')" class="partition comment"
+                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
+                                          [ngClass]="{'error': data.arr_sum_aawak[m] < 0}">{{data.arr_sum_aawak[m]}}</span>
+                                    </td>
+                                    <td (mouseenter)="data.showTooltip[m] = true"
+                                       (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(m, data, 'main_row')" class="comment"
+                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
+                                          [ngClass]="{'error': data.arr_sum_used[m] < 0}">{{data.arr_sum_used[m]}}</span>
+                                    </td>
+                                    <td (mouseenter)="data.showTooltip[m] = true"
+                                       (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(m, data, 'main_row')" class="comment"
+                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
+                                          [ngClass]="{'error': data.arr_sum_jawak[m] < 0}">{{data.arr_sum_jawak[m]}}</span>
+                                    </td>
+                                    <td (mouseenter)="data.showTooltip[m] = true"
+                                       (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(m, data, 'main_row')" class="comment"
+                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
+                                          [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">{{data.arr_sum_bachat[m]}}</span>
+                                    </td>
+                                    <td (mouseenter)="data.showTooltip[m] = true"
+                                       (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(m, data, 'main_row')" class="comment-cell"
+                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}">
+                                       <div class="cell-content"
+                                          [ngClass]="{'error': data.arr_difference_bachat && data.arr_difference_bachat[m] != 0}">
+                                          {{data.arr_difference_bachat ? data.arr_difference_bachat[m] : ''}}</div>
+                                       <div [ngClass]="{'comment-indicator':data.arr_comment[m]}">
+                                       </div>
+                                       <div class="comment-tooltip"
+                                          [hidden]="!data.showTooltip[m] || !data.arr_comment[m]">
+                                          {{data.arr_comment[m]}}
+                                          <!-- <textarea [(ngModel)]="data.arr_comment[m]" (blur)="toggleEditMode(i, m)"
                                                 (input)="handleInputChange(i, m)"></textarea> -->
-                                             <!-- <span [hidden]="data.editMode && data.editMode[m]" [class.changed]="data.commentChanged && data.commentChanged[m]">{{
+                                          <!-- <span [hidden]="data.editMode && data.editMode[m]" [class.changed]="data.commentChanged && data.commentChanged[m]">{{
                                                 data.arr_comment[m] }}</span>
                                              <textarea [hidden]="!data.editMode || !data.editMode[m]" [(ngModel)]="data.arr_comment[m]"
                                                 (blur)="toggleEditMode(i, m)" (input)="handleInputChange(i, m)"></textarea> -->
 
-                                          </div>
-                                       </td>
-                                    </ng-container>
-
-                                 </ng-container>
-                              </tr>
-                              <ng-container *ngIf="monthsSel.length <= 0 && data.arr_condition_id.length > 0">
-                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
-                                    aria-labelledby="headingOne">
-                                    <td colspan="3" style="border: none;"></td>
-                                    <td colspan="6" class="sub-row">
-                                       <table class="" style="width: 99.7%;table-layout: fixed;">
-                                          <!-- <thead>
-                                             <td>C</td>
-                                          </thead> -->
-                                          <tbody>
-                                             <tr *ngFor="let bcht of data.arr_condition_hin; let j = index;">
-                                                <td style="width: 75px;">
-                                                   <i class="uil-corner-down-right"></i>
-                                                   <span class="mx-1">{{j+1}} </span>
-                                                </td>
-                                                <td><span [ngClass]="{'error': bcht < 0}"> {{bcht ? bcht :
-                                                      'N/A'}}</span></td>
-                                                <td><span [ngClass]="{'error': data.arr_sum_aawak[j] < 0}">
-                                                      {{data.arr_sum_aawak[j] + " " + data.unit_short }}</span></td>
-                                                <td><span [ngClass]="{'error': data.arr_sum_used[j] < 0}">
-                                                      {{data.arr_sum_used[j] + " " + data.unit_short }}</span></td>
-                                                <td><span [ngClass]="{'error': data.arr_sum_jawak[j] < 0}">
-                                                      {{data.arr_sum_jawak[j] + " " + data.unit_short }}</span></td>
-                                                <td>
-                                                   <span class="px-1"
-                                                      [ngClass]="{'error': data.arr_sum_bachat[j] < 0, 'stock':data.arr_sum_bachat[j] > 0}">
-                                                      {{data.arr_sum_bachat[j] + " " + data.unit_short}}
-                                                   </span>
-                                                </td>
-                                             </tr>
-                                          </tbody>
-                                       </table>
-                                    </td>
-                                 </tr>
-
-                              </ng-container>
-                              <!-- [attr.id]="'collapse-' + i" -->
-                              <ng-container *ngIf="monthsSel.length > 0 && data.subReport">
-                                 <tr *ngFor="let sdata of data[data.currentReport]; let j = index;"
-                                    class="accordion-collapse collapse ribbon-box show" aria-labelledby="headingOne">
-                                    <ng-container *ngIf="j == 0">
-                                       <td colspan="3" [attr.rowspan]="data[data.currentReport].length"
-                                          style="border: none;">
-                                          <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
-                                             aria-orientation="vertical">
-                                             <ng-container *ngFor="let op of operationList;">
-                                                <a class="nav-link"
-                                                   [ngClass]="{'active': data.currentReport == op.key, 'no-data': !data[op.key] || data[op.key].length < 1}"
-                                                   (click)="operationClick(data, op.key)">
-                                                   <i class="mdi mdi-home-variant d-md-none d-block"></i>
-                                                   <span class="d-none d-md-block">{{op.name}}</span>
-                                                </a>
-                                             </ng-container>
-                                          </div>
-                                       </td>
-                                    </ng-container>
-                                    <td>{{j+1}}</td>
-                                    <td>
-                                       <div>
-                                          <span>{{(sdata.list_name_hin ? sdata.list_name_hin : 'N/A')}}</span> <br />
-                                          <small class="text-muted">{{(sdata.list_name_eng ? sdata.list_name_eng :
-                                             '')}}</small>
                                        </div>
                                     </td>
-                                    <ng-container *ngIf="monthsSel.length > 0">
-                                       <td>{{sdata.past_bachat ? sdata.past_bachat : 0 + " " + sdata.unit_short}}</td>
-                                       <ng-container *ngFor="let row of monthsSel; let m = index;">
-                                          <td (mouseenter)="sdata.showTooltip[m] = true"
-                                             (mouseleave)="sdata.showTooltip[m] = false"
-                                             (click)="editComment(m, sdata, data.currentReport, data)"
-                                             class="partition comment"
-                                             [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
-                                             {{sdata.arr_sum_aawak[m] ? sdata.arr_sum_aawak[m] : '-'}}
-                                          </td>
-                                          <td (mouseenter)="sdata.showTooltip[m] = true"
-                                             (mouseleave)="sdata.showTooltip[m] = false"
-                                             (click)="editComment(m, sdata, data.currentReport, data)" class="comment"
-                                             [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
-                                             <span [ngClass]="{'error': sdata.arr_sum_used[m] < 0}">
-                                                {{sdata.arr_sum_used[m] ? sdata.arr_sum_used[m] : '-'}}
-                                             </span>
-                                          </td>
-                                          <td (mouseenter)="sdata.showTooltip[m] = true"
-                                             (mouseleave)="sdata.showTooltip[m] = false"
-                                             (click)="editComment(m, sdata, data.currentReport, data)" class="comment"
-                                             [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
-                                             <span [ngClass]="{'error': sdata.arr_sum_jawak[m] < 0}">
-                                                {{sdata.arr_sum_jawak[m] ? sdata.arr_sum_jawak[m] : '-'}}
-                                             </span>
-                                          </td>
-                                          <td (mouseenter)="sdata.showTooltip[m] = true"
-                                             (mouseleave)="sdata.showTooltip[m] = false"
-                                             (click)="editComment(m, sdata, data.currentReport, data)"
-                                             class="comment-cell" [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+                                 </ng-container>
 
-                                             <div class="cell-content"
-                                                [ngClass]="{'error': sdata.arr_sum_bachat[m] < 0, 'stock':sdata.arr_sum_bachat[m] > 0}">
-                                                {{sdata.arr_sum_bachat[m] ? sdata.arr_sum_bachat[m] : '-'}}</div>
-                                             <div [ngClass]="{'comment-indicator':sdata.arr_comment[m]}">
-                                             </div>
-                                             <div class="comment-tooltip"
-                                                [hidden]="!sdata.showTooltip[m] || !sdata.arr_comment[m]">
-                                                {{sdata.arr_comment[m]}}
-                                             </div>
-
-                                          </td>
-                                       </ng-container>
-                                    </ng-container>
-                                 </tr>
                               </ng-container>
+                           </tr>
+                           <ng-container *ngIf="monthsSel.length <= 0 && data.arr_condition_id.length > 0">
+                              <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
+                                 aria-labelledby="headingOne">
+                                 <td colspan="3" style="border: none;"></td>
+                                 <td colspan="6" class="sub-row">
+                                    <table class="" style="width: 99.7%;table-layout: fixed;">
+                                       <!-- <thead>
+                                             <td>C</td>
+                                          </thead> -->
+                                       <tbody>
+                                          <tr *ngFor="let bcht of data.arr_condition_hin; let j = index;">
+                                             <td style="width: 75px;">
+                                                <i class="uil-corner-down-right"></i>
+                                                <span class="mx-1">{{j+1}} </span>
+                                             </td>
+                                             <td><span [ngClass]="{'error': bcht < 0}"> {{bcht ? bcht :
+                                                   'N/A'}}</span></td>
+                                             <td><span [ngClass]="{'error': data.arr_sum_aawak[j] < 0}">
+                                                   {{data.arr_sum_aawak[j] + " " + data.unit_short }}</span></td>
+                                             <td><span [ngClass]="{'error': data.arr_sum_used[j] < 0}">
+                                                   {{data.arr_sum_used[j] + " " + data.unit_short }}</span></td>
+                                             <td><span [ngClass]="{'error': data.arr_sum_jawak[j] < 0}">
+                                                   {{data.arr_sum_jawak[j] + " " + data.unit_short }}</span></td>
+                                             <td>
+                                                <span class="px-1"
+                                                   [ngClass]="{'error': data.arr_sum_bachat[j] < 0, 'stock':data.arr_sum_bachat[j] > 0}">
+                                                   {{data.arr_sum_bachat[j] + " " + data.unit_short}}
+                                                </span>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </td>
+                              </tr>
 
                            </ng-container>
-                        </tbody>
-                     </table>
-                  </div>
+                           <!-- [attr.id]="'collapse-' + i" -->
+                           <ng-container *ngIf="monthsSel.length > 0 && data.subReport">
+                              <tr *ngFor="let sdata of data[data.currentReport]; let j = index;"
+                                 class="accordion-collapse collapse ribbon-box show" aria-labelledby="headingOne">
+                                 <ng-container *ngIf="j == 0">
+                                    <td colspan="3" [attr.rowspan]="data[data.currentReport].length"
+                                       style="border: none;">
+                                       <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
+                                          aria-orientation="vertical">
+                                          <ng-container *ngFor="let op of operationList;">
+                                             <a class="nav-link"
+                                                [ngClass]="{'active': data.currentReport == op.key, 'no-data': !data[op.key] || data[op.key].length < 1}"
+                                                (click)="operationClick(data, op.key)">
+                                                <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                                                <span class="d-none d-md-block">{{op.name}}</span>
+                                             </a>
+                                          </ng-container>
+                                       </div>
+                                    </td>
+                                 </ng-container>
+                                 <td>{{j+1}}</td>
+                                 <td>
+                                    <div>
+                                       <span>{{(sdata.list_name_hin ? sdata.list_name_hin : 'N/A')}}</span> <br />
+                                       <small class="text-muted">{{(sdata.list_name_eng ? sdata.list_name_eng :
+                                          '')}}</small>
+                                    </div>
+                                 </td>
+                                 <ng-container *ngIf="monthsSel.length > 0">
+                                    <td>{{sdata.past_bachat ? sdata.past_bachat : 0 + " " + sdata.unit_short}}</td>
+                                    <ng-container *ngFor="let row of monthsSel; let m = index;">
+                                       <td (mouseenter)="sdata.showTooltip[m] = true"
+                                          (mouseleave)="sdata.showTooltip[m] = false"
+                                          (click)="editComment(m, sdata, data.currentReport, data)"
+                                          class="partition comment" [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+                                          {{sdata.arr_sum_aawak[m] ? sdata.arr_sum_aawak[m] : '-'}}
+                                       </td>
+                                       <td (mouseenter)="sdata.showTooltip[m] = true"
+                                          (mouseleave)="sdata.showTooltip[m] = false"
+                                          (click)="editComment(m, sdata, data.currentReport, data)" class="comment"
+                                          [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+                                          <span [ngClass]="{'error': sdata.arr_sum_used[m] < 0}">
+                                             {{sdata.arr_sum_used[m] ? sdata.arr_sum_used[m] : '-'}}
+                                          </span>
+                                       </td>
+                                       <td (mouseenter)="sdata.showTooltip[m] = true"
+                                          (mouseleave)="sdata.showTooltip[m] = false"
+                                          (click)="editComment(m, sdata, data.currentReport, data)" class="comment"
+                                          [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+                                          <span [ngClass]="{'error': sdata.arr_sum_jawak[m] < 0}">
+                                             {{sdata.arr_sum_jawak[m] ? sdata.arr_sum_jawak[m] : '-'}}
+                                          </span>
+                                       </td>
+                                       <td (mouseenter)="sdata.showTooltip[m] = true"
+                                          (mouseleave)="sdata.showTooltip[m] = false"
+                                          (click)="editComment(m, sdata, data.currentReport, data)" class="comment-cell"
+                                          [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+
+                                          <div class="cell-content"
+                                             [ngClass]="{'error': sdata.arr_sum_bachat[m] < 0, 'stock':sdata.arr_sum_bachat[m] > 0}">
+                                             {{sdata.arr_sum_bachat[m] ? sdata.arr_sum_bachat[m] : '-'}}</div>
+                                          <div [ngClass]="{'comment-indicator':sdata.arr_comment[m]}">
+                                          </div>
+                                          <div class="comment-tooltip"
+                                             [hidden]="!sdata.showTooltip[m] || !sdata.arr_comment[m]">
+                                             {{sdata.arr_comment[m]}}
+                                          </div>
+
+                                       </td>
+                                    </ng-container>
+                                 </ng-container>
+                              </tr>
+                           </ng-container>
+
+                        </ng-container>
+                     </tbody>
+                  </table>
                </div>
             </div>
-
-            <h2 class="text-center m-5" *ngIf="!bachatData.length">No Data!</h2>
          </div>
+
+         <h2 class="text-center m-5" *ngIf="!bachatData.length">No Data!</h2>
+
       </div>
    </div>
 </div>

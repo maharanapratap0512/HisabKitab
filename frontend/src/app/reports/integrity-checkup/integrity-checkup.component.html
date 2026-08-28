@@ -59,6 +59,32 @@
                </div>
             </div>
 
+            <!-- Dynamic Comparison Column Selector (for Duplicate Aawak & Jawak test) -->
+            <div class="card bg-light border mb-4" *ngIf="selectedTest?.id === 'duplicate-aj-assumption'">
+               <div class="card-body py-2 px-3">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                     <span class="font-weight-bold font-13 text-dark">
+                        <i class="uil-sliders-v-alt text-primary me-1"></i>
+                        Dynamic Comparison Columns (मैचिंग कॉलम सेटिंग्स):
+                     </span>
+                     <div>
+                        <button class="btn btn-xs btn-link text-primary p-0 me-2" (click)="selectAllColumns()">Select All</button>
+                        <button class="btn btn-xs btn-link text-secondary p-0" (click)="resetDefaultColumns()">Reset Defaults</button>
+                     </div>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1">
+                     <button *ngFor="let col of comparisonColumns"
+                             type="button"
+                             class="btn btn-sm py-0 px-2 rounded-pill font-12 transition-all"
+                             [ngClass]="col.selected ? 'btn-primary' : 'btn-outline-secondary'"
+                             (click)="toggleColumn(col)">
+                        <i class="uil" [ngClass]="col.selected ? 'uil-check-circle' : 'uil-circle'"></i>
+                        {{ col.label }}
+                     </button>
+                  </div>
+               </div>
+            </div>
+
             <!-- Terminal Console Logs Panel -->
             <div class="mb-4">
                <h5 class="header-title font-14 mb-2">Live Scanning Log</h5>
@@ -76,8 +102,127 @@
                </div>
             </div>
 
-            <!-- Mismatches Summary List -->
-            <div *ngIf="hasRunScan">
+            <!-- Duplicate Groups Results (for Duplicate Aawak & Jawak test) -->
+            <div *ngIf="selectedTest?.id === 'duplicate-aj-assumption' && hasRunScan">
+               <div class="d-flex align-items-center justify-content-between mb-3">
+                  <h5 class="header-title font-14 mb-0">
+                     Duplicate Groups Found ({{ duplicateGroups.length }})
+                  </h5>
+               </div>
+
+               <div *ngIf="duplicateGroups.length > 0" class="duplicate-groups-container" style="max-height: 600px; overflow-y: auto;">
+                  <div *ngFor="let group of duplicateGroups; let gIdx = index" class="card border mb-3 shadow-sm">
+                     <div class="card-header bg-light py-2 px-3 d-flex align-items-center justify-content-between">
+                        <div>
+                           <span class="badge me-2" [ngClass]="group.entry_type === 'aawak' ? 'bg-primary' : 'bg-warning text-dark'">
+                              {{ group.entry_type === 'aawak' ? 'Aawak Duplicate' : 'Jawak Duplicate' }}
+                           </span>
+                           <strong class="font-13 text-dark">Group #{{ gIdx + 1 }}:</strong>
+                           <span class="text-muted font-12 ms-2">{{ group.match_summary }}</span>
+                        </div>
+                        <span class="badge bg-danger rounded-pill">{{ group.match_count }} Repeated Entries</span>
+                     </div>
+                     <div class="card-body p-0">
+                        <div class="table-responsive">
+                           <table class="table table-sm table-striped table-bordered mb-0 font-12 align-middle">
+                              <thead class="table-dark">
+                                 <tr>
+                                    <th style="width: 40px;">#</th>
+                                    <th>Voucher / ID / Date</th>
+                                    <th>Connected Links</th>
+                                    <th>MM / Aawak-Jawak MM</th>
+                                    <th>PBK / Person</th>
+                                    <th>Item - Subitem</th>
+                                    <th>Condition</th>
+                                    <th>Qty & Unit</th>
+                                    <th>Rate & Amt</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th style="width: 90px;" class="text-center">Actions</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr *ngFor="let entry of group.entries; let eIdx = index">
+                                    <td class="text-center font-weight-bold">{{ eIdx + 1 }}</td>
+                                    <td>
+                                       <div class="font-weight-bold">V: {{ entry.voucher_no || 'N/A' }}</div>
+                                       <div class="text-muted font-11">ID: {{ entry._id }}</div>
+                                       <div class="font-11 text-primary">{{ entry.date | date:'dd-MM-yyyy' }}</div>
+                                    </td>
+                                    <td>
+                                       <!-- Connected Relations Count Badge -->
+                                       <div *ngIf="entry.record_type === 'aawak'">
+                                          <span *ngIf="entry.connected_jawak_count > 0" class="badge bg-info text-white font-11">
+                                             <i class="uil-link me-1"></i>{{ entry.connected_jawak_count }} Jawaks Connected
+                                          </span>
+                                          <span *ngIf="!entry.connected_jawak_count || entry.connected_jawak_count === 0" class="badge bg-secondary font-11 opacity-75">
+                                             No Linked Jawaks
+                                          </span>
+                                       </div>
+                                       <div *ngIf="entry.record_type === 'jawak'">
+                                          <span *ngIf="entry.connected_aawak_count > 0" class="badge bg-info text-white font-11">
+                                             <i class="uil-link me-1"></i>{{ entry.connected_aawak_count }} Aawaks Connected
+                                          </span>
+                                          <span *ngIf="!entry.connected_aawak_count || entry.connected_aawak_count === 0" class="badge bg-secondary font-11 opacity-75">
+                                             No Linked Aawaks
+                                          </span>
+                                       </div>
+                                    </td>
+                                    <td>
+                                       <div><strong>MM:</strong> {{ entry.mm_hin || 'N/A' }}</div>
+                                       <div class="text-muted font-11"><strong>AJ MM:</strong> {{ entry.aj_mm_hin || 'N/A' }}</div>
+                                    </td>
+                                    <td>
+                                       <div *ngIf="entry.pbk_hin">{{ entry.roll_no ? entry.roll_no + ' - ' : '' }}{{ entry.pbk_hin }}</div>
+                                       <span *ngIf="!entry.pbk_hin" class="text-muted font-11">None</span>
+                                    </td>
+                                    <td>
+                                       <div class="font-weight-bold">{{ entry.item_hin || 'ID: ' + entry.item_id }}</div>
+                                       <div class="text-muted font-11" *ngIf="entry.subitem_hin">({{ entry.subitem_hin }})</div>
+                                    </td>
+                                    <td>
+                                       <span class="badge bg-light text-dark border font-11">{{ entry.condition_hin || 'N/A' }}</span>
+                                    </td>
+                                    <td class="font-weight-bold text-success">
+                                       {{ entry.qty }} {{ entry.unit_short }}
+                                    </td>
+                                    <td>
+                                       <div *ngIf="entry.rate">Rate: {{ entry.rate }}</div>
+                                       <div *ngIf="entry.actual_amt">Amt: ₹{{ entry.actual_amt }}</div>
+                                       <span *ngIf="!entry.rate && !entry.actual_amt" class="text-muted font-11">N/A</span>
+                                    </td>
+                                    <td>
+                                       <span class="badge bg-light text-primary border font-11">{{ entry.type_hin || 'N/A' }}</span>
+                                    </td>
+                                    <td class="font-11 text-muted">
+                                       <div *ngIf="entry.item_detail">{{ entry.item_detail }}</div>
+                                       <div *ngIf="entry.description">{{ entry.description }}</div>
+                                       <span *ngIf="!entry.item_detail && !entry.description">-</span>
+                                    </td>
+                                    <td class="text-center">
+                                       <button class="btn btn-xs btn-outline-primary me-1" (click)="editEntry(entry)" title="Edit Entry">
+                                          <i class="uil-pen"></i>
+                                       </button>
+                                       <button class="btn btn-xs btn-outline-danger" (click)="deleteEntry(entry, gIdx, eIdx)" title="Delete Entry">
+                                          <i class="uil-trash-alt"></i>
+                                       </button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div *ngIf="duplicateGroups.length === 0" class="alert alert-success text-center py-3 mb-0">
+                  <i class="uil-check-circle font-20 me-2 align-middle"></i>
+                  <span>No duplicate entries found matching the selected criteria!</span>
+               </div>
+            </div>
+
+            <!-- Standard Mismatches Summary List (for other tests) -->
+            <div *ngIf="selectedTest?.id !== 'duplicate-aj-assumption' && hasRunScan">
                <div class="d-flex align-items-center justify-content-between mb-3">
                   <h5 class="header-title font-14 mb-0">Mismatches Found ({{ mismatches.length }})</h5>
                   <button class="btn btn-danger btn-sm"
@@ -283,3 +428,61 @@
       </div>
    </div>
 </div>
+
+<!-- Quick Edit Entry Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showEditModal && editingEntry" style="background-color: rgba(0,0,0,0.5);">
+   <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+         <div class="modal-header py-2 bg-primary text-white">
+            <h5 class="modal-title font-16">
+               <i class="uil-pen me-1"></i>
+               Edit {{ editingEntry.record_type === 'aawak' ? 'Aawak (आवक)' : 'Jawak (जावक)' }} Entry (ID: {{ editingEntry._id }})
+            </h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeEditModal()"></button>
+         </div>
+         <div class="modal-body font-13">
+            <div class="row g-3">
+               <div class="col-md-4">
+                  <label class="form-label font-weight-bold">Date (तारीख)</label>
+                  <input type="date" class="form-control form-control-sm" [(ngModel)]="editingEntry.date">
+               </div>
+               <div class="col-md-4">
+                  <label class="form-label font-weight-bold">Voucher No</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="editingEntry.voucher_no">
+               </div>
+               <div class="col-md-4">
+                  <label class="form-label font-weight-bold">Quantity (मात्रा)</label>
+                  <input type="number" class="form-control form-control-sm" [(ngModel)]="editingEntry.qty">
+               </div>
+               <div class="col-md-4">
+                  <label class="form-label font-weight-bold">Rate (दर)</label>
+                  <input type="number" class="form-control form-control-sm" [(ngModel)]="editingEntry.rate">
+               </div>
+               <div class="col-md-4">
+                  <label class="form-label font-weight-bold">Actual Amount (अमाउन्ट)</label>
+                  <input type="number" class="form-control form-control-sm" [(ngModel)]="editingEntry.actual_amt">
+               </div>
+               <div class="col-md-4">
+                  <label class="form-label font-weight-bold">Lot No</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="editingEntry.lot_no">
+               </div>
+               <div class="col-md-6">
+                  <label class="form-label font-weight-bold">Item Detail</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="editingEntry.item_detail">
+               </div>
+               <div class="col-md-6">
+                  <label class="form-label font-weight-bold">Description (विवरण)</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="editingEntry.description">
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer py-2">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="closeEditModal()">Cancel</button>
+            <button type="button" class="btn btn-success btn-sm px-3" (click)="saveEditedEntry()">
+               <i class="uil-check me-1"></i> Save Changes
+            </button>
+         </div>
+      </div>
+   </div>
+</div>
+

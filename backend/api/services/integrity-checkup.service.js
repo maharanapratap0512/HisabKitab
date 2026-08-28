@@ -354,6 +354,210 @@ async function rebuildAllBachat(logCallback = () => {}) {
     }
 }
 
+/**
+ * Scan for Duplicate Aawak and Jawak Assumption entries
+ */
+function scanDuplicateMismatches(selectedColumns = [], groupCallback = null, logCallback = () => {}) {
+    logCallback('Starting scan for Duplicate Aawak & Jawak entries...');
+    
+    if (!selectedColumns || !Array.isArray(selectedColumns) || selectedColumns.length === 0) {
+        selectedColumns = ['date', 'mm_id', 'aj_mm_id', 'item_id', 'subitem_id', 'unit_id', 'qty', 'type_id'];
+    }
+
+    logCallback(`Active matching criteria (${selectedColumns.length} columns): ${selectedColumns.join(', ')}`);
+
+    const aawakQuery = `
+        SELECT 
+            'aawak' AS record_type,
+            a._id,
+            a.voucher_no,
+            a.date,
+            a.lot_no,
+            a.pkt_num,
+            a.mm_id,
+            a.aawak_mm_id AS aj_mm_id,
+            a.pbk_id,
+            a.dept_id,
+            a.item_id,
+            a.subitem_id,
+            a.unit_id,
+            a.condition_id,
+            a.qty,
+            a.rate,
+            a.actual_amt,
+            a.aawak_source_id,
+            a.aawak_type_id AS type_id,
+            a.usage_list_id,
+            a.item_detail,
+            a.description,
+            
+            mm.mm_hin AS mm_hin,
+            amm.mm_hin AS aj_mm_hin,
+            i.item_hin,
+            si.subitem_hin,
+            u.unit_short,
+            c.list_name_hin AS condition_hin,
+            at.list_name_hin AS type_hin,
+            asrc.list_name_hin AS aawak_source_hin,
+            ul.list_name_hin AS usage_list_hin,
+            p.pbk_hin,
+            p.roll_no,
+            
+            COALESCE(j_conn.connected_jawak_count, 0) AS connected_jawak_count
+        FROM aawak a
+        LEFT JOIN mm ON mm._id = a.mm_id
+        LEFT JOIN mm amm ON amm._id = a.aawak_mm_id
+        LEFT JOIN item i ON i._id = a.item_id
+        LEFT JOIN subitem si ON si._id = a.subitem_id
+        LEFT JOIN unit u ON u._id = a.unit_id
+        LEFT JOIN support_list c ON c._id = a.condition_id
+        LEFT JOIN support_list at ON at._id = a.aawak_type_id
+        LEFT JOIN support_list asrc ON asrc._id = a.aawak_source_id
+        LEFT JOIN support_list ul ON ul._id = a.usage_list_id
+        LEFT JOIN pbk p ON p._id = a.pbk_id
+        LEFT JOIN (
+            SELECT aawak_id, COUNT(DISTINCT jawak_id) AS connected_jawak_count
+            FROM rel_aawak_jawak
+            GROUP BY aawak_id
+        ) j_conn ON j_conn.aawak_id = a._id
+        ORDER BY a.date DESC, a._id DESC
+    `;
+
+    const jawakQuery = `
+        SELECT 
+            'jawak' AS record_type,
+            j._id,
+            j.voucher_no,
+            j.date,
+            j.lot_no,
+            j.pkt_num,
+            j.mm_id,
+            j.jawak_mm_id AS aj_mm_id,
+            j.pbk_id,
+            j.dept_id,
+            j.item_id,
+            j.subitem_id,
+            j.unit_id,
+            j.condition_id,
+            j.qty,
+            j.rate,
+            j.actual_amt,
+            j.aawak_source_id,
+            j.jawak_type_id AS type_id,
+            j.usage_list_id,
+            j.item_detail,
+            j.description,
+            
+            mm.mm_hin AS mm_hin,
+            jmm.mm_hin AS aj_mm_hin,
+            i.item_hin,
+            si.subitem_hin,
+            u.unit_short,
+            c.list_name_hin AS condition_hin,
+            jt.list_name_hin AS type_hin,
+            asrc.list_name_hin AS aawak_source_hin,
+            ul.list_name_hin AS usage_list_hin,
+            p.pbk_hin,
+            p.roll_no,
+            
+            COALESCE(a_conn.connected_aawak_count, 0) AS connected_aawak_count
+        FROM jawak j
+        LEFT JOIN mm ON mm._id = j.mm_id
+        LEFT JOIN mm jmm ON jmm._id = j.jawak_mm_id
+        LEFT JOIN item i ON i._id = j.item_id
+        LEFT JOIN subitem si ON si._id = j.subitem_id
+        LEFT JOIN unit u ON u._id = j.unit_id
+        LEFT JOIN support_list c ON c._id = j.condition_id
+        LEFT JOIN support_list jt ON jt._id = j.jawak_type_id
+        LEFT JOIN support_list asrc ON asrc._id = j.aawak_source_id
+        LEFT JOIN support_list ul ON ul._id = j.usage_list_id
+        LEFT JOIN pbk p ON p._id = j.pbk_id
+        LEFT JOIN (
+            SELECT jawak_id, COUNT(DISTINCT aawak_id) AS connected_aawak_count
+            FROM rel_aawak_jawak
+            GROUP BY jawak_id
+        ) a_conn ON a_conn.jawak_id = j._id
+        ORDER BY j.date DESC, j._id DESC
+    `;
+
+    const aawaks = db.prepare(aawakQuery).all();
+    const jawaks = db.prepare(jawakQuery).all();
+    
+    logCallback(`Fetched ${aawaks.length} Aawak entries and ${jawaks.length} Jawak entries. Analyzing matchups...`);
+
+    const makeKey = (row) => {
+        return selectedColumns.map(col => {
+            const val = row[col];
+            if (val === undefined || val === null || val === '') return 'NULL';
+            return String(val).trim().toLowerCase();
+        }).join('|');
+    };
+
+    const makeSummary = (row) => {
+        const parts = [];
+        if (selectedColumns.includes('date') && row.date) parts.push(`Date: ${row.date}`);
+        if (selectedColumns.includes('mm_id') && row.mm_hin) parts.push(`MM: ${row.mm_hin}`);
+        if (selectedColumns.includes('aj_mm_id') && row.aj_mm_hin) parts.push(`Aawak/Jawak MM: ${row.aj_mm_hin}`);
+        if (selectedColumns.includes('item_id') && row.item_hin) parts.push(`Item: ${row.item_hin}`);
+        if (selectedColumns.includes('subitem_id') && row.subitem_hin) parts.push(`Subitem: ${row.subitem_hin}`);
+        if (selectedColumns.includes('unit_id') && row.unit_short) parts.push(`Unit: ${row.unit_short}`);
+        if (selectedColumns.includes('qty') && row.qty !== undefined) parts.push(`Qty: ${row.qty}`);
+        if (selectedColumns.includes('type_id') && row.type_hin) parts.push(`Type: ${row.type_hin}`);
+        if (selectedColumns.includes('condition_id') && row.condition_hin) parts.push(`Condition: ${row.condition_hin}`);
+        return parts.join(' | ') || 'Matched Criteria';
+    };
+
+    const aawakGroupsMap = new Map();
+    for (const awk of aawaks) {
+        const key = makeKey(awk);
+        if (!aawakGroupsMap.has(key)) aawakGroupsMap.set(key, []);
+        aawakGroupsMap.get(key).push(awk);
+    }
+
+    const jawakGroupsMap = new Map();
+    for (const jwk of jawaks) {
+        const key = makeKey(jwk);
+        if (!jawakGroupsMap.has(key)) jawakGroupsMap.set(key, []);
+        jawakGroupsMap.get(key).push(jwk);
+    }
+
+    const duplicateGroups = [];
+    let groupIndex = 1;
+
+    for (const [key, rows] of aawakGroupsMap.entries()) {
+        if (rows.length > 1) {
+            const groupObj = {
+                group_id: `awk_grp_${groupIndex++}`,
+                group_key: key,
+                entry_type: 'aawak',
+                match_summary: makeSummary(rows[0]),
+                match_count: rows.length,
+                entries: rows
+            };
+            duplicateGroups.push(groupObj);
+            if (groupCallback) groupCallback(groupObj);
+        }
+    }
+
+    for (const [key, rows] of jawakGroupsMap.entries()) {
+        if (rows.length > 1) {
+            const groupObj = {
+                group_id: `jwk_grp_${groupIndex++}`,
+                group_key: key,
+                entry_type: 'jawak',
+                match_summary: makeSummary(rows[0]),
+                match_count: rows.length,
+                entries: rows
+            };
+            duplicateGroups.push(groupObj);
+            if (groupCallback) groupCallback(groupObj);
+        }
+    }
+
+    logCallback(`[Complete] Duplicate scan finished. Found ${duplicateGroups.length} duplicate groups.`);
+    return duplicateGroups;
+}
+
 module.exports = {
     scanMismatches,
     resolveMismatches,
@@ -361,5 +565,7 @@ module.exports = {
     resolveRemainingQtyMismatches,
     scanBachatMismatches,
     resolveBachatMismatches,
-    rebuildAllBachat
+    rebuildAllBachat,
+    scanDuplicateMismatches
 };
+
