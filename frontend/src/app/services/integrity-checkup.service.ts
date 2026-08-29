@@ -31,7 +31,7 @@ export class IntegrityCheckupService {
       body: JSON.stringify({ testId, selectedColumns })
     }).then(response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`HTTP ${response.status}: ${response.statusText || 'Server Error'}`);
       }
       return response.body;
     });
@@ -47,7 +47,7 @@ export class IntegrityCheckupService {
       body: JSON.stringify({ mismatches, testId })
     }).then(response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`HTTP ${response.status}: ${response.statusText || 'Server Error'}`);
       }
       return response.body;
     });
@@ -62,7 +62,7 @@ export class IntegrityCheckupService {
       }
     }).then(response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`HTTP ${response.status}: ${response.statusText || 'Server Error'}`);
       }
       return response.body;
     });

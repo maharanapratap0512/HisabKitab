@@ -4,8 +4,10 @@ import { IntegrityCheckupService } from 'src/app/services/integrity-checkup.serv
 import { AuthService } from 'src/app/services/auth.service';
 import { HttpService } from 'src/app/services/http.service';
 import { ApiService } from 'src/app/services/api.service';
+import { GlobalService } from 'src/app/services/global.service';
 
 import Swal from 'sweetalert2';
+declare var $: any;
 
 @Component({
   selector: 'app-integrity-checkup',
@@ -14,6 +16,7 @@ import Swal from 'sweetalert2';
 })
 export class IntegrityCheckupComponent implements OnInit {
   @ViewChild('consoleBox') private consoleBox!: ElementRef;
+  @ViewChild('resultsSection') private resultsSection!: ElementRef;
 
   tests: any[] = [];
   selectedTest: any = null;
@@ -27,6 +30,7 @@ export class IntegrityCheckupComponent implements OnInit {
 
   // Dynamic comparison columns setting
   comparisonColumns = [
+    { id: 'pkt_num', label: 'Pkt Num / पैकेट नंबर', default: true, selected: true },
     { id: 'date', label: 'Date / तारीख', default: true, selected: true },
     { id: 'mm_id', label: 'Main MM / मिनीमधुबन', default: true, selected: true },
     { id: 'aj_mm_id', label: 'Aawak/Jawak MM', default: true, selected: true },
@@ -42,20 +46,23 @@ export class IntegrityCheckupComponent implements OnInit {
     { id: 'rate', label: 'Rate / रेट', default: false, selected: false },
     { id: 'actual_amt', label: 'Amount / राशि', default: false, selected: false },
     { id: 'lot_no', label: 'Lot No', default: false, selected: false },
-    { id: 'pkt_num', label: 'Pkt Num', default: false, selected: false },
+    { id: 'item_detail', label: 'Item Detail', default: false, selected: false },
     { id: 'description', label: 'Description / विवरण', default: false, selected: false }
   ];
 
   // Quick edit modal state
   showEditModal: boolean = false;
   editingEntry: any = null;
+  showModal: string = '';
+  editData: any = null;
 
   constructor(
     private integrityService: IntegrityCheckupService,
     private http: HttpService,
     private api: ApiService,
     private toastr: ToastrService,
-    public auth: AuthService
+    public auth: AuthService,
+    public gs: GlobalService
   ) { }
 
   ngOnInit(): void {
@@ -69,9 +76,12 @@ export class IntegrityCheckupComponent implements OnInit {
         if (this.tests.length > 0) {
           this.selectTest(this.tests[0]);
         }
+      } else {
+        this.toastr.error(res.message || 'Failed to load integrity tests.');
       }
     }, err => {
-      this.toastr.error('Failed to load integrity tests.');
+      const errorMsg = err?.error?.message || err?.message || 'Failed to load integrity tests.';
+      this.toastr.error(errorMsg);
     });
   }
 
@@ -125,13 +135,19 @@ export class IntegrityCheckupComponent implements OnInit {
           this.toastr.success('No integrity mismatches found!');
         } else {
           this.toastr.warning(`Found ${this.mismatches.length} mismatches!`);
+          this.scrollToResults();
         }
+        this.scrollConsoleToBottom();
+      } else {
+        this.logs.push(`[Error] Scan failed: ${res.message || 'Unknown error'}`);
+        this.toastr.error(res.message || 'Integrity scan failed.');
         this.scrollConsoleToBottom();
       }
     }, err => {
       this.isScanning = false;
-      this.logs.push(`[Error] Scan failed: ${err.message}`);
-      this.toastr.error('Integrity scan failed.');
+      const errorMsg = err?.error?.message || err?.message || 'Integrity scan failed.';
+      this.logs.push(`[Error] Scan failed: ${errorMsg}`);
+      this.toastr.error(errorMsg);
       this.scrollConsoleToBottom();
     });
   }
@@ -152,7 +168,8 @@ export class IntegrityCheckupComponent implements OnInit {
     try {
       const stream = await this.integrityService.scanStream(this.selectedTest.id, selectedCols);
       if (!stream) {
-        this.logs.push('[Error] Could not initialize scan stream.');
+        this.logs.push('[Error] Could not initialize scan stream from backend.');
+        this.toastr.error('Could not initialize scan stream from backend.');
         this.isScanning = false;
         return;
       }
@@ -178,12 +195,16 @@ export class IntegrityCheckupComponent implements OnInit {
               this.scrollConsoleToBottom();
             } else if (data.type === 'group') {
               this.duplicateGroups.push(data.group);
+              if (this.duplicateGroups.length === 1) {
+                this.scrollToResults();
+              }
             } else if (data.type === 'complete') {
               this.logs.push(`[Complete] Duplicate scan finished. Found ${data.count} duplicate groups.`);
               if (data.count === 0) {
                 this.toastr.success('No duplicate entries found!');
               } else {
                 this.toastr.warning(`Found ${data.count} duplicate groups!`);
+                this.scrollToResults();
               }
               this.scrollConsoleToBottom();
             }
@@ -193,8 +214,9 @@ export class IntegrityCheckupComponent implements OnInit {
         }
       }
     } catch (err: any) {
-      this.logs.push(`[Fatal Error] ${err.message}`);
-      this.toastr.error('Scan stream failed.');
+      const errorMsg = err?.error?.message || err?.message || 'Scan stream failed.';
+      this.logs.push(`[Fatal Error] ${errorMsg}`);
+      this.toastr.error(`Scan failed: ${errorMsg}`);
       this.scrollConsoleToBottom();
     } finally {
       this.isScanning = false;
@@ -238,35 +260,31 @@ export class IntegrityCheckupComponent implements OnInit {
   }
 
   editEntry(entry: any) {
-    this.editingEntry = JSON.parse(JSON.stringify(entry));
-    this.showEditModal = true;
+    this.editData = JSON.parse(JSON.stringify(entry));
+    if (entry.record_type === 'aawak') {
+      this.showModal = 'Edit Aawak';
+    } else {
+      this.showModal = 'Edit Jawak';
+    }
+    setTimeout(() => {
+      $('#showModal').modal('show');
+    }, 50);
   }
 
   closeEditModal() {
-    this.editingEntry = null;
-    this.showEditModal = false;
+    $('#showModal').modal('hide');
+    this.showModal = '';
+    this.editData = null;
   }
 
-  saveEditedEntry() {
-    if (!this.editingEntry) return;
-    const isAawak = this.editingEntry.record_type === 'aawak';
-    const url = isAawak ? this.api.getUrl('AAWAK') + 'new/' : this.api.getUrl('JAWAK') + 'new/';
-    const body = {
-      query: { _id: this.editingEntry._id },
-      set: { ...this.editingEntry }
-    };
-    
-    this.http.put(url, body).subscribe((res: any) => {
-      if (res && (res.success || res.result)) {
-        this.toastr.success('Entry updated successfully!');
-        this.closeEditModal();
-        this.runScanStream();
-      } else {
-        this.toastr.error(res.message || 'Update failed.');
-      }
-    }, err => {
-      this.toastr.error(err?.error?.message || err?.message || 'Update failed.');
-    });
+  onEditResponse(res: any) {
+    $('#showModal').modal('hide');
+    this.showModal = '';
+    this.editData = null;
+    if (res) {
+      this.toastr.success('Entry updated successfully!');
+      this.runScanStream();
+    }
   }
 
   async runResolution() {
@@ -392,6 +410,10 @@ export class IntegrityCheckupComponent implements OnInit {
     } finally {
       this.isResolving = false;
     }
+  }
+
+  private scrollToResults() {
+    this.gs.smoothScrollTo(this.resultsSection);
   }
 
   private scrollConsoleToBottom() {

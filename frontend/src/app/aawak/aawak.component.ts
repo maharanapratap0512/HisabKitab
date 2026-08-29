@@ -1692,7 +1692,7 @@ export class AawakComponent implements OnInit {
                 }
                 break;
               case "subitem": obj.subitem = exceldata[i][j];
-                if (obj.item_id) {
+                if (obj.item_id && obj.subitem) {
                   let getitem = this.items.find((i: any) => i._id == obj.item_id);
                   let getsubitem = getitem?.subitems.find((m: any) => this.gs.stringCompare(m.subitem_hin, obj.subitem) || this.gs.stringCompare(m.subitem_eng, obj.subitem) || this.gs.stringCompare(m.subitem_code, obj.subitem));
                   obj.subitem_id = getsubitem ? getsubitem._id : null;

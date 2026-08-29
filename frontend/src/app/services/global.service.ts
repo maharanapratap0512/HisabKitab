@@ -192,15 +192,16 @@ export class GlobalService {
     }
   }
 
-  cleanString(str: string): string {
-    return (str || "")
+  cleanString(str: any): string {
+    if (str === null || str === undefined) return "";
+    return String(str)
       .trim()
       .normalize("NFC")          // normalize Unicode
       .replace(/\u200B/g, "")    // remove zero-width space
       .replace(/\u00A0/g, " ")   // remove non-breaking space
       .replace(/\s+/g, " ")      // collapse multiple spaces
       .toLowerCase();            // case-insensitive for English
-  };
+  }
 
   stringCompare(a: string, b: string): boolean {
     return this.cleanString(a) === this.cleanString(b);
@@ -226,6 +227,52 @@ export class GlobalService {
 
     // For numbers, dates, booleans - return as is
     return value;
+  }
+
+  /**
+   * Universal Slow & Smooth Animated Scroll Helper
+   * Can accept an ElementRef, HTMLElement, CSS selector string, or target Y position number
+   */
+  smoothScrollTo(target: any, offset: number = -20, duration: number = 1000) {
+    setTimeout(() => {
+      let targetY = 0;
+      if (typeof target === 'number') {
+        targetY = target;
+      } else if (typeof target === 'string') {
+        const el = document.querySelector(target);
+        if (el) targetY = el.getBoundingClientRect().top + window.pageYOffset + offset;
+        else return;
+      } else if (target?.nativeElement) {
+        targetY = target.nativeElement.getBoundingClientRect().top + window.pageYOffset + offset;
+      } else if (target instanceof HTMLElement) {
+        targetY = target.getBoundingClientRect().top + window.pageYOffset + offset;
+      } else {
+        return;
+      }
+
+      const startPosition = window.pageYOffset;
+      const distance = targetY - startPosition;
+      let start: number | null = null;
+
+      const animateScroll = (currentTime: number) => {
+        if (start === null) start = currentTime;
+        const timeElapsed = currentTime - start;
+        const progress = Math.min(timeElapsed / duration, 1);
+        
+        // Ease In Out Cubic curve for smooth, gentle animation
+        const ease = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+        window.scrollTo(0, startPosition + distance * ease);
+
+        if (timeElapsed < duration) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+
+      requestAnimationFrame(animateScroll);
+    }, 50);
   }
 
 }

@@ -488,9 +488,10 @@ function scanDuplicateMismatches(selectedColumns = [], groupCallback = null, log
     const makeKey = (row) => {
         return selectedColumns.map(col => {
             const val = row[col];
-            if (val === undefined || val === null || val === '') return 'NULL';
-            return String(val).trim().toLowerCase();
-        }).join('|');
+            if (val === undefined || val === null) return 'NULL';
+            const strVal = String(val).trim().toLowerCase();
+            return strVal === '' ? 'NULL' : strVal;
+        }).join('||');
     };
 
     const makeSummary = (row) => {
@@ -501,9 +502,18 @@ function scanDuplicateMismatches(selectedColumns = [], groupCallback = null, log
         if (selectedColumns.includes('item_id') && row.item_hin) parts.push(`Item: ${row.item_hin}`);
         if (selectedColumns.includes('subitem_id') && row.subitem_hin) parts.push(`Subitem: ${row.subitem_hin}`);
         if (selectedColumns.includes('unit_id') && row.unit_short) parts.push(`Unit: ${row.unit_short}`);
-        if (selectedColumns.includes('qty') && row.qty !== undefined) parts.push(`Qty: ${row.qty}`);
+        if (selectedColumns.includes('qty') && row.qty !== undefined && row.qty !== null) parts.push(`Qty: ${row.qty}`);
         if (selectedColumns.includes('type_id') && row.type_hin) parts.push(`Type: ${row.type_hin}`);
         if (selectedColumns.includes('condition_id') && row.condition_hin) parts.push(`Condition: ${row.condition_hin}`);
+        if (selectedColumns.includes('pbk_id') && row.pbk_hin) parts.push(`PBK: ${row.pbk_hin}`);
+        if (selectedColumns.includes('aawak_source_id') && row.aawak_source_hin) parts.push(`Source: ${row.aawak_source_hin}`);
+        if (selectedColumns.includes('usage_list_id') && row.usage_list_hin) parts.push(`Usage: ${row.usage_list_hin}`);
+        if (selectedColumns.includes('rate') && row.rate !== undefined && row.rate !== null) parts.push(`Rate: ${row.rate}`);
+        if (selectedColumns.includes('actual_amt') && row.actual_amt !== undefined && row.actual_amt !== null) parts.push(`Amt: ${row.actual_amt}`);
+        if (selectedColumns.includes('lot_no') && row.lot_no) parts.push(`Lot: ${row.lot_no}`);
+        if (selectedColumns.includes('pkt_num') && row.pkt_num) parts.push(`Pkt: ${row.pkt_num}`);
+        if (selectedColumns.includes('item_detail') && row.item_detail) parts.push(`Detail: ${row.item_detail}`);
+        if (selectedColumns.includes('description') && row.description) parts.push(`Desc: ${row.description}`);
         return parts.join(' | ') || 'Matched Criteria';
     };
 
