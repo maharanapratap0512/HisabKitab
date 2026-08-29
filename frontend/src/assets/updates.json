@@ -1,10 +1,35 @@
 [
     {
+        "version": "36.3",
+        "date": "29-08-2026",
+        "summary": "Excel Import Subitem Matching Fix & Duplicate Assumption Integrity Checkup",
+        "summary_hin": "एक्सेल इम्पोर्ट सबआइटम मैचिंग बग फिक्स एवं डुप्लिकेट आवक-जावक इंटीग्रिटी चेकअप",
+        "isNew": true,
+        "items": [
+            {
+                "type": "fix",
+                "module": "Aawak & Excel Import",
+                "title": "Excel Import Subitem Matching Bug Fix",
+                "title_hin": "एक्सेल इम्पोर्ट सबआइटम मैचिंग बग फिक्स",
+                "desc": "Fixed issue where empty/null subitem cells during Excel import incorrectly matched empty subitem master records. Subitem comparison is now skipped when subitem is empty/null, correctly assigning subitem_id = null.",
+                "desc_hin": "एक्सेल इम्पोर्ट के दौरान खाली सबआइटम सेल होने पर गलत सबआइटम मैचिंग की समस्या को ठीक किया गया। सबआइटम खाली होने पर तुलना स्किप होकर सबआइटम ID = null सेट होती है।"
+            },
+            {
+                "type": "feature",
+                "module": "Integrity Checkup",
+                "title": "Duplicate Aawak & Jawak Assumption Integrity Checkup",
+                "title_hin": "डुप्लिकेट आवक एवं जावक इंटीग्रिटी चेकअप",
+                "desc": "Added new Duplicate Aawak & Jawak Assumption integrity scanner with real-time HTTP chunked streaming, dynamic comparison column toolbar, connected relation badges (Aawak <-> Jawak links), smooth auto-scrolling, inline modal edit via singular form components, and instant delete action.",
+                "desc_hin": "नया डुप्लिकेट आवक व जावक इंटीग्रिटी स्कैनर जो रियल-टाइम स्ट्रीमिंग स्कैन, डायनामिक तुलना कॉलम टॉगल, कनेक्टेड लिंक्स काउंट, स्मूथ ऑटो-स्क्रॉल, सिंगुलर फॉर्म एडिट मोडल एवं डिलीट एक्शन के साथ उपलब्ध है।"
+            }
+        ]
+    },
+    {
         "version": "36.2",
         "date": "26-08-2026",
         "summary": "Dynamic Item/Variant Mode Toggle, Centralized Field Settings, Entry Form Adaptations & Unified Import Dropdown",
         "summary_hin": "डायनामिक आइटम/वेरिएंट मोड टॉगल, सेंट्रलाइज्ड फ़ील्ड सेटिंग्स, एंट्री फॉर्म अनुकूलन एवं एकीकृत इम्पोर्ट ड्रॉपडाउन",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",
