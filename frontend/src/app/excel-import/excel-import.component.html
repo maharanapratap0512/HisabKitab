@@ -365,27 +365,43 @@
                                           </ng-select>
                                        </div>
 
-                                       <!-- item dropdown -->
-                                       <div class="d-flex justify-content-center" *ngIf="data.type == 'item'">
-                                          <div class="col-4">
-                                             <ng-select class="custom custom-import" placeholder="Select Category"
-                                                [virtualScroll]="true" (change)="catSelected($event)"
-                                                (open)="onDropdownOpen()" (close)="onDropdownClose()" appendTo="body">
-                                                <ng-option selected="selected" disabled value="">-- Select Category
-                                                   --</ng-option>
-                                                <ng-option *ngFor="let item of categories" [value]="item._id">
-                                                   {{item.category_hin}}:{{item.category_eng}}</ng-option>
-                                             </ng-select>
+                                       <!-- item dropdown & detail/description fields (for jawak import) -->
+                                       <div class="d-flex flex-column w-100" *ngIf="data.type == 'item'">
+                                          <div class="d-flex justify-content-center w-100">
+                                             <div class="col-4">
+                                                <ng-select class="custom custom-import" placeholder="Select Category"
+                                                   [virtualScroll]="true" (change)="catSelected($event)"
+                                                   (open)="onDropdownOpen()" (close)="onDropdownClose()" appendTo="body">
+                                                   <ng-option selected="selected" disabled value="">-- Select Category
+                                                      --</ng-option>
+                                                   <ng-option *ngFor="let item of categories" [value]="item._id">
+                                                      {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                                                </ng-select>
+                                             </div>
+                                             <!-- single item-dropdown for item & subitem / variant -->
+                                             <div class="col-8 mx-1">
+                                                <app-item-dropdown class="custom-import" style="min-width: 250px;"
+                                                   [filterObj]="{ category_id: cat }" [(itemId)]="data.item_id"
+                                                   [(subitemId)]="data.subitem_id" (open)="onDropdownOpen()"
+                                                   (close)="onDropdownClose()"
+                                                   (change)="itemChange($event, data, ((page_unmatched-1) * 10) + i)"
+                                                   appendTo="body">
+                                                </app-item-dropdown>
+                                             </div>
                                           </div>
-                                          <!-- single item-dropdown for item & subitem / variant -->
-                                          <div class="col-8 mx-1">
-                                             <app-item-dropdown class="custom-import" style="min-width: 250px;"
-                                                [filterObj]="{ category_id: cat }" [(itemId)]="data.item_id"
-                                                [(subitemId)]="data.subitem_id" (open)="onDropdownOpen()"
-                                                (close)="onDropdownClose()"
-                                                (change)="itemChange($event, data, ((page_unmatched-1) * 10) + i)"
-                                                appendTo="body">
-                                             </app-item-dropdown>
+                                          <div class="d-flex gap-2 mt-1 w-100" *ngIf="importType?.name == 'jawak'">
+                                             <div class="flex-fill">
+                                                <input type="text" class="form-control form-control-sm"
+                                                   placeholder="Append Item Detail..."
+                                                   [(ngModel)]="data.item_detail"
+                                                   [ngModelOptions]="{standalone: true}">
+                                             </div>
+                                             <div class="flex-fill">
+                                                <input type="text" class="form-control form-control-sm"
+                                                   placeholder="Append Description..."
+                                                   [(ngModel)]="data.description"
+                                                   [ngModelOptions]="{standalone: true}">
+                                             </div>
                                           </div>
                                        </div>
 
@@ -578,9 +594,9 @@
                                        [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'">
                                  </td>
                                  <td>
-                                    <button *ngIf="!(data.id || data.item_id) && !data.ignore" class="btn btn-warning"
+                                    <button *ngIf="!(data.id || data.item_id || (data.type == 'item' && (data.item_detail || data.description))) && !data.ignore" class="btn btn-warning"
                                        (click)="ignoreCorrection(data, ((page_unmatched-1) * 10) + i)">Ignore</button>
-                                    <button *ngIf="data.id || data.item_id" class="btn btn-success"
+                                    <button *ngIf="data.id || data.item_id || (data.type == 'item' && (data.item_detail || data.description))" class="btn btn-success"
                                        (click)="correctionSubmit(data, ((page_unmatched-1) * 10) + i)">Correct</button>
                                     <span *ngIf="data.ignore" class="text-warning"> Ignored</span>
                                  </td>

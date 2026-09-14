@@ -25,6 +25,12 @@ async function getJawakDetailForAawak(aawakId, deptId = null, extraCondition = n
             } else {
                 jwk.allocated_qty = jwk.qty;
             }
+            if (typeof jwk.aawak_splits === 'string') {
+                try { jwk.aawak_splits = JSON.parse(jwk.aawak_splits); } catch (e) { jwk.aawak_splits = []; }
+            }
+            if (!jwk.aawak_splits || !jwk.aawak_splits.length) {
+                jwk.aawak_splits = [{ aawak_id: aawakId, split_qty: jwk.allocated_qty, is_split: jwk.is_split || 0 }];
+            }
         }
         return list;
     } catch (e) {
@@ -359,9 +365,15 @@ router.put('/new', async (req, res, next) => {
             // await updateAawak(req.body.set);
             let oldAwk = await DB.getById('aawak', req.body.set._id);
             await Fn.updateAJ(req.body.set, 'aawak', oldAwk).then(async (resolve) => {
-                await DB.getList('jawak', { conditionString: ` (jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${oldAwk._id}) OR jawak.aawak_ref_id = ${oldAwk._id})` }).then(async (jwkdata) => {
+                // --- Update rel-jawak (linked via rel_aawak_jawak) through full updateAJ ---
+                // Re-read aawak_splits from DB for each rel-jawak so processRelAawakJawak
+                // can correctly recreate the relation rows after updating.
+                const BaseTable = require('../database/base.table');
+                const relAawakJawak = new BaseTable('rel_aawak_jawak');
+                await DB.getList('jawak', { conditionString: ` jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${oldAwk._id})` }).then(async (jwkdata) => {
                     if (jwkdata.data) {
                         for (let jwk of jwkdata.data) {
+                            const relRows = relAawakJawak.getAll({ jawak_id: jwk._id }, { full: false });
                             let jwkNew = {
                                 ...jwk,
                                 condition_id: req.body.set.condition_id,
@@ -369,21 +381,20 @@ router.put('/new', async (req, res, next) => {
                                 item_id: req.body.set.item_id,
                                 subitem_id: req.body.set.subitem_id,
                                 product_id: req.body.set.product_id,
-                                condition_id: req.body.set.condition_id,
                                 aawak_source_id: req.body.set.aawak_source_id,
                                 unit_id: req.body.set.unit_id,
                                 dept_id: req.body.set.dept_id,
+                                // Pass aawak_splits so processRelAawakJawak can re-insert correctly
+                                aawak_splits: relRows.map(r => ({ aawak_id: r.aawak_id, split_qty: r.split_qty, qty: r.qty })),
                             }
-                            await Fn.updateAJ(jwkNew, 'jawak', jwk).then((data) => {
-                            }, (err) => {
-                                console.log('jwk', err);
+                            await Fn.updateAJ(jwkNew, 'jawak', jwk).then(() => {}, (err) => {
+                                console.log('rel-jwk update err', err);
                                 throw err;
                             });
                         }
                     }
-                }, (err) => {
-                    throw err;
-                });
+                }, (err) => { throw err; });
+
 
                 for (let jwk of req.body.set.jawak_detail) {
                     if (!jwk._id) {

@@ -1307,7 +1307,7 @@ export class AawakNewComponent implements OnInit {
   }
 
   addJawakResponse(ev: any) {
-    let awkId = ev.aawak_ref_id || (ev.aawak_splits && ev.aawak_splits.length > 0 ? (ev.aawak_splits[0].aawak_id || ev.aawak_splits[0]._id) : null);
+    let awkId = (ev.aawak_splits && ev.aawak_splits.length > 0 ? (ev.aawak_splits[0].aawak_id || ev.aawak_splits[0]._id) : null);
     if (awkId) {
       let i = this.aawakData.findIndex((b: any) => b._id == awkId);
       if (i > -1) {

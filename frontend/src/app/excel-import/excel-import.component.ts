@@ -447,31 +447,36 @@ export class ExcelImportComponent implements OnInit {
 
     if (data.type == 'item') {
       for (let i in this.excelArrObj) {
+        let isMatch = false;
         if (typeof data.name === 'string') {
           if (this.excelArrObj[i].item == data.name) {
-            if (data.item) {
-              this.excelArrObj[i].item_id = data.item_id;
-              this.excelArrObj[i].item_hin = data.item.item_hin;
-            }
-            if (data.subitem) {
-              this.excelArrObj[i].subitem_id = data.subitem_id;
-              this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
-              this.excelArrObj[i].subitem_corrected = true;
-            }
-            console.log("excel data", this.excelArrObj[i]);
-
+            isMatch = true;
           }
         } else if (data.name && typeof data.name === 'object' && this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
+          isMatch = true;
+        }
+
+        if (isMatch) {
           if (data.item) {
             this.excelArrObj[i].item_id = data.item_id;
             this.excelArrObj[i].item_hin = data.item.item_hin;
           }
-          this.excelArrObj[i].subitem_corrected = true;
-          this.excelArrObj[i].subitem_hin = '-';
           if (data.subitem) {
             this.excelArrObj[i].subitem_id = data.subitem_id;
             this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
+            this.excelArrObj[i].subitem_corrected = true;
+          } else if (typeof data.name === 'object') {
+            this.excelArrObj[i].subitem_corrected = true;
+            this.excelArrObj[i].subitem_hin = '-';
           }
+
+          if (data.item_detail) {
+            this.excelArrObj[i].item_detail = (this.excelArrObj[i].item_detail ? this.excelArrObj[i].item_detail + ' ' : '') + data.item_detail;
+          }
+          if (data.description) {
+            this.excelArrObj[i].description = (this.excelArrObj[i].description ? this.excelArrObj[i].description + ' ' : '') + data.description;
+          }
+
           console.log("excel data", this.excelArrObj[i]);
         }
       }

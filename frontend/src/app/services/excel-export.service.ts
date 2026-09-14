@@ -82,6 +82,81 @@ export class ExcelExportService {
     this.saveAsExcelFile(excelBuffer, excelFileName);
   }
 
+  public exportStyledExcel(json: any[], excelFileName: string, titleText: string = ''): void {
+    if (!json || json.length === 0) return;
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Sheet1');
+
+    worksheet.views = [{ showGridLines: true }];
+
+    const keys = Object.keys(json[0]);
+
+    const border: Partial<any> = {
+      top: { style: 'thin', color: { argb: 'FFD9D9D9' } },
+      left: { style: 'thin', color: { argb: 'FFD9D9D9' } },
+      bottom: { style: 'thin', color: { argb: 'FFD9D9D9' } },
+      right: { style: 'thin', color: { argb: 'FFD9D9D9' } }
+    };
+
+    let startRow = 1;
+
+    // 1. Universal Title Sub-header Row (Matching HMP Banner Style)
+    if (titleText) {
+      worksheet.mergeCells(1, 1, 1, keys.length);
+      const titleCell = worksheet.getCell('A1');
+      titleCell.value = titleText;
+      titleCell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FF000000' } };
+      titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCE6F1' } };
+      titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+      titleCell.border = border;
+      worksheet.getRow(1).height = 20;
+      startRow = 2;
+    }
+
+    // 2. Universal Column Headers (Matching HMP Header Style)
+    const headerRow = worksheet.getRow(startRow);
+    headerRow.values = keys;
+    headerRow.height = 22;
+    headerRow.eachCell((cell) => {
+      cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: 'FF000000' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFBDD7EE' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = border;
+    });
+
+    // 3. Universal Data Rows
+    json.forEach((rowObj) => {
+      const row = worksheet.addRow(keys.map(k => rowObj[k]));
+      row.height = 20;
+      const isTotal = Object.values(rowObj).some(v => String(v).includes('--TOTAL--'));
+
+      row.eachCell((cell) => {
+        const valStr = cell.value !== null && cell.value !== undefined ? String(cell.value) : '';
+        cell.font = { name: 'Calibri', size: 9.5, color: { argb: 'FF000000' } };
+        cell.border = border;
+
+        let align: any = { vertical: 'middle', horizontal: 'left' };
+        if (typeof cell.value === 'number') {
+          align.horizontal = 'right';
+        } else if (valStr.length <= 4 && !isNaN(Number(valStr))) {
+          align.horizontal = 'center';
+        }
+        cell.alignment = align;
+
+        if (isTotal) {
+          cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: 'FF0F5132' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD4EDDA' } };
+        }
+      });
+    });
+
+    const fileName = (excelFileName ? excelFileName : 'HK_Export') + '.xlsx';
+    workbook.xlsx.writeBuffer().then((buffer: any) => {
+      const data: Blob = new Blob([buffer], { type: EXCEL_TYPE });
+      FileSaver.saveAs(data, fileName);
+    });
+  }
+
 
 
   public exportTblToExcelFile(table: any, excelFileName: string): void {

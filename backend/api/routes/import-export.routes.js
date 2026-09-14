@@ -145,12 +145,16 @@ router.put('/correction', async (req, res, next) => {
                         await DB.runQuery('excel_correction', 'update_jawak', { obj: obj });
                     }
                 }
-                if (req.body[i].type == 'item' && req.body[i].extra_note) {
-                    let qname = 'update_subitem';
-                    if (req.body[i].id && !req.body[i].id2) {
-                        qname = 'update_ignore_subitem';
+                if (req.body[i].type == 'item') {
+                    if (req.body[i].extra_note) {
+                        let qname = 'update_subitem';
+                        if (req.body[i].id && !req.body[i].id2) {
+                            qname = 'update_ignore_subitem';
+                        }
+                        await DB.runQuery('excel_correction', qname, { obj: req.body[i] });
+                    } else {
+                        await DB.runQuery('excel_correction', 'update_item', { obj: req.body[i] });
                     }
-                    await DB.runQuery('excel_correction', qname, { obj: req.body[i] });
                 } else {
                     await DB.runQuery('excel_correction', 'update_' + req.body[i].type, { obj: req.body[i] });
                 }

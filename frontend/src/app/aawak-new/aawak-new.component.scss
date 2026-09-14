@@ -21,6 +21,9 @@
 .main-row {
     transition: all 0.15s ease-in-out;
     cursor: pointer;
+    border-top: 2px solid rgba(114, 124, 245, 0.5) !important;
+    border-left: 4px solid #727cf5 !important;
+    background-color: rgba(114, 124, 245, 0.13) !important;
 
     td {
         padding: 5px 8px !important;
@@ -29,12 +32,24 @@
     }
 
     &[aria-expanded="true"] {
-        border-left: 3px solid #727cf5;
         .collapse-icon {
             transform: rotate(90deg);
         }
     }
+
+    // When voucher has no aawak items — this IS the last row, add bottom border
+    &.voucher-no-items {
+        border-bottom: 3px solid rgba(114, 124, 245, 0.6) !important;
+    }
 }
+
+// Sub-row collapse — teal, marks the end of an expanded voucher
+.sub-row-collapse {
+    border-left: 4px solid #10b7b3 !important;
+    border-bottom: 3px solid rgba(114, 124, 245, 0.6) !important;
+    background-color: rgba(16, 183, 179, 0.10) !important;
+}
+
 
 // Sub-Row Container (Nested Items inside Voucher)
 .sub-row {

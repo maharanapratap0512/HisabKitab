@@ -12,6 +12,7 @@ export class ChangelogPanelComponent implements OnInit, OnChanges {
     @Input() lastSeenVersion: string | null = null;
     @Output() onClose = new EventEmitter<void>();
 
+    currentLang: 'en' | 'hi' = 'en';
     expandedStates: { [key: string]: boolean } = {};
 
     constructor() { }

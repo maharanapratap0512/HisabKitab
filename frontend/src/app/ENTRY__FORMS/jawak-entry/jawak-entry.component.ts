@@ -154,77 +154,89 @@ export class JawakEntryComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     console.log("jawak-changes", changes);
     if (changes.getData && changes.getData.currentValue) {
+      const data = changes.getData.currentValue;
+
+      let splits = data.aawak_splits;
+      if (typeof splits === 'string') {
+        try { splits = JSON.parse(splits); } catch (e) { splits = []; }
+      }
+      if (!Array.isArray(splits)) {
+        splits = [];
+      }
+      this.aawak_splits = splits;
+
+      const aawakId = (splits.length > 0)
+        ? (splits[0].aawak_id || splits[0]._id)
+        : null;
+
       this.jawakForm.patchValue({
-        date: changes.getData.currentValue.date,
-        date_sent: changes.getData.currentValue.date_sent || null,
-        mm_id: changes.getData.currentValue.mm_id,
-        pkt_num: changes.getData.currentValue.pkt_num,
-        lot_no: changes.getData.currentValue.lot_no || null,
-        jawak_mm_id: changes.getData.currentValue.jawak_mm_id,
-        pbk_id: changes.getData.currentValue.pbk_id,
-        item_id: changes.getData.currentValue.item_id,
-        subitem_id: changes.getData.currentValue.subitem_id,
-        usage_list_id: changes.getData.currentValue.usage_list_id,
-        item_detail: changes.getData.currentValue.item_detail,
-        product_id: changes.getData.currentValue.product_id,
-        condition_id: changes.getData.currentValue.condition_id,
-        qty: changes.getData.currentValue.qty,
-        remaining_qty: changes.getData.currentValue.remaining_qty ? changes.getData.currentValue.remaining_qty : 0,
-        rate: changes.getData.currentValue.rate ? changes.getData.currentValue.rate : null,
-        actual_amt: changes.getData.currentValue.actual_amt ? changes.getData.currentValue.actual_amt : null,
-        company_name: changes.getData.currentValue.company_name,
-        jawak_type_id: changes.getData.currentValue.jawak_type_id,
-        aawak_source_id: changes.getData.currentValue.aawak_source_id || null,
-        unit_id: changes.getData.currentValue.unit_id,
-        description: changes.getData.currentValue.description,
-        parchi_place: changes.getData.currentValue.parchi_place ? changes.getData.currentValue.parchi_place : null,
-        sell_repair_place: changes.getData.currentValue.sell_repair_place ? changes.getData.currentValue.sell_repair_place : null,
-        aawak_ref_id: changes.getData.currentValue.aawak_ref_id,
-        aawak_splits: changes.getData.currentValue.aawak_splits || [],
-        nimitt_id: changes.getData.currentValue.nimitt_id,
-        dept_id: changes.getData.currentValue.dept_id,
-        is_xl: changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0,
-        is_process: changes.getData.currentValue.is_process ? changes.getData.currentValue.is_process : 0,
-        is_recieved: changes.getData.currentValue.is_recieved ? changes.getData.currentValue.is_recieved : 0,
-        hl: changes.getData.currentValue.hl ? changes.getData.currentValue.hl : 0,
-        unit_short: changes.getData.currentValue.unit_short,
-        auto_awk: changes.getData.currentValue.auto_awk ? changes.getData.currentValue.auto_awk : 0,
-        auto_reawk: changes.getData.currentValue.auto_reawk ? changes.getData.currentValue.auto_reawk : 0,
-        aawak_type_id: changes.getData.currentValue.aawak_type_id ? changes.getData.currentValue.aawak_type_id : null,
-        aawak_dept_id: changes.getData.currentValue.aawak_dept_id ? changes.getData.currentValue.aawak_dept_id : null,
-        aawak_date: changes.getData.currentValue.aawak_date ? changes.getData.currentValue.aawak_date : null,
-        re_aawak_type_id: changes.getData.currentValue.re_aawak_type_id ? changes.getData.currentValue.re_aawak_type_id : null,
+        date: data.date,
+        date_sent: data.date_sent || null,
+        mm_id: data.mm_id,
+        pkt_num: data.pkt_num,
+        lot_no: data.lot_no || null,
+        jawak_mm_id: data.jawak_mm_id,
+        pbk_id: data.pbk_id,
+        item_id: data.item_id,
+        subitem_id: data.subitem_id,
+        usage_list_id: data.usage_list_id,
+        item_detail: data.item_detail,
+        product_id: data.product_id,
+        condition_id: data.condition_id,
+        qty: data.qty,
+        remaining_qty: data.remaining_qty ? data.remaining_qty : 0,
+        rate: data.rate ? data.rate : null,
+        actual_amt: data.actual_amt ? data.actual_amt : null,
+        company_name: data.company_name,
+        jawak_type_id: data.jawak_type_id,
+        aawak_source_id: data.aawak_source_id || null,
+        unit_id: data.unit_id,
+        description: data.description,
+        parchi_place: data.parchi_place ? data.parchi_place : null,
+        sell_repair_place: data.sell_repair_place ? data.sell_repair_place : null,
+        aawak_splits: splits,
+        nimitt_id: data.nimitt_id,
+        dept_id: data.dept_id,
+        is_xl: data.is_xl ? data.is_xl : 0,
+        is_process: data.is_process ? data.is_process : 0,
+        is_recieved: data.is_recieved ? data.is_recieved : 0,
+        hl: data.hl ? data.hl : 0,
+        unit_short: data.unit_short,
+        auto_awk: data.auto_awk ? data.auto_awk : 0,
+        auto_reawk: data.auto_reawk ? data.auto_reawk : 0,
+        aawak_type_id: data.aawak_type_id ? data.aawak_type_id : null,
+        aawak_dept_id: data.aawak_dept_id ? data.aawak_dept_id : null,
+        aawak_date: data.aawak_date ? data.aawak_date : null,
+        re_aawak_type_id: data.re_aawak_type_id ? data.re_aawak_type_id : null,
       });
 
       // Patch jawak_id in enz if editing
-      if (changes.getData.currentValue.enz) {
+      if (data.enz) {
         this.jawakForm.get('enz')?.patchValue({
-          _id: changes.getData.currentValue.enz._id,
-          container_capacity: changes.getData.currentValue.enz.container_capacity
+          _id: data.enz._id,
+          container_capacity: data.enz.container_capacity
         });
       }
 
       setTimeout(() => {
-        this.itemSelected(changes.getData.currentValue);
-        if (changes.getData.currentValue.subitem_id) {
-          this.subitemSelected(changes.getData.currentValue);
+        this.itemSelected(data);
+        if (data.subitem_id) {
+          this.subitemSelected(data);
         }
       }, 100);
 
-      const aawakId = (changes.getData.currentValue.aawak_splits && changes.getData.currentValue.aawak_splits.length > 0)
-        ? changes.getData.currentValue.aawak_splits[0].aawak_id
-        : changes.getData.currentValue.aawak_ref_id;
-
-      if (changes.getData.currentValue.aawak_splits && changes.getData.currentValue.aawak_splits.length > 0) {
-        this.aawak_splits = changes.getData.currentValue.aawak_splits;
-      }
-
       if (aawakId) {
         this.fetchAawakRef(aawakId);
+      } else {
+        this.aawakRef = null;
       }
     }
     if (changes.aawakRef && changes.aawakRef.currentValue) {
       this.aawakRef = changes.aawakRef.currentValue;
+      const refId = this.aawakRef._id || this.aawakRef.aawak_id;
+      if (!this.aawak_splits || !this.aawak_splits.length) {
+        this.aawak_splits = [{ aawak_id: refId, split_qty: this.aawakRef.remaining_qty || this.aawakRef.Stock || 0, is_split: 0 }];
+      }
       this.jawakForm.patchValue({
         lot_no: this.aawakRef.lot_no,
         mm_id: this.aawakRef.mm_id,
@@ -243,7 +255,8 @@ export class JawakEntryComponent implements OnInit {
         description: this.aawakRef.description,
         parchi_place: this.aawakRef.parchi_place ? this.aawakRef.parchi_place : null,
         sell_repair_place: this.aawakRef.sell_repair_place ? this.aawakRef.sell_repair_place : null,
-        aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id : null),
+        aawak_ref_id: refId,
+        aawak_splits: this.aawak_splits,
         nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
         dept_id: this.aawakRef.dept_id,
         is_xl: 0,

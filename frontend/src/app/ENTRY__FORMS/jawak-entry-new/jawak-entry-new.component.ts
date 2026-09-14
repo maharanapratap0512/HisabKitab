@@ -231,13 +231,21 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
         if (jwk.item_id) {
           this.itemSubitemSelected(jwk, i);
         }
-        if (jwk.aawak_splits && jwk.aawak_splits.length > 0) {
-          const primary = jwk.aawak_splits[0]?.aawak_obj || jwk.aawak_splits[0];
-          if (primary) {
-            jwk.aawak_ref_obj = primary;
+        let splits = jwk.aawak_splits;
+        if (typeof splits === 'string') {
+          try { splits = JSON.parse(splits); } catch (e) { splits = []; }
+        }
+        if (splits && splits.length > 0) {
+          jwk.aawak_splits = splits;
+          const primary = splits[0]?.aawak_obj || splits[0];
+          const refId = primary?.aawak_id || primary?._id;
+          if (refId) {
+            if (primary.date && primary.mm_hin) {
+              jwk.aawak_ref_obj = primary;
+            } else {
+              this.fetchAawakRefDetails(refId, i);
+            }
           }
-        } else if (jwk.aawak_ref_id) {
-          this.fetchAawakRefDetails(jwk.aawak_ref_id, i);
         }
       }
 

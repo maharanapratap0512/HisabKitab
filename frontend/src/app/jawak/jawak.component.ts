@@ -306,7 +306,10 @@ export class JawakComponent implements OnInit {
     if (ev._id) {
       $('#showModal').modal('hide');
       this.showModal = '';
-      this.jawakData.splice(this.jawakData.indexOf(this.editData), 1, ev);
+      const idx = this.jawakData.findIndex((item: any) => item._id === ev._id);
+      if (idx !== -1) {
+        this.jawakData[idx] = ev;
+      }
       this.isLoader = false;
     }
     else {

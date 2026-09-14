@@ -335,6 +335,10 @@ export class ItemComponent implements OnInit {
     if (ev._id) {
       this.isLoader = true;
       this.closeModal();
+      if (ev.unit) {
+        ev.unit_full = ev.unit.unit_full;
+        ev.unit_short = ev.unit.unit_short;
+      }
       this.itemData.unshift(ev);
       this.isLoader = false;
     }
@@ -347,6 +351,10 @@ export class ItemComponent implements OnInit {
     if (ev._id) {
       this.isLoader = true;
       this.closeModal();
+      if (ev.unit) {
+        ev.unit_full = ev.unit.unit_full;
+        ev.unit_short = ev.unit.unit_short;
+      }
       let index = this.itemData.findIndex((it: any) => it._id === ev._id);
 
       if (index >= 0) {
@@ -364,19 +372,22 @@ export class ItemComponent implements OnInit {
 
 
   addSubitemResponse(ev: any) {
-    console.log("item", ev);
-
     if (ev._id) {
       this.isLoader = true;
       this.closeModal();
+      if (ev.unit) {
+        ev.unit_full = ev.unit.unit_full;
+        ev.unit_short = ev.unit.unit_short;
+      }
       let i = this.itemData.findIndex((i: { _id: any; }) => i._id == ev.item_id);
-      this.itemData[i].subitems.push(ev);
-      // this.itemData[i].categories.push(ev.category_id);
-      this.si_total_count++;
+      if (i > -1) {
+        this.itemData[i].subitems.push(ev);
+        this.si_total_count++;
+      }
       this.isLoader = false;
     }
     else {
-      console.log("message", ev)
+      console.log("message", ev);
     }
   }
 
@@ -384,9 +395,17 @@ export class ItemComponent implements OnInit {
     if (ev._id) {
       this.isLoader = true;
       this.closeModal();
+      if (ev.unit) {
+        ev.unit_full = ev.unit.unit_full;
+        ev.unit_short = ev.unit.unit_short;
+      }
       let i = this.itemData.findIndex((i: { _id: any; }) => i._id == ev.item_id);
-      let j = this.itemData[i].subitems.findIndex((i: { _id: any; }) => i._id == ev._id);
-      this.itemData[i].subitems.splice(j, 1, ev);
+      if (i > -1) {
+        let j = this.itemData[i].subitems.findIndex((si: any) => si._id == ev._id);
+        if (j > -1) {
+          Object.assign(this.itemData[i].subitems[j], ev);
+        }
+      }
       this.isLoader = false;
     }
     else {

@@ -250,12 +250,16 @@ export class ThemeService implements OnInit {
     const root = document.documentElement;
 
     // ── Resolve theme name — fallback chain ──
-    const resolvedTheme =
-      (this.settings?.headerTheme && this.themes[this.settings.headerTheme])
-        ? this.settings.headerTheme
-        : (this.themes[defaultTheme] ? defaultTheme : 'indigo');
+    const isValidTheme = Boolean(
+      this.settings?.headerTheme && 
+      (this.themes[this.settings.headerTheme] || (this.settings.headerTheme === 'custom' && this.settings.headerCustomColor))
+    );
 
-    if (!this.settings.headerTheme || !this.themes[this.settings.headerTheme]) {
+    const resolvedTheme = isValidTheme
+      ? this.settings.headerTheme
+      : (this.themes[defaultTheme] ? defaultTheme : 'indigo');
+
+    if (!isValidTheme) {
       this.settings.headerTheme = resolvedTheme;
     }
 
@@ -266,10 +270,10 @@ export class ThemeService implements OnInit {
     // ── Pick dark or light variant ──
     let themeParams: any;
 
-    if (this.settings.headerTheme === 'custom' && this.settings.headerCustomColor) {
+    if (resolvedTheme === 'custom' && this.settings.headerCustomColor) {
       themeParams = this.generateThemeFromColor(this.settings.headerCustomColor, isDark);
     } else {
-      const themeSet = this.themes[resolvedTheme];
+      const themeSet = this.themes[resolvedTheme] || this.themes['indigo'];
       themeParams = structuredClone(isDark ? themeSet.dark : themeSet.light);
     }
 

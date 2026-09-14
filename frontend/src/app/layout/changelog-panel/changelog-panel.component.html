@@ -1,66 +1,108 @@
 <!-- 
   @CHANGELOG_PANEL_UI
-  Slide-in drawer with Accordion-style Hindi-first updates and distinctive iconography.
+  Ultra-Wide High-Contrast Version History Drawer (Apple App Store / Linear Design)
 -->
 <div class="changelog-overlay" [class.show]="isVisible" (click)="close()"></div>
 
 <div class="changelog-panel card p-0 shadow-lg border-start" [class.show]="isVisible">
-    <div class="card-header d-flex justify-content-between align-items-center border-bottom px-3 py-2">
-        <h5 class="m-0 fw-bold"><i class="uil uil-megaphone me-2"></i>What's New / क्या नया है?</h5>
-        <button type="button" class="btn-close shadow-none" (click)="close()"></button>
+    <!-- Header Bar -->
+    <div class="card-header d-flex justify-content-between align-items-center border-bottom px-4 py-3">
+        <h4 class="m-0 fw-bold d-flex align-items-center gap-2 text-body">
+            <i class="uil uil-history text-primary fs-3"></i>
+            <span>{{ currentLang === 'en' ? 'Version History' : 'अद्यतन इतिहास' }}</span>
+        </h4>
+
+        <!-- EN / HI Language Toggle Button -->
+        <div class="d-flex align-items-center gap-3">
+            <div class="btn-group btn-group-sm lang-toggle border rounded-pill p-1">
+                <button type="button" class="btn btn-xs rounded-pill px-3 py-1 fw-bold"
+                    [class.btn-primary]="currentLang === 'en'" [class.btn-outline-secondary]="currentLang !== 'en'"
+                    (click)="currentLang = 'en'">EN</button>
+                <button type="button" class="btn btn-xs rounded-pill px-3 py-1 fw-bold"
+                    [class.btn-primary]="currentLang === 'hi'" [class.btn-outline-secondary]="currentLang !== 'hi'"
+                    (click)="currentLang = 'hi'">HI</button>
+            </div>
+            <button type="button" class="btn-close shadow-none" (click)="close()"></button>
+        </div>
     </div>
 
-    <div class="card-body p-0" style="overflow-y: auto; height: calc(100% - 50px);">
+    <!-- Body Container -->
+    <div class="card-body" style="overflow-y: auto; height: calc(100% - 64px);">
         <div *ngIf="!updates || updates.length === 0" class="p-5 text-center text-muted">
             <i class="uil uil-hourglass-end fs-1 mb-2 d-block"></i>
-            कोई अपडेट नहीं मिला। (No updates found)
+            {{ currentLang === 'en' ? 'No updates found.' : 'कोई अपडेट नहीं मिला।' }}
         </div>
 
-        <div *ngFor="let version of updates; let isFirst = first" class="version-accordion border-bottom">
-            <!-- Accordion Header -->
-            <div class="accordion-header px-3 py-3 d-flex align-items-center cursor-pointer hover-bg"
-                (click)="toggleVersion(version.version)" [class.active-header]="expandedStates[version.version]">
-                <i class="uil fs-3 text-primary transition-all" [class.uil-angle-down]="expandedStates[version.version]"
-                    [class.uil-angle-right]="!expandedStates[version.version]"></i>
-
-                <div class="ms-2 flex-grow-1">
-                    <div class="d-flex align-items-center mb-1">
-                        <span class="badge badge-theme-soft me-2 px-2 py-1">v{{version.version}}</span>
-                        <span class="text-muted smallest fst-italic">{{version.date}}</span>
+        <div *ngFor="let version of updates; let isFirst = first" class="version-card mb-4 p-4 rounded-3 border">
+            <!-- Version Header -->
+            <div class="mb-3 pb-2 border-bottom">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="version-number fw-bold fs-3">v{{version.version}}</span>
+                        <span *ngIf="version.isNew" class="badge bg-danger rounded-pill px-3 py-1 font-size-11 fw-bold">NEW
+                            UPDATE</span>
                     </div>
-                    <h6 class="mb-0 fw-bold header-summary">{{version.summary_hin || version.summary}}</h6>
+                    <span class="version-date text-muted font-size-14 fw-medium">{{version.date}}</span>
+                </div>
+
+                <!-- Very Small Category Legend Indicators Above Line -->
+                <div class="d-flex align-items-center gap-2">
+                    <span class="category-pill cat-improved px-2 py-0.5 rounded font-size-10 fw-bold">Improved</span>
+                    <span class="category-pill cat-fix px-2 py-0.5 rounded font-size-10 fw-bold">Fix</span>
+                    <span class="category-pill cat-feature px-2 py-0.5 rounded font-size-10 fw-bold">Feature</span>
                 </div>
             </div>
 
-            <!-- Accordion Body -->
-            <div class="accordion-body px-0 bg-white" [class.d-none]="!expandedStates[version.version]">
-                <div class="px-3 pt-3">
-                    <div *ngFor="let item of version.items" class="update-card mb-4">
-                        <div class="item-content p-3 rounded-3 border">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span [class]="'badge-pill ' + getTypeBadgeClass(item.type)">
-                                    <i class="uil me-1" [ngClass]="getTypeIcon(item.type)"></i>
-                                    {{item.type | uppercase}}
-                                </span>
-                                <span class="fw-bold text-secondary smallest opacity-75">{{item.module}}</span>
-                            </div>
+            <!-- Version Headline Summary -->
+            <h6 *ngIf="version.summary || version.summary_hin" class="version-headline fw-bold fs-5 mb-3">
+                {{ currentLang === 'en' ? (version.summary || version.summary_hin) : (version.summary_hin ||
+                version.summary) }}
+            </h6>
 
-                            <h6 class="mb-2 item-title fw-bold">
-                                {{item.title_hin || item.title}}
-                            </h6>
+            <!-- Line-by-line Bullet List of Updates -->
+            <ul class="version-items-list list-unstyled mb-0 d-flex flex-column gap-3">
+                <li *ngFor="let item of version.items" class="changelog-item d-flex align-items-start gap-3">
+                    <!-- Colorful Bullet Dot per Category -->
+                    <span class="item-bullet fs-4 lh-1" [ngClass]="{
+                        'bullet-improved': item.type === 'improved',
+                        'bullet-feature': item.type === 'feature',
+                        'bullet-fix': item.type === 'fix',
+                        'bullet-warning': item.type === 'warning'
+                    }">•</span>
 
-                            <div class="item-desc text-muted small" [innerHTML]="item.desc_hin || item.desc"></div>
+                    <div class="flex-grow-1">
+                        <div class="item-header mb-1 d-flex align-items-center flex-wrap gap-2">
+                            <!-- Module Tag with same Coloured Box Styling based on type -->
+                            <span *ngIf="item.module" [ngClass]="{
+                                'cat-improved': item.type === 'improved',
+                                'cat-feature': item.type === 'feature',
+                                'cat-fix': item.type === 'fix',
+                                'cat-warning': item.type === 'warning'
+                            }" class="category-pill px-2 py-1 rounded font-size-12 fw-bold">
+                                {{item.module}}
+                            </span>
 
-                            <div *ngIf="item.media"
-                                class="update-media mt-3 rounded-2 border overflow-hidden p-1 shadow-sm">
-                                <img [src]="item.media" class="img-fluid rounded" [alt]="item.title"
-                                    (error)="item.media = null"
-                                    style="max-height: 250px; width: 100%; object-fit: contain;">
-                            </div>
+                            <!-- Title -->
+                            <span class="item-title fs-6 fw-bold">
+                                {{ currentLang === 'en' ? (item.title || item.title_hin) : (item.title_hin ||
+                                item.title) }}
+                            </span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="item-desc fs-6 lh-base">
+                            {{ currentLang === 'en' ? (item.desc || item.desc_hin) : (item.desc_hin || item.desc) }}
+                        </div>
+
+                        <!-- Optional Media -->
+                        <div *ngIf="item.media" class="mt-3 rounded border overflow-hidden p-1 bg-body">
+                            <img [src]="item.media" class="img-fluid rounded" [alt]="item.title"
+                                (error)="item.media = null"
+                                style="max-height: 280px; width: 100%; object-fit: contain;">
                         </div>
                     </div>
-                </div>
-            </div>
+                </li>
+            </ul>
         </div>
     </div>
 </div>

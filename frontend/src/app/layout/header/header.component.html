@@ -38,7 +38,8 @@
                <ng-container *ngFor="let item of menuItems">
 
                   <li class="nav-item" *ngIf="item.visible && !item.dropdown">
-                     <a class="nav-link" routerLinkActive="active-parent" [routerLink]="item.link" [target]="item.target">
+                     <a class="nav-link" routerLinkActive="active-parent" [routerLink]="item.link"
+                        [target]="item.target">
                         <i [class]="item.icon" class="me-1" *ngIf="item.icon"></i>{{item.title}}
                      </a>
                   </li>
@@ -110,10 +111,10 @@
                   </a>
                </li>
 
-               <li class="dropdown">
-                  <a class="dropdown-toggle arrow-none show" data-bs-toggle="dropdown" href="#" role="button"
-                     aria-haspopup="false" aria-expanded="true">
-                     <i class="uil uil-palette font-22"></i>
+               <li class="dropdown no-hover-dropdown">
+                  <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="javascript:void(0);" role="button"
+                     aria-haspopup="false" aria-expanded="false" title="Theme Settings">
+                     <i class="uil uil-palette noti-icon fs-3"></i>
                   </a>
                   <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg px-2"
                      style="width: 300px;">

@@ -10,12 +10,12 @@ module.exports = {
 
     ...defineTable('subitem', {
         _id: col.id(),
-        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'], join: true }),
         variant_id: col.ref('variant._id', { as: 'variant', select: ['sku', 'display_name'], join: true }),
         subitem_hin: col.string(),
         subitem_eng: col.string(),
         subitem_roman: col.string(),
-        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
+        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'], join: true }),
         extra_note: col.string(),
         document: col.json(),
         restrict_month: col.number(),
@@ -42,7 +42,7 @@ module.exports = {
         item_eng: col.string(),
         item_roman: col.string(),
         item_code: col.string(),
-        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
+        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'], join: true }),
         extra_note: col.string(),
         document: col.json(),
         restrict_month: col.number(),

@@ -702,10 +702,12 @@
                             </thead>
                             <tbody>
                                 <ng-container
-                                    *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
+                                    *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index"
+                                    class="voucher-group">
                                     <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
-                                        aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i"
-                                        class="main-row">
+                                        aria-expanded="true" [attr.aria-controls]="'#collapseExample-'+i"
+                                        class="main-row"
+                                        [ngClass]="(!data.aawaks || data.aawaks.length === 0) ? 'voucher-no-items' : ''">
                                         <td>
                                             <div class="d-flex align-items-center gap-1">
                                                 <i class="uil uil-chevron-down collapse-icon text-primary me-1"

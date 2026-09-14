@@ -210,7 +210,7 @@
                             [ngClass]="{'validation':jawakForm.get('nimitt')?.errors && (jawakForm.get('nimitt')?.touched || jawakForm.get ('nimitt')?.dirty)}">
                     </div>
                 </div> -->
-                <div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimitt">
+                <div class="col-md-2 mb-3" *ngIf="!aawakRef || (!aawakRef.nimitt_id && !aawakRef.nimitt_hin)">
                     <div class="form-group">
                         <label class="form-label">Nimitt</label>
                         <a type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"

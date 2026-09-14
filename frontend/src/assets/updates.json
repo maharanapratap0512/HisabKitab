@@ -1,26 +1,83 @@
 [
     {
-        "version": "36.3",
-        "date": "29-08-2026",
-        "summary": "Excel Import Subitem Matching Fix & Duplicate Assumption Integrity Checkup",
-        "summary_hin": "एक्सेल इम्पोर्ट सबआइटम मैचिंग बग फिक्स एवं डुप्लिकेट आवक-जावक इंटीग्रिटी चेकअप",
+        "version": "36.4",
+        "date": "13-09-2026",
+        "summary": "Aawak New Table UI Improvements, Jawak Edit Fix & Import Correction Enhancements",
+        "summary_hin": "आवक (New) तालिका UI सुधार, जावक एडिट सुधार एवं इम्पोर्ट करेक्शन संवर्धन",
         "isNew": true,
         "items": [
             {
+                "type": "improved",
+                "module": "आवक तालिका",
+                "title": "Aawak New Table UI Enhancements",
+                "title_hin": "आवक (New) तालिका UI डिज़ाइन सुधार",
+                "desc": "Enhanced main and sub-row background distinction in light mode with consistent bottom borders across vouchers.",
+                "desc_hin": "आवक तालिका में मुख्य रो एवं सब-रो के रंगों को सुस्पष्ट किया गया तथा वाउचर के अंत में सुसंगत बॉर्डर जोड़ा गया।"
+            },
+            {
                 "type": "fix",
-                "module": "Aawak & Excel Import",
-                "title": "Excel Import Subitem Matching Bug Fix",
-                "title_hin": "एक्सेल इम्पोर्ट सबआइटम मैचिंग बग फिक्स",
-                "desc": "Fixed issue where empty/null subitem cells during Excel import incorrectly matched empty subitem master records. Subitem comparison is now skipped when subitem is empty/null, correctly assigning subitem_id = null.",
-                "desc_hin": "एक्सेल इम्पोर्ट के दौरान खाली सबआइटम सेल होने पर गलत सबआइटम मैचिंग की समस्या को ठीक किया गया। सबआइटम खाली होने पर तुलना स्किप होकर सबआइटम ID = null सेट होती है।"
+                "module": "जावक प्रविष्टि",
+                "title": "Jawak Linked Reference Edit Fix",
+                "title_hin": "जावक लिंक आवक संदर्भ एडिट सुधार",
+                "desc": "Corrected Jawak editing for linked entries. Inherited Aawak fields remain locked, allowing full edit only upon unlinking.",
+                "desc_hin": "आवक से जुड़ी जावक एंट्रियों के एडिट में सुधार। आवक के फ़ील्ड्स लॉक रहेंगे और अनलिंक करने पर ही पूर्ण एडिट संभव होगा।"
+            },
+            {
+                "type": "improved",
+                "module": "डेटा इम्पोर्ट",
+                "title": "Import Correction Field Additions (Item Detail & Description)",
+                "title_hin": "इम्पोर्ट करेक्शन में आइटम विवरण व विवरण फ़ील्ड संवर्धन",
+                "desc": "Added Item Detail and Description fields in the Import Correction tab, seamlessly appending details to matching records upon submission.",
+                "desc_hin": "इम्पोर्ट करेक्शन टैब में आइटम विवरण एवं डिस्क्रिप्शन जोड़ने की सुविधा, जिससे सबमिट करने पर विवरण स्वतः जुड़ जाता है।"
+            }
+        ]
+    },
+    {
+        "version": "36.3",
+        "date": "29-08-2026",
+        "summary": "Subitem Edit Improvement, Styled Excel Export & Custom Theme Saving",
+        "summary_hin": "सबआइटम एडिट सुधार, सुसज्जित एक्सेल एक्सपोर्ट एवं कस्टम थीम सेविंग",
+        "isNew": false,
+        "items": [
+            {
+                "type": "improved",
+                "module": "सबआइटम लिस्ट",
+                "title": "Subitem List Stays Open on Edit",
+                "title_hin": "सबआइटम एडिट पर लिस्ट स्वतः खुली रहेगी",
+                "desc": "Subitem list stays open after editing. Added 5-second glowing highlight for newly added and updated rows.",
+                "desc_hin": "सबआइटम में बदलाव करने पर मेन लिस्ट बंद नहीं होगी। साथ ही नए व अपडेटेड सबआइटम पर 5-सेकंड तक हाइलाइट दिखेगा।"
+            },
+            {
+                "type": "improved",
+                "module": "रिपोर्ट एक्सपोर्ट",
+                "title": "Styled & Organized Excel Export",
+                "title_hin": "सुसज्जित एवं व्यवस्थित एक्सेल एक्सपोर्ट",
+                "desc": "Store stock report exports with clean soft ice-blue headers, gridlines, and proper number alignment.",
+                "desc_hin": "स्टोर स्टॉक रिपोर्ट अब सुंदर सॉफ्ट आइस-ब्लू हेडर, थिन ग्रिड बॉर्डर एवं व्यवस्थित नंबर अलाइनमेंट के साथ एक्सपोर्ट होगी।"
+            },
+            {
+                "type": "fix",
+                "module": "थीम सेटिंग्स",
+                "title": "Custom Color Theme Saving Fix",
+                "title_hin": "कस्टम कलर थीम सेविंग सुधार",
+                "desc": "Custom theme colors chosen via color picker now remain saved even after refreshing the page.",
+                "desc_hin": "कलर पिकर से चुनी गई मनपसंद कस्टम थीम अब पेज रिफ्रेश करने पर भी स्वतः सेव रहेगी।"
+            },
+            {
+                "type": "fix",
+                "module": "एक्सेल इम्पोर्ट",
+                "title": "Subitem Import Accuracy Fix",
+                "title_hin": "सबआइटम इम्पोर्ट शुद्धता सुधार",
+                "desc": "Blank subitem columns during Excel import are now correctly handled without false matching.",
+                "desc_hin": "एक्सेल से डेटा इम्पोर्ट करते समय खाली सबआइटम कॉलम की प्रविष्टि सही तरीके से प्रोसेस होगी।"
             },
             {
                 "type": "feature",
-                "module": "Integrity Checkup",
-                "title": "Duplicate Aawak & Jawak Assumption Integrity Checkup",
-                "title_hin": "डुप्लिकेट आवक एवं जावक इंटीग्रिटी चेकअप",
-                "desc": "Added new Duplicate Aawak & Jawak Assumption integrity scanner with real-time HTTP chunked streaming, dynamic comparison column toolbar, connected relation badges (Aawak <-> Jawak links), smooth auto-scrolling, inline modal edit via singular form components, and instant delete action.",
-                "desc_hin": "नया डुप्लिकेट आवक व जावक इंटीग्रिटी स्कैनर जो रियल-टाइम स्ट्रीमिंग स्कैन, डायनामिक तुलना कॉलम टॉगल, कनेक्टेड लिंक्स काउंट, स्मूथ ऑटो-स्क्रॉल, सिंगुलर फॉर्म एडिट मोडल एवं डिलीट एक्शन के साथ उपलब्ध है।"
+                "module": "डेटा चेकअप",
+                "title": "Duplicate Entry Scanner Tool",
+                "title_hin": "डुप्लिकेट एंट्री स्कैनर सुविधा",
+                "desc": "New real-time scanner tool to detect, view, edit, or delete duplicate Aawak and Jawak entries.",
+                "desc_hin": "आवक एवं जावक में डुप्लिकेट प्रविष्टियाँ खोजने, देखने और तुरंत इनलाइन एडिट/डिलीट करने हेतु नया स्कैनर।"
             }
         ]
     },
@@ -164,679 +221,257 @@
         ]
     },
     {
-        "version": "35.4",
-        "date": "31-07-2026",
-        "summary": "Date Range Filter, Auto MM Selection & Click-to-Open Filters",
-        "summary_hin": "तारीख रेंज फ़िल्टर, ऑटो डिफ़ॉल्ट MM चुनाव व क्लिक पर फ़िल्टर",
+        "version": "35 (v35.1 to v35.4)",
+        "date": "18-07-2026 - 31-07-2026",
+        "summary": "Date Range Filters, Inline Modals, Interactive Tours & PDF Zip Export",
+        "summary_hin": "तारीख रेंज फ़िल्टर, इनलाइन निर्माण, इंटरएक्टिव टूर एवं पीडीएफ ज़िप एक्सपोर्ट",
         "isNew": false,
         "items": [
             {
                 "type": "feature",
-                "module": "Aawak & Jawak Modules",
-                "title": "Date Range Filtering (From Date to To Date)",
-                "title_hin": "तारीख से तारीख (Date Range) फ़िल्टर",
-                "desc": "Filter entries between any two dates easily in Aawak and Jawak tables and header filters.",
-                "desc_hin": "आवक और जावक में किसी भी दो तारीखों (From Date से To Date) के बीच का रिकॉर्ड आसानी से फ़िल्टर करें।"
+                "module": "आवक व जावक",
+                "title": "Date Range Filtering & Default MM Auto-Select",
+                "title_hin": "तारीख रेंज फ़िल्टर व डिफ़ॉल्ट MM चुनाव",
+                "desc": "Filter entries between any two dates and auto-select default MM.",
+                "desc_hin": "दो तारीखों के बीच प्रविष्टियों को फ़िल्टर करने व डिफ़ॉल्ट MM स्वतः चुनने की सुविधा।"
+            },
+            {
+                "type": "feature",
+                "module": "फॉर्म्स व इम्पोर्ट",
+                "title": "Inline (+ Add) Modals in Form Dropdowns",
+                "title_hin": "फॉर्म ड्रॉपडाउन में इनलाइन निर्माण",
+                "desc": "Create master records (+ Add Item, MM, PBK) directly inside form dropdowns.",
+                "desc_hin": "एंट्री फॉर्म ड्रॉपडाउन से सीधे नए रिकॉर्ड्स (+ Add) जोड़ने की सुविधा।"
+            },
+            {
+                "type": "feature",
+                "module": "पेज गाइड्स",
+                "title": "Bilingual Interactive Guided Page Tours",
+                "title_hin": "द्विभाषी इंटरएक्टिव मार्गदर्शिका",
+                "desc": "Interactive Driver.js tours with bilingual guidance across main modules.",
+                "desc_hin": "मुख्य मॉड्यूल हेतु हिंदी-अंग्रेजी में स्टेप-बाय-स्टेप इंटरएक्टिव मार्गदर्शिका।"
+            },
+            {
+                "type": "feature",
+                "module": "रिपोर्ट्स",
+                "title": "Multiple MM Stock Report & Bulk ZIP Export",
+                "title_hin": "मल्टी-MM स्टॉक रिपोर्ट व ज़िप एक्सपोर्ट",
+                "desc": "Side-by-side multiple MM stock report and fast shared PDF ZIP export engine.",
+                "desc_hin": "मल्टी-MM स्टॉक रिपोर्ट एवं तेज़ साझा पीडीएफ ज़िप थोक निर्यात।"
+            },
+            {
+                "type": "feature",
+                "module": "बल्क ऑपरेशन्स",
+                "title": "Universal Bulk Row Delete",
+                "title_hin": "सार्वभौमिक बल्क डिलीट सुविधा",
+                "desc": "Select multiple rows via table checkboxes to perform safe bulk deletion.",
+                "desc_hin": "चेकबॉक्स द्वारा एक साथ कई रो चुनकर सुरक्षित बल्क डिलीट करने की सुविधा।"
+            }
+        ]
+    },
+    {
+        "version": "34 (v34.0 to v34.4)",
+        "date": "24-06-2026 - 09-07-2026",
+        "summary": "Item Ledger Reports, Dashboard Excel Export & Integrity Checkup Fixes",
+        "summary_hin": "आइटम लेजर रिपोर्ट, डैशबोर्ड एक्सेल एक्सपोर्ट एवं इंटीग्रिटी चेकअप फिक्स",
+        "isNew": false,
+        "items": [
+            {
+                "type": "feature",
+                "module": "रिपोर्ट्स",
+                "title": "Item Ledger Report & PDF Engine",
+                "title_hin": "आइटम लेजर रिपोर्ट एवं पीडीएफ इंजन",
+                "desc": "Multi-item month-to-month ledger tracking with high-speed PDF export.",
+                "desc_hin": "मल्टी-आइटम लेजर ट्रैकिंग एवं तेज़ पीडीएफ एक्सपोर्ट सुविधा।"
             },
             {
                 "type": "improved",
-                "module": "Reports & Entry Forms",
-                "title": "Auto-Selection & Filtering by Default MM",
-                "title_hin": "डिफ़ॉल्ट महामहीना (MM) का स्वतः चुनाव",
-                "desc": "Your default MM is now automatically pre-selected in entry forms, reports, dashboard, and initial page loads for faster work.",
-                "desc_hin": "एंट्री फॉर्म, रिपोर्ट, डैशबोर्ड और पेज खोलते ही आपकी डिफ़ॉल्ट MM अपने आप चुन ली जाएगी।"
-            },
-            {
-                "type": "improved",
-                "module": "Table Column Filters",
-                "title": "Click-to-Open Table Column Filters",
-                "title_hin": "क्लिक करने पर फ़िल्टर पॉपअप",
-                "desc": "Table header filters now open smoothly on click instead of hover, avoiding accidental popups while moving the mouse cursor.",
-                "desc_hin": "टेबल हेडर के फ़िल्टर अब माउस घुमाने पर नहीं, बल्कि केवल क्लिक करने पर खुलेंगे।"
-            },
-            {
-                "type": "improved",
-                "module": "Table Displays",
-                "title": "Visible Headers & Clean 'No Data Found' Display",
-                "title_hin": "स्पष्ट 'No Data Found' संदेश व टेबल हेडर",
-                "desc": "Table headers and filter icons now stay visible even when no records match, showing a clear 'No Data Found' message in the table.",
-                "desc_hin": "डेटा न मिलने पर भी टेबल हेडर और फ़िल्टर दिखाई देंगे, और टेबल के अंदर 'No Data Found' का स्पष्ट संदेश दिखेगा।"
-            }
-        ]
-    },
-    {
-        "version": "35.3",
-        "date": "28-07-2026",
-        "summary": "Inline Creation in Form Dropdowns & English PBK Display",
-        "summary_hin": "फॉर्म ड्रॉपडाउन में इनलाइन निर्माण व अंग्रेजी PBK नाम",
-        "isNew": false,
-        "items": [
-            {
-                "type": "feature",
-                "module": "Entry Forms & Import",
-                "title": "Add New Option Across Dropdowns with Self-Contained Modals",
-                "title_hin": "सभी फॉर्म व इम्पोर्ट ड्रॉपडाउन में नए निर्माण विकल्प (+ Add)",
-                "desc": "Quickly create master records (+ Add Item, + Add Subitem, + Add MM, + Add PBK, Condition, Aawak Type, Aawak Source, Usage List, etc.) directly inside form dropdowns and import correction tabs with instant auto-selection.",
-                "desc_hin": "एंट्री फॉर्म और इम्पोर्ट करेक्शन टैब में ड्रॉपडाउन से ही सीधे नए रिकॉर्ड बनाने और स्वतः चुने जाने की सुविधा।"
+                "module": "एक्सेल एक्सपोर्ट",
+                "title": "Dashboard Style Excel Export",
+                "title_hin": "डैशबोर्ड स्टाइल एक्सेल एक्सपोर्ट",
+                "desc": "Styled Excel exports with summary boxes and formatted tables.",
+                "desc_hin": "समरी बॉक्स व सुसज्जित टेबल्स के साथ एक्सेल एक्सपोर्ट।"
             },
             {
                 "type": "feature",
-                "module": "Master Data",
-                "title": "English PBK Name Display Across Dropdowns",
-                "title_hin": "PBK ड्रॉपडाउन में अंग्रेजी PBK नाम का प्रदर्शन",
-                "desc": "PBK dropdowns now display both Hindi and English names for clearer identification and search.",
-                "desc_hin": "आसानी से खोजने और चुनने के लिए PBK ड्रॉपडाउन में अब हिंदी के साथ अंग्रेजी PBK नाम भी प्रदर्शित होते हैं।"
-            }
-        ]
-    },
-    {
-        "version": "35.2",
-        "date": "22-07-2026",
-        "summary": "Interactive Page Tours & Universal Bulk Delete",
-        "summary_hin": "इंटरएक्टिव पेज टूर व बल्क डिलीट",
-        "isNew": false,
-        "items": [
-            {
-                "type": "feature",
-                "module": "Interactive Tours",
-                "title": "Bilingual Guided Page Tours (Aawak, Jawak, HMP, Prastav)",
-                "title_hin": "द्विभाषी इंटरएक्टिव मार्गदर्शिका (आवक, जावक, एचएमपी, प्रस्ताव)",
-                "desc": "Interactive step-by-step Driver.js tours with bilingual Hindi & English guidance across main modules. Features unified spotlight focus halo on open filters & dropdowns, auto-triggering actions, and quick mini tours.",
-                "desc_hin": "मुख्य मॉड्यूल (आवक, जावक, एचएमपी, प्रस्ताव) के लिए हिंदी और अंग्रेजी में स्टेप-बाय-स्टेप इंटरएक्टिव मार्गदर्शिका। इसमें ओपन फ़िल्टर और ड्रॉपडाउन पर जॉइंट स्पॉटलाइट फोकस, ऑटो-एक्शन और त्वरित मिनी टूर शामिल हैं।"
+                "module": "इंटीग्रिटी चेकअप",
+                "title": "Aawak & Jawak Reference Integrity",
+                "title_hin": "आवक व जावक रेफरेंस चेकिंग",
+                "desc": "Verified and resolved references between Aawak and Jawak entries.",
+                "desc_hin": "आवक व जावक प्रविष्टियों के बीच रेफरेंस की जाँच व सुधार।"
             },
-            {
-                "type": "feature",
-                "module": "Bulk Operations",
-                "title": "Universal Bulk Delete across Modules (Aawak, Jawak, HMP, Prastav)",
-                "title_hin": "सार्वभौमिक बल्क डिलीट (आवक, जावक, एचएमपी, प्रस्ताव)",
-                "desc": "Select multiple rows or all rows using smart table checkboxes to perform safe bulk delete with SweetAlert confirmation dialogs.",
-                "desc_hin": "स्मार्ट टेबल चेकबॉक्स का उपयोग करके एक साथ कई पंक्तियों को चुनें और स्वीटअलर्ट कन्फर्मेशन के साथ आसानी से बल्क डिलीट करें।"
-            }
-        ]
-    },
-    {
-        "version": "35.1",
-        "date": "18-07-2026",
-        "summary": "Report",
-        "summary_hin": "रिपोर्ट",
-        "isNew": false,
-        "items": [
-            {
-                "type": "feature",
-                "module": "Store Stock Reports",
-                "title": "Multiple MM Stock Report",
-                "title_hin": "",
-                "desc": "Multiple MM, Store, Khet, Stock Currect Stock side by side qty....",
-                "desc_hin": ""
-            },
-            {
-                "type": "feature",
-                "module": "Item Ledger Reports",
-                "title": "Calculation Solved, PDF export added",
-                "title_hin": "",
-                "desc": "High featured Index PDF generation, and past bachat, rate, amount column added in report....",
-                "desc_hin": ""
-            },
-            {
-                "type": "feature",
-                "module": "Item Ledger Reports",
-                "title": "Universal Shared PDF Engine & ZIP Bulk Export",
-                "title_hin": "नया यूनिवर्सल पीडीएफ इंजन और ज़िप एक्सपोर्ट",
-                "desc": "Built a blazing fast shared PDF engine that stays in memory. Bulk exports for Excel and PDF are now bundled securely into a single ZIP download folder.",
-                "desc_hin": "एक बहुत ही तेज़ पीडीएफ इंजन बनाया गया है जो मेमोरी में सेव रहता है। एक्सेल और पीडीएफ के थोक निर्यात (Bulk Export) अब एक ही ज़िप (ZIP) फ़ोल्डर में डाउनलोड होते हैं।"
-            }
-        ]
-    },
-    {
-        "version": "34.4",
-        "date": "09-07-2026",
-        "summary": "Item Ledger Report & Dashboard Excel",
-        "summary_hin": "नया आइटम लेजर रिपोर्ट और डैशबोर्ड एक्सेल",
-        "isNew": true,
-        "items": [
-            {
-                "type": "feature",
-                "module": "Reports",
-                "title": "New Item Ledger Report",
-                "title_hin": "नया आइटम लेजर रिपोर्ट",
-                "desc": "Track Aawak, Jawak, and Bachat for multiple items simultaneously using a specific month-to-month date range. Features smart auto-selection and a fast badge-navigation UI.",
-                "desc_hin": "एक साथ कई आइटम का आवक, जावक और बचत ट्रैक करें। यह रिपोर्ट 'From' और 'To' महीने के हिसाब से काम करती है।"
-            },
-            {
-                "type": "feature",
-                "module": "Excel Export",
-                "title": "Dashboard Style Item Ledger Export",
-                "title_hin": "डैशबोर्ड स्टाइल आइटम लेजर एक्सपोर्ट",
-                "desc": "Beautifully styled Excel exports with dashboard-like summary boxes, color-coded tables, and proper Hindi header titles.",
-                "desc_hin": "एक्सेल एक्सपोर्ट को पूरी तरह से नया रूप दिया गया है। अब यह डैशबोर्ड की तरह कलर-कोडेड समरी और साफ़ टेबल्स के साथ आता है।"
-            }
-        ]
-    },
-    {
-        "version": "34.3",
-        "date": "08-07-2026",
-        "summary": "Excel Import, Jawak Entry",
-        "summary_hin": "",
-        "isNew": true,
-        "items": [
             {
                 "type": "fix",
-                "module": "Excel Import Component",
-                "title": "Correction fail fixed.",
-                "title_hin": "",
-                "desc": "aawak MM missing for corrected MM, solved.",
-                "desc_hin": ""
-            },
-            {
-                "type": "improved",
-                "module": "Jawak Edit Component",
-                "title": "UI Improved",
-                "title_hin": "",
-                "desc": "Aawak reference UI while edit and allowed full edit on unlink reference aawak.",
-                "desc_hin": ""
+                "module": "एचएमपी घटक",
+                "title": "HMP Auto Entry & Field Controls",
+                "title_hin": "एचएमपी ऑटो एंट्री व फ़ील्ड कंट्रोल",
+                "desc": "Auto Aawak-Jawak creation and customizable field controls.",
+                "desc_hin": "ऑटो आवक-जावक प्रविष्टि एवं फ़ील्ड विजिबिलिटी नियंत्रण।"
             }
         ]
     },
     {
-        "version": "34.2",
-        "date": "04-07-2026",
-        "summary": "Item-Subitem Import, Jawak Export, Variant Improved...",
-        "summary_hin": "",
-        "isNew": true,
-        "items": [
-            {
-                "type": "feature",
-                "module": "Variant Component",
-                "title": "Add item, subitem and delete atribute and value...",
-                "title_hin": "",
-                "desc": "",
-                "desc_hin": ""
-            },
-            {
-                "type": "improved",
-                "module": "Bachat Component",
-                "title": "Bachat Export",
-                "title_hin": "",
-                "desc": "Dummy records removed from bachat export.",
-                "desc_hin": ""
-            }
-        ]
-    },
-    {
-        "version": "34.1",
-        "date": "28-06-2026",
-        "summary": "Integrity Chechup/ resolve & Bachat Export Dummy Ignore Fixed",
-        "summary_hin": "",
-        "isNew": true,
-        "items": [
-            {
-                "type": "feature",
-                "module": "Integrity Chechup",
-                "title": "Integrity Chechup/ resolve",
-                "title_hin": "",
-                "desc": "check and verify references between aawak and jawak... and resolve issue....",
-                "desc_hin": ""
-            },
-            {
-                "type": "improved",
-                "module": "Bachat Component",
-                "title": "Bachat Export",
-                "title_hin": "",
-                "desc": "Dummy records removed from bachat export.",
-                "desc_hin": ""
-            }
-        ]
-    },
-    {
-        "version": "34",
+        "version": "33 (v33.1)",
         "date": "24-06-2026",
-        "summary": "HMP auto aawak & Jawak Type",
-        "summary_hin": "",
+        "summary": "HMP & Jawak Entry Improvements & Small Problem Fixes",
+        "summary_hin": "एचएमपी और जावक प्रविष्टि सुधार एवं लघु त्रुटि निवारण",
         "isNew": false,
         "items": [
             {
                 "type": "fix",
-                "module": "HMP Component",
-                "title": "HMP Auto Aawak Jawak",
-                "title_hin": "",
-                "desc": "source MM copy into destination and new type created and set in auto entry.",
-                "desc_hin": ""
+                "module": "एचएमपी प्रविष्टि",
+                "title": "Aawak Source Dropdown Fix",
+                "title_hin": "आवक स्रोत ड्रॉपडाउन सुधार",
+                "desc": "Fixed Aawak source dropdown selection during HMP entry.",
+                "desc_hin": "एचएमपी प्रविष्टि में आवक स्रोत ड्रॉपडाउन की त्रुटि का समाधान।"
             },
             {
-                "type": "improved",
-                "module": "HMP Component",
-                "title": "Excel Export",
-                "title_hin": "",
-                "desc": "Excel Export Destribution of output added.",
-                "desc_hin": ""
-            },
-            {
-                "type": "improved",
-                "module": "HMP Component",
-                "title": "Fields Control",
-                "title_hin": "",
-                "desc": "condition and aawak source, auto awk jwk column can be hide/show in entry form, table and excel/pdf export.",
-                "desc_hin": ""
+                "type": "fix",
+                "module": "जावक प्रविष्टि",
+                "title": "Object Reference & Condition Display Fix",
+                "title_hin": "ऑब्जेक्ट त्रुटि व कंडीशन डिस्प्ले सुधार",
+                "desc": "Resolved object reference error and restored condition dropdown while editing.",
+                "desc_hin": "जावक एडिट में ऑब्जेक्ट त्रुटि का समाधान व कंडीशन ड्रॉपडाउन पुनः चालू।"
             }
         ]
     },
     {
-        "version": "33.1",
-        "date": "24-06-2026",
-        "summary": "Small Problem Fixes",
-        "summary_hin": "",
-        "isNew": false,
-        "items": [
-            {
-                "type": "fix",
-                "module": "HMP Entry",
-                "title": "aawak source dropdown fixed...",
-                "title_hin": "",
-                "desc": "",
-                "desc_hin": ""
-            },
-            {
-                "type": "fix",
-                "module": "Jawak Entry & update",
-                "title": "",
-                "title_hin": "",
-                "desc": "Object error solved.. and condition dropdown again display while edit jawak..",
-                "desc_hin": ""
-            }
-        ]
-    },
-    {
-        "version": "32.2",
-        "date": "04-06-2026",
-        "summary": "HMP and Item & variant improved",
-        "summary_hin": "",
+        "version": "32 (v32.0 to v32.2)",
+        "date": "20-05-2026 - 04-06-2026",
+        "summary": "Offline Feedback Tracker, HMP Batches, Item-Subitem Filters & Bachat Export Fixes",
+        "summary_hin": "ऑफ़लाइन फीडबैक ट्रैकर, एचएमपी बैच, आइटम-सबआइटम फ़िल्टर व बचत एक्सपोर्ट सुधार",
         "isNew": false,
         "items": [
             {
                 "type": "improved",
-                "module": "HMP Batch",
-                "title": "auto awk and auto jwk improved with UI.",
-                "title_hin": "",
-                "desc": "",
-                "desc_hin": ""
-            },
-            {
-                "type": "fix",
-                "module": "Item Component",
-                "title": "Edit item solved",
-                "title_hin": "",
-                "desc": "",
-                "desc_hin": ""
+                "module": "एचएमपी बैच",
+                "title": "Auto Aawak-Jawak Workflow & Batch No",
+                "title_hin": "ऑटो आवक-जावक प्रक्रिया व बैच नंबर",
+                "desc": "Added Batch No column and advanced PDF exports for input/output distribution.",
+                "desc_hin": "बैच नंबर कॉलम तथा इनपुट/आउटपुट वितरण हेतु एडवांस PDF एक्सपोर्ट।"
             },
             {
                 "type": "improved",
-                "module": "Variant Component",
-                "title": "Edit feature added in attribute & attribute value.",
-                "title_hin": "",
-                "desc": "",
-                "desc_hin": ""
-            }
-        ]
-    },
-    {
-        "version": "32.1",
-        "date": "30-05-2026",
-        "summary": "HMP and filter improved",
-        "summary_hin": "",
-        "isNew": true,
-        "items": [
-            {
-                "type": "feature",
-                "module": "HMP Batch",
-                "title": "batch no column added",
-                "title_hin": "",
-                "desc": "",
-                "desc_hin": ""
+                "module": "आइटम व वेरिएंट",
+                "title": "Item Edit & Attribute Inline Editing",
+                "title_hin": "आइटम एडिट व एट्रीब्यूट इनलाइन संपादन",
+                "desc": "Added inline editing for attributes and fixed item edit issues.",
+                "desc_hin": "एट्रीब्यूट वैल्यू इनलाइन संपादन एवं आइटम एडिट त्रुटि समाधान।"
             },
             {
                 "type": "feature",
-                "module": "Aawak & Jawak",
-                "title": "Item Filter Improved with Item only Option.",
-                "title_hin": "",
-                "desc": "now we can filter items without subitems, in aawak, aawak-new, jawak and jawak-new.",
-                "desc_hin": ""
+                "module": "आवक व जावक",
+                "title": "Item-Only Filter Option",
+                "title_hin": "केवल-आइटम फ़िल्टर विकल्प",
+                "desc": "Filter items independently without subitems across Aawak and Jawak.",
+                "desc_hin": "बिना सबआइटम के केवल आइटम फ़िल्टर करने की सुविधा।"
+            },
+            {
+                "type": "feature",
+                "module": "फीडबैक टूल",
+                "title": "Offline-First Feedback System",
+                "title_hin": "ऑफ़लाइन फीडबैक सिस्टम",
+                "desc": "Real-time issue reporting that works offline and auto-syncs online.",
+                "desc_hin": "ऑफ़लाइन काम करने वाला रीयल-टाइम बग रिपोर्टिंग सिस्टम।"
             }
         ]
     },
     {
-        "version": "32.0",
-        "date": "20-05-2026",
-        "summary": "P2P Feedback & Issue Tracking",
-        "summary_hin": "P2P फीडबैक और बग रिपोर्टिंग सिस्टम",
+        "version": "31 (v31.1 to v31.3)",
+        "date": "28-04-2026 - 06-05-2026",
+        "summary": "Item Variant System, Category Hierarchies & Streaming Import Enhancements",
+        "summary_hin": "आइटम वेरिएंट सिस्टम, सीढ़ीनुमा कैटेगरी व तेज़ एक्सेल इम्पोर्ट सुधार",
         "isNew": false,
         "items": [
             {
                 "type": "feature",
-                "module": "Direct feedback and chat System",
-                "title": "Offline-First Feedback & Chat Tracker",
-                "title_hin": "ऑफ़लाइन फीडबैक और चैट ट्रैकर",
-                "desc": "Real-time direct feedback and chat system for issues and feedback. Works fully offline and syncs automatically upon connection.",
-                "desc_hin": "इश्यू और फीडबैक के लिए नया रीयल-टाइम डायरेक्ट फीडबैक और चैट सिस्टम। यह पूरी तरह से ऑफलाइन काम करता है और कनेक्ट होने पर अपने आप सिंक हो जाता है।"
+                "module": "वेरिएंट सिस्टम",
+                "title": "Item Variant Workflow & Aliases",
+                "title_hin": "वेरिएंट मैनेजमेंट व अलियास सिस्टम",
+                "desc": "Complete variant management system with bulk generation and count badges.",
+                "desc_hin": "साइज, कलर आदि वेरिएंट्स का संपूर्ण मैनेजमेंट व बल्क जनरेशन।"
             },
             {
                 "type": "feature",
-                "module": "HMP Batch",
-                "title": "Advance PDF export feature.",
-                "title_hin": "एडवांस PDF एक्सपोर्ट",
-                "desc": "Advanced pdf export feature for HMP batches. input/output and outputs destribution in one go.",
-                "desc_hin": "HMP बैच के लिए एडवांस PDF एक्सपोर्ट सुविधा।"
-            },
-            {
-                "type": "feature",
-                "module": "HMP Batch",
-                "title": "New Design for insert HMP batch",
-                "title_hin": "HMP बैच के लिए नया डिजाइन",
-                "desc": "New Design for insert HMP batch, auto aawak then jawak for input, aawak type and aawak ref selection added in hmp input.",
-                "desc_hin": "HMP बैच दर्ज करने के लिए नया डिजाइन। ऑटो आवक फिर इनपुट के लिए जावक, आवक प्रकार और आवक संदर्भ चयन एचएमपी इनपुट में जोड़ा गया।"
-            },
-            {
-                "type": "fix",
-                "module": "Bachat New",
-                "title": "Excel Export Improved.",
-                "title_hin": "बचत नई एक्सेल एक्सपोर्ट बेहतर।",
-                "desc": "category now visible in export, condition wise export solved and improve speed.",
-                "desc_hin": "category अब export में दिखाई दे रही हैं, condition wise export हल हो गया है और गति में सुधार हुआ है।"
+                "module": "जावक इम्पोर्ट",
+                "title": "Streaming Jawak Import & DB Tools",
+                "title_hin": "तेज़ जावक इम्पोर्ट व डेटाबेस टूल",
+                "desc": "Ultra-fast streaming bulk import for Jawak sheets and DB tools.",
+                "desc_hin": "जावक रिकॉर्ड्स हेतु तेज़ इम्पोर्ट व स्वचलित डेटाबेस टूल।"
             },
             {
                 "type": "improved",
-                "module": "Jawak & Jawak New",
-                "title": "Filter, Export, Modern UI (Bunch), is recived flag added.",
-                "title_hin": "फिल्टर, एक्सपोर्ट(kisko diya column), आधुनिक यूआई, is recived flag जोड़ा गया।",
-                "desc": "Filter added for jawak and jawak new, export added for jawak and jawak new, modern ui for jawak and jawak new, is recived flag added for jawak and jawak new.",
-                "desc_hin": "फिल्टर जोड़ा गया, एक्सपोर्ट जोड़ा गया, आधुनिक यूआई जोड़ा गया, is recived flag जोड़ा गया।"
+                "module": "जावक-आवक लिंक",
+                "title": "Smart Link & Unlink References",
+                "title_hin": "स्मार्ट लिंक व अनलिंक आवक रेफरेंस",
+                "desc": "Link or unlink Aawak references directly from the Jawak row table.",
+                "desc_hin": "बिना एडिट किए सीधे रो से आवक रेफरेंस जोड़ने व हटाने की सुविधा।"
             }
         ]
     },
     {
-        "version": "31.3",
-        "date": "06-05-2026",
-        "summary": "Import Automation & Premium UI Redesign",
-        "summary_hin": "इंपोर्ट स्वचालन और नया प्रीमियम डिज़ाइन",
-        "isNew": false,
-        "items": [
-            {
-                "type": "feature",
-                "module": "Jawak Import",
-                "title": "Streaming Jawak Excel Import",
-                "title_hin": "जावक एक्सेल import",
-                "desc": "Ultra-fast bulk import for Jawak records.",
-                "desc_hin": "जावक रिकॉर्ड्स के लिए अल्ट्रा-फास्ट थोक आयात।"
-            },
-            {
-                "type": "feature",
-                "module": "Management Tools",
-                "title": "Automated DB Generate",
-                "title_hin": "Generate DB Improved.",
-                "desc": "Fully redesign and Optimized DB generation",
-                "desc_hin": "Generate DB Fully redesign and Optimized DB generation"
-            },
-            {
-                "type": "improved",
-                "module": "UI/UX Redesign for Image View",
-                "title": "Image Add, select and View UI Improved",
-                "title_hin": "छवि जोड़ें, चुनें और देखें UI बेहतर",
-                "desc": "Improved layout for adding, selecting, and viewing images with a modern glass-morphic design. All details are now displayed in Hindi labels side-by-side (2 columns) for better readability and scannability.",
-                "desc_hin": "इमेज ऐड, सेलेक्ट और व्यू के लिए इम्प्रूव्ड लेआउट। अब सभी डिटेल्स हिंदी लेबल्स के साथ साइड-बाय-साइड (2 कॉलम) में दिखेंगी।"
-            }
-        ]
-    },
-    {
-        "version": "31.2",
-        "date": "02-05-2026",
-        "summary": "Reference Management, Dropdown Filters & More",
-        "summary_hin": "रेफरेंस मैनेजमेंट, फिल्टर ड्रॉपडाउन और बहुत कुछ",
-        "isNew": true,
-        "items": [
-            {
-                "type": "fix",
-                "module": "AJ Excel Import",
-                "title": "pbk in aawak and jawak row insert fixed.",
-                "title_hin": "आवक जावक पंक्ति में pbk प्रविष्टि ठीक हो गई।",
-                "desc": "pbk is now inserting in aawak and jawak row. ",
-                "desc_hin": "pbk अब आवक और जावक पंक्ति में इन्सर्ट हो रहा है।"
-            },
-            {
-                "type": "improved",
-                "module": "Jawak - Aawak Reference",
-                "title": "Smart Linking & Unlinking",
-                "title_hin": "जावक - आवक रेफरेंस",
-                "desc": "Enhanced UI for managing Aawak references in Jawak. Includes: <br/> - Smart selection with filtering (Qty, MM, Subitem, Condition, Nimitt). <br/> - quick link-Unlink directly from table, jawak row without edit jawak. <br /> - jaawak-entry auto_aawak, auto_reaawak automatic selection removed and position changed.",
-                "desc_hin": "जावक में आवक रेफरेंस को मैनेज करने के लिए बेहतर UI। इसमें शामिल है: <br/> - फिल्टरिंग के साथ स्मार्ट सिलेक्शन (Qty, MM, Subitem, Condition, Nimitt)। <br/> - बिना जावक एडिट किए, सीधे टेबल से लिंक-अनलिंक की सुविधा। <br /> - जावक-एंट्री में ऑटो_आवक, ऑटो_रेआवक ऑटोमेटिक सिलेक्शन हटा दिए गए और पोजीशन बदल दी गई।"
-            },
-            {
-                "type": "improved",
-                "module": "Category Management",
-                "title": "parent id and alias support.",
-                "title_hin": "Parent ID और Alias सपोर्ट",
-                "desc": "you can set category's parent category, and also create alias (alternative names) for category, which also works for unique restrictions ",
-                "desc_hin": "आप किसी भी कैटेगरी की पैरेंट कैटेगरी set कर सकते हैं, और उस कैटेगरी के लिए alias (alternative names) भी बना सकते हैं, जो unique restriction के लिए भी काम करेगा।"
-            },
-            {
-                "type": "improved",
-                "module": "Excel Export",
-                "title": "Aawak & jawak excel export improved.",
-                "title_hin": "आवक जावक एक्सपोर्ट इंप्रूव्ड।",
-                "desc": "error solved,writing excel data counting displayed.",
-                "desc_hin": "एरर सॉल्व हो गयी है, एक्सपोर्ट करते समय कितने रिकॉर्ड्स प्रोसेस counting दिखाई देगा।"
-            },
-            {
-                "type": "fix",
-                "module": "Item Export",
-                "title": "export Format Changed",
-                "title_hin": "निर्यात प्रारूप बदला गया।",
-                "desc": "Every subitem row now export with item's data also. It solve subitem import problem.",
-                "desc_hin": "हर सबआइटम रो अब आइटम के डेटा के साथ एक्सपोर्ट होती है। इससे सबआइटम आयात समस्या हल हो गयी है।"
-            }
-        ]
-    },
-    {
-        "version": "31.1",
-        "date": "28-04-2026",
-        "summary": "Variant System Fixes & UI Optimizations",
-        "summary_hin": "वेरिएंट सिस्टम फिक्स और यूआई सुधार",
-        "isNew": true,
-        "items": [
-            {
-                "type": "feature",
-                "module": "Variant Management",
-                "title": "Full Variant Workflow",
-                "title_hin": "वेरिएंट मैनेजमेंट पेज",
-                "desc": "Complete system to manage item variants (Size, Color, etc.). <br/> - Bulk generation of variants. <br/> - Attribute & Alias management. <br/> - Real-time variant count badges.",
-                "desc_hin": "आइटम के अलग-अलग प्रकारों (Size, Color आदि) को मैनेज करने का पूरा सिस्टम। <br/> - एक साथ कई वेरिएंट बनाने की सुविधा। <br/> - एट्रिब्यूट और निकनेम (Alias) मैनेजमेंट। <br/> - वेरिएंट की संख्या तुरंत अपडेट होने की सुविधा।"
-            },
-            {
-                "type": "improved",
-                "module": "Item-Subitem Dropdown Redesign",
-                "title": "UI Improvements & Fixes",
-                "title_hin": "आवक, जावक, एचएमपी और प्रस्ताव में नया ड्रॉपडाउन",
-                "desc": "new optimised dropdown UI design",
-                "desc_hin": "आवक, जावक, एचएमपी और प्रस्ताव में नया ड्रॉपडाउन UI डिजाइन"
-            },
-            {
-                "type": "fix",
-                "module": "Aawak Jawak Check",
-                "title": "Item wise Filter Error solved",
-                "title_hin": "आवक जावक चेक: आइटम वाइज फिल्टर एरर सॉल्वड",
-                "desc": "<br/>",
-                "desc_hin": "आवक जावक चेक में आइटम वाइज फिल्टर काम नहीं कर रहा था, उसे सॉल्व कर दिया गया है। <br/>"
-            },
-            {
-                "type": "feature",
-                "module": "Management Tools",
-                "title": "Smart Deletion & Reference Transfer",
-                "title_hin": "स्मार्ट डिलीशन और रेफरेंस ट्रांसफर",
-                "desc": "Improved UI/UX for safe and fast entity management (MM, Items, etc.). <br/> - Proactive dependency checks across all tables. <br/> - Automated SWAL confirmation for clean deletions. <br/> - Secure reference transfer to avoid data loss.",
-                "desc_hin": "एमएम और आइटम मैनेजमेंट के लिए सुरक्षित और फ़ास्ट यूआई। <br/> - सभी टेबल्स में डिपेंडेंसी की ऑटोमैटिक चेकिंग। <br/> - क्लीन डिलीशन के लिए ऑटोमैटिक कन्फर्मेशन (SWAL)। <br/> - डेटा लॉस से बचने के लिए सुरक्षित रेफरेंस ट्रांसफर।"
-            }
-        ]
-    },
-    {
-        "version": "30.0",
+        "version": "30 (v30.0)",
         "date": "22-04-2026",
-        "summary": "Major Upgrade: Structure Optimization & UI Redesign & NetDrop P2P Offline File Sharing",
-        "summary_hin": "नया अपग्रेड: स्ट्रक्चर सुधार और नया यूआई और नेटड्रॉप P2P शेयरिंग",
+        "summary": "Structure Optimization, NetDrop P2P Sharing & Tree Category UI",
+        "summary_hin": "संरचना सुधार, नेटड्रॉप P2P शेयरिंग एवं ट्री कैटेगरी लेआउट",
         "isNew": false,
         "items": [
             {
-                "type": "warning",
-                "module": "Version 30",
-                "title": "Update in Progress",
-                "title_hin": "अपडेट जारी है",
-                "desc": "Version 30 update is still in progress, so errors may occur on some pages. If you encounter an error anywhere, please report it with a screenshot.",
-                "desc_hin": "वर्जन 30 का अपडेट अभी चल रहा है, इसलिए कुछ पेजों में एरर आ सकते हैं। अगर कहीं भी एरर आए तो कृपया स्क्रीनशॉट के साथ रिपोर्ट करें।"
-            },
-            {
-                "type": "coming_soon",
-                "module": "Inventory Core",
-                "title": "Coming Soon: Variant System",
-                "title_hin": "आने वाला है: वेरिएंट सिस्टम (Variant System)",
-                "desc": "A major upgrade to handle items with different attributes (Size, Color, Brand, etc.) under a single product. <br/> - Multi-attribute Mapping. <br/> - Detailed stock tracking per variant.",
-                "desc_hin": "एक ही आइटम के अलग-अलग प्रकारों (जैसे साइज, कलर, ब्रांड आदि) को मैनेज करने के लिए बड़ा अपग्रेड। <br/> - एट्रिब्यूट मैपिंग की सुविधा। <br/> - हर वेरिएंट का अलग स्टॉक मैनेजमेंट।"
-            },
-            {
                 "type": "improved",
-                "module": "Inventory Core",
-                "title": "Structure Optimization",
-                "title_hin": "इन्वेंट्री स्ट्रक्चर सुधार",
-                "desc": "Category, Item, and Subitem structure optimized and improved. Reset all related modules (Aawak, Jawak, HMP, etc.) for better performance.",
-                "desc_hin": "कैटेगरी, आइटम और सब-आइटम स्ट्रक्चर को पहले से बेहतर बनाया गया है। आवक, जावक और अन्य पेजों को नए स्ट्रक्चर के हिसाब से अपडेट किया गया है।"
-            },
-            {
-                "type": "improved",
-                "module": "Jawak Entry",
-                "title": "Smart Aawak Selection UI",
-                "title_hin": "स्मार्ट आवक सिलेक्शन यूआई",
-                "desc": "Redesigned Aawak selection dropdown with detailed summaries. View Lot No, Date, Source MM, and Remaining Quantity at a glance to ensure accurate data entry.",
-                "desc_hin": "जावक एंट्री में आवक चुनने के लिए नया और बेहतर डिजाइन। अब लॉट नंबर, तारीख, एमएम और बची हुई मात्रा (Remaining Qty) को एक साथ देखें, जिससे गलतियां कम होंगी।",
-                "media": "/assets/updates/aawak_ref_design.png"
+                "module": "इन्वेंट्री कोर",
+                "title": "Structure Optimization & Performance",
+                "title_hin": "इन्वेंट्री स्ट्रक्चर व स्पीड सुधार",
+                "desc": "Optimized core Item and Subitem data structures for higher performance.",
+                "desc_hin": "कैटेगरी, आइटम और सब-आइटम की डेटा संरचना में सुधार व गति में तेज़ी।"
             },
             {
                 "type": "feature",
-                "module": "NetDrop",
-                "title": "Local Network P2P Transfer",
-                "title_hin": "लोकल नेटवर्क P2P ट्रांसफर",
-                "desc": "Share files instantly between devices on the same Wi-Fi. <br/> - High-speed P2P transfer using WebRTC. <br/> - Animated Radar UI for device discovery.",
-                "desc_hin": "एक ही वाई-फाई पर मौजूद डिवाइस के बीच तुरंत फाइल शेयर करें। <br/> - वेब-आरटीसी (WebRTC) के साथ हाई-स्पीड ट्रांसफर। <br/> - डिवाइस खोजने के लिए एनिमेटेड राडार यूआई।",
-                "media": "/assets/updates/netdrop-ui.png"
+                "module": "नेटड्रॉप P2P",
+                "title": "Local Wi-Fi P2P File Transfer",
+                "title_hin": "लोकल वाई-फ़ाई P2P फ़ाइल शेयरिंग",
+                "desc": "High-speed P2P file sharing between devices on local Wi-Fi.",
+                "desc_hin": "एक ही वाई-फ़ाई पर दो डिवाइस के बीच तुरंत फ़ाइल शेयरिंग।"
             },
             {
                 "type": "feature",
-                "module": "MM Delete & Transfer",
-                "title": "Transfer MM & Clear MM data.",
-                "title_hin": "एमएम ट्रांसफर और एमएम डेटा क्लियर।",
-                "desc": "Transfer All data of one MM to another or Delete ALL related MM data.",
-                "desc_hin": "एक एमएम का सभी डेटा दूसरे एमएम में ट्रांसफर हो जाएगा। या एक एमएम को डिलीट कर सकते हैं।",
-                "media": "/assets/updates/mm-transfer-delete.png"
-            },
-            {
-                "type": "feature",
-                "module": "Category Management",
-                "title": "Hierarchical Category System (Tree UI)",
-                "title_hin": "हाइरार्कीकल कैटेगरी सिस्टम (ट्री यूआई)",
-                "desc": "Organize categories in a parent-child structure for better classification. <br/> - Interactive Tree UI with folder/file icons and branch lines. <br/> - Hierarchical selection in entry forms with indentation. <br/> - Custom sort order support for each level.",
-                "desc_hin": "कैटेगरी को अब आप पेरेंट-चाइल्ड (सीढ़ीनुमा) स्ट्रक्चर में व्यवस्थित कर सकते हैं। <br/> - नया ट्री यूआई, फोल्डर आइकॉन्स और ब्रांच लाइन्स के साथ। <br/> - एंट्री फॉर्म में कैटेगरी चुनना हुआ और भी आसान। <br/> - हर लेवल पर अपनी पसंद का क्रम (Sort Order) सेट करने की सुविधा।"
-            },
-            {
-                "type": "improved",
-                "module": "UI/UX",
-                "title": "Bilingual Table Design",
-                "title_hin": "हिंदी-इंग्लिश टेबल डिजाइन",
-                "desc": "Improved table UI with a standardized bilingual format. Hindi on top, muted English on the second line for consistent readability across all reports.",
-                "desc_hin": "रिपोर्ट टेबल्स में हिंदी और इंग्लिश को बेहतर तरीके से दिखाया गया है। पहली लाइन में हिंदी और दूसरी लाइन में हल्की इंग्लिश, जिससे पढ़ना आसान हो गया है।"
+                "module": "कैटेगरी ट्री UI",
+                "title": "Hierarchical Category Tree Layout",
+                "title_hin": "सीढ़ीनुमा कैटेगरी ट्री लेआउट",
+                "desc": "Organize categories in parent-child tree structure with folder icons.",
+                "desc_hin": "कैटेगरी को फोल्डर आइकन्स के साथ सीढ़ीनुमा ट्री लेआउट में देखें।"
             }
         ]
     },
     {
-        "version": "29.1",
+        "version": "29 (v29.1)",
         "date": "05-04-2026",
-        "summary": "Major Software Upgrade - Version 29.1",
-        "summary_hin": "नया सॉफ्टवेयर अपग्रेड - वर्जन 29.1",
-        "isNew": true,
+        "summary": "Changelog Panel, Settings Panel PRO & Dedicated Prastav Module",
+        "summary_hin": "वर्जन अपडेट पैनल, सेटिंग्स पैनल एवं नया प्रस्ताव मॉड्यूल",
+        "isNew": false,
         "items": [
             {
                 "type": "feature",
-                "module": "Updates Manager",
+                "module": "अपडेट पैनल",
                 "title": "Interactive Changelog Panel",
-                "title_hin": "नया वर्जन अपडेट पैनल",
-                "desc": "Stay updated with all new features and fixes. <br/> - Detailed version history with icons and descriptions. <br/> - Automatic popup notification for new releases.",
-                "desc_hin": "सॉफ्टवेयर के हर नए अपडेट को अब आप आसानी से देख सकते हैं। <br/> - वर्जन हिस्ट्री को नए डिजाइन और आइकॉन्स के साथ देखें। <br/> - नया वर्जन आने पर अपने आप जानकारी (Popup) आ जाएगी।",
-                "media": "/assets/updates/updates-panel.gif"
+                "title_hin": "इंटरएक्टिव अद्यतन इतिहास पैनल",
+                "desc": "Detailed version history panel with clean release notes.",
+                "desc_hin": "सॉफ्टवेयर के नए अपडेट सरलता से देखने हेतु अद्यतन इतिहास पैनल।"
             },
             {
                 "type": "feature",
-                "module": "Settings Panel",
+                "module": "सेटिंग्स पैनल",
                 "title": "Context Settings Panel PRO",
-                "title_hin": "एडवांस्ड सेटिंग्स पैनल",
-                "desc": "Redesigned settings panel with sidebar navigation, permission toggles (Add/Edit/Delete), and theme-aware UI. <br/> - Configure columns for each page individually. <br/> - Global page visibility control.",
-                "desc_hin": "साइडबार नेविगेशन और परमिशन कंट्रोल (Add/Edit/Delete) के साथ नया सेटिंग्स पैनल। <br/> - हर पेज के कॉलम सेटिंग्स अब एक ही जगह से मैनेज करें। <br/> - डार्क और लाइट मोड में बेहतर दृश्यता (Visibility)।",
-                "media": "/assets/updates/settings-panel.gif"
+                "title_hin": "सेटिंग्स व परमिशन कंट्रोल पैनल",
+                "desc": "Centralized settings panel with page visibility controls and permissions.",
+                "desc_hin": "पेज विजिबिलिटी, कॉलम सेटिंग्स तथा परमिशन कंट्रोल पैनल।"
             },
             {
                 "type": "feature",
-                "module": "Aawak New & Entry",
-                "title": "Jawak Integration & UI Redesign",
-                "title_hin": "जावक इंटीग्रेशन और नया डिजाइन",
-                "desc": "Smart Jawak management now available directly on each row. <br/> - View Jawak count and total quantity at a glance.",
-                "desc_hin": "अब हर रो (Row) पर जावक की जानकारी सीधे देखें। <br/> - जावक की संख्या और कुल वजन एक साथ देखें। <br/> - बिना पेज बदले जावक एंट्री करें।",
-                "media": ""
-            },
-            {
-                "type": "feature",
-                "module": "Prastav (Proposal)",
-                "title": "Whole New Prastav Page",
-                "title_hin": "नया प्रस्ताव पेज",
-                "desc": "Integrated a dedicated Prastav management page for streamlined proposal handling and tracking.",
-                "desc_hin": "प्रस्तावों को मैनेज करने के लिए एक नया और आसान पेज जोड़ा गया है।",
-                "media": ""
-            },
-            {
-                "type": "fix",
-                "module": "Item Directory",
-                "title": "Category Filter Correction",
-                "title_hin": "कैटेगरी फ़िल्टर सुधार",
-                "desc": "Fixed a bug where the category filter was showing inaccurate results. <br/> - More precise item and subitem matching logic.",
-                "desc_hin": "आइटम पेज पर कैटेगरी फ़िल्टर की गड़बड़ी को ठीक किया गया है। <br/> - अब आइटम्स और सब-आइटम्स अपनी जुडी हुई कैटेगरी के हिसाब से बिलकुल सही दिखेंगे।",
-                "media": ""
-            },
-            {
-                "type": "feature",
-                "module": "Prastav Management",
-                "title": "PBK Count Ribbon",
-                "title_hin": "PBK काउंट रिबन",
-                "desc": "Added a small ribbon next to MM names showing the total registered PBKs for that location.",
-                "desc_hin": "MM के नाम के बगल में एक छोटा रिबन जोड़ा गया है जो उस स्थान के कुल रजिस्टर्ड PBK की संख्या दिखाता है।",
-                "media": ""
-            },
-            {
-                "type": "feature",
-                "module": "Prastav Management",
-                "title": "Jawak Focus Mode",
-                "title_hin": "जावक फोकस मोड",
-                "desc": "A new focused editing mode for deliveries. Hides complex headers and parent tables, showing only a summary and the delivery (Jawak) table for a single item.",
-                "desc_hin": "डिलिवरी (जावक) के लिए विशेष फोकस मोड। यह फालतू के हेडर्स और टेबल्स को छुपाकर केवल चुने हुए आइटम की डिलिवरी डिटेल्स पर ध्यान केंद्रित करने में मदद करता है।",
-                "media": ""
-            },
-            {
-                "type": "improved",
-                "module": "Report MM Stock, Khet Saar, Khet AJ Saar",
-                "title": "Report MM Stock, Khet Saar, Khet AJ Saar",
-                "title_hin": "रिपोर्ट एमएम स्टॉक, खेत सार, खेत एजे सार को All MM ke liye upgrade kar diya hai",
-                "desc": "All Type of MM Report Generation",
-                "desc_hin": "pehle sirf stores/Khets ka report dekh sakte the abhi सभी प्रकार के MM ke liye report तैयार करने की सुविधा",
-                "media": ""
-            },
-            {
-                "type": "fix",
-                "module": "Report Awk Type Saar and Jawak Type Saar",
-                "title": "Report Awk Type Saar and Jawak Type Saar",
-                "title_hin": "रिपोर्ट आवक टाइप सार और जावक टाइप सार",
-                "desc": "Without Month Select, All rows comes with blank Qty, now Month compulsary to Procced.",
-                "desc_hin": "बिना Month Select किए, सभी rows blank Qty के साथ आती थी, अब आगे बढ़ने के लिए Month अनिवार्य है।"
+                "module": "प्रस्ताव मॉड्यूल",
+                "title": "Dedicated Proposal Page & Focus Mode",
+                "title_hin": "प्रस्ताव मैनेजमेंट पेज व जावक फोकस मोड",
+                "desc": "Dedicated proposal handling page with PBK count ribbons and focus mode.",
+                "desc_hin": "प्रस्ताव प्रबंधन हेतु नया समर्पित पेज व जावक फोकस मोड।"
             }
         ]
     }

@@ -193,7 +193,46 @@ async function createSubitem(data, dept_id = null) {
             if (dept_id) deptService.pushToConfig(dept_id, 'subitem', subitem_id);
         }
 
-        return subitem.getById(subitem_id, { full: true });
+        const res = subitem.getById(subitem_id, { full: true });
+        if (res) {
+            res.document = (res.document && res.document != "[null]" ? (typeof res.document === 'string' ? JSON.parse(res.document) : res.document) : []);
+            res.categories = (res.categories && res.categories != "[null]" ? (typeof res.categories === 'string' ? JSON.parse(res.categories) : res.categories) : []);
+        }
+        return res;
+    } catch (err) {
+        throw err;
+    }
+}
+
+/**
+ * Updates a subitem and syncs its category mappings in rel_subitem_category.
+ */
+async function updateSubitem(id, setData) {
+    try {
+        checkSubitemConflict(setData, id);
+        let catIds = null;
+        if (setData.categories) {
+            if (Array.isArray(setData.categories)) catIds = setData.categories;
+            else if (typeof setData.categories === 'string') {
+                try { catIds = JSON.parse(setData.categories); } catch (e) { }
+            }
+        }
+
+        if (catIds && Array.isArray(catIds)) {
+            // Sync junction table rel_subitem_category via Sutram BaseTable
+            rel_subitem_cat.delete({ subitem_id: id });
+            for (const cat_id of catIds) {
+                try { rel_subitem_cat.insert({ subitem_id: id, category_id: Number(cat_id) }, false); } catch (e) { }
+            }
+        }
+
+        subitem.updateById(setData, id);
+        const res = subitem.getById(id, { full: true });
+        if (res) {
+            res.document = (res.document && res.document != "[null]" ? (typeof res.document === 'string' ? JSON.parse(res.document) : res.document) : []);
+            res.categories = (res.categories && res.categories != "[null]" ? (typeof res.categories === 'string' ? JSON.parse(res.categories) : res.categories) : []);
+        }
+        return res;
     } catch (err) {
         throw err;
     }
@@ -528,5 +567,6 @@ module.exports = {
     getRelSubitemCategoryConflict,
     getSubitemConflict,
     checkSubitemConflict,
-    createSubitem
+    createSubitem,
+    updateSubitem
 };

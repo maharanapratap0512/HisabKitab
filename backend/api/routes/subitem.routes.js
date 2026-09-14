@@ -2,6 +2,7 @@ const router = require('express').Router();
 const BaseTable = require('../database/base.table');
 const HmpService = require('../services/hmp.service');
 const PrastavService = require('../services/prastav.service');
+const ItemService = require('../services/item.service');
 const Subitem = new BaseTable('subitem');
 const hmp_batch = new BaseTable('hmp_batch');
 const DBContex = require('../database/DBContex');
@@ -74,15 +75,10 @@ router.put('/:dept_id', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
-            req.body.document = JSON.stringify(req.body.document ? req.body.document : []);
-            req.body.categories = JSON.stringify(req.body.categories ? req.body.categories : []);
-            await DB.insert('subitem', req.body, req.params.dept_id).then((data) => {
-                data.document = data.document ? JSON.parse(data.document) : [];
-                data.categories = data.categories ? JSON.parse(data.categories) : [];
-                res.json({
-                    success: true,
-                    result: data || {}
-                });
+            const data = await ItemService.createSubitem(req.body, req.params.dept_id);
+            res.json({
+                success: true,
+                result: data || {}
             });
         }
         else {
@@ -95,16 +91,11 @@ router.post('/:dept_id', async (req, res, next) => {
 // update subitem 
 router.put('/', async (req, res, next) => {
     try {
-        if (req.body.set && req.body.query) {
-            req.body.set.document = JSON.stringify(req.body.set.document ? req.body.set.document : []);
-            req.body.set.categories = JSON.stringify(req.body.set.categories ? req.body.set.categories : []);
-            await DB.update('subitem', req.body.set, req.body.query._id).then(async (data) => {
-                data.document = data.document ? JSON.parse(data.document) : [];
-                data.categories = data.categories ? JSON.parse(data.categories) : [];
-                res.json({
-                    success: true,
-                    result: data || {}
-                });
+        if (req.body.set && req.body.query && req.body.query._id) {
+            const data = await ItemService.updateSubitem(req.body.query._id, req.body.set);
+            res.json({
+                success: true,
+                result: data || {}
             });
         }
         else {
@@ -140,7 +131,7 @@ router.put('/transfer/:dept_id', async (req, res, next) => {
 
         let to_item_id = null;
         let to_subitem_id = null;
-        
+
         if (typeof to_id_raw === 'string' && to_id_raw.includes(':')) {
             const parts = to_id_raw.split(':');
             to_item_id = parseInt(parts[0]) || null;
@@ -197,9 +188,9 @@ router.put('/transfer/:dept_id', async (req, res, next) => {
         for (let u of otherUpdates) {
             try {
                 if (u.hasSubitem && to_item_id) {
-                     DB.db.prepare(`UPDATE ${u.table} SET item_id = ?, subitem_id = ? WHERE subitem_id = ? AND dept_id = ?`).run(to_item_id, to_subitem_id, parseInt(from_id), parseInt(dept_id));
+                    DB.db.prepare(`UPDATE ${u.table} SET item_id = ?, subitem_id = ? WHERE subitem_id = ? AND dept_id = ?`).run(to_item_id, to_subitem_id, parseInt(from_id), parseInt(dept_id));
                 } else {
-                     DB.db.prepare(`UPDATE ${u.table} SET subitem_id = ? WHERE subitem_id = ? AND dept_id = ?`).run(to_subitem_id, parseInt(from_id), parseInt(dept_id));
+                    DB.db.prepare(`UPDATE ${u.table} SET subitem_id = ? WHERE subitem_id = ? AND dept_id = ?`).run(to_subitem_id, parseInt(from_id), parseInt(dept_id));
                 }
             } catch (e) { console.error(e); }
         }

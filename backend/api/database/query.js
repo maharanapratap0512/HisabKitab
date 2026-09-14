@@ -2845,9 +2845,9 @@ const excel_correction = {
 
     update_mm: `update temp_import set mm_id = @id where mm = @name`,
     update_usage_list: `update temp_import set usage_list_id = @id where usage_list = @name`,
-    update_item: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name`,
-    update_subitem: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name AND subitem = @extra_note`,
-    update_ignore_subitem: `update temp_import set item = item || ' ' || subitem, item_id = @id, subitem_id = @id2, subitem = null where item = @name AND subitem = @extra_note`,
+    update_item: `update temp_import set item_id = @id, subitem_id = @id2, item_detail = TRIM(COALESCE(item_detail || ' ', '') || COALESCE(@item_detail, '')), description = TRIM(COALESCE(description || ' ', '') || COALESCE(@description, '')) where item = @name`,
+    update_subitem: `update temp_import set item_id = @id, subitem_id = @id2, item_detail = TRIM(COALESCE(item_detail || ' ', '') || COALESCE(@item_detail, '')), description = TRIM(COALESCE(description || ' ', '') || COALESCE(@description, '')) where item = @name AND subitem = @extra_note`,
+    update_ignore_subitem: `update temp_import set item = item || ' ' || subitem, item_id = @id, subitem_id = @id2, subitem = null, item_detail = TRIM(COALESCE(item_detail || ' ', '') || COALESCE(@item_detail, '')), description = TRIM(COALESCE(description || ' ', '') || COALESCE(@description, '')) where item = @name AND subitem = @extra_note`,
     update_aj_mm: `update temp_import set aj_mm_id = @id where aj_mm = @name`,
     update_awk_type: `update temp_import set aj_type_id = @id where type = 'awk' AND aj_type = @name`,
     update_jwk_type: `update temp_import set aj_type_id = @id where type = 'jwk' AND aj_type = @name`,

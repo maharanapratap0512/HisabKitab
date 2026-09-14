@@ -159,12 +159,16 @@ export class SubitemEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('SUBITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
-          this.gs.Lists.itemmix[i].subitems.splice(this.gs.Lists.itemmix[i].subitems.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
-          // this.gs.Lists.itemmix[i].categories.push(data['result'].categories);
+          let i = this.gs.Lists.itemmix.findIndex((item: { _id: any; }) => item._id == data['result'].item_id);
+          if (i > -1 && this.gs.Lists.itemmix[i].subitems) {
+            let subIndex = this.gs.Lists.itemmix[i].subitems.findIndex((si: any) => si._id == this.getData._id);
+            if (subIndex > -1) {
+              this.gs.Lists.itemmix[i].subitems[subIndex] = data['result'];
+            }
+          }
           this.subitemForm.reset();
           this.isLoader = false;
-          this.toastr.success('SUBITEM added successfully.')
+          this.toastr.success('SUBITEM updated successfully.')
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
@@ -186,7 +190,7 @@ export class SubitemEntryComponent implements OnInit {
       if (item) {
         let itemCats = item.categories;
         if (typeof itemCats === 'string') {
-          try { itemCats = JSON.parse(itemCats); } catch (e) {}
+          try { itemCats = JSON.parse(itemCats); } catch (e) { }
         }
         if (Array.isArray(itemCats)) {
           itemCats = itemCats

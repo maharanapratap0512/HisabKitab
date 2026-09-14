@@ -1229,10 +1229,18 @@ export class AawakComponent implements OnInit {
   }
 
   editAawakResponse(ev: any) {
-    if (ev.length > 0) {
+    if (ev && ev.length > 0) {
       this.isLoader = true;
+      const idx = this.aawakData.findIndex((a: any) => a._id == this.editData._id);
+      if (idx > -1) {
+        this.aawakData.splice(idx, 1, ev[0]);
+        // Also sync aawakAll if it's a different array reference
+        const allIdx = this.aawakAll.findIndex((a: any) => a._id == this.editData._id);
+        if (allIdx > -1 && this.aawakAll[allIdx] !== this.aawakData[idx]) {
+          this.aawakAll.splice(allIdx, 1, ev[0]);
+        }
+      }
       this.closeModal();
-      this.aawakData.splice(this.aawakData.indexOf(this.editData), 1, ev[0]);
       this.isLoader = false;
     }
     else {
@@ -1263,7 +1271,14 @@ export class AawakComponent implements OnInit {
   }
 
   editJawak(i: any, j: any) {
-    this.editData = this.aawakData[i].jawak_detail[j];
+    let jwk = this.aawakData[i].jawak_detail[j];
+    if (typeof jwk.aawak_splits === 'string') {
+      try { jwk.aawak_splits = JSON.parse(jwk.aawak_splits); } catch (e) { jwk.aawak_splits = []; }
+    }
+    if (!jwk.aawak_splits || !jwk.aawak_splits.length) {
+      jwk.aawak_splits = [{ aawak_id: this.aawakData[i]._id, split_qty: jwk.qty, qty: jwk.qty }];
+    }
+    this.editData = jwk;
     this.editIndex = { i: i, j: j };
     this.openModal('Edit Jawak');
   }
@@ -1434,7 +1449,7 @@ export class AawakComponent implements OnInit {
   }
 
   addJawakResponse(ev: any) {
-    let awkId = ev.aawak_ref_id || (ev.aawak_splits && ev.aawak_splits.length > 0 ? (ev.aawak_splits[0].aawak_id || ev.aawak_splits[0]._id) : null);
+    let awkId = (ev.aawak_splits && ev.aawak_splits.length > 0 ? (ev.aawak_splits[0].aawak_id || ev.aawak_splits[0]._id) : null);
     if (awkId) {
       let i = this.aawakData.findIndex((b: any) => b._id == awkId);
       if (i > -1) {

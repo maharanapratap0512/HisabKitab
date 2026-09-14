@@ -196,7 +196,7 @@ export class ReportStoreStockComponent {
       row['कुल मात्रा'] = this.reportData[i].Stock;
       data.push(row)
     }
-    this.excelExportService.exportAsExcelFile(data, this.auth.webUser.dept_code + "_" + this.reportHeading);
+    this.excelExportService.exportStyledExcel(data, this.auth.webUser.dept_code + "_" + this.reportHeading, (this.auth.webUser.dept_code || '') + " - " + this.reportHeading);
   }
 
   exportToExcelEng() {
@@ -216,6 +216,6 @@ export class ReportStoreStockComponent {
       row['Total Qty'] = this.reportData[i].Stock;
       data.push(row)
     }
-    this.excelExportService.exportAsExcelFile(data, this.auth.webUser.dept_eng + "_" + this.reportHeading);
+    this.excelExportService.exportStyledExcel(data, this.auth.webUser.dept_eng + "_" + this.reportHeading, (this.auth.webUser.dept_eng || '') + " - " + this.reportHeading);
   }
 }

@@ -269,20 +269,36 @@
                            </ng-select>
 
                            <!-- item dropdown -->
-                           <div class="d-flex justify-content-center"
+                           <div class="d-flex flex-column w-100"
                               *ngIf="data.type == 'item' || data.type == 'category'">
-                              <ng-select class="custom custom-import" placeholder="Select Category"
-                                 [virtualScroll]="true" (change)="onCategoryChange($event, data)" appendTo="body">
-                                 <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
-                                 <ng-option value="+add" class="text-primary fw-bold">+ Add Category</ng-option>
-                                 <ng-option *ngFor="let item of categories" [value]="item._id">
-                                    {{item.category_hin}}:{{item.category_eng}}</ng-option>
-                              </ng-select>
-                              <!-- single item-dropdown for item & subitem / variant -->
-                               <app-item-dropdown *ngIf="data.type == 'item'" class="custom-import mx-2" style="min-width: 250px;"
-                                  [items]="items" [(itemId)]="data.id" [(subitemId)]="data.id2"
-                                  (change)="data.id = $event.item_id; data.id2 = $event.subitem_id" appendTo="body">
-                               </app-item-dropdown>
+                              <div class="d-flex justify-content-center w-100">
+                                 <ng-select class="custom custom-import" placeholder="Select Category"
+                                    [virtualScroll]="true" (change)="onCategoryChange($event, data)" appendTo="body">
+                                    <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
+                                    <ng-option value="+add" class="text-primary fw-bold">+ Add Category</ng-option>
+                                    <ng-option *ngFor="let item of categories" [value]="item._id">
+                                       {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                                 </ng-select>
+                                 <!-- single item-dropdown for item & subitem / variant -->
+                                  <app-item-dropdown *ngIf="data.type == 'item'" class="custom-import mx-2" style="min-width: 250px;"
+                                     [items]="items" [(itemId)]="data.id" [(subitemId)]="data.id2"
+                                     (change)="data.id = $event.item_id; data.id2 = $event.subitem_id" appendTo="body">
+                                  </app-item-dropdown>
+                              </div>
+                              <div class="d-flex gap-2 mt-1 w-100" *ngIf="data.type == 'item'">
+                                 <div class="flex-fill">
+                                    <input type="text" class="form-control form-control-sm"
+                                       placeholder="Append Item Detail..."
+                                       [(ngModel)]="data.item_detail"
+                                       [ngModelOptions]="{standalone: true}">
+                                 </div>
+                                 <div class="flex-fill">
+                                    <input type="text" class="form-control form-control-sm"
+                                       placeholder="Append Description..."
+                                       [(ngModel)]="data.description"
+                                       [ngModelOptions]="{standalone: true}">
+                                 </div>
+                              </div>
                            </div>
 
                            <!-- product dropdown -->
