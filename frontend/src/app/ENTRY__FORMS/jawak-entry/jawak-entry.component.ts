@@ -438,6 +438,7 @@ export class JawakEntryComponent implements OnInit {
             unit_id: item.unit_id,
             unit_short: item.unit_short
           });
+          this.lookupItemRate();
         }
       }
     } else {
@@ -446,6 +447,26 @@ export class JawakEntryComponent implements OnInit {
         this.jawakForm.patchValue({ unit_id: null, unit_short: null });
       }
     }
+  }
+
+  lookupItemRate() {
+    const item_id = this.jawakForm.get('item_id')?.value;
+    const subitem_id = this.jawakForm.get('subitem_id')?.value;
+    const dateVal = this.jawakForm.get('date')?.value;
+    if (!item_id || !dateVal) return;
+
+    const year = new Date(dateVal).getFullYear();
+    if (isNaN(year)) return;
+
+    const url = `${this.api.getUrl('ITEMRATE')}lookup/${this.auth.webUser.dept_id}?item_id=${item_id}&subitem_id=${subitem_id || ''}&year=${year}`;
+    this.http.get(url).subscribe((res: any) => {
+      if (res && res.success && res.rate !== null && res.rate !== undefined) {
+        const qty = Number(this.jawakForm.get('qty')?.value || 0);
+        const rate = Number(res.rate);
+        const actual_amt = qty ? Math.round(qty * rate * 100) / 100 : null;
+        this.jawakForm.patchValue({ rate: rate, actual_amt: actual_amt });
+      }
+    });
   }
 
   subitemSelected(ev: any) {
@@ -459,10 +480,14 @@ export class JawakEntryComponent implements OnInit {
             unit_id: subitem.unit_id,
             unit_short: subitem.unit_short ? subitem.unit_short : null
           });
+          this.lookupItemRate();
         }
       }
     } else {
       this.products = this.productsAll;
+      if (!this.isEdit) {
+        this.lookupItemRate();
+      }
     }
   }
 

@@ -1,0 +1,130 @@
+<div class="modal fade" [id]="modalId" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title"><i class="uil uil-bill me-1"></i> Yearly Rates (वार्षिक दरें)</h5>
+            <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+               [fullScreen]="false">
+               <p style="color: white"> लोड हो रहा है... </p>
+            </ngx-spinner>
+
+            <div class="card p-3 mb-3 border">
+               <h5 class="fw-bold mb-3"><i class="uil uil-edit me-1"></i> Add / Edit Yearly Rate (वार्षिक दर जोड़े/बदले)</h5>
+               <div class="row g-2 align-items-end">
+                  <div class="col-md-5">
+                     <label class="form-label font-weight-bold">Select Item / Subitem *</label>
+                     <app-item-dropdown [items]="itemData" [(itemId)]="rateObj.item_id"
+                        [(subitemId)]="rateObj.subitem_id" (change)="onRateItemChange($event)"
+                        placeholder="Select Item / Subitem"></app-item-dropdown>
+                  </div>
+                  <div class="col-md-2">
+                     <label class="form-label font-weight-bold">Year *</label>
+                     <input type="number" class="form-control" [(ngModel)]="rateObj.year" placeholder="e.g. 2026">
+                  </div>
+                  <div class="col-md-2">
+                     <label class="form-label font-weight-bold">Rate (₹) *</label>
+                     <input type="number" class="form-control" [(ngModel)]="rateObj.rate" placeholder="e.g. 500">
+                  </div>
+                  <div class="col-md-3 d-flex gap-1">
+                     <button class="btn btn-primary w-50" (click)="saveRate(false)" title="Save to rate master only">
+                        <i class="uil uil-save"></i> Save
+                     </button>
+                     <button class="btn btn-success w-50" (click)="saveRate(true)"
+                        title="Save & apply to all Aawak & Jawak entries of this year">
+                        <i class="uil uil-check-circle"></i> Save & Apply
+                     </button>
+                  </div>
+               </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+               <table class="table table-hover align-middle border">
+                  <thead class="table-light sticky-top">
+                     <tr>
+                        <th style="width: 50px;">No.</th>
+                        <th style="width: 140px;">
+                           <div class="d-flex align-items-center justify-content-between">
+                              <span>Year</span>
+                              <app-popover-filter #yearPopover [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                 [isOpen]="!!rateFilter.year"
+                                 (clear)="rateFilter.year = null"
+                                 triggerOn="click">
+                                 <div class="d-flex flex-wrap p-2 gap-2" style="width: 250px;">
+                                    <span class="badge year-box cursor-pointer" style="font-size: 13px;"
+                                       [ngClass]="rateFilter.year === null ? 'bg-primary' : 'badge-outline-secondary'"
+                                       (click)="rateFilter.year = null; yearPopover.closePopover()">
+                                       All
+                                    </span>
+                                    <span *ngFor="let y of rateYears" class="badge year-box cursor-pointer" style="font-size: 13px;"
+                                       [ngClass]="rateFilter.year == y ? 'bg-primary' : 'badge-outline-secondary'"
+                                       (click)="rateFilter.year = y; yearPopover.closePopover()">
+                                       {{y}}
+                                    </span>
+                                 </div>
+                              </app-popover-filter>
+                           </div>
+                        </th>
+                        <th>
+                           <div class="d-flex align-items-center justify-content-between">
+                              <span>Item - Subitem</span>
+                              <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                 [isOpen]="(selectedItemmix && selectedItemmix.length > 0) || !!rateFilter.search"
+                                 (clear)="selectedItemmix = []; rateFilter.search = ''"
+                                 triggerOn="click">
+                                 <div style="width: 280px;" class="p-1">
+                                    <div class="mb-2">
+                                       <label class="form-label mb-1"><small class="fw-bold">Item & Subitem Dropdown</small></label>
+                                       <app-item-dropdown [items]="itemData" [(ngModel)]="selectedItemmix" [multiple]="true"
+                                          [closeOnSelect]="false" name="hdr_rate_item_mix"
+                                          appendTo="body"></app-item-dropdown>
+                                    </div>
+                                    <div>
+                                       <label class="form-label mb-1"><small class="fw-bold">Quick Search</small></label>
+                                       <input type="text" class="form-control form-control-sm" placeholder="Search name..." [(ngModel)]="rateFilter.search">
+                                    </div>
+                                 </div>
+                              </app-popover-filter>
+                           </div>
+                        </th>
+                        <th style="width: 120px;">Rate (₹)</th>
+                        <th style="width: 180px;" class="text-center">Actions</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr *ngFor="let item of filteredItemRates; let i = index">
+                        <td>{{i + 1}}</td>
+                        <td>
+                           <span class="badge bg-primary px-2 py-1 fs-6">{{item.year}}</span>
+                        </td>
+                        <td>
+                           <div class="fw-bold">{{item.item_hin}} <small class="text-muted">({{item.item_eng || '-'}})</small></div>
+                           <div *ngIf="item.subitem_hin" class="small text-info fw-normal mt-1">
+                              <i class="uil uil-corner-down-right me-1"></i>{{item.subitem_hin}} <small class="text-muted">({{item.subitem_eng || '-'}})</small>
+                           </div>
+                        </td>
+                        <td class="fw-bold text-success">₹{{item.rate}}</td>
+                        <td class="text-center">
+                           <button class="btn btn-sm btn-outline-primary me-2 py-0 px-2" (click)="applyRateRow(item)"
+                              title="Apply Rate to Aawak/Jawak">
+                              <i class="uil uil-check-circle me-1"></i> Apply
+                           </button>
+                           <i class="uil uil-trash i-outline-danger cursor-pointer" (click)="deleteRateRow(item._id)"
+                              title="Delete"></i>
+                        </td>
+                     </tr>
+                     <tr *ngIf="!filteredItemRates.length">
+                        <td colspan="5" class="text-center py-4 text-muted">No yearly rates found.</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;" (click)="closeModal()">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

@@ -52,3 +52,33 @@
 - Do NOT add `OR jawak.aawak_ref_id = ...` to any WHERE clause.
 - Do NOT write any UPDATE/SELECT that filters or joins on `aawak_ref_id`.
 - This rule applies across ALL routes, services, and queries — backend and frontend.
+
+## 10. Table Header Filters Rule (`app-popover-filter` & Year Badges)
+- For **Year filter** in table column headers (`th`), use standard `uil uil-filter` icon trigger outside before click, and inside the popover panel render year badge pills (`All`, year list):
+  ```html
+  <app-popover-filter #yearPopover [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+     [isOpen]="!!selectedYear" (clear)="selectedYear = null" triggerOn="click">
+     <div class="d-flex flex-wrap p-2 gap-2" style="width: 250px;">
+        <span class="badge year-box cursor-pointer" style="font-size: 13px;"
+           [ngClass]="selectedYear === null ? 'bg-primary' : 'badge-outline-secondary'"
+           (click)="selectedYear = null; yearPopover.closePopover()">All</span>
+        <span *ngFor="let y of yearList" class="badge year-box cursor-pointer" style="font-size: 13px;"
+           [ngClass]="selectedYear == y ? 'bg-primary' : 'badge-outline-secondary'"
+           (click)="selectedYear = y; yearPopover.closePopover()">{{y}}</span>
+     </div>
+  </app-popover-filter>
+  ```
+- For **Item & Subitem filter** in table headers, ALWAYS place `<app-item-dropdown [(ngModel)]="selectedItemmix" [multiple]="true" [closeOnSelect]="false" appendTo="body"></app-item-dropdown>` inside `<app-popover-filter>`:
+  ```html
+  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+     [isOpen]="selectedItemmix && selectedItemmix.length > 0"
+     (clear)="selectedItemmix = []"
+     triggerOn="click">
+     <div style="width: 280px;" class="p-1">
+        <label class="form-label mb-1"><small class="fw-bold">Item & Subitem</small></label>
+        <app-item-dropdown [(ngModel)]="selectedItemmix" [multiple]="true"
+           [closeOnSelect]="false" appendTo="body"></app-item-dropdown>
+     </div>
+  </app-popover-filter>
+  ```
+- In TypeScript, parse `selectedItemmix` entries by splitting `"item_id:subitem_id"` strings (`parts[0]` = `item_id`, `parts[1]` = `subitem_id`) to perform accurate item/subitem filtering.

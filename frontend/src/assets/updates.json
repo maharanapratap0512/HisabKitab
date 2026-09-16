@@ -1,10 +1,27 @@
 [
     {
+        "version": "37.0",
+        "date": "16-09-2026",
+        "summary": "Yearly Rates Management & Smart Header Filters",
+        "summary_hin": "वार्षिक दर प्रबंधन एवं स्मार्ट हेडर फ़िल्टर सुविधा",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "आइटम व दर प्रबंधन",
+                "title": "Yearly Rates Management Component",
+                "title_hin": "वार्षिक दर (Yearly Rates) प्रबंधन सुविधा",
+                "desc": "Added a dedicated Yearly Rates manager accessible from Item and Variant pages to configure rates per year and automatically apply them across entries.",
+                "desc_hin": "आइटम एवं वैरियंट पेज से सीधे वर्ष अनुसार दरें तय करने तथा आवक व जावक एंट्रियों में स्वतः लागू करने की सुविधा।"
+            }
+        ]
+    },
+    {
         "version": "36.4",
         "date": "13-09-2026",
         "summary": "Aawak New Table UI Improvements, Jawak Edit Fix & Import Correction Enhancements",
         "summary_hin": "आवक (New) तालिका UI सुधार, जावक एडिट सुधार एवं इम्पोर्ट करेक्शन संवर्धन",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "improved",
@@ -29,6 +46,14 @@
                 "title_hin": "इम्पोर्ट करेक्शन में आइटम विवरण व विवरण फ़ील्ड संवर्धन",
                 "desc": "Added Item Detail and Description fields in the Import Correction tab, seamlessly appending details to matching records upon submission.",
                 "desc_hin": "इम्पोर्ट करेक्शन टैब में आइटम विवरण एवं डिस्क्रिप्शन जोड़ने की सुविधा, जिससे सबमिट करने पर विवरण स्वतः जुड़ जाता है।"
+            },
+            {
+                "type": "feature",
+                "module": "आइटम सेटिंग्स",
+                "title": "Per-Year Item & Subitem Rate Management",
+                "title_hin": "वार्षिक आइटम व सबआइटम दर प्रबंधन",
+                "desc": "Set rates per year for items/subitems. Includes Save and Save & Apply buttons to bulk update Aawak/Jawak entries of that year, with automatic rate pre-filling on new entries.",
+                "desc_hin": "वर्ष अनुसार आइटम/सबआइटम की दरें तय करने की सुविधा। सहेजें व सहेजें एवं लागू करें बटन द्वारा आवक/जावक एंट्रियों में दरें स्वतः अपडेट करें।"
             }
         ]
     },

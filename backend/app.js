@@ -64,6 +64,7 @@ const hmpRoutes = require('./api/routes/hmp.routes');
 const prastavRoutes = require('./api/routes/prastav.routes');
 const variantRoutes = require('./api/routes/variant.routes');
 const integrityCheckupRoutes = require('./api/routes/integrity-checkup.routes');
+const itemRateRoutes = require('./api/routes/item-rate.routes');
 const { sutramEngine } = require('./api/database/db.model');
 
 
@@ -109,6 +110,7 @@ app.use('/api/hmp', hmpRoutes);
 app.use('/api/prastav', prastavRoutes);
 app.use('/api/variants', variantRoutes);
 app.use('/api/integrity-checkup', integrityCheckupRoutes);
+app.use('/api/item-rates', itemRateRoutes);
 
 
 

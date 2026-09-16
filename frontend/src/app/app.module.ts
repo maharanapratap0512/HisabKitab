@@ -115,6 +115,7 @@ import { JoinObjPipe } from './pipe/formatter/join-obj.pipe';
 import { ItemDropdownComponent } from './SHARED/item-dropdown/item-dropdown.component';
 import { AawakRefDropdownComponent } from './SHARED/aawak-ref-dropdown/aawak-ref-dropdown.component';
 import { AawakRefComponent } from './SHARED/aawak-ref/aawak-ref.component';
+import { YearlyRatesComponent } from './SHARED/yearly-rates/yearly-rates.component';
 
 
 import { VariantComponent }               from './CHILD_TABLES/variant/variant.component';
@@ -237,6 +238,7 @@ import { ReportItemLedgerComponent } from './reports/report-item-ledger/report-i
     ItemDropdownComponent,
     AawakRefDropdownComponent,
     AawakRefComponent,
+    YearlyRatesComponent,
     DbGenerateComponent,
     P2pFeedbackComponent,
     ReportItemLedgerComponent,

@@ -2703,6 +2703,20 @@ class dbModal {
               SET remaining_qty = round(remaining_qty + IFNULL(OLD.split_qty, OLD.qty), 2)
               WHERE _id = OLD.aawak_id AND OLD.aawak_id IS NOT NULL;
           END;`
+    },
+    // new version migration: item_rate table
+    {
+      item_rate: `CREATE TABLE IF NOT EXISTS item_rate(
+          _id integer PRIMARY KEY AUTOINCREMENT,
+          dept_id integer not null,
+          item_id integer not null,
+          subitem_id integer null,
+          year integer not null,
+          rate real not null,
+          created_at timestamp default (datetime('now', 'localtime')),
+          updated_at timestamp default (datetime('now', 'localtime')),
+          UNIQUE(dept_id, item_id, subitem_id, year)
+        );`
     }
   ];
 
@@ -2772,8 +2786,8 @@ class dbModal {
       select CAST(strftime('%Y', date) AS INTEGER) as year, CAST(strftime('%m', date) AS INTEGER) as month, dept_id, mm_id, item_id, subitem_id, unit_id, aawak_type_id,
       sum(qty) as t_qty, sum(rate) as t_rate, sum(actual_amt) as t_amt, sum(remaining_qty) as t_remaining_qty 
       from aawak
-      group by month, year, dept_id, mm_id, item_id, subitem_id, unit_id, aawak_type_id;`,
-  }
+      group by month, year, dept_id, mm_id, item_id, subitem_id, unit_id, aawak_type_id;`
+  };
   migrationLength;
   constructor(dbPath) {
     try {

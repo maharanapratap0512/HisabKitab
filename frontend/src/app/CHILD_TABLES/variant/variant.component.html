@@ -25,6 +25,9 @@
                                 <small class="text-muted">Items → Attributes → Variants → Subitems</small>
                             </div>
                             <div class="col-6 d-flex justify-content-end gap-2">
+                                <button class="btn btn-warning text-dark btn-sm fw-bold" (click)="yearlyRatesComp.openModal()">
+                                    <i class="uil uil-bill me-1"></i> Yearly Rates
+                                </button>
                                 <button class="btn btn-outline-info btn-sm"
                                     (click)="openAttributeManager('attributes')">
                                     <i class="uil uil-tag-alt"></i> Attributes
@@ -379,3 +382,5 @@
         </div>
     </div>
 </div>
+
+<app-yearly-rates #yearlyRatesComp></app-yearly-rates>

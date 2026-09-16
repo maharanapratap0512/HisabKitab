@@ -5,6 +5,17 @@ const { defineTable, defineView, col } = require('sutramcore');
 
 module.exports = {
 
+    // ── Item Rate ──────────────────────────────────────────────
+    ...defineTable('item_rate', {
+        _id: col.id(),
+        dept_id: col.ref('department._id', { as: 'department' }),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'], join: true }),
+        subitem_id: col.ref('subitem._id', { as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'], join: true }),
+        year: col.number(),
+        rate: col.number(),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
 
     // ── Subitem ───────────────────────────────────────────────
 

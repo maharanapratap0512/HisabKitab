@@ -417,6 +417,7 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
         if (!this.isEdit && !jwk.aawak_ref_id) {
           if (subitem) jwk.unit_id = subitem.unit_id;
           else jwk.unit_id = item.unit_id;
+          this.lookupItemRate(i);
         }
       }
     }
@@ -428,6 +429,24 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
       jwk.unit_id = null;
       jwk.lot_no = null;
     }
+  }
+
+  lookupItemRate(i: any) {
+    const jwk = this.fs.jawakFormMain?.jawaks[i];
+    if (!jwk || !jwk.item_id || !jwk.date) return;
+
+    const year = new Date(jwk.date).getFullYear();
+    if (isNaN(year)) return;
+
+    const url = `${this.api.getUrl('ITEMRATE')}lookup/${this.auth.webUser.dept_id}?item_id=${jwk.item_id}&subitem_id=${jwk.subitem_id || ''}&year=${year}`;
+    this.http.get(url).subscribe((res: any) => {
+      if (res && res.success && res.rate !== null && res.rate !== undefined) {
+        jwk.rate = Number(res.rate);
+        if (typeof this.rateClick === 'function') {
+          this.rateClick(i);
+        }
+      }
+    });
   }
 
   subitemSelected(ev: any, i: any) {
