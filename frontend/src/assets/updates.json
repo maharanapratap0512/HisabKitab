@@ -29,6 +29,14 @@
                 "title_hin": "जावक तालिका की दिनांक कॉलम में बहुमुखी फ़िल्टर सुविधा",
                 "desc": "Added a quick date popover filter directly on the Date column header in Jawak, allowing users to easily filter entries by Date Range, Year, and Month Range.",
                 "desc_hin": "जावक तालिका के दिनांक हेडर पर क्विक फ़िल्टर पॉपओवर जोड़ा गया है, जिससे दिनांक सीमा, वर्ष एवं माह के आधार पर तुरंत जावक प्रविष्टियाँ फ़िल्टर की जा सकती हैं।"
+            },
+            {
+                "type": "fix",
+                "module": "आवक",
+                "title": "Category Visibility in Aawak Excel Export for Subitem Rows",
+                "title_hin": "आवक एक्सेल एक्सपोर्ट में सब-आइटम पंक्तियों की श्रेणी (Category) दृश्यता में सुधार",
+                "desc": "Fixed an issue where item category was not displayed in Excel export files when entries contained subitems.",
+                "desc_hin": "आवक रिपोर्ट को एक्सेल (Excel) में एक्सपोर्ट करते समय सब-आइटम वाली पंक्तियों में श्रेणी (Category) का नाम स्पष्ट रूप से दिखाई देगा।"
             }
         ]
     },

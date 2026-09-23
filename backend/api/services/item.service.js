@@ -23,6 +23,22 @@ async function getNextId(tableName, deptId) {
     return result && result.max_id ? result.max_id + 1 : startRange + 1;
 }
 
+function parseSubitemCategories(subitem) {
+    if (!subitem) return [];
+    let cats = subitem.categories;
+    if (typeof cats === 'string') {
+        try {
+            cats = (cats && cats !== "[null]" && cats !== "null") ? JSON.parse(cats) : [];
+        } catch (e) {
+            cats = [];
+        }
+    }
+    if (Array.isArray(cats)) {
+        return cats.filter(c => c && c._id != null);
+    }
+    return [];
+}
+
 /**
  * Fetches items with their related subitems, categories, etc.
  */
@@ -36,6 +52,9 @@ async function getItems(deptId, options = {}) {
         row.categories = (row.categories && row.categories != "[null]" ? JSON.parse(row.categories) : []);
         row.item_aliases = (row.item_aliases && row.item_aliases != "[null]" ? JSON.parse(row.item_aliases) : []);
         subitem_count += row.subitems.length;
+        for (let j = 0; j < row.subitems.length; j++) {
+            row.subitems[j].categories = parseSubitemCategories(row.subitems[j]);
+        }
     }
     return { data: resolve.data, total_count: resolve.total_count, subitem_count };
 }
@@ -89,7 +108,7 @@ async function filterItems(deptId, body) {
         subitem_count += row.subitems.length;
 
         for (let j = 0; j < row.subitems.length; j++) {
-            row.subitems[j].categories = (row.subitems[j].categories && row.subitems[j].categories != "[null]" ? JSON.parse(row.subitems[j].categories) : []);
+            row.subitems[j].categories = parseSubitemCategories(row.subitems[j]);
         }
     }
 

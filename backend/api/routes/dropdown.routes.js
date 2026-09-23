@@ -95,7 +95,16 @@ router.get('/all/:dept_id', async (req, res, next) => {
                     resolve.data[i].item_aliases = (resolve.data[i].item_aliases && resolve.data[i].item_aliases != "[null]" ? JSON.parse(resolve.data[i].item_aliases) : []);
 
                     for (let j in resolve.data[i].subitems) {
-                        resolve.data[i].subitems[j].categories = ((resolve.data[i].subitems[j].categories_hin && typeof resolve.data[i].subitems[j].categories_hin == "string" && resolve.data[i].subitems[j].categories_hin != "[null]") ? JSON.parse(resolve.data[i].subitems[j].categories_hin) : []);
+                        let subCat = resolve.data[i].subitems[j].categories;
+                        if (typeof subCat === 'string') {
+                            subCat = (subCat && subCat !== "[null]" && subCat !== "null") ? JSON.parse(subCat) : [];
+                        }
+                        if (Array.isArray(subCat)) {
+                            subCat = subCat.filter(c => c && c._id != null);
+                        } else {
+                            subCat = [];
+                        }
+                        resolve.data[i].subitems[j].categories = subCat;
                         delete resolve.data[i].subitems[j].document; // Remove heavy document field from subitems
                     }
                     subitem_count += resolve.data[i].subitems.length;
