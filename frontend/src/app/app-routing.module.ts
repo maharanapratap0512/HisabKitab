@@ -50,6 +50,7 @@ import { listsResolver } from './resolver/lists.resolver';
 import { NetdropUiComponent } from './modules/netdrop/components/netdrop-ui/netdrop-ui.component';
 import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.component';
 import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
+import { UniversalReportComponent } from './reports/universal-report/universal-report.component';
 
 const routes: Routes = [
    {
@@ -104,8 +105,10 @@ const routes: Routes = [
                { path: "report-kh-itemwise", component: ReportKhItemwiseComponent },
                { path: "report-kh-ajsaar", component: ReportKhAjsaarComponent },
                { path: "report-item-ledger", component: ReportItemLedgerComponent },
+               { path: "report-universal", component: UniversalReportComponent },
             ]
          },
+         { path: "report-universal", component: UniversalReportComponent },
 
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },

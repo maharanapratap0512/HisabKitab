@@ -290,8 +290,27 @@ export class JawakNewComponent implements OnInit {
 
   yearClick(year: any) {
     this.filterBody.year = year;
-    this.pageNo = 0;
+    this.onMonthRangeChange();
+    this.pageNo = 1;
     this.getFilteredData();
+  }
+
+  onMonthRangeChange() {
+    let year = this.filterBody.year;
+    let mFrom = this.filterBody.month_from;
+    let mTo = this.filterBody.month_to || mFrom;
+
+    if (mFrom) {
+      let yr = year || new Date().getFullYear();
+      let startDate = `${yr}-${mFrom.toString().padStart(2, '0')}-01`;
+      let lastDay = new Date(yr, mTo, 0).getDate();
+      let endDate = `${yr}-${mTo.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
+      this.filterBody.date_from = startDate;
+      this.filterBody.date_to = endDate;
+    } else {
+      this.filterBody.date_from = null;
+      this.filterBody.date_to = null;
+    }
   }
 
   clearFilter() {

@@ -116,6 +116,7 @@ import { ItemDropdownComponent } from './SHARED/item-dropdown/item-dropdown.comp
 import { AawakRefDropdownComponent } from './SHARED/aawak-ref-dropdown/aawak-ref-dropdown.component';
 import { AawakRefComponent } from './SHARED/aawak-ref/aawak-ref.component';
 import { YearlyRatesComponent } from './SHARED/yearly-rates/yearly-rates.component';
+import { VirtualInfiniteScrollDirective } from './SHARED/virtual-infinite-scroll.directive';
 
 
 import { VariantComponent }               from './CHILD_TABLES/variant/variant.component';
@@ -128,6 +129,7 @@ import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.comp
 import { DbGenerateComponent } from './department/db-generate/db-generate.component';
 import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
 import { ReportItemLedgerComponent } from './reports/report-item-ledger/report-item-ledger.component';
+import { UniversalReportComponent } from './reports/universal-report/universal-report.component';
 
 
 // import { FilterPipeModule } from 'ngx-filter-pipe';
@@ -227,6 +229,7 @@ import { ReportItemLedgerComponent } from './reports/report-item-ledger/report-i
     ChangelogPanelComponent,
     ContextSettingsPanelComponent,
     SmartFocusDirective,
+    VirtualInfiniteScrollDirective,
     JoinObjPipe,
     VariantComponent,
     VariantGeneratorEntryComponent,
@@ -242,7 +245,7 @@ import { ReportItemLedgerComponent } from './reports/report-item-ledger/report-i
     DbGenerateComponent,
     P2pFeedbackComponent,
     ReportItemLedgerComponent,
-
+    UniversalReportComponent
   ],
 
   imports: [

@@ -254,6 +254,7 @@ export class HeaderComponent implements AfterViewInit {
         children: [
           { title: 'Bachat', link: 'bachat_new', visible: true },
           { title: 'All Time Bachat', link: 'bachat', visible: this.auth.webUser.settings?.bachat?.visible },
+          { title: 'Generate Reports', link: 'report-universal', visible: true },
           { title: 'Item Ledger', link: 'report/report-item-ledger', visible: true },
           { title: 'Aawak Jawak Check', link: 'report/report-aj-check', visible: this.auth.webUser.settings?.report?.report_aj_check },
           { title: 'Aawak Type Saar', link: 'report/report-at', visible: this.auth.webUser.settings?.report?.report_at },

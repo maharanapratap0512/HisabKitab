@@ -1,10 +1,43 @@
 [
     {
+        "version": "37.1",
+        "date": "20-09-2026",
+        "summary": "Universal Stock Matrix Report & Master Ledger Exports",
+        "summary_hin": "यूनिवर्सल स्टॉक मैट्रिक्स रिपोर्ट एवं मास्टर लेजर एक्सपोर्ट सुविधा",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "रिपोर्ट्स",
+                "title": "Universal Monthly & Yearly Stock Matrix Report",
+                "title_hin": "यूनिवर्सल मंथली एवं ईयरली स्टॉक मैट्रिक्स रिपोर्ट",
+                "desc": "Introducing the all-new Universal Matrix Report to analyze stock breakdown by Aawak Source, Aawak Type, Jawak Type, Usage List, or Condition across single or multi-month ranges. Features dimension-wise Opening Balance (Pichala Bachat), alternate month color shading, 0 stock toggle, Hindi text matra protection, real-time PDF progress indicator, and styled color Excel export.",
+                "desc_hin": "नई 'यूनिवर्सल स्टॉक मैट्रिक्स रिपोर्ट' सुविधा प्रस्तुत है, जिससे आवक स्त्रोत, आवक प्रकार, जावक प्रकार, उपयोग सूची अथवा कंडीशन अनुसार 12 महीनों तक की बचत रिपोर्ट देखें। इसमें पिछला बचत (Pichala Bachat) का विवरण, वैकल्पिक माह का सुंदर कलर शेडिंग, 0 बचत छुपाने का फ़िल्टर, हिंदी नाम सुरक्षा, लाइव पीडीएफ प्रोग्रेस इंडिकेटर एवं सुंदर कलरफुल एक्सेल एक्सपोर्ट की पूरी सुविधा है।"
+            },
+            {
+                "type": "feature",
+                "module": "आइटम लेजर",
+                "title": "Item Ledger Master Single Heavy Export (Excel & PDF)",
+                "title_hin": "आइटम लेजर मास्टर सिंगल हैवी फाइल एक्सपोर्ट (एक्सेल एवं पीडीएफ)",
+                "desc": "Added 3-in-1 export dropdowns for Excel and PDF: Current View, All Categories ZIP, and Single Heavy Master File. Excel Single Heavy File organizes Master Saar Index followed by all Category Index sheets with clickable internal sheet hyperlinks. PDF Single Heavy File features a single unified Table of Contents organized category-wise with direct topic jump links.",
+                "desc_hin": "आइटम लेजर में एक्सेल एवं पीडीएफ एक्सपोर्ट हेतु 3-इन-1 ड्रॉपडाउन विकल्प उपलब्ध हैं। एक्सेल सिंगल हैवी फाइल में मास्टर सार के तुरंत बाद सभी श्रेणियों की अनुक्रमणिका (Index) शीट्स तथा फिर आइटम शीट्स क्लिक योग्य हाइपरलिंक के साथ सहेजी जाती हैं। पीडीएफ में पूरी रिपोर्ट के प्रारंभ में एक ही एकीकृत अनुक्रमणिका श्रेणी अनुसार सुव्यवस्थित रहती है।"
+            },
+            {
+                "type": "feature",
+                "module": "जावक",
+                "title": "Jawak Date Column Header Filter Popover",
+                "title_hin": "जावक तालिका की दिनांक कॉलम में बहुमुखी फ़िल्टर सुविधा",
+                "desc": "Added a quick date popover filter directly on the Date column header in Jawak, allowing users to easily filter entries by Date Range, Year, and Month Range.",
+                "desc_hin": "जावक तालिका के दिनांक हेडर पर क्विक फ़िल्टर पॉपओवर जोड़ा गया है, जिससे दिनांक सीमा, वर्ष एवं माह के आधार पर तुरंत जावक प्रविष्टियाँ फ़िल्टर की जा सकती हैं।"
+            }
+        ]
+    },
+    {
         "version": "37.0",
         "date": "16-09-2026",
         "summary": "Yearly Rates Management & Smart Header Filters",
         "summary_hin": "वार्षिक दर प्रबंधन एवं स्मार्ट हेडर फ़िल्टर सुविधा",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

@@ -1,0 +1,256 @@
+.universal-matrix-container {
+  max-height: calc(100vh - 210px);
+  overflow: auto;
+  position: relative;
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: 6px;
+}
+
+.universal-matrix-table {
+  font-size: 0.81rem;
+  white-space: nowrap;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+
+  /* ── 2-Level Sticky Header Rows ── */
+  thead {
+    tr:nth-child(1) th {
+      position: sticky;
+      top: 0;
+      z-index: 12;
+      border-bottom: 1px solid var(--bs-border-color, rgba(128, 128, 128, 0.2));
+    }
+
+    tr:nth-child(2) th {
+      position: sticky;
+      top: 32px;
+      z-index: 12;
+      border-bottom: 2px solid var(--bs-border-color, rgba(128, 128, 128, 0.4));
+    }
+
+    /* Fixed Left Column Headers (Rowspan 2) */
+    th.sticky-col {
+      top: 0 !important;
+      z-index: 20 !important;
+    }
+  }
+
+  /* ── Fixed Left Columns (Horizontal Sticky) ── */
+  tbody td.sticky-col {
+    position: sticky;
+    z-index: 8;
+
+    :host-context(body[data-bs-theme="light"]) &,
+    :host-context(body:not([data-bs-theme="dark"])) & {
+      background-color: #fff !important;
+    }
+
+    :host-context(body[data-bs-theme="dark"]) &,
+    :host-context(body.dark-mode) & {
+      background-color: #252525 !important;
+    }
+  }
+
+  /* Devanagari Hindi Text Protection (Prevents Top Matra Clipping) */
+  .hindi-cell-text {
+    display: block;
+    padding-top: 3px;
+    padding-bottom: 2px;
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+  }
+
+  /* Pixel-Accurate Offsets for Fixed Left Columns */
+  .col-no {
+    left: 0;
+    min-width: 45px;
+    max-width: 45px;
+    width: 45px;
+    text-align: center;
+  }
+
+  .col-mm {
+    left: 45px;
+    min-width: 130px;
+    max-width: 130px;
+    width: 130px;
+  }
+
+  .col-cat {
+    left: 175px;
+    min-width: 120px;
+    max-width: 120px;
+    width: 120px;
+  }
+
+  .col-item {
+    left: 295px;
+    min-width: 160px;
+    max-width: 160px;
+    width: 160px;
+  }
+
+  .col-subitem {
+    left: 455px;
+    min-width: 130px;
+    max-width: 130px;
+    width: 130px;
+  }
+
+  .col-unit {
+    left: 585px;
+    min-width: 60px;
+    max-width: 60px;
+    width: 60px;
+    text-align: center;
+  }
+
+  .col-past {
+    left: 645px;
+    min-width: 95px;
+    max-width: 95px;
+    width: 95px;
+    border-right: 3px solid var(--bs-border-color, rgba(128, 128, 128, 0.4)) !important;
+    text-align: right;
+  }
+
+  .col-total-sticky {
+    left: 0;
+    min-width: 645px;
+    width: 645px;
+    z-index: 10;
+  }
+
+  /* Floating Back to Top Button */
+  .back-to-top-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 35px;
+    z-index: 9999;
+    border-radius: 50px !important;
+    padding: 8px 18px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transition: all 0.25s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  /* ── Metric Sub-Columns ── */
+  .metric-awk {
+    min-width: 62px;
+    width: 62px;
+  }
+
+  .metric-jwk {
+    min-width: 62px;
+    width: 62px;
+  }
+
+  .metric-bcht {
+    min-width: 68px;
+    width: 68px;
+    border-right: 1px solid var(--bs-border-color, rgba(128, 128, 128, 0.2));
+  }
+
+  .month-header-cell {
+    border-right: 2px solid rgba(59, 130, 246, 0.5) !important;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  .month-subtotal-header {
+    border-right: 2px solid rgba(59, 130, 246, 0.5) !important;
+  }
+
+  .grand-header-cell {
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-left: 3px solid rgba(42, 181, 125, 0.6) !important;
+  }
+
+  .grand-subtotal-header {
+    border-left: 3px solid rgba(42, 181, 125, 0.6) !important;
+  }
+
+  .dim-header-cell {
+    font-size: 0.8rem;
+    border-right: 1px solid var(--bs-border-color, rgba(128, 128, 128, 0.2));
+  }
+
+  /* Alternate Month Column Background Shading & Boundary Lines */
+  .month-bg-alt {
+    background-color: rgba(59, 130, 246, 0.06) !important;
+
+    :host-context(body[data-bs-theme="dark"]) &,
+    :host-context(body.dark-mode) & {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+  }
+
+  .month-border-end {
+    border-right: 2px solid rgba(59, 130, 246, 0.4) !important;
+
+    :host-context(body[data-bs-theme="dark"]) &,
+    :host-context(body.dark-mode) & {
+      border-right: 2px solid rgba(255, 255, 255, 0.3) !important;
+    }
+  }
+
+  /* ── Sticky Footer ── */
+  tfoot {
+    position: sticky;
+    bottom: 0;
+    z-index: 15;
+
+    tr td {
+      position: sticky;
+      bottom: 0;
+      border-top: 2px solid var(--bs-border-color, rgba(128, 128, 128, 0.5)) !important;
+      font-weight: bold;
+
+      :host-context(body[data-bs-theme="light"]) &,
+      :host-context(body:not([data-bs-theme="dark"])) & {
+        background-color: #fff !important;
+      }
+
+      :host-context(body[data-bs-theme="dark"]) &,
+      :host-context(body.dark-mode) & {
+        background-color: #252525 !important;
+      }
+    }
+
+    td.sticky-col {
+      z-index: 22 !important;
+    }
+  }
+}
+
+/* Printable PDF adjustments */
+@media print {
+
+  .card-header,
+  select,
+  button,
+  input {
+    display: none !important;
+  }
+
+  .universal-matrix-container {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .sticky-col {
+    position: static !important;
+  }
+}

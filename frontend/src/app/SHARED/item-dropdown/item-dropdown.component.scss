@@ -3,12 +3,18 @@
         background-color: transparent !important;
         color: inherit !important;
         border-color: rgba(128, 128, 128, 0.2) !important;
+        max-height: 95px !important;
+        overflow-y: auto !important;
+    }
+
+    ::ng-deep .ng-value-container {
+        max-height: 90px !important;
+        overflow-y: auto !important;
     }
 
     &.custom-sm {
         ::ng-deep .ng-select-container {
             min-height: 31px;
-            height: 31px;
             font-size: 13px;
         }
     }

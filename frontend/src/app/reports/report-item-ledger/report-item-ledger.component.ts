@@ -263,6 +263,352 @@ export class ReportItemLedgerComponent implements OnInit {
     FileSaver.saveAs(data, title + '.xlsx');
   }
 
+  async fetchAllCategoriesData(): Promise<Array<{ categoryObj: any, reports: any[] }>> {
+    if (!this.filterBody.from || !this.filterBody.to || !this.filterBody.mm_id) {
+      this.toastr.error('Please select From Date, To Date, and MM for Export.');
+      return [];
+    }
+
+    let validCategories = this.categories.filter((c: any) => this.getCategoryItems(c._id).length > 0);
+    if (validCategories.length === 0) {
+      this.toastr.warning('No items selected across categories.');
+      return [];
+    }
+
+    let allCategoryGroups: Array<{ categoryObj: any, reports: any[] }> = [];
+
+    for (let i = 0; i < validCategories.length; i++) {
+      let catObj = validCategories[i];
+      let items = this.getCategoryItems(catObj._id);
+      let catName = catObj.category_hin || catObj.category_eng || 'Category';
+
+      this.isLoader = true;
+      this.loadingStatus = `Fetching ledger records for ${catName}... (${i + 1}/${validCategories.length})`;
+
+      let itemSubitemParsed = items.map((idStr: string) => {
+        let parts = idStr.split(':');
+        let i_id = Number(parts[0]);
+        let s_id = parts[1] ? Number(parts[1]) : null;
+        let itemObj = this.items.find((item: any) => item._id === i_id);
+        let subitem_hin = '';
+        let subitem_eng = '';
+        if (itemObj && s_id) {
+          let subObj = itemObj.subitems.find((s: any) => s._id === s_id);
+          if (subObj) {
+            subitem_hin = subObj.subitem_hin;
+            subitem_eng = subObj.subitem_eng;
+          }
+        }
+        return {
+          item_id: i_id, subitem_id: s_id,
+          item_hin: itemObj?.item_hin || '', item_eng: itemObj?.item_eng || '',
+          subitem_hin: subitem_hin, subitem_eng: subitem_eng
+        };
+      });
+
+      let body = { ...this.filterBody, item_subitem_ids: itemSubitemParsed, category_name: catName };
+      try {
+        let res: any = await this.http.put(this.api.getUrl('REPORT_ITEM_LEDGER') + this.auth.webUser.dept_id, body).toPromise();
+        if (res && res.success) {
+          let validReports = res.data.filter((r: any) =>
+            r.overview.total_aawak !== 0 || r.overview.total_jawak !== 0 || r.overview.current_bachat !== 0 || r.overview.past_bachat !== 0
+          );
+          if (validReports.length > 0) {
+            allCategoryGroups.push({
+              categoryObj: catObj,
+              reports: validReports
+            });
+          }
+        }
+      } catch (err) {
+        console.error(`Error fetching category ${catName}`, err);
+      }
+    }
+
+    return allCategoryGroups;
+  }
+
+  async exportSingleHeavyExcel() {
+    let allGroups = await this.fetchAllCategoriesData();
+    if (!allGroups || allGroups.length === 0) {
+      this.isLoader = false;
+      this.loadingStatus = 'Loading...';
+      this.toastr.info('No activity found to export.');
+      return;
+    }
+
+    this.isLoader = true;
+    this.loadingStatus = 'Building Master Single Heavy Excel Workbook...';
+
+    const workbook = new Workbook();
+    let mmObj = this.mms.find((m: any) => m._id === this.filterBody.mm_id);
+    let mmName = mmObj ? mmObj.mm_hin : 'All MMs';
+    const periodStr = `${this.filterBody.from.name_hin} से ${this.filterBody.to.name_hin}`;
+
+    // Pre-calculate unique sheet names for all categories to construct hyperlinks
+    const usedSheetNames = new Set<string>();
+    usedSheetNames.add('Master Category Saar');
+
+    let categorySheetMap: Array<{ g: any, catName: string, catSheetName: string }> = [];
+
+    for (let g of allGroups) {
+      let catName = g.categoryObj.category_hin || g.categoryObj.category_eng || 'Cat';
+      let safeCatSheetName = ('Index - ' + catName).substring(0, 30).replace(/[\\*?:\[\]/]/g, '');
+
+      let catSheetIdx = 1;
+      let finalCatSheetName = safeCatSheetName;
+      while (usedSheetNames.has(finalCatSheetName)) {
+        finalCatSheetName = safeCatSheetName.substring(0, 26) + `_${catSheetIdx++}`;
+      }
+      usedSheetNames.add(finalCatSheetName);
+
+      categorySheetMap.push({
+        g: g,
+        catName: catName,
+        catSheetName: finalCatSheetName
+      });
+    }
+
+    // --- SHEET 1: Master Category Saar Index ---
+    const masterIndexSheet = workbook.addWorksheet('Master Category Saar');
+    masterIndexSheet.mergeCells('A1:G1');
+    let titleCell = masterIndexSheet.getCell('A1');
+    titleCell.value = `${periodStr} तक, ${mmName} का संपूर्ण श्रेणीवार सार (Master Category Summary)`;
+    titleCell.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F4E79' } };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    masterIndexSheet.getRow(1).height = 32;
+
+    const masterHeaders = ['No.', 'Category Name (श्रेणी)', 'Total Items (वस्तुएं)', 'Past Bachat (पिछला)', 'Total Aawak (आवक)', 'Total Jawak (जावक)', 'Current Bachat (वर्तमान)'];
+    masterIndexSheet.getRow(3).values = masterHeaders;
+    masterIndexSheet.getRow(3).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    masterIndexSheet.getRow(3).eachCell(c => {
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2C3E50' } };
+      c.alignment = { horizontal: 'center', vertical: 'middle' };
+      c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+    });
+
+    let masterRowIdx = 4;
+    let grandTotals = { items: 0, past: 0, aawak: 0, jawak: 0, bachat: 0 };
+
+    for (let i = 0; i < categorySheetMap.length; i++) {
+      let itemMap = categorySheetMap[i];
+      let g = itemMap.g;
+      let catName = itemMap.catName;
+      let catSheetName = itemMap.catSheetName;
+
+      let catPast = g.reports.reduce((s: number, r: any) => s + Number(r.overview.past_bachat || 0), 0);
+      let catAwk = g.reports.reduce((s: number, r: any) => s + Number(r.overview.total_aawak || 0), 0);
+      let catJwk = g.reports.reduce((s: number, r: any) => s + Number(r.overview.total_jawak || 0), 0);
+      let catBcht = g.reports.reduce((s: number, r: any) => s + Number(r.overview.current_bachat || 0), 0);
+
+      grandTotals.items += g.reports.length;
+      grandTotals.past += catPast;
+      grandTotals.aawak += catAwk;
+      grandTotals.jawak += catJwk;
+      grandTotals.bachat += catBcht;
+
+      let row = masterIndexSheet.getRow(masterRowIdx);
+      row.values = [
+        i + 1,
+        '',
+        g.reports.length,
+        catPast.toFixed(2),
+        catAwk.toFixed(2),
+        catJwk.toFixed(2),
+        catBcht.toFixed(2)
+      ];
+
+      let catCell = masterIndexSheet.getCell(`B${masterRowIdx}`);
+      catCell.value = { text: catName, hyperlink: `#'${catSheetName}'!A1` };
+      catCell.font = { color: { argb: 'FF1F4E79' }, underline: true, bold: true };
+
+      row.eachCell((c, cIdx) => {
+        c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        c.alignment = { vertical: 'middle', horizontal: cIdx <= 2 ? (cIdx === 1 ? 'center' : 'left') : 'right' };
+      });
+      masterRowIdx++;
+    }
+
+    // Master Summary Total Row
+    masterIndexSheet.getRow(masterRowIdx).values = [
+      '*',
+      'Grand Summary Total',
+      grandTotals.items,
+      grandTotals.past.toFixed(2),
+      grandTotals.aawak.toFixed(2),
+      grandTotals.jawak.toFixed(2),
+      grandTotals.bachat.toFixed(2)
+    ];
+    masterIndexSheet.getRow(masterRowIdx).font = { bold: true };
+    masterIndexSheet.getRow(masterRowIdx).eachCell((c, cIdx) => {
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
+      c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
+      c.alignment = { vertical: 'middle', horizontal: cIdx <= 2 ? (cIdx === 1 ? 'center' : 'left') : 'right' };
+    });
+
+    masterIndexSheet.columns.forEach((col, idx) => {
+      col.width = idx === 0 ? 8 : (idx === 1 ? 32 : 18);
+    });
+
+    // --- SHEETS 2+: Category Index Sheets & Item Detailed Sheets ---
+    for (let itemMap of categorySheetMap) {
+      let g = itemMap.g;
+      let catName = itemMap.catName;
+      let finalCatSheetName = itemMap.catSheetName;
+
+      const catIndexSheet = workbook.addWorksheet(finalCatSheetName);
+      catIndexSheet.mergeCells('A1:E1');
+      let catTitleCell = catIndexSheet.getCell('A1');
+      catTitleCell.value = `${periodStr} तक, ${mmName} के ${catName} का सार`;
+      catTitleCell.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+      catTitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
+      catTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      catIndexSheet.getRow(1).height = 30;
+
+      catIndexSheet.getCell('F1').value = { text: '⬅️ Master Index', hyperlink: "#'Master Category Saar'!A1" };
+      catIndexSheet.getCell('F1').font = { bold: true, color: { argb: 'FFFFFFFF' }, underline: true };
+      catIndexSheet.getCell('F1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
+      catIndexSheet.getCell('F1').alignment = { horizontal: 'center', vertical: 'middle' };
+
+      const catHeaders = ['No.', 'Item Name (वस्तु)', 'Past Bachat (पिछला)', 'Total Aawak (आवक)', 'Total Jawak (जावक)', 'Current Bachat (वर्तमान)'];
+      catIndexSheet.getRow(3).values = catHeaders;
+      catIndexSheet.getRow(3).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      catIndexSheet.getRow(3).eachCell(c => {
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5D6D7E' } };
+        c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+      });
+
+      let cRow = 4;
+      let catPastTotal = 0, catAwkTotal = 0, catJwkTotal = 0, catBchtTotal = 0;
+      let itemSheetNames: string[] = [];
+
+      for (let i = 0; i < g.reports.length; i++) {
+        let r = g.reports[i];
+        let itemName = r.item_hin + (r.subitem_hin ? ' (' + r.subitem_hin + ')' : '');
+
+        let baseSheetName = itemName.substring(0, 30).replace(/[\\*?:\[\]/]/g, '');
+        let itemSheetIdx = 1;
+        let finalItemSheetName = baseSheetName || 'Item';
+        while (usedSheetNames.has(finalItemSheetName)) {
+          finalItemSheetName = baseSheetName.substring(0, 26) + `_${itemSheetIdx++}`;
+        }
+        usedSheetNames.add(finalItemSheetName);
+        itemSheetNames.push(finalItemSheetName);
+
+        let pVal = Number(r.overview.past_bachat || 0);
+        let aVal = Number(r.overview.total_aawak || 0);
+        let jVal = Number(r.overview.total_jawak || 0);
+        let bVal = Number(r.overview.current_bachat || 0);
+
+        catPastTotal += pVal;
+        catAwkTotal += aVal;
+        catJwkTotal += jVal;
+        catBchtTotal += bVal;
+
+        let row = catIndexSheet.getRow(cRow);
+        row.values = [
+          i + 1,
+          '',
+          `${pVal.toFixed(2)} ${r.unit_short}`,
+          `${aVal.toFixed(2)} ${r.unit_short}`,
+          `${jVal.toFixed(2)} ${r.unit_short}`,
+          `${bVal.toFixed(2)} ${r.unit_short}`
+        ];
+
+        let itemCell = catIndexSheet.getCell(`B${cRow}`);
+        itemCell.value = { text: itemName, hyperlink: `#'${finalItemSheetName}'!A1` };
+        itemCell.font = { color: { argb: 'FF2980B9' }, underline: true, bold: true };
+
+        row.eachCell(c => c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } });
+        cRow++;
+      }
+
+      // Category Summary Total Row
+      catIndexSheet.getRow(cRow).values = [
+        '*',
+        `${catName} Total`,
+        catPastTotal.toFixed(2),
+        catAwkTotal.toFixed(2),
+        catJwkTotal.toFixed(2),
+        catBchtTotal.toFixed(2)
+      ];
+      catIndexSheet.getRow(cRow).font = { bold: true };
+      catIndexSheet.getRow(cRow).eachCell((c, cIdx) => {
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
+        c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
+        c.alignment = { vertical: 'middle', horizontal: cIdx <= 2 ? (cIdx === 1 ? 'center' : 'left') : 'right' };
+      });
+
+      catIndexSheet.columns.forEach((col, i) => {
+        col.width = i === 0 ? 8 : (i === 1 ? 35 : 20);
+      });
+
+      // Save itemSheetNames on itemMap so item sheets can be generated after all category index sheets
+      (itemMap as any).itemSheetNames = itemSheetNames;
+    }
+
+    // --- SHEETS (K+1)+: Populate ALL Item Detailed Sheets after all index sheets ---
+    for (let itemMap of categorySheetMap) {
+      let g = itemMap.g;
+      let finalCatSheetName = itemMap.catSheetName;
+      let itemSheetNames = (itemMap as any).itemSheetNames;
+      this.populateItemSheetsForWorkbook(workbook, g.reports, mmName, usedSheetNames, itemSheetNames, finalCatSheetName);
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const fileName = `Item_Ledger_Single_Heavy_Master_${Date.now()}.xlsx`;
+    FileSaver.saveAs(new Blob([buffer]), fileName);
+
+    this.isLoader = false;
+    this.loadingStatus = 'Loading...';
+    this.toastr.success('Single Heavy Master Excel exported successfully!');
+  }
+
+  async exportSingleHeavyPDF() {
+    let allGroups = await this.fetchAllCategoriesData();
+    if (!allGroups || allGroups.length === 0) {
+      this.isLoader = false;
+      this.loadingStatus = 'Loading...';
+      this.toastr.info('No activity found to export.');
+      return;
+    }
+
+    this.isLoader = true;
+    this.loadingStatus = 'Generating Single Heavy Master PDF Document...';
+
+    let mmObj = this.mms.find((m: any) => m._id === this.filterBody.mm_id);
+    let mmName = mmObj ? mmObj.mm_hin : 'All MMs';
+
+    // Build categories payload for backend single heavy PDF generator
+    let categoriesPayload = allGroups.map(g => ({
+      category_id: g.categoryObj._id,
+      category_hin: g.categoryObj.category_hin || g.categoryObj.category_eng || '',
+      category_eng: g.categoryObj.category_eng || '',
+      reports: g.reports
+    }));
+
+    let body = {
+      ...this.filterBody,
+      isHeavySinglePdf: true,
+      categoriesPayload: categoriesPayload,
+      from_name_hin: this.filterBody.from.name_hin,
+      to_name_hin: this.filterBody.to.name_hin,
+      mmName: mmName
+    };
+
+    let title = `Item_Ledger_Single_Heavy_Master_${Date.now()}`;
+
+    this.downloadPdfBlobAsync(body, title, (statusMsg) => {
+      this.loadingStatus = `Single Heavy PDF: ${statusMsg}`;
+    }).then(({ blob, title }) => {
+      FileSaver.saveAs(blob, title + '.pdf');
+      this.toastr.success('Single Heavy Master PDF downloaded successfully!');
+    }).catch(err => {
+      console.error(err);
+    });
+  }
+
   async exportBulkExcel() {
     if (!this.filterBody.from || !this.filterBody.to || !this.filterBody.mm_id) {
       this.toastr.error('Please select From Date, To Date, and MM for Bulk Export.');
@@ -379,10 +725,44 @@ export class ReportItemLedgerComponent implements OnInit {
     });
 
     // Process each item to create a separate sheet
-    for (let report of reportsToExport) {
+    const usedSheetNames = new Set<string>(['Index']);
+    this.populateItemSheetsForWorkbook(workbook, reportsToExport, mmName, usedSheetNames);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    let title = 'Item_Ledger_' + this.filterBody.from.name.replace(' ', '') + '_to_' + this.filterBody.to.name.replace(' ', '');
+    if (categoryObj) {
+      let catName = categoryObj.category_eng || categoryObj.category_hin || '';
+      if (catName) title += '_' + catName.replace(/ /g, '_');
+    }
+    return { buffer: buffer, title: title };
+  }
+
+  populateItemSheetsForWorkbook(
+    workbook: Workbook,
+    reportsToExport: any[],
+    mmName: string,
+    usedSheetNames: Set<string>,
+    precalculatedSheetNames?: string[],
+    backCatSheetName?: string
+  ): void {
+    for (let idx = 0; idx < reportsToExport.length; idx++) {
+      let report = reportsToExport[idx];
       let itemName = report.item_hin + (report.subitem_hin ? ' (' + report.subitem_hin + ')' : '');
-      let safeSheetName = itemName.substring(0, 30).replace(/[\\*?:\[\]/]/g, '');
-      const worksheet = workbook.addWorksheet(safeSheetName);
+
+      let finalSheetName = '';
+      if (precalculatedSheetNames && precalculatedSheetNames[idx]) {
+        finalSheetName = precalculatedSheetNames[idx];
+      } else {
+        let baseSheetName = itemName.substring(0, 30).replace(/[\\*?:\[\]/]/g, '');
+        let itemSheetIdx = 1;
+        finalSheetName = baseSheetName || 'Item';
+        while (usedSheetNames.has(finalSheetName)) {
+          finalSheetName = baseSheetName.substring(0, 26) + `_${itemSheetIdx++}`;
+        }
+        usedSheetNames.add(finalSheetName);
+      }
+
+      const worksheet = workbook.addWorksheet(finalSheetName);
 
       // Big Heading
       worksheet.mergeCells('A1:I1');
@@ -392,6 +772,16 @@ export class ReportItemLedgerComponent implements OnInit {
       titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4E73DF' } };
       titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
       worksheet.getRow(1).height = 30;
+
+      // Link back to Category Index sheet (or Master Index)
+      if (backCatSheetName) {
+        worksheet.mergeCells('J1:K1');
+        let backCell = worksheet.getCell('J1');
+        backCell.value = { text: '⬅️ Category Index', hyperlink: `#'${backCatSheetName}'!A1` };
+        backCell.font = { bold: true, color: { argb: 'FFFFFFFF' }, underline: true };
+        backCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4E73DF' } };
+        backCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      }
 
       // Summary View (Software Style: 4 Boxes)
       worksheet.mergeCells('A3:B3');
@@ -532,14 +922,6 @@ export class ReportItemLedgerComponent implements OnInit {
         col.width = i === 0 ? 15 : (i === 10 ? 40 : 18);
       });
     }
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    let title = 'Item_Ledger_' + this.filterBody.from.name.replace(' ', '') + '_to_' + this.filterBody.to.name.replace(' ', '');
-    if (categoryObj) {
-      let catName = categoryObj.category_eng || categoryObj.category_hin || '';
-      if (catName) title += '_' + catName.replace(/ /g, '_');
-    }
-    return { buffer: buffer, title: title };
   }
 
   exportCurrentPDF() {

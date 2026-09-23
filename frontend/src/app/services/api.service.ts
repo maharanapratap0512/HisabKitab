@@ -91,8 +91,8 @@ export class ApiService {
     IMPORTHISTORY: base_url + 'import_history/',
     VEHICLE: base_url + 'vehicle/',
     COMMENT: base_url + 'comment/',
-    INTEGRITY: base_url + 'integrity-checkup/'
-
+    INTEGRITY: base_url + 'integrity-checkup/',
+    UNIVERSAL_REPORT: base_url + 'universal-report/'
   };
 
   getUrl(key: string): string {

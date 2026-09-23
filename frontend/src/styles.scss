@@ -579,10 +579,14 @@ span.search-icon {
     .ng-select-container {
       height: auto !important;
       min-height: 25px !important;
+      max-height: 95px !important;
+      overflow-y: auto !important;
 
       .ng-value-container {
         padding-top: 1px !important;
         padding-bottom: 1px !important;
+        max-height: 90px !important;
+        overflow-y: auto !important;
 
         .ng-value {
           margin: 1px !important;

@@ -34,66 +34,67 @@
         right: 0;
     }
 
+    /* ── Light Mode Base Styling (Default) ── */
     .version-card {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border-color: rgba(255, 255, 255, 0.15) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 
         .version-number {
             font-family: inherit;
-            color: #ffffff !important;
+            color: #0f172a;
         }
 
         .version-headline {
-            color: #818cf8 !important;
+            color: #4338ca;
         }
 
         .item-bullet {
-            color: #818cf8 !important;
+            color: #4338ca;
         }
 
-        .bullet-improved { color: #10b981 !important; }
-        .bullet-feature  { color: #06b6d4 !important; }
-        .bullet-fix      { color: #f43f5e !important; }
-        .bullet-warning  { color: #f59e0b !important; }
+        .bullet-improved { color: #059669; }
+        .bullet-feature  { color: #0284c7; }
+        .bullet-fix      { color: #e11d48; }
+        .bullet-warning  { color: #d97706; }
 
         .cat-improved {
-            background-color: rgba(16, 185, 129, 0.18) !important;
-            color: #34d399 !important;
-            border: 1px solid rgba(16, 185, 129, 0.35) !important;
+            background-color: #d1fae5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
         }
         .cat-feature {
-            background-color: rgba(6, 182, 212, 0.18) !important;
-            color: #38bdf8 !important;
-            border: 1px solid rgba(6, 182, 212, 0.35) !important;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
         }
         .cat-fix {
-            background-color: rgba(244, 63, 94, 0.18) !important;
-            color: #fb7185 !important;
-            border: 1px solid rgba(244, 63, 94, 0.35) !important;
+            background-color: #ffe4e6;
+            color: #be123c;
+            border: 1px solid #fecdd3;
         }
         .cat-warning {
-            background-color: rgba(245, 158, 11, 0.18) !important;
-            color: #fbbf24 !important;
-            border: 1px solid rgba(245, 158, 11, 0.35) !important;
+            background-color: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
         }
 
         .module-tag {
-            background-color: rgba(129, 140, 248, 0.15) !important;
-            color: #93c5fd !important;
-            border: 1px solid rgba(129, 140, 248, 0.25) !important;
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
             display: inline-block;
         }
 
         .item-title {
-            color: #ffffff !important;
-            font-weight: 700 !important;
+            color: #0f172a;
+            font-weight: 700;
         }
 
         .item-desc {
-            color: rgba(255, 255, 255, 0.85) !important;
-            font-size: 0.95rem !important;
-            line-height: 1.55 !important;
+            color: #334155;
+            font-size: 0.95rem;
+            line-height: 1.55;
         }
     }
 
@@ -106,65 +107,6 @@
 
         &:hover img {
             transform: scale(1.02);
-        }
-    }
-}
-
-/* Light Mode High Contrast Override */
-[data-bs-theme="light"] {
-    .changelog-panel {
-        .version-card {
-            background-color: #ffffff !important;
-            border-color: #cbd5e1 !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-
-            .version-number {
-                color: #0f172a !important;
-            }
-
-            .version-headline {
-                color: #4338ca !important;
-            }
-
-            .bullet-improved { color: #059669 !important; }
-            .bullet-feature  { color: #0284c7 !important; }
-            .bullet-fix      { color: #e11d48 !important; }
-            .bullet-warning  { color: #d97706 !important; }
-
-            .cat-improved {
-                background-color: #d1fae5 !important;
-                color: #047857 !important;
-                border: 1px solid #a7f3d0 !important;
-            }
-            .cat-feature {
-                background-color: #e0f2fe !important;
-                color: #0369a1 !important;
-                border: 1px solid #bae6fd !important;
-            }
-            .cat-fix {
-                background-color: #ffe4e6 !important;
-                color: #be123c !important;
-                border: 1px solid #fecdd3 !important;
-            }
-            .cat-warning {
-                background-color: #fef3c7 !important;
-                color: #b45309 !important;
-                border: 1px solid #fde68a !important;
-            }
-
-            .module-tag {
-                background-color: #f1f5f9 !important;
-                color: #475569 !important;
-                border: 1px solid #cbd5e1 !important;
-            }
-
-            .item-title {
-                color: #0f172a !important;
-            }
-
-            .item-desc {
-                color: #334155 !important;
-            }
         }
     }
 }
@@ -203,7 +145,7 @@
     font-size: 0.7rem;
 }
 
-// Dark mode overrides
+/* ── Dark Mode Host-Context Overrides ── */
 :host-context([data-bs-theme="dark"]),
 :host-context(.dark-mode) {
     .changelog-panel {
@@ -233,6 +175,32 @@
 
             .item-bullet {
                 color: #818cf8 !important;
+            }
+
+            .bullet-improved { color: #10b981 !important; }
+            .bullet-feature  { color: #06b6d4 !important; }
+            .bullet-fix      { color: #f43f5e !important; }
+            .bullet-warning  { color: #f59e0b !important; }
+
+            .cat-improved {
+                background-color: rgba(16, 185, 129, 0.18) !important;
+                color: #34d399 !important;
+                border: 1px solid rgba(16, 185, 129, 0.35) !important;
+            }
+            .cat-feature {
+                background-color: rgba(6, 182, 212, 0.18) !important;
+                color: #38bdf8 !important;
+                border: 1px solid rgba(6, 182, 212, 0.35) !important;
+            }
+            .cat-fix {
+                background-color: rgba(244, 63, 94, 0.18) !important;
+                color: #fb7185 !important;
+                border: 1px solid rgba(244, 63, 94, 0.35) !important;
+            }
+            .cat-warning {
+                background-color: rgba(245, 158, 11, 0.18) !important;
+                color: #fbbf24 !important;
+                border: 1px solid rgba(245, 158, 11, 0.35) !important;
             }
 
             .module-tag {

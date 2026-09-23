@@ -85,6 +85,29 @@
       </span>
     </span>
   </ng-template>
+
+  <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+    <ng-container *ngIf="items.length > 0 && options.length > 0 && items.length === options.length">
+      <div class="ng-value font-weight-bold px-2 py-1 text-primary bg-primary-subtle rounded border border-primary-subtle me-1">
+        <span class="ng-value-label">✓ All Items Selected ({{ items.length }})</span>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="items.length > 0 && (options.length === 0 || items.length !== options.length)">
+      <div class="ng-value" *ngFor="let item of items | slice:0:3">
+        <span class="ng-value-icon left" (click)="clear(item)" aria-hidden="true">×</span>
+        <span class="selected-label px-1">
+          <span class="label-name">
+            <span *ngIf="$any(item).isSubitem" class="subitem-text">{{$any(item).subitem_hin}} </span>
+            <span class="item-text">{{$any(item).item_hin || $any(item).subitem_hin}}</span>
+          </span>
+        </span>
+      </div>
+      <div class="ng-value font-weight-bold px-2 py-1 text-primary bg-light rounded border me-1" *ngIf="items.length > 3">
+        <span class="ng-value-label">+ {{ items.length - 3 }} more selected</span>
+      </div>
+    </ng-container>
+  </ng-template>
 </ng-select>
 
 <!-- Self-contained Modal Container for Item, Subitem & Variant Creation -->

@@ -12,6 +12,15 @@ export class ReportsComponent implements OnInit {
 
   reports = [
     { 
+      id: 'report-universal', 
+      title: 'Universal Matrix Report (यूनिवर्सल रिपोर्ट)', 
+      path: '/report-universal', 
+      description: 'Dynamic Monthly and Yearly Matrix report pivoted by Source, Type, Usage, or Condition.', 
+      descriptionHi: 'आवक स्त्रोत, प्रकार, उपयोग सूची, या कंडीशन अनुसार मंथली व ईयरली मैट्रिक्स रिपोर्ट।',
+      howToUse: 'Select Breakdown field (Source/Type/Usage/Condition) and Date Range to generate matrix report.',
+      howToUseHi: 'मैट्रिक्स रिपोर्ट देखने के लिए ब्रेकडाउन फ़ील्ड और दिनांक अवधि चुनें।'
+    },
+    { 
       id: 'report-aj-check', 
       title: 'Aawak Jawak Check', 
       path: '/report-aj-check', 

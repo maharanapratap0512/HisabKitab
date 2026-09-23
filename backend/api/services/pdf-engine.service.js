@@ -53,9 +53,9 @@ async function getBrowser() {
     launchPromise = puppeteer.launch({
         executablePath: executablePath,
         headless: true,
-        timeout: 30000, // Revert to 30 seconds so it doesn't hang forever
-        pipe: false,    // Revert pipe, use default WebSocket
-        dumpio: true,   // IMPORTANT: Print Chrome's internal logs to the backend terminal!
+        timeout: 30000,
+        pipe: false,
+        dumpio: false, // Turn off dumpio to suppress Chrome internal GCM/DisplayLink debug logs
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -63,7 +63,27 @@ async function getBrowser() {
             '--disable-gpu',
             '--disable-software-rasterizer',
             '--no-first-run',
+            '--no-default-browser-check',
             '--disable-extensions',
+            '--disable-default-apps',
+            '--disable-component-update',
+            '--disable-sync',
+            '--disable-background-networking',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-breakpad',
+            '--disable-client-side-phishing-detection',
+            '--disable-domain-reliability',
+            '--disable-hang-monitor',
+            '--disable-ipc-flooding-protection',
+            '--disable-popup-blocking',
+            '--disable-prompt-on-repost',
+            '--disable-renderer-backgrounding',
+            '--disable-speech-api',
+            '--disable-translate',
+            '--metrics-recording-only',
+            '--mute-audio',
+            '--safebrowsing-disable-auto-update',
             '--ignore-certificate-errors'
         ]
     }).then(browser => {

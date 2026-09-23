@@ -1,0 +1,425 @@
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-clip-rotate" [fullScreen]="true">
+  <p style="color: white; font-weight: bold; margin-top: 10px;">{{ loadingStatus }}</p>
+</ngx-spinner>
+
+<div class="container-fluid py-3">
+  
+  <!-- Header Title Card -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center py-2">
+      <h5 class="m-0 font-weight-bold">
+        <i class="uil uil-chart-bar me-2"></i>यूनीवर्सल मैट्रिक्स रिपोर्ट (Universal Report)
+      </h5>
+      <span class="badge bg-primary text-uppercase fs-7">
+        {{ viewMode === 'monthly' ? 'मंथली (Single Month)' : 'ईयरली (Multi-Month Matrix)' }}
+      </span>
+    </div>
+
+    <div class="card-body py-3">
+      <!-- Filter Form Controls using application's standard <ng-select> and <app-item-dropdown> -->
+      <div class="row g-2 align-items-end">
+
+        <!-- 1. Pivot Dimension Selection -->
+        <div class="col-md-3">
+          <div class="form-group">
+            <label class="form-label font-weight-bold mb-1">1. रिपोर्ट ब्रेकडाउन (Pivot Dimension)</label>
+            <ng-select class="custom" style="width: 100%;" placeholder="Select Pivot Dimension" [clearable]="false"
+              [virtualScroll]="true" [(ngModel)]="filterBody.pivot_dimension" (change)="onPivotDimensionChange()">
+              <ng-option *ngFor="let dim of pivotDimensions" [value]="dim.key">
+                {{ dim.name_hin }} : {{ dim.name_eng }}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+
+        <!-- 2. Specific Sub-Type Selection -->
+        <div class="col-md-3">
+          <div class="form-group">
+            <label class="form-label font-weight-bold mb-1">2. विशिष्ट प्रकार (Filter Types)</label>
+            <ng-select class="custom" style="width: 100%;" placeholder="All Types (सभी प्रकार)" [clearable]="true"
+              [multiple]="true" [virtualScroll]="true" [(ngModel)]="filterBody.dimension_ids">
+              <ng-option *ngFor="let item of dimensionListOptions" [value]="item._id">
+                {{ item.list_name_hin }} : {{ item.list_name_eng }}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+
+        <!-- 2. From Year & Month -->
+        <div class="col-md-3">
+          <div class="form-group">
+            <label class="form-label font-weight-bold mb-1">2. प्रारंभिक वर्ष व माह (From)</label>
+            <div class="row g-1">
+              <div class="col-6">
+                <ng-select class="custom" style="width: 100%;" placeholder="Year" [clearable]="false"
+                  [virtualScroll]="true" [(ngModel)]="filterBody.from_year" (change)="onFromYearChange($event)">
+                  <ng-option *ngFor="let y of years" [value]="y">{{ y }}</ng-option>
+                </ng-select>
+              </div>
+              <div class="col-6">
+                <ng-select class="custom" style="width: 100%;" placeholder="Month" [clearable]="false"
+                  [virtualScroll]="true" [(ngModel)]="filterBody.from_month">
+                  <ng-option *ngFor="let m of monthsFrom" [value]="m.m">{{ m.name_hin }} : {{ m.name }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. To Year & Month -->
+        <div class="col-md-3">
+          <div class="form-group">
+            <label class="form-label font-weight-bold mb-1">3. अंतिम वर्ष व माह (To)</label>
+            <div class="row g-1">
+              <div class="col-6">
+                <ng-select class="custom" style="width: 100%;" placeholder="Year" [clearable]="false"
+                  [virtualScroll]="true" [(ngModel)]="filterBody.to_year" (change)="updateMonthsTo($event)">
+                  <ng-option *ngFor="let y of years" [value]="y">{{ y }}</ng-option>
+                </ng-select>
+              </div>
+              <div class="col-6">
+                <ng-select class="custom" style="width: 100%;" placeholder="Month" [clearable]="false"
+                  [virtualScroll]="true" [(ngModel)]="filterBody.to_month">
+                  <ng-option *ngFor="let m of monthsTo" [value]="m.m">{{ m.name_hin }} : {{ m.name }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Location (MM) Selection -->
+        <div class="col-md-3">
+          <div class="form-group">
+            <label class="form-label font-weight-bold mb-1">4. MM / संस्थान (Store)</label>
+            <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
+              [virtualScroll]="true" [(ngModel)]="filterBody.mm_id">
+              <ng-option *ngFor="let item of mms" [value]="item._id">
+                {{ item.mm_hin }} : {{ item.mm_eng }}{{ item.mm_code ? ' : ' + item.mm_code : '' }}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+
+        <!-- 5. Category Filter -->
+        <div class="col-md-3">
+          <div class="form-group">
+            <label class="form-label font-weight-bold mb-1">5. श्रेणी (Category)</label>
+            <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
+              [virtualScroll]="true" [(ngModel)]="filterBody.category_id" (change)="catSelected($event)">
+              <ng-option *ngFor="let item of categories" [value]="item._id">
+                {{ item.category_hin }} : {{ item.category_eng }}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+
+        <!-- 6. Reusable Item Dropdown Component (<app-item-dropdown>) -->
+        <div class="col-md-5">
+          <div class="form-group">
+            <label class="form-label font-weight-bold mb-1">6. वस्तु / उप-वस्तु (Item / Subitem / Variant)</label>
+            <app-item-dropdown 
+              [categoryIds]="filterBody.category_id ? [filterBody.category_id] : []"
+              [(ngModel)]="filterBody.item_subitem_ids"
+              [multiple]="true"
+              placeholder="Select Items / Subitems">
+            </app-item-dropdown>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="col-md-4 d-flex gap-2">
+          <button class="btn btn-primary btn-sm px-3 flex-fill" (click)="generateReport()" [disabled]="isLoader">
+            <i class="uil uil-play me-1"></i> {{ isLoader ? 'Generating...' : 'Generate Report' }}
+          </button>
+          
+          <button class="btn btn-outline-success btn-sm px-3 flex-fill" (click)="exportToExcel()" [disabled]="filteredRows.length === 0">
+            <i class="uil uil-file-spreadsheet me-1"></i> Export Excel
+          </button>
+
+          <button class="btn btn-outline-danger btn-sm px-3 flex-fill" (click)="exportToPdf()" [disabled]="filteredRows.length === 0">
+            <i class="uil uil-file-pdf me-1"></i> Export PDF
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="universalReportResultsSection" class="card shadow-sm" *ngIf="reportRows && reportRows.length > 0">
+    
+    <!-- Table Header Toolbar with Pagination Controls -->
+    <div class="card-header d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <span class="font-weight-bold">
+          <i class="uil uil-table me-1"></i> परिणाम: {{ filteredRows.length }} Rows
+        </span>
+        <span class="badge bg-secondary ms-1">{{ getPivotDimensionLabel() }}</span>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <!-- Hide 0 Stock Rows Toggle -->
+        <div class="form-check form-switch mb-0 me-2" title="Hide rows where all stock balance values are zero">
+          <input type="checkbox" class="form-check-input" id="hideZeroRowsSwitch" [(ngModel)]="hideZeroRows" (change)="applySearchFilter()" style="cursor: pointer;">
+          <label class="form-check-label text-nowrap fw-semibold small" for="hideZeroRowsSwitch" style="cursor: pointer;">
+            <i class="uil uil-eye-slash me-1"></i> 0 बचत छुपाएं (Hide 0)
+          </label>
+        </div>
+
+        <!-- Quick Search (Hindi, English, Roman) -->
+        <div style="min-width: 240px;">
+          <input type="text" class="form-control form-control-sm" placeholder="Search (Hindi / English / Roman)..." [(ngModel)]="term" (ngModelChange)="applySearchFilter()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Matrix Table Container -->
+    <div class="card-body p-0 table-responsive universal-matrix-container"
+         style="max-height: 75vh; overflow-y: auto;"
+         appVirtualInfiniteScroll
+         [totalItems]="filteredRows.length"
+         (sliceChange)="onVirtualSliceChange($event)"
+         (scroll)="onTableScroll($event)">
+      <table class="table table-bordered table-hover table-sm text-center align-middle m-0 universal-matrix-table">
+        
+        <!-- Multi-level Table Header -->
+        <thead>
+          <!-- Header Row 1: Time Axis / Months -->
+          <tr>
+            <th rowspan="2" class="sticky-col col-no">क्र.</th>
+            <th rowspan="2" class="sticky-col col-mm">MM / स्थान</th>
+            <th rowspan="2" class="sticky-col col-cat">
+              <div class="d-flex align-items-center justify-content-between px-1">
+                <span>कैटेगरी</span>
+                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                  [isOpen]="!!filterBody.category_id"
+                  (clear)="filterBody.category_id = null; generateReport()"
+                  triggerOn="click">
+                  <ng-select placeholder="Select Category" class="custom-sm"
+                    dropdownClass="custom-sm" [(ngModel)]="filterBody.category_id"
+                    (change)="generateReport()" style="width: 220px;">
+                    <ng-option *ngFor="let cat of categories" [value]="cat._id">
+                      {{ cat.category_hin }} : {{ cat.category_eng }}
+                    </ng-option>
+                  </ng-select>
+                </app-popover-filter>
+              </div>
+            </th>
+            <th rowspan="2" class="sticky-col col-item">वस्तु (Item Name)</th>
+            <th rowspan="2" class="sticky-col col-subitem">उप-वस्तु (Subitem)</th>
+            <th rowspan="2" class="sticky-col col-unit">यूनिट</th>
+
+            <!-- Past Bachat Group Header -->
+            <th [attr.colspan]="activeDimensions.length + 1" class="past-header-cell">
+              पिछला बचत (Opening Balance)
+            </th>
+
+            <!-- Month Headers -->
+            <ng-container *ngFor="let m of monthsList; let mIdx = index">
+              <th [attr.colspan]="monthsList.length > 1 ? activeDimensions.length : (activeDimensions.length + 1)"
+                  class="month-header-cell"
+                  [class.month-bg-alt]="mIdx % 2 === 1"
+                  [class.month-border-end]="true">
+                {{ m.name_hin }} ({{ m.name_eng }})
+              </th>
+            </ng-container>
+
+            <!-- Final Grand Total Column Group Header (Only for Multi-Month Range) -->
+            <th *ngIf="monthsList.length > 1" [attr.colspan]="activeDimensions.length + 1" class="grand-header-cell">
+              कुल योग (Final Period Set)
+            </th>
+          </tr>
+
+          <!-- Header Row 2: Dimensions (Only Bachat Columns) -->
+          <tr>
+            <!-- Sub-headers for Past Bachat Dimensions -->
+            <ng-container *ngFor="let d of activeDimensions">
+              <th class="past-dim-header-cell">
+                {{ d.list_name_hin }}
+                <span *ngIf="d.list_name_eng" class="d-block text-muted font-size-10">({{ d.list_name_eng }})</span>
+              </th>
+            </ng-container>
+            <th class="past-subtotal-header">कुल पिछला बचत</th>
+
+            <!-- Sub-headers for Months -->
+            <ng-container *ngFor="let m of monthsList; let mIdx = index">
+              <ng-container *ngFor="let d of activeDimensions; let dIdx = index">
+                <th class="dim-header-cell"
+                    [class.month-bg-alt]="mIdx % 2 === 1"
+                    [class.month-border-end]="dIdx === activeDimensions.length - 1">
+                  {{ d.list_name_hin }}
+                  <span *ngIf="d.list_name_eng" class="d-block text-muted font-size-10">({{ d.list_name_eng }})</span>
+                </th>
+              </ng-container>
+              <th *ngIf="monthsList.length <= 1" class="month-subtotal-header" [class.month-bg-alt]="mIdx % 2 === 1">अंतिम कुल बचत</th>
+            </ng-container>
+
+            <!-- Grand total dimensions (Only for Multi-Month Range) -->
+            <ng-container *ngIf="monthsList.length > 1">
+              <ng-container *ngFor="let d of activeDimensions">
+                <th class="dim-header-cell">
+                  {{ d.list_name_hin }}
+                  <span *ngIf="d.list_name_eng" class="d-block text-muted font-size-10">({{ d.list_name_eng }})</span>
+                </th>
+              </ng-container>
+              <th class="grand-subtotal-header">अंतिम कुल बचत</th>
+            </ng-container>
+          </tr>
+        </thead>
+
+        <!-- Table Body -->
+        <tbody>
+          <tr *ngIf="virtualSlice.paddingTop > 0" style="border: none;">
+            <td [attr.colspan]="100" [style.height.px]="virtualSlice.paddingTop" style="padding: 0; border: none; background: transparent;"></td>
+          </tr>
+          <tr *ngFor="let r of virtualReportRows; let i = index">
+            <td class="sticky-col col-no">{{ virtualSlice.startIndex + i + 1 }}</td>
+            <td class="sticky-col col-mm text-start" [title]="r.mm_hin + (r.mm_eng ? ' : ' + r.mm_eng : '')">
+              <span class="fw-bold hindi-cell-text">{{ r.mm_hin }}</span>
+              <span *ngIf="r.mm_eng" class="d-block text-muted font-size-10 text-truncate">{{ r.mm_eng }}</span>
+            </td>
+            <td class="sticky-col col-cat text-start" [title]="r.category_hin + (r.category_eng ? ' : ' + r.category_eng : '')">
+              <span class="hindi-cell-text">{{ r.category_hin }}</span>
+              <span *ngIf="r.category_eng" class="d-block text-muted font-size-10 text-truncate">{{ r.category_eng }}</span>
+            </td>
+            <td class="sticky-col col-item text-start font-weight-bold" [title]="r.item_hin + (r.item_eng ? ' : ' + r.item_eng : '')">
+              <span class="hindi-cell-text">{{ r.item_hin }}</span>
+              <span *ngIf="r.item_eng" class="d-block text-muted font-size-10 fw-normal text-truncate">{{ r.item_eng }}</span>
+              <span *ngIf="r.item_roman" class="d-block text-info font-size-9 fw-normal text-truncate">({{ r.item_roman }})</span>
+            </td>
+            <td class="sticky-col col-subitem text-start" [title]="r.subitem_hin || '-'">
+              <span *ngIf="r.subitem_id" class="hindi-cell-text">{{ r.subitem_hin }}</span>
+              <span *ngIf="r.subitem_id && r.subitem_eng" class="d-block text-muted font-size-10 text-truncate">{{ r.subitem_eng }}</span>
+              <span *ngIf="!r.subitem_id">-</span>
+            </td>
+            <td class="sticky-col col-unit">{{ r.unit_short }}</td>
+
+            <!-- Past Bachat Values per Dimension -->
+            <ng-container *ngFor="let d of activeDimensions">
+              <td class="metric-bcht text-end font-weight-bold" [class.text-danger]="(r.past_bachat?.dims[d._id] || 0) < 0">
+                {{ (r.past_bachat?.dims[d._id] || 0) | number:'1.0-2' }}
+              </td>
+            </ng-container>
+            <!-- Total Past Bachat -->
+            <td class="metric-bcht text-end font-weight-bold" [class.text-danger]="(r.past_bachat?.total || 0) < 0">
+              {{ (r.past_bachat?.total || 0) | number:'1.0-2' }}
+            </td>
+
+            <!-- Monthly Bachat Values -->
+            <ng-container *ngFor="let m of monthsList; let mIdx = index">
+              <ng-container *ngFor="let d of activeDimensions; let dIdx = index">
+                <td class="metric-bcht text-end font-weight-bold"
+                    [class.month-bg-alt]="mIdx % 2 === 1"
+                    [class.month-border-end]="dIdx === activeDimensions.length - 1"
+                    [class.text-danger]="(r.months[m.key]?.dims[d._id]?.bachat || 0) < 0">
+                  {{ (r.months[m.key]?.dims[d._id]?.bachat || 0) | number:'1.0-2' }}
+                </td>
+              </ng-container>
+
+              <!-- Month Net Bachat Sub-group -->
+              <ng-container *ngIf="monthsList.length <= 1">
+                <td class="metric-bcht text-end font-weight-bold fs-7"
+                    [class.month-bg-alt]="mIdx % 2 === 1"
+                    [class.month-border-end]="true"
+                    [class.text-danger]="(r.grand_total?.final_bachat || 0) < 0"
+                    [class.text-success]="(r.grand_total?.final_bachat || 0) >= 0">
+                  {{ (r.grand_total?.final_bachat || 0) | number:'1.0-2' }}
+                </td>
+              </ng-container>
+            </ng-container>
+
+            <!-- Grand Total Bachat Columns (Only for Multi-Month Range) -->
+            <ng-container *ngIf="monthsList.length > 1">
+              <ng-container *ngFor="let d of activeDimensions">
+                <td class="metric-bcht text-end font-weight-bold" [class.text-danger]="(r.grand_total?.dims[d._id]?.bachat || 0) < 0">
+                  {{ (r.grand_total?.dims[d._id]?.bachat || 0) | number:'1.0-2' }}
+                </td>
+              </ng-container>
+
+              <!-- Period Grand Total Overall Bachat -->
+              <td class="metric-bcht text-end font-weight-bold fs-7"
+                  [class.text-danger]="(r.grand_total?.final_bachat || 0) < 0"
+                  [class.text-success]="(r.grand_total?.final_bachat || 0) >= 0">
+                {{ (r.grand_total?.final_bachat || 0) | number:'1.0-2' }}
+              </td>
+            </ng-container>
+          </tr>
+          <tr *ngIf="virtualSlice.paddingBottom > 0" style="border: none;">
+            <td [attr.colspan]="100" [style.height.px]="virtualSlice.paddingBottom" style="padding: 0; border: none; background: transparent;"></td>
+          </tr>
+        </tbody>
+
+        <!-- Footer Total Row -->
+        <tfoot class="sticky-footer" *ngIf="columnTotals">
+          <tr class="font-weight-bold">
+            <td colspan="6" class="sticky-col col-total-sticky text-end pe-2">कुल योग (Total):</td>
+
+            <!-- Past Bachat Column Totals -->
+            <ng-container *ngFor="let d of activeDimensions">
+              <td class="metric-bcht text-end" [class.text-danger]="(columnTotals.past_bachat?.dims[d._id] || 0) < 0">
+                {{ (columnTotals.past_bachat?.dims[d._id] || 0) | number:'1.0-2' }}
+              </td>
+            </ng-container>
+            <td class="metric-bcht text-end text-dark" [class.text-danger]="(columnTotals.past_bachat?.total || 0) < 0">
+              {{ (columnTotals.past_bachat?.total || 0) | number:'1.0-2' }}
+            </td>
+
+            <!-- Monthly Column Totals -->
+            <ng-container *ngFor="let m of monthsList; let mIdx = index">
+              <ng-container *ngFor="let d of activeDimensions; let dIdx = index">
+                <td class="metric-bcht text-end"
+                    [class.month-bg-alt]="mIdx % 2 === 1"
+                    [class.month-border-end]="dIdx === activeDimensions.length - 1"
+                    [class.text-danger]="(columnTotals.months[m.key]?.dims[d._id]?.bachat || 0) < 0">
+                  {{ (columnTotals.months[m.key]?.dims[d._id]?.bachat || 0) | number:'1.0-2' }}
+                </td>
+              </ng-container>
+
+              <ng-container *ngIf="monthsList.length <= 1">
+                <td class="metric-bcht text-end fs-7"
+                    [class.month-bg-alt]="mIdx % 2 === 1"
+                    [class.month-border-end]="true"
+                    [class.text-danger]="(columnTotals.grand_total?.final_bachat || 0) < 0"
+                    [class.text-success]="(columnTotals.grand_total?.final_bachat || 0) >= 0">
+                  {{ (columnTotals.grand_total?.final_bachat || 0) | number:'1.0-2' }}
+                </td>
+              </ng-container>
+            </ng-container>
+
+            <!-- Grand Total Footer Columns (Only for Multi-Month Range) -->
+            <ng-container *ngIf="monthsList.length > 1">
+              <ng-container *ngFor="let d of activeDimensions">
+                <td class="metric-bcht text-end" [class.text-danger]="(columnTotals.grand_total?.dims[d._id]?.bachat || 0) < 0">
+                  {{ (columnTotals.grand_total?.dims[d._id]?.bachat || 0) | number:'1.0-2' }}
+                </td>
+              </ng-container>
+
+              <td class="metric-bcht text-end fs-7"
+                  [class.text-danger]="(columnTotals.grand_total?.final_bachat || 0) < 0"
+                  [class.text-success]="(columnTotals.grand_total?.final_bachat || 0) >= 0">
+                {{ (columnTotals.grand_total?.final_bachat || 0) | number:'1.0-2' }}
+              </td>
+            </ng-container>
+          </tr>
+        </tfoot>
+
+      </table>
+    </div>
+
+    <!-- Floating Back to Top Button -->
+    <button *ngIf="showBackToTop" (click)="scrollToTop()" class="btn btn-primary btn-sm rounded-circle back-to-top-btn" title="Back to Top">
+      <i class="uil uil-arrow-up fs-6"></i> Top
+    </button>
+
+  </div>
+
+  <!-- Empty state message -->
+  <div class="card shadow-sm mt-3" *ngIf="!isLoader && reportRows.length === 0">
+    <div class="card-body text-center py-5">
+      <i class="uil uil-search-h text-muted fs-1 mb-2"></i>
+      <h6 class="text-muted">कोई डेटा नहीं मिला (No report data found).</h6>
+      <p class="text-muted small">कृपया फ़िल्टर बदलें और "Generate Report" बटन पर क्लिक करें।</p>
+    </div>
+  </div>
+
+</div>

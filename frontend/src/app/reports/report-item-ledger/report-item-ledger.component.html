@@ -58,12 +58,13 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-2 mb-2">
+        <div class="row align-items-end">
+            <div class="col-md-3 mb-2">
                 <div class="d-flex align-items-end h-100">
                     <div class="flex-grow-1">
-                        <button class="btn btn-primary form-control w-100" (click)="searchReports()">Generate
-                            Report</button>
+                        <button class="btn btn-primary form-control w-100" (click)="searchReports()">
+                            <i class="uil uil-play me-1"></i> Generate Report
+                        </button>
                     </div>
                     <div class="ms-2 mb-1">
                         <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false"
@@ -82,34 +83,58 @@
                                 <p class="mb-0 fs-7">
                                     <strong>How to use: (कैसे उपयोग करें?)</strong><br>
                                     Select Month/Year, Category, and Items to view the ledger. Export to
-                                    Excel for item-wise sheets.<br>
+                                    Excel or PDF.<br>
                                     <span class="text-muted">लेजर देखने के लिए माह/वर्ष, श्रेणी और आइटम
-                                        चुनें। आइटम-वार शीट के लिए एक्सेल में निर्यात करें।</span>
+                                        चुनें।</span>
                                 </p>
                             </div>
                         </app-popover-filter>
                     </div>
                 </div>
             </div>
-            <div class="col-md-2 mb-2" *ngIf="groupedReportData.length > 0">
-                <button type="button" class="btn btn-outline-success w-100" (click)="exportCurrentExcel()">
-                    <i class="uil uil-export"></i> Excel (Current)
-                </button>
+
+            <!-- Excel Export Dropdown Button -->
+            <div class="col-md-3 mb-2" *ngIf="groupedReportData.length > 0">
+                <div class="dropdown w-100">
+                    <button type="button" class="btn btn-outline-success dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span><i class="uil uil-file-spreadsheet me-1"></i> Export Excel</span>
+                    </button>
+                    <div class="dropdown-menu shadow w-100">
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportCurrentExcel()">
+                            <i class="uil uil-export text-success me-2"></i> 1. Current Category / View
+                        </a>
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportBulkExcel()">
+                            <i class="uil uil-archive text-primary me-2"></i> 2. All Categories (ZIP)
+                        </a>
+                        <div class="dropdown-divider my-1"></div>
+                        <a class="dropdown-item cursor-pointer py-2 text-dark" (click)="exportSingleHeavyExcel()">
+                            <i class="uil uil-file-compress text-warning me-2"></i> 3. Single Heavy File
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-2 mb-2" *ngIf="groupedReportData.length > 0">
-                <button type="button" class="btn btn-success w-100" (click)="exportBulkExcel()">
-                    <i class="uil uil-export"></i> Bulk Excel (All)
-                </button>
-            </div>
-            <div class="col-md-2 mb-2" *ngIf="groupedReportData.length > 0">
-                <button type="button" class="btn btn-outline-danger w-100" (click)="exportCurrentPDF()">
-                    <i class="uil uil-file-download"></i> PDF (Current)
-                </button>
-            </div>
-            <div class="col-md-2 mb-2" *ngIf="groupedReportData.length > 0">
-                <button type="button" class="btn btn-danger w-100" (click)="exportBulkPDF()">
-                    <i class="uil uil-file-download"></i> Bulk PDF (All)
-                </button>
+
+            <!-- PDF Export Dropdown Button -->
+            <div class="col-md-3 mb-2" *ngIf="groupedReportData.length > 0">
+                <div class="dropdown w-100">
+                    <button type="button" class="btn btn-outline-danger dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span><i class="uil uil-file-pdf me-1"></i> Export PDF</span>
+                    </button>
+                    <div class="dropdown-menu shadow w-100">
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportCurrentPDF()">
+                            <i class="uil uil-file-download text-danger me-2"></i> 1. Current Category / View
+                        </a>
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportBulkPDF()">
+                            <i class="uil uil-archive text-primary me-2"></i> 2. All Categories (ZIP)
+                        </a>
+                        <div class="dropdown-divider my-1"></div>
+                        <a class="dropdown-item cursor-pointer py-2 text-dark" (click)="exportSingleHeavyPDF()">
+                            <i class="uil uil-file-compress text-warning me-2"></i> 3. Single Heavy File
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

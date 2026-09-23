@@ -193,6 +193,31 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
         let item_subitem_ids = req.body.item_subitem_ids || [];
         let taskId = req.body.taskId;
 
+        let mmName = 'All MMs';
+        if (mm_id) {
+            let mmRow = mmTable.getById(mm_id);
+            if (mmRow) mmName = mmRow.mm_hin;
+        }
+
+        // Single Heavy Master PDF Branch
+        if (req.body.isHeavySinglePdf && req.body.categoriesPayload) {
+            if (taskId) global.pdfProgress[taskId] = { status: 'Constructing Master Single Heavy PDF template...' };
+            const pdfBuffer = await itemLedgerPdf.generateItemLedgerPdf(
+                [],
+                req.body.from ? req.body.from.name_hin : (req.body.from_name_hin || ''), 
+                req.body.to ? req.body.to.name_hin : (req.body.to_name_hin || ''), 
+                mmName,
+                taskId,
+                '',
+                req.body.categoriesPayload
+            );
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=item_ledger_heavy.pdf');
+            res.end(pdfBuffer, 'binary');
+            if (taskId) delete global.pdfProgress[taskId];
+            return;
+        }
+
         if (taskId) global.pdfProgress[taskId] = { status: 'Fetching database records...' };
 
         let reportData = [];
@@ -318,12 +343,6 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
                     jawaks: jawaks
                 });
             }
-        }
-
-        let mmName = 'All MMs';
-        if (mm_id) {
-            let mmRow = mmTable.getById(mm_id);
-            if (mmRow) mmName = mmRow.mm_hin;
         }
 
         let category_name = req.body.category_name || '';
