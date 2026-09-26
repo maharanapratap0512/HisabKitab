@@ -97,7 +97,7 @@
                     <div class="stock-section">
                         <div class="stock-remaining">
                             <span class="label">बचत:</span>
-                            <span class="value">{{item.remaining_qty}}</span>
+                            <span class="value">{{item.remaining_qty | number:'1.0-3'}}</span>
                             <span class="unit">{{item.unit_short}}</span>
                         </div>
                         <div class="stock-total">

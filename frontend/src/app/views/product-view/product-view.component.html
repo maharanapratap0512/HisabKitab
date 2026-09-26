@@ -269,7 +269,7 @@
                             <div class="glass-card">
                                 <div class="label-hindi"><i class="uil uil-chart-pie"></i> मात्रा</div>
                                 <div class="value-hindi">{{aawak.qty}} <small class="fw-normal">{{aawak.unit_short}}</small></div>
-                                <div class="text-danger x-small mt-1" *ngIf="aawak.remaining_qty">बचत: {{aawak.remaining_qty}}</div>
+                                <div class="text-danger x-small mt-1" *ngIf="aawak.remaining_qty">बचत: {{aawak.remaining_qty | number:'1.0-3'}}</div>
                             </div>
                             <div class="glass-card">
                                 <div class="label-hindi"><i class="uil uil-check-circle"></i> स्थिति</div>

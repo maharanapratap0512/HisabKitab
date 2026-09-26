@@ -137,6 +137,7 @@ export class AawakComponent implements OnInit {
   editIndex: any = null;
   itemSubitemMerge: any = false;
   orderBy: any = false;
+  dateSortState: 'default' | 'asc' | 'desc' = 'default';
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   // months: any = [{no:1, name:'January'}]
   constructor(
@@ -363,6 +364,21 @@ export class AawakComponent implements OnInit {
     });
   }
 
+
+  
+  toggleDateSort() {
+    if (this.dateSortState === 'default') {
+      this.dateSortState = 'asc';
+      this.filterBody.orderBy = this.filterBody.type === 'jawak' ? 'jawak.date asc, jawak._id asc' : 'aawak.date asc, aawak._id asc';
+    } else if (this.dateSortState === 'asc') {
+      this.dateSortState = 'desc';
+      this.filterBody.orderBy = this.filterBody.type === 'jawak' ? 'jawak.date desc, jawak._id desc' : 'aawak.date desc, aawak._id desc';
+    } else {
+      this.dateSortState = 'default';
+      this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, icategories, scategories, item_hin, subitem_hin, aawak.date" : null;
+    }
+    this.getFilteredData();
+  }
 
   getFilteredAawakData() {
     this.filterBody.type = 'aawak';
@@ -1258,7 +1274,7 @@ export class AawakComponent implements OnInit {
     if (ev._id > 0) {
       this.isLoader = true;
       this.aawakData[this.editIndex.i].jawak_detail.splice(this.editIndex.j, 1, ev);
-      this.aawakData[this.editIndex.i].remaining_qty -= (ev.qty - this.editData.qty)
+      this.aawakData[this.editIndex.i].remaining_qty = Math.round((this.aawakData[this.editIndex.i].remaining_qty - (ev.qty - this.editData.qty)) * 1000) / 1000;
       this.editData = null;
       this.editIndex = null;
       this.closeModal();
@@ -1389,7 +1405,7 @@ export class AawakComponent implements OnInit {
         this.http.delete(this.api.getUrl('JAWAK') + '/' + id).subscribe((data: any) => {
           if (data['success']) {
             this.isLoader = false;
-            this.aawakData[i].remaining_qty += this.aawakData[i].jawak_detail[j].qty;
+            this.aawakData[i].remaining_qty = Math.round((this.aawakData[i].remaining_qty + this.aawakData[i].jawak_detail[j].qty) * 1000) / 1000;
             this.aawakData[i].jawak_detail.splice(j, 1);
             this.toastr.success('Deleted Successfully');
           }
@@ -1453,7 +1469,7 @@ export class AawakComponent implements OnInit {
     if (awkId) {
       let i = this.aawakData.findIndex((b: any) => b._id == awkId);
       if (i > -1) {
-        this.aawakData[i].remaining_qty = (this.aawakData[i].remaining_qty ? this.aawakData[i].remaining_qty : 0) - ev.qty;
+        this.aawakData[i].remaining_qty = Math.round(((this.aawakData[i].remaining_qty ? this.aawakData[i].remaining_qty : 0) - ev.qty) * 1000) / 1000;
         if (!this.aawakData[i].jawak_detail) {
           this.aawakData[i].jawak_detail = [];
         }

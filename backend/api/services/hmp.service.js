@@ -205,7 +205,7 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_
                 if (out.aawak_ref_id) {
                     const aawak_detail = aawak.getById(out.aawak_ref_id);
                     if (aawak_detail) {
-                        const conditionString = `(jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${out.aawak_ref_id}) OR jawak.aawak_ref_id = ${out.aawak_ref_id})`;
+                        const conditionString = `jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${out.aawak_ref_id})`;
                         aawak_detail.jawak_detail = jawak.getAll(conditionString);
                     }
                     out.aawak_detail = aawak_detail;

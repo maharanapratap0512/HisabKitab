@@ -1,10 +1,35 @@
 [
     {
+        "version": "37.2",
+        "date": "26-09-2026",
+        "summary": "Date Column Header Sorting & Bachat Hindi Category Excel Export",
+        "summary_hin": "दिनांक कॉलम हेडर सॉर्टिंग एवं बचत (New) एक्सेल एक्सपोर्ट में हिंदी श्रेणी सुधार",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "आवक एवं जावक तालिका",
+                "title": "Date Header Quick Interactive Sorting",
+                "title_hin": "दिनांक कॉलम हेडर द्वारा तुरंत सॉर्टिंग सुविधा",
+                "desc": "Added clean 3-state date sorting icons directly in the Date header of Aawak and Jawak tables. Click the arrow icon next to the filter to easily toggle between default order, oldest entries first, and newest entries first.",
+                "desc_hin": "आवक एवं जावक तालिकाओं में दिनांक हेडर पर सीधा सॉर्टिंग विकल्प जोड़ा गया है। फ़िल्टर आइकॉन के पास दिए गए तीरों पर क्लिक करके आप आसानी से पुरानी एंट्रियाँ पहले, नई एंट्रियाँ पहले या डिफ़ॉल्ट क्रम में डेटा देख सकते हैं।"
+            },
+            {
+                "type": "improved",
+                "module": "बचत रिपोर्ट",
+                "title": "Hindi Category Formatting in Bachat Multi-Month Excel Exports",
+                "title_hin": "बचत (New) बहु-माह एक्सेल एक्सपोर्ट में हिंदी श्रेणी नाम",
+                "desc": "Improved Category column formatting in Bachat (New) multi-month Main Saar and Condition-wise Excel exports to display category names clearly in Hindi.",
+                "desc_hin": "बचत (New) रिपोर्ट में बहु-माह मुख्य सार एवं कंडीशन अनुसार एक्सेल एक्सपोर्ट डाउनलोड करते समय अब श्रेणी (Category) का नाम स्पष्ट रूप से हिंदी में दिखाई देगा।"
+            }
+        ]
+    },
+    {
         "version": "37.1",
         "date": "20-09-2026",
         "summary": "Universal Stock Matrix Report & Master Ledger Exports",
         "summary_hin": "यूनिवर्सल स्टॉक मैट्रिक्स रिपोर्ट एवं मास्टर लेजर एक्सपोर्ट सुविधा",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

@@ -765,7 +765,7 @@ const jawak_voucher = {
         group by
             case when jawak.voucher_no is not null then jawak.voucher_no
             else jawak._id
-        end
+        end #
         limit @limit offset @offset`,
     count: `select count(*) as total_count from jawak ? group by jawak.voucher_no`
 }
@@ -973,6 +973,7 @@ const aawak_voucher = {
                 case when aawak.voucher_no is not null then aawak.voucher_no
                 else aawak._id
             end
+            #
             limit @limit offset @offset`,
     count: `select count(*) as total_count from aawak ? group by aawak.voucher_no`
 }

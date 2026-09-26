@@ -192,7 +192,7 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
                 if (aawak._id) {
                     let oldAwk = await DB.getById('aawak', aawak._id);
                     await Fn.updateAJ(aawak, 'aawak', oldAwk).then(async (resolve) => {
-                        await DB.getList('jawak', { conditionString: ` (jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${oldAwk._id}) OR jawak.aawak_ref_id = ${oldAwk._id})` }).then(async (jwkdata) => {
+                        await DB.getList('jawak', { conditionString: `jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${oldAwk._id})` }).then(async (jwkdata) => {
                             if (jwkdata.data) {
                                 for (let jwk of jwkdata.data) {
                                     let jwkNew = {
@@ -690,7 +690,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
     if (req.body.orderBy) {
         orderBy = req.body.orderBy;
     }
-    else if (conditionString.trim() == `1=1`) {
+    else {
         orderBy = "aawak._id desc";
     }
 
@@ -698,7 +698,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
-    await DB.getList('aawak_voucher', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, limit: limit, offset: offset }).then(async (resolve) => {
+    await DB.getList('aawak_voucher', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].aawaks = (resolve.data[i].aawaks ? JSON.parse(resolve.data[i].aawaks) : {});
 

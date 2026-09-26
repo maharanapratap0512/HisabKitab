@@ -67,6 +67,7 @@ export class AawakNewComponent implements OnInit {
   departments: any = [];
   itemSubitemMerge: any = false;
   orderBy: any = false;
+  dateSortState: 'default' | 'asc' | 'desc' = 'default';
   filterBody: any = {
     type: 'aawak',
     pbk_id: [],
@@ -441,6 +442,20 @@ export class AawakNewComponent implements OnInit {
     });
   }
 
+
+  toggleDateSort() {
+    if (this.dateSortState === 'default') {
+      this.dateSortState = 'asc';
+      this.filterBody.orderBy = this.filterBody.type === 'jawak' ? 'jawak.date asc, jawak._id asc' : 'aawak.date asc, aawak._id asc';
+    } else if (this.dateSortState === 'asc') {
+      this.dateSortState = 'desc';
+      this.filterBody.orderBy = this.filterBody.type === 'jawak' ? 'jawak.date desc, jawak._id desc' : 'aawak.date desc, aawak._id desc';
+    } else {
+      this.dateSortState = 'default';
+      this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, icategories, scategories, item_hin, subitem_hin, aawak.date" : null;
+    }
+    this.getFilteredData();
+  }
 
   getFilteredAawakData() {
     this.filterBody.type = 'aawak';
@@ -1311,7 +1326,7 @@ export class AawakNewComponent implements OnInit {
     if (awkId) {
       let i = this.aawakData.findIndex((b: any) => b._id == awkId);
       if (i > -1) {
-        this.aawakData[i].remaining_qty = (this.aawakData[i].remaining_qty ? this.aawakData[i].remaining_qty : 0) - ev.qty;
+        this.aawakData[i].remaining_qty = Math.round(((this.aawakData[i].remaining_qty ? this.aawakData[i].remaining_qty : 0) - ev.qty) * 1000) / 1000;
         if (!this.aawakData[i].jawak_detail) {
           this.aawakData[i].jawak_detail = [];
         }

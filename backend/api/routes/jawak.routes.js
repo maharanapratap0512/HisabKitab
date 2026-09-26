@@ -175,7 +175,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
     if (req.body.orderBy) {
         orderBy = req.body.orderBy;
     }
-    else if (conditionString.trim() == `1=1`) {
+    else {
         orderBy = "jawak._id desc";
     }
 
@@ -183,7 +183,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
-    await DB.getList('jawak_voucher', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, limit: limit, offset: offset }).then(async (resolve) => {
+    await DB.getList('jawak_voucher', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].jawaks = (resolve.data[i].jawaks ? JSON.parse(resolve.data[i].jawaks) : {});
 
@@ -227,7 +227,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
 router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
     try {
         const awkId = Number(req.params.aawak_ref_id);
-        let conditionString = `(jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${awkId}) OR jawak.aawak_ref_id = ${awkId})`;
+        let conditionString = `(jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${awkId})`;
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('jawak', { full: true, conditionString: conditionString }).then((resolve) => {
             for (let i in resolve.data) {
@@ -603,15 +603,6 @@ router.put('/ref-link/:id', async (req, res, next) => {
 
         // Process rel_aawak_jawak entries (if splits is empty [], deletes all links => unlinks)
         await Fn.processRelAawakJawak(jawakId, splits);
-
-        if (splits.length === 0) {
-            DB.db.prepare(`UPDATE jawak SET aawak_ref_id = NULL, updated_at = datetime('now','localtime') WHERE _id = ?`).run(jawakId);
-        } else {
-            const firstAawakId = splits[0]?.aawak_id || splits[0]?._id;
-            if (firstAawakId) {
-                DB.db.prepare(`UPDATE jawak SET aawak_ref_id = ?, updated_at = datetime('now','localtime') WHERE _id = ?`).run(firstAawakId, jawakId);
-            }
-        }
 
         return res.json({
             success: true,

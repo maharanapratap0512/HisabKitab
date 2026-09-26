@@ -20,6 +20,21 @@ declare var $: any;
   styleUrls: ['./jawak.component.scss']
 })
 export class JawakComponent implements OnInit {
+  dateSortState: 'default' | 'asc' | 'desc' = 'default';
+
+  toggleDateSort() {
+    if (this.dateSortState === 'default') {
+      this.dateSortState = 'asc';
+      this.filterBody.orderBy = 'jawak.date asc, jawak._id asc';
+    } else if (this.dateSortState === 'asc') {
+      this.dateSortState = 'desc';
+      this.filterBody.orderBy = 'jawak.date desc, jawak._id desc';
+    } else {
+      this.dateSortState = 'default';
+      this.filterBody.orderBy = null;
+    }
+    this.getJawakData(1);
+  }
 
   page = 1;
   itemsPerPage = 100;

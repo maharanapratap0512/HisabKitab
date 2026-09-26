@@ -2690,7 +2690,7 @@ class dbModal {
           FOR EACH ROW
           BEGIN
               UPDATE aawak 
-              SET remaining_qty = round(remaining_qty - IFNULL(NEW.split_qty, NEW.qty), 2)
+              SET remaining_qty = round(remaining_qty - IFNULL(NEW.split_qty, NEW.qty), 3)
               WHERE _id = NEW.aawak_id AND NEW.aawak_id IS NOT NULL;
           END;`,
       drop_raj_updt_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_updt_avk_rem_qty"`,
@@ -2700,7 +2700,7 @@ class dbModal {
           FOR EACH ROW
           BEGIN
               UPDATE aawak 
-              SET remaining_qty = round(remaining_qty + IFNULL(OLD.split_qty, OLD.qty), 2)
+              SET remaining_qty = round(remaining_qty + IFNULL(OLD.split_qty, OLD.qty), 3)
               WHERE _id = OLD.aawak_id AND OLD.aawak_id IS NOT NULL;
           END;`
     },
@@ -2717,6 +2717,27 @@ class dbModal {
           updated_at timestamp default (datetime('now', 'localtime')),
           UNIQUE(dept_id, item_id, subitem_id, year)
         );`
+    },
+    // version 38: trigger remaining_qty round precision update to 3 decimals
+    {
+      drop_raj_ins_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_ins_avk_rem_qty"`,
+      create_raj_ins_avk_rem_qty: `CREATE TRIGGER "raj_ins_avk_rem_qty"
+          AFTER INSERT ON "rel_aawak_jawak"
+          FOR EACH ROW
+          BEGIN
+              UPDATE aawak 
+              SET remaining_qty = round(remaining_qty - IFNULL(NEW.split_qty, NEW.qty), 3)
+              WHERE _id = NEW.aawak_id AND NEW.aawak_id IS NOT NULL;
+          END;`,
+      drop_raj_del_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_del_avk_rem_qty"`,
+      create_raj_del_avk_rem_qty: `CREATE TRIGGER "raj_del_avk_rem_qty"
+          AFTER DELETE ON "rel_aawak_jawak"
+          FOR EACH ROW
+          BEGIN
+              UPDATE aawak 
+              SET remaining_qty = round(remaining_qty + IFNULL(OLD.split_qty, OLD.qty), 3)
+              WHERE _id = OLD.aawak_id AND OLD.aawak_id IS NOT NULL;
+          END;`
     }
   ];
 

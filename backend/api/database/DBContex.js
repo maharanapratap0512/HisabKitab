@@ -141,6 +141,9 @@ class DBContex {
                 else if (tblname == 'aawak_voucher') {
                     conditionQuery = (options.dept_id ? `(aawak.dept_id = ${options.dept_id})` : null);
                 }
+                else if (tblname == 'jawak_voucher') {
+                    conditionQuery = (options.dept_id ? `(jawak.dept_id = ${options.dept_id})` : null);
+                }
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
@@ -152,7 +155,7 @@ class DBContex {
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
                     // console.log(sql);
                 }
-                else if (["itemmix", "item", "subitem", "product", "aawak_voucher"].includes(tblname)) {
+                else if (["itemmix", "item", "subitem", "product", "aawak_voucher", "jawak_voucher"].includes(tblname)) {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
 

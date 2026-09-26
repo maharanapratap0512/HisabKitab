@@ -28,9 +28,9 @@ router.post('/recipe', (req, res, next) => {
         const recipeId = hmp.insertUpdateRecipe(req.body);
         sutramDB.commit();
         res.json({ success: true, result: { _id: recipeId } });
-    } catch (e) { 
+    } catch (e) {
         sutramDB.rollback();
-        next(e); 
+        next(e);
     }
 });
 
@@ -41,9 +41,9 @@ router.delete('/recipe/:id', (req, res, next) => {
         const result = hmp.deleteRecipe(req.params.id);
         sutramDB.commit();
         res.json({ success: true, result });
-    } catch (e) { 
+    } catch (e) {
         sutramDB.rollback();
-        next(e); 
+        next(e);
     }
 });
 
@@ -82,7 +82,7 @@ router.post('/batch/export-pdf/:dept_id', async (req, res, next) => {
                 if (batch.outputs && batch.outputs.length > 0) {
                     for (const out of batch.outputs) {
                         if (out.aawak_ref_id) {
-                            out.jawaks = jawakTable.getAll(`(jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${out.aawak_ref_id}) OR jawak.aawak_ref_id = ${out.aawak_ref_id}) AND jawak.active = 1`);
+                            out.jawaks = jawakTable.getAll(`jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${out.aawak_ref_id})`);
                         } else {
                             out.jawaks = [];
                         }
@@ -112,9 +112,9 @@ router.post('/batch/:dept_id', async (req, res, next) => {
         const batch = await hmp.insertUpdateBatch(req.body);
         sutramDB.commit();
         res.json({ success: true, result: batch });
-    } catch (e) { 
+    } catch (e) {
         sutramDB.rollback();
-        next(e); 
+        next(e);
     }
 });
 
@@ -128,9 +128,9 @@ router.delete('/input/:id', async (req, res, next) => {
         const result = await hmp.deleteBatchInput(req.params.id);
         sutramDB.commit();
         res.json({ success: true, result });
-    } catch (e) { 
+    } catch (e) {
         sutramDB.rollback();
-        next(e); 
+        next(e);
     }
 });
 
@@ -141,9 +141,9 @@ router.delete('/output/:id', async (req, res, next) => {
         const result = await hmp.deleteBatchOutput(req.params.id);
         sutramDB.commit();
         res.json({ success: true, result });
-    } catch (e) { 
+    } catch (e) {
         sutramDB.rollback();
-        next(e); 
+        next(e);
     }
 });
 
@@ -163,9 +163,9 @@ router.put('/:id', async (req, res, next) => {
         const batch = await hmp.insertUpdateBatch(req.body);
         sutramDB.commit();
         res.json({ success: true, result: batch });
-    } catch (e) { 
+    } catch (e) {
         sutramDB.rollback();
-        next(e); 
+        next(e);
     }
 });
 
@@ -176,9 +176,9 @@ router.delete('/:id', async (req, res, next) => {
         const result = await hmp.deleteBatch(req.params.id);
         sutramDB.commit();
         res.json({ success: true, result });
-    } catch (e) { 
+    } catch (e) {
         sutramDB.rollback();
-        next(e); 
+        next(e);
     }
 });
 

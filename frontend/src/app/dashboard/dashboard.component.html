@@ -359,7 +359,7 @@
                                                             {{awk.qty}} {{awk.unit_short}} <br />
                                                             <span style="font-weight:bold; color: red;"
                                                                *ngIf="awk.remaining_qty != 0">
-                                                               बचत: {{awk.remaining_qty}}
+                                                               बचत: {{awk.remaining_qty | number:'1.0-3'}}
                                                             </span>
                                                          </td>
                                                          <td>@ {{awk.rate?awk.rate:'-'}} <br>

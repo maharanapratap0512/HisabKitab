@@ -442,7 +442,11 @@
                            <th style="width: 160px;" class="text-start ps-2">
                               <div class="d-flex align-items-center justify-content-between">
                                  <span>Date</span>
-                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                 <span class="cursor-pointer d-inline-flex align-items-center" (click)="toggleDateSort()" [title]="dateSortState === 'asc' ? 'Date Ascending (Oldest First)' : (dateSortState === 'desc' ? 'Date Descending (Newest First)' : 'Default Sort (_id DESC)')" style="font-size: 15px; line-height: 1;">
+                                       <i class="uil uil-arrow-up" [style.color]="dateSortState === 'asc' ? '#198754' : '#6c757d'" [style.font-weight]="dateSortState === 'asc' ? 'bold' : 'normal'" style="margin-right: -4px;"></i>
+                                       <i class="uil uil-arrow-down" [style.color]="dateSortState === 'desc' ? '#198754' : '#6c757d'" [style.font-weight]="dateSortState === 'desc' ? 'bold' : 'normal'"></i>
+                                    </span>
+                                    <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                                     [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date || !!filterBody.year || !!filterBody.month_from || !!filterBody.month_to"
                                     (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; filterBody.year = null; filterBody.month_from = null; filterBody.month_to = null; getFilteredAawakData()"
                                     triggerOn="click">
@@ -938,7 +942,7 @@
 <!-- Modal -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
    aria-hidden="true">
-   <div class="modal-dialog" style="width: 99%;">
+   <div class="modal-dialog" style="width: 98%;">
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>

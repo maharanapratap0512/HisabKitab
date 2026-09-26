@@ -245,7 +245,7 @@
                                 <div class="stock-section text-end ms-auto">
                                     <div class="stock-remaining font-size-12">
                                         <span class="label opacity-75">बचत: </span>
-                                        <span class="value fw-bold font-size-13">{{item.remaining_qty}}</span>
+                                        <span class="value fw-bold font-size-13">{{item.remaining_qty | number:'1.0-3'}}</span>
                                         <span class="unit opacity-75 ms-1 font-size-11">{{item.unit_short}}</span>
                                     </div>
                                     <div class="stock-total font-size-10 opacity-75">

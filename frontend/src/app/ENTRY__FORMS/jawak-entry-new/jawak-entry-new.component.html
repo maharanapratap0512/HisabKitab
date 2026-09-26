@@ -472,7 +472,7 @@
                                         <label class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">
                                             Qty <span class="text-danger">*</span>
                                             <span *ngIf="jwkForm.aawak_ref_id" class="text-primary float-end"
-                                                style="text-transform: none;">(Rem: {{jwkForm?.remaining_qty}})</span>
+                                                style="text-transform: none;">(Rem: {{jwkForm?.remaining_qty | number:'1.0-3'}})</span>
                                         </label>
                                         <div class="input-group input-group-sm">
                                             <input type="number" class="form-control" placeholder="0"
@@ -953,7 +953,7 @@
                                                         </ng-select>
                                                     </span>
                                                 </div>
-                                                <span>Remaining Qty : {{jwkForm?.remaining_qty}}</span>
+                                                <span>Remaining Qty : {{jwkForm?.remaining_qty | number:'1.0-3'}}</span>
                                             </td>
                                             <td>
                                                 <div class="input-group">

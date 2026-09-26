@@ -67,6 +67,7 @@ export class JawakNewComponent implements OnInit {
 
   // Filter/Search
   filterBody: any = {};
+  dateSortState: 'default' | 'asc' | 'desc' = 'default';
   filteredItems: any[] = [];
 
   constructor(
@@ -348,6 +349,21 @@ export class JawakNewComponent implements OnInit {
       this.filterBody.subitem_id = subitem_ids;
     }
 
+    this.getFilteredData();
+  }
+
+  
+  toggleDateSort() {
+    if (this.dateSortState === 'default') {
+      this.dateSortState = 'asc';
+      this.filterBody.orderBy = 'jawak.date asc, jawak._id asc';
+    } else if (this.dateSortState === 'asc') {
+      this.dateSortState = 'desc';
+      this.filterBody.orderBy = 'jawak.date desc, jawak._id desc';
+    } else {
+      this.dateSortState = 'default';
+      this.filterBody.orderBy = null;
+    }
     this.getFilteredData();
   }
 
