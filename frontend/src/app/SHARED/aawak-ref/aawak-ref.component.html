@@ -118,22 +118,32 @@
 <div class="modal fade" [id]="splitModalId" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content shadow-lg border-0">
-            <div class="modal-header py-2">
-                <h6 class="modal-title font-size-14 m-0 d-flex align-items-center">
+            <div class="modal-header py-2 bg-light bg-opacity-50 border-bottom">
+                <h6 class="modal-title font-size-14 m-0 d-flex align-items-center fw-bold">
                     <i class="uil uil-share-alt me-2 font-size-16 text-warning"></i> Multi-Aawak Split Allocation
                 </h6>
                 <button type="button" class="btn-close" (click)="closeSplitModal()"></button>
             </div>
             <div class="modal-body p-3 style-scroll" (scroll)="onSplitScroll($event)">
 
-                <!-- Live Search Box -->
-                <div class="input-group mb-2 shadow-sm">
-                    <span class="input-group-text"><i class="uil uil-search opacity-75"></i></span>
-                    <input type="text" class="form-control font-size-13"
-                        placeholder="Type to search by Lot No, Item, Subitem, Party (PBK), MM..."
-                        [(ngModel)]="splitSearchTerm" (input)="onSplitSearchInput()">
-                    <button class="btn btn-outline-secondary btn-sm" type="button" *ngIf="splitSearchTerm"
-                        (click)="splitSearchTerm=''; onSplitSearchInput()">Clear</button>
+                <!-- Live Search & Action Header -->
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <div class="input-group shadow-sm flex-fill">
+                        <span class="input-group-text bg-body border-end-0"><i class="uil uil-search opacity-75"></i></span>
+                        <input type="text" class="form-control font-size-13 border-start-0"
+                            placeholder="Type to search by Lot No, Item, Subitem, Party (PBK), MM..."
+                            [(ngModel)]="splitSearchTerm" (input)="onSplitSearchInput()">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" *ngIf="splitSearchTerm"
+                            (click)="splitSearchTerm=''; onSplitSearchInput()">Clear</button>
+                    </div>
+                    <button *ngIf="!readonly && showAdd" type="button"
+                        class="btn btn-primary btn-sm fw-bold text-nowrap d-flex align-items-center gap-1 shadow-sm px-3"
+                        style="height: 35px; border-radius: 4px;"
+                        (mousedown)="$event.preventDefault()" (click)="onAddAawakClick($event)"
+                        title="Add new Aawak with pre-loaded filters">
+                        <i class="uil uil-plus-circle font-size-15"></i>
+                        <span>Add Aawak</span>
+                    </button>
                 </div>
 
                 <div
@@ -272,8 +282,15 @@
                         <i class="uil uil-spinner-alt spin me-1"></i> Loading Aawaks...
                     </div>
 
-                    <div *ngIf="splitList.length === 0 && !splitLoading" class="text-center opacity-75 py-4">
-                        <i class="uil uil-search-h fs-24 mb-1 d-block"></i> No matching available Aawaks found.
+                    <div *ngIf="splitList.length === 0 && !splitLoading" class="text-center opacity-75 py-4 border rounded bg-light bg-opacity-50">
+                        <i class="uil uil-search-h fs-24 mb-1 d-block text-muted"></i>
+                        <div class="font-size-13 mb-2 text-muted">No matching available Aawaks found.</div>
+                        <div *ngIf="!readonly && showAdd">
+                            <button type="button" class="btn btn-sm btn-primary fw-bold px-3 shadow-sm"
+                                (click)="onAddAawakClick($event)">
+                                <i class="uil uil-plus-circle me-1"></i> Add New Aawak Now
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -296,6 +313,22 @@
                         {{ getSelectedCount() > 1 ? 'Apply & Split Qty' : (getSelectedCount() === 0 ? 'Unlink Reference' : 'Apply Selection') }}
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Self-contained Modal Container for Aawak Entry -->
+<div class="modal fade" [id]="selfModalId" data-bs-backdrop="static" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog" style="width: 99%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Aawak</h5>
+                <button type="button" class="btn-close" (click)="closeSelfModal()"></button>
+            </div>
+            <div class="modal-body p-2">
+                <app-aawak-entry *ngIf="showSelfModal" [getData]="presetAawakData"
+                    (response)="onSelfAawakCreated($event)"></app-aawak-entry>
             </div>
         </div>
     </div>

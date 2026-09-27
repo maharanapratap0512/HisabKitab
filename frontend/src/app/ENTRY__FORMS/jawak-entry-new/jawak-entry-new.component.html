@@ -96,7 +96,8 @@
                             <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                             </ng-option>
                             <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} :
+                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' +
+                                item.pbk_eng : ''}} : {{item.relation}} :
                                 {{item.relative_name}}
                             </ng-option>
                         </ng-select>
@@ -176,41 +177,51 @@
                                                 [iconClass]="'uil uil-sliders-v-alt p-1'" [btnOutline]="false"
                                                 [btnClass]="(jwkForm.auto_awk || jwkForm.auto_reawk ? 'btn btn-primary btn-sm rounded-pill px-2 py-0 fs-10' : 'btn btn-outline-secondary btn-sm rounded-pill px-2 py-0 fs-10')"
                                                 triggerOn="click">
-                                                <div style="width: 450px; padding: 10px; text-align: left;">
+                                                <div style="width: 650px; padding: 10px; text-align: left;">
                                                     <div class="mb-1 border" style="border-radius: 4px;">
-                                                        <div (click)="jwkForm.auto_awk = !jwkForm.auto_awk;"
-                                                            style="cursor: pointer;"
+                                                        <div (click)="toggleAutoAwk(jwkForm)" style="cursor: pointer;"
                                                             class="p-1 d-flex justify-content-between align-items-center border-bottom">
                                                             <h6 class="mb-0 fs-13">Auto Aawak</h6>
                                                             <div class="form-check form-switch p-0 m-0">
                                                                 <input type="checkbox" class="form-check-input ms-0"
-                                                                    [(ngModel)]="jwkForm.auto_awk" name="auto_awk">
+                                                                    (click)="$event.stopPropagation()"
+                                                                    (change)="onAutoAwkChange(jwkForm)"
+                                                                    [(ngModel)]="jwkForm.auto_awk"
+                                                                    name="auto_awk_{{i}}">
                                                             </div>
                                                         </div>
                                                         <div class="p-1 mx-1" *ngIf="jwkForm.auto_awk">
                                                             <div class="row g-2">
-                                                                <div class="col-6">
+                                                                <div class="col-4">
+                                                                    <label class="form-label fs-11 mb-1">Pkt Num</label>
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm"
+                                                                        placeholder="Pkt Num"
+                                                                        [(ngModel)]="jwkForm.pkt_num"
+                                                                        name="pkt_num_awk_{{i}}">
+                                                                </div>
+                                                                <div class="col-4">
                                                                     <label
                                                                         class="form-label fs-11 mb-1">Department</label>
                                                                     <ng-select class="custom-sm"
                                                                         placeholder="Select Dept" [clearable]="true"
                                                                         [virtualScroll]="true" appendTo="body"
                                                                         [(ngModel)]="jwkForm.aawak_dept_id"
-                                                                        name="aawak_dept_id">
+                                                                        name="aawak_dept_id_{{i}}">
                                                                         <ng-option *ngFor="let item of departments"
                                                                             [value]="item._id">
                                                                             {{item.dept_hin}} : {{item.dept_eng}}
                                                                         </ng-option>
                                                                     </ng-select>
                                                                 </div>
-                                                                <div class="col-6">
+                                                                <div class="col-4">
                                                                     <label class="form-label fs-11 mb-1">Aawak
                                                                         Type</label>
                                                                     <ng-select class="custom-sm"
                                                                         placeholder="Select Type" [clearable]="true"
                                                                         [virtualScroll]="true" appendTo="body"
                                                                         [(ngModel)]="jwkForm.aawak_type_id"
-                                                                        name="aawak_type_id">
+                                                                        name="aawak_type_id_{{i}}">
                                                                         <ng-option *ngFor="let item of aawak_types"
                                                                             [value]="item._id">
                                                                             {{item.list_name_hin}} :
@@ -223,33 +234,43 @@
                                                     </div>
 
                                                     <div class="border" style="border-radius: 4px;">
-                                                        <div (click)="jwkForm.auto_reawk = !jwkForm.auto_reawk;"
-                                                            style="cursor: pointer;"
+                                                        <div (click)="toggleAutoReawk(jwkForm)" style="cursor: pointer;"
                                                             class="p-1 d-flex justify-content-between align-items-center border-bottom">
                                                             <h6 class="mb-0 fs-13">Auto Re-Aawak</h6>
                                                             <div class="form-check form-switch p-0 m-0">
                                                                 <input type="checkbox" class="form-check-input ms-0"
-                                                                    [(ngModel)]="jwkForm.auto_reawk" name="auto_reawk">
+                                                                    (click)="$event.stopPropagation()"
+                                                                    (change)="onAutoReawkChange(jwkForm)"
+                                                                    [(ngModel)]="jwkForm.auto_reawk"
+                                                                    name="auto_reawk_{{i}}">
                                                             </div>
                                                         </div>
                                                         <div class="p-1 mx-1" *ngIf="jwkForm.auto_reawk">
                                                             <div class="row g-2">
-                                                                <div class="col-6">
+                                                                <div class="col-4">
+                                                                    <label class="form-label fs-11 mb-1">Pkt Num</label>
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm"
+                                                                        placeholder="Pkt Num"
+                                                                        [(ngModel)]="jwkForm.pkt_num"
+                                                                        name="pkt_num_reawk_{{i}}">
+                                                                </div>
+                                                                <div class="col-4">
                                                                     <label class="form-label fs-11 mb-1">Return
                                                                         Date</label>
                                                                     <input type="date"
                                                                         class="form-control form-control-sm"
                                                                         [(ngModel)]="jwkForm.aawak_date"
-                                                                        name="aawak_date">
+                                                                        name="aawak_date_{{i}}">
                                                                 </div>
-                                                                <div class="col-6">
+                                                                <div class="col-4">
                                                                     <label class="form-label fs-11 mb-1">Aawak
                                                                         Type</label>
                                                                     <ng-select class="custom-sm"
                                                                         placeholder="Select Type" [clearable]="true"
                                                                         [virtualScroll]="true" appendTo="body"
                                                                         [(ngModel)]="jwkForm.re_aawak_type_id"
-                                                                        name="re_aawak_type_id">
+                                                                        name="re_aawak_type_id_{{i}}">
                                                                         <ng-option *ngFor="let item of aawak_types"
                                                                             [value]="item._id">
                                                                             {{item.list_name_hin}} :
@@ -266,10 +287,10 @@
                                     </div>
 
                                     <!-- 2. Select Aawak Reference -->
-                                    <div *ngIf="settings.jawak.aawak_ref_id" style="min-width: 240px; margin-bottom: 2px;">
-                                        <app-aawak-ref [mmId]="fs.jawakFormMain.mm_id"
-                                            [maxDate]="fs.jawakFormMain.date" [deptId]="auth.webUser.dept_id"
-                                            [filterObj]="{
+                                    <div *ngIf="settings.jawak.aawak_ref_id"
+                                        style="min-width: 240px; margin-bottom: 2px;">
+                                        <app-aawak-ref [mmId]="fs.jawakFormMain.mm_id" [maxDate]="fs.jawakFormMain.date"
+                                            [deptId]="auth.webUser.dept_id" [filterObj]="{
                                                 item_id: jwkForm.item_id,
                                                 subitem_id: jwkForm.subitem_id,
                                                 condition_id: jwkForm.condition_id,
@@ -378,8 +399,7 @@
                                         <div style="min-width: 220px; margin-bottom: 2px;">
                                             <label class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">Item
                                                 - Subitem <span class="text-danger">*</span></label>
-                                            <app-item-dropdown size="sm"
-                                                [filterObj]="{ date: fs.jawakFormMain.date }"
+                                            <app-item-dropdown size="sm" [filterObj]="{ date: fs.jawakFormMain.date }"
                                                 [(itemId)]="jwkForm.item_id" [(subitemId)]="jwkForm.subitem_id"
                                                 (change)="itemSubitemSelected($event, i)" [required]="true"
                                                 [readonly]="!!jwkForm.aawak_ref_id">
@@ -394,7 +414,8 @@
                                                 placeholder="Product" [clearable]="true" [virtualScroll]="true"
                                                 [(ngModel)]="jwkForm.product_id" name="product_id" #product_id="ngModel"
                                                 (change)="productSelected($event, i)" [selectOnTab]="true">
-                                                <ng-option value="+add" class="text-primary fw-bold">+ Add Product</ng-option>
+                                                <ng-option value="+add" class="text-primary fw-bold">+ Add
+                                                    Product</ng-option>
                                                 <ng-option *ngFor="let item of products" [value]="item._id">
                                                     {{item.product_code ? item.product_code : ''}} : {{item.sr_num ?
                                                     item.sr_num : ''}}
@@ -409,8 +430,10 @@
                                             <ng-select class="custom-sm" style="width: 100%;" placeholder="Condition"
                                                 [clearable]="true" [virtualScroll]="true"
                                                 [(ngModel)]="jwkForm.condition_id" name="condition_id"
-                                                #condition_id="ngModel" (change)="conditionSelected($event, i)" [selectOnTab]="true" appendTo="body">
-                                                <ng-option value="+add" class="text-primary fw-bold">+ Add Condition</ng-option>
+                                                #condition_id="ngModel" (change)="conditionSelected($event, i)"
+                                                [selectOnTab]="true" appendTo="body">
+                                                <ng-option value="+add" class="text-primary fw-bold">+ Add
+                                                    Condition</ng-option>
                                                 <ng-option *ngFor="let item of conditions"
                                                     [value]="item._id">{{item.list_name_hin}} : {{item.list_name_roman}}
                                                     : {{item.list_name_eng}} </ng-option>
@@ -434,8 +457,10 @@
                                             <ng-select class="custom-sm" style="width: 100%;" placeholder="Source"
                                                 [clearable]="true" [virtualScroll]="true"
                                                 [(ngModel)]="jwkForm.aawak_source_id" name="aawak_source_id"
-                                                #aawak_source_id="ngModel" (change)="aawakSourceSelected($event, i)" [selectOnTab]="true" appendTo="body">
-                                                <ng-option value="+add" class="text-primary fw-bold">+ Add Aawak Source</ng-option>
+                                                #aawak_source_id="ngModel" (change)="aawakSourceSelected($event, i)"
+                                                [selectOnTab]="true" appendTo="body">
+                                                <ng-option value="+add" class="text-primary fw-bold">+ Add Aawak
+                                                    Source</ng-option>
                                                 <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
                                                     {{item.list_name_hin}} : {{item.list_name_roman}} :
                                                     {{item.list_name_eng}}
@@ -472,7 +497,8 @@
                                         <label class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">
                                             Qty <span class="text-danger">*</span>
                                             <span *ngIf="jwkForm.aawak_ref_id" class="text-primary float-end"
-                                                style="text-transform: none;">(Rem: {{jwkForm?.remaining_qty | number:'1.0-3'}})</span>
+                                                style="text-transform: none;">(Rem: {{jwkForm?.remaining_qty |
+                                                number:'1.0-3'}})</span>
                                         </label>
                                         <div class="input-group input-group-sm">
                                             <input type="number" class="form-control" placeholder="0"
@@ -505,7 +531,8 @@
                                             [ngClass]="{'validation' : (jawak_type_id?.touched || fMain.submitted) && jawak_type_id.errors?.['required']}"
                                             required>
                                             <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
+                                                {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng
+                                                : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
                                             </ng-option>
                                         </ng-select>
                                     </div>
@@ -883,22 +910,23 @@
                                                 </app-popover-filter>
                                             </td>
                                             <td *ngIf="settings.jawak.aawak_ref_id">
-                                                 <div style="min-width: 240px; margin-bottom: 2px;">
-                                                     <app-aawak-ref [mmId]="fs.jawakFormMain.mm_id"
-                                                         [maxDate]="fs.jawakFormMain.date" [deptId]="auth.webUser.dept_id"
-                                                         [filterObj]="{
+                                                <div style="min-width: 240px; margin-bottom: 2px;">
+                                                    <app-aawak-ref [mmId]="fs.jawakFormMain.mm_id"
+                                                        [maxDate]="fs.jawakFormMain.date"
+                                                        [deptId]="auth.webUser.dept_id" [filterObj]="{
                                                              item_id: jwkForm.item_id,
                                                              subitem_id: jwkForm.subitem_id,
                                                              condition_id: jwkForm.condition_id,
                                                              aawak_source_id: jwkForm.aawak_source_id,
                                                              remaining_qty: true
                                                          }" [(ngModel)]="jwkForm.aawak_ref_id"
-                                                         [selectedSplitsData]="jwkForm.aawak_splits" [totalSplitQty]="jwkForm.qty"
-                                                         (selectionChange)="refAawakSelected($event, i)"
-                                                         (splitsChange)="onAawakSplitsSelected($event, i)" size="sm"
-                                                         placeholder="Select Aawak / Split">
-                                                     </app-aawak-ref>
-                                                 </div>
+                                                        [selectedSplitsData]="jwkForm.aawak_splits"
+                                                        [totalSplitQty]="jwkForm.qty"
+                                                        (selectionChange)="refAawakSelected($event, i)"
+                                                        (splitsChange)="onAawakSplitsSelected($event, i)" size="sm"
+                                                        placeholder="Select Aawak / Split">
+                                                    </app-aawak-ref>
+                                                </div>
                                             </td>
                                             <td *ngIf="settings.jawak.lot_no">
 
@@ -1024,16 +1052,23 @@
                                             </td>
                                             <td>
                                                 <div style="min-width: 140px; margin-bottom: 2px;">
-                                                    <label class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">Jawak Type <span class="text-danger">*</span></label>
-                                                    <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Type"
-                                                        [clearable]="true" [virtualScroll]="true"
-                                                        [(ngModel)]="jwkForm.jawak_type_id" name="jawak_type_id"
-                                                        #jawak_type_id="ngModel" (change)="jawakTypeSelected($event, i)" [selectOnTab]="true" appendTo="body"
+                                                    <label
+                                                        class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">Jawak
+                                                        Type <span class="text-danger">*</span></label>
+                                                    <ng-select class="custom-sm" style="width: 100%;"
+                                                        placeholder="Select Type" [clearable]="true"
+                                                        [virtualScroll]="true" [(ngModel)]="jwkForm.jawak_type_id"
+                                                        name="jawak_type_id" #jawak_type_id="ngModel"
+                                                        (change)="jawakTypeSelected($event, i)" [selectOnTab]="true"
+                                                        appendTo="body"
                                                         [ngClass]="{'validation' : (jawak_type_id?.touched || fMain.submitted) && jawak_type_id.errors?.['required']}"
                                                         required>
-                                                        <ng-option value="+add" class="text-primary fw-bold">+ Add Jawak Type</ng-option>
+                                                        <ng-option value="+add" class="text-primary fw-bold">+ Add Jawak
+                                                            Type</ng-option>
                                                         <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                            {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
+                                                            {{item.list_name_hin}}{{item.list_name_eng ? ' : ' +
+                                                            item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' +
+                                                            item.list_name_roman : ''}}
                                                         </ng-option>
                                                     </ng-select>
                                                 </div>
@@ -1248,10 +1283,14 @@
 
                     <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)="addPbkResponse($event)"></app-pbk-entry>
                     <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="addMMResponse($event)"></app-mm-entry>
-                    <app-product-entry *ngIf="showModal == 'Add Product'" (response)="addProductResponse($event)"></app-product-entry>
-                    <app-support-list-entry *ngIf="showModal == 'Add Condition'" [list_type]="'condition'" (response)="addConditionResponse($event)"></app-support-list-entry>
-                    <app-support-list-entry *ngIf="showModal == 'Add Aawak Source'" [list_type]="'aawak_source'" (response)="addAawakSourceResponse($event)"></app-support-list-entry>
-                    <app-support-list-entry *ngIf="showModal == 'Add Jawak Type'" [list_type]="'jawak_type'" (response)="addJawakTypeResponse($event)"></app-support-list-entry>
+                    <app-product-entry *ngIf="showModal == 'Add Product'"
+                        (response)="addProductResponse($event)"></app-product-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Condition'" [list_type]="'condition'"
+                        (response)="addConditionResponse($event)"></app-support-list-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Aawak Source'" [list_type]="'aawak_source'"
+                        (response)="addAawakSourceResponse($event)"></app-support-list-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Jawak Type'" [list_type]="'jawak_type'"
+                        (response)="addJawakTypeResponse($event)"></app-support-list-entry>
 
                     <!-- Add Usage Type -->
                     <app-support-list-entry *ngIf="showModal == 'Add Usage Type'"

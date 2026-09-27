@@ -175,6 +175,512 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
     }
 });
 
+// Helper function to aggregate item-wise summary for a PBK using CTE (Common Table Expression)
+function getPbkItemSummary(dept_id, mm_id, pbk_id, from_str, to_str) {
+    let sql = `
+    WITH PriorAawak AS (
+        SELECT item_id, IFNULL(subitem_id, 0) AS subitem_id, IFNULL(unit_id, 0) AS unit_id,
+               SUM(IFNULL(qty, 0)) AS prior_awk
+        FROM aawak
+        WHERE pbk_id IS NOT NULL AND pbk_id = @pbk_id
+          AND dept_id = @dept_id
+          ${mm_id ? `AND mm_id = ${mm_id}` : ''}
+          AND strftime('%Y-%m', date) < @from_str
+        GROUP BY item_id, IFNULL(subitem_id, 0), IFNULL(unit_id, 0)
+    ),
+    PriorJawak AS (
+        SELECT item_id, IFNULL(subitem_id, 0) AS subitem_id, IFNULL(unit_id, 0) AS unit_id,
+               SUM(IFNULL(qty, 0)) AS prior_jwk
+        FROM jawak
+        WHERE pbk_id IS NOT NULL AND pbk_id = @pbk_id
+          AND dept_id = @dept_id
+          ${mm_id ? `AND mm_id = ${mm_id}` : ''}
+          AND strftime('%Y-%m', date) < @from_str
+        GROUP BY item_id, IFNULL(subitem_id, 0), IFNULL(unit_id, 0)
+    ),
+    RangeAawak AS (
+        SELECT item_id, IFNULL(subitem_id, 0) AS subitem_id, IFNULL(unit_id, 0) AS unit_id,
+               SUM(IFNULL(qty, 0)) AS total_aawak
+        FROM aawak
+        WHERE pbk_id IS NOT NULL AND pbk_id = @pbk_id
+          AND dept_id = @dept_id
+          ${mm_id ? `AND mm_id = ${mm_id}` : ''}
+          AND strftime('%Y-%m', date) >= @from_str AND strftime('%Y-%m', date) <= @to_str
+        GROUP BY item_id, IFNULL(subitem_id, 0), IFNULL(unit_id, 0)
+    ),
+    RangeJawak AS (
+        SELECT item_id, IFNULL(subitem_id, 0) AS subitem_id, IFNULL(unit_id, 0) AS unit_id,
+               SUM(IFNULL(qty, 0)) AS total_jawak
+        FROM jawak
+        WHERE pbk_id IS NOT NULL AND pbk_id = @pbk_id
+          AND dept_id = @dept_id
+          ${mm_id ? `AND mm_id = ${mm_id}` : ''}
+          AND strftime('%Y-%m', date) >= @from_str AND strftime('%Y-%m', date) <= @to_str
+        GROUP BY item_id, IFNULL(subitem_id, 0), IFNULL(unit_id, 0)
+    ),
+    AllKeys AS (
+        SELECT item_id, subitem_id, unit_id FROM PriorAawak
+        UNION
+        SELECT item_id, subitem_id, unit_id FROM PriorJawak
+        UNION
+        SELECT item_id, subitem_id, unit_id FROM RangeAawak
+        UNION
+        SELECT item_id, subitem_id, unit_id FROM RangeJawak
+    )
+    SELECT 
+        k.item_id, 
+        k.subitem_id, 
+        k.unit_id,
+        vi.icategories AS item_icategories,
+        vs.categories AS subitem_categories,
+        item.item_hin, 
+        item.item_eng, 
+        subitem.subitem_hin, 
+        subitem.subitem_eng, 
+        unit.unit_short,
+        (IFNULL(pa.prior_awk, 0) - IFNULL(pj.prior_jwk, 0)) AS past_bachat,
+        IFNULL(ra.total_aawak, 0) AS total_aawak,
+        IFNULL(rj.total_jawak, 0) AS total_jawak,
+        (IFNULL(pa.prior_awk, 0) - IFNULL(pj.prior_jwk, 0) + IFNULL(ra.total_aawak, 0) - IFNULL(rj.total_jawak, 0)) AS current_bachat
+    FROM AllKeys k
+    LEFT JOIN PriorAawak pa ON k.item_id = pa.item_id AND k.subitem_id = pa.subitem_id AND k.unit_id = pa.unit_id
+    LEFT JOIN PriorJawak pj ON k.item_id = pj.item_id AND k.subitem_id = pj.subitem_id AND k.unit_id = pj.unit_id
+    LEFT JOIN RangeAawak ra ON k.item_id = ra.item_id AND k.subitem_id = ra.subitem_id AND k.unit_id = ra.unit_id
+    LEFT JOIN RangeJawak rj ON k.item_id = rj.item_id AND k.subitem_id = rj.subitem_id AND k.unit_id = rj.unit_id
+    LEFT JOIN item ON item._id = k.item_id
+    LEFT JOIN subitem ON subitem._id = k.subitem_id
+    LEFT JOIN v_item vi ON vi._id = k.item_id
+    LEFT JOIN v_subitem vs ON vs._id = k.subitem_id
+    LEFT JOIN unit ON unit._id = k.unit_id
+    WHERE (IFNULL(pa.prior_awk, 0) - IFNULL(pj.prior_jwk, 0)) != 0
+       OR IFNULL(ra.total_aawak, 0) != 0
+       OR IFNULL(rj.total_jawak, 0) != 0
+       OR (IFNULL(pa.prior_awk, 0) - IFNULL(pj.prior_jwk, 0) + IFNULL(ra.total_aawak, 0) - IFNULL(rj.total_jawak, 0)) != 0
+    ORDER BY item.item_hin ASC;
+    `;
+
+    let stmt = DB.db.prepare(sql);
+    let rows = stmt.all({
+        dept_id: dept_id,
+        pbk_id: pbk_id,
+        from_str: from_str,
+        to_str: to_str
+    });
+
+    let itemsSummary = rows.map(r => {
+        let catsRaw = (r.subitem_id && r.subitem_id > 0) ? r.subitem_categories : r.item_icategories;
+        let parsedCats = [];
+        try {
+            parsedCats = typeof catsRaw === 'string' ? JSON.parse(catsRaw || '[]') : (catsRaw || []);
+        } catch (e) {}
+        let catHin = (Array.isArray(parsedCats) && parsedCats.length > 0) ? parsedCats.map(c => c.category_hin).filter(Boolean).join(', ') : 'सामान्य';
+        let catEng = (Array.isArray(parsedCats) && parsedCats.length > 0) ? parsedCats.map(c => c.category_eng).filter(Boolean).join(', ') : 'General';
+
+        return {
+            item_id: r.item_id,
+            subitem_id: r.subitem_id,
+            unit_id: r.unit_id,
+            category_hin: catHin,
+            category_eng: catEng,
+            item_hin: r.item_hin || 'Item',
+            item_eng: r.item_eng || '',
+            subitem_hin: r.subitem_hin || '',
+            subitem_eng: r.subitem_eng || '',
+            unit_short: r.unit_short || 'Pcs',
+            past_bachat: Number(r.past_bachat || 0),
+            total_aawak: Number(r.total_aawak || 0),
+            total_jawak: Number(r.total_jawak || 0),
+            current_bachat: Number(r.current_bachat || 0)
+        };
+    });
+
+    let past_bachat_total = itemsSummary.reduce((sum, i) => sum + i.past_bachat, 0);
+    let total_aawak_total = itemsSummary.reduce((sum, i) => sum + i.total_aawak, 0);
+    let total_jawak_total = itemsSummary.reduce((sum, i) => sum + i.total_jawak, 0);
+    let current_bachat_total = itemsSummary.reduce((sum, i) => sum + i.current_bachat, 0);
+
+    return {
+        overview: {
+            past_bachat: past_bachat_total,
+            total_aawak: total_aawak_total,
+            total_jawak: total_jawak_total,
+            current_bachat: current_bachat_total
+        },
+        itemsSummary: itemsSummary
+    };
+}
+
+// Helper function to aggregate item-wise summary for an MM using CTE
+function getMmItemSummary(dept_id, mm_id, from_str, to_str) {
+    let sql = `
+    WITH PriorAawak AS (
+        SELECT item_id, IFNULL(subitem_id, 0) AS subitem_id, IFNULL(unit_id, 0) AS unit_id,
+               SUM(IFNULL(qty, 0)) AS prior_awk
+        FROM aawak
+        WHERE mm_id = @mm_id
+          AND dept_id = @dept_id
+          AND strftime('%Y-%m', date) < @from_str
+        GROUP BY item_id, IFNULL(subitem_id, 0), IFNULL(unit_id, 0)
+    ),
+    PriorJawak AS (
+        SELECT item_id, IFNULL(subitem_id, 0) AS subitem_id, IFNULL(unit_id, 0) AS unit_id,
+               SUM(IFNULL(qty, 0)) AS prior_jwk
+        FROM jawak
+        WHERE mm_id = @mm_id
+          AND dept_id = @dept_id
+          AND strftime('%Y-%m', date) < @from_str
+        GROUP BY item_id, IFNULL(subitem_id, 0), IFNULL(unit_id, 0)
+    ),
+    RangeAawak AS (
+        SELECT item_id, IFNULL(subitem_id, 0) AS subitem_id, IFNULL(unit_id, 0) AS unit_id,
+               SUM(IFNULL(qty, 0)) AS total_aawak
+        FROM aawak
+        WHERE mm_id = @mm_id
+          AND dept_id = @dept_id
+          AND strftime('%Y-%m', date) >= @from_str AND strftime('%Y-%m', date) <= @to_str
+        GROUP BY item_id, IFNULL(subitem_id, 0), IFNULL(unit_id, 0)
+    ),
+    RangeJawak AS (
+        SELECT item_id, IFNULL(subitem_id, 0) AS subitem_id, IFNULL(unit_id, 0) AS unit_id,
+               SUM(IFNULL(qty, 0)) AS total_jawak
+        FROM jawak
+        WHERE mm_id = @mm_id
+          AND dept_id = @dept_id
+          AND strftime('%Y-%m', date) >= @from_str AND strftime('%Y-%m', date) <= @to_str
+        GROUP BY item_id, IFNULL(subitem_id, 0), IFNULL(unit_id, 0)
+    ),
+    AllKeys AS (
+        SELECT item_id, subitem_id, unit_id FROM PriorAawak
+        UNION
+        SELECT item_id, subitem_id, unit_id FROM PriorJawak
+        UNION
+        SELECT item_id, subitem_id, unit_id FROM RangeAawak
+        UNION
+        SELECT item_id, subitem_id, unit_id FROM RangeJawak
+    )
+    SELECT 
+        k.item_id, 
+        k.subitem_id, 
+        k.unit_id,
+        vi.icategories AS item_icategories,
+        vs.categories AS subitem_categories,
+        item.item_hin, 
+        item.item_eng, 
+        subitem.subitem_hin, 
+        subitem.subitem_eng, 
+        unit.unit_short,
+        (IFNULL(pa.prior_awk, 0) - IFNULL(pj.prior_jwk, 0)) AS past_bachat,
+        IFNULL(ra.total_aawak, 0) AS total_aawak,
+        IFNULL(rj.total_jawak, 0) AS total_jawak,
+        (IFNULL(pa.prior_awk, 0) - IFNULL(pj.prior_jwk, 0) + IFNULL(ra.total_aawak, 0) - IFNULL(rj.total_jawak, 0)) AS current_bachat
+    FROM AllKeys k
+    LEFT JOIN PriorAawak pa ON k.item_id = pa.item_id AND k.subitem_id = pa.subitem_id AND k.unit_id = pa.unit_id
+    LEFT JOIN PriorJawak pj ON k.item_id = pj.item_id AND k.subitem_id = pj.subitem_id AND k.unit_id = pj.unit_id
+    LEFT JOIN RangeAawak ra ON k.item_id = ra.item_id AND k.subitem_id = ra.subitem_id AND k.unit_id = ra.unit_id
+    LEFT JOIN RangeJawak rj ON k.item_id = rj.item_id AND k.subitem_id = rj.subitem_id AND k.unit_id = rj.unit_id
+    LEFT JOIN item ON item._id = k.item_id
+    LEFT JOIN subitem ON subitem._id = k.subitem_id
+    LEFT JOIN v_item vi ON vi._id = k.item_id
+    LEFT JOIN v_subitem vs ON vs._id = k.subitem_id
+    LEFT JOIN unit ON unit._id = k.unit_id
+    WHERE (IFNULL(pa.prior_awk, 0) - IFNULL(pj.prior_jwk, 0)) != 0
+       OR IFNULL(ra.total_aawak, 0) != 0
+       OR IFNULL(rj.total_jawak, 0) != 0
+       OR (IFNULL(pa.prior_awk, 0) - IFNULL(pj.prior_jwk, 0) + IFNULL(ra.total_aawak, 0) - IFNULL(rj.total_jawak, 0)) != 0
+    ORDER BY item.item_hin ASC;
+    `;
+
+    let stmt = DB.db.prepare(sql);
+    let rows = stmt.all({
+        dept_id: dept_id,
+        mm_id: mm_id,
+        from_str: from_str,
+        to_str: to_str
+    });
+
+    let itemsSummary = rows.map(r => {
+        let catsRaw = (r.subitem_id && r.subitem_id > 0) ? r.subitem_categories : r.item_icategories;
+        let parsedCats = [];
+        try {
+            parsedCats = typeof catsRaw === 'string' ? JSON.parse(catsRaw || '[]') : (catsRaw || []);
+        } catch (e) {}
+        let catHin = (Array.isArray(parsedCats) && parsedCats.length > 0) ? parsedCats.map(c => c.category_hin).filter(Boolean).join(', ') : 'सामान्य';
+        let catEng = (Array.isArray(parsedCats) && parsedCats.length > 0) ? parsedCats.map(c => c.category_eng).filter(Boolean).join(', ') : 'General';
+
+        return {
+            item_id: r.item_id,
+            subitem_id: r.subitem_id,
+            unit_id: r.unit_id,
+            category_hin: catHin,
+            category_eng: catEng,
+            item_hin: r.item_hin || 'Item',
+            item_eng: r.item_eng || '',
+            subitem_hin: r.subitem_hin || '',
+            subitem_eng: r.subitem_eng || '',
+            unit_short: r.unit_short || 'Pcs',
+            past_bachat: Number(r.past_bachat || 0),
+            total_aawak: Number(r.total_aawak || 0),
+            total_jawak: Number(r.total_jawak || 0),
+            current_bachat: Number(r.current_bachat || 0)
+        };
+    });
+
+    let past_bachat_total = itemsSummary.reduce((sum, i) => sum + i.past_bachat, 0);
+    let total_aawak_total = itemsSummary.reduce((sum, i) => sum + i.total_aawak, 0);
+    let total_jawak_total = itemsSummary.reduce((sum, i) => sum + i.total_jawak, 0);
+    let current_bachat_total = itemsSummary.reduce((sum, i) => sum + i.current_bachat, 0);
+
+    return {
+        overview: {
+            past_bachat: past_bachat_total,
+            total_aawak: total_aawak_total,
+            total_jawak: total_jawak_total,
+            current_bachat: current_bachat_total
+        },
+        itemsSummary: itemsSummary
+    };
+}
+
+// PBK Ledger API
+router.put('/pbk_ledger/:dept_id', async (req, res, next) => {
+    try {
+        let from_month = parseInt(req.body.from.m);
+        let from_year = req.body.from.y;
+        let to_month = parseInt(req.body.to.m);
+        let to_year = req.body.to.y;
+
+        let from_str = `${from_year}-${from_month.toString().padStart(2, '0')}`;
+        let to_str = `${to_year}-${to_month.toString().padStart(2, '0')}`;
+
+        let dept_id = req.params.dept_id;
+        let mm_id = req.body.mm_id;
+        let pbk_ids = req.body.pbk_ids || [];
+
+        let reportData = [];
+
+        for (let p of pbk_ids) {
+            let summaryRes = getPbkItemSummary(dept_id, mm_id, p.pbk_id, from_str, to_str);
+
+            reportData.push({
+                pbk_id: p.pbk_id,
+                roll_no: p.roll_no,
+                pbk_hin: p.pbk_hin,
+                pbk_eng: p.pbk_eng,
+                state_id: p.state_id,
+                state_hin: p.state_hin,
+                state_eng: p.state_eng,
+                overview: summaryRes.overview,
+                itemsSummary: summaryRes.itemsSummary
+            });
+        }
+
+        res.json({
+            success: true,
+            data: reportData
+        });
+
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+});
+
+// MM Ledger API
+router.put('/mm_ledger/:dept_id', async (req, res, next) => {
+    try {
+        let from_month = parseInt(req.body.from.m);
+        let from_year = req.body.from.y;
+        let to_month = parseInt(req.body.to.m);
+        let to_year = req.body.to.y;
+
+        let from_str = `${from_year}-${from_month.toString().padStart(2, '0')}`;
+        let to_str = `${to_year}-${to_month.toString().padStart(2, '0')}`;
+
+        let dept_id = req.params.dept_id;
+        let mm_objs = req.body.mm_objs || [];
+
+        let reportData = [];
+
+        for (let m of mm_objs) {
+            let summaryRes = getMmItemSummary(dept_id, m.mm_id, from_str, to_str);
+
+            reportData.push({
+                mm_id: m.mm_id,
+                mm_hin: m.mm_hin,
+                mm_eng: m.mm_eng,
+                mm_code: m.mm_code,
+                state_id: m.state_id,
+                state_hin: m.state_hin,
+                state_eng: m.state_eng,
+                overview: summaryRes.overview,
+                itemsSummary: summaryRes.itemsSummary
+            });
+        }
+
+        res.json({
+            success: true,
+            data: reportData
+        });
+
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+});
+
+router.post('/pbk_ledger_pdf/:dept_id', async (req, res, next) => {
+    try {
+        let from_month = parseInt(req.body.from.m);
+        let from_year = req.body.from.y;
+        let to_month = parseInt(req.body.to.m);
+        let to_year = req.body.to.y;
+
+        let from_str = `${from_year}-${from_month.toString().padStart(2, '0')}`;
+        let to_str = `${to_year}-${to_month.toString().padStart(2, '0')}`;
+
+        let dept_id = req.params.dept_id;
+        let mm_id = req.body.mm_id;
+        let pbk_ids = req.body.pbk_ids || [];
+        let taskId = req.body.taskId;
+
+        let mmName = 'All MMs';
+        if (mm_id) {
+            let mmRow = mmTable.getById(mm_id);
+            if (mmRow) mmName = mmRow.mm_hin;
+        }
+
+        if (req.body.isHeavySinglePdf && req.body.statesPayload) {
+            if (taskId) global.pdfProgress[taskId] = { status: 'Constructing Master Single Heavy PBK PDF template...' };
+            const pdfBuffer = await itemLedgerPdf.generatePbkLedgerPdf(
+                [],
+                req.body.from ? req.body.from.name_hin : (req.body.from_name_hin || ''),
+                req.body.to ? req.body.to.name_hin : (req.body.to_name_hin || ''),
+                mmName,
+                taskId,
+                '',
+                req.body.statesPayload
+            );
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=pbk_ledger_heavy.pdf');
+            res.end(pdfBuffer, 'binary');
+            if (taskId) delete global.pdfProgress[taskId];
+            return;
+        }
+
+        if (taskId) global.pdfProgress[taskId] = { status: 'Fetching database records...' };
+
+        let reportData = [];
+
+        for (let p of pbk_ids) {
+            let summaryRes = getPbkItemSummary(dept_id, mm_id, p.pbk_id, from_str, to_str);
+
+            reportData.push({
+                pbk_id: p.pbk_id,
+                roll_no: p.roll_no,
+                pbk_hin: p.pbk_hin,
+                pbk_eng: p.pbk_eng,
+                state_id: p.state_id,
+                state_hin: p.state_hin,
+                state_eng: p.state_eng,
+                overview: summaryRes.overview,
+                itemsSummary: summaryRes.itemsSummary
+            });
+        }
+
+        if (taskId) global.pdfProgress[taskId] = { status: 'Constructing PDF template...' };
+        const pdfBuffer = await itemLedgerPdf.generatePbkLedgerPdf(
+            reportData,
+            req.body.from ? req.body.from.name_hin : '',
+            req.body.to ? req.body.to.name_hin : '',
+            mmName,
+            taskId,
+            req.body.state_name || ''
+        );
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=pbk_ledger.pdf');
+        res.end(pdfBuffer, 'binary');
+
+        if (taskId) delete global.pdfProgress[taskId];
+    } catch (err) {
+        console.error(err);
+        if (req.body.taskId) delete global.pdfProgress[req.body.taskId];
+        next(err);
+    }
+});
+
+router.post('/mm_ledger_pdf/:dept_id', async (req, res, next) => {
+    try {
+        let from_month = parseInt(req.body.from.m);
+        let from_year = req.body.from.y;
+        let to_month = parseInt(req.body.to.m);
+        let to_year = req.body.to.y;
+
+        let from_str = `${from_year}-${from_month.toString().padStart(2, '0')}`;
+        let to_str = `${to_year}-${to_month.toString().padStart(2, '0')}`;
+
+        let dept_id = req.params.dept_id;
+        let mm_objs = req.body.mm_objs || [];
+        let taskId = req.body.taskId;
+
+        if (req.body.isHeavySinglePdf && req.body.statesPayload) {
+            if (taskId) global.pdfProgress[taskId] = { status: 'Constructing Master Single Heavy MM PDF template...' };
+            const pdfBuffer = await itemLedgerPdf.generateMmLedgerPdf(
+                [],
+                req.body.from ? req.body.from.name_hin : (req.body.from_name_hin || ''),
+                req.body.to ? req.body.to.name_hin : (req.body.to_name_hin || ''),
+                taskId,
+                '',
+                req.body.statesPayload
+            );
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=mm_ledger_heavy.pdf');
+            res.end(pdfBuffer, 'binary');
+            if (taskId) delete global.pdfProgress[taskId];
+            return;
+        }
+
+        if (taskId) global.pdfProgress[taskId] = { status: 'Fetching database records...' };
+
+        let reportData = [];
+
+        for (let m of mm_objs) {
+            let summaryRes = getMmItemSummary(dept_id, m.mm_id, from_str, to_str);
+
+            reportData.push({
+                mm_id: m.mm_id,
+                mm_code: m.mm_code || '',
+                mm_hin: m.mm_hin,
+                mm_eng: m.mm_eng,
+                state_id: m.state_id,
+                state_hin: m.state_hin,
+                state_eng: m.state_eng,
+                overview: summaryRes.overview,
+                itemsSummary: summaryRes.itemsSummary
+            });
+        }
+
+        if (taskId) global.pdfProgress[taskId] = { status: 'Constructing PDF template...' };
+        const pdfBuffer = await itemLedgerPdf.generateMmLedgerPdf(
+            reportData,
+            req.body.from ? req.body.from.name_hin : '',
+            req.body.to ? req.body.to.name_hin : '',
+            taskId,
+            req.body.state_name || ''
+        );
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=mm_ledger.pdf');
+        res.end(pdfBuffer, 'binary');
+
+        if (taskId) delete global.pdfProgress[taskId];
+    } catch (err) {
+        console.error(err);
+        if (req.body.taskId) delete global.pdfProgress[req.body.taskId];
+        next(err);
+    }
+});
+
 const itemLedgerPdf = require('../services/item-ledger-pdf.service');
 const mmTable = new (require('../database/base.table'))('mm');
 

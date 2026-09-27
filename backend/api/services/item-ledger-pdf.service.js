@@ -606,6 +606,701 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
     }
 }
 
+/**
+ * Render PBK Ledger Section HTML
+ */
+function renderPbkLedgerSection(report, fromName, toName, mmName, stateName, pbkName, pbkRollNo, anchorId, hasPageBreak = true) {
+    let html = `
+    <div class="item-section ${hasPageBreak ? 'page-break' : ''}" id="${anchorId}">
+        <div class="header-title" style="background-color: #0f766e;">
+            PBK LEDGER REPORT: ${pbkName} ${pbkRollNo ? `(Roll: ${pbkRollNo})` : ''}
+            <div style="font-size: 11px; font-weight: normal; margin-top: 3px;">
+                अवधि: ${fromName} से ${toName} | MM / Store: ${mmName}${stateName ? ` | State: ${stateName}` : ''}
+            </div>
+        </div>
+    `;
+
+    if (report.itemsSummary && report.itemsSummary.length > 0) {
+        html += `
+        <table class="data-table">
+            <thead>
+                <tr style="background-color: #0f766e; color: #ffffff;">
+                    <th width="6%" style="text-align: center;">क्र.</th>
+                    <th width="18%">Category (श्रेणी)</th>
+                    <th>Item / Subitem (वस्तु एवं सबआइटम)</th>
+                    <th width="10%" style="text-align: center;">Unit (इकाई)</th>
+                    <th width="15%" style="text-align: right;">Past Bachat (पिछली बचत)</th>
+                    <th width="15%" style="text-align: right;">Total Aawak (कुल आवक)</th>
+                    <th width="15%" style="text-align: right;">Total Jawak (कुल जावक)</th>
+                    <th width="15%" style="text-align: right;">Current Bachat (वर्तमान बचत)</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+        report.itemsSummary.forEach((item, i) => {
+            const itemStr = (item.item_hin || item.item_eng || '') + (item.subitem_hin ? ` (${item.subitem_hin})` : '');
+            html += `
+                <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#f0fdf4'};">
+                    <td style="text-align: center;">${i + 1}</td>
+                    <td><span style="background-color: #f1f5f9; color: #475569; padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: 600;">${item.category_hin || 'सामान्य'}</span></td>
+                    <td><strong>${itemStr}</strong></td>
+                    <td style="text-align: center;">${item.unit_short || ''}</td>
+                    <td style="text-align: right;">${formatNumber(item.past_bachat)}</td>
+                    <td style="text-align: right; color: #059669; font-weight: bold;">${formatNumber(item.total_aawak)}</td>
+                    <td style="text-align: right; color: #dc2626; font-weight: bold;">${formatNumber(item.total_jawak)}</td>
+                    <td style="text-align: right; color: #0284c7; font-weight: bold;">${formatNumber(item.current_bachat)}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                <tr style="background-color: #e2e8f0; font-weight: bold;">
+                    <td style="text-align: center;">*</td>
+                    <td colspan="3">Total (कुल योग)</td>
+                    <td style="text-align: right;">${formatNumber(report.overview.past_bachat)}</td>
+                    <td style="text-align: right; color: #059669;">${formatNumber(report.overview.total_aawak)}</td>
+                    <td style="text-align: right; color: #dc2626;">${formatNumber(report.overview.total_jawak)}</td>
+                    <td style="text-align: right; color: #0284c7;">${formatNumber(report.overview.current_bachat)}</td>
+                </tr>
+            </tbody>
+        </table>
+        `;
+    } else {
+        html += `<div class="no-records">No ledger items found for this PBK in the selected period.</div>`;
+    }
+
+    html += `
+        <div style="margin-top: 25px; text-align: right; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+            <a href="#index-page" style="text-decoration: none; color: #0f766e; font-weight: bold; font-size: 11px; background-color: #f8fafc; padding: 5px 12px; border: 1px solid #cbd5e1; border-radius: 4px; display: inline-block;">
+                ⬆️ मुख्य अनुक्रमणिका (Main Index) पर जाएं
+            </a>
+        </div>
+    </div>
+    `;
+
+    return html;
+}
+
+/**
+ * Generate PBK Ledger PDF
+ */
+async function generatePbkLedgerPdf(reportData, fromName, toName, mmName, taskId, stateName, statesPayload = null) {
+    let htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                color: #333;
+                font-size: 10px;
+                line-height: 1.4;
+                margin: 0;
+                padding: 0;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+            .header-title {
+                text-align: center;
+                font-size: 15px;
+                font-weight: bold;
+                color: #ffffff;
+                background-color: #0f766e;
+                padding: 10px;
+                margin-bottom: 15px;
+                border-radius: 4px;
+            }
+            .toc-container {
+                padding: 15px;
+            }
+            .toc-title {
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 10px;
+                color: #0f766e;
+                border-bottom: 2px solid #0d9488;
+                padding-bottom: 10px;
+            }
+            .toc-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+            }
+            .toc-table th, .toc-table td {
+                border: 1px solid #cbd5e1;
+                padding: 7px 9px;
+                font-size: 11px;
+                text-align: left;
+            }
+            .toc-table th {
+                background-color: #0f766e;
+                color: #ffffff;
+                font-weight: bold;
+            }
+            .item-section {
+                padding: 10px 0;
+            }
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+            }
+            .data-table th, .data-table td {
+                border: 1px solid #cbd5e1;
+                padding: 5px 7px;
+                font-size: 10px;
+            }
+            .data-table th {
+                font-weight: bold;
+            }
+            .table-success th {
+                background-color: #d1fae5;
+                color: #065f46;
+            }
+            .table-danger th {
+                background-color: #fee2e2;
+                color: #991b1b;
+            }
+            .text-success-h {
+                color: #059669;
+                font-size: 12px;
+                border-bottom: 1px solid #a7f3d0;
+                padding-bottom: 4px;
+                margin-top: 15px;
+                margin-bottom: 8px;
+            }
+            .text-danger-h {
+                color: #dc2626;
+                font-size: 12px;
+                border-bottom: 1px solid #fecaca;
+                padding-bottom: 4px;
+                margin-top: 15px;
+                margin-bottom: 8px;
+            }
+            .no-records {
+                font-style: italic;
+                color: #64748b;
+                padding: 8px;
+                background-color: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 4px;
+                margin-bottom: 15px;
+            }
+        </style>
+    </head>
+    <body>
+    `;
+
+    if (statesPayload && Array.isArray(statesPayload) && statesPayload.length > 0) {
+        if (taskId) global.pdfProgress[taskId] = { status: 'Constructing Master Single Index & State Table of Contents...' };
+
+        htmlContent += `
+        <div class="toc-container page-break" id="index-page">
+            <div class="toc-title">${mmName} - सम्पूर्ण PBK लेजर अनुक्रमणिका (Master PBK Index)</div>
+            <div style="text-align: center; margin-bottom: 5px; font-size: 12px; color: #555;">
+                अवधि: ${fromName} से ${toName} | Store: ${mmName} | कुल राज्य: ${statesPayload.length}
+            </div>
+            <div style="text-align: center; margin-bottom: 15px; font-size: 10px; color: #0f766e; font-weight: bold; font-style: italic;">
+                * विवरण देखने के लिए PBK नाम पर क्लिक करें / Click on PBK for details
+            </div>
+
+            <table class="toc-table">
+                <thead>
+                    <tr style="background-color: #0f766e; color: #ffffff;">
+                        <th width="10%" style="text-align: center;">क्र.</th>
+                        <th>राज्य (State) एवं PBK / जिज्ञासु का नाम</th>
+                        <th width="22%" style="text-align: right;">वर्तमान बचत मात्रा</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        statesPayload.forEach((g, gIdx) => {
+            let stateNameHin = g.state_hin || g.state_eng || 'State';
+            let reports = g.reports || [];
+            let stateBcht = reports.reduce((s, r) => s + Number(r.overview.current_bachat || 0), 0);
+
+            htmlContent += `
+                <tr style="background-color: #115e59; color: #ffffff; font-weight: bold;">
+                    <td style="text-align: center; background-color: #0f766e; color: #5eead4; font-size: 11px;">
+                        राज्य ${gIdx + 1}
+                    </td>
+                    <td colspan="2" style="padding: 8px 10px; background-color: #115e59; color: #f0fdf4; font-size: 12px;">
+                        📍 <strong>${stateNameHin}</strong>
+                        <span style="font-size: 10px; font-weight: normal; margin-left: 15px; color: #ccfbf1;">
+                            — कुल ${reports.length} PBK | बचत: <strong>${formatNumber(stateBcht)}</strong>
+                        </span>
+                    </td>
+                </tr>
+            `;
+
+            reports.forEach((r, rIdx) => {
+                const pbkName = r.pbk_hin + (r.roll_no ? ` (Roll: ${r.roll_no})` : '');
+                htmlContent += `
+                    <tr style="background-color: ${rIdx % 2 === 0 ? '#ffffff' : '#f0fdf4'};">
+                        <td style="text-align: center; color: #64748b; font-weight: 600;">${gIdx + 1}.${rIdx + 1}</td>
+                        <td style="padding-left: 20px;">
+                            <a href="#pbk-sec-${gIdx}-${rIdx}" style="text-decoration: none; color: #0d9488; font-weight: 600;">
+                                👤 ${pbkName}
+                            </a>
+                        </td>
+                        <td style="text-align: right; font-weight: bold;">
+                            ${formatNumber(r.overview.current_bachat)} ${r.unit_short || ''}
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+
+        htmlContent += `
+                </tbody>
+            </table>
+        </div>
+        `;
+
+        statesPayload.forEach((g, gIdx) => {
+            (g.reports || []).forEach((r, rIdx) => {
+                const pbkName = r.pbk_hin || '';
+                const pbkRollNo = r.roll_no || '';
+                const stateNameStr = g.state_hin || g.state_eng || '';
+                htmlContent += renderPbkLedgerSection(
+                    r, fromName, toName, mmName, stateNameStr, pbkName, pbkRollNo,
+                    `pbk-sec-${gIdx}-${rIdx}`,
+                    true
+                );
+            });
+        });
+    } else {
+        htmlContent += `
+        <div class="toc-container page-break" id="index-page">
+            <div class="toc-title">${mmName} - PBK लेजर अनुक्रमणिका</div>
+            <div style="text-align: center; margin-bottom: 5px; font-size: 12px; color: #555;">
+                अवधि: ${fromName} से ${toName} | Store: ${mmName}${stateName ? ` | State: ${stateName}` : ''}
+            </div>
+            
+            <table class="toc-table">
+                <thead>
+                    <tr>
+                        <th width="8%" style="text-align: center;">S.No.</th>
+                        <th>PBK / जिज्ञासु नाम</th>
+                        <th width="22%" style="text-align: right;">Bachat Qty / बचत मात्रा</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        reportData.forEach((report, i) => {
+            const pbkName = report.pbk_hin + (report.roll_no ? ` (Roll: ${report.roll_no})` : '');
+            htmlContent += `
+                <tr>
+                    <td style="text-align: center;">${i + 1}</td>
+                    <td>
+                        <a href="#pbk-sec-${i}" style="text-decoration: none; color: #0d9488; font-weight: bold;">
+                            ${pbkName}
+                        </a>
+                    </td>
+                    <td style="text-align: right; font-weight: bold;">
+                        ${formatNumber(report.overview.current_bachat)} ${report.unit_short || ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        htmlContent += `
+                </tbody>
+            </table>
+        </div>
+        `;
+
+        reportData.forEach((report, i) => {
+            const pbkName = report.pbk_hin || '';
+            const pbkRollNo = report.roll_no || '';
+            htmlContent += renderPbkLedgerSection(
+                report, fromName, toName, mmName, stateName, pbkName, pbkRollNo,
+                `pbk-sec-${i}`,
+                i < reportData.length - 1
+            );
+        });
+    }
+
+    htmlContent += `
+    </body>
+    </html>
+    `;
+
+    if (taskId) global.pdfProgress[taskId] = { status: 'Waiting for PDF engine...' };
+    const browser = await pdfEngine.getBrowser();
+
+    let page = null;
+    try {
+        page = await browser.newPage();
+        if (taskId) global.pdfProgress[taskId] = { status: 'Rendering HTML to PDF...' };
+        await page.setContent(htmlContent, { waitUntil: 'domcontentloaded', timeout: 0 });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            timeout: 0,
+            printBackground: true,
+            margin: { top: '15mm', right: '15mm', bottom: '20mm', left: '15mm' },
+            displayHeaderFooter: true,
+            headerTemplate: '<div></div>',
+            footerTemplate: `
+                <div style="width: 100%; font-size: 8px; color: #7f8c8d; font-family: sans-serif; padding: 0 15mm; display: flex; justify-content: space-between; box-sizing: border-box;">
+                    <span>HisabKitab PBK Ledger Report</span>
+                    <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+                </div>
+            `
+        });
+
+        await page.close();
+        return pdfBuffer;
+    } catch (err) {
+        if (page) await page.close().catch(() => { });
+        throw err;
+    }
+}
+
+/**
+ * Render MM Ledger Section HTML
+ */
+function renderMmLedgerSection(report, fromName, toName, stateName, mmName, mmCode, elementId, pageBreak = true) {
+    const fullMmTitle = mmName + (mmCode ? ` (${mmCode})` : '');
+    let html = `
+    <div class="item-section ${pageBreak ? 'page-break' : ''}" id="${elementId}">
+        <div class="header-title">
+            ${fullMmTitle} | State: ${stateName || report.state_hin || ''}
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 12px; font-size: 11px; color: #555;">
+            अवधि: <strong>${fromName}</strong> से <strong>${toName}</strong> | MM / Store: <strong>${fullMmTitle}</strong>
+        </div>
+    `;
+
+    if (report.itemsSummary && report.itemsSummary.length > 0) {
+        html += `
+        <table class="data-table">
+            <thead>
+                <tr style="background-color: #0f766e; color: #ffffff;">
+                    <th style="width: 45px; text-align: center;">S.No.</th>
+                    <th style="width: 110px;">Category (श्रेणी)</th>
+                    <th>Item / Subitem (वस्तु)</th>
+                    <th style="text-align: center; width: 70px;">Unit (इकाई)</th>
+                    <th style="text-align: right; width: 100px;">Past Bachat (पिछला बचत)</th>
+                    <th style="text-align: right; width: 100px;">Total Aawak (कुल आवक)</th>
+                    <th style="text-align: right; width: 100px;">Total Jawak (कुल जावक)</th>
+                    <th style="text-align: right; width: 110px;">Final Bachat (वर्तमान बचत)</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        report.itemsSummary.forEach((item, idx) => {
+            const itemStr = item.item_hin + (item.subitem_hin ? ` (${item.subitem_hin})` : '');
+            html += `
+                <tr style="background-color: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                    <td style="text-align: center;">${idx + 1}</td>
+                    <td><span style="background-color: #f1f5f9; color: #475569; padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: 600;">${item.category_hin || 'सामान्य'}</span></td>
+                    <td><strong>${itemStr}</strong></td>
+                    <td style="text-align: center;">${item.unit_short || ''}</td>
+                    <td style="text-align: right;">${formatNumber(item.past_bachat)}</td>
+                    <td style="text-align: right; color: #059669; font-weight: bold;">${formatNumber(item.total_aawak)}</td>
+                    <td style="text-align: right; color: #dc2626; font-weight: bold;">${formatNumber(item.total_jawak)}</td>
+                    <td style="text-align: right; font-weight: bold; color: ${Number(item.current_bachat) >= 0 ? '#0284c7' : '#dc2626'};">${formatNumber(item.current_bachat)}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                <tr style="background-color: #f1f5f9; font-weight: bold; border-top: 2px solid #0f766e;">
+                    <td colspan="4" style="text-align: right;">Total Summary:</td>
+                    <td style="text-align: right;">${formatNumber(report.overview.past_bachat)}</td>
+                    <td style="text-align: right; color: #059669;">${formatNumber(report.overview.total_aawak)}</td>
+                    <td style="text-align: right; color: #dc2626;">${formatNumber(report.overview.total_jawak)}</td>
+                    <td style="text-align: right; color: #0284c7;">${formatNumber(report.overview.current_bachat)}</td>
+                </tr>
+            </tbody>
+        </table>
+        `;
+    } else {
+        html += `<div class="no-records">No ledger items found for this MM in the selected period.</div>`;
+    }
+
+    html += `
+        <div style="margin-top: 25px; text-align: right; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+            <a href="#index-page" style="text-decoration: none; color: #0f766e; font-weight: bold; font-size: 11px; background-color: #f8fafc; padding: 5px 12px; border: 1px solid #cbd5e1; border-radius: 4px; display: inline-block;">
+                ⬆️ मुख्य अनुक्रमणिका (Main Index) पर जाएं
+            </a>
+        </div>
+    </div>
+    `;
+
+    return html;
+}
+
+/**
+ * Generate MM Ledger PDF
+ */
+async function generateMmLedgerPdf(reportData, fromName, toName, taskId, stateName, statesPayload = null) {
+    let htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                color: #333;
+                font-size: 10px;
+                line-height: 1.4;
+                margin: 0;
+                padding: 0;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+            .header-title {
+                text-align: center;
+                font-size: 15px;
+                font-weight: bold;
+                color: #ffffff;
+                background-color: #0f766e;
+                padding: 10px;
+                margin-bottom: 15px;
+                border-radius: 4px;
+            }
+            .toc-container {
+                padding: 15px;
+            }
+            .toc-title {
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 10px;
+                color: #0f766e;
+                border-bottom: 2px solid #0d9488;
+                padding-bottom: 10px;
+            }
+            .toc-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+            }
+            .toc-table th, .toc-table td {
+                border: 1px solid #cbd5e1;
+                padding: 7px 9px;
+                font-size: 11px;
+                text-align: left;
+            }
+            .toc-table th {
+                background-color: #0f766e;
+                color: #ffffff;
+                font-weight: bold;
+            }
+            .item-section {
+                padding: 10px 0;
+            }
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+            }
+            .data-table th, .data-table td {
+                border: 1px solid #cbd5e1;
+                padding: 5px 7px;
+                font-size: 10px;
+            }
+            .data-table th {
+                font-weight: bold;
+            }
+            .no-records {
+                font-style: italic;
+                color: #64748b;
+                padding: 8px;
+                background-color: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 4px;
+                margin-bottom: 15px;
+            }
+        </style>
+    </head>
+    <body>
+    `;
+
+    if (statesPayload && Array.isArray(statesPayload) && statesPayload.length > 0) {
+        if (taskId) global.pdfProgress[taskId] = { status: 'Constructing Master Single Index & MM Table of Contents...' };
+
+        htmlContent += `
+        <div class="toc-container page-break" id="index-page">
+            <div class="toc-title">सम्पूर्ण MM लेजर अनुक्रमणिका (Master MM Index)</div>
+            <div style="text-align: center; margin-bottom: 5px; font-size: 12px; color: #555;">
+                अवधि: ${fromName} से ${toName} | कुल राज्य: ${statesPayload.length}
+            </div>
+            <div style="text-align: center; margin-bottom: 15px; font-size: 10px; color: #0f766e; font-weight: bold; font-style: italic;">
+                * विवरण देखने के लिए MM नाम पर क्लिक करें / Click on MM for details
+            </div>
+
+            <table class="toc-table">
+                <thead>
+                    <tr style="background-color: #0f766e; color: #ffffff;">
+                        <th width="10%" style="text-align: center;">क्र.</th>
+                        <th>राज्य (State) एवं MM / मण्डल का नाम</th>
+                        <th width="22%" style="text-align: right;">वर्तमान बचत मात्रा</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        statesPayload.forEach((g, gIdx) => {
+            let stateNameHin = g.state_hin || g.state_eng || 'State';
+            let reports = g.reports || [];
+            let stateBcht = reports.reduce((s, r) => s + Number(r.overview.current_bachat || 0), 0);
+
+            htmlContent += `
+                <tr style="background-color: #115e59; color: #ffffff; font-weight: bold;">
+                    <td style="text-align: center; background-color: #0f766e; color: #5eead4; font-size: 11px;">
+                        राज्य ${gIdx + 1}
+                    </td>
+                    <td colspan="2" style="padding: 8px 10px; background-color: #115e59; color: #f0fdf4; font-size: 12px;">
+                        📍 <strong>${stateNameHin}</strong>
+                        <span style="font-size: 10px; font-weight: normal; margin-left: 15px; color: #ccfbf1;">
+                            — कुल ${reports.length} MM | बचत: <strong>${formatNumber(stateBcht)}</strong>
+                        </span>
+                    </td>
+                </tr>
+            `;
+
+            reports.forEach((r, rIdx) => {
+                const mmNameStr = r.mm_hin + (r.mm_code ? ` (${r.mm_code})` : '');
+                htmlContent += `
+                    <tr style="background-color: ${rIdx % 2 === 0 ? '#ffffff' : '#f0fdf4'};">
+                        <td style="text-align: center; color: #64748b; font-weight: 600;">${gIdx + 1}.${rIdx + 1}</td>
+                        <td style="padding-left: 20px;">
+                            <a href="#mm-sec-${gIdx}-${rIdx}" style="text-decoration: none; color: #0d9488; font-weight: 600;">
+                                🏢 ${mmNameStr}
+                            </a>
+                        </td>
+                        <td style="text-align: right; font-weight: bold;">
+                            ${formatNumber(r.overview.current_bachat)} ${r.unit_short || ''}
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+
+        htmlContent += `
+                </tbody>
+            </table>
+        </div>
+        `;
+
+        statesPayload.forEach((g, gIdx) => {
+            (g.reports || []).forEach((r, rIdx) => {
+                const mmNameStr = r.mm_hin || '';
+                const mmCodeStr = r.mm_code || '';
+                const stateNameStr = g.state_hin || g.state_eng || '';
+                htmlContent += renderMmLedgerSection(
+                    r, fromName, toName, stateNameStr, mmNameStr, mmCodeStr,
+                    `mm-sec-${gIdx}-${rIdx}`,
+                    true
+                );
+            });
+        });
+    } else {
+        htmlContent += `
+        <div class="toc-container page-break" id="index-page">
+            <div class="toc-title">${stateName ? stateName + ' - ' : ''}MM लेजर अनुक्रमणिका</div>
+            <div style="text-align: center; margin-bottom: 5px; font-size: 12px; color: #555;">
+                अवधि: ${fromName} से ${toName}${stateName ? ` | State: ${stateName}` : ''}
+            </div>
+            
+            <table class="toc-table">
+                <thead>
+                    <tr>
+                        <th width="8%" style="text-align: center;">S.No.</th>
+                        <th>MM / मण्डल का नाम</th>
+                        <th width="22%" style="text-align: right;">Bachat Qty / बचत मात्रा</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        reportData.forEach((report, i) => {
+            const mmNameStr = report.mm_hin + (report.mm_code ? ` (${report.mm_code})` : '');
+            htmlContent += `
+                <tr>
+                    <td style="text-align: center;">${i + 1}</td>
+                    <td>
+                        <a href="#mm-sec-${i}" style="text-decoration: none; color: #0d9488; font-weight: bold;">
+                            ${mmNameStr}
+                        </a>
+                    </td>
+                    <td style="text-align: right; font-weight: bold;">
+                        ${formatNumber(report.overview.current_bachat)} ${report.unit_short || ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        htmlContent += `
+                </tbody>
+            </table>
+        </div>
+        `;
+
+        reportData.forEach((report, i) => {
+            const mmNameStr = report.mm_hin || '';
+            const mmCodeStr = report.mm_code || '';
+            htmlContent += renderMmLedgerSection(
+                report, fromName, toName, stateName, mmNameStr, mmCodeStr,
+                `mm-sec-${i}`,
+                i < reportData.length - 1
+            );
+        });
+    }
+
+    htmlContent += `
+    </body>
+    </html>
+    `;
+
+    if (taskId) global.pdfProgress[taskId] = { status: 'Waiting for PDF engine...' };
+    const browser = await pdfEngine.getBrowser();
+
+    let page = null;
+    try {
+        page = await browser.newPage();
+        if (taskId) global.pdfProgress[taskId] = { status: 'Rendering HTML to PDF...' };
+        await page.setContent(htmlContent, { waitUntil: 'domcontentloaded', timeout: 0 });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            timeout: 0,
+            printBackground: true,
+            margin: { top: '15mm', right: '15mm', bottom: '20mm', left: '15mm' },
+            displayHeaderFooter: true,
+            headerTemplate: '<div></div>',
+            footerTemplate: `
+                <div style="width: 100%; font-size: 8px; color: #7f8c8d; font-family: sans-serif; padding: 0 15mm; display: flex; justify-content: space-between; box-sizing: border-box;">
+                    <span>HisabKitab MM Ledger Report</span>
+                    <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+                </div>
+            `
+        });
+
+        await page.close();
+        return pdfBuffer;
+    } catch (err) {
+        if (page) await page.close().catch(() => { });
+        throw err;
+    }
+}
+
 module.exports = {
-    generateItemLedgerPdf
+    generateItemLedgerPdf,
+    generatePbkLedgerPdf,
+    generateMmLedgerPdf
 };
+

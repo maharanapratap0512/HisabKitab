@@ -330,10 +330,11 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
 
       if (createdItem && createdItem._id) {
         if (!this.items.some((i: any) => i._id === createdItem._id)) {
-          this.items.unshift(createdItem);
+          this.items = [createdItem, ...this.items];
         }
         this.selectedValue = createdItem._id;
         this.commitChange(createdItem._id, createdItem);
+        this.onDropdownOpen();
       }
     }
     this.closeSelfModal();

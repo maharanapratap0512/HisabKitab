@@ -3,7 +3,41 @@
     <p style="color: white"> {{loadingStatus}} </p>
 </ngx-spinner>
 
-<div class="row">
+<!-- Dimension Toggle Cards (Item-wise vs PBK-wise vs MM-wise) -->
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center gap-2 dimension-toggle-container p-1 rounded-3">
+            <button type="button" class="btn dimension-btn d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+                [class.btn-primary]="activeDimension === 'item'"
+                [class.btn-outline-secondary]="activeDimension !== 'item'"
+                [class.active-dimension]="activeDimension === 'item'"
+                (click)="setDimension('item')">
+                <i class="uil uil-box fs-5"></i>
+                <span>Item Wise Ledger (वस्तु अनुसार)</span>
+            </button>
+
+            <button type="button" class="btn dimension-btn d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+                [class.btn-primary]="activeDimension === 'pbk'"
+                [class.btn-outline-secondary]="activeDimension !== 'pbk'"
+                [class.active-dimension]="activeDimension === 'pbk'"
+                (click)="setDimension('pbk')">
+                <i class="uil uil-user fs-5"></i>
+                <span>PBK Wise Ledger (PBK/जिज्ञासु अनुसार)</span>
+            </button>
+
+            <button type="button" class="btn dimension-btn d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+                [class.btn-primary]="activeDimension === 'mm'"
+                [class.btn-outline-secondary]="activeDimension !== 'mm'"
+                [class.active-dimension]="activeDimension === 'mm'"
+                (click)="setDimension('mm')">
+                <i class="uil uil-building fs-5"></i>
+                <span>MM Wise Ledger (मण्डल अनुसार)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row" *ngIf="activeDimension === 'item'">
     <div>
         <div class="row mb-2">
             <div class="col-md-2 mb-2">
@@ -140,132 +174,599 @@
     </div>
 </div>
 
-<div class="row mt-4" *ngIf="groupedReportData.length > 0">
-    <div class="col-12">
-        <ul class="nav nav-tabs">
+<div class="row" *ngIf="activeDimension === 'pbk'">
+    <div>
+        <div class="row mb-2">
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">From Date</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select From" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="filterBodyPbk.from" name="from_pbk"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option selected="selected" disabled value="">Select From</ng-option>
+                        <ng-option *ngFor="let item of monthYearOptions" [value]="item">{{item.name}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">To Date</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select To" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="filterBodyPbk.to" name="to_pbk"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option selected="selected" disabled value="">Select To</ng-option>
+                        <ng-option *ngFor="let item of monthYearOptions" [value]="item">{{item.name}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">MM / Store</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
+                        [multiple]="false" [virtualScroll]="true" [(ngModel)]="filterBodyPbk.mm_id"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option *ngFor="let item of mms" [value]="item._id">
+                            {{item.mm_hin}} : {{item.mm_code}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">State (राज्य)</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="true"
+                        [multiple]="false" [virtualScroll]="true" [(ngModel)]="filterBodyPbk.state_id"
+                        [ngModelOptions]="{standalone: true}" (change)="onStateChangePbk($event)">
+                        <ng-option *ngFor="let item of states" [value]="item._id">
+                            {{item.state_hin}} : {{item.state_eng}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="form-group">
+                    <label class="form-label">PBK / जिज्ञासु</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select PBKs" [clearable]="true"
+                        [multiple]="true" [virtualScroll]="true" [(ngModel)]="filterBodyPbk.pbk_ids"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option *ngFor="let item of filteredPbks" [value]="item._id">
+                            {{item.pbk_hin}} {{item.roll_no ? ' (Roll: ' + item.roll_no + ')' : ''}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-end">
+            <div class="col-md-3 mb-2">
+                <div class="d-flex align-items-end h-100">
+                    <div class="flex-grow-1">
+                        <button class="btn btn-primary form-control w-100" (click)="searchReportsPbk()">
+                            <i class="uil uil-play me-1"></i> Generate Report
+                        </button>
+                    </div>
+                    <div class="ms-2 mb-1">
+                        <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false"
+                            direction="left" [showClearButton]="false" triggerOn="click">
+                            <div style="width: 320px; padding: 10px; white-space: normal;">
+                                <h6 class="mb-2 text-info border-bottom pb-1">PBK Ledger - Details / विवरण</h6>
+                                <p class="mb-2 fs-7">
+                                    <strong>What is this report for? (यह रिपोर्ट किस लिए है?)</strong><br>
+                                    Detailed ledger showing Aawak and Jawak transactions grouped by State for selected PBKs.<br>
+                                    <span class="text-muted">चयनित PBKs के लिए राज्यवार आवक और जावक लेजर विवरण।</span>
+                                </p>
+                                <p class="mb-0 fs-7">
+                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br>
+                                    Select Month/Year, State and PBKs to view the report. Export to Excel or PDF.<br>
+                                    <span class="text-muted">रिपोर्ट देखने के लिए माह/वर्ष, राज्य और PBK चुनें।</span>
+                                </p>
+                            </div>
+                        </app-popover-filter>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Excel Export Dropdown Button -->
+            <div class="col-md-3 mb-2" *ngIf="groupedReportDataPbk.length > 0">
+                <div class="dropdown w-100">
+                    <button type="button" class="btn btn-outline-success dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span><i class="uil uil-file-spreadsheet me-1"></i> Export Excel</span>
+                    </button>
+                    <div class="dropdown-menu shadow w-100">
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportCurrentExcelPbk()">
+                            <i class="uil uil-export text-success me-2"></i> 1. Current State / View
+                        </a>
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportBulkExcelPbk()">
+                            <i class="uil uil-archive text-primary me-2"></i> 2. All States (ZIP)
+                        </a>
+                        <div class="dropdown-divider my-1"></div>
+                        <a class="dropdown-item cursor-pointer py-2 text-dark" (click)="exportSingleHeavyExcelPbk()">
+                            <i class="uil uil-file-compress text-warning me-2"></i> 3. Single Heavy File
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PDF Export Dropdown Button -->
+            <div class="col-md-3 mb-2" *ngIf="groupedReportDataPbk.length > 0">
+                <div class="dropdown w-100">
+                    <button type="button" class="btn btn-outline-danger dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span><i class="uil uil-file-pdf me-1"></i> Export PDF</span>
+                    </button>
+                    <div class="dropdown-menu shadow w-100">
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportCurrentPDFPbk()">
+                            <i class="uil uil-file-download text-danger me-2"></i> 1. Current State / View
+                        </a>
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportBulkPDFPbk()">
+                            <i class="uil uil-archive text-primary me-2"></i> 2. All States (ZIP)
+                        </a>
+                        <div class="dropdown-divider my-1"></div>
+                        <a class="dropdown-item cursor-pointer py-2 text-dark" (click)="exportSingleHeavyPDFPbk()">
+                            <i class="uil uil-file-compress text-warning me-2"></i> 3. Single Heavy File
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MM Dimension Filter Controls -->
+<div class="row" *ngIf="activeDimension === 'mm'">
+    <div>
+        <div class="row mb-2">
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">From Date</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select From" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="filterBodyMm.from" name="from"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option selected="selected" disabled value="">Select From</ng-option>
+                        <ng-option *ngFor="let item of monthYearOptions" [value]="item">{{item.name}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">To Date</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select To" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="filterBodyMm.to" name="to"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option selected="selected" disabled value="">Select To</ng-option>
+                        <ng-option *ngFor="let item of monthYearOptions" [value]="item">{{item.name}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="form-group">
+                    <label class="form-label">State Filter</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select State (Optional)" [clearable]="true"
+                        [multiple]="false" [virtualScroll]="true" [(ngModel)]="filterBodyMm.state_id"
+                        [ngModelOptions]="{standalone: true}" (change)="onStateChangeMm($event)">
+                        <ng-option *ngFor="let item of states" [value]="item._id">
+                            {{item.state_hin}} : {{item.state_eng}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-5 mb-2">
+                <div class="form-group">
+                    <label class="form-label">MM / Store Selection</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select MMs (Leave blank for All)" [clearable]="true"
+                        [multiple]="true" [virtualScroll]="true" [(ngModel)]="filterBodyMm.mm_ids"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option *ngFor="let item of filteredMmsForMmDimension" [value]="item._id">
+                            {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code ? ' : ' + item.mm_code : ''}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-end">
+            <div class="col-md-3 mb-2">
+                <div class="d-flex align-items-end h-100">
+                    <div class="flex-grow-1">
+                        <button class="btn btn-primary form-control w-100" (click)="searchReportsMm()">
+                            <i class="uil uil-play me-1"></i> Generate Report
+                        </button>
+                    </div>
+                    <div class="ms-2 mb-1">
+                        <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false"
+                            direction="left" [showClearButton]="false" triggerOn="click">
+                            <div style="width: 320px; padding: 10px; white-space: normal;">
+                                <h6 class="mb-2 text-info border-bottom pb-1">MM Ledger - Details / विवरण</h6>
+                                <p class="mb-2 fs-7">
+                                    <strong>What is this report for?</strong><br>
+                                    Generates MM (Store) wise stock summary showing Past Bachat, Total Aawak, Total Jawak and Current Bachat for each MM grouped by State.<br>
+                                    <span class="text-muted">चयनित मण्डलों के लिए राज्यवार आवक, जावक और बचत का स्टॉक सारांश दिखाता है।</span>
+                                </p>
+                            </div>
+                        </app-popover-filter>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Excel Export Dropdown Button -->
+            <div class="col-md-3 mb-2" *ngIf="groupedReportDataMm.length > 0">
+                <div class="dropdown w-100">
+                    <button type="button" class="btn btn-outline-success dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span><i class="uil uil-file-spreadsheet me-1"></i> Export Excel</span>
+                    </button>
+                    <div class="dropdown-menu shadow w-100">
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportCurrentExcelMm()">
+                            <i class="uil uil-export text-success me-2"></i> 1. Current State / View
+                        </a>
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportBulkExcelMm()">
+                            <i class="uil uil-archive text-primary me-2"></i> 2. All States (ZIP)
+                        </a>
+                        <div class="dropdown-divider my-1"></div>
+                        <a class="dropdown-item cursor-pointer py-2 text-dark" (click)="exportSingleHeavyExcelMm()">
+                            <i class="uil uil-file-compress text-warning me-2"></i> 3. Single Heavy File
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PDF Export Dropdown Button -->
+            <div class="col-md-3 mb-2" *ngIf="groupedReportDataMm.length > 0">
+                <div class="dropdown w-100">
+                    <button type="button" class="btn btn-outline-danger dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span><i class="uil uil-file-pdf me-1"></i> Export PDF</span>
+                    </button>
+                    <div class="dropdown-menu shadow w-100">
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportCurrentPDFMm()">
+                            <i class="uil uil-file-download text-danger me-2"></i> 1. Current State / View
+                        </a>
+                        <a class="dropdown-item cursor-pointer py-2" (click)="exportBulkPDFMm()">
+                            <i class="uil uil-archive text-primary me-2"></i> 2. All States (ZIP)
+                        </a>
+                        <div class="dropdown-divider my-1"></div>
+                        <a class="dropdown-item cursor-pointer py-2 text-dark" (click)="exportSingleHeavyPDFMm()">
+                            <i class="uil uil-file-compress text-warning me-2"></i> 3. Single Heavy File
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Item Dimension View Header with Toggle -->
+<div class="row mt-4" *ngIf="activeDimension === 'item' && groupedReportData.length > 0">
+    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom pb-2">
+        <ul class="nav nav-tabs border-bottom-0 mb-0">
             <li class="nav-item" *ngFor="let cat of groupedReportData; let i = index">
-                <a class="nav-link" [class.active]="activeCategoryIndex === i" (click)="setActiveCategory(i)" style="cursor: pointer;">
+                <a class="nav-link cursor-pointer" [class.active]="activeCategoryIndex === i" (click)="setActiveCategory(i)">
                     {{cat.category_name}}
                 </a>
             </li>
         </ul>
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" [ngClass]="viewMode === 'chips' ? 'btn-primary' : 'btn-outline-primary'" (click)="viewMode = 'chips'" title="Chips / Pill View">
+                <i class="uil uil-apps me-1"></i> Chips View
+            </button>
+            <button type="button" class="btn" [ngClass]="viewMode === 'scroll' ? 'btn-primary' : 'btn-outline-primary'" (click)="viewMode = 'scroll'" title="Continuous Scroll View">
+                <i class="uil uil-list-ul me-1"></i> Scroll View
+            </button>
+        </div>
     </div>
 </div>
 
-<div class="row mt-3" *ngIf="groupedReportData.length > 0 && groupedReportData[activeCategoryIndex]">
+<!-- Item Chips (Chips View Only) -->
+<div class="row mt-3" *ngIf="activeDimension === 'item' && viewMode === 'chips' && groupedReportData.length > 0 && groupedReportData[activeCategoryIndex]">
     <div class="col-12 mb-3">
-        <span *ngFor="let report of groupedReportData[activeCategoryIndex].reports; let j = index" class="badge rounded-pill me-1 mb-1"
+        <span *ngFor="let report of groupedReportData[activeCategoryIndex].reports; let j = index" class="badge rounded-pill me-1 mb-1 cursor-pointer"
             [ngClass]="activeReportIndex === j ? 'bg-primary border border-primary text-white' : 'bg-light text-dark border'"
             (click)="setActiveReport(j)"
-            style="cursor: pointer; font-size: 0.85rem; padding: 0.4rem 0.6rem; font-weight: 500; display: inline-block;">
+            style="font-size: 0.85rem; padding: 0.4rem 0.6rem; font-weight: 500; display: inline-block;">
             {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}}
         </span>
     </div>
 </div>
 
-<div class="row" *ngIf="groupedReportData.length > 0 && groupedReportData[activeCategoryIndex]">
+<!-- Item Details (Chips View: Single Selected Item) -->
+<div class="row" *ngIf="activeDimension === 'item' && viewMode === 'chips' && groupedReportData.length > 0 && groupedReportData[activeCategoryIndex]">
     <div class="col-12" *ngIf="groupedReportData[activeCategoryIndex].reports[activeReportIndex] as report">
-        <div class="card mb-4 border border-primary">
-            <div class="card-header bg-primary text-white fs-4">
-                {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}}
-                | {{report.item_eng}} {{report.subitem_eng ? '(' + report.subitem_eng + ')' : ''}}
-            </div>
-            <div class="card-body">
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="alert alert-secondary m-0 h-100 d-flex flex-column justify-content-center">
-                            <h5 class="alert-heading mb-1">Past Bachat (पिछली बचत)</h5>
-                            <h3 class="mb-0">{{report.overview.past_bachat | number:'1.0-2'}} <small
-                                    class="fs-6">{{report.unit_short}}</small></h3>
-                            <small>Start of selected month (चयनित महीने की शुरुआत में)</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="alert alert-success m-0 h-100 d-flex flex-column justify-content-center">
-                            <h5 class="alert-heading mb-1">Total Aawak (कुल आवक)</h5>
-                            <h3 class="mb-0">{{report.overview.total_aawak | number:'1.0-2'}} <small
-                                    class="fs-6">{{report.unit_short}}</small></h3>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="alert alert-danger m-0 h-100 d-flex flex-column justify-content-center">
-                            <h5 class="alert-heading mb-1">Total Jawak (कुल जावक)</h5>
-                            <h3 class="mb-0">{{report.overview.total_jawak | number:'1.0-2'}} <small
-                                    class="fs-6">{{report.unit_short}}</small></h3>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="alert alert-info m-0 h-100 d-flex flex-column justify-content-center">
-                            <h5 class="alert-heading mb-1">Current Bachat (वर्तमान बचत)</h5>
-                            <h3 class="mb-0">{{report.overview.current_bachat | number:'1.0-2'}} <small
-                                    class="fs-6">{{report.unit_short}}</small></h3>
-                            <small>End of selected month (चयनित महीने के अंत में)</small>
-                        </div>
-                    </div>
-                </div>
+        <ng-container *ngTemplateOutlet="itemCardTemplate; context: { report: report }"></ng-container>
+    </div>
+</div>
 
-                <h4 class="text-success border-bottom pb-2 mb-3">Aawak Entries (आवक)</h4>
-                <table class="table table-bordered table-sm table-striped dt-responsive mb-4"
-                    *ngIf="report.aawaks.length > 0">
-                    <thead class="table-success">
-                        <tr>
-                            <th>Date</th>
-                            <th>Lot No.</th>
-                            <th>From (कहाँ से आया)</th>
-                            <th>Condition</th>
-                            <th>Qty</th>
-                            <th>Rate</th>
-                            <th>Amount</th>
-                            <th>Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let a of report.aawaks">
-                            <td>{{a.date | date:'dd-MM-yyyy'}}</td>
-                            <td>{{a.lot_no}}</td>
-                            <td>{{a.aawak_mm_hin}} <br> <small>{{a.pbk_hin}} {{a.roll_no}}</small></td>
-                            <td>{{a.condition_hin}}</td>
-                            <td><strong>{{a.qty | number:'1.0-2'}}</strong> {{a.unit_short}}</td>
-                            <td>{{a.rate ? (a.rate | number:'1.2-2') : '-'}}</td>
-                            <td>{{a.actual_amt ? (a.actual_amt | number:'1.2-2') : '-'}}</td>
-                            <td>{{a.aawak_type_hin}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="alert alert-light" *ngIf="report.aawaks.length === 0">No Aawak entries
-                    found.</div>
+<!-- Item Details (Scroll View: All Items in Category Stacked) -->
+<div class="row mt-3" *ngIf="activeDimension === 'item' && viewMode === 'scroll' && groupedReportData.length > 0 && groupedReportData[activeCategoryIndex]">
+    <div class="col-12 mb-4" *ngFor="let report of groupedReportData[activeCategoryIndex].reports">
+        <ng-container *ngTemplateOutlet="itemCardTemplate; context: { report: report }"></ng-container>
+    </div>
+</div>
 
-                <h4 class="text-danger border-bottom pb-2 mb-3">Jawak Entries (जावक)</h4>
-                <table class="table table-bordered table-sm table-striped dt-responsive mb-0"
-                    *ngIf="report.jawaks.length > 0">
-                    <thead class="table-danger">
-                        <tr>
-                            <th>Date</th>
-                            <th>Lot No.</th>
-                            <th>To (कहाँ भेजा)</th>
-                            <th>Condition</th>
-                            <th>Qty</th>
-                            <th>Rate</th>
-                            <th>Amount</th>
-                            <th>Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let j of report.jawaks">
-                            <td>{{j.date | date:'dd-MM-yyyy'}}</td>
-                            <td>{{j.lot_no}}</td>
-                            <td>{{j.jawak_mm_hin}} <br> <small>{{j.pbk_hin}} {{j.roll_no}}</small></td>
-                            <td>{{j.condition_hin}}</td>
-                            <td><strong>{{j.qty | number:'1.0-2'}}</strong> {{j.unit_short}}</td>
-                            <td>{{j.rate ? (j.rate | number:'1.2-2') : '-'}}</td>
-                            <td>{{j.actual_amt ? (j.actual_amt | number:'1.2-2') : '-'}}</td>
-                            <td>{{j.jawak_type_hin}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="alert alert-light" *ngIf="report.jawaks.length === 0">No Jawak entries
-                    found.</div>
-            </div>
+
+<!-- PBK Dimension View Header with Toggle -->
+<div class="row mt-4" *ngIf="activeDimension === 'pbk' && groupedReportDataPbk.length > 0">
+    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom pb-2">
+        <ul class="nav nav-tabs border-bottom-0 mb-0">
+            <li class="nav-item" *ngFor="let st of groupedReportDataPbk; let i = index">
+                <a class="nav-link cursor-pointer" [class.active]="activeStateIndex === i" (click)="setActiveState(i)">
+                    {{st.state_name}}
+                </a>
+            </li>
+        </ul>
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" [ngClass]="viewMode === 'chips' ? 'btn-primary' : 'btn-outline-primary'" (click)="viewMode = 'chips'" title="Chips / Pill View">
+                <i class="uil uil-apps me-1"></i> Chips View
+            </button>
+            <button type="button" class="btn" [ngClass]="viewMode === 'scroll' ? 'btn-primary' : 'btn-outline-primary'" (click)="viewMode = 'scroll'" title="Continuous Scroll View">
+                <i class="uil uil-list-ul me-1"></i> Scroll View
+            </button>
         </div>
     </div>
 </div>
+
+<!-- PBK Badges / Pill Buttons (Chips View Only) -->
+<div class="row mt-3" *ngIf="activeDimension === 'pbk' && viewMode === 'chips' && groupedReportDataPbk.length > 0 && groupedReportDataPbk[activeStateIndex]">
+    <div class="col-12 mb-3">
+        <span *ngFor="let report of groupedReportDataPbk[activeStateIndex].reports; let j = index" class="badge rounded-pill me-1 mb-1 cursor-pointer"
+            [ngClass]="activePbkIndex === j ? 'bg-primary border border-primary text-white' : 'bg-light text-dark border'"
+            (click)="setActivePbk(j)"
+            style="font-size: 0.85rem; padding: 0.4rem 0.6rem; font-weight: 500; display: inline-block;">
+            {{report.pbk_hin}} {{report.roll_no ? '(Roll: ' + report.roll_no + ')' : ''}}
+        </span>
+    </div>
+</div>
+
+<!-- PBK Details (Chips View: Single Selected PBK) -->
+<div class="row" *ngIf="activeDimension === 'pbk' && viewMode === 'chips' && groupedReportDataPbk.length > 0 && groupedReportDataPbk[activeStateIndex]">
+    <div class="col-12" *ngIf="groupedReportDataPbk[activeStateIndex].reports[activePbkIndex] as report">
+        <ng-container *ngTemplateOutlet="pbkCardTemplate; context: { report: report }"></ng-container>
+    </div>
+</div>
+
+<!-- PBK Details (Scroll View: All PBKs in State Stacked) -->
+<div class="row mt-3" *ngIf="activeDimension === 'pbk' && viewMode === 'scroll' && groupedReportDataPbk.length > 0 && groupedReportDataPbk[activeStateIndex]">
+    <div class="col-12 mb-4" *ngFor="let report of groupedReportDataPbk[activeStateIndex].reports">
+        <ng-container *ngTemplateOutlet="pbkCardTemplate; context: { report: report }"></ng-container>
+    </div>
+</div>
+
+
+<!-- MM Dimension View Header with Toggle -->
+<div class="row mt-4" *ngIf="activeDimension === 'mm' && groupedReportDataMm.length > 0">
+    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom pb-2">
+        <ul class="nav nav-tabs border-bottom-0 mb-0">
+            <li class="nav-item" *ngFor="let st of groupedReportDataMm; let i = index">
+                <a class="nav-link cursor-pointer" [class.active]="activeStateIndexMm === i" (click)="setActiveStateMm(i)">
+                    {{st.state_name}}
+                </a>
+            </li>
+        </ul>
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" [ngClass]="viewMode === 'chips' ? 'btn-primary' : 'btn-outline-primary'" (click)="viewMode = 'chips'" title="Chips / Pill View">
+                <i class="uil uil-apps me-1"></i> Chips View
+            </button>
+            <button type="button" class="btn" [ngClass]="viewMode === 'scroll' ? 'btn-primary' : 'btn-outline-primary'" (click)="viewMode = 'scroll'" title="Continuous Scroll View">
+                <i class="uil uil-list-ul me-1"></i> Scroll View
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MM Badges / Pill Buttons (Chips View Only) -->
+<div class="row mt-3" *ngIf="activeDimension === 'mm' && viewMode === 'chips' && groupedReportDataMm.length > 0 && groupedReportDataMm[activeStateIndexMm]">
+    <div class="col-12 mb-3">
+        <span *ngFor="let report of groupedReportDataMm[activeStateIndexMm].reports; let j = index" class="badge rounded-pill me-1 mb-1 cursor-pointer"
+            [ngClass]="activeMmIndex === j ? 'bg-primary border border-primary text-white' : 'bg-light text-dark border'"
+            (click)="setActiveMm(j)"
+            style="font-size: 0.85rem; padding: 0.4rem 0.6rem; font-weight: 500; display: inline-block;">
+            {{report.mm_hin}} {{report.mm_code ? '(' + report.mm_code + ')' : ''}}
+        </span>
+    </div>
+</div>
+
+<!-- MM Details (Chips View: Single Selected MM) -->
+<div class="row" *ngIf="activeDimension === 'mm' && viewMode === 'chips' && groupedReportDataMm.length > 0 && groupedReportDataMm[activeStateIndexMm]">
+    <div class="col-12" *ngIf="groupedReportDataMm[activeStateIndexMm].reports[activeMmIndex] as report">
+        <ng-container *ngTemplateOutlet="mmCardTemplate; context: { report: report }"></ng-container>
+    </div>
+</div>
+
+<!-- MM Details (Scroll View: All MMs in State Stacked) -->
+<div class="row mt-3" *ngIf="activeDimension === 'mm' && viewMode === 'scroll' && groupedReportDataMm.length > 0 && groupedReportDataMm[activeStateIndexMm]">
+    <div class="col-12 mb-4" *ngFor="let report of groupedReportDataMm[activeStateIndexMm].reports">
+        <ng-container *ngTemplateOutlet="mmCardTemplate; context: { report: report }"></ng-container>
+    </div>
+</div>
+
+
+<!-- Reusable Item Card Template -->
+<ng-template #itemCardTemplate let-report="report">
+    <div class="card mb-4 border border-primary">
+        <div class="card-header bg-primary text-white fs-4">
+            {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}}
+            | {{report.item_eng}} {{report.subitem_eng ? '(' + report.subitem_eng + ')' : ''}}
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="alert alert-secondary m-0 h-100 d-flex flex-column justify-content-center">
+                        <h5 class="alert-heading mb-1">Past Bachat (पिछली बचत)</h5>
+                        <h3 class="mb-0">{{report.overview.past_bachat | number:'1.0-2'}} <small class="fs-6">{{report.unit_short}}</small></h3>
+                        <small>Start of selected month (चयनित महीने की शुरुआत में)</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="alert alert-success m-0 h-100 d-flex flex-column justify-content-center">
+                        <h5 class="alert-heading mb-1">Total Aawak (कुल आवक)</h5>
+                        <h3 class="mb-0">{{report.overview.total_aawak | number:'1.0-2'}} <small class="fs-6">{{report.unit_short}}</small></h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="alert alert-danger m-0 h-100 d-flex flex-column justify-content-center">
+                        <h5 class="alert-heading mb-1">Total Jawak (कुल जावक)</h5>
+                        <h3 class="mb-0">{{report.overview.total_jawak | number:'1.0-2'}} <small class="fs-6">{{report.unit_short}}</small></h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="alert alert-info m-0 h-100 d-flex flex-column justify-content-center">
+                        <h5 class="alert-heading mb-1">Current Bachat (वर्तमान बचत)</h5>
+                        <h3 class="mb-0">{{report.overview.current_bachat | number:'1.0-2'}} <small class="fs-6">{{report.unit_short}}</small></h3>
+                        <small>End of selected month (चयनित महीने के अंत में)</small>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="text-success border-bottom pb-2 mb-3">Aawak Entries (आवक)</h4>
+            <table class="table table-bordered table-sm table-striped dt-responsive mb-4" *ngIf="report.aawaks.length > 0">
+                <thead class="table-success">
+                    <tr>
+                        <th>Date</th>
+                        <th>Lot No.</th>
+                        <th>From (कहाँ से आया)</th>
+                        <th>Condition</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let a of report.aawaks">
+                        <td>{{a.date | date:'dd-MM-yyyy'}}</td>
+                        <td>{{a.lot_no}}</td>
+                        <td>{{a.aawak_mm_hin}} <br> <small>{{a.pbk_hin}} {{a.roll_no}}</small></td>
+                        <td>{{a.condition_hin}}</td>
+                        <td><strong>{{a.qty | number:'1.0-2'}}</strong> {{a.unit_short}}</td>
+                        <td>{{a.rate ? (a.rate | number:'1.2-2') : '-'}}</td>
+                        <td>{{a.actual_amt ? (a.actual_amt | number:'1.2-2') : '-'}}</td>
+                        <td>{{a.aawak_type_hin}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="alert alert-light" *ngIf="report.aawaks.length === 0">No Aawak entries found.</div>
+
+            <h4 class="text-danger border-bottom pb-2 mb-3">Jawak Entries (जावक)</h4>
+            <table class="table table-bordered table-sm table-striped dt-responsive mb-0" *ngIf="report.jawaks.length > 0">
+                <thead class="table-danger">
+                    <tr>
+                        <th>Date</th>
+                        <th>Lot No.</th>
+                        <th>To (कहाँ भेजा)</th>
+                        <th>Condition</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let j of report.jawaks">
+                        <td>{{j.date | date:'dd-MM-yyyy'}}</td>
+                        <td>{{j.lot_no}}</td>
+                        <td>{{j.jawak_mm_hin}} <br> <small>{{j.pbk_hin}} {{j.roll_no}}</small></td>
+                        <td>{{j.condition_hin}}</td>
+                        <td><strong>{{j.qty | number:'1.0-2'}}</strong> {{j.unit_short}}</td>
+                        <td>{{j.rate ? (j.rate | number:'1.2-2') : '-'}}</td>
+                        <td>{{j.actual_amt ? (j.actual_amt | number:'1.2-2') : '-'}}</td>
+                        <td>{{j.jawak_type_hin}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="alert alert-light" *ngIf="report.jawaks.length === 0">No Jawak entries found.</div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Reusable PBK Card Template -->
+<ng-template #pbkCardTemplate let-report="report">
+    <div class="card mb-4 border border-primary">
+        <div class="card-header bg-primary text-white fs-4">
+            {{report.pbk_hin}} {{report.roll_no ? '(Roll: ' + report.roll_no + ')' : ''}}
+            | State: {{report.state_hin}}
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm table-striped mb-0" *ngIf="report.itemsSummary && report.itemsSummary.length > 0">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;" class="text-center">S.No.</th>
+                            <th>Category (श्रेणी)</th>
+                            <th>Item / Subitem (वस्तु)</th>
+                            <th class="text-center">Unit (इकाई)</th>
+                            <th class="text-end">Past Bachat (पिछला बचत)</th>
+                            <th class="text-end">Total Aawak (कुल आवक)</th>
+                            <th class="text-end">Total Jawak (कुल जावक)</th>
+                            <th class="text-end">Final Bachat (वर्तमान बचत)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of report.itemsSummary; let idx = index">
+                            <td class="text-center">{{idx + 1}}</td>
+                            <td><span class="badge bg-light text-dark border">{{item.category_hin}}</span></td>
+                            <td><strong>{{item.item_hin}}</strong> <span *ngIf="item.subitem_hin">({{item.subitem_hin}})</span></td>
+                            <td class="text-center">{{item.unit_short}}</td>
+                            <td class="text-end">{{item.past_bachat | number:'1.0-2'}}</td>
+                            <td class="text-end text-success fw-bold">{{item.total_aawak | number:'1.0-2'}}</td>
+                            <td class="text-end text-danger fw-bold">{{item.total_jawak | number:'1.0-2'}}</td>
+                            <td class="text-end fw-bold" [ngClass]="item.current_bachat >= 0 ? 'text-primary' : 'text-danger'">{{item.current_bachat | number:'1.0-2'}}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="fw-bold" *ngIf="report.overview">
+                        <tr>
+                            <td colspan="4" class="text-end">Total Summary:</td>
+                            <td class="text-end">{{report.overview.past_bachat | number:'1.0-2'}}</td>
+                            <td class="text-end text-success">{{report.overview.total_aawak | number:'1.0-2'}}</td>
+                            <td class="text-end text-danger">{{report.overview.total_jawak | number:'1.0-2'}}</td>
+                            <td class="text-end text-primary">{{report.overview.current_bachat | number:'1.0-2'}}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="alert alert-light m-0" *ngIf="!report.itemsSummary || report.itemsSummary.length === 0">No item summary available.</div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Reusable MM Card Template -->
+<ng-template #mmCardTemplate let-report="report">
+    <div class="card mb-4 border border-primary">
+        <div class="card-header bg-primary text-white fs-4">
+            {{report.mm_hin}} {{report.mm_code ? '(' + report.mm_code + ')' : ''}}
+            | State: {{report.state_hin}}
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm table-striped mb-0" *ngIf="report.itemsSummary && report.itemsSummary.length > 0">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;" class="text-center">S.No.</th>
+                            <th>Category (श्रेणी)</th>
+                            <th>Item / Subitem (वस्तु)</th>
+                            <th class="text-center">Unit (इकाई)</th>
+                            <th class="text-end">Past Bachat (पिछला बचत)</th>
+                            <th class="text-end">Total Aawak (कुल आवक)</th>
+                            <th class="text-end">Total Jawak (कुल जावक)</th>
+                            <th class="text-end">Final Bachat (वर्तमान बचत)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of report.itemsSummary; let idx = index">
+                            <td class="text-center">{{idx + 1}}</td>
+                            <td><span class="badge bg-light text-dark border">{{item.category_hin}}</span></td>
+                            <td><strong>{{item.item_hin}}</strong> <span *ngIf="item.subitem_hin">({{item.subitem_hin}})</span></td>
+                            <td class="text-center">{{item.unit_short}}</td>
+                            <td class="text-end">{{item.past_bachat | number:'1.0-2'}}</td>
+                            <td class="text-end text-success fw-bold">{{item.total_aawak | number:'1.0-2'}}</td>
+                            <td class="text-end text-danger fw-bold">{{item.total_jawak | number:'1.0-2'}}</td>
+                            <td class="text-end fw-bold" [ngClass]="item.current_bachat >= 0 ? 'text-primary' : 'text-danger'">{{item.current_bachat | number:'1.0-2'}}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="fw-bold" *ngIf="report.overview">
+                        <tr>
+                            <td colspan="4" class="text-end">Total Summary:</td>
+                            <td class="text-end">{{report.overview.past_bachat | number:'1.0-2'}}</td>
+                            <td class="text-end text-success">{{report.overview.total_aawak | number:'1.0-2'}}</td>
+                            <td class="text-end text-danger">{{report.overview.total_jawak | number:'1.0-2'}}</td>
+                            <td class="text-end text-primary">{{report.overview.current_bachat | number:'1.0-2'}}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="alert alert-light m-0" *ngIf="!report.itemsSummary || report.itemsSummary.length === 0">No item summary available.</div>
+            </div>
+        </div>
+    </div>
+</ng-template>

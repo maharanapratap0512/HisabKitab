@@ -1,10 +1,51 @@
 [
     {
+        "version": "37.3",
+        "date": "27-09-2026",
+        "summary": "Ledger Report MM Dimension, Jawak Auto Aawak Enhancements & Universal Report",
+        "summary_hin": "लेजर रिपोर्ट (MM आयाम), जावक (New) ऑटो आवक सुधार एवं यूनीवर्सल रिपोर्ट संवर्धन",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "आवक लिंक ड्रापडाउन",
+                "title": "On-the-Fly Add Aawak Button & Automatic Filter Data Pre-loading",
+                "title_hin": "आवक लिंक ड्रॉपडाउन: ऑन-द-फ्लाई '+ Add Aawak' बटन एवं फ़िल्टर डेटा स्वतः लोड सुविधा",
+                "desc": "Added an '+ Add Aawak' button inside the Aawak reference modal that pre-loads all current item, subitem, unit, MM, and condition filters, automatically refreshing the Aawak list upon creation.",
+                "desc_hin": "आवक संदर्भ विकल्प में '+ Add Aawak' बटन जोड़ा गया है जो वर्तमान आइटम, सब-आइटम, यूनिट, MM तथा कंडीशन फ़िल्टर को नई आवक प्रविष्टि में स्वतः भर देता है एवं नया आवक जोड़ने के तुरंत बाद सूची को रिफ्रेश कर देता है।"
+            },
+            {
+                "type": "feature",
+                "module": "जावक प्रविष्टि",
+                "title": "Auto Aawak Toggle Switch & Default Packet Number Entry",
+                "title_hin": "ऑटो आवक/री-आवक ऑन/ऑफ स्विच सुधार एवं पैकेट नंबर स्वतः कॉपी",
+                "desc": "Fixed Auto Aawak toggle switch visual state in Jawak (New) and added a dedicated Packet Number field that automatically copies the main Jawak packet number as default.",
+                "desc_hin": "जावक (New) में ऑटो आवक एवं ऑटो री-आवक स्विच का ऑन/ऑफ दृश्य सुधार किया गया है तथा नया पैकेट नंबर (Pkt Num) फ़ील्ड जोड़ा गया है जो मुख्य जावक पैकेट नंबर को स्वतः कॉपी कर लेता है।"
+            },
+            {
+                "type": "feature",
+                "module": "लेजर रिपोर्ट",
+                "title": "Renamed Module to Ledger Report with MM Dimension & Chips/Scroll Toggle",
+                "title_hin": "लेजर रिपोर्ट: मण्डल (MM) अनुसार नया आयाम, एकीकृत स्टॉक तालिका एवं चिप्स/स्क्रॉल व्यू स्विच",
+                "desc": "Renamed Item Ledger to Ledger Report and added MM-Wise dimension alongside Item and PBK views with a single consolidated stock table showing Past Bachat, Total Aawak, Total Jawak, and Final Bachat. Added a right-side toggle switch to easily flip between Chips View and Continuous Scroll View.",
+                "desc_hin": "मॉड्यूल का नाम 'आइटम लेजर' से बदलकर 'लेजर रिपोर्ट' रखा गया है। इसमें वस्तु व PBK के साथ 'मण्डल (MM) अनुसार' नया आयाम, एकीकृत स्टॉक तालिका एवं चिप्स व्यू और सतत स्क्रॉल (Scroll View) में आसानी से बदलने के लिए नया टॉगल बटन दिया गया है।"
+            },
+            {
+                "type": "feature",
+                "module": "यूनीवर्सल रिपोर्ट",
+                "title": "Combined Month-Year Selection & PDF Export Clarity Alert",
+                "title_hin": "यूनीवर्सल रिपोर्ट: 1st स्थान पर संयुक्त माह-वर्ष चयन एवं PDF एक्सपोर्ट सीमा चेतावनी",
+                "desc": "Positioned From and To Month-Year filter controls to the 1st position using a combined month-year picker. Added a friendly confirmation alert when exporting PDF with more than 5 months for optimal print readability.",
+                "desc_hin": "यूनीवर्सल रिपोर्ट में 'प्रारंभिक वर्ष-माह' एवं 'अंतिम वर्ष-माह' फ़िल्टर को प्रथम स्थान पर स्थानांतरित किया गया है। साथ ही PDF एक्सपोर्ट करते समय 5 से अधिक महीने चुनने पर स्पष्टता हेतु उपयोगकर्ता-अनुकूल चेतावनी अलर्ट दिया गया है।"
+            }
+        ]
+    },
+    {
         "version": "37.2",
         "date": "26-09-2026",
         "summary": "Date Column Header Sorting & Bachat Hindi Category Excel Export",
         "summary_hin": "दिनांक कॉलम हेडर सॉर्टिंग एवं बचत (New) एक्सेल एक्सपोर्ट में हिंदी श्रेणी सुधार",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

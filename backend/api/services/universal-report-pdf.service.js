@@ -28,17 +28,26 @@ async function generatePdf(data) {
 
     if (taskId) global.pdfProgress[taskId] = { status: 'Constructing InDesign HTML matrix...' };
 
-    const isSingleMonth = monthsList.length <= 1;
-    const totalMatrixCols = 6 + (activeDimensions.length + 1) + (monthsList.length * (activeDimensions.length + (isSingleMonth ? 1 : 0))) + (!isSingleMonth ? (activeDimensions.length + 1) : 0);
-    
-    // Choose landscape format size
-    const paperFormat = totalMatrixCols > 16 ? 'A3' : 'A4';
-
     const fromMonthStr = filterBody.from_month || '';
     const fromYearStr = filterBody.from_year || '';
     const toMonthStr = filterBody.to_month || '';
     const toYearStr = filterBody.to_year || '';
     const periodStr = `${fromMonthStr}/${fromYearStr} to ${toMonthStr}/${toYearStr}`;
+    const pivotDim = filterBody.pivot_dimension || filterBody.pivotDim || 'aawak_type';
+
+    const isSingleMonth = monthsList.length <= 1;
+    const pastCols = 1;
+    const monthCols = (pivotDim === 'aawak_type' || pivotDim === 'jawak_type') 
+        ? activeDimensions.length + 2 
+        : (activeDimensions.length + (isSingleMonth ? 1 : 0));
+    const grandCols = !isSingleMonth 
+        ? ((pivotDim === 'aawak_type' || pivotDim === 'jawak_type') ? activeDimensions.length + 2 : activeDimensions.length + 1)
+        : 0;
+
+    const totalMatrixCols = 6 + pastCols + (monthsList.length * monthCols) + grandCols;
+
+    // Choose landscape format size
+    const paperFormat = totalMatrixCols > 16 ? 'A3' : 'A4';
 
     const parts = [];
 
@@ -156,27 +165,59 @@ async function generatePdf(data) {
                     <th rowspan="2" class="th-sticky">वस्तु (Item Name)</th>
                     <th rowspan="2" class="th-sticky">उप-वस्तु</th>
                     <th rowspan="2" class="th-sticky" width="35">यूनिट</th>
-                    <th colspan="${activeDimensions.length + 1}" class="th-past-group month-border-end">Opening Bachat (पिछली बचत)</th>
+                    
+                    <th colspan="1" class="th-past-group month-border-end">Opening Bachat (पिछली बचत)</th>
+                    
                     ${monthsList.map((m, mIdx) => `
-                        <th colspan="${activeDimensions.length + (isSingleMonth ? 1 : 0)}" class="th-month-group ${mIdx % 2 === 1 ? 'th-month-alt' : ''} month-border-end">${m.name_hin} (${m.name_eng})</th>
+                        <th colspan="${monthCols}" class="th-month-group ${mIdx % 2 === 1 ? 'th-month-alt' : ''} month-border-end">${m.name_hin} (${m.name_eng})</th>
                     `).join('')}
+                    
                     ${!isSingleMonth ? `
-                        <th colspan="${activeDimensions.length + 1}" class="th-grand-group">Final Period Set Total (कुल योग)</th>
+                        <th colspan="${grandCols}" class="th-grand-group">Final Period Set Total (कुल योग)</th>
                     ` : ''}
                 </tr>
                 <tr>
-                    ${activeDimensions.map(d => `<th class="th-sub">${d.list_name_hin}</th>`).join('')}
+                    <!-- Past Bachat Sub-headers -->
                     <th class="th-sub-tot month-border-end">कुल पिछला</th>
 
-                    ${monthsList.map((m, mIdx) => `
-                        ${activeDimensions.map((d, dIdx) => `<th class="th-sub ${mIdx % 2 === 1 ? 'th-sub-alt' : ''} ${dIdx === activeDimensions.length - 1 ? 'month-border-end' : ''}">${d.list_name_hin}</th>`).join('')}
-                        ${isSingleMonth ? `<th class="th-sub-tot month-border-end">अंतिम बचत</th>` : ''}
-                    `).join('')}
+                    <!-- Months Sub-headers -->
+                    ${monthsList.map((m, mIdx) => {
+                        const isAlt = mIdx % 2 === 1;
+                        if (pivotDim === 'aawak_type') {
+                            return `
+                                ${activeDimensions.map(d => `<th class="th-sub ${isAlt ? 'th-sub-alt' : ''}">${d.list_name_hin} (आवक)</th>`).join('')}
+                                <th class="th-sub-tot ${isAlt ? 'th-sub-alt' : ''}">कुल जावक</th>
+                                <th class="th-sub-tot ${isAlt ? 'th-sub-alt' : ''} month-border-end">अंतिम बचत</th>
+                            `;
+                        } else if (pivotDim === 'jawak_type') {
+                            return `
+                                <th class="th-sub-tot ${isAlt ? 'th-sub-alt' : ''}">कुल आवक</th>
+                                ${activeDimensions.map(d => `<th class="th-sub ${isAlt ? 'th-sub-alt' : ''}">${d.list_name_hin} (जावक)</th>`).join('')}
+                                <th class="th-sub-tot ${isAlt ? 'th-sub-alt' : ''} month-border-end">अंतिम बचत</th>
+                            `;
+                        } else {
+                            return `
+                                ${activeDimensions.map((d, dIdx) => `<th class="th-sub ${isAlt ? 'th-sub-alt' : ''} ${!isSingleMonth && dIdx === activeDimensions.length - 1 ? 'month-border-end' : ''}">${d.list_name_hin}</th>`).join('')}
+                                ${isSingleMonth ? `<th class="th-sub-tot ${isAlt ? 'th-sub-alt' : ''} month-border-end">अंतिम बचत</th>` : ''}
+                            `;
+                        }
+                    }).join('')}
 
-                    ${!isSingleMonth ? `
-                        ${activeDimensions.map(d => `<th class="th-sub">${d.list_name_hin}</th>`).join('')}
-                        <th class="th-sub-tot">अंतिम कुल</th>
-                    ` : ''}
+                    <!-- Grand Total Sub-headers -->
+                    ${!isSingleMonth ? (
+                        pivotDim === 'aawak_type' ? `
+                            ${activeDimensions.map(d => `<th class="th-sub">${d.list_name_hin} (आवक)</th>`).join('')}
+                            <th class="th-sub-tot">कुल जावक</th>
+                            <th class="th-sub-tot">अंतिम बचत</th>
+                        ` : pivotDim === 'jawak_type' ? `
+                            <th class="th-sub-tot">कुल आवक</th>
+                            ${activeDimensions.map(d => `<th class="th-sub">${d.list_name_hin} (जावक)</th>`).join('')}
+                            <th class="th-sub-tot">अंतिम बचत</th>
+                        ` : `
+                            ${activeDimensions.map(d => `<th class="th-sub">${d.list_name_hin}</th>`).join('')}
+                            <th class="th-sub-tot">अंतिम कुल</th>
+                        `
+                    ) : ''}
                 </tr>
             </thead>
             <tbody>
@@ -197,45 +238,87 @@ async function generatePdf(data) {
                 <td class="cell-center">${r.unit_short || '-'}</td>
         `;
 
-        // Past Bachat
-        for (let j = 0; j < activeDimensions.length; j++) {
-            const d = activeDimensions[j];
-            const val = r.past_bachat && r.past_bachat.dims ? (r.past_bachat.dims[d._id] || 0) : 0;
-            rowHtml += `<td class="cell-right ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
-        }
+        // Past Bachat (Single Column)
         rowHtml += `<td class="cell-right ${pastTot < 0 ? 'val-negative' : ''} cell-final-highlight month-border-end">${formatNumber(pastTot)}</td>`;
 
         // Months Dims
         for (let mIdx = 0; mIdx < monthsList.length; mIdx++) {
             const m = monthsList[mIdx];
             const mData = r.months ? r.months[m.key] : null;
+            const isAlt = mIdx % 2 === 1;
 
-            for (let j = 0; j < activeDimensions.length; j++) {
-                const d = activeDimensions[j];
-                const dimData = (mData && mData.dims) ? mData.dims[d._id] : null;
-                const val = dimData ? dimData.bachat : 0;
-                const isAlt = mIdx % 2 === 1;
-                const isEndBorder = j === activeDimensions.length - 1;
-                rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} ${isEndBorder ? 'month-border-end' : ''} ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
-            }
+            if (pivotDim === 'aawak_type') {
+                for (let j = 0; j < activeDimensions.length; j++) {
+                    const d = activeDimensions[j];
+                    const dimData = (mData && mData.dims) ? mData.dims[d._id] : null;
+                    const val = dimData ? dimData.aawak : 0;
+                    rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
+                }
+                const jwkTot = mData ? (mData.total_jawak || 0) : 0;
+                rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} ${jwkTot < 0 ? 'val-negative' : ''}">${formatNumber(jwkTot)}</td>`;
+                const nbch = mData ? (mData.net_bachat || 0) : 0;
+                rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} month-border-end ${nbch < 0 ? 'val-negative' : ''} cell-final-highlight">${formatNumber(nbch)}</td>`;
+            } else if (pivotDim === 'jawak_type') {
+                const awkTot = mData ? (mData.total_aawak || 0) : 0;
+                rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} ${awkTot < 0 ? 'val-negative' : ''}">${formatNumber(awkTot)}</td>`;
+                for (let j = 0; j < activeDimensions.length; j++) {
+                    const d = activeDimensions[j];
+                    const dimData = (mData && mData.dims) ? mData.dims[d._id] : null;
+                    const val = dimData ? dimData.jawak : 0;
+                    rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
+                }
+                const nbch = mData ? (mData.net_bachat || 0) : 0;
+                rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} month-border-end ${nbch < 0 ? 'val-negative' : ''} cell-final-highlight">${formatNumber(nbch)}</td>`;
+            } else {
+                for (let j = 0; j < activeDimensions.length; j++) {
+                    const d = activeDimensions[j];
+                    const dimData = (mData && mData.dims) ? mData.dims[d._id] : null;
+                    const val = dimData ? dimData.bachat : 0;
+                    const isEndBorder = !isSingleMonth && (j === activeDimensions.length - 1);
+                    rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} ${isEndBorder ? 'month-border-end' : ''} ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
+                }
 
-            if (isSingleMonth) {
-                const fbch = r.grand_total ? r.grand_total.final_bachat : 0;
-                const isAlt = mIdx % 2 === 1;
-                rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} month-border-end ${fbch < 0 ? 'val-negative' : ''} cell-final-highlight">${formatNumber(fbch)}</td>`;
+                if (isSingleMonth) {
+                    const fbch = r.grand_total ? r.grand_total.final_bachat : 0;
+                    rowHtml += `<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} month-border-end ${fbch < 0 ? 'val-negative' : ''} cell-final-highlight">${formatNumber(fbch)}</td>`;
+                }
             }
         }
 
         // Multi-month Grand Total
         if (!isSingleMonth) {
-            for (let j = 0; j < activeDimensions.length; j++) {
-                const d = activeDimensions[j];
-                const gdData = (r.grand_total && r.grand_total.dims) ? r.grand_total.dims[d._id] : null;
-                const val = gdData ? gdData.bachat : 0;
-                rowHtml += `<td class="cell-right ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
+            if (pivotDim === 'aawak_type') {
+                for (let j = 0; j < activeDimensions.length; j++) {
+                    const d = activeDimensions[j];
+                    const gdData = (r.grand_total && r.grand_total.dims) ? r.grand_total.dims[d._id] : null;
+                    const val = gdData ? gdData.aawak : 0;
+                    rowHtml += `<td class="cell-right ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
+                }
+                const jwkTot = r.grand_total ? (r.grand_total.total_jawak || 0) : 0;
+                rowHtml += `<td class="cell-right ${jwkTot < 0 ? 'val-negative' : ''}">${formatNumber(jwkTot)}</td>`;
+                const fbch = r.grand_total ? r.grand_total.final_bachat : 0;
+                rowHtml += `<td class="cell-right ${fbch < 0 ? 'val-negative' : ''} cell-final-highlight">${formatNumber(fbch)}</td>`;
+            } else if (pivotDim === 'jawak_type') {
+                const awkTot = r.grand_total ? (r.grand_total.total_aawak || 0) : 0;
+                rowHtml += `<td class="cell-right ${awkTot < 0 ? 'val-negative' : ''}">${formatNumber(awkTot)}</td>`;
+                for (let j = 0; j < activeDimensions.length; j++) {
+                    const d = activeDimensions[j];
+                    const gdData = (r.grand_total && r.grand_total.dims) ? r.grand_total.dims[d._id] : null;
+                    const val = gdData ? gdData.jawak : 0;
+                    rowHtml += `<td class="cell-right ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
+                }
+                const fbch = r.grand_total ? r.grand_total.final_bachat : 0;
+                rowHtml += `<td class="cell-right ${fbch < 0 ? 'val-negative' : ''} cell-final-highlight">${formatNumber(fbch)}</td>`;
+            } else {
+                for (let j = 0; j < activeDimensions.length; j++) {
+                    const d = activeDimensions[j];
+                    const gdData = (r.grand_total && r.grand_total.dims) ? r.grand_total.dims[d._id] : null;
+                    const val = gdData ? gdData.bachat : 0;
+                    rowHtml += `<td class="cell-right ${val < 0 ? 'val-negative' : ''}">${formatNumber(val)}</td>`;
+                }
+                const fbch = r.grand_total ? r.grand_total.final_bachat : 0;
+                rowHtml += `<td class="cell-right ${fbch < 0 ? 'val-negative' : ''} cell-final-highlight">${formatNumber(fbch)}</td>`;
             }
-            const fbch = r.grand_total ? r.grand_total.final_bachat : 0;
-            rowHtml += `<td class="cell-right ${fbch < 0 ? 'val-negative' : ''} cell-final-highlight">${formatNumber(fbch)}</td>`;
         }
 
         rowHtml += `</tr>`;
@@ -250,40 +333,77 @@ async function generatePdf(data) {
                     <td colspan="6" style="text-align: right; font-weight: bold;">TOTAL SUMMARY:</td>
     `);
 
-    for (let j = 0; j < activeDimensions.length; j++) {
-        const d = activeDimensions[j];
-        const val = columnTotals.past_bachat && columnTotals.past_bachat.dims ? (columnTotals.past_bachat.dims[d._id] || 0) : 0;
-        parts.push(`<td class="cell-right">${formatNumber(val)}</td>`);
-    }
+    // Past Bachat footer (Single Column)
     parts.push(`<td class="cell-right month-border-end">${formatNumber(columnTotals.past_bachat ? columnTotals.past_bachat.total : 0)}</td>`);
 
+    // Monthly footer
     for (let mIdx = 0; mIdx < monthsList.length; mIdx++) {
         const m = monthsList[mIdx];
         const mTotals = columnTotals.months ? columnTotals.months[m.key] : null;
+        const isAlt = mIdx % 2 === 1;
 
-        for (let j = 0; j < activeDimensions.length; j++) {
-            const d = activeDimensions[j];
-            const dimTot = (mTotals && mTotals.dims) ? mTotals.dims[d._id] : null;
-            const val = dimTot ? dimTot.bachat : 0;
-            const isAlt = mIdx % 2 === 1;
-            const isEndBorder = j === activeDimensions.length - 1;
-            parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} ${isEndBorder ? 'month-border-end' : ''}">${formatNumber(val)}</td>`);
-        }
+        if (pivotDim === 'aawak_type') {
+            for (let j = 0; j < activeDimensions.length; j++) {
+                const d = activeDimensions[j];
+                const dimTot = (mTotals && mTotals.dims) ? mTotals.dims[d._id] : null;
+                const val = dimTot ? dimTot.aawak : 0;
+                parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''}">${formatNumber(val)}</td>`);
+            }
+            parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''}">${formatNumber(mTotals ? mTotals.total_jawak : 0)}</td>`);
+            parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} month-border-end">${formatNumber(mTotals ? mTotals.net_bachat : 0)}</td>`);
+        } else if (pivotDim === 'jawak_type') {
+            parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''}">${formatNumber(mTotals ? mTotals.total_aawak : 0)}</td>`);
+            for (let j = 0; j < activeDimensions.length; j++) {
+                const d = activeDimensions[j];
+                const dimTot = (mTotals && mTotals.dims) ? mTotals.dims[d._id] : null;
+                const val = dimTot ? dimTot.jawak : 0;
+                parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''}">${formatNumber(val)}</td>`);
+            }
+            parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} month-border-end">${formatNumber(mTotals ? mTotals.net_bachat : 0)}</td>`);
+        } else {
+            for (let j = 0; j < activeDimensions.length; j++) {
+                const d = activeDimensions[j];
+                const dimTot = (mTotals && mTotals.dims) ? mTotals.dims[d._id] : null;
+                const val = dimTot ? dimTot.bachat : 0;
+                const isEndBorder = !isSingleMonth && (j === activeDimensions.length - 1);
+                parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} ${isEndBorder ? 'month-border-end' : ''}">${formatNumber(val)}</td>`);
+            }
 
-        if (isSingleMonth) {
-            const isAlt = mIdx % 2 === 1;
-            parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} month-border-end">${formatNumber(columnTotals.grand_total ? columnTotals.grand_total.final_bachat : 0)}</td>`);
+            if (isSingleMonth) {
+                parts.push(`<td class="cell-right ${isAlt ? 'cell-month-alt' : ''} month-border-end">${formatNumber(columnTotals.grand_total ? columnTotals.grand_total.final_bachat : 0)}</td>`);
+            }
         }
     }
 
+    // Grand total footer
     if (!isSingleMonth) {
-        for (let j = 0; j < activeDimensions.length; j++) {
-            const d = activeDimensions[j];
-            const gdTot = (columnTotals.grand_total && columnTotals.grand_total.dims) ? columnTotals.grand_total.dims[d._id] : null;
-            const val = gdTot ? gdTot.bachat : 0;
-            parts.push(`<td class="cell-right">${formatNumber(val)}</td>`);
+        if (pivotDim === 'aawak_type') {
+            for (let j = 0; j < activeDimensions.length; j++) {
+                const d = activeDimensions[j];
+                const gdTot = (columnTotals.grand_total && columnTotals.grand_total.dims) ? columnTotals.grand_total.dims[d._id] : null;
+                const val = gdTot ? gdTot.aawak : 0;
+                parts.push(`<td class="cell-right">${formatNumber(val)}</td>`);
+            }
+            parts.push(`<td class="cell-right">${formatNumber(columnTotals.grand_total ? columnTotals.grand_total.total_jawak : 0)}</td>`);
+            parts.push(`<td class="cell-right">${formatNumber(columnTotals.grand_total ? columnTotals.grand_total.final_bachat : 0)}</td>`);
+        } else if (pivotDim === 'jawak_type') {
+            parts.push(`<td class="cell-right">${formatNumber(columnTotals.grand_total ? columnTotals.grand_total.total_aawak : 0)}</td>`);
+            for (let j = 0; j < activeDimensions.length; j++) {
+                const d = activeDimensions[j];
+                const gdTot = (columnTotals.grand_total && columnTotals.grand_total.dims) ? columnTotals.grand_total.dims[d._id] : null;
+                const val = gdTot ? gdTot.jawak : 0;
+                parts.push(`<td class="cell-right">${formatNumber(val)}</td>`);
+            }
+            parts.push(`<td class="cell-right">${formatNumber(columnTotals.grand_total ? columnTotals.grand_total.final_bachat : 0)}</td>`);
+        } else {
+            for (let j = 0; j < activeDimensions.length; j++) {
+                const d = activeDimensions[j];
+                const gdTot = (columnTotals.grand_total && columnTotals.grand_total.dims) ? columnTotals.grand_total.dims[d._id] : null;
+                const val = gdTot ? gdTot.bachat : 0;
+                parts.push(`<td class="cell-right">${formatNumber(val)}</td>`);
+            }
+            parts.push(`<td class="cell-right">${formatNumber(columnTotals.grand_total ? columnTotals.grand_total.final_bachat : 0)}</td>`);
         }
-        parts.push(`<td class="cell-right">${formatNumber(columnTotals.grand_total ? columnTotals.grand_total.final_bachat : 0)}</td>`);
     }
 
     parts.push(`

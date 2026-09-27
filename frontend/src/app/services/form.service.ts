@@ -111,6 +111,7 @@ export class FormService {
       re_aawak_type_id: null,
       aawak_dept_id: null,
       aawak_type_id: null,
+      pkt_num: null,
       parchi_place: null,
       sell_repair_place: null,
       filterObj: {},

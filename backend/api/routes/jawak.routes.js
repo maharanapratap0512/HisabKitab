@@ -300,9 +300,10 @@ router.post('/new/:dept_id', async (req, res, next) => {
                 if (resolve) {
                     if (req.body.auto_awk) {
                         let awk = DB.tbInterface.getAawakFromJawak(req.body);
-                        awk.dept_id = req.body.aawak_dept_id;
+                        awk.dept_id = req.body.aawak_dept_id || req.body.dept_id;
                         awk.aawak_type_id = req.body.aawak_type_id;
                         awk.aawak_source_id = req.body.aawak_source_id;
+                        awk.pkt_num = req.body.pkt_num;
                         awk.description = "Automatic Entry from Jawak."
                         await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
                         });
@@ -314,6 +315,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
                         awk.mm_id = req.body.mm_id;
                         awk.aawak_mm_id = req.body.jawak_mm_id;
                         awk.aawak_source_id = req.body.aawak_source_id;
+                        awk.pkt_num = req.body.pkt_num;
                         awk.description = "Automatic Entry from Jawak to Re-aawak."
 
                         await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
@@ -387,6 +389,7 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                         awk.dept_id = jawak.aawak_dept_id;
                         awk.aawak_type_id = jawak.aawak_type_id;
                         awk.aawak_source_id = jawak.aawak_source_id;
+                        awk.pkt_num = jawak.pkt_num || req.body.pkt_num;
                         awk.description = "Automatic Entry from Jawak."
                         await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
                         });
@@ -398,6 +401,7 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                         awk.mm_id = jawak.mm_id;
                         awk.aawak_mm_id = jawak.jawak_mm_id;
                         awk.aawak_source_id = jawak.aawak_source_id;
+                        awk.pkt_num = jawak.pkt_num || req.body.pkt_num;
                         awk.description = "Automatic Entry from Jawak to Re-aawak."
                         await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
                         });

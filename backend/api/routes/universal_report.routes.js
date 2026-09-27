@@ -340,6 +340,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     unit_id: r.unit_id,
                     unit_short: r.unit_short || '-',
                     past_bachat: {
+                        total_aawak: 0,
+                        total_jawak: 0,
                         total: 0,
                         dims: {}
                     },
@@ -359,12 +361,32 @@ router.put('/filter/:dept_id', async (req, res, next) => {
         txData.forEach(r => {
             const row = getOrCreateRow(r);
             const dimId = getMappedDimId(r.dim_id);
-            usedDimIdsSet.add(dimId);
+
+            // Populate usedDimIdsSet selectively based on pivot_dimension
+            if (pivot_dimension === 'aawak_type') {
+                if (r.total_awk > 0) {
+                    usedDimIdsSet.add(dimId);
+                }
+            } else if (pivot_dimension === 'jawak_type') {
+                if (r.total_jwk > 0) {
+                    usedDimIdsSet.add(dimId);
+                }
+            } else {
+                if (r.total_awk > 0 || r.total_jwk > 0) {
+                    usedDimIdsSet.add(dimId);
+                }
+            }
 
             if (r.month_key === 'PRIOR') {
                 const netQty = r.total_awk - r.total_jwk;
-                if (row.past_bachat.dims[dimId] === undefined) row.past_bachat.dims[dimId] = 0;
-                row.past_bachat.dims[dimId] += netQty;
+                if (!row.past_bachat.dims[dimId]) {
+                    row.past_bachat.dims[dimId] = { aawak: 0, jawak: 0, bachat: 0 };
+                }
+                row.past_bachat.dims[dimId].aawak += r.total_awk;
+                row.past_bachat.dims[dimId].jawak += r.total_jwk;
+                row.past_bachat.dims[dimId].bachat += netQty;
+                row.past_bachat.total_aawak += r.total_awk;
+                row.past_bachat.total_jawak += r.total_jwk;
                 row.past_bachat.total += netQty;
             } else {
                 const mKey = r.month_key;
@@ -424,14 +446,16 @@ router.put('/filter/:dept_id', async (req, res, next) => {
         rowsArray.forEach(row => {
             activeDimensions.forEach(dim => {
                 const dimId = dim._id;
-                if (row.past_bachat.dims[dimId] === undefined) {
-                    row.past_bachat.dims[dimId] = 0;
+                if (!row.past_bachat.dims[dimId]) {
+                    row.past_bachat.dims[dimId] = { aawak: 0, jawak: 0, bachat: 0 };
                 }
             });
 
             const runningDimBachat = {};
             activeDimensions.forEach(dim => {
-                runningDimBachat[dim._id] = row.past_bachat.dims[dim._id] || 0;
+                const dimId = dim._id;
+                const dPast = row.past_bachat.dims[dimId];
+                runningDimBachat[dimId] = dPast ? (dPast.bachat || 0) : 0;
             });
             let runningTotalBachat = row.past_bachat.total || 0;
 
@@ -448,7 +472,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                         row.months[mKey].dims[dimId] = { aawak: 0, jawak: 0, bachat: 0 };
                     }
                     const d = row.months[mKey].dims[dimId];
-                    runningDimBachat[dimId] += (d.aawak - d.jawak);
+                    runningDimBachat[dimId] += ((d.aawak || 0) - (d.jawak || 0));
                     d.bachat = runningDimBachat[dimId];
                 });
 

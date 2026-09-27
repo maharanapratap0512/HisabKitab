@@ -686,4 +686,30 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
     this.closeModal();
     this.activeRowIndex = null;
   }
+
+  toggleAutoAwk(jwkForm: any) {
+    jwkForm.auto_awk = !jwkForm.auto_awk;
+    if (jwkForm.auto_awk && !jwkForm.pkt_num && this.fs.jawakFormMain?.pkt_num) {
+      jwkForm.pkt_num = this.fs.jawakFormMain.pkt_num;
+    }
+  }
+
+  onAutoAwkChange(jwkForm: any) {
+    if (jwkForm.auto_awk && !jwkForm.pkt_num && this.fs.jawakFormMain?.pkt_num) {
+      jwkForm.pkt_num = this.fs.jawakFormMain.pkt_num;
+    }
+  }
+
+  toggleAutoReawk(jwkForm: any) {
+    jwkForm.auto_reawk = !jwkForm.auto_reawk;
+    if (jwkForm.auto_reawk && !jwkForm.pkt_num && this.fs.jawakFormMain?.pkt_num) {
+      jwkForm.pkt_num = this.fs.jawakFormMain.pkt_num;
+    }
+  }
+
+  onAutoReawkChange(jwkForm: any) {
+    if (jwkForm.auto_reawk && !jwkForm.pkt_num && this.fs.jawakFormMain?.pkt_num) {
+      jwkForm.pkt_num = this.fs.jawakFormMain.pkt_num;
+    }
+  }
 }

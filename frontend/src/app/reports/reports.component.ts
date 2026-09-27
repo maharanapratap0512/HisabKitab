@@ -58,12 +58,12 @@ export class ReportsComponent implements OnInit {
     },
     { 
       id: 'report-item-ledger', 
-      title: 'Item Ledger', 
+      title: 'Ledger Report (लेजर रिपोर्ट)', 
       path: '/report-item-ledger', 
-      description: 'Detailed ledger showing Aawak, Jawak and Bachat for items.', 
-      descriptionHi: 'वस्तुओं के लिए आवक, जावक और बचत दिखाने वाला विस्तृत लेजर।',
-      howToUse: 'Select Month/Year, Category, and Items to view the ledger.',
-      howToUseHi: 'लेजर देखने के लिए माह/वर्ष, श्रेणी और आइटम चुनें।'
+      description: 'Detailed ledger showing Aawak, Jawak and Bachat by Item, PBK or MM.', 
+      descriptionHi: 'वस्तुओं, PBK (जिज्ञासु) तथा मण्डल (MM) अनुसार आवक, जावक और बचत दिखाने वाला विस्तृत लेजर।',
+      howToUse: 'Select Month/Year, Dimension (Item/PBK/MM) and filters to view the ledger.',
+      howToUseHi: 'लेजर देखने के लिए माह/वर्ष, आयाम (वस्तु/PBK/MM) और फ़िल्टर चुनें।'
     },
     { 
       id: 'report-kh-saar', 

@@ -29,6 +29,12 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
   @Input() size: 'sm' | 'default' = 'default';
   @Input() mode: 'default' | 'tiny' | 'compact' = 'default';
   @Input() readonly: boolean = false;
+  @Input() showAdd: boolean = true;
+
+  // Self modal properties for Add Aawak
+  showSelfModal = false;
+  selfModalId: string = 'aawakRefSelfModal_' + Math.random().toString(36).substring(2, 9);
+  presetAawakData: any = null;
 
   // Auto-save related
   @Input() autoSave: boolean = false;
@@ -139,6 +145,11 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
       if ($modal.length) {
         $modal.modal('hide');
         $modal.remove();
+      }
+      const $selfModal = $('#' + this.selfModalId);
+      if ($selfModal.length) {
+        $selfModal.modal('hide');
+        $selfModal.remove();
       }
       $('.modal-backdrop').remove();
       $('body').removeClass('modal-open').css('padding-right', '');
@@ -611,5 +622,92 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
         this.splitLoading = false;
         this.toastr.error('Failed to update reference link');
       });
+  }
+
+  onAddAawakClick(e?: Event) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (!this.mmId) {
+      this.toastr.warning('Please select Mandi/MM first');
+      return;
+    }
+
+    const data: any = {};
+    if (this.mmId) {
+      data.mm_id = Array.isArray(this.mmId) ? this.mmId[0] : this.mmId;
+      data.aawak_mm_id = data.mm_id;
+    }
+    if (this.maxDate) {
+      data.date = this.maxDate;
+    }
+
+    if (this.filterObj) {
+      if (this.filterObj.item_id) data.item_id = this.filterObj.item_id;
+      if (this.filterObj.subitem_id) data.subitem_id = this.filterObj.subitem_id;
+      if (this.filterObj.condition_id) data.condition_id = this.filterObj.condition_id;
+      if (this.filterObj.aawak_source_id) data.aawak_source_id = this.filterObj.aawak_source_id;
+      if (this.filterObj.aawak_type_id) data.aawak_type_id = this.filterObj.aawak_type_id;
+      if (this.filterObj.unit_id) data.unit_id = this.filterObj.unit_id;
+      if (this.filterObj.pbk_id) data.pbk_id = this.filterObj.pbk_id;
+      if (this.filterObj.aawak_mm_id) data.aawak_mm_id = this.filterObj.aawak_mm_id;
+      if (this.filterObj.nimitt_id) data.nimitt_id = this.filterObj.nimitt_id;
+    }
+
+    const first = this.getFirstSelectedItem();
+    if (first) {
+      if (!data.item_id && first.item_id) data.item_id = first.item_id;
+      if (!data.subitem_id && first.subitem_id) data.subitem_id = first.subitem_id;
+      if (!data.unit_id && first.unit_id) data.unit_id = first.unit_id;
+      if (!data.condition_id && first.condition_id) data.condition_id = first.condition_id;
+      if (!data.aawak_source_id && first.aawak_source_id) data.aawak_source_id = first.aawak_source_id;
+    }
+
+    this.presetAawakData = data;
+    this.showSelfModal = true;
+    setTimeout(() => {
+      if (typeof $ !== 'undefined') {
+        const $modal = $('#' + this.selfModalId);
+        if ($modal.length) {
+          if ($modal.parent()[0] !== document.body) {
+            $modal.appendTo('body');
+          }
+          $modal.modal('show');
+        }
+      }
+    }, 50);
+  }
+
+  closeSelfModal() {
+    if (typeof $ !== 'undefined') {
+      const $modal = $('#' + this.selfModalId);
+      if ($modal.length) {
+        $modal.modal('hide');
+      }
+    }
+    this.showSelfModal = false;
+    this.presetAawakData = null;
+  }
+
+  onSelfAawakCreated(ev: any) {
+    if (ev) {
+      let createdItem: any = null;
+      if (Array.isArray(ev)) {
+        createdItem = ev[0];
+      } else if (ev.aawaks && Array.isArray(ev.aawaks)) {
+        createdItem = ev.aawaks[0];
+      } else if (ev.result && Array.isArray(ev.result)) {
+        createdItem = ev.result[0];
+      } else {
+        createdItem = ev;
+      }
+
+      if (createdItem && createdItem._id) {
+        this.toastr.success('New Aawak created successfully');
+        this.openSplitModalBody();
+      }
+    }
+    this.closeSelfModal();
   }
 }

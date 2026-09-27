@@ -11,6 +11,7 @@ import * as FileSaver from 'file-saver';
 import { VirtualSlice } from '../../SHARED/virtual-infinite-scroll.directive';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-universal-report',
@@ -29,6 +30,8 @@ export class UniversalReportComponent implements OnInit {
   filterBody: any = {
     pivot_dimension: 'aawak_source',
     dimension_ids: [],
+    from_year_month: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
+    to_year_month: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
     from_year: new Date().getFullYear(),
     from_month: new Date().getMonth() + 1,
     to_year: new Date().getFullYear(),
@@ -96,6 +99,8 @@ export class UniversalReportComponent implements OnInit {
     this.spinner.show();
     this.years = this.gs.years || [2023, 2024, 2025, 2026];
 
+    this.syncYearMonth();
+
     this.gs.observeList().subscribe({
       next: (result) => {
         this.mms = result.mm ? result.mm : [];
@@ -103,9 +108,6 @@ export class UniversalReportComponent implements OnInit {
         this.items = result.itemmix ? result.itemmix : [];
 
         this.filterBody.mm_id = this.auth.webUser?.settings?.defaultMM ? [this.auth.webUser.settings.defaultMM] : null;
-
-        this.updateMonthsFrom(this.filterBody.from_year);
-        this.updateMonthsTo(this.filterBody.to_year);
 
         this.loadSupportLists();
 
@@ -116,6 +118,36 @@ export class UniversalReportComponent implements OnInit {
         this.toastr.error('Failed to load initial master lists');
       }
     });
+  }
+
+  syncYearMonth(): void {
+    if (this.filterBody.from_year_month) {
+      const parts = this.filterBody.from_year_month.split('-');
+      this.filterBody.from_year = parseInt(parts[0], 10);
+      this.filterBody.from_month = parseInt(parts[1], 10);
+    } else {
+      this.filterBody.from_year = null;
+      this.filterBody.from_month = null;
+    }
+
+    if (this.filterBody.to_year_month) {
+      const parts = this.filterBody.to_year_month.split('-');
+      this.filterBody.to_year = parseInt(parts[0], 10);
+      this.filterBody.to_month = parseInt(parts[1], 10);
+    } else {
+      this.filterBody.to_year = null;
+      this.filterBody.to_month = null;
+    }
+
+    if (this.filterBody.from_year && !this.filterBody.to_year) {
+      this.filterBody.to_year_month = this.filterBody.from_year_month;
+      this.filterBody.to_year = this.filterBody.from_year;
+      this.filterBody.to_month = this.filterBody.from_month;
+    } else if (!this.filterBody.from_year && this.filterBody.to_year) {
+      this.filterBody.from_year_month = this.filterBody.to_year_month;
+      this.filterBody.from_year = this.filterBody.to_year;
+      this.filterBody.from_month = this.filterBody.to_month;
+    }
   }
 
   loadSupportLists(): void {
@@ -140,24 +172,6 @@ export class UniversalReportComponent implements OnInit {
     this.filterBody.dimension_ids = [];
   }
 
-  updateMonthsFrom(year: number) {
-    if (!year) return;
-    this.monthsFrom = this.gs.yearChangedGetMonth(year);
-  }
-
-  updateMonthsTo(year: number) {
-    if (!year) return;
-    this.monthsTo = this.gs.yearChangedGetMonth(year);
-  }
-
-  onFromYearChange(ev: any) {
-    this.updateMonthsFrom(ev);
-    if (!this.filterBody.to_year || this.filterBody.to_year < ev) {
-      this.filterBody.to_year = ev;
-      this.updateMonthsTo(ev);
-    }
-  }
-
   catSelected(catId: any) {
     if (catId) {
       this.items = this.gs.Lists.itemmix.filter((i: any) => i.categories && i.categories.some((c: any) => c._id == catId));
@@ -180,12 +194,15 @@ export class UniversalReportComponent implements OnInit {
   }
 
   generateReport(): void {
+    this.syncYearMonth();
+
     if (!this.filterBody.from_year || !this.filterBody.from_month) {
-      this.toastr.error('Please select From Year and Month');
+      this.toastr.error('Please select From Year-Month');
       return;
     }
 
     if (!this.filterBody.to_year || !this.filterBody.to_month) {
+      this.filterBody.to_year_month = this.filterBody.from_year_month;
       this.filterBody.to_year = this.filterBody.from_year;
       this.filterBody.to_month = this.filterBody.from_month;
     }
@@ -308,6 +325,8 @@ export class UniversalReportComponent implements OnInit {
   calculateTotals(): void {
     const totals: any = {
       past_bachat: {
+        total_aawak: 0,
+        total_jawak: 0,
         total: 0,
         dims: {}
       },
@@ -322,7 +341,7 @@ export class UniversalReportComponent implements OnInit {
 
     // Initialize past_bachat dims
     this.activeDimensions.forEach((d: any) => {
-      totals.past_bachat.dims[d._id] = 0;
+      totals.past_bachat.dims[d._id] = { aawak: 0, jawak: 0, bachat: 0 };
     });
 
     // Initialize months total structures
@@ -348,10 +367,21 @@ export class UniversalReportComponent implements OnInit {
 
     this.reportRows.forEach((row: any) => {
       if (row.past_bachat) {
+        totals.past_bachat.total_aawak = r2(totals.past_bachat.total_aawak + (row.past_bachat.total_aawak || 0));
+        totals.past_bachat.total_jawak = r2(totals.past_bachat.total_jawak + (row.past_bachat.total_jawak || 0));
         totals.past_bachat.total = r2(totals.past_bachat.total + (row.past_bachat.total || 0));
         this.activeDimensions.forEach((d: any) => {
           const dimId = d._id;
-          totals.past_bachat.dims[dimId] = r2(totals.past_bachat.dims[dimId] + (row.past_bachat.dims ? (row.past_bachat.dims[dimId] || 0) : 0));
+          const dimObj = row.past_bachat.dims ? row.past_bachat.dims[dimId] : null;
+          if (dimObj) {
+            if (typeof dimObj === 'number') {
+              totals.past_bachat.dims[dimId].bachat = r2(totals.past_bachat.dims[dimId].bachat + dimObj);
+            } else {
+              totals.past_bachat.dims[dimId].aawak = r2(totals.past_bachat.dims[dimId].aawak + (dimObj.aawak || 0));
+              totals.past_bachat.dims[dimId].jawak = r2(totals.past_bachat.dims[dimId].jawak + (dimObj.jawak || 0));
+              totals.past_bachat.dims[dimId].bachat = r2(totals.past_bachat.dims[dimId].bachat + (dimObj.bachat || 0));
+            }
+          }
         });
       }
 
@@ -416,6 +446,7 @@ export class UniversalReportComponent implements OnInit {
 
     const dimLabel = this.getPivotDimensionLabel();
     const modeLabel = this.viewMode === 'monthly' ? 'Monthly Report' : 'Yearly Report';
+    const pivotDim = this.filterBody.pivot_dimension;
 
     // Map column metadata array to accurately track column types & alternate month shading
     const colMetas: Array<{
@@ -431,41 +462,57 @@ export class UniversalReportComponent implements OnInit {
       colMetas.push({ type: 'fixed' });
     }
 
-    // Past Bachat Columns
-    for (let j = 0; j < this.activeDimensions.length; j++) {
-      colMetas.push({ type: 'past' });
-    }
-    colMetas.push({ type: 'past', isMonthEnd: true, isHighlight: true }); // Total Past Bachat
+    // Past Bachat Column (Single Opening Balance Column)
+    colMetas.push({ type: 'past', isMonthEnd: true, isHighlight: true });
 
     // Month Columns
     this.monthsList.forEach((m: any, mIdx: number) => {
       const isAlt = mIdx % 2 === 1;
-      this.activeDimensions.forEach((d: any, dIdx: number) => {
-        colMetas.push({
-          type: 'month',
-          mIdx,
-          isAltMonth: isAlt,
-          isMonthEnd: dIdx === this.activeDimensions.length - 1
-        });
-      });
 
-      if (this.monthsList.length <= 1) {
-        colMetas.push({
-          type: 'month',
-          mIdx,
-          isAltMonth: isAlt,
-          isMonthEnd: true,
-          isHighlight: true
+      if (pivotDim === 'aawak_type') {
+        this.activeDimensions.forEach(() => colMetas.push({ type: 'month', mIdx, isAltMonth: isAlt }));
+        colMetas.push({ type: 'month', mIdx, isAltMonth: isAlt }); // Total Jawak
+        colMetas.push({ type: 'month', mIdx, isAltMonth: isAlt, isMonthEnd: true, isHighlight: true }); // Net Bachat
+      } else if (pivotDim === 'jawak_type') {
+        colMetas.push({ type: 'month', mIdx, isAltMonth: isAlt }); // Total Aawak
+        this.activeDimensions.forEach(() => colMetas.push({ type: 'month', mIdx, isAltMonth: isAlt }));
+        colMetas.push({ type: 'month', mIdx, isAltMonth: isAlt, isMonthEnd: true, isHighlight: true }); // Net Bachat
+      } else {
+        this.activeDimensions.forEach((d: any, dIdx: number) => {
+          colMetas.push({
+            type: 'month',
+            mIdx,
+            isAltMonth: isAlt,
+            isMonthEnd: this.monthsList.length > 1 ? dIdx === this.activeDimensions.length - 1 : false
+          });
         });
+
+        if (this.monthsList.length <= 1) {
+          colMetas.push({
+            type: 'month',
+            mIdx,
+            isAltMonth: isAlt,
+            isMonthEnd: true,
+            isHighlight: true
+          });
+        }
       }
     });
 
     // Multi-month Grand Total Columns
     if (this.monthsList.length > 1) {
-      this.activeDimensions.forEach((d: any) => {
-        colMetas.push({ type: 'grand' });
-      });
-      colMetas.push({ type: 'grand', isHighlight: true });
+      if (pivotDim === 'aawak_type') {
+        this.activeDimensions.forEach(() => colMetas.push({ type: 'grand' }));
+        colMetas.push({ type: 'grand' }); // Total Jawak
+        colMetas.push({ type: 'grand', isHighlight: true }); // Final Bachat
+      } else if (pivotDim === 'jawak_type') {
+        colMetas.push({ type: 'grand' }); // Total Aawak
+        this.activeDimensions.forEach(() => colMetas.push({ type: 'grand' }));
+        colMetas.push({ type: 'grand', isHighlight: true }); // Final Bachat
+      } else {
+        this.activeDimensions.forEach(() => colMetas.push({ type: 'grand' }));
+        colMetas.push({ type: 'grand', isHighlight: true }); // Final Bachat
+      }
     }
 
     const totalCols = colMetas.length;
@@ -486,36 +533,72 @@ export class UniversalReportComponent implements OnInit {
     const headerRow1 = ['No.', 'MM / Location', 'Category', 'Item Name', 'Subitem', 'Unit'];
     const headerRow2 = ['', '', '', '', '', ''];
 
-    // Past Bachat Headers
-    this.activeDimensions.forEach((d: any) => {
-      headerRow1.push('Past Bachat');
-      headerRow2.push(d.list_name_hin);
-    });
+    // Past Bachat Header (Single Column)
     headerRow1.push('Past Bachat');
-    headerRow2.push('Total Past Bachat');
+    headerRow2.push('कुल पिछला बचत');
 
     // Month Headers
     this.monthsList.forEach((m: any) => {
-      this.activeDimensions.forEach((d: any) => {
+      if (pivotDim === 'aawak_type') {
+        this.activeDimensions.forEach((d: any) => {
+          headerRow1.push(`${m.name_hin} (${m.name_eng})`);
+          headerRow2.push(`${d.list_name_hin} (आवक)`);
+        });
         headerRow1.push(`${m.name_hin} (${m.name_eng})`);
-        headerRow2.push(d.list_name_hin);
-      });
+        headerRow2.push('कुल जावक');
+        headerRow1.push(`${m.name_hin} (${m.name_eng})`);
+        headerRow2.push('अंतिम बचत');
+      } else if (pivotDim === 'jawak_type') {
+        headerRow1.push(`${m.name_hin} (${m.name_eng})`);
+        headerRow2.push('कुल आवक');
+        this.activeDimensions.forEach((d: any) => {
+          headerRow1.push(`${m.name_hin} (${m.name_eng})`);
+          headerRow2.push(`${d.list_name_hin} (जावक)`);
+        });
+        headerRow1.push(`${m.name_hin} (${m.name_eng})`);
+        headerRow2.push('अंतिम बचत');
+      } else {
+        this.activeDimensions.forEach((d: any) => {
+          headerRow1.push(`${m.name_hin} (${m.name_eng})`);
+          headerRow2.push(d.list_name_hin);
+        });
 
-      if (this.monthsList.length <= 1) {
-        headerRow1.push(`${m.name_hin} (${m.name_eng})`);
-        headerRow2.push('अंतिम कुल बचत');
+        if (this.monthsList.length <= 1) {
+          headerRow1.push(`${m.name_hin} (${m.name_eng})`);
+          headerRow2.push('अंतिम कुल बचत');
+        }
       }
     });
 
     // Grand Total Headers
     if (this.monthsList.length > 1) {
-      this.activeDimensions.forEach((d: any) => {
+      if (pivotDim === 'aawak_type') {
+        this.activeDimensions.forEach((d: any) => {
+          headerRow1.push('Final Period Total');
+          headerRow2.push(`${d.list_name_hin} (आवक)`);
+        });
         headerRow1.push('Final Period Total');
-        headerRow2.push(`${d.list_name_hin} (Final)`);
-      });
+        headerRow2.push('कुल जावक');
+        headerRow1.push('Period Grand Total');
+        headerRow2.push('अंतिम बचत');
+      } else if (pivotDim === 'jawak_type') {
+        headerRow1.push('Final Period Total');
+        headerRow2.push('कुल आवक');
+        this.activeDimensions.forEach((d: any) => {
+          headerRow1.push('Final Period Total');
+          headerRow2.push(`${d.list_name_hin} (जावक)`);
+        });
+        headerRow1.push('Period Grand Total');
+        headerRow2.push('अंतिम बचत');
+      } else {
+        this.activeDimensions.forEach((d: any) => {
+          headerRow1.push('Final Period Total');
+          headerRow2.push(`${d.list_name_hin} (Final)`);
+        });
 
-      headerRow1.push('Period Grand Total');
-      headerRow2.push('अंतिम कुल बचत');
+        headerRow1.push('Period Grand Total');
+        headerRow2.push('अंतिम कुल बचत');
+      }
     }
 
     const h1 = worksheet.addRow(headerRow1);
@@ -570,7 +653,7 @@ export class UniversalReportComponent implements OnInit {
     // Populate Data Rows
     let rowNum = 1;
     this.filteredRows.forEach((r: any, rIdx: number) => {
-      const rowVals = [
+      const rowVals: any[] = [
         rowNum++,
         r.mm_hin || '-',
         r.category_hin || '-',
@@ -579,11 +662,7 @@ export class UniversalReportComponent implements OnInit {
         r.unit_short || '-'
       ];
 
-      // Past Bachat dimension values
-      this.activeDimensions.forEach((d: any) => {
-        const dimId = d._id;
-        rowVals.push(r.past_bachat && r.past_bachat.dims ? (r.past_bachat.dims[dimId] || 0) : 0);
-      });
+      // Single Past Bachat Opening Balance value
       rowVals.push(r.past_bachat ? (r.past_bachat.total || 0) : 0);
 
       // Monthly values
@@ -591,26 +670,61 @@ export class UniversalReportComponent implements OnInit {
         const mKey = m.key;
         const mData = r.months ? r.months[mKey] : null;
 
-        this.activeDimensions.forEach((d: any) => {
-          const dimId = d._id;
-          const dimData = (mData && mData.dims) ? mData.dims[dimId] : null;
-          rowVals.push(dimData ? dimData.bachat : 0);
-        });
+        if (pivotDim === 'aawak_type') {
+          this.activeDimensions.forEach((d: any) => {
+            const dimId = d._id;
+            const dimData = (mData && mData.dims) ? mData.dims[dimId] : null;
+            rowVals.push(dimData ? dimData.aawak : 0);
+          });
+          rowVals.push(mData ? (mData.total_jawak || 0) : 0);
+          rowVals.push(mData ? (mData.net_bachat || 0) : 0);
+        } else if (pivotDim === 'jawak_type') {
+          rowVals.push(mData ? (mData.total_aawak || 0) : 0);
+          this.activeDimensions.forEach((d: any) => {
+            const dimId = d._id;
+            const dimData = (mData && mData.dims) ? mData.dims[dimId] : null;
+            rowVals.push(dimData ? dimData.jawak : 0);
+          });
+          rowVals.push(mData ? (mData.net_bachat || 0) : 0);
+        } else {
+          this.activeDimensions.forEach((d: any) => {
+            const dimId = d._id;
+            const dimData = (mData && mData.dims) ? mData.dims[dimId] : null;
+            rowVals.push(dimData ? dimData.bachat : 0);
+          });
 
-        if (this.monthsList.length <= 1) {
-          rowVals.push(r.grand_total ? r.grand_total.final_bachat : 0);
+          if (this.monthsList.length <= 1) {
+            rowVals.push(r.grand_total ? r.grand_total.final_bachat : 0);
+          }
         }
       });
 
       // Multi-month grand total
       if (this.monthsList.length > 1) {
-        this.activeDimensions.forEach((d: any) => {
-          const dimId = d._id;
-          const gdData = (r.grand_total && r.grand_total.dims) ? r.grand_total.dims[dimId] : null;
-          rowVals.push(gdData ? gdData.bachat : 0);
-        });
-
-        rowVals.push(r.grand_total ? r.grand_total.final_bachat : 0);
+        if (pivotDim === 'aawak_type') {
+          this.activeDimensions.forEach((d: any) => {
+            const dimId = d._id;
+            const gdData = (r.grand_total && r.grand_total.dims) ? r.grand_total.dims[dimId] : null;
+            rowVals.push(gdData ? gdData.aawak : 0);
+          });
+          rowVals.push(r.grand_total ? (r.grand_total.total_jawak || 0) : 0);
+          rowVals.push(r.grand_total ? r.grand_total.final_bachat : 0);
+        } else if (pivotDim === 'jawak_type') {
+          rowVals.push(r.grand_total ? (r.grand_total.total_aawak || 0) : 0);
+          this.activeDimensions.forEach((d: any) => {
+            const dimId = d._id;
+            const gdData = (r.grand_total && r.grand_total.dims) ? r.grand_total.dims[dimId] : null;
+            rowVals.push(gdData ? gdData.jawak : 0);
+          });
+          rowVals.push(r.grand_total ? r.grand_total.final_bachat : 0);
+        } else {
+          this.activeDimensions.forEach((d: any) => {
+            const dimId = d._id;
+            const gdData = (r.grand_total && r.grand_total.dims) ? r.grand_total.dims[dimId] : null;
+            rowVals.push(gdData ? gdData.bachat : 0);
+          });
+          rowVals.push(r.grand_total ? r.grand_total.final_bachat : 0);
+        }
       }
 
       const dRow = worksheet.addRow(rowVals);
@@ -662,13 +776,9 @@ export class UniversalReportComponent implements OnInit {
     });
 
     // Footer Total Summary Row
-    const footerVals = ['*', 'Total Summary', '', '', '', ''];
+    const footerVals: any[] = ['*', 'Total Summary', '', '', '', ''];
 
-    // Past Bachat footer totals
-    this.activeDimensions.forEach((d: any) => {
-      const dimId = d._id;
-      footerVals.push(this.columnTotals.past_bachat && this.columnTotals.past_bachat.dims ? (this.columnTotals.past_bachat.dims[dimId] || 0) : 0);
-    });
+    // Past Bachat footer total (Single Opening Balance Total)
     footerVals.push(this.columnTotals.past_bachat ? (this.columnTotals.past_bachat.total || 0) : 0);
 
     // Monthly footer totals
@@ -676,26 +786,61 @@ export class UniversalReportComponent implements OnInit {
       const mKey = m.key;
       const mTotals = this.columnTotals.months ? this.columnTotals.months[mKey] : null;
 
-      this.activeDimensions.forEach((d: any) => {
-        const dimId = d._id;
-        const dimTot = (mTotals && mTotals.dims) ? mTotals.dims[dimId] : null;
-        footerVals.push(dimTot ? dimTot.bachat : 0);
-      });
+      if (pivotDim === 'aawak_type') {
+        this.activeDimensions.forEach((d: any) => {
+          const dimId = d._id;
+          const dimTot = (mTotals && mTotals.dims) ? mTotals.dims[dimId] : null;
+          footerVals.push(dimTot ? dimTot.aawak : 0);
+        });
+        footerVals.push(mTotals ? (mTotals.total_jawak || 0) : 0);
+        footerVals.push(mTotals ? (mTotals.net_bachat || 0) : 0);
+      } else if (pivotDim === 'jawak_type') {
+        footerVals.push(mTotals ? (mTotals.total_aawak || 0) : 0);
+        this.activeDimensions.forEach((d: any) => {
+          const dimId = d._id;
+          const dimTot = (mTotals && mTotals.dims) ? mTotals.dims[dimId] : null;
+          footerVals.push(dimTot ? dimTot.jawak : 0);
+        });
+        footerVals.push(mTotals ? (mTotals.net_bachat || 0) : 0);
+      } else {
+        this.activeDimensions.forEach((d: any) => {
+          const dimId = d._id;
+          const dimTot = (mTotals && mTotals.dims) ? mTotals.dims[dimId] : null;
+          footerVals.push(dimTot ? dimTot.bachat : 0);
+        });
 
-      if (this.monthsList.length <= 1) {
-        footerVals.push(this.columnTotals.grand_total ? this.columnTotals.grand_total.final_bachat : 0);
+        if (this.monthsList.length <= 1) {
+          footerVals.push(this.columnTotals.grand_total ? this.columnTotals.grand_total.final_bachat : 0);
+        }
       }
     });
 
     // Grand total footer
     if (this.monthsList.length > 1) {
-      this.activeDimensions.forEach((d: any) => {
-        const dimId = d._id;
-        const gdTot = (this.columnTotals.grand_total && this.columnTotals.grand_total.dims) ? this.columnTotals.grand_total.dims[dimId] : null;
-        footerVals.push(gdTot ? gdTot.bachat : 0);
-      });
-
-      footerVals.push(this.columnTotals.grand_total ? this.columnTotals.grand_total.final_bachat : 0);
+      if (pivotDim === 'aawak_type') {
+        this.activeDimensions.forEach((d: any) => {
+          const dimId = d._id;
+          const gdTot = (this.columnTotals.grand_total && this.columnTotals.grand_total.dims) ? this.columnTotals.grand_total.dims[dimId] : null;
+          footerVals.push(gdTot ? gdTot.aawak : 0);
+        });
+        footerVals.push(this.columnTotals.grand_total ? (this.columnTotals.grand_total.total_jawak || 0) : 0);
+        footerVals.push(this.columnTotals.grand_total ? (this.columnTotals.grand_total.final_bachat || 0) : 0);
+      } else if (pivotDim === 'jawak_type') {
+        footerVals.push(this.columnTotals.grand_total ? (this.columnTotals.grand_total.total_aawak || 0) : 0);
+        this.activeDimensions.forEach((d: any) => {
+          const dimId = d._id;
+          const gdTot = (this.columnTotals.grand_total && this.columnTotals.grand_total.dims) ? this.columnTotals.grand_total.dims[dimId] : null;
+          footerVals.push(gdTot ? gdTot.jawak : 0);
+        });
+        footerVals.push(this.columnTotals.grand_total ? (this.columnTotals.grand_total.final_bachat || 0) : 0);
+      } else {
+        this.activeDimensions.forEach((d: any) => {
+          const dimId = d._id;
+          const gdTot = (this.columnTotals.grand_total && this.columnTotals.grand_total.dims) ? this.columnTotals.grand_total.dims[dimId] : null;
+          footerVals.push(gdTot ? gdTot.bachat : 0);
+        });
+        footerVals.push(this.columnTotals.grand_total ? (this.columnTotals.grand_total.final_bachat || 0) : 0);
+      }
     }
 
     const footRow = worksheet.addRow(footerVals);
@@ -775,6 +920,28 @@ export class UniversalReportComponent implements OnInit {
       return;
     }
 
+    if (this.monthsList && this.monthsList.length > 5) {
+      Swal.fire({
+        title: 'महीने की चेतावनी (Month Limit Warning)',
+        text: `आपने ${this.monthsList.length} महीने चुने हैं। PDF रिपोर्ट में केवल 5 महीने ही आसानी और स्पष्टता (comfortably) से फिट आ पाते हैं। क्या आप एक्सपोर्ट जारी रखना चाहते हैं?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'हां, एक्सपोर्ट करें',
+        cancelButtonText: 'रद्द करें'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.proceedExportToPdf();
+        }
+      });
+    } else {
+      this.proceedExportToPdf();
+    }
+  }
+
+  private proceedExportToPdf(): void {
+    this.syncYearMonth();
     this.spinner.show();
     this.loadingStatus = 'Rendering InDesign PDF...';
 
