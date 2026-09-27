@@ -227,7 +227,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
 router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
     try {
         const awkId = Number(req.params.aawak_ref_id);
-        let conditionString = `(jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${awkId})`;
+        let conditionString = `jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${awkId})`;
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('jawak', { full: true, conditionString: conditionString }).then((resolve) => {
             for (let i in resolve.data) {

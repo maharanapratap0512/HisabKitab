@@ -327,7 +327,7 @@
                                                                   (click)="addJawak(awk, data)">
                                                                   <i class="mdi mdi-plus noti-icon"></i>
                                                                </button>
-                                                               <button class="btn btn-sm btn-outline-warning"
+                                                               <button *ngIf="awk.jawak_detail?.length > 0" class="btn btn-sm btn-outline-warning"
                                                                   (click)="showJawak(awk._id)">
                                                                   <i class="dripicons-view-list noti-icon"></i>
                                                                </button>
