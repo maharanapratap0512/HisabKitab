@@ -1018,7 +1018,7 @@ const bachat = {
                 'condition_hin', cnd.list_name_hin, 'qty', aawak.qty, 'rate', aawak.rate,
                 'actual_amt', aawak.actual_amt, 'aawak_type_id', aawak.aawak_type_id,
                 'aawak_type_hin', awk_type.list_name_hin, 'description', aawak.description,
-                'remaining_qty', aawak.remaining_qty
+                'remaining_qty', aawak.remaining_qty, 'is_variable_qty', aawak.is_variable_qty
             )) 
             ELSE json('[]') END as aawaks
         from bachat
@@ -1027,7 +1027,7 @@ const bachat = {
             AND aawak.item_id = bachat.item_id 
             AND IFNULL(aawak.subitem_id, 0) = IFNULL(bachat.subitem_id, 0) 
             AND aawak.unit_id = bachat.unit_id 
-            AND aawak.remaining_qty <> 0
+            AND (aawak.remaining_qty <> 0 OR aawak.is_variable_qty = 1)
         left join mm amm on amm._id = aawak.aawak_mm_id
         left join pbk on pbk._id = aawak.pbk_id
         left join support_list cnd on cnd._id = aawak.condition_id

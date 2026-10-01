@@ -464,6 +464,13 @@ export class AawakEntryNewComponent implements OnInit {
     this.activeRowIndex = null;
   }
 
+  onVarQtyChange(i: any) {
+    if (this.fs.aawakFormMain.aawaks[i]?.is_variable_qty) {
+      this.fs.aawakFormMain.aawaks[i].qty = 0;
+      this.qtyClick(i);
+    }
+  }
+
   qtyClick(i: any) {
     if (this.fs.aawakFormMain.aawaks[i].qty && this.fs.aawakFormMain.aawaks[i].rate) {
       let actual_amt = this.fs.aawakFormMain.aawaks[i].qty * this.fs.aawakFormMain.aawaks[i].rate

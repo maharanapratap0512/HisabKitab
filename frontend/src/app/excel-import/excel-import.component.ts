@@ -431,44 +431,65 @@ export class ExcelImportComponent implements OnInit {
   }
 
   itemChange(event: any, data: any, index?: any) {
-    // console.log("itemChange event:", event, "data:", data, "index:", index);
     if (event) {
       data.id = event.item_id;
+      data.item_id = event.item_id;
       data.subitem_id = event.subitem_id;
       data.item = event.item;
       data.subitem = event.subitem_id ? event.subitem : null;
+    } else {
+      data.id = null;
+      data.item_id = null;
+      data.subitem_id = null;
+      data.item = null;
+      data.subitem = null;
     }
   }
 
   correctionSubmit(data: any, index: any) {
     let conf = this.headerList.filter((h: { ref_table: any; }) => h.ref_table == data.type);
-    // console.log("data", data, "conf", conf);
-    // console.log(this.excelArrObj);
 
     if (data.type == 'item') {
       for (let i in this.excelArrObj) {
         let isMatch = false;
         if (typeof data.name === 'string') {
-          if (this.excelArrObj[i].item == data.name) {
+          const rowItem = (this.excelArrObj[i].item || this.excelArrObj[i].item_hin || '').trim().toLowerCase();
+          const nameItem = (data.name || '').trim().toLowerCase();
+          const rowSubitem = (this.excelArrObj[i].subitem || this.excelArrObj[i].subitem_hin || '').trim().toLowerCase();
+          const extraNote = (data.extra_note || '').trim().toLowerCase();
+          if (rowItem === nameItem && (extraNote ? rowSubitem === extraNote : true)) {
             isMatch = true;
           }
-        } else if (data.name && typeof data.name === 'object' && this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
-          isMatch = true;
+        } else if (data.name && typeof data.name === 'object') {
+          const rowItem = (this.excelArrObj[i].item || this.excelArrObj[i].item_hin || '').trim().toLowerCase();
+          const nameItem = (data.name.item || '').trim().toLowerCase();
+          const rowSubitem = (this.excelArrObj[i].subitem || this.excelArrObj[i].subitem_hin || '').trim().toLowerCase();
+          const nameSubitem = (data.name.subitem || '').trim().toLowerCase();
+          if (rowItem === nameItem && (nameSubitem ? rowSubitem === nameSubitem : true)) {
+            isMatch = true;
+          }
         }
 
         if (isMatch) {
-          if (data.item) {
-            this.excelArrObj[i].item_id = data.item_id;
-            this.excelArrObj[i].item_hin = data.item.item_hin;
+          const targetItemId = data.item_id || data.id;
+          if (targetItemId) {
+            this.excelArrObj[i].item_id = targetItemId;
+            if (data.item) {
+              this.excelArrObj[i].item_hin = typeof data.item === 'object' ? data.item.item_hin : data.item;
+            }
           }
-          if (data.subitem) {
+
+          if (data.subitem_id !== undefined && data.subitem_id !== null) {
             this.excelArrObj[i].subitem_id = data.subitem_id;
-            this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
-            this.excelArrObj[i].subitem_corrected = true;
-          } else if (typeof data.name === 'object') {
-            this.excelArrObj[i].subitem_corrected = true;
+            if (data.subitem) {
+              this.excelArrObj[i].subitem_hin = typeof data.subitem === 'object' ? data.subitem.subitem_hin : data.subitem;
+            }
+          } else {
+            this.excelArrObj[i].subitem = null;
+            this.excelArrObj[i].subitem_id = null;
             this.excelArrObj[i].subitem_hin = '-';
           }
+          delete this.excelArrObj[i].subitem_corrected;
 
           if (data.item_detail) {
             this.excelArrObj[i].item_detail = (this.excelArrObj[i].item_detail ? this.excelArrObj[i].item_detail + ' ' : '') + data.item_detail;
@@ -476,8 +497,6 @@ export class ExcelImportComponent implements OnInit {
           if (data.description) {
             this.excelArrObj[i].description = (this.excelArrObj[i].description ? this.excelArrObj[i].description + ' ' : '') + data.description;
           }
-
-          console.log("excel data", this.excelArrObj[i]);
         }
       }
     } else if (data.isArray) {
@@ -719,7 +738,7 @@ export class ExcelImportComponent implements OnInit {
         if (data[this.headerList[j].ref_field].includes(null)) {
           return true;
         }
-      } else if (this.headerList[j].ref_table && ((data[this.headerList[j].name] && !data[this.headerList[j].ref_field]) || data[this.headerList[j].name + '_corrected'])) {
+      } else if (this.headerList[j].ref_table && (data[this.headerList[j].name] && !data[this.headerList[j].ref_field])) {
         return true;
       }
     }

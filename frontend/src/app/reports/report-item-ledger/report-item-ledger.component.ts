@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
@@ -16,7 +18,8 @@ import * as JSZip from 'jszip';
   templateUrl: './report-item-ledger.component.html',
   styleUrls: ['./report-item-ledger.component.scss']
 })
-export class ReportItemLedgerComponent implements OnInit {
+export class ReportItemLedgerComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   isLoader: any = false;
   loadingStatus: any = 'Loading...';
@@ -85,7 +88,7 @@ export class ReportItemLedgerComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.categories = result.category ? result.category : [];
       this.items = result.itemmix ? result.itemmix : [];
@@ -101,6 +104,22 @@ export class ReportItemLedgerComponent implements OnInit {
 
       this.isLoader = false;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.reportData = [];
+    this.groupedReportData = [];
+    this.reportDataPbk = [];
+    this.groupedReportDataPbk = [];
+    this.reportDataMm = [];
+    this.groupedReportDataMm = [];
+    this.items = [];
+    this.pbks = [];
+    this.filteredPbks = [];
+    this.mms = [];
+    this.filteredMmsForMmDimension = [];
   }
 
   buildMonthYearOptions() {

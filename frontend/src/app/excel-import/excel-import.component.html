@@ -303,11 +303,13 @@
                                  <td> {{data.type}} </td>
                                  <td *ngIf="data.type != 'item'"> {{data.isArray ? data.name.join(', ') : data.name}}
                                  </td>
-                                 <td *ngIf="data.type == 'item' && data.name.item">
-                                    {{data.name.item}} - {{data.name.subitem}}
-                                 </td>
-                                 <td *ngIf="data.type == 'item' && !data.name.item">
-                                    {{data.name}}
+                                 <td *ngIf="data.type == 'item'">
+                                    <ng-container *ngIf="data.name && (data.name.item !== undefined || data.name.subitem !== undefined); else stringItemTpl">
+                                       {{data.name.item || ''}}{{data.name.item && data.name.subitem ? ' - ' : ''}}{{data.name.subitem || ''}}
+                                    </ng-container>
+                                    <ng-template #stringItemTpl>
+                                       {{data.name || ''}}{{data.name && data.extra_note ? ' - ' + data.extra_note : (data.extra_note || '')}}
+                                    </ng-template>
                                  </td>
                                  <td>
                                     <div class="row">

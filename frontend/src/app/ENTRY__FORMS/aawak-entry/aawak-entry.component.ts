@@ -836,6 +836,13 @@ export class AawakEntryComponent implements OnInit {
 		}
 	}
 
+	onVarQtyChange() {
+		if (this.awkfg.is_variable_qty) {
+			this.awkfg.qty = 0;
+			this.qtyclick();
+		}
+	}
+
 	qtyclick() {
 		if (this.awkfg.qty && this.awkfg.rate) {
 			let actual_amt = this.awkfg.qty * this.awkfg.rate

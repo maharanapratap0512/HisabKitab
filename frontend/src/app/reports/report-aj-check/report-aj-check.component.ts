@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
@@ -17,7 +19,8 @@ import autoTable from 'jspdf-autotable';
   templateUrl: './report-aj-check.component.html',
   styleUrls: ['./report-aj-check.component.scss']
 })
-export class ReportAjCheckComponent {
+export class ReportAjCheckComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   isLoader: any = false;
   term: any;
@@ -59,7 +62,7 @@ export class ReportAjCheckComponent {
   ngOnInit(): void {
     this.spinner.show();
 
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.departments = result.department ? result.department : [];
       this.categories = result.category ? result.category : [];
       this.mms = result.mm ? result.mm : [];
@@ -78,6 +81,16 @@ export class ReportAjCheckComponent {
     }
     this.searchReports();
 
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.aawaks = [];
+    this.jawaks = [];
+    this.reportData = [];
+    this.items = [];
+    this.subitems = [];
   }
 
   categorySelected(ev: any) {
@@ -132,7 +145,7 @@ export class ReportAjCheckComponent {
       body.item_subitem_ids = this.getCategoryItems(body.category_id);
     }
 
-    this.http.put(this.api.getUrl('REPORT_AJ_CH'), body).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('REPORT_AJ_CH'), body).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
       if (data.success) {
         this.aawaks = data.aawaks;
         this.jawaks = data.jawaks;

@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
@@ -15,7 +17,8 @@ import { HttpService } from 'src/app/services/http.service';
   templateUrl: './report-jwk-type-saar.component.html',
   styleUrls: ['./report-jwk-type-saar.component.scss']
 })
-export class ReportJwkTypeSaarComponent {
+export class ReportJwkTypeSaarComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   isLoader: any = false;
   term: any;
@@ -41,17 +44,18 @@ export class ReportJwkTypeSaarComponent {
   ngOnInit(): void {
     this.spinner.show();
 
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.departments = result.department ? result.department : [];
       this.categories = result.category ? result.category : [];
     });
 
-    // this.filterBody = {
-    //   months: [12],
-    //   year: 2022
-    // }
-    // this.searchReports();
+  }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.reportData = [];
+    this.categories = [];
   }
 
   searchReports() {
@@ -61,7 +65,7 @@ export class ReportJwkTypeSaarComponent {
       return;
     }
     this.isLoader = true;
-    this.http.put(this.api.getUrl('REPORT_JT'), this.filterBody).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('REPORT_JT'), this.filterBody).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
       if (data.success) {
         this.reportData = data.result;
         this.monthsSel = this.gs.months.filter((m: { m: any; }) => data.months.includes(m.m));

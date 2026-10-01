@@ -297,7 +297,7 @@
                                                 aawak_source_id: jwkForm.aawak_source_id,
                                                 remaining_qty: true
                                             }" [(ngModel)]="jwkForm.aawak_ref_id"
-                                            [selectedSplitsData]="jwkForm.aawak_splits" [totalSplitQty]="jwkForm.qty"
+                                            [selectedSplitsData]="jwkForm.aawak_splits" [totalSplitQty]="jwkForm.qty" [targetQty]="jwkForm.qty"
                                             (selectionChange)="refAawakSelected($event, i)"
                                             (splitsChange)="onAawakSplitsSelected($event, i)" size="sm"
                                             placeholder="Select Aawak / Split">
@@ -921,7 +921,7 @@
                                                              remaining_qty: true
                                                          }" [(ngModel)]="jwkForm.aawak_ref_id"
                                                         [selectedSplitsData]="jwkForm.aawak_splits"
-                                                        [totalSplitQty]="jwkForm.qty"
+                                                        [totalSplitQty]="jwkForm.qty" [targetQty]="jwkForm.qty"
                                                         (selectionChange)="refAawakSelected($event, i)"
                                                         (splitsChange)="onAawakSplitsSelected($event, i)" size="sm"
                                                         placeholder="Select Aawak / Split">

@@ -82,3 +82,29 @@
   </app-popover-filter>
   ```
 - In TypeScript, parse `selectedItemmix` entries by splitting `"item_id:subitem_id"` strings (`parts[0]` = `item_id`, `parts[1]` = `subitem_id`) to perform accurate item/subitem filtering.
+
+## 11. Sutram Database Transaction Rule (`sutramDB.begin()`, `sutramDB.commit()`, `sutramDB.rollback()`)
+- **NEVER** use non-existent `BaseTable.transaction(...)` or `this.transaction(...)` function calls.
+- **ALWAYS** use the explicit built-in `sutramDB` transaction methods (`sutramDB.begin()`, `sutramDB.commit()`, `sutramDB.rollback()`) with `try...catch` blocks for database transaction management.
+- **ROUTER-LEVEL PLACEMENT**: Transaction controls (`sutramDB.begin()`, `sutramDB.commit()`, `sutramDB.rollback()`) MUST normally be executed within **router handlers** (`routes/*.js`) wrapping multi-step mutation requests, NOT inside service layer functions, unless a specific edge case explicitly warrants service-level transaction scope.
+- Standard Router Pattern:
+  ```javascript
+  const { sutramDB } = require('../database/db.model');
+
+  router.post('/bunch/:dept_id', async (req, res, next) => {
+      try {
+          sutramDB.begin();
+          try {
+              const result = serviceFunction(req.body);
+              sutramDB.commit();
+              res.json({ success: true, result });
+          } catch (err) {
+              sutramDB.rollback();
+              throw err;
+          }
+      } catch (err) {
+          next(err);
+      }
+  });
+  ```
+

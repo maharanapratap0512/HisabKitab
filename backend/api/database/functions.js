@@ -691,16 +691,46 @@ class Functions extends DBContex {
             const BaseTable = require('./base.table');
             const relAawakJawakModel = new BaseTable('rel_aawak_jawak');
 
-            // Delete all existing rel_aawak_jawak rows for this jawak
+            // 1. Fetch old rel_aawak_jawak rows before deleting
+            const oldRelRows = this.db.prepare(`
+               SELECT raj.*, a.is_variable_qty 
+               FROM rel_aawak_jawak raj 
+               JOIN aawak a ON a._id = raj.aawak_id 
+               WHERE raj.jawak_id = ?
+            `).all(jawakId);
+
+            // 2. Delete all existing rel_aawak_jawak rows FIRST for this jawak
+            // (This fires SQLite trigger raj_del_avk_rem_qty, adding old split_qty back to aawak.remaining_qty)
             relAawakJawakModel.delete({ jawak_id: jawakId });
 
-            // Insert new split or 1:1 relation rows
+            // 3. Revert variable-qty Aawaks for old links
+            for (const oldRow of oldRelRows) {
+               if (oldRow.is_variable_qty == 1) {
+                  const oldSplitQty = Number(oldRow.split_qty) || Number(oldRow.qty) || 0;
+                  if (oldRow.aawak_id && oldSplitQty > 0) {
+                     const awkObj = await this.getById('aawak', oldRow.aawak_id);
+                     if (awkObj) {
+                        const newQty = Math.max(0, Math.round((Number(awkObj.qty) - oldSplitQty) * 1000) / 1000);
+                        const newRemaining = Math.max(0, Math.round((Number(awkObj.remaining_qty) - oldSplitQty) * 1000) / 1000);
+                        await this.updateAJ({ ...awkObj, qty: newQty, remaining_qty: newRemaining }, 'aawak', awkObj);
+                     }
+                  }
+               }
+            }
+
+            // 4. Insert new split or 1:1 relation rows
             if (Array.isArray(aawakSplits) && aawakSplits.length > 0) {
                const isSplit = aawakSplits.length > 1 ? 1 : 0;
                for (const s of aawakSplits) {
                   const awkId = s.aawak_id || s._id;
                   const itemSplitQty = Number(s.split_qty) || Number(s.qty) || Number(qty) || 0;
                   if (awkId && itemSplitQty > 0) {
+                     const awkObj = await this.getById('aawak', awkId);
+                     if (awkObj && awkObj.is_variable_qty == 1) {
+                        const newQty = Math.round((Number(awkObj.qty) + itemSplitQty) * 1000) / 1000;
+                        const newRemaining = Math.round((Number(awkObj.remaining_qty) + itemSplitQty) * 1000) / 1000;
+                        await this.updateAJ({ ...awkObj, qty: newQty, remaining_qty: newRemaining }, 'aawak', awkObj);
+                     }
                      relAawakJawakModel.insert({
                         aawak_id: awkId,
                         jawak_id: jawakId,

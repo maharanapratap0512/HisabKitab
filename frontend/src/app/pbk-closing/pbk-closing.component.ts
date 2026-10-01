@@ -91,11 +91,13 @@ export class PbkClosingComponent implements OnInit {
         if (data.success) {
           this.closingDataRaw = data.result;
           this.groupDataByVoucher();
+        } else {
+          this.toastr.error(data.message || 'Error fetching closing data');
         }
         this.isLoader = false;
       }, err => {
         this.isLoader = false;
-        this.toastr.error('Error fetching data');
+        this.toastr.error(err.error?.message || err.error || 'Error fetching closing data');
       });
   }
 

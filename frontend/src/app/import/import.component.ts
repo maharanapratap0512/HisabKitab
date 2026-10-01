@@ -278,8 +278,14 @@ export class ImportComponent implements OnInit {
   getUnmatchedList() {
     this.http.get(this.api.getUrl('IMPORTEXPORT') + 'correction').subscribe((data: any) => {
       if (data.result) {
-        this.unmatchedData = data.result;
+        this.unmatchedData = data.result.map((item: any) => ({
+          item_detail: null,
+          description: null,
+          ...item
+        }));
       }
+    }, (err: any) => {
+      this.toastr.error('Failed to fetch unmatched correction list');
     });
   }
 
@@ -311,13 +317,19 @@ export class ImportComponent implements OnInit {
   }
 
   applyCorrection() {
+    const payload = (this.unmatchedData || []).map((item: any) => ({
+      item_detail: null,
+      description: null,
+      ...item
+    }));
 
-    this.http.put(this.api.getUrl('IMPORTEXPORT') + 'correction', this.unmatchedData).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('IMPORTEXPORT') + 'correction', payload).subscribe((data: any) => {
       // this.unmatchedData = data;
       this.getUnmatchedList();
       this.getImportData();
+    }, (err: any) => {
+      this.toastr.error(err.error?.message || 'Error applying correction');
     });
-
   }
 
   ignoreCorrection(data: any, i: any) {

@@ -115,14 +115,8 @@
 
                   <!-- Right: Actions -->
                   <div class="d-flex align-items-center gap-1" (click)="$event.stopPropagation()">
-                    <button class="btn btn-light btn-sm btn-icon py-0" (click)="openModal('Edit Closing', group)"
-                      title="Edit" style="height: 28px; width: 28px;">
-                      <i class="uil uil-pen"></i>
-                    </button>
-                    <button class="btn btn-light btn-sm btn-icon text-danger py-0" (click)="deleteVoucher(group)"
-                      title="Delete" style="height: 28px; width: 28px;">
-                      <i class="uil uil-trash"></i>
-                    </button>
+                    <i class="uil uil-pen i-outline-primary cursor-pointer me-1" (click)="openModal('Edit Closing', group)" title="Edit"></i>
+                    <i class="uil uil-trash i-outline-danger cursor-pointer me-1" (click)="deleteVoucher(group)" title="Delete"></i>
                     <button class="btn btn-sm btn-icon transition-icon py-0" [ngClass]="{'rotate-180': group.expanded}"
                       (click)="toggleExpand(group)">
                       <i class="uil uil-angle-down h5 mb-0"></i>
@@ -182,7 +176,7 @@
 <!-- Modal -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel"
   aria-hidden="true">
-  <div class="modal-dialog" style="width: 90%;">
+  <div class="modal-dialog" style="width: 98%;">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalLabel">{{showModal}}</h5>

@@ -290,8 +290,13 @@ class BaseTable {
     // ── WHERE BUILDER ─────────────────────────────────────────
     // ─────────────────────────────────────────────────────────
     //
-    // object → { _id: 5, active: 1 }  → WHERE col = ? AND ...  (bound params)
-    // string → "date > '2024-01-01'"  → WHERE <raw sql>        (no params)
+    // Usage Examples:
+    //   Equality:            { active: 1, dept_id: 3 }                 → WHERE active = ? AND dept_id = ?
+    //   Operators:           { qty: { '>': 0 }, price: { '<=': 100 } }  → WHERE qty > ? AND price <= ?
+    //   Not Equals:          { status: { '!=': 'closed' } }            → WHERE status != ?
+    //   Arrays (IN clause):  { item_id: [10, 20, 30] }                 → WHERE item_id IN (?, ?, ?)
+    //   Null Checks:         { subitem_id: null }                      → WHERE subitem_id IS NULL
+    //   Raw SQL String:      "date >= '2026-01-01'"                    → WHERE date >= '2026-01-01'
     //
     // prefixTable: true  → tableName.col = ?  (avoids ambiguity in JOINs)
     // prefixTable: false → col = ?            (UPDATE / DELETE / plain SELECT)
@@ -313,12 +318,32 @@ class BaseTable {
                     const col = prefixTable && !k.includes('.')
                         ? `${this.tableName}.${k}`
                         : k;
-                    if (Array.isArray(where[k])) {
-                        if (where[k].length === 0) return '1=0'; // Safe fallback for empty array
-                        params.push(...where[k]);
-                        return `${col} IN (${where[k].map(() => '?').join(', ')})`;
+                    const val = where[k];
+                    if (Array.isArray(val)) {
+                        if (val.length === 0) return '1=0'; // Safe fallback for empty array
+                        params.push(...val);
+                        return `${col} IN (${val.map(() => '?').join(', ')})`;
                     }
-                    params.push(where[k]);
+                    if (val !== null && typeof val === 'object' && val.constructor === Object) {
+                        const opKeys = Object.keys(val);
+                        if (opKeys.length > 0) {
+                            const subClauses = opKeys.map(op => {
+                                const subVal = val[op];
+                                const upperOp = op.trim().toUpperCase();
+                                if (subVal === null) {
+                                    if (upperOp === '!=' || upperOp === '<>' || upperOp === 'IS NOT') return `${col} IS NOT NULL`;
+                                    if (upperOp === '=' || upperOp === 'IS') return `${col} IS NULL`;
+                                }
+                                params.push(subVal);
+                                return `${col} ${op} ?`;
+                            });
+                            return subClauses.join(' AND ');
+                        }
+                    }
+                    if (val === null) {
+                        return `${col} IS NULL`;
+                    }
+                    params.push(val);
                     return `${col} = ?`;
                 })
                 .join(' AND ');

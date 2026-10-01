@@ -105,7 +105,9 @@ router.put('/correction', async (req, res, next) => {
                 let type = null;
                 let stmt = null;
                 switch (req.body[i].type) {
-                    case 'pbk': req.body[i].name = req.body[i].name ? JSON.stringify(req.body[i].name) : null;
+                    case 'pbk':
+                        type = 'pbk';
+                        req.body[i].name = req.body[i].name ? JSON.stringify(req.body[i].name) : null;
                         break;
                     case 'aj_mm': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.aj_mm_id') IS NULL AND json_extract(json_each.value, '$.aj_mm') IS NOT NULL ;`);
                         type = 'aj_mm';
@@ -117,13 +119,16 @@ router.put('/correction', async (req, res, next) => {
                         type = 'nimitt';
                         break;
                     case 'jwk_pbk':
-                        // req.body[i].name = req.body[i].name ? JSON.stringify(req.body[i].name) : null
+                        req.body[i].name = req.body[i].name ? JSON.stringify(req.body[i].name) : null;
                         // pbk is an object {name, roll_no} - custom handling below
                         stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.pbk_id') IS NULL AND json_extract(json_each.value, '$.pbk') IS NOT NULL ;`);
                         type = 'pbk'; // special type flag
                         break;
                     case 'usage_list': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL ;`);
                         type = 'usage_list';
+                        break;
+                    default:
+                        type = req.body[i].type;
                         break;
                 }
 
@@ -145,30 +150,33 @@ router.put('/correction', async (req, res, next) => {
                         await DB.runQuery('excel_correction', 'update_jawak', { obj: obj });
                     }
                 }
-                if (req.body[i].type == 'item') {
-                    if (req.body[i].extra_note) {
-                        let qname = 'update_subitem';
-                        if (req.body[i].id && !req.body[i].id2) {
-                            qname = 'update_ignore_subitem';
+
+                if (req.body[i].id || req.body[i].id2) {
+                    if (type == 'item') {
+                        if (req.body[i].extra_note) {
+                            let qname = 'update_subitem';
+                            if (req.body[i].id && !req.body[i].id2) {
+                                qname = 'update_ignore_subitem';
+                            }
+                            await DB.runQuery('excel_correction', qname, { obj: req.body[i] });
+                        } else {
+                            await DB.runQuery('excel_correction', 'update_item', { obj: req.body[i] });
                         }
-                        await DB.runQuery('excel_correction', qname, { obj: req.body[i] });
                     } else {
-                        await DB.runQuery('excel_correction', 'update_item', { obj: req.body[i] });
+                        await DB.runQuery('excel_correction', 'update_' + type, { obj: req.body[i] });
                     }
-                } else {
-                    await DB.runQuery('excel_correction', 'update_' + req.body[i].type, { obj: req.body[i] });
-                }
-                if (req.body[i].dictionary) {
-                    let obj = req.body[i];
-                    if (obj.type != 'product') {
-                        if (obj.type == 'pbk') {
-                            obj.name = obj.pbk ? JSON.stringify(obj.pbk) : null;
+                    if (req.body[i].dictionary) {
+                        let obj = req.body[i];
+                        if (type != 'product') {
+                            if (type == 'pbk') {
+                                obj.name = obj.pbk ? JSON.stringify(obj.pbk) : null;
+                            }
+                            if (type != 'item') {
+                                obj.extra_note = null;
+                                obj.id2 = null;
+                            }
+                            await DB.insert('dictionary', req.body[i], null, false);
                         }
-                        if (obj.type != 'item') {
-                            obj.extra_note = null;
-                            obj.id2 = null;
-                        }
-                        await DB.insert('dictionary', req.body[i], null, false);
                     }
                 }
             }

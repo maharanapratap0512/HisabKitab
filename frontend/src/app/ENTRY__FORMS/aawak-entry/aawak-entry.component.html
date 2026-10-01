@@ -387,11 +387,17 @@
 
             <div class="col-md-2 mb-3" [ngClass]="{'readOnly':awkfg.product_id}">
                <div class="form-group">
-                  <label class="form-label">Quantity</label>
-                  <div class="input-group">
+                  <div class="d-flex justify-content-between align-items-center">
+                     <label class="form-label mb-0">Quantity</label>
+                     <div class="form-check form-switch mb-0 ms-1 p-0 d-flex align-items-center" *ngIf="settings.aawak?.is_variable_qty" title="Auto Calculate Qty">
+                        <input type="checkbox" class="form-check-input ms-0 me-1" id="varQtySwitch" [(ngModel)]="awkfg.is_variable_qty" (change)="onVarQtyChange()" [ngModelOptions]="{standalone: true}" style="height: 14px; width: 26px;">
+                        <label class="form-check-label text-warning fw-semibold" for="varQtySwitch" style="font-size: 10px; cursor: pointer;">Var Qty</label>
+                     </div>
+                  </div>
+                  <div class="input-group mt-1">
                      <input type="text" class="form-control" placeholder="Quantity" [(ngModel)]="awkfg.qty" name="qty"
-                        #qty="ngModel" (focusout)="qtyclick()" [readonly]="awkfg.product_id"
-                        [ngClass]="{ 'validation': (qty?.touched || f.submitted) && qty.errors?.['required']}" required>
+                        #qty="ngModel" (focusout)="qtyclick()" [readonly]="awkfg.product_id || awkfg.is_variable_qty"
+                        [ngClass]="{ 'validation': !awkfg.is_variable_qty && (qty?.touched || f.submitted) && qty.errors?.['required']}" required>
                      <span class="input-group-text ml-1 border border-secondary"
                         style="padding: 0px; min-width: 40%;background: #252932;">
                         <ng-select class="custom" style="width: 100%;" placeholder="Unit" [clearable]="true"
@@ -402,6 +408,9 @@
                         </ng-select>
                      </span>
                   </div>
+                  <small *ngIf="awkfg.is_variable_qty" class="text-warning d-block mt-0 fw-semibold" style="font-size: 10px; line-height: 1.1;">
+                     (auto calculate)
+                  </small>
                </div>
             </div>
 
@@ -546,15 +555,7 @@
                </div>
             </div>
 
-            <div class="col-md-1 mb-3" *ngIf="settings.aawak.is_variable_qty">
-               <div class="form-group">
-                  <label class="form-label">Variable Qty</label>
-                  <div class="form-check form-switch">
-                     <input type="checkbox" class="form-check-input" [(ngModel)]="awkfg.is_variable_qty"
-                        [ngModelOptions]="{standalone: true}">
-                  </div>
-               </div>
-            </div>
+
 
             <div class="col-md-1 mb-3">
                <div class="form-group">

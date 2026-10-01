@@ -800,14 +800,14 @@
                                                         <tbody>
                                                             <tr *ngFor="let awk of data.aawaks; let j = index;"
                                                                 class="aawak-row" title="Click on Row to Edit"
-                                                                [ngClass]="{'hl': awk.hl}">
+                                                                [ngClass]="{'hl': awk.hl, 'var-qty': awk.is_variable_qty}">
                                                                 <td class="p-1"
                                                                     style="vertical-align: middle; white-space: nowrap;">
                                                                     <div class="d-flex align-items-center gap-1">
                                                                         <span
                                                                             class="badge bg-secondary-subtle text-secondary px-1"
                                                                             style="font-size: 10px;">#{{j+1}}</span>
-                                                                        <button *ngIf="awk.remaining_qty > 0"
+                                                                        <button *ngIf="awk.remaining_qty > 0 || awk.is_variable_qty"
                                                                             class="btn btn-xs btn-outline-warning py-0 px-2 font-size-12 fw-bold"
                                                                             title="Add Jawak"
                                                                             (click)="$event.stopPropagation(); addJawak(awk)">
@@ -859,6 +859,9 @@
                                                                 <td>
                                                                     <div class="fw-bold">{{awk.qty}} <small
                                                                             class="text-muted">{{awk.unit_short}}</small>
+                                                                        <span *ngIf="awk.is_variable_qty" class="badge-var-qty ms-1" title="Variable Quantity Aawak">
+                                                                            <i class="uil uil-sliders-v me-1"></i>Var Qty
+                                                                        </span>
                                                                     </div>
                                                                     <span class="badge-stock mt-1 d-inline-block"
                                                                         *ngIf="awk.remaining_qty != 0">

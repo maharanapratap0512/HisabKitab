@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
@@ -17,7 +19,8 @@ declare var $: any;
   templateUrl: './bachat-new.component.html',
   styleUrls: ['./bachat-new.component.scss']
 })
-export class BachatNewComponent implements OnInit {
+export class BachatNewComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   isLoader: boolean = false;
   term: any;
@@ -83,7 +86,7 @@ export class BachatNewComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getbachatData();
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.states = result.state ? result.state : [];
       this.mms = result.mm ? result.mm : [];
       this.categories = result.category ? result.category : [];
@@ -97,11 +100,19 @@ export class BachatNewComponent implements OnInit {
     // this.filter();
   }
 
-
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.bachatData = [];
+    this.bachatAll = [];
+    this.subBachatData = [];
+    this.items = [];
+    this.subitems = [];
+  }
 
   getbachatData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('BACHATNEW') + this.auth.webUser.dept_id).subscribe(async (data) => {
+    this.http.get(this.api.getUrl('BACHATNEW') + this.auth.webUser.dept_id).pipe(takeUntil(this.destroy$)).subscribe(async (data) => {
       if (data['result'] && data['success']) {
 
         this.bachatAll = data['result'];

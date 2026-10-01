@@ -1,9 +1,9 @@
 [
     {
         "version": "37.3",
-        "date": "27-09-2026",
-        "summary": "Ledger Report MM Dimension, Jawak Auto Aawak Enhancements & Universal Report",
-        "summary_hin": "लेजर रिपोर्ट (MM आयाम), जावक (New) ऑटो आवक सुधार एवं यूनीवर्सल रिपोर्ट संवर्धन",
+        "date": "01-10-2026",
+        "summary": "Ledger Report, Universal Report, Import Correction & Variable Qty UI Enhancements",
+        "summary_hin": "लेजर रिपोर्ट, यूनीवर्सal रिपोर्ट, एक्सेल इम्पोर्ट करेक्शन एवं आवक (Variable Qty) UI संवर्धन",
         "isNew": true,
         "items": [
             {
@@ -13,6 +13,14 @@
                 "title_hin": "आवक लिंक ड्रॉपडाउन: ऑन-द-फ्लाई '+ Add Aawak' बटन एवं फ़िल्टर डेटा स्वतः लोड सुविधा",
                 "desc": "Added an '+ Add Aawak' button inside the Aawak reference modal that pre-loads all current item, subitem, unit, MM, and condition filters, automatically refreshing the Aawak list upon creation.",
                 "desc_hin": "आवक संदर्भ विकल्प में '+ Add Aawak' बटन जोड़ा गया है जो वर्तमान आइटम, सब-आइटम, यूनिट, MM तथा कंडीशन फ़िल्टर को नई आवक प्रविष्टि में स्वतः भर देता है एवं नया आवक जोड़ने के तुरंत बाद सूची को रिफ्रेश कर देता है।"
+            },
+            {
+                "type": "feature",
+                "module": "आवक एवं जावक प्रविष्टि",
+                "title": "Variable Quantity Aawak Support & Auto Quantity Sync on Jawak Link",
+                "title_hin": "परिवर्तनशील परिमाण (Variable Qty) आवक सुविधा एवं जावक लिंक होने पर स्वतः परिमाण वृद्धि",
+                "desc": "Added support for Variable Quantity Aawak entries which can be selected in Jawak reference dropdowns even with zero remaining stock. Linking Jawak entries automatically increases the total Aawak quantity with distinct visual row highlights and 'Var Qty' badges.",
+                "desc_hin": "परिवर्तनशील परिमाण (Variable Qty) आवक प्रविष्टि सुविधा जोड़ी गई है, जिससे शेष बचत 0 होने पर भी जावक संदर्भ ड्रॉपडाउन में आवक उपलब्ध रहती है। जावक लिंक करने पर आवक की कुल मात्रा स्वतः बढ़ जाती है तथा सूची में विशेष 'Var Qty' टैग दिखाई देता है।"
             },
             {
                 "type": "feature",
@@ -37,6 +45,22 @@
                 "title_hin": "यूनीवर्सल रिपोर्ट: 1st स्थान पर संयुक्त माह-वर्ष चयन एवं PDF एक्सपोर्ट सीमा चेतावनी",
                 "desc": "Positioned From and To Month-Year filter controls to the 1st position using a combined month-year picker. Added a friendly confirmation alert when exporting PDF with more than 5 months for optimal print readability.",
                 "desc_hin": "यूनीवर्सल रिपोर्ट में 'प्रारंभिक वर्ष-माह' एवं 'अंतिम वर्ष-माह' फ़िल्टर को प्रथम स्थान पर स्थानांतरित किया गया है। साथ ही PDF एक्सपोर्ट करते समय 5 से अधिक महीने चुनने पर स्पष्टता हेतु उपयोगकर्ता-अनुकूल चेतावनी अलर्ट दिया गया है।"
+            },
+            {
+                "type": "improved",
+                "module": "एक्सेल इम्पोर्ट करेक्शन",
+                "title": "Combined Item & Subitem Display with Smooth Optional Subitem Import",
+                "title_hin": "एक्सेल इम्पोर्ट: आइटम एवं सब-आइटम का संयुक्त दृश्य तथा सुगम करेक्शन सुधार",
+                "desc": "Excel import correction list now displays missing item and subitem words together (e.g. Item - Subitem). Correcting an item without selecting a subitem now imports smoothly without false entry rejection.",
+                "desc_hin": "एक्सेल डेटा इम्पोर्ट करते समय करेक्शन सूची में अब आइटम एवं सब-आइटम का नाम एक साथ (जैसे Item - Subitem) सुस्पष्ट दिखाई देगा। साथ ही सब-आइटम रहित आइटम करेक्शन चुनने पर प्रविष्टि बिना किसी रिजेक्शन के आसानी से इम्पोर्ट हो जाती है।"
+            },
+            {
+                "type": "feature",
+                "module": "आवक प्रविष्टि",
+                "title": "Compact Inline 'Var Qty' Switch & Auto Calculate Display",
+                "title_hin": "आवक प्रविष्टि: मात्रा हेडर पर सीधा 'Var Qty' स्विच एवं स्वतः गणना (Auto Calculate) दृश्य",
+                "desc": "Positioned the Variable Quantity switch right next to the Quantity label in Aawak entry forms. Toggling Var Qty automatically sets quantity to 0 and displays a clean orange '(auto calculate)' label for intuitive data entry.",
+                "desc_hin": "आवक (Aawak & Bunch Aawak) प्रविष्टि फॉर्म में मात्रा (Quantity) हेडर के पास ही सुव्यवस्थित 'Var Qty' स्विच दिया गया है। इसे ऑन करते ही मात्रा स्वतः 0 सेट हो जाती है एवं ऑरेंज रंग में '(auto calculate)' दिखाई देता है, जिससे प्रविष्टि अधिक सरल व सुविधाजनक हो गई है।"
             }
         ]
     },

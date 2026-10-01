@@ -1019,3 +1019,35 @@ body.dark-mode {
     }
   }
 }
+
+/* --- Variable Quantity Aawak Global Styling --- */
+tr.var-qty, .row-var-qty {
+  border-left: 4px solid #ff9800 !important;
+  background-color: rgba(255, 152, 0, 0.08) !important;
+}
+
+body.dark-mode tr.var-qty,
+body[data-theme-mode="dark"] tr.var-qty,
+[data-bs-theme="dark"] tr.var-qty {
+  background-color: rgba(255, 152, 0, 0.15) !important;
+}
+
+.badge-var-qty {
+  background-color: rgba(255, 152, 0, 0.15) !important;
+  color: #e65100 !important;
+  border: 1px solid rgba(255, 152, 0, 0.4) !important;
+  font-weight: 600;
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+body.dark-mode .badge-var-qty,
+body[data-theme-mode="dark"] .badge-var-qty,
+[data-bs-theme="dark"] .badge-var-qty {
+  background-color: rgba(255, 152, 0, 0.25) !important;
+  color: #ffb74d !important;
+  border-color: rgba(255, 152, 0, 0.5) !important;
+}

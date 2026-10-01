@@ -181,7 +181,7 @@
                 <div class="split-cards-container">
                     <div *ngFor="let item of getVisibleSplitList(); let i = index"
                         class="split-card-item mb-2 rounded d-flex align-items-center gap-2 cursor-pointer transition-all shadow-sm"
-                        [class.selected]="item.selected" (click)="onSplitCardClick(item, $event)">
+                        [class.selected]="item.selected" [class.var-qty]="item.is_variable_qty" (click)="onSplitCardClick(item, $event)">
 
                         <!-- Row Number & Checkbox -->
                         <div class="d-flex align-items-center gap-1">
@@ -248,6 +248,9 @@
                                             </span>
                                             <span class="badge type-badge-pill" *ngIf="item.aawak_type_hin">
                                                 <i class="uil uil-tag-alt me-1"></i>{{item.aawak_type_hin}}
+                                            </span>
+                                            <span class="badge badge-var-qty ms-1" *ngIf="item.is_variable_qty" title="Variable Quantity Aawak">
+                                                <i class="uil uil-sliders-v me-1"></i>Var Qty
                                             </span>
                                         </span>
                                     </div>

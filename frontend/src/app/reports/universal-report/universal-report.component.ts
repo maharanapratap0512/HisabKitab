@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
@@ -18,7 +20,8 @@ import Swal from 'sweetalert2';
   templateUrl: './universal-report.component.html',
   styleUrls: ['./universal-report.component.scss']
 })
-export class UniversalReportComponent implements OnInit {
+export class UniversalReportComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   isLoader: boolean = false;
   loadingStatus: string = 'Loading Report...';
@@ -101,7 +104,7 @@ export class UniversalReportComponent implements OnInit {
 
     this.syncYearMonth();
 
-    this.gs.observeList().subscribe({
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe({
       next: (result) => {
         this.mms = result.mm ? result.mm : [];
         this.categories = result.category ? result.category : [];
@@ -118,6 +121,17 @@ export class UniversalReportComponent implements OnInit {
         this.toastr.error('Failed to load initial master lists');
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.reportRows = [];
+    this.filteredRows = [];
+    this.items = [];
+    this.mms = [];
+    this.categories = [];
+    this.activeDimensions = [];
   }
 
   syncYearMonth(): void {

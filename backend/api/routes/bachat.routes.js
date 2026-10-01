@@ -38,7 +38,7 @@ router.get('/home/:dept_id', async (req, res, next) => {
 
         let result = [];
         // let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
-        let sql = DB.query.bachat.with_pending_aawak.replace('?', `where bachat.dept_id = ${req.params.dept_id} AND bachat.Stock <> 0`);
+        let sql = DB.query.bachat.with_pending_aawak.replace('?', `where bachat.dept_id = ${req.params.dept_id} AND (bachat.Stock <> 0 OR aawak.is_variable_qty = 1)`);
         sql = sql.replace('#', '');
         let stmt = DB.db.prepare(sql);
         for (let row of stmt.iterate({ limit: -1, offset: -1 })) {

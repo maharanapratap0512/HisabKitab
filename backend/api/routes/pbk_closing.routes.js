@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const pbkService = require('../services/pbk.service');
+const { sutramDB } = require('../database/db.model');
 
 // get closing all / by dept
 router.get('/:dept_id?', async (req, res, next) => {
@@ -34,23 +35,27 @@ router.get('/bachat/:pbk_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
-// post/put closing bunch
 router.post('/bunch/:dept_id', async (req, res, next) => {
     try {
         const { dept_id } = req.params;
         if (req.body && req.body.date && req.body.pbk_id && req.body.pbk_closings && req.body.pbk_closings.length > 0) {
+            sutramDB.begin();
+            try {
+                const { result, voucher_no } = pbkService.insertUpdateClosingBunch({
+                    ...req.body,
+                    dept_id
+                });
+                sutramDB.commit();
 
-            const { result, voucher_no } = pbkService.insertUpdateClosingBunch({
-                ...req.body,
-                dept_id
-            });
-
-            res.json({
-                success: true,
-                result,
-                voucher_no
-            });
-
+                res.json({
+                    success: true,
+                    result,
+                    voucher_no
+                });
+            } catch (err) {
+                sutramDB.rollback();
+                throw err;
+            }
         } else {
             throw new Error('Please fill required fields.')
         }
@@ -63,18 +68,23 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
     try {
         const { dept_id } = req.params;
         if (req.body && req.body.pbk_closings && req.body.pbk_closings.length > 0) {
+            sutramDB.begin();
+            try {
+                const { result, voucher_no } = pbkService.insertUpdateClosingBunch({
+                    ...req.body,
+                    dept_id
+                });
+                sutramDB.commit();
 
-            const { result, voucher_no } = pbkService.insertUpdateClosingBunch({
-                ...req.body,
-                dept_id
-            });
-
-            res.json({
-                success: true,
-                result,
-                voucher_no
-            });
-
+                res.json({
+                    success: true,
+                    result,
+                    voucher_no
+                });
+            } catch (err) {
+                sutramDB.rollback();
+                throw err;
+            }
         } else {
             throw new Error('Please fill required fields.')
         }

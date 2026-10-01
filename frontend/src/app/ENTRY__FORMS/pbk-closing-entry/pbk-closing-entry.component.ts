@@ -73,13 +73,14 @@ export class PbkClosingEntryComponent implements OnInit {
       this.http.put(this.api.getUrl('PBKBACHAT') + 'bypbk/' + this.auth.webUser.dept_id, { pbk_id: ev })
         .subscribe((data: any) => {
           if (data.success) {
-
             this.populateForm(data.result);
+          } else {
+            this.toastr.error(data.message || 'Error fetching bachat');
           }
           this.isLoader = false;
         }, err => {
           this.isLoader = false;
-          this.toastr.error(err.error || 'Error fetching bachat');
+          this.toastr.error(err.error?.message || err.error || 'Error fetching bachat');
         });
     } else {
       this.fs.resetPbkClosing();
@@ -92,7 +93,7 @@ export class PbkClosingEntryComponent implements OnInit {
     for (let i in bachatList) {
       bachatList[i].pbk_bachat_id = bachatList[i]._id || null;
       bachatList[i].sw_bachat = bachatList[i].qty;
-      bachatList[i].difference = bachatList[i].qty - bachatList[i].sw_bachat;
+      bachatList[i].difference = (bachatList[i].sw_bachat || 0) - (bachatList[i].qty || 0);
       delete bachatList[i]._id;
     }
 

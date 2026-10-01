@@ -287,6 +287,10 @@ async function insertUpdateBatch(data) {
                 jwk.aawak_source_id = inp.aawak_source_id || null;
 
                 if (Array.isArray(inp.aawak_splits) && inp.aawak_splits.length > 0) {
+                    if (inp.aawak_splits.length === 1) {
+                        inp.aawak_splits[0].split_qty = Number(inp.qty) || Number(inp.aawak_splits[0].split_qty);
+                        inp.aawak_splits[0].qty = Number(inp.qty) || Number(inp.aawak_splits[0].qty);
+                    }
                     jwk.aawak_splits = inp.aawak_splits;
                     const primaryId = inp.aawak_splits[0].aawak_id || inp.aawak_splits[0]._id;
                     jwk.aawak_ref_id = inp.aawak_ref_id || primaryId || null;

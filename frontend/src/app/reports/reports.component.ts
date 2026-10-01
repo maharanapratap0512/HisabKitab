@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-reports',
@@ -8,7 +9,8 @@ import { filter } from 'rxjs/operators';
   styleUrls: ['./reports.component.scss'],
   providers: []
 })
-export class ReportsComponent implements OnInit {
+export class ReportsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   reports = [
     { 
@@ -102,7 +104,8 @@ export class ReportsComponent implements OnInit {
   ngOnInit(): void {
     this.checkCurrentRoute(this.router.url);
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
     ).subscribe((event: any) => {
       this.checkCurrentRoute(event.urlAfterRedirects || event.url);
     });
@@ -126,5 +129,10 @@ export class ReportsComponent implements OnInit {
   
   toggleDetails() {
     this.isDetailsOpen = !this.isDetailsOpen;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

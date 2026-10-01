@@ -309,7 +309,7 @@
                                                       </th>
                                                    </thead>
                                                    <tbody>
-                                                      <tr *ngFor="let awk of data.aawaks; let j = index;">
+                                                      <tr *ngFor="let awk of data.aawaks; let j = index;" [ngClass]="{'var-qty': awk.is_variable_qty}">
                                                          <td style="width: 75px;">
                                                             <i class="uil-corner-down-right"></i>
                                                             <span class="mx-1">{{j+1}} </span>
@@ -322,7 +322,7 @@
                                                                      class="uil-trash"></i></button>
                                                             </div> -->
                                                             <div class="d-flex justify-content-between mb-1">
-                                                               <button *ngIf="awk.remaining_qty > 0"
+                                                               <button *ngIf="awk.remaining_qty > 0 || awk.is_variable_qty"
                                                                   class="btn btn-sm btn-warning"
                                                                   (click)="addJawak(awk, data)">
                                                                   <i class="mdi mdi-plus noti-icon"></i>
@@ -356,7 +356,7 @@
                                                             {{awk.company_name ? awk.company_name : ''}}
                                                          </td>
                                                          <td>
-                                                            {{awk.qty}} {{awk.unit_short}} <br />
+                                                            {{awk.qty}} {{awk.unit_short}} <span *ngIf="awk.is_variable_qty" class="badge-var-qty ms-1"><i class="uil uil-sliders-v me-1"></i>Var Qty</span> <br />
                                                             <span style="font-weight:bold; color: red;"
                                                                *ngIf="awk.remaining_qty != 0">
                                                                बचत: {{awk.remaining_qty | number:'1.0-3'}}

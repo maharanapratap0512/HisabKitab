@@ -45,6 +45,7 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
   @Output() splitsSelected = new EventEmitter<any>();
 
   @Input() totalSplitQty = 0;
+  @Input() targetQty: number = 0;
   @Input() selectedSplitsData: any[] = [];
 
   // Multi-split modal properties
@@ -341,7 +342,7 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
       this.splitList = fetched.map((item: any) => ({
         ...item,
         selected: selectedMap.has(item._id),
-        split_qty: selectedMap.has(item._id) ? selectedMap.get(item._id) : (item.remaining_qty !== undefined ? item.remaining_qty : item.qty)
+        split_qty: selectedMap.has(item._id) ? selectedMap.get(item._id) : this.getDefaultSplitQty(item)
       })).sort((a: any, b: any) => {
         if (a.selected !== b.selected) return a.selected ? -1 : 1;
         const dateA = a.date ? new Date(a.date).getTime() : 0;
@@ -410,7 +411,7 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
       return {
         ...item,
         selected: false,
-        split_qty: item.remaining_qty !== undefined ? item.remaining_qty : item.qty
+        split_qty: this.getDefaultSplitQty(item)
       };
     });
 
@@ -465,26 +466,33 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
     }
   }
 
-  onSplitCardClick(awk: any, event: Event) {
+  getDefaultSplitQty(awk: any): number {
+    if (awk.is_variable_qty) {
+      return Number(this.targetQty) || Number(this.totalSplitQty) || Number(awk.qty) || 1;
+    }
+    return awk.remaining_qty !== undefined ? Number(awk.remaining_qty) : Number(awk.qty);
+  }
+
+  onSplitCardClick(awk: any, event: MouseEvent) {
     const target = event.target as HTMLElement;
     if (target && target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'number') {
       if (!awk.selected) {
         awk.selected = true;
-        awk.split_qty = awk.remaining_qty !== undefined ? awk.remaining_qty : awk.qty;
+        awk.split_qty = this.getDefaultSplitQty(awk);
         this.onSplitQtyChange();
       }
       return;
     }
     awk.selected = !awk.selected;
     if (awk.selected) {
-      awk.split_qty = awk.remaining_qty !== undefined ? awk.remaining_qty : awk.qty;
+      awk.split_qty = this.getDefaultSplitQty(awk);
     }
     this.onSplitQtyChange();
   }
 
   onSplitCheckToggle(awk: any) {
     if (awk.selected) {
-      awk.split_qty = awk.remaining_qty !== undefined ? awk.remaining_qty : awk.qty;
+      awk.split_qty = this.getDefaultSplitQty(awk);
     }
     this.onSplitQtyChange();
   }
@@ -538,7 +546,14 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
   }
 
   applySplitSelection() {
-    const selected = this.splitList.filter((i: any) => i.selected && Number(i.split_qty) > 0);
+    if (this.splitList) {
+      this.splitList.forEach((i: any) => {
+        if (i.selected && (!i.split_qty || Number(i.split_qty) <= 0) && i.is_variable_qty) {
+          i.split_qty = this.getDefaultSplitQty(i);
+        }
+      });
+    }
+    const selected = this.splitList.filter((i: any) => i.selected && (Number(i.split_qty) > 0 || i.is_variable_qty === 1));
     if (selected.length === 0) {
       // Unlink all references
       this.selectedSplitsData = [];

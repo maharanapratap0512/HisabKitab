@@ -137,7 +137,6 @@
                                 <th *ngIf="settings.aawak.document">Image</th>
                                 <th *ngIf="settings.aawak.item_detail">Item Detail</th>
                                 <th *ngIf="settings.aawak.isbill">Is Bill</th>
-                                <th *ngIf="settings.aawak.is_variable_qty">Variable Qty</th>
                                 <th>Highlight</th>
                                 <th *ngIf="settings.aawak.enz">Enzyme Container Details</th>
                             </tr>
@@ -231,24 +230,36 @@
                                             #company_name="ngModel">
                                     </td>
                                     <td>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Quantity"
-                                                [(ngModel)]="awkForm.qty" name="qty" #qty="ngModel"
-                                                (focusout)="qtyClick(i)"
-                                                [ngClass]="{'validation' : (qty?.touched || fMain.submitted) && qty.errors?.['required']}"
-                                                required>
-                                            <span class="input-group-text ml-1 border border-secondary"
-                                                style="padding: 0px; min-width: 40%;background: #252932;">
-                                                <ng-select class="custom-sm" style="width: 100%;" placeholder="Unit"
-                                                    [clearable]="true" [virtualScroll]="true"
-                                                    [(ngModel)]="awkForm.unit_id" name="unit_id" #unit_id="ngModel"
-                                                    [ngClass]="{'validation' : (unit_id?.touched || fMain.submitted) && unit_id.errors?.['required']}"
-                                                    [selectOnTab]="true" required>
-                                                    <ng-option selected="selected" disabled value="">Unit</ng-option>
-                                                    <ng-option *ngFor="let item of units"
-                                                        [value]="item._id">{{item.unit_short}}</ng-option>
-                                                </ng-select>
-                                            </span>
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex justify-content-between align-items-center mb-0" *ngIf="settings.aawak?.is_variable_qty">
+                                                <div class="form-check form-switch mb-0 p-0 d-flex align-items-center" title="Auto Calculate Qty">
+                                                    <input type="checkbox" class="form-check-input ms-0 me-1" id="varQtySwitchNew_{{i}}" [(ngModel)]="awkForm.is_variable_qty" (change)="onVarQtyChange(i)" name="is_variable_qty_{{i}}" style="height: 12px; width: 22px;">
+                                                    <label class="form-check-label text-warning fw-semibold" for="varQtySwitchNew_{{i}}" style="font-size: 9px; cursor: pointer;">Var Qty</label>
+                                                </div>
+                                            </div>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" placeholder="Quantity"
+                                                    [(ngModel)]="awkForm.qty" name="qty" #qty="ngModel"
+                                                    (focusout)="qtyClick(i)"
+                                                    [readonly]="awkForm.is_variable_qty"
+                                                    [ngClass]="{'validation' : !awkForm.is_variable_qty && (qty?.touched || fMain.submitted) && qty.errors?.['required']}"
+                                                    required>
+                                                <span class="input-group-text ml-1 border border-secondary"
+                                                    style="padding: 0px; min-width: 40%;background: #252932;">
+                                                    <ng-select class="custom-sm" style="width: 100%;" placeholder="Unit"
+                                                        [clearable]="true" [virtualScroll]="true"
+                                                        [(ngModel)]="awkForm.unit_id" name="unit_id" #unit_id="ngModel"
+                                                        [ngClass]="{'validation' : (unit_id?.touched || fMain.submitted) && unit_id.errors?.['required']}"
+                                                        [selectOnTab]="true" required>
+                                                        <ng-option selected="selected" disabled value="">Unit</ng-option>
+                                                        <ng-option *ngFor="let item of units"
+                                                            [value]="item._id">{{item.unit_short}}</ng-option>
+                                                    </ng-select>
+                                                </span>
+                                            </div>
+                                            <small *ngIf="awkForm.is_variable_qty" class="text-warning d-block mt-0 fw-semibold" style="font-size: 9px; line-height: 1.1;">
+                                                (auto calculate)
+                                            </small>
                                         </div>
                                     </td>
                                     <td *ngIf="settings.aawak.rate">
@@ -353,14 +364,6 @@
                                             <input type="checkbox" class="form-check-input" [(ngModel)]="awkForm.isbill"
                                                 name="isbill" #isbill="ngModel" />
                                             <!-- <label class="form-check-label" for="isbill"></label> -->
-                                        </div>
-
-                                    </td>
-                                    <td *ngIf="settings.aawak.is_variable_qty">
-                                        <div class="form-check mb-2">
-                                            <input type="checkbox" class="form-check-input"
-                                                [(ngModel)]="awkForm.is_variable_qty" name="is_variable_qty"
-                                                #is_variable_qty="ngModel" />
                                         </div>
 
                                     </td>

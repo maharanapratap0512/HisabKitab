@@ -288,23 +288,19 @@ export class FormService {
   }
 
   validPbkClosing() {
-
-    if (!this.pbkClosingFormMain.date || !this.pbkClosingFormMain.pbk_id || this.pbkClosingFormMain.pbk_closings?.length <= 1)
+    if (!this.pbkClosingFormMain.date || !this.pbkClosingFormMain.pbk_id || !this.pbkClosingFormMain.pbk_closings || this.pbkClosingFormMain.pbk_closings.length === 0)
       return false;
 
-    for (let i = 0; i < this.pbkClosingFormMain.pbk_closings.length - 1; i++) {
-      if (!(this.pbkClosingFormMain.pbk_closings[i].item_id && this.pbkClosingFormMain.pbk_closings[i].qty)) {
-        return false;
-      }
+    // Filter out trailing empty rows where item_id is missing or qty is not entered
+    this.pbkClosingFormMain.pbk_closings = this.pbkClosingFormMain.pbk_closings.filter((row: any) => row.item_id && row.qty !== null && row.qty !== undefined && row.qty !== '');
+
+    if (this.pbkClosingFormMain.pbk_closings.length === 0) {
+      return false;
     }
 
     this.submit = true;
-    // remove last auto inserted empty row
-    this.pbkClosingFormMain.pbk_closings.splice(this.pbkClosingFormMain.pbk_closings.length - 1, 1);
     return true;
-
   }
-
 
 
 

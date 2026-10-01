@@ -710,7 +710,7 @@
                         <ng-container
                            *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
-                              [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl, 'hl':data.hl}" aria-expanded="true"
+                              [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl, 'hl':data.hl, 'var-qty':data.is_variable_qty}" aria-expanded="true"
                               [attr.aria-controls]="'collapseExample-'+i" class="main-row">
                               <td>
                                  {{itemsPerPage * (page-1) + i+1}}
@@ -730,7 +730,7 @@
                                  <div class="d-flex justify-content-between mb-1">
                                     <!-- <button class="btn btn-sm btn-warning w-100" type="button"
                                        (click)="jawak(data)">Jawak</button> -->
-                                    <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
+                                    <button *ngIf="data.remaining_qty > 0 || data.is_variable_qty" class="btn btn-sm btn-warning"
                                        (click)="addJawak(data)">
                                        <i class="mdi mdi-plus noti-icon"></i>
                                     </button>
@@ -799,7 +799,7 @@
                                  {{data.company_name ? data.company_name : ''}}
                               </td>
                               <td>
-                                 {{data.qty}} {{data.unit_short}} <br />
+                                 {{data.qty}} {{data.unit_short}} <span *ngIf="data.is_variable_qty" class="badge-var-qty ms-1" title="Variable Quantity Aawak"><i class="uil uil-sliders-v me-1"></i>Var Qty</span> <br />
                                  <span style="font-weight:bold; color: red;" *ngIf="data.remaining_qty != 0">
                                     बचत: {{data.remaining_qty}}
                                  </span>

@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
@@ -15,7 +17,9 @@ import { HttpService } from 'src/app/services/http.service';
   templateUrl: './report-kh-saar.component.html',
   styleUrls: ['./report-kh-saar.component.scss']
 })
-export class ReportKhSaarComponent {
+export class ReportKhSaarComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   isLoader: any = false;
   loadingStatus: any = 'मैं आत्मा शांत स्वरूप हूँ ।';
   reportHeading: any = '';
@@ -44,7 +48,7 @@ export class ReportKhSaarComponent {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
       this.categories = result.category ? result.category : [];
@@ -53,6 +57,13 @@ export class ReportKhSaarComponent {
       this.isLoader = false;
       // this.searchReports();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.reportData = [];
+    this.mms = [];
   }
 
   mmTypeSelected(ev: any) {
@@ -83,7 +94,7 @@ export class ReportKhSaarComponent {
 
       this.loadingStatus = 'Generating Report....'
       this.isLoader = true;
-      this.http.put(this.api.getUrl('REPORT_KH') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      this.http.put(this.api.getUrl('REPORT_KH') + this.auth.webUser.dept_id, this.filterBody).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
         if (data.success) {
           this.reportData = data.result;
           this.setHeading();

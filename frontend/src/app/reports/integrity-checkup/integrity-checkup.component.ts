@@ -1,5 +1,7 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { IntegrityCheckupService } from 'src/app/services/integrity-checkup.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { HttpService } from 'src/app/services/http.service';
@@ -14,7 +16,9 @@ declare var $: any;
   templateUrl: './integrity-checkup.component.html',
   styleUrls: ['./integrity-checkup.component.scss']
 })
-export class IntegrityCheckupComponent implements OnInit {
+export class IntegrityCheckupComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   @ViewChild('consoleBox') private consoleBox!: ElementRef;
   @ViewChild('resultsSection') private resultsSection!: ElementRef;
 
@@ -69,8 +73,17 @@ export class IntegrityCheckupComponent implements OnInit {
     this.loadTests();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.mismatches = [];
+    this.duplicateGroups = [];
+    this.logs = [];
+    this.tests = [];
+  }
+
   loadTests() {
-    this.integrityService.getTests().subscribe((res: any) => {
+    this.integrityService.getTests().pipe(takeUntil(this.destroy$)).subscribe((res: any) => {
       if (res.success) {
         this.tests = res.tests;
         if (this.tests.length > 0) {

@@ -270,7 +270,7 @@
                               <div class="d-flex align-items-center justify-content-center gap-1">
                                 <!-- Show + (Add) if no Aawak exists, OR if no Jawak exists, OR remaining_qty > 0 -->
                                 <button
-                                  *ngIf="output.aawak_ref_id && (!output.jawak_detail?.length || output.aawak_detail?.remaining_qty > 0)"
+                                  *ngIf="output.aawak_ref_id && (!output.jawak_detail?.length || output.aawak_detail?.remaining_qty > 0 || output.aawak_detail?.is_variable_qty)"
                                   class="btn btn-sm btn-outline-warning p-0 lh-1"
                                   style="font-size: 11px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center;"
                                   title="Add Jawak" (click)="addJawak(output)">

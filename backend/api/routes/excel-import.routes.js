@@ -218,24 +218,16 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             if (i == 6) {
                                 req.body.excelData[i].log = true;
                             }
-                            if (req.body.config[j].type == 'mix')
+                            if (req.body.config[j].type == 'mix') {
                                 req.body.excelData[i] = await fn.matchItemMix(req.body.excelData[i]);
-                            else
-                                id = await fn.matchItem(name);
-                            // let subitem = req.body.excelData[i].subitem;
-                            // if (await req.body.config.some(c => c.col_name === 'subitem') && subitem) {
-                            //     console.log("req.body.excelData[i].subitem", req.body.excelData[i].subitem);
-                            //     if (typeof subitem == "string")
-                            //         subitem = req.body.excelData[i].subitem.trim().toLowerCase();
-                            //     subitem_id = await fn.matchSubitem(subitem, id);
-                            // }
+                            } else {
+                                let subitemVal = req.body.excelData[i].subitem || req.body.excelData[i].subitem_hin || null;
+                                id = await fn.matchItem(name, subitemVal);
+                            }
                             break;
                         case 'subitem':
-                            if (req.body.excelData[i].item_id) {
-                                // Extract the item string based on what was provided in excelData (e.g. item_hin or item)
-                                let itemStr = req.body.excelData[i].item_hin || req.body.excelData[i].item || '';
-                                id = await fn.matchSubitem(name, req.body.excelData[i].item_id, itemStr);
-                            }
+                            let itemStr = req.body.excelData[i].item_hin || req.body.excelData[i].item || '';
+                            id = await fn.matchSubitem(name, req.body.excelData[i].item_id, itemStr);
                             break;
                         case 'condition': id = await fn.matchSupportList(name, 'condition');
                             break;
