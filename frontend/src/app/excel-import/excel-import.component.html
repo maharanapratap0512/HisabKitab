@@ -427,6 +427,7 @@
                                        <!-- pbk dropdown -->
                                        <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import"
                                           placeholder="Select Pbk" [virtualScroll]="true" [(ngModel)]="data.pbk_id"
+                                          (ngModelChange)="data.id = data.pbk_id"
                                           [ngModelOptions]="{standalone: true}" (open)="onDropdownOpen()"
                                           (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add PBK')" appendTo="body">
@@ -596,9 +597,9 @@
                                        [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'">
                                  </td>
                                  <td>
-                                    <button *ngIf="!(data.id || data.item_id || (data.type == 'item' && (data.item_detail || data.description))) && !data.ignore" class="btn btn-warning"
+                                    <button *ngIf="!(data.id || data.pbk_id || data.item_id || (data.type == 'item' && (data.item_detail || data.description))) && !data.ignore" class="btn btn-warning"
                                        (click)="ignoreCorrection(data, ((page_unmatched-1) * 10) + i)">Ignore</button>
-                                    <button *ngIf="data.id || data.item_id || (data.type == 'item' && (data.item_detail || data.description))" class="btn btn-success"
+                                    <button *ngIf="data.id || data.pbk_id || data.item_id || (data.type == 'item' && (data.item_detail || data.description))" class="btn btn-success"
                                        (click)="correctionSubmit(data, ((page_unmatched-1) * 10) + i)">Correct</button>
                                     <span *ngIf="data.ignore" class="text-warning"> Ignored</span>
                                  </td>

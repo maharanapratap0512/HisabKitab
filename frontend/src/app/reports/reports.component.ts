@@ -33,21 +33,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
     },
     { 
       id: 'report-at', 
-      title: 'Aawak Type Saar', 
+      title: 'AJ Type Saar (आवक जावक प्रकार सार)', 
       path: '/report-at', 
-      description: 'Summarizes Aawak entries categorized by their type.', 
-      descriptionHi: 'आवक प्रकार के आधार पर आवक एंट्रीज का सारांश दिखाता है।',
-      howToUse: 'Choose the specific Aawak type and date to view the summarized report.',
-      howToUseHi: 'सारांश रिपोर्ट देखने के लिए विशिष्ट आवक प्रकार और दिनांक चुनें।'
-    },
-    { 
-      id: 'report-jt', 
-      title: 'Jawak Type Saar', 
-      path: '/report-jt', 
-      description: 'Summarizes Jawak entries categorized by their type.', 
-      descriptionHi: 'जावक प्रकार के आधार पर जावक एंट्रीज का सारांश दिखाता है।',
-      howToUse: 'Choose the specific Jawak type and date to view the summarized report.',
-      howToUseHi: 'सारांश रिपोर्ट देखने के लिए विशिष्ट जावक प्रकार और दिनांक चुनें।'
+      description: 'Summarizes Aawak and Jawak entries categorized by their type.', 
+      descriptionHi: 'आवक प्रकार और जावक प्रकार के आधार पर प्रविष्टियों का सार दिखाता है।',
+      howToUse: 'Choose Aawak or Jawak tab and filters to view summarized report.',
+      howToUseHi: 'सारांश रिपोर्ट देखने के लिए आवक/जावक टैब और फ़िल्टर चुनें।'
     },
     { 
       id: 'report-str-stk', 

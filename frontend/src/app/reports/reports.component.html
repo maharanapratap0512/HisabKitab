@@ -3,7 +3,7 @@
    <div class="content-page">
       <div class="content">
 
-         <div class="row" *ngIf="selectedReport?.id !== 'report-item-ledger'">
+         <div class="row" *ngIf="selectedReport?.id !== 'report-item-ledger' && selectedReport?.id !== 'report-aj-check' && selectedReport?.id !== 'report-at' && selectedReport?.id !== 'report-jt'">
             <div class="card-header">Select Report</div>
             <div class="mt-1">
                <div class="d-flex flex-wrap gap-2 mb-1">

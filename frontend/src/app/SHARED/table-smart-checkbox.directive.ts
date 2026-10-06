@@ -141,6 +141,7 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
                 const th = this.renderer.createElement('th');
                 this.renderer.addClass(th, 'smart-selection-header');
                 this.renderer.setStyle(th, 'width', '40px');
+                this.renderer.setAttribute(th, 'freezeCol', '0');
 
                 const checkbox = this.renderer.createElement('input');
                 this.renderer.setAttribute(checkbox, 'type', 'checkbox');
@@ -172,6 +173,7 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
 
             const td = this.renderer.createElement('td');
             this.renderer.addClass(td, 'smart-selection-row');
+            this.renderer.setAttribute(td, 'freezeCol', '0');
 
             const checkbox = this.renderer.createElement('input');
             this.renderer.setAttribute(checkbox, 'type', 'checkbox');

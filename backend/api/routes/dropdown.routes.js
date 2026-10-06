@@ -27,7 +27,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
             const [
                 country, category, city, department, departmen_config, mm, pbk,
                 nimitt, state, zone, district, subitem_list, unit, gender, relation,
-                aawak_type, mm_type, jawak_type, condition, usage_list, usage_type, aawak_source
+                aawak_type, mm_type, jawak_type, condition, usage_list, usage_type, aawak_source, status, prastav_type, jawak_status
             ] = await Promise.all([
                 DB.getList('country', { dept_id: req.params.dept_id }),
                 DB.getList('category', { dept_id: req.params.dept_id }),
@@ -51,7 +51,10 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 DB.getList('condition', { dept_id: req.params.dept_id }),
                 DB.getList('usage_list', { dept_id: req.params.dept_id }),
                 DB.getList('usage_type', { dept_id: req.params.dept_id }),
-                DB.getList('aawak_source', { dept_id: req.params.dept_id })
+                DB.getList('aawak_source', { dept_id: req.params.dept_id }),
+                DB.getList('status', { dept_id: req.params.dept_id }),
+                DB.getList('prastav_type', { dept_id: req.params.dept_id }),
+                DB.getList('jawak_status', { dept_id: req.params.dept_id })
             ]);
 
             // Assign with fallbacks
@@ -83,6 +86,9 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.usage_list = usage_list || [];
             lists.usage_type = usage_type || [];
             lists.aawak_source = aawak_source || [];
+            lists.status = status || [];
+            lists.prastav_type = prastav_type || [];
+            lists.jawak_status = jawak_status || [];
 
             // Process items and subitems in parallel
             await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id }).then((resolve) => {

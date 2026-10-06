@@ -148,8 +148,10 @@
     </div>
 
     <!-- Matrix Table Container -->
-    <div class="card-body p-0 table-responsive universal-matrix-container"
+    <div class="card-body p-0 table-responsive universal-matrix-container table-freeze-container"
          style="max-height: 75vh; overflow-y: auto;"
+         appTableFreeze
+         appKeyScroll
          appVirtualInfiniteScroll
          [totalItems]="filteredRows.length"
          (sliceChange)="onVirtualSliceChange($event)"
@@ -160,9 +162,9 @@
         <thead>
           <!-- Header Row 1: Time Axis / Months -->
           <tr>
-            <th rowspan="2" class="sticky-col col-no">क्र.</th>
-            <th rowspan="2" class="sticky-col col-mm">MM / स्थान</th>
-            <th rowspan="2" class="sticky-col col-cat">
+            <th rowspan="2" freezeCol="0" class="sticky-col col-no">क्र.</th>
+            <th rowspan="2" freezeCol="1" class="sticky-col col-mm">MM / स्थान</th>
+            <th rowspan="2" freezeCol="2" class="sticky-col col-cat">
               <div class="d-flex align-items-center justify-content-between px-1">
                 <span>कैटेगरी</span>
                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
@@ -179,9 +181,9 @@
                 </app-popover-filter>
               </div>
             </th>
-            <th rowspan="2" class="sticky-col col-item">वस्तु (Item Name)</th>
-            <th rowspan="2" class="sticky-col col-subitem">उप-वस्तु (Subitem)</th>
-            <th rowspan="2" class="sticky-col col-unit">यूनिट</th>
+            <th rowspan="2" freezeCol="3" class="sticky-col col-item">वस्तु (Item Name)</th>
+            <th rowspan="2" freezeCol="4" class="sticky-col col-subitem">उप-वस्तु (Subitem)</th>
+            <th rowspan="2" freezeCol="5" class="sticky-col col-unit">यूनिट</th>
 
             <!-- Past Bachat Group Header -->
             <th colspan="1" class="past-header-cell month-border-end">
@@ -292,26 +294,26 @@
             <td [attr.colspan]="100" [style.height.px]="virtualSlice.paddingTop" style="padding: 0; border: none; background: transparent;"></td>
           </tr>
           <tr *ngFor="let r of virtualReportRows; let i = index">
-            <td class="sticky-col col-no">{{ virtualSlice.startIndex + i + 1 }}</td>
-            <td class="sticky-col col-mm text-start" [title]="r.mm_hin + (r.mm_eng ? ' : ' + r.mm_eng : '')">
+            <td freezeCol="0" class="sticky-col col-no">{{ virtualSlice.startIndex + i + 1 }}</td>
+            <td freezeCol="1" class="sticky-col col-mm text-start" [title]="r.mm_hin + (r.mm_eng ? ' : ' + r.mm_eng : '')">
               <span class="fw-bold hindi-cell-text">{{ r.mm_hin }}</span>
               <span *ngIf="r.mm_eng" class="d-block text-muted font-size-10 text-truncate">{{ r.mm_eng }}</span>
             </td>
-            <td class="sticky-col col-cat text-start" [title]="r.category_hin + (r.category_eng ? ' : ' + r.category_eng : '')">
+            <td freezeCol="2" class="sticky-col col-cat text-start" [title]="r.category_hin + (r.category_eng ? ' : ' + r.category_eng : '')">
               <span class="hindi-cell-text">{{ r.category_hin }}</span>
               <span *ngIf="r.category_eng" class="d-block text-muted font-size-10 text-truncate">{{ r.category_eng }}</span>
             </td>
-            <td class="sticky-col col-item text-start font-weight-bold" [title]="r.item_hin + (r.item_eng ? ' : ' + r.item_eng : '')">
+            <td freezeCol="3" class="sticky-col col-item text-start font-weight-bold" [title]="r.item_hin + (r.item_eng ? ' : ' + r.item_eng : '')">
               <span class="hindi-cell-text">{{ r.item_hin }}</span>
               <span *ngIf="r.item_eng" class="d-block text-muted font-size-10 fw-normal text-truncate">{{ r.item_eng }}</span>
               <span *ngIf="r.item_roman" class="d-block text-info font-size-9 fw-normal text-truncate">({{ r.item_roman }})</span>
             </td>
-            <td class="sticky-col col-subitem text-start" [title]="r.subitem_hin || '-'">
+            <td freezeCol="4" class="sticky-col col-subitem text-start" [title]="r.subitem_hin || '-'">
               <span *ngIf="r.subitem_id" class="hindi-cell-text">{{ r.subitem_hin }}</span>
               <span *ngIf="r.subitem_id && r.subitem_eng" class="d-block text-muted font-size-10 text-truncate">{{ r.subitem_eng }}</span>
               <span *ngIf="!r.subitem_id">-</span>
             </td>
-            <td class="sticky-col col-unit">{{ r.unit_short }}</td>
+            <td freezeCol="5" class="sticky-col col-unit">{{ r.unit_short }}</td>
 
             <!-- Single Opening Balance (Past Bachat) Column -->
             <td class="metric-bcht text-end font-weight-bold month-border-end" [class.text-danger]="(r.past_bachat?.total || 0) < 0">

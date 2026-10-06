@@ -352,7 +352,7 @@ export class PbkEntryComponent implements OnInit {
       this.isLoader = true;
       $('#pbkEntryComponent > #showModal').modal('hide');
       this.showModal = '';
-      // this.statuses.unshift(ev);
+      this.statuses = [ev, ...this.statuses];
       this.pbkForm.patchValue(
         {
           status: ev.list_name_eng

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
@@ -19,7 +19,8 @@ declare var $: any;
   templateUrl: './jawak.component.html',
   styleUrls: ['./jawak.component.scss']
 })
-export class JawakComponent implements OnInit {
+export class JawakComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   dateSortState: 'default' | 'asc' | 'desc' = 'default';
 
   toggleDateSort() {
@@ -134,7 +135,7 @@ export class JawakComponent implements OnInit {
     this.filterBody.mm_id = this.settings.defaultMM ? [this.settings.defaultMM] : [];
     this.getJawakData(1);
     this.months = this.gs.months;
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
@@ -543,5 +544,28 @@ export class JawakComponent implements OnInit {
       // This is a limitation of the current filter structure if we combine them.
     });
     return res;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.jawakData = [];
+    this.mms = [];
+    this.months = [];
+    this.viewData = [];
+    this.items = [];
+    this.units = [];
+    this.conditions = [];
+    this.subitems = [];
+    this.pbks = [];
+    this.nimitts = [];
+    this.jawak_types = [];
+    this.products = [];
+    this.productsAll = [];
+    this.categories = [];
+    this.states = [];
+    this.departments = [];
+    this.zones = [];
+    this.allJwkData = [];
   }
 }

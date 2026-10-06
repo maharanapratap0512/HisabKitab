@@ -1,0 +1,40 @@
+.fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeline-steps {
+  position: relative;
+}
+.timeline-steps::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background-color: #e9ecef;
+  z-index: 0;
+}
+.timeline-steps .d-flex {
+  position: relative;
+  z-index: 1;
+}
+
+.guide-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.guide-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.1) !important;
+}

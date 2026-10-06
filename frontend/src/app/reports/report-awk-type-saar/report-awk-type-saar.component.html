@@ -3,168 +3,527 @@
     <div class="content-page">
         <div class="content">
 
+            <!-- Item Ledger Style Dimension Toggle Tabs (Aawak Type Saar vs Jawak Type Saar) -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div id="tour-dimension-toggle" class="d-flex flex-wrap align-items-center gap-2 dimension-toggle-container p-1 rounded-3">
+                        <button type="button" class="btn dimension-btn d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+                            [class.btn-primary]="reportMode === 'aawak'"
+                            [class.btn-outline-secondary]="reportMode !== 'aawak'"
+                            [class.active-dimension]="reportMode === 'aawak'"
+                            (click)="setReportMode('aawak')">
+                            <i class="uil uil-arrow-down-left fs-5"></i>
+                            <span>Aawak Type Saar (आवक प्रकार सार)</span>
+                        </button>
+
+                        <button type="button" class="btn dimension-btn d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+                            [class.btn-primary]="reportMode === 'jawak'"
+                            [class.btn-outline-secondary]="reportMode !== 'jawak'"
+                            [class.active-dimension]="reportMode === 'jawak'"
+                            (click)="setReportMode('jawak')">
+                            <i class="uil uil-arrow-up-right fs-5"></i>
+                            <span>Jawak Type Saar (जावक प्रकार सार)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
-                <div class="card-header">Report Aawak Type Wise Saar (Under Construction)</div>
-                <div class="card-body pb-0">
-                        <div class="row">
-                            <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Year</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
-                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.year"
-                                        name="year">
-                                        <ng-option selected="selected" disabled value="">Select Year
-                                        </ng-option>
-                                        <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
-                                    </ng-select>
+                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold fs-5 me-2">
+                            {{reportMode === 'jawak' ? 'AJ Type Saar: Jawak / आवक जावक प्रकार सार: जावक' : 'AJ Type Saar: Aawak / आवक जावक प्रकार सार: आवक'}}
+                        </span>
+                        <button type="button" class="btn btn-outline-warning btn-sm fw-semibold ms-2" (click)="startTour()">
+                            <i class="uil uil-compass me-1"></i> Feature Tour (गाइड देखें)
+                        </button>
+                    </div>
+                    <app-popover-filter iconClass="uil uil-info-circle text-info fs-4" [btnOutline]="false"
+                        direction="left" [showClearButton]="false" triggerOn="click">
+                        <div style="width: 330px; padding: 10px; white-space: normal;">
+                            <h6 class="mb-2 text-info border-bottom pb-1">
+                                {{reportMode === 'jawak' ? 'AJ Type Saar (Jawak) Details' : 'AJ Type Saar (Aawak) Details'}}
+                            </h6>
+                            <p class="mb-2 fs-7">
+                                <strong>What is this report for? (यह रिपोर्ट किस लिए है?)</strong><br>
+                                Summarizes {{reportMode === 'jawak' ? 'Jawak' : 'Aawak'}} entries categorized by item and type across selected months.<br>
+                                <span class="text-muted">चयनित महीनों में आइटम और {{reportMode === 'jawak' ? 'जावक' : 'आवक'}} प्रकार के आधार पर प्रविष्टियों का सार दिखाता है।</span>
+                            </p>
+                            <p class="mb-0 fs-7">
+                                <strong>Interactive Click & Edit/Delete (इंटरएक्टिव क्लिक):</strong><br>
+                                Click on any month quantity cell or total quantity to view detailed transaction vouchers with inline Edit & Delete options.<br>
+                                <span class="text-muted">संपादन (Edit) व डिलीट सुविधाओं के साथ प्रविष्टियाँ देखने के लिए मात्रा सेल पर क्लिक करें।</span>
+                            </p>
+                        </div>
+                    </app-popover-filter>
+                </div>
+
+                <div class="card-body pb-2">
+                    <div class="row">
+                        <!-- Year -->
+                        <div class="col-md-3 mb-2" id="tour-filter-year">
+                            <div class="form-group">
+                                <label class="form-label fw-semibold">Year / वर्ष</label>
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
+                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.year" name="year">
+                                    <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                                </ng-select>
+                            </div>
+                        </div>
+
+                        <!-- Month -->
+                        <div class="col-md-5 mb-2" id="tour-filter-month">
+                            <div class="form-group">
+                                <label class="form-label fw-semibold">Month / महीना <strong class="text-danger">*</strong></label>
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Month(s)"
+                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.months" name="month"
+                                    [multiple]="true" [ngClass]="{'validation': submitted && (!filterBody.months || filterBody.months.length === 0)}">
+                                    <ng-option *ngFor="let item of gs.yearChangedGetMonth(filterBody.year)" [value]="item.m">
+                                        {{item.name}} ({{item.name_hin}})
+                                    </ng-option>
+                                </ng-select>
+                            </div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="col-md-4 mb-2" id="tour-filter-category">
+                            <div class="form-group">
+                                <label class="form-label fw-semibold">Category / श्रेणी</label>
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.category_id" name="category">
+                                    <ng-option *ngFor="let item of categories" [value]="item._id">
+                                        {{item.category_hin}} : {{item.category_eng}}
+                                    </ng-option>
+                                </ng-select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-end">
+                        <!-- Items / Subitems Dropdown -->
+                        <div class="col-md-3 mb-2" id="tour-filter-item">
+                            <div class="form-group">
+                                <label class="form-label fw-semibold">Item / Subitem (आइटम / सबआइटम)</label>
+                                <app-item-dropdown [(ngModel)]="filterBody.item_subitem_ids" [multiple]="true"
+                                    placeholder="Select Items / Subitems"></app-item-dropdown>
+                            </div>
+                        </div>
+
+                        <!-- Aawak/Jawak Type Filter -->
+                        <div class="col-md-3 mb-2" id="tour-filter-type">
+                            <div class="form-group">
+                                <label class="form-label fw-semibold">
+                                    {{reportMode === 'jawak' ? 'Jawak Type / जावक प्रकार' : 'Aawak Type / आवक प्रकार'}}
+                                </label>
+                                <ng-select class="custom" style="width: 100%;"
+                                    [placeholder]="reportMode === 'jawak' ? 'All Jawak Types' : 'All Aawak Types'"
+                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.aawak_type_id" [multiple]="true" name="aawak_type">
+                                    <ng-option *ngFor="let item of activeTypeOptions" [value]="item._id">
+                                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                                    </ng-option>
+                                </ng-select>
+                            </div>
+                        </div>
+
+                        <!-- Generate Button -->
+                        <div class="col-md-2 mb-2" id="tour-btn-generate">
+                            <button class="btn btn-primary w-100 fw-semibold" (click)="searchReports()">
+                                <i class="uil uil-search me-1"></i> Generate
+                            </button>
+                        </div>
+
+                        <!-- Export Excel Button Dropdown -->
+                        <div class="col-md-2 mb-2" id="tour-btn-excel">
+                            <div class="btn-group w-100">
+                                <button type="button" class="btn btn-outline-success dropdown-toggle fw-semibold w-100"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="uil uil-file-spreadsheet me-1"></i> Excel
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li>
+                                        <a class="dropdown-item cursor-pointer" (click)="exportGeneralExcelCombo()">
+                                            <i class="uil uil-file-spreadsheet text-success me-2"></i>General Saar Excel (Hin & Eng)
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item cursor-pointer" (click)="exportMultiSheetDetailedExcel()">
+                                            <i class="uil uil-folder-plus text-primary me-2"></i>Detailed Excel (Saar + Monthly Sheets)
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Export PDF Button Dropdown -->
+                        <div class="col-md-2 mb-2" id="tour-btn-pdf">
+                            <div class="btn-group w-100">
+                                <button type="button" class="btn btn-outline-danger dropdown-toggle fw-semibold w-100"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="uil uil-file-pdf me-1"></i> PDF
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 280px;">
+                                    <li>
+                                        <a class="dropdown-item cursor-pointer" (click)="exportNormalPDF()">
+                                            <i class="uil uil-file-alt text-warning me-2"></i>Standard PDF (Instant)
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item cursor-pointer" (click)="exportToPDF('summary')">
+                                            <i class="uil uil-print text-danger me-2"></i>Puppeteer Saar PDF (Summary)
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item cursor-pointer" (click)="exportToPDF('detailed')">
+                                            <i class="uil uil-layer-group text-primary me-2"></i>Puppeteer Advance Detailed PDF (Item Links)
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Table Section -->
+            <div class="row mt-2" *ngIf="reportData.length">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <!-- Search Bar -->
+                                <div class="style-search position-relative" style="width: 260px;" id="tour-table-search">
+                                    <input type="text" class="form-control" placeholder="Search item, category, type..." [(ngModel)]="term" name="search">
+                                </div>
+
+                                <!-- Hide 0 Rows Checkbox -->
+                                <div class="form-check form-switch mb-0" id="tour-hide-zero-switch">
+                                    <input type="checkbox" class="form-check-input cursor-pointer" [(ngModel)]="filterBody.hideZeroRows" (change)="processReportData()" id="hideZeroCheck">
+                                    <label class="form-check-label fw-semibold cursor-pointer text-muted fs-7" for="hideZeroCheck">Hide 0 Rows (0 पंक्तियाँ छिपाएँ)</label>
                                 </div>
                             </div>
-                            <div class="col-md-3 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Month <strong class="text-danger">*</strong></label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
-                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.months"
-                                        name="month" [multiple]="true" [ngModalOptions]="{standalone: true}"
-                                        [ngClass]="{'validation': submitted && (!filterBody.months || filterBody.months.length === 0)}">
-                                        <ng-option selected="selected" disabled value="">Select Month
-                                        </ng-option>
-                                        <ng-option *ngFor="let item of gs.yearChangedGetMonth(filterBody.year)"
-                                            [value]="item.m">{{item.name}}</ng-option>
-                                    </ng-select>
-                                </div>
-                            </div>
-                            <!-- <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">MM Type</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select MM Type"
-                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.mm_type"
-                                        name="month" [multiple]="true" [ngModalOptions]="{standalone: true}">
-                                        <ng-option selected="selected" disabled value="">Select MM Type
-                                        </ng-option>
-                                        <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}}
-                                            : {{item.dept_code }}</ng-option>
-                                    </ng-select>
-                                </div>
-                            </div> -->
-                            <div class="col-md-2 mb-2">
-                                <div class="d-flex align-items-end h-100">
-                                    <div class="flex-grow-1">
-                                        <label class="form-label"></label>
-                                        <button class="btn btn-primary form-control" (click)="searchReports()">Generate
-                                            Reports</button>
-                                    </div>
-                                    <div class="ms-2 mb-1">
-                                        <app-popover-filter iconClass="uil uil-info-circle text-info"
-                                            [btnOutline]="false" direction="left" [showClearButton]="false"
-                                            triggerOn="click">
-                                            <div style="width: 320px; padding: 10px; white-space: normal;">
-                                                <h6 class="mb-2 text-info border-bottom pb-1">Aawak Type Saar - Details
-                                                    / विवरण</h6>
-                                                <p class="mb-2 fs-7">
-                                                    <strong>What is this report for? (यह रिपोर्ट किस लिए
-                                                        है?)</strong><br>
-                                                    Summarizes Aawak entries categorized by their type.<br>
-                                                    <span class="text-muted">आवक प्रकार के आधार पर आवक एंट्रीज का सारांश
-                                                        दिखाता है।</span>
-                                                </p>
-                                                <p class="mb-0 fs-7">
-                                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br>
-                                                    Choose the specific Aawak type and date to view the summarized
-                                                    report.<br>
-                                                    <span class="text-muted">सारांश रिपोर्ट देखने के लिए विशिष्ट आवक
-                                                        प्रकार और दिनांक चुनें।</span>
-                                                </p>
-                                            </div>
-                                        </app-popover-filter>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-2 mt-3">
-                                <div class="form-group">
-                                    <label class="form-label"></label>
-                                    <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                                        data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" (click)="exportToExcelHin()">To Excel (Hin)</a>
-                                        <a class="dropdown-item" (click)="exportToExcelEng()">To Excel (Eng)</a>
-                                        <a class="dropdown-item" (click)="exportToPDF()">To PDF (Eng)</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-2 mt-3">
-                                <button type="button" style="font-weight: 700 !important;"
-                                    class="btn btn-light w-100">Total
-                                    Count : {{reportData.length}}
+
+                            <!-- View Mode Toggle Buttons -->
+                            <div class="btn-group" id="tour-view-toggle">
+                                <button type="button" class="btn btn-outline-primary btn-sm fw-semibold"
+                                    [ngClass]="{'active': viewType === 'grouped'}" (click)="viewType = 'grouped'">
+                                    <i class="uil uil-layer-group me-1"></i> Grouped View (समूहीकृत)
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm fw-semibold"
+                                    [ngClass]="{'active': viewType === 'flat'}" (click)="viewType = 'flat'">
+                                    <i class="uil uil-list-ul me-1"></i> Flat View (सपाट सूची)
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="row" *ngIf="reportData.length">
-                    <div class="card-body" style="overflow: auto;">
-                        <div class="row mb-2">
-                            <div class="col-5">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                                        name="search">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="table-container">
-                            <table id="tbl" #tbl class="table table-sticky-header dt-responsive">
-                                <thead>
-                                    <tr>
-                                        <td style="width: 70px;">No.</td>
-                                        <td style="width: 100px;">Department</td>
-                                        <td>Category</td>
-                                        <td>Item</td>
-                                        <td>Aawak Type</td>
-                                        <ng-container *ngIf="monthsSel.length <= 0">
-                                            <td>Total Qty</td>
-                                        </ng-container>
-                                        <ng-container *ngIf="monthsSel.length > 0">
-                                            <th class="center-header" *ngFor="let row of monthsSel">
+                        <div class="card-body p-0 style-table" id="tour-table-matrix">
+                            <!-- Matrix Scroll Container with Sticky Header & Left Sticky Columns -->
+                            <div class="matrix-container table-freeze-container" appTableFreeze appKeyScroll>
+                                <table id="tbl" #tbl class="table table-bordered matrix-table align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th freezeCol="0" class="sticky-col col-no">No.</th>
+                                            <th freezeCol="1" class="sticky-col col-dept">Department</th>
+                                            <th freezeCol="2" class="sticky-col col-cat">Category</th>
+                                            <th freezeCol="3" class="sticky-col col-item">Item / Subitem</th>
+                                            <th freezeCol="4" class="sticky-col col-type">
+                                                {{reportMode === 'jawak' ? 'Jawak Type' : 'Aawak Type'}}
+                                            </th>
+                                            <th *ngFor="let row of monthsSel" class="text-center">
                                                 {{row.name + " - " + filterBody.year }}
                                             </th>
-                                        </ng-container>
+                                            <th freezeColRight="0" class="text-center style-total-col">Total Qty</th>
+                                        </tr>
+                                    </thead>
 
-                                    </tr>
+                                    <tbody>
+                                        <!-- GROUPED VIEW (Rowspan Merged Left Columns + Item Subtotal Row) -->
+                                        <ng-container *ngIf="viewType === 'grouped'">
+                                            <ng-container *ngFor="let group of groupedReportData | search: term; let gIdx = index;">
+                                                <tr *ngFor="let row of group.rows; let rIdx = index;"
+                                                    [ngClass]="{'item-group-first-row': rIdx === 0, 'item-group-last-row': group.rows.length === 1 && rIdx === 0}">
+                                                    <!-- Left Common Columns rendered ONCE with Rowspan -->
+                                                    <td *ngIf="rIdx === 0" [attr.rowspan]="group.rows.length > 1 ? group.rows.length + 1 : 1"
+                                                        class="sticky-col col-no align-middle font-weight-bold item-group-border-bottom">
+                                                        {{gIdx + 1}}
+                                                    </td>
+                                                    <td *ngIf="rIdx === 0" [attr.rowspan]="group.rows.length > 1 ? group.rows.length + 1 : 1"
+                                                        class="sticky-col col-dept align-middle item-group-border-bottom">
+                                                        {{group.dept_hin}} <br/>
+                                                        <small class="text-muted">{{group.dept_code}}</small>
+                                                    </td>
+                                                    <td *ngIf="rIdx === 0" [attr.rowspan]="group.rows.length > 1 ? group.rows.length + 1 : 1"
+                                                        class="sticky-col col-cat align-middle fs-7 item-group-border-bottom">
+                                                        {{group.categories_hin || group.categories_eng || '-'}}
+                                                    </td>
+                                                    <td *ngIf="rIdx === 0" [attr.rowspan]="group.rows.length > 1 ? group.rows.length + 1 : 1"
+                                                        class="sticky-col col-item align-middle font-weight-bold item-group-border-bottom">
+                                                        {{group.item_hin}} {{group.subitem_hin ? " : " + group.subitem_hin : ""}}<br />
+                                                        <small class="text-muted">{{group.item_eng}} {{group.subitem_eng ? " : " + group.subitem_eng : ""}}</small>
+                                                    </td>
 
-                                </thead>
-                                <tbody>
-                                    <ng-container *ngFor="let data of reportData | search: term; let i = index;">
-                                        <tr>
-                                            <td style="width: 70px;">{{i+1}}</td>
-                                            <td style="width: 100px;">{{data.dept_hin}} : {{data.dept_code}}</td>
-                                            <td>{{data.categories_eng ? data.categories_eng : data.categories_hin}}</td>
-                                            <td>
-                                                {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin :
-                                                ""}}<br />
-                                                {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
-                                            </td>
-                                            <td>
-                                                {{data.aawak_type_hin}} {{data.aawak_type_eng ? " : " +
-                                                data.aawak_type_eng
-                                                : ""}}
-                                            </td>
-                                            <ng-container *ngIf="monthsSel.length > 0">
-                                                <ng-container *ngFor="let row of monthsSel; let j = index;">
-                                                    <td>
-                                                        <span [ngClass]="{'error': data.arr_sum_qty[j] < 0}">
-                                                            {{data.arr_sum_qty[j]}} {{data.unit_short}}
+                                                    <!-- Right Distinct Aawak/Jawak Type Column -->
+                                                    <td class="sticky-col col-type align-middle">
+                                                        <span class="badge bg-soft-info text-info border border-info-subtle fs-7 px-2 py-1">
+                                                            {{row.type_hin || 'सामान्य'}} {{row.type_eng ? '(' + row.type_eng + ')' : ''}}
                                                         </span>
                                                     </td>
-                                                </ng-container>
+
+                                                    <!-- Month-wise Clickable Quantities (0s Hidden as '-') -->
+                                                    <td *ngFor="let qty of row.arr_sum_qty; let mIdx = index;" class="text-end style-qty-cell"
+                                                        (click)="openDetailModal(row, monthsSel[mIdx])"
+                                                        title="Click to view {{reportMode === 'jawak' ? 'Jawak' : 'Aawak'}} entries for {{monthsSel[mIdx].name_hin || monthsSel[mIdx].name}} / प्रविष्टियाँ देखें">
+                                                        <ng-container *ngIf="qty !== 0; else dashTpl">
+                                                            <span [ngClass]="{'text-danger font-weight-bold': qty < 0}">
+                                                                {{qty | number:'1.0-3'}} <small class="text-muted">{{group.unit_short}}</small>
+                                                            </span>
+                                                        </ng-container>
+                                                        <ng-template #dashTpl>
+                                                            <span class="text-muted opacity-50">-</span>
+                                                        </ng-template>
+                                                    </td>
+
+                                                    <!-- Clickable Row Total Qty across all selected months -->
+                                                    <td class="text-end font-weight-bold style-row-total"
+                                                        (click)="openDetailModal(row)"
+                                                        title="Click to view all {{reportMode === 'jawak' ? 'Jawak' : 'Aawak'}} entries across selected months / सभी महीनों की प्रविष्टियाँ देखें">
+                                                        <ng-container *ngIf="row.row_total_qty !== 0; else totalDashTpl">
+                                                            {{row.row_total_qty | number:'1.0-3'}} {{group.unit_short}}
+                                                        </ng-container>
+                                                        <ng-template #totalDashTpl>
+                                                            <span class="text-muted opacity-50">-</span>
+                                                        </ng-template>
+                                                    </td>
+                                                </tr>
+
+                                                <!-- Item Group Subtotal Row (Generated ONLY if more than 1 type row exists) -->
+                                                <tr *ngIf="group.rows.length > 1" class="style-subtotal-row item-group-last-row">
+                                                    <td class="sticky-col col-type text-end font-weight-bold text-primary">
+                                                        <i class="uil uil-sigma me-1"></i> {{group.item_hin}} कुल:
+                                                    </td>
+                                                    <td *ngFor="let sumQty of group.item_sum_qty" class="text-end font-weight-bold text-primary">
+                                                        <ng-container *ngIf="sumQty !== 0; else subDashTpl">
+                                                            {{sumQty | number:'1.0-3'}} <small class="text-muted">{{group.unit_short}}</small>
+                                                        </ng-container>
+                                                        <ng-template #subDashTpl>
+                                                            <span class="text-muted opacity-50">-</span>
+                                                        </ng-template>
+                                                    </td>
+                                                    <td class="text-end font-weight-bold text-primary style-subtotal-total">
+                                                        <ng-container *ngIf="group.item_total_qty !== 0; else subTotDashTpl">
+                                                            {{group.item_total_qty | number:'1.0-3'}} {{group.unit_short}}
+                                                        </ng-container>
+                                                        <ng-template #subTotDashTpl>
+                                                            <span class="text-muted opacity-50">-</span>
+                                                        </ng-template>
+                                                    </td>
+                                                </tr>
                                             </ng-container>
+                                        </ng-container>
+
+                                        <!-- FLAT VIEW (Standard Flat Rows) -->
+                                        <ng-container *ngIf="viewType === 'flat'">
+                                            <tr *ngFor="let data of reportData | search: term; let i = index;">
+                                                <td class="sticky-col col-no text-center">{{i + 1}}</td>
+                                                <td class="sticky-col col-dept">{{data.dept_hin}} : {{data.dept_code}}</td>
+                                                <td class="sticky-col col-cat fs-7">{{data.categories_hin || data.categories_eng || '-'}}</td>
+                                                <td class="sticky-col col-item font-weight-bold">
+                                                    {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}<br />
+                                                    <small class="text-muted">{{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}</small>
+                                                </td>
+                                                <td class="sticky-col col-type">
+                                                    <span class="badge bg-soft-info text-info border border-info-subtle fs-7 px-2 py-1">
+                                                        {{data.type_hin || 'सामान्य'}} {{data.type_eng ? '(' + data.type_eng + ')' : ''}}
+                                                    </span>
+                                                </td>
+                                                <td *ngFor="let qty of data.arr_sum_qty; let mIdx = index;" class="text-end style-qty-cell"
+                                                    (click)="openDetailModal(data, monthsSel[mIdx])"
+                                                    title="Click to view {{reportMode === 'jawak' ? 'Jawak' : 'Aawak'}} entries for {{monthsSel[mIdx].name_hin || monthsSel[mIdx].name}} / प्रविष्टियाँ देखें">
+                                                    <ng-container *ngIf="qty !== 0; else flatDashTpl">
+                                                        <span [ngClass]="{'text-danger font-weight-bold': qty < 0}">
+                                                            {{qty | number:'1.0-3'}} <small class="text-muted">{{data.unit_short}}</small>
+                                                        </span>
+                                                    </ng-container>
+                                                    <ng-template #flatDashTpl>
+                                                        <span class="text-muted opacity-50">-</span>
+                                                    </ng-template>
+                                                </td>
+                                                <td class="text-end font-weight-bold style-row-total"
+                                                    (click)="openDetailModal(data)"
+                                                    title="Click to view all {{reportMode === 'jawak' ? 'Jawak' : 'Aawak'}} entries across selected months / सभी महीनों की प्रविष्टियाँ देखें">
+                                                    <ng-container *ngIf="data.row_total_qty !== 0; else flatTotDashTpl">
+                                                        {{data.row_total_qty | number:'1.0-3'}} {{data.unit_short}}
+                                                    </ng-container>
+                                                    <ng-template #flatTotDashTpl>
+                                                        <span class="text-muted opacity-50">-</span>
+                                                    </ng-template>
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </tbody>
+
+                                    <!-- Grand Footer Totals -->
+                                    <tfoot *ngIf="monthsSel.length > 0 && reportData.length > 0" class="style-grand-footer">
+                                        <tr>
+                                            <td colspan="5" class="sticky-col col-no text-end font-weight-bold text-uppercase">
+                                                <i class="uil uil-calculator me-1"></i> महायोग (Grand Total):
+                                            </td>
+                                            <td *ngFor="let gSum of grandMonthTotals" class="text-end font-weight-bold">
+                                                <ng-container *ngIf="gSum !== 0; else grandDashTpl">
+                                                    {{gSum | number:'1.0-3'}}
+                                                </ng-container>
+                                                <ng-template #grandDashTpl>
+                                                    <span class="text-muted opacity-50">-</span>
+                                                </ng-template>
+                                            </td>
+                                            <td class="text-end font-weight-bold style-grand-total-col">
+                                                {{grandTotalQty | number:'1.0-3'}}
+                                            </td>
                                         </tr>
-                                    </ng-container>
-                                </tbody>
-                            </table>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Drill-Down Detail Modal (Backdrop Click Auto-Close enabled) -->
+<div *ngIf="showModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;" (click)="closeDetailModal()">
+    <div class="modal-dialog" style="width: 98%;" (click)="$event.stopPropagation()">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-primary text-white py-2">
+                <h5 class="modal-title fs-6 fw-bold">
+                    <i class="uil uil-list-ol-alt me-1"></i> {{modalTitle}}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" (click)="closeDetailModal()"></button>
+            </div>
+            <div class="modal-body p-2" style="max-height: 75vh; overflow-y: auto;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div style="width: 250px;">
+                        <input type="text" class="form-control form-control-sm" placeholder="Filter modal rows..." [(ngModel)]="modalTerm">
+                    </div>
+                    <span class="badge bg-secondary">Total Entries: {{modalData.length}}</span>
+                </div>
+
+                <div *ngIf="modalLoader" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted mb-0">Loading transactions...</p>
+                </div>
+
+                <div *ngIf="!modalLoader && modalData.length === 0" class="text-center py-4 text-muted">
+                    No transaction entries found for this selection.
+                </div>
+
+                <div *ngIf="!modalLoader && modalData.length > 0" class="table-responsive table-freeze-container" appTableFreeze appKeyScroll>
+                    <table class="table table-sm table-striped table-hover border align-middle mb-0" style="font-size: 0.82rem;">
+                        <thead>
+                            <tr>
+                                <th freezeCol="0" style="width: 80px; white-space: nowrap;" class="text-center">Actions</th>
+                                <th style="width: 40px;">#</th>
+                                <th>Date</th>
+                                <th>Voucher / Lot</th>
+                                <th>MM</th>
+                                <th>PBK</th>
+                                <th>Item / Subitem</th>
+                                <th>Type</th>
+                                <th class="text-end">Qty</th>
+                                <th>Unit</th>
+                                <th>Description / Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of modalData | search: modalTerm; let idx = index;">
+                                <!-- Action Prebuilt Icons per Rule #3 -->
+                                <td class="text-center" style="white-space: nowrap;">
+                                    <i class="uil uil-pen i-outline-primary cursor-pointer me-1" (click)="editEntry(item)" title="Edit Entry"></i>
+                                    <i class="uil uil-trash i-outline-danger cursor-pointer me-1" (click)="deleteEntry(item)" title="Delete Entry"></i>
+                                    <app-aawak-ref *ngIf="reportMode === 'jawak'" class="d-inline-block align-middle ms-1"
+                                        [mmId]="item.jawak_mm_id || item.mm_id"
+                                        [maxDate]="item.date"
+                                        [deptId]="auth.webUser?.dept_id"
+                                        [filterObj]="{
+                                            item_id: item.item_id,
+                                            subitem_id: item.subitem_id,
+                                            condition_id: item.condition_id,
+                                            aawak_source_id: item.aawak_source_id
+                                        }"
+                                        [(ngModel)]="item.aawak_ref_id"
+                                        [selectedSplitsData]="item.aawak_splits"
+                                        [totalSplitQty]="item.qty"
+                                        [autoSave]="true"
+                                        [jawakId]="item._id"
+                                        (saved)="onAawakRefSaved($event, item)"
+                                        mode="tiny"
+                                        size="sm">
+                                    </app-aawak-ref>
+                                </td>
+                                <td class="text-center">{{idx + 1}}</td>
+                                <td>{{item.date | date:'dd-MM-yyyy'}}</td>
+                                <td>
+                                    <span class="fw-semibold">{{item.voucher_no || item.lot_no || '-'}}</span>
+                                    <small *ngIf="item.pkt_num" class="text-muted block">(Pkt: {{item.pkt_num}})</small>
+                                </td>
+                                <td>{{item.mm_hin || item.mm_eng || '-'}} <small class="text-muted">({{item.mm_code}})</small></td>
+                                <td>{{item.pbk_hin || item.pbk_eng || '-'}}</td>
+                                <td>
+                                    {{item.item_hin}} {{item.subitem_hin ? ' : ' + item.subitem_hin : ''}}
+                                </td>
+                                <td>
+                                    <span class="badge bg-soft-info text-info">{{item.type_hin || 'सामान्य'}}</span>
+                                </td>
+                                <td class="text-end font-weight-bold text-success">
+                                    {{item.qty | number:'1.0-3'}}
+                                </td>
+                                <td>{{item.unit_short || '-'}}</td>
+                                <td class="text-muted fs-7">{{item.description || item.remarks || '-'}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="closeDetailModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Entry Edit Modal (Backdrop Click Auto-Close enabled) -->
+<div *ngIf="showEditEntryModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5); z-index: 1060;" (click)="closeEditEntryModal()">
+    <div class="modal-dialog" style="width: 98%;" (click)="$event.stopPropagation()">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-primary text-white py-2">
+                <h5 class="modal-title fs-6 fw-bold">
+                    <i class="uil uil-edit me-1"></i> {{editingEntryTitle}}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" (click)="closeEditEntryModal()"></button>
+            </div>
+            <div class="modal-body p-2" style="max-height: 80vh; overflow-y: auto;">
+                <app-aawak-entry *ngIf="reportMode === 'aawak'" [getData]="editingEntry" [isEdit]="true" (response)="onEntryEdited($event)"></app-aawak-entry>
+                <app-jawak-entry *ngIf="reportMode === 'jawak'" [getData]="editingEntry" [isEdit]="true" (response)="onEntryEdited($event)"></app-jawak-entry>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="closeEditEntryModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PDF Generation Progress Modal Overlay -->
+<div *ngIf="isPdfExporting" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.6); z-index: 1080;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content shadow-lg border-0 rounded-3 text-center p-4">
+            <div class="spinner-border text-danger mb-3" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
+            <h5 class="fw-bold mb-1 text-dark">Generating PDF Report</h5>
+            <p class="text-muted fs-7 mb-3">Constructing high-quality PDF document...</p>
+            <div class="alert alert-soft-primary border border-primary-subtle py-2 px-3 mb-0 fs-7 fw-semibold text-primary">
+                <i class="uil uil-spin uil-spinner me-1"></i> {{pdfProgressStatus || 'Processing request...'}}
+            </div>
         </div>
     </div>
 </div>

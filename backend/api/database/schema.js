@@ -75,6 +75,15 @@ module.exports = {
 
 
 
+    // ── Pbk Sewa Dept ─────────────────────────────────────
+    ...defineTable('pbk_sewa_dept', {
+        _id: col.id(),
+        pbk_id: col.ref('pbk._id', { as: 'pbk', select: ['pbk_hin', 'pbk_eng'] }),
+        dept_id: col.ref('department._id', { as: 'department', select: ['dept_hin', 'dept_eng'] }),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
     // ── Prastav (Proposal) ─────────────────────────────────────
 
     ...defineTable('prastav', {
@@ -96,6 +105,9 @@ module.exports = {
         is_noted: col.boolean().default(0),
         note_details: col.string(),
         description: col.string(),
+        nimitt_id: col.ref('nimitt._id', { as: 'nimitt', select: ['nimitt_hin', 'nimitt_eng'] }),
+        bachat_qty: col.number(),
+        prastav_type: col.ref('support_list._id', { as: 'type', select: ['list_name_hin', 'list_name_eng'] }),
         is_rejected: col.boolean().default(0),
         reject_reason: col.string(),
         active: col.boolean().default(1),
@@ -124,6 +136,8 @@ module.exports = {
         received_date: col.string(),
         review: col.boolean(),
         review_reason: col.string(),
+        jawak_status: col.ref('support_list._id', { as: 'status', select: ['list_name_hin', 'list_name_eng'] }),
+        current_place: col.ref('mm._id', { as: 'place', select: ['mm_hin', 'mm_eng'] }),
         active: col.boolean().default(1),
     }),
 

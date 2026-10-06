@@ -1,23 +1,44 @@
-import { Directive, ElementRef, HostListener } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input } from '@angular/core';
 
 @Directive({
-  selector: '[appHorizontalScrollWithArrows]'
+  selector: '[appKeyScroll], [appHorizontalScrollWithArrows]'
 })
-export class HorizontalScrollWithArrowsDirective {
+export class KeyScrollDirective {
+  @Input() scrollStep: number = 100;
+  @Input() enableVerticalScroll: boolean = true;
 
   constructor(private el: ElementRef) { }
 
-  @HostListener
-    ('window:keydown', ['$event'])
+  @HostListener('window:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-    const scrollAmount = 60;
+    // Never intercept arrow keys when typing inside text inputs, textareas, or dropdowns
+    const target = event.target as HTMLElement;
+    if (target) {
+      const tagName = target.tagName ? target.tagName.toUpperCase() : '';
+      if (tagName === 'INPUT' || tagName === 'TEXTAREA' || target.closest('.ng-select')) {
+        return;
+      }
+    }
+
+    const container = this.el.nativeElement;
+    if (!container) return;
+
     if (event.key === 'ArrowRight') {
-      this.el.nativeElement.scrollLeft += scrollAmount;
+      container.scrollBy({ left: this.scrollStep, behavior: 'smooth' });
       event.preventDefault();
     } else if (event.key === 'ArrowLeft') {
-      this.el.nativeElement.scrollLeft -= scrollAmount;
+      container.scrollBy({ left: -this.scrollStep, behavior: 'smooth' });
+      event.preventDefault();
+    } else if (this.enableVerticalScroll && event.key === 'ArrowDown') {
+      container.scrollBy({ top: 40, behavior: 'smooth' });
+      event.preventDefault();
+    } else if (this.enableVerticalScroll && event.key === 'ArrowUp') {
+      container.scrollBy({ top: -40, behavior: 'smooth' });
       event.preventDefault();
     }
   }
-
 }
+
+// Backward compatibility alias export
+export { KeyScrollDirective as HorizontalScrollWithArrowsDirective };
+

@@ -181,6 +181,7 @@ export class PbkComponent implements OnInit {
         "gender": this.pbkData[i].gender,
         "birth_date": this.pbkData[i].birth_date,
         "age": this.pbkData[i].age,
+        "status": this.pbkData[i].status,
         "address": this.pbkData[i].address,
         "townarea": this.pbkData[i].townarea,
         "district": this.pbkData[i].district_hin,

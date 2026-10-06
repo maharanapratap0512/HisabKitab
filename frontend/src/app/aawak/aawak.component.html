@@ -411,19 +411,19 @@
                      </pagination-controls>
                   </div>
                </div>
-               <div class="table-container" style="min-height: 450px;" appHorizontalScrollWithArrows
+               <div class="table-container table-freeze-container" style="min-height: 450px;" appTableFreeze appHorizontalScrollWithArrows
                   [appTableSmartCheckbox]="'aawak'" [selectionData]="aawakData" [showCheckboxes]="true"
                   [rowSelector]="'tbody > tr.main-row'">
                   <table id="datatable-buttons" class="table table-hover dt-responsive table-sticky-header" #TABLE>
                      <thead>
                         <tr>
-                           <th style="width: 50px;" id="tour-hl-switch">
+                           <th style="width: 50px;" id="tour-hl-switch" freezeCol="1">
                               No.
                               <input type="checkbox" id="hl_all" data-switch="none"
                                  (change)="hlFilter($event.target)" />
                               <label for="hl_all" class="chk-sm"></label>
                            </th>
-                           <th style="width: 110px;">
+                           <th style="width: 110px;" freezeCol="2">
                               Manage
                            </th>
                            <th style="width: 100px;" *ngIf="settings.aawak.pkt_num">
@@ -712,14 +712,14 @@
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
                               [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl, 'hl':data.hl, 'var-qty':data.is_variable_qty}" aria-expanded="true"
                               [attr.aria-controls]="'collapseExample-'+i" class="main-row">
-                              <td>
+                              <td freezeCol="1">
                                  {{itemsPerPage * (page-1) + i+1}}
                                  <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}" data-switch="none"
                                     (change)="hlChanged(data)" />
                                  <label [id]="i === 0 ? 'tour-row-hl-switch' : null" for="{{'hl_'+data._id}}"
                                     class="chk-sm"></label>
                               </td>
-                              <td [id]="i === 0 ? 'tour-row-manage' : null">
+                              <td [id]="i === 0 ? 'tour-row-manage' : null" freezeCol="2">
 
                                  <div class="d-flex justify-content-between mb-1">
                                     <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i

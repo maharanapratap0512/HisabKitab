@@ -249,7 +249,7 @@
                         </thead>
                         <tbody>
                           <tr *ngFor="let output of batch.outputs; let i = index"
-                            [class.row-auto-awk]="output.is_auto_awk">
+                            [class.row-auto-awk]="output.is_auto_awk || output.aawak_ref_id">
                             <td class="ps-2">
                               {{i+1}}
                               <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.outputs.length > 1"
@@ -277,7 +277,10 @@
                                   <i class="uil uil-plus font-12 fw-bold"></i>
                                 </button>
 
-                                <span *ngIf="!output.aawak_ref_id" class="text-danger">No Aawak</span>
+                                <button *ngIf="!output.aawak_ref_id" class="btn btn-sm btn-outline-success p-0 lh-1 text-nowrap px-1"
+                                  style="font-size: 10px;" title="Create & Link Aawak Entry" (click)="addAawak(output, batch)">
+                                  + Aawak
+                                </button>
 
 
                                 <!-- Show J-Q summary if Jawaks exist -->
@@ -448,7 +451,7 @@
                 <ng-container *ngIf="batch.outputs?.length > 0">
                   <tr *ngFor="let output of batch.outputs; let i = index"
                     [class.border-top-dashed]="i === 0 && (batch.inputs?.length > 0)"
-                    [class.row-auto-awk]="$any(output).is_auto_awk">
+                    [class.row-auto-awk]="$any(output).is_auto_awk || $any(output).aawak_ref_id">
                     <td><span class="badge badge-success-lighten rounded-pill py-1 px-2">↑ OUT</span>
                     </td>
                     <td>
@@ -501,6 +504,9 @@
       <div class="modal-body p-0">
         <app-hmp-entry *ngIf="showModal == 'Edit HMP' || showModal == 'Add HMP' " [isEdit]="isEdit"
           [getData]="selectedBatch" (response)="onBatchSaved($event)"></app-hmp-entry>
+
+        <app-aawak-entry *ngIf="showModal == 'Add Aawak'" (response)="addAawakResponse($event)"
+          [getData]="aawakPreFillData"></app-aawak-entry>
 
         <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)="addJawakResponse($event)"
           [aawakRef]="awkRefData"></app-jawak-entry>

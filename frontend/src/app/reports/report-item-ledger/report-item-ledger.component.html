@@ -611,61 +611,65 @@
             </div>
 
             <h4 class="text-success border-bottom pb-2 mb-3">Aawak Entries (आवक)</h4>
-            <table class="table table-bordered table-sm table-striped dt-responsive mb-4" *ngIf="report.aawaks.length > 0">
-                <thead class="table-success">
-                    <tr>
-                        <th>Date</th>
-                        <th>Lot No.</th>
-                        <th>From (कहाँ से आया)</th>
-                        <th>Condition</th>
-                        <th>Qty</th>
-                        <th>Rate</th>
-                        <th>Amount</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let a of report.aawaks">
-                        <td>{{a.date | date:'dd-MM-yyyy'}}</td>
-                        <td>{{a.lot_no}}</td>
-                        <td>{{a.aawak_mm_hin}} <br> <small>{{a.pbk_hin}} {{a.roll_no}}</small></td>
-                        <td>{{a.condition_hin}}</td>
-                        <td><strong>{{a.qty | number:'1.0-2'}}</strong> {{a.unit_short}}</td>
-                        <td>{{a.rate ? (a.rate | number:'1.2-2') : '-'}}</td>
-                        <td>{{a.actual_amt ? (a.actual_amt | number:'1.2-2') : '-'}}</td>
-                        <td>{{a.aawak_type_hin}}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive table-freeze-container mb-4" appTableFreeze appKeyScroll *ngIf="report.aawaks.length > 0">
+                <table class="table table-bordered table-sm table-striped mb-0">
+                    <thead class="table-success">
+                        <tr>
+                            <th freezeCol="0">Date</th>
+                            <th freezeCol="1">Lot No.</th>
+                            <th>From (कहाँ से आया)</th>
+                            <th>Condition</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let a of report.aawaks">
+                            <td freezeCol="0">{{a.date | date:'dd-MM-yyyy'}}</td>
+                            <td freezeCol="1">{{a.lot_no}}</td>
+                            <td>{{a.aawak_mm_hin}} <br> <small>{{a.pbk_hin}} {{a.roll_no}}</small></td>
+                            <td>{{a.condition_hin}}</td>
+                            <td><strong>{{a.qty | number:'1.0-2'}}</strong> {{a.unit_short}}</td>
+                            <td>{{a.rate ? (a.rate | number:'1.2-2') : '-'}}</td>
+                            <td>{{a.actual_amt ? (a.actual_amt | number:'1.2-2') : '-'}}</td>
+                            <td>{{a.aawak_type_hin}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             <div class="alert alert-light" *ngIf="report.aawaks.length === 0">No Aawak entries found.</div>
 
             <h4 class="text-danger border-bottom pb-2 mb-3">Jawak Entries (जावक)</h4>
-            <table class="table table-bordered table-sm table-striped dt-responsive mb-0" *ngIf="report.jawaks.length > 0">
-                <thead class="table-danger">
-                    <tr>
-                        <th>Date</th>
-                        <th>Lot No.</th>
-                        <th>To (कहाँ भेजा)</th>
-                        <th>Condition</th>
-                        <th>Qty</th>
-                        <th>Rate</th>
-                        <th>Amount</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let j of report.jawaks">
-                        <td>{{j.date | date:'dd-MM-yyyy'}}</td>
-                        <td>{{j.lot_no}}</td>
-                        <td>{{j.jawak_mm_hin}} <br> <small>{{j.pbk_hin}} {{j.roll_no}}</small></td>
-                        <td>{{j.condition_hin}}</td>
-                        <td><strong>{{j.qty | number:'1.0-2'}}</strong> {{j.unit_short}}</td>
-                        <td>{{j.rate ? (j.rate | number:'1.2-2') : '-'}}</td>
-                        <td>{{j.actual_amt ? (j.actual_amt | number:'1.2-2') : '-'}}</td>
-                        <td>{{j.jawak_type_hin}}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive table-freeze-container mb-0" appTableFreeze appKeyScroll *ngIf="report.jawaks.length > 0">
+                <table class="table table-bordered table-sm table-striped mb-0">
+                    <thead class="table-danger">
+                        <tr>
+                            <th freezeCol="0">Date</th>
+                            <th freezeCol="1">Lot No.</th>
+                            <th>To (कहाँ भेजा)</th>
+                            <th>Condition</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let j of report.jawaks">
+                            <td freezeCol="0">{{j.date | date:'dd-MM-yyyy'}}</td>
+                            <td freezeCol="1">{{j.lot_no}}</td>
+                            <td>{{j.jawak_mm_hin}} <br> <small>{{j.pbk_hin}} {{j.roll_no}}</small></td>
+                            <td>{{j.condition_hin}}</td>
+                            <td><strong>{{j.qty | number:'1.0-2'}}</strong> {{j.unit_short}}</td>
+                            <td>{{j.rate ? (j.rate | number:'1.2-2') : '-'}}</td>
+                            <td>{{j.actual_amt ? (j.actual_amt | number:'1.2-2') : '-'}}</td>
+                            <td>{{j.jawak_type_hin}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             <div class="alert alert-light" *ngIf="report.jawaks.length === 0">No Jawak entries found.</div>
         </div>
     </div>
@@ -679,13 +683,13 @@
             | State: {{report.state_hin}}
         </div>
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive table-freeze-container" appTableFreeze appKeyScroll>
                 <table class="table table-bordered table-sm table-striped mb-0" *ngIf="report.itemsSummary && report.itemsSummary.length > 0">
                     <thead>
                         <tr>
-                            <th style="width: 50px;" class="text-center">S.No.</th>
-                            <th>Category (श्रेणी)</th>
-                            <th>Item / Subitem (वस्तु)</th>
+                            <th freezeCol="0" style="width: 50px;" class="text-center">S.No.</th>
+                            <th freezeCol="1">Category (श्रेणी)</th>
+                            <th freezeCol="2">Item / Subitem (वस्तु)</th>
                             <th class="text-center">Unit (इकाई)</th>
                             <th class="text-end">Past Bachat (पिछला बचत)</th>
                             <th class="text-end">Total Aawak (कुल आवक)</th>
@@ -695,9 +699,9 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let item of report.itemsSummary; let idx = index">
-                            <td class="text-center">{{idx + 1}}</td>
-                            <td><span class="badge bg-light text-dark border">{{item.category_hin}}</span></td>
-                            <td><strong>{{item.item_hin}}</strong> <span *ngIf="item.subitem_hin">({{item.subitem_hin}})</span></td>
+                            <td freezeCol="0" class="text-center">{{idx + 1}}</td>
+                            <td freezeCol="1"><span class="badge bg-light text-dark border">{{item.category_hin}}</span></td>
+                            <td freezeCol="2"><strong>{{item.item_hin}}</strong> <span *ngIf="item.subitem_hin">({{item.subitem_hin}})</span></td>
                             <td class="text-center">{{item.unit_short}}</td>
                             <td class="text-end">{{item.past_bachat | number:'1.0-2'}}</td>
                             <td class="text-end text-success fw-bold">{{item.total_aawak | number:'1.0-2'}}</td>
@@ -707,7 +711,7 @@
                     </tbody>
                     <tfoot class="fw-bold" *ngIf="report.overview">
                         <tr>
-                            <td colspan="4" class="text-end">Total Summary:</td>
+                            <td freezeCol="0" colspan="4" class="text-end">Total Summary:</td>
                             <td class="text-end">{{report.overview.past_bachat | number:'1.0-2'}}</td>
                             <td class="text-end text-success">{{report.overview.total_aawak | number:'1.0-2'}}</td>
                             <td class="text-end text-danger">{{report.overview.total_jawak | number:'1.0-2'}}</td>
@@ -729,13 +733,13 @@
             | State: {{report.state_hin}}
         </div>
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive table-freeze-container" appTableFreeze appKeyScroll>
                 <table class="table table-bordered table-sm table-striped mb-0" *ngIf="report.itemsSummary && report.itemsSummary.length > 0">
                     <thead>
                         <tr>
-                            <th style="width: 50px;" class="text-center">S.No.</th>
-                            <th>Category (श्रेणी)</th>
-                            <th>Item / Subitem (वस्तु)</th>
+                            <th freezeCol="0" style="width: 50px;" class="text-center">S.No.</th>
+                            <th freezeCol="1">Category (श्रेणी)</th>
+                            <th freezeCol="2">Item / Subitem (वस्तु)</th>
                             <th class="text-center">Unit (इकाई)</th>
                             <th class="text-end">Past Bachat (पिछला बचत)</th>
                             <th class="text-end">Total Aawak (कुल आवक)</th>
@@ -745,9 +749,9 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let item of report.itemsSummary; let idx = index">
-                            <td class="text-center">{{idx + 1}}</td>
-                            <td><span class="badge bg-light text-dark border">{{item.category_hin}}</span></td>
-                            <td><strong>{{item.item_hin}}</strong> <span *ngIf="item.subitem_hin">({{item.subitem_hin}})</span></td>
+                            <td freezeCol="0" class="text-center">{{idx + 1}}</td>
+                            <td freezeCol="1"><span class="badge bg-light text-dark border">{{item.category_hin}}</span></td>
+                            <td freezeCol="2"><strong>{{item.item_hin}}</strong> <span *ngIf="item.subitem_hin">({{item.subitem_hin}})</span></td>
                             <td class="text-center">{{item.unit_short}}</td>
                             <td class="text-end">{{item.past_bachat | number:'1.0-2'}}</td>
                             <td class="text-end text-success fw-bold">{{item.total_aawak | number:'1.0-2'}}</td>
@@ -757,7 +761,7 @@
                     </tbody>
                     <tfoot class="fw-bold" *ngIf="report.overview">
                         <tr>
-                            <td colspan="4" class="text-end">Total Summary:</td>
+                            <td freezeCol="0" colspan="4" class="text-end">Total Summary:</td>
                             <td class="text-end">{{report.overview.past_bachat | number:'1.0-2'}}</td>
                             <td class="text-end text-success">{{report.overview.total_aawak | number:'1.0-2'}}</td>
                             <td class="text-end text-danger">{{report.overview.total_jawak | number:'1.0-2'}}</td>

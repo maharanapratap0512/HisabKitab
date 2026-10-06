@@ -62,8 +62,7 @@
                                 <label class="form-label">Aawak Jawak Type</label>
                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Aawak Type"
                                     [clearable]="true" [multiple]="false" [virtualScroll]="true"
-                                    [(ngModel)]="filterBody.aawak_type_id" [ngModelOptions]="{standalone: true}"
-                                    (change)="itemSelected($event)">
+                                    [(ngModel)]="filterBody.aawak_type_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of aawak_types" [value]="item._id">
                                         {{item.list_name_hin}} : {{item.list_name_eng}} :
                                         {{item.list_name_roman}}</ng-option>
@@ -79,11 +78,10 @@
                         </div>
                         <div class="col-md-2 mb-2">
                             <div class="form-group">
-                                <label class="form-label">Conndition & Usage List </label>
+                                <label class="form-label">Condition & Usage List</label>
                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Condition"
                                     [clearable]="true" [multiple]="false" [virtualScroll]="true"
-                                    [(ngModel)]="filterBody.condition_id" [ngModelOptions]="{standalone: true}"
-                                    (change)="itemSelected($event)">
+                                    [(ngModel)]="filterBody.condition_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of conditions" [value]="item._id">
                                         {{item.list_name_hin}} : {{item.list_name_eng}} :
                                         {{item.list_name_roman}}</ng-option>
@@ -91,7 +89,7 @@
                                 <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Usage List"
                                     [clearable]="true" [multiple]="false" [virtualScroll]="true"
                                     [(ngModel)]="filterBody.usage_list_id" [ngModelOptions]="{standalone: true}">
-                                    <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                    <ng-option *ngFor="let item of usage_lists" [value]="item._id">
                                         {{item.list_name_hin}} : {{item.list_name_eng}} :
                                         {{item.list_name_roman}}</ng-option>
                                 </ng-select>

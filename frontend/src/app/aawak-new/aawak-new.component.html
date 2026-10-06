@@ -534,20 +534,20 @@
                             </pagination-controls>
                         </div>
                     </div>
-                    <div class="table-container" style="min-height: 450px;" appHorizontalScrollWithArrows
+                    <div class="table-container table-freeze-container" style="min-height: 450px;" appTableFreeze appHorizontalScrollWithArrows
                         [appTableSmartCheckbox]="'aawak-new'" [idField]="'temp_id'" [selectionData]="aawakData"
                         [showCheckboxes]="true" [rowSelector]="'tbody > tr.main-row'">
                         <table id="datatable-buttons"
                             class="table table-sm table-hover dt-responsive table-sticky-header" #TABLE>
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">
+                                    <th style="width: 50px;" freezeCol="1">
                                         No.
                                         <!-- <input type="checkbox" id="hl_all" data-switch="none"
                                                 (change)="hlFilter($event.target)" />
                                             <label for="hl_all" class="chk-sm"></label> -->
                                     </th>
-                                    <th style="width: 110px;">Manage</th>
+                                    <th style="width: 110px;" freezeCol="2">Manage</th>
                                     <th style="width: 110px;">Voucher No</th>
                                     <th style="width: 110px;" *ngIf="settings.aawak.pkt_num">
                                         <div class="d-flex align-items-center justify-content-between">
@@ -712,14 +712,14 @@
                                         aria-expanded="true" [attr.aria-controls]="'#collapseExample-'+i"
                                         class="main-row"
                                         [ngClass]="(!data.aawaks || data.aawaks.length === 0) ? 'voucher-no-items' : ''">
-                                        <td>
+                                        <td freezeCol="1">
                                             <div class="d-flex align-items-center gap-1">
                                                 <i class="uil uil-chevron-down collapse-icon text-primary me-1"
                                                     style="font-size: 15px; transition: transform 0.2s;"></i>
                                                 <span class="fw-semibold">{{itemsPerPage * (page-1) + i+1}}</span>
                                             </div>
                                         </td>
-                                        <td [id]="i === 0 ? 'tour-row-manage' : null"
+                                        <td [id]="i === 0 ? 'tour-row-manage' : null" freezeCol="2"
                                             (click)="$event.stopPropagation()">
                                             <div class="d-flex align-items-center gap-1">
                                                 <button class="btn btn-action-icon btn-primary" type="button"

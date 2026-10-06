@@ -134,13 +134,30 @@ router.delete('/input/:id', async (req, res, next) => {
     }
 });
 
-// DELETE /output/:id  — delete single batch output (+ linked aawak if auto_aawak)
+// DELETE /output/:id — delete single batch output (+ linked aawak if auto_aawak)
 router.delete('/output/:id', async (req, res, next) => {
     try {
         sutramDB.begin();
         const result = await hmp.deleteBatchOutput(req.params.id);
         sutramDB.commit();
         res.json({ success: true, result });
+    } catch (e) {
+        sutramDB.rollback();
+        next(e);
+    }
+});
+
+// POST /output/link-aawak — link an Aawak entry to an HMP Batch Output row
+router.post('/output/link-aawak', async (req, res, next) => {
+    try {
+        const { output_id, aawak_ref_id } = req.body;
+        if (!output_id || !aawak_ref_id) {
+            return res.status(400).json({ success: false, message: 'Missing output_id or aawak_ref_id' });
+        }
+        sutramDB.begin();
+        await hmp.linkAawakToOutput(output_id, aawak_ref_id);
+        sutramDB.commit();
+        res.json({ success: true, message: 'Aawak linked to output successfully' });
     } catch (e) {
         sutramDB.rollback();
         next(e);

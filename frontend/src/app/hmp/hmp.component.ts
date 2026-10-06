@@ -36,6 +36,8 @@ export class HmpComponent implements OnInit {
   showModal = '';
   selectedJawak: any = null;
   awkRefData: any = null;
+  selectedOutputForAawak: any = null;
+  aawakPreFillData: any = null;
 
   // Filter data
   recipes: any = [];
@@ -616,7 +618,56 @@ export class HmpComponent implements OnInit {
     this.openModal('Add Jawak');
   }
 
+  addAawak(output: any, batch: any) {
+    this.selectedOutputForAawak = output;
+    this.aawakPreFillData = {
+      date: batch.date,
+      mm_id: batch.mm_id,
+      dept_id: batch.dept_id || this.auth.webUser.dept_id,
+      item_id: output.item_id,
+      subitem_id: output.subitem_id || null,
+      product_id: output.product_id || null,
+      condition_id: output.condition_id || null,
+      unit_id: output.unit_id,
+      qty: output.qty,
+      rate: output.rate || null,
+      aawak_type_id: 27,
+      description: `HMP Batch Production (${batch.batch_no || ''})`
+    };
+    this.openModal('Add Aawak');
+  }
 
+  addAawakResponse(ev: any) {
+    const aawakObj = Array.isArray(ev) ? ev[0] : ev;
+    if (aawakObj && (aawakObj._id || aawakObj.id)) {
+      const createdAawakId = aawakObj._id || aawakObj.id;
+      const outputId = this.selectedOutputForAawak?._id;
+      if (outputId) {
+        this.http.post(this.api.getUrl('HMP') + 'output/link-aawak', {
+          output_id: outputId,
+          aawak_ref_id: createdAawakId
+        }).subscribe((res: any) => {
+          if (res && res.success) {
+            this.toastr.success('Aawak entry linked to Output product successfully');
+          } else {
+            this.toastr.error(res?.message || 'Failed to link Aawak to Output');
+          }
+          this.closeModal();
+          this.getBatches();
+        }, err => {
+          this.toastr.error('Error linking Aawak to Output');
+          this.closeModal();
+          this.getBatches();
+        });
+      } else {
+        this.closeModal();
+        this.getBatches();
+      }
+    } else {
+      this.closeModal();
+      this.getBatches();
+    }
+  }
 
   addJawakResponse(ev: any) {
     if (ev) {

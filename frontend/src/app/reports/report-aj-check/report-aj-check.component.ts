@@ -69,7 +69,7 @@ export class ReportAjCheckComponent implements OnInit, OnDestroy {
       this.items = result.itemmix ? result.itemmix : [];
       this.aawak_sources = result.aawak_source ? result.aawak_source : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
-      this.aawak_types = result.jawak_type ? result.jawak_type : [];
+      this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.usage_lists = result.usage_list ? result.usage_list : [];
       this.conditions = result.condition ? result.condition : [];
     });

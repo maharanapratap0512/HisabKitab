@@ -29,6 +29,9 @@
                         </div>
 
                         <div class="col-auto ms-auto d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm fw-bold" (click)="startGuide()">
+                                <i class="uil uil-info-circle me-1"></i> Full Guide
+                            </button>
                             <button class="btn btn-warning text-dark btn-sm fw-bold" (click)="yearlyRatesComp.openModal()">
                                 <i class="uil uil-bill me-1"></i> Yearly Rates
                             </button>
@@ -191,7 +194,7 @@
 
                                 <!-- Actions -->
                                 <td (click)="$event.stopPropagation()">
-                                    <button class="btn btn-sm btn-success py-0 w-100" (click)="openGenerator(item)"
+                                    <button class="btn btn-sm btn-theme py-0 w-100" (click)="openGenerator(item)"
                                         title="Variants Generate Karo" style="white-space:nowrap;">
                                         <i class="uil uil-plus-circle"></i> Variants
                                     </button>
@@ -441,9 +444,367 @@
                 <app-delete *ngIf='showModal == "delete_item"' [Type]="delType" [ID]="delID"
                     (response)="deleteResponse($event)"></app-delete>
 
+                <!-- Full Guide Multi-Step Content -->
+                <div *ngIf="showModal === 'Full Guide'" class="p-0">
+                    
+                    <!-- Header -->
+                    <div class="bg-soft-primary border-bottom border-primary py-2 px-3 text-center rounded-top">
+                        <h5 class="text-primary mb-1 fw-bold" style="letter-spacing: 0.5px;">
+                            <i class="uil uil-book-reader me-1"></i>Variant Management Guide
+                        </h5>
+                        <p class="text-muted small mb-2">
+                            Master how to organize your inventory effectively. 
+                            <span class="text-secondary ms-1 border-start ps-2">इन्वेंटरी को सही तरीके से व्यवस्थित करना सीखें।</span>
+                        </p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="d-flex justify-content-between text-muted small mb-1 px-1" style="font-size: 11px;">
+                            <span>Step {{ guideStep }} of 5</span>
+                            <span class="fw-semibold text-primary">{{ guideStep * 20 }}% Completed</span>
+                        </div>
+                        <div class="progress" style="height: 4px; border-radius: 10px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                 role="progressbar" 
+                                 [style.width]="(guideStep * 20) + '%'">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4">
+                        <!-- Step 1: Items & Subitems -->
+                        <div *ngIf="guideStep === 1" class="guide-step fade-in">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <span class="bg-primary text-white rounded-circle d-inline-block text-center me-2" style="width:28px; height:28px; line-height:28px; font-size: 14px;">1</span> 
+                                Items vs Subitems (आइटम और सब-आइटम)
+                            </h5>
+                            
+                            <p class="text-muted mb-4">
+                                Before creating variants, it's important to understand the hierarchy of your inventory.<br>
+                                <small class="text-secondary">वेरिएंट बनाने से पहले, अपनी इन्वेंटरी की संरचना (hierarchy) को समझना ज़रूरी है।</small>
+                            </p>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-primary shadow-sm guide-card">
+                                        <div class="card-header bg-soft-primary border-primary py-2">
+                                            <h6 class="mb-0 text-primary"><i class="uil uil-box me-1"></i> Item (मुख्य उत्पाद)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small text-muted mb-2">
+                                                The general product category or parent name.<br>
+                                                <span class="text-secondary">सामान्य उत्पाद श्रेणी या मुख्य नाम।</span>
+                                            </p>
+                                            <ul class="list-unstyled mb-0 small">
+                                                <li class="mb-2"><i class="uil uil-check-circle text-success me-1"></i> <strong>Apple iPhone 15</strong></li>
+                                                <li class="mb-2"><i class="uil uil-check-circle text-success me-1"></i> <strong>Polo T-Shirt</strong></li>
+                                                <li><i class="uil uil-check-circle text-success me-1"></i> <strong>Amul Milk</strong></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-info shadow-sm guide-card">
+                                        <div class="card-header bg-soft-info border-info py-2">
+                                            <h6 class="mb-0 text-info"><i class="uil uil-layer-group me-1"></i> Subitem (फिजिकल स्टॉक)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small text-muted mb-2">
+                                                The actual physical variations that you keep in stock and sell.<br>
+                                                <span class="text-secondary">असली फिजिकल वस्तुएं जो आप स्टॉक में रखते हैं और बेचते हैं।</span>
+                                            </p>
+                                            <ul class="list-unstyled mb-0 small">
+                                                <li class="mb-2"><i class="uil uil-arrow-right text-info me-1"></i> iPhone 15 <span class="badge border text-body">128GB Blue</span></li>
+                                                <li class="mb-2"><i class="uil uil-arrow-right text-info me-1"></i> Polo T-Shirt <span class="badge border text-body">Large Red</span></li>
+                                                <li><i class="uil uil-arrow-right text-info me-1"></i> Amul Milk <span class="badge border text-body">500ml</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Attributes -->
+                        <div *ngIf="guideStep === 2" class="guide-step fade-in">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <span class="bg-primary text-white rounded-circle d-inline-block text-center me-2" style="width:28px; height:28px; line-height:28px; font-size: 14px;">2</span> 
+                                Attributes & Values (विशेषताएं और उनके मान)
+                            </h5>
+                            
+                            <p class="text-muted mb-4">
+                                Attributes define exactly <strong>how</strong> your items differ from each other.<br>
+                                <small class="text-secondary">विशेषताएं तय करती हैं कि आपके आइटम एक-दूसरे से कैसे अलग हैं।</small>
+                            </p>
+                            
+                            <div class="table-responsive border rounded shadow-sm">
+                                <table class="table table-bordered table-striped mb-0 text-center align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-primary w-25"><i class="uil uil-tag-alt me-1"></i> Attribute (विशेषता)</th>
+                                            <th class="text-secondary"><i class="uil uil-list-ul me-1"></i> Attribute Values (विशेषता के मान)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold">Size (साइज)</td>
+                                            <td>
+                                                <span class="badge bg-primary rounded-pill px-3 py-2 m-1">Small (S)</span>
+                                                <span class="badge bg-primary rounded-pill px-3 py-2 m-1">Medium (M)</span>
+                                                <span class="badge bg-primary rounded-pill px-3 py-2 m-1">Large (L)</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Color (रंग)</td>
+                                            <td>
+                                                <span class="badge bg-danger rounded-pill px-3 py-2 m-1">Red</span>
+                                                <span class="badge bg-info rounded-pill px-3 py-2 m-1">Blue</span>
+                                                <span class="badge bg-dark rounded-pill px-3 py-2 m-1">Black</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Storage (स्टोरेज)</td>
+                                            <td>
+                                                <span class="badge bg-secondary rounded-pill px-3 py-2 m-1">64GB</span>
+                                                <span class="badge bg-secondary rounded-pill px-3 py-2 m-1">128GB</span>
+                                                <span class="badge bg-secondary rounded-pill px-3 py-2 m-1">256GB</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3 border-info d-flex align-items-center">
+                                <i class="uil uil-lightbulb-alt fs-3 me-3 text-info"></i>
+                                <span class="small" style="color: inherit;">
+                                    Use the <strong>"Attributes"</strong> and <strong>"Values"</strong> buttons at the top of the main page to create these master lists before generating variants.<br>
+                                    <span style="opacity: 0.85;">वेरिएंट जनरेट करने से पहले इन मास्टर लिस्ट्स को बनाने के लिए मुख्य पेज के ऊपर दिए गए "Attributes" और "Values" बटन का इस्तेमाल करें।</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Variants -->
+                        <div *ngIf="guideStep === 3" class="guide-step fade-in">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <span class="bg-primary text-white rounded-circle d-inline-block text-center me-2" style="width:28px; height:28px; line-height:28px; font-size: 14px;">3</span> 
+                                The Variant Formula (वेरिएंट कैसे काम करता है?)
+                            </h5>
+                            
+                            <p class="text-muted mb-3">
+                                A variant is simply an <strong>Item</strong> dynamically combined with <strong>Attributes</strong>.<br>
+                                <small class="text-secondary">एक वेरिएंट मूल रूप से एक 'आइटम' और उसकी 'विशेषताओं' का जोड़ होता है।</small>
+                            </p>
+                            
+                            <!-- Formula Graphic -->
+                            <div class="p-3 rounded border text-center mb-4 shadow-sm" style="background: var(--bs-table-striped-bg, rgba(0,0,0,0.02));">
+                                <h6 class="text-muted mb-3">
+                                    Example: Generating T-Shirt Variants <br>
+                                    <small class="text-secondary fw-normal">(उदाहरण: टी-शर्ट के वेरिएंट बनाना)</small>
+                                </h6>
+                                
+                                <div class="d-flex align-items-center justify-content-center flex-wrap gap-2">
+                                    <div class="p-2 border rounded border-primary shadow-sm card">
+                                        <h6 class="text-primary mb-0">Polo T-Shirt</h6>
+                                        <small class="text-muted">Item</small>
+                                    </div>
+                                    <i class="uil uil-plus fs-3 text-muted"></i>
+                                    <div class="p-2 border rounded border-info shadow-sm text-center card">
+                                        <div><span class="badge bg-info">Size: M, L</span></div>
+                                        <div><span class="badge bg-danger mt-1">Color: Red, Blue</span></div>
+                                        <small class="text-muted d-block mt-1">Selected Attributes <br><span class="text-secondary">(चुनी गई विशेषताएं)</span></small>
+                                    </div>
+                                    <i class="uil uil-arrow-right fs-3 text-success fw-bold"></i>
+                                    <div class="p-2 border rounded border-success shadow-sm text-start card">
+                                        <h6 class="text-success mb-2 border-bottom pb-1">
+                                            4 Variants Generated! <br>
+                                            <small class="text-secondary fw-normal">(4 वेरिएंट बन गए!)</small>
+                                        </h6>
+                                        <ul class="list-unstyled mb-0 small" style="line-height: 1.8;">
+                                            <li><i class="uil uil-check text-success"></i> Polo T-Shirt <span class="badge border text-body">M</span> <span class="badge border text-body">Red</span></li>
+                                            <li><i class="uil uil-check text-success"></i> Polo T-Shirt <span class="badge border text-body">M</span> <span class="badge border text-body">Blue</span></li>
+                                            <li><i class="uil uil-check text-success"></i> Polo T-Shirt <span class="badge border text-body">L</span> <span class="badge border text-body">Red</span></li>
+                                            <li><i class="uil uil-check text-success"></i> Polo T-Shirt <span class="badge border text-body">L</span> <span class="badge border text-body">Blue</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Real World Example 2 -->
+                            <div class="bg-soft-warning p-3 rounded border border-warning shadow-sm">
+                                <h6 class="text-warning-dark mb-2">
+                                    <i class="uil uil-mobile-android me-1"></i> Example 2: Electronics <br>
+                                    <small class="text-secondary fw-normal ms-4">(उदाहरण 2: इलेक्ट्रॉनिक्स)</small>
+                                </h6>
+                                <p class="small mb-2">Item: <strong>Samsung S24</strong> | Attributes: <strong>Storage</strong> (128GB, 256GB), <strong>RAM</strong> (8GB)</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="badge border text-body px-2 py-1 card"><i class="uil uil-box"></i> Samsung S24 - 8GB - 128GB</div>
+                                    <div class="badge border text-body px-2 py-1 card"><i class="uil uil-box"></i> Samsung S24 - 8GB - 256GB</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Generating Process -->
+                        <div *ngIf="guideStep === 4" class="guide-step fade-in">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <span class="bg-primary text-white rounded-circle d-inline-block text-center me-2" style="width:28px; height:28px; line-height:28px; font-size: 14px;">4</span> 
+                                How to Generate? (वेरिएंट कैसे बनाएं?)
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="timeline-steps">
+                                        
+                                        <div class="d-flex mb-3 align-items-start">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+                                                    <i class="uil uil-mouse-alt fs-4"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3 p-2 card rounded border">
+                                                <h6 class="mb-1">
+                                                    Step 1: Click "Variants" <br>
+                                                    <small class="text-secondary fw-normal">स्टेप 1: "Variants" बटन पर क्लिक करें</small>
+                                                </h6>
+                                                <p class="small text-muted mb-0">
+                                                    Find your item in the main list and click the <button class="btn btn-sm btn-theme py-0 px-1 mx-1 pointer-events-none" style="font-size:10px;"><i class="uil uil-plus-circle"></i> Variants</button> button on the right side.<br>
+                                                    <span class="text-secondary">मुख्य लिस्ट में अपना आइटम ढूंढें और दाईं ओर दिए गए Variants बटन पर क्लिक करें।</span>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex mb-3 align-items-start">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-soft-info text-info rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+                                                    <i class="uil uil-check-square fs-4"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3 p-2 card rounded border">
+                                                <h6 class="mb-1">
+                                                    Step 2: Select Attributes <br>
+                                                    <small class="text-secondary fw-normal">स्टेप 2: विशेषताएं चुनें</small>
+                                                </h6>
+                                                <p class="small text-muted mb-0">
+                                                    In the modal, pick the attributes you want (e.g., Color and Size) from the dropdown.<br>
+                                                    <span class="text-secondary">मॉडल में, ड्रॉपडाउन से अपनी पसंद की विशेषताएं (जैसे Color और Size) चुनें।</span>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex mb-3 align-items-start">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-soft-warning text-warning rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+                                                    <i class="uil uil-list-ui-alt fs-4"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3 p-2 card rounded border">
+                                                <h6 class="mb-1">
+                                                    Step 3: Choose Values <br>
+                                                    <small class="text-secondary fw-normal">स्टेप 3: मान (Values) चुनें</small>
+                                                </h6>
+                                                <p class="small text-muted mb-0">
+                                                    For each selected attribute, pick the values (e.g., Red, Blue, Medium, Large).<br>
+                                                    <span class="text-secondary">हर चुनी गई विशेषता के लिए, उसके मान (जैसे Red, Blue, M, L) चुनें।</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-soft-success text-success rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+                                                    <i class="uil uil-magic fs-4"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3 p-2 card rounded border border-success">
+                                                <h6 class="mb-1 text-success">
+                                                    Step 4: Save! <br>
+                                                    <small class="text-secondary fw-normal">स्टेप 4: सेव करें!</small>
+                                                </h6>
+                                                <p class="small text-muted mb-0">
+                                                    The system instantly creates a live preview grid of all combinations. Click Save, and your subitems are ready for billing!<br>
+                                                    <span class="text-secondary">सिस्टम तुरंत सभी कॉम्बिनेशन का एक लाइव ग्रिड बना देगा। सेव पर क्लिक करें, और आपके सब-आइटम बिलिंग के लिए तैयार हैं!</span>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 5: Aliases -->
+                        <div *ngIf="guideStep === 5" class="guide-step fade-in">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <span class="bg-primary text-white rounded-circle d-inline-block text-center me-2" style="width:28px; height:28px; line-height:28px; font-size: 14px;">5</span> 
+                                Item Aliases (सर्च उपनाम)
+                            </h5>
+                            
+                            <p class="text-muted mb-3">
+                                Aliases help your billing operators find items easily, even if they type the wrong spelling or local name.<br>
+                                <small class="text-secondary">उपनाम आपके बिलिंग ऑपरेटरों को आइटम आसानी से ढूंढने में मदद करते हैं, भले ही वे गलत स्पेलिंग या स्थानीय नाम टाइप करें।</small>
+                            </p>
+                            
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <div class="row align-items-center text-center">
+                                        <div class="col-4 border-end">
+                                            <h6 class="text-primary mb-1">Official Item <br><small class="text-secondary fw-normal">(मुख्य आइटम)</small></h6>
+                                            <div class="badge border text-body fs-6 py-2 px-3">T-Shirt</div>
+                                        </div>
+                                        <div class="col-4 border-end">
+                                            <i class="uil uil-exchange text-muted fs-3"></i><br>
+                                            <small class="text-muted">Searched as <br><span class="text-secondary">(सर्च किया गया नाम)</span></small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-secondary mb-2">Aliases <br><small class="fw-normal">(उपनाम)</small></h6>
+                                            <div class="d-flex flex-wrap justify-content-center gap-1">
+                                                <span class="badge bg-soft-secondary text-secondary border">Tshirt</span>
+                                                <span class="badge bg-soft-secondary text-secondary border">Teashirt</span>
+                                                <span class="badge bg-soft-secondary text-secondary border">टी-शर्ट</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <p class="mt-4 text-center">
+                                <button class="btn btn-outline-secondary pointer-events-none">
+                                    <i class="uil uil-plus-circle me-1"></i> Add Alias
+                                </button>
+                                <br>
+                                <small class="text-muted mt-2 d-inline-block">
+                                    Click this button on any item row to add searchable alternative names.<br>
+                                    <span class="text-secondary">सर्च किए जा सकने वाले अन्य नाम जोड़ने के लिए किसी भी आइटम की पंक्ति में इस बटन पर क्लिक करें।</span>
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Footer -->
+                    <div class="p-3 border-top d-flex justify-content-between rounded-bottom align-items-center" style="background: var(--bs-table-striped-bg, rgba(0,0,0,0.02));">
+                        <button class="btn btn-outline-secondary px-4 rounded-pill shadow-sm" [disabled]="guideStep === 1" (click)="prevGuide()">
+                            <i class="uil uil-angle-left-b"></i> Prev
+                        </button>
+                        
+                        <!-- Dots Indicator -->
+                        <div class="d-flex gap-1">
+                            <span class="rounded-circle" [class.bg-primary]="guideStep===1" [class.bg-secondary]="guideStep!==1" style="width:8px; height:8px; opacity:0.5;" [style.opacity]="guideStep===1 ? '1' : '0.4'"></span>
+                            <span class="rounded-circle" [class.bg-primary]="guideStep===2" [class.bg-secondary]="guideStep!==2" style="width:8px; height:8px; opacity:0.5;" [style.opacity]="guideStep===2 ? '1' : '0.4'"></span>
+                            <span class="rounded-circle" [class.bg-primary]="guideStep===3" [class.bg-secondary]="guideStep!==3" style="width:8px; height:8px; opacity:0.5;" [style.opacity]="guideStep===3 ? '1' : '0.4'"></span>
+                            <span class="rounded-circle" [class.bg-primary]="guideStep===4" [class.bg-secondary]="guideStep!==4" style="width:8px; height:8px; opacity:0.5;" [style.opacity]="guideStep===4 ? '1' : '0.4'"></span>
+                            <span class="rounded-circle" [class.bg-primary]="guideStep===5" [class.bg-secondary]="guideStep!==5" style="width:8px; height:8px; opacity:0.5;" [style.opacity]="guideStep===5 ? '1' : '0.4'"></span>
+                        </div>
+
+                        <button class="btn btn-primary px-4 rounded-pill shadow-sm" *ngIf="guideStep < 5" (click)="nextGuide()">
+                            Next <i class="uil uil-angle-right-b"></i>
+                        </button>
+                        <button class="btn btn-success px-4 rounded-pill shadow-sm" *ngIf="guideStep === 5" (click)="closeModal()">
+                            <i class="uil uil-check-circle me-1"></i> Finish
+                        </button>
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="modal-footer py-2">
+            <div class="modal-footer py-2" *ngIf="showModal !== 'Full Guide'">
                 <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">
                     Bandh Karo
                 </button>

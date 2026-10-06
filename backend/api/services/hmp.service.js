@@ -568,6 +568,15 @@ async function transferReferences(list_type, from_id, to_id_raw, dept_id) {
     }
 }
 
+async function linkAawakToOutput(output_id, aawak_ref_id) {
+    if (!output_id || !aawak_ref_id) return false;
+    await hmpBatchOut.updateById({
+        aawak_ref_id: aawak_ref_id,
+        is_auto_awk: 1
+    }, output_id);
+    return true;
+}
+
 // ─────────────────────────────────────────────────────────────
 module.exports = {
     // subitem list
@@ -584,4 +593,5 @@ module.exports = {
     deleteBatchInput,
     deleteBatchOutput,
     transferReferences,
+    linkAawakToOutput,
 };

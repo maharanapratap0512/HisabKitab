@@ -1,11 +1,117 @@
 [
     {
-        "version": "37.3",
-        "date": "01-10-2026",
-        "summary": "Ledger Report, Universal Report, Import Correction & Variable Qty UI Enhancements",
-        "summary_hin": "लेजर रिपोर्ट, यूनीवर्सal रिपोर्ट, एक्सेल इम्पोर्ट करेक्शन एवं आवक (Variable Qty) UI संवर्धन",
+        "version": "37.5",
+        "date": "05-10-2026",
+        "summary": "Jawak Excel Company Name Import, HMP Production KPIs & Item List UI Freeze Enhancements",
+        "summary_hin": "जावक एक्सेल कंपनी नाम इम्पोर्ट, HMP लाइव लॉस KPI व रेसिपी स्केलिंग तथा आइटम लिस्ट तालिका यूआई अपग्रेड",
         "isNew": true,
         "items": [
+            {
+                "type": "feature",
+                "module": "Jawak Excel Import",
+                "title": "Support for Company Name in Jawak Excel Import",
+                "title_hin": "जावक एक्सेल इम्पोर्ट (Jawak Excel Import): कंपनी नाम (Company Name) कॉलम सपोर्ट",
+                "desc": "Added automatic Company Name column mapping support when importing Jawak entries from Excel sheets.",
+                "desc_hin": "जावक डेटा एक्सेल इम्पोर्ट करते समय कंपनी का नाम (Company / company_name) कॉलम जोड़ने और स्वचालित रूप से पढ़ने की सुविधा उपलब्ध करा दी गई है।"
+            },
+            {
+                "type": "improved",
+                "module": "Item List UI & Table Freeze",
+                "title": "Pinned 3 Left Columns and Streamlined Table Control Bar in Item List",
+                "title_hin": "आइटम सूची (Item List): प्रथम 3 फिक्स्ड (Freeze) कॉलम व प्रस्तावक शैली कंट्रोल बार यूआई",
+                "desc": "Upgraded Item List table with 3 pinned left columns (Smart Checkbox, Sr No, Manage) for smooth horizontal scrolling, moved Category filter to table control bar, and added live total counts, expand toggle, and batch action buttons.",
+                "desc_hin": "आइटम सूची (Item List) तालिका में प्रथम 3 कॉलम (स्मार्ट चेकबॉक्स, क्रमांक, संपादन बटन) को फिक्स्ड (Freeze) किया गया है। टेबल के ऊपर प्रस्तावक (Prastav) शैली में श्रेणी (Category) फ़िल्टर, कुल आइटम/सबआइटम संख्या, एक्सपैंड बटन व बल्क डिलीट बटन की सुगम सुविधा दी गई है।"
+            },
+            {
+                "type": "improved",
+                "module": "HMP Production Batches",
+                "title": "Smart Recipe Scaling, Live Consumption Loss KPI & Direct '+ Aawak' Link",
+                "title_hin": "HMP उत्पादन बैच: स्वतः रेसिपी अनुपात (Auto-Scale), लाइव हानि KPI एवं '+ Aawak' लिंक",
+                "desc": "Upgraded HMP Production Batches with automatic proportional recipe scaling when output quantities change, live batch consumption loss/variance KPI bar, instant form loading, and a direct '+ Aawak' action button.",
+                "desc_hin": "HMP उत्पादन बैच (Production Batches) में आउटपुट बदलने पर रेसिपी कच्चे माल स्वतः अनुपात में बदल जाते हैं, फॉर्म में लाइव खपत-उत्पादन का अंतर (Loss %) दिखाई देता है, तथा बिना आवक दर्ज पंक्तियों में तुरंत आवक रसीद बनाने के लिए '+ Aawak' बटन दिया गया है।"
+            },
+            {
+                "type": "feature",
+                "module": "Yearly Rates Matrix UI",
+                "title": "Interactive Yearly Rates Matrix View with Double-Click Inline Edit & Right-Click Context Menu",
+                "title_hin": "वार्षिक दरें (Yearly Rates): वर्षवार तालिका (Matrix View), डबल-क्लिक संपादन एवं राइट-क्लिक मेनू",
+                "desc": "Added a new Yearly Rates Matrix view displaying items once with auto-calculated year columns (e.g. 2026, 2025, 2024). Double-click any cell to edit with a green tick save button, and right-click for instant Apply / Delete options.",
+                "desc_hin": "वार्षिक दरों में नया वर्षवार तालिका (Matrix View) जोड़ा गया है। इसमें प्रत्येक आइटम-सबआइटम एक बार दिखाई देता है और सभी वर्षों की दरें सामने कॉलम में दिखती हैं। किसी भी सेल पर डबल-क्लिक करके दर बदलें (हरे टिक से सेव करें) तथा राइट-क्लिक करके लागू (Apply) या डिलीट करें।"
+            }
+        ]
+    },
+    {
+        "version": "37.4",
+        "date": "02-10-2026",
+        "summary": "Type Saar Report PDF & Excel Enhancements and Automated Department Scoping",
+        "summary_hin": "टाइप सार रिपोर्ट: पृथक PDF व एक्सेल एक्सपोर्ट एवं स्वतः विभाग (Login Dept) चयन",
+        "isNew": false,
+        "items": [
+            {
+                "type": "feature",
+                "module": "AJ Type Saar Report",
+                "title": "Renamed Module to AJ Type Saar with Integrated Feature Tour & Interactive PDF",
+                "title_hin": "AJ Type Saar (आवक जावक प्रकार सार): एकीकृत फीचर्स गाइड (Feature Tour) एवं एडवांस PDF",
+                "desc": "Consolidated report navigation under AJ Type Saar (आवक जावक प्रकार सार) in top menu. Added an interactive step-by-step Feature Tour covering Aawak/Jawak tab toggling, multi-filters, Excel/PDF exports, zero row hiding, view modes, and drill-down voucher click actions.",
+                "desc_hin": "रिपोर्ट मेनू में मॉड्यूल का नाम 'AJ Type Saar (आवक जावक प्रकार सार)' रखा गया है। इसमें आवक/जावक प्रकार सार स्विच, मल्टी-फ़िल्टर, एक्सेल/PDF एक्सपोर्ट, 0 पंक्तियाँ छिपाने, व्यू मोड व प्रविष्टि संपादन सुविधाओं को सिखाने के लिए नया स्टेप-बाय-स्टेप गाइड (Feature Tour) जोड़ा गया है।"
+            },
+            {
+                "type": "improved",
+                "module": "Table Freeze & Reports UI",
+                "title": "Universal Theme-Aware Table Freeze & Smooth Arrow Key Navigation Across All Reports",
+                "title_hin": "सभी रिपोर्टों में थीम आधारित पिन (Freeze) हेडर, फिक्स्ड कॉलम एवं सुगम एरो-की कीबोर्ड स्क्रॉल",
+                "desc": "Upgraded Aawak, Aawak New, Jawak New, AJ Type Saar, Item Ledger, and Universal Reports with dynamic theme-aware pinned headers, fixed 3 left columns (Smart Checkbox, No, Manage), and fluid arrow-key keyboard scrolling.",
+                "desc_hin": "आवक (Aawak), आवक न्यू (Aawak New), जावक न्यू (Jawak New), AJ Type Saar, आइटम लेजर तथा यूनीवर्सल रिपोर्ट में चयनित थीम के अनुसार प्रथम 3 फिक्स्ड कॉलम (स्मार्ट चेकबॉक्स, क्रम संख्या, एक्शन/मैनेज), पिन हेडर एवं एरो-की स्क्रॉलिंग सुविधा लागू की गई है।"
+            },
+            {
+                "type": "improved",
+                "module": "Jawak Speed & Navigation",
+                "title": "Ultra-Fast Jawak Page Loading & Enhanced Keyboard Navigation",
+                "title_hin": "जावक सूची (Jawak List): अत्यंत तीव्र पेज लोडिंग एवं सुगम कीबोर्ड नेविगेशन (Key Scroll)",
+                "desc": "Optimized Jawak page opening speed by eliminating redundant background network calls on initial load, allowing pages to render instantly. Upgraded key navigation to support smooth keyboard arrow key scrolling across data tables while typing comfortably in form fields.",
+                "desc_hin": "जावक सूची (Jawak List) के खुलने की गति को अत्यधिक तेज़ बनाया गया है। अब पेज खुलते ही सभी प्रविष्टियाँ तुरंत दिखाई देती हैं। साथ ही तालिकाओं में एरो-की (Arrow Keys) द्वारा आसानी से स्क्रॉल करने एवं फॉर्म में टाइपिंग के दौरान सुगम नेविगेशन की सुविधा दी गई है।"
+            },
+            {
+                "type": "feature",
+                "module": "HMP Batch Production",
+                "title": "Smart Recipe Scaling, Live Loss KPI & Direct '+ Aawak' Creation Button",
+                "title_hin": "HMP उत्पादन बैच: स्वतः रेसिपी अनुपात (Auto-Scale), लाइव हानि/अंतर KPI एवं '+ Aawak' रसीद बटन",
+                "desc": "Upgraded HMP Production Batches with automatic proportional recipe scaling when output quantities change, live batch consumption loss/variance KPI bar, instant form loading, and a direct '+ Aawak' action button for output rows missing stock entries.",
+                "desc_hin": "HMP उत्पादन बैच (Production Batches) में प्रमुख सुधार किए गए हैं: आउटपुट बदलने पर रेसिपी के सभी कच्चे माल स्वतः अनुपात में स्केल हो जाते हैं, फॉर्म में लाइव खपत-उत्पादन का अंतर (Loss %) दिखाई देता है, फ़ॉर्म लोडिंग अत्यधिक तेज़ बनाई गई है, तथा बिना आवक दर्ज उत्पाद पंक्तियों में तुरंत आवक रसीद बनाने के लिए नया '+ Aawak' बटन जोड़ा गया है।"
+            },
+            {
+                "type": "improved",
+                "module": "Excel Import Corrections",
+                "title": "Seamless PBK (Sewadhari) Selection in Excel Import Correction Tab",
+                "title_hin": "एक्सेल इम्पोर्ट (Excel Import): करेक्शन टैब में सेवाधारी (PBK) चयन एवं सुगम सुधार सुविधा",
+                "desc": "Enhanced Excel Import correction workflow so selecting a PBK (Sewadhari) immediately enables the green 'Correct' button, ensuring seamless data resolution when importing Jawak entries.",
+                "desc_hin": "एक्सेल इम्पोर्ट (Excel Import) के सुधार टैब (Make Correction) में सेवाधारी (PBK) चुनने के तुरंत बाद हरा 'Correct' बटन सक्रिय हो जाता है, जिससे जावक डेटा इम्पोर्ट के दौरान नामों का सुधार आसानी से हो जाता है।"
+            },
+            {
+                "type": "improved",
+                "module": "Aawak & Jawak Tables UI",
+                "title": "Pinned First 3 Columns (Freeze Columns) in Aawak, Aawak-New, Jawak-New, and Item List",
+                "title_hin": "आवक, आवक-न्यू, जावक-न्यू एवं आइटम सूची तालिकाएं: प्रथम 3 कॉलम (पिन/फ्रीज कॉलम) स्थिर सुविधा",
+                "desc": "Upgraded Aawak, Aawak-New, Jawak-New, and Item list tables with pinned/frozen first 3 columns (Smart Checkbox, Sr No, Manage/Actions), keeping key identifier columns fixed on screen while scrolling horizontally across columns.",
+                "desc_hin": "आवक (Aawak), आवक-न्यू (Aawak-New), जावक-न्यू (Jawak-New) तथा आइटम सूची (Item List) तालिकाओं के प्रथम 3 कॉलम (स्मार्ट चेकबॉक्स, क्रमांक, संपादन/Manage बटन) को स्क्रीन पर स्थिर (Freeze/Pin) किया गया है। अब तालिका में दाएं-बाएं स्क्रॉल करते समय मुख्य जानकारी हमेशा स्थिर दिखाई देगी।"
+            }
+        ]
+    },
+    {
+        "version": "37.3",
+        "date": "01-10-2026",
+        "summary": "Aawak Type Saar Report, Ledger Report, Universal Report & UI Enhancements",
+        "summary_hin": "आवक टाइप-वार सार रिपोर्ट, लेजर रिपोर्ट, यूनीवर्सल रिपोर्ट एवं UI संवर्धन",
+        "isNew": false,
+        "items": [
+            {
+                "type": "feature",
+                "module": "आवक टाइप-वार सार रिपोर्ट",
+                "title": "Complete Aawak Type Saar Report Upgrade with Item Grouping & Multi-Filters",
+                "title_hin": "आवक टाइप-वार सार रिपोर्ट: आइटम समूहबद्ध तालिका, उप-योग (Subtotals) एवं बहुस्तरीय फ़िल्टरिंग",
+                "desc": "Upgraded Aawak Type Saar report with complete item-wise grouped view (merging left columns once), item subtotals, grand totals, KPI summary cards, new Department/Category/Item/Type filters, and styled Excel exports.",
+                "desc_hin": "आवक टाइप-वार सार रिपोर्ट को पूर्ण रूप से अपडेट किया गया है। इसमें बाईं ओर की कॉलम प्रविष्टियों को एक बार मर्ज करके आइटम-वार समूहबद्ध तालिका, प्रत्येक आइटम का उप-योग (Subtotal), कुल महायोग, नए केपीआई कार्ड्स, बहुस्तरीय फ़िल्टर एवं सुंदर एक्सेल एक्सपोर्ट जोड़ा गया है।"
+            },
             {
                 "type": "feature",
                 "module": "आवक लिंक ड्रापडाउन",

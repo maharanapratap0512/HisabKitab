@@ -3,6 +3,7 @@ const { json } = require('body-parser');
 const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 const Fn = require('../database/functions');
+const typeSaarPdf = require('../services/type-saar-pdf.service');
 
 global.pdfProgress = global.pdfProgress || {};
 
@@ -999,6 +1000,15 @@ router.put('/awk_jwk_check/', async (req, res, next) => {
         let awkConditionString = `1=1`;
         let jwkConditionString = `1=1`;
 
+        const buildCond = (column, val) => {
+            if (!val) return '';
+            if (Array.isArray(val)) {
+                if (val.length === 0) return '';
+                return ` AND ${column} IN (${val.join(',')})`;
+            }
+            return ` AND ${column} = ${val}`;
+        };
+
         if (req.body.date_from) {
             awkConditionString += ` AND aawak.date >= '${req.body.date_from}'`;
             jwkConditionString += ` AND jawak.date >= '${req.body.date_from}'`;
@@ -1008,12 +1018,32 @@ router.put('/awk_jwk_check/', async (req, res, next) => {
             jwkConditionString += ` AND jawak.date <= '${req.body.date_to}'`;
         }
         if (req.body.mm_id) {
-            awkConditionString += ` AND aawak.mm_id = ${req.body.mm_id}`;
-            jwkConditionString += ` AND jawak.mm_id = ${req.body.mm_id}`;
+            awkConditionString += buildCond('aawak.mm_id', req.body.mm_id);
+            jwkConditionString += buildCond('jawak.mm_id', req.body.mm_id);
         }
         if (req.body.aj_mm_id) {
-            awkConditionString += ` AND aawak_mm_id = '${req.body.aj_mm_id}'`;
-            jwkConditionString += ` AND jawak_mm_id = '${req.body.aj_mm_id}'`;
+            awkConditionString += buildCond('aawak.aawak_mm_id', req.body.aj_mm_id);
+            jwkConditionString += buildCond('jawak.jawak_mm_id', req.body.aj_mm_id);
+        }
+
+        // Aawak Type & Jawak Type Filters
+        if (req.body.aawak_type_id) {
+            awkConditionString += buildCond('aawak.aawak_type_id', req.body.aawak_type_id);
+        }
+        if (req.body.jawak_type_id) {
+            jwkConditionString += buildCond('jawak.jawak_type_id', req.body.jawak_type_id);
+        }
+
+        // Condition Filter
+        if (req.body.condition_id) {
+            awkConditionString += buildCond('aawak.condition_id', req.body.condition_id);
+            jwkConditionString += buildCond('jawak.condition_id', req.body.condition_id);
+        }
+
+        // Usage List Filter
+        if (req.body.usage_list_id) {
+            awkConditionString += buildCond('aawak.usage_list_id', req.body.usage_list_id);
+            jwkConditionString += buildCond('jawak.usage_list_id', req.body.usage_list_id);
         }
 
         // Category filter
@@ -1031,7 +1061,7 @@ router.put('/awk_jwk_check/', async (req, res, next) => {
                 if (s_id) {
                     return `(aawak.item_id = ${i_id} AND aawak.subitem_id = ${s_id})`;
                 } else {
-                    return `(aawak.item_id = ${i_id} AND aawak.subitem_id IS NULL)`;
+                    return `(aawak.item_id = ${i_id} AND (aawak.subitem_id IS NULL OR aawak.subitem_id = 0))`;
                 }
             });
             awkConditionString += ` AND (${awkParts.join(' OR ')})`;
@@ -1043,19 +1073,19 @@ router.put('/awk_jwk_check/', async (req, res, next) => {
                 if (s_id) {
                     return `(jawak.item_id = ${i_id} AND jawak.subitem_id = ${s_id})`;
                 } else {
-                    return `(jawak.item_id = ${i_id} AND jawak.subitem_id IS NULL)`;
+                    return `(jawak.item_id = ${i_id} AND (jawak.subitem_id IS NULL OR jawak.subitem_id = 0))`;
                 }
             });
             jwkConditionString += ` AND (${jwkParts.join(' OR ')})`;
         } else {
             // Backward compatibility for single dropdown
             if (req.body.item_id) {
-                awkConditionString += ` AND aawak.item_id = ${req.body.item_id}`;
-                jwkConditionString += ` AND jawak.item_id = ${req.body.item_id}`;
+                awkConditionString += buildCond('aawak.item_id', req.body.item_id);
+                jwkConditionString += buildCond('jawak.item_id', req.body.item_id);
             }
             if (req.body.subitem_id) {
-                awkConditionString += ` AND aawak.subitem_id = ${req.body.subitem_id}`;
-                jwkConditionString += ` AND jawak.subitem_id = ${req.body.subitem_id}`;
+                awkConditionString += buildCond('aawak.subitem_id', req.body.subitem_id);
+                jwkConditionString += buildCond('jawak.subitem_id', req.body.subitem_id);
             }
         }
 
@@ -1097,8 +1127,51 @@ router.put('/awk_type_saar/', async (req, res, next) => {
             months = Fn.sortAndFillMonths(req.body.months);
             conditionString += ` AND strftime('%m', date) in (${Fn.join(monthsString)})`
         }
+
+        if (req.body.dept_id) {
+            if (Array.isArray(req.body.dept_id) && req.body.dept_id.length > 0) {
+                conditionString += ` AND dept_id IN (${req.body.dept_id.map(id => Number(id)).join(',')})`;
+            } else if (!Array.isArray(req.body.dept_id)) {
+                conditionString += ` AND dept_id = ${Number(req.body.dept_id)}`;
+            }
+        }
+
+        if (req.body.aawak_type_id) {
+            if (Array.isArray(req.body.aawak_type_id) && req.body.aawak_type_id.length > 0) {
+                conditionString += ` AND aawak_type_id IN (${req.body.aawak_type_id.map(id => Number(id)).join(',')})`;
+            } else if (!Array.isArray(req.body.aawak_type_id)) {
+                conditionString += ` AND aawak_type_id = ${Number(req.body.aawak_type_id)}`;
+            }
+        }
+
+        if (req.body.category_id) {
+            conditionString += ` AND item_id IN (select item_id from item_category where category_id = ${Number(req.body.category_id)})`;
+        }
+
+        if (req.body.item_subitem_ids && req.body.item_subitem_ids.length > 0) {
+            let itemParts = req.body.item_subitem_ids.map(idStr => {
+                let parts = String(idStr).split(':');
+                let i_id = Number(parts[0]);
+                let s_id = parts[1] ? Number(parts[1]) : null;
+                if (s_id) {
+                    return `(aawak.item_id = ${i_id} AND aawak.subitem_id = ${s_id})`;
+                } else {
+                    return `(aawak.item_id = ${i_id} AND (aawak.subitem_id IS NULL OR aawak.subitem_id = 0))`;
+                }
+            });
+            conditionString += ` AND (${itemParts.join(' OR ')})`;
+        } else {
+            if (req.body.item_id) {
+                conditionString += ` AND item_id = ${Number(req.body.item_id)}`;
+            }
+            if (req.body.subitem_id) {
+                conditionString += ` AND subitem_id = ${Number(req.body.subitem_id)}`;
+            }
+        }
+
         let sql = `select JSON_GROUP_ARRAY(awk.month) as arr_months, 
         JSON_GROUP_ARRAY(awk.sum_qty) as arr_sum_qty, 
+        awk.dept_id, awk.item_id, awk.subitem_id, awk.unit_id, awk.aawak_type_id,
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
         sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
         sl.list_name_hin as aawak_type_hin, sl.list_name_eng as aawak_type_eng,
@@ -1111,28 +1184,29 @@ router.put('/awk_type_saar/', async (req, res, next) => {
         left join unit on unit._id = awk.unit_id
         left join department on department._id = awk.dept_id
         left join support_list sl on sl._id = awk.aawak_type_id
-        group by awk.dept_id, awk.item_id, awk.subitem_id, awk.unit_id, awk.aawak_type_id`;
-        console.log(sql);
+        group by awk.dept_id, awk.item_id, awk.subitem_id, awk.unit_id, awk.aawak_type_id
+        order by awk.dept_id, it.item_hin, sit.subitem_hin, sl.list_name_hin`;
+        
         let stmt = DB.db.prepare(sql);
         for (let row of stmt.iterate()) {
             for (let key of Object.keys(row)) {
                 if (key.includes('arr')) {
-                    row[key] = row[key] ? JSON.parse(row[key]) : []
+                    row[key] = row[key] ? JSON.parse(row[key]) : [];
                 }
             }
             row.arr_sum_qty = monthsString.map(m => row.arr_months.includes(m) ? row.arr_sum_qty[row.arr_months.indexOf(m)] : 0);
-            row.arr_months = monthsString
-            reportData.push(row)
+            row.arr_months = monthsString;
+            reportData.push(row);
         }
         res.json({
             result: reportData,
             months: months,
             success: true
-        })
+        });
     } catch (err) {
         console.log(err);
-        next(err)
-    };
+        next(err);
+    }
 });
 
 // by jawak type wise saar 
@@ -1145,8 +1219,52 @@ router.put('/jwk_type_saar/', async (req, res, next) => {
             months = Fn.sortAndFillMonths(req.body.months);
             conditionString += ` AND strftime('%m', date) in (${Fn.join(monthsString)})`
         }
+
+        if (req.body.dept_id) {
+            if (Array.isArray(req.body.dept_id) && req.body.dept_id.length > 0) {
+                conditionString += ` AND dept_id IN (${req.body.dept_id.map(id => Number(id)).join(',')})`;
+            } else if (!Array.isArray(req.body.dept_id)) {
+                conditionString += ` AND dept_id = ${Number(req.body.dept_id)}`;
+            }
+        }
+
+        if (req.body.jawak_type_id || req.body.aawak_type_id) {
+            let tId = req.body.jawak_type_id || req.body.aawak_type_id;
+            if (Array.isArray(tId) && tId.length > 0) {
+                conditionString += ` AND jawak_type_id IN (${tId.map(id => Number(id)).join(',')})`;
+            } else if (!Array.isArray(tId)) {
+                conditionString += ` AND jawak_type_id = ${Number(tId)}`;
+            }
+        }
+
+        if (req.body.category_id) {
+            conditionString += ` AND item_id IN (select item_id from item_category where category_id = ${Number(req.body.category_id)})`;
+        }
+
+        if (req.body.item_subitem_ids && req.body.item_subitem_ids.length > 0) {
+            let itemParts = req.body.item_subitem_ids.map(idStr => {
+                let parts = String(idStr).split(':');
+                let i_id = Number(parts[0]);
+                let s_id = parts[1] ? Number(parts[1]) : null;
+                if (s_id) {
+                    return `(jawak.item_id = ${i_id} AND jawak.subitem_id = ${s_id})`;
+                } else {
+                    return `(jawak.item_id = ${i_id} AND (jawak.subitem_id IS NULL OR jawak.subitem_id = 0))`;
+                }
+            });
+            conditionString += ` AND (${itemParts.join(' OR ')})`;
+        } else {
+            if (req.body.item_id) {
+                conditionString += ` AND item_id = ${Number(req.body.item_id)}`;
+            }
+            if (req.body.subitem_id) {
+                conditionString += ` AND subitem_id = ${Number(req.body.subitem_id)}`;
+            }
+        }
+
         let sql = `select JSON_GROUP_ARRAY(jwk.month) as arr_months, 
         JSON_GROUP_ARRAY(jwk.sum_qty) as arr_sum_qty, 
+        jwk.dept_id, jwk.item_id, jwk.subitem_id, jwk.unit_id, jwk.jawak_type_id,
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
         sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
         sl.list_name_hin as jawak_type_hin, sl.list_name_eng as jawak_type_eng,
@@ -1159,28 +1277,160 @@ router.put('/jwk_type_saar/', async (req, res, next) => {
         left join unit on unit._id = jwk.unit_id
         left join department on department._id = jwk.dept_id
         left join support_list sl on sl._id = jwk.jawak_type_id
-        group by jwk.dept_id, jwk.item_id, jwk.subitem_id, jwk.unit_id, jwk.jawak_type_id`;
-        console.log(sql);
+        group by jwk.dept_id, jwk.item_id, jwk.subitem_id, jwk.unit_id, jwk.jawak_type_id
+        order by jwk.dept_id, it.item_hin, sit.subitem_hin, sl.list_name_hin`;
+
         let stmt = DB.db.prepare(sql);
         for (let row of stmt.iterate()) {
             for (let key of Object.keys(row)) {
                 if (key.includes('arr')) {
-                    row[key] = row[key] ? JSON.parse(row[key]) : []
+                    row[key] = row[key] ? JSON.parse(row[key]) : [];
                 }
             }
             row.arr_sum_qty = monthsString.map(m => row.arr_months.includes(m) ? row.arr_sum_qty[row.arr_months.indexOf(m)] : 0);
-            row.arr_months = monthsString
-            reportData.push(row)
+            row.arr_months = monthsString;
+            reportData.push(row);
         }
         res.json({
             result: reportData,
             months: months,
             success: true
-        })
+        });
     } catch (err) {
         console.log(err);
-        next(err)
-    };
+        next(err);
+    }
+});
+
+// Get detailed transactions for Aawak or Jawak type saar drilldown modal
+router.put('/type_saar_details/', async (req, res, next) => {
+    try {
+        const { mode, year, months, dept_id, item_id, subitem_id, type_id } = req.body;
+        let table = mode === 'jawak' ? 'jawak' : 'aawak';
+        let typeCol = mode === 'jawak' ? 'jawak_type_id' : 'aawak_type_id';
+        let mmCol = mode === 'jawak' ? 'jawak_mm_id' : 'aawak_mm_id';
+
+        let condition = `1=1`;
+        if (year) {
+            condition += ` AND strftime('%Y', ${table}.date) = '${year}'`;
+        }
+        if (months && months.length > 0) {
+            let monthsString = Fn.sortAndFillMonthsString(months);
+            condition += ` AND strftime('%m', ${table}.date) IN (${Fn.join(monthsString)})`;
+        }
+        if (dept_id) {
+            condition += ` AND ${table}.dept_id = ${Number(dept_id)}`;
+        }
+        if (item_id) {
+            condition += ` AND ${table}.item_id = ${Number(item_id)}`;
+        }
+        if (subitem_id) {
+            condition += ` AND ${table}.subitem_id = ${Number(subitem_id)}`;
+        } else {
+            condition += ` AND (${table}.subitem_id IS NULL OR ${table}.subitem_id = 0)`;
+        }
+        if (type_id) {
+            condition += ` AND ${table}.${typeCol} = ${Number(type_id)}`;
+        }
+
+        let sql = `SELECT ${table}.*, 
+            it.item_hin, it.item_eng, 
+            sit.subitem_hin, sit.subitem_eng,
+            unit.unit_short,
+            sl.list_name_hin as type_hin, sl.list_name_eng as type_eng,
+            mm.mm_hin, mm.mm_eng, mm.mm_code,
+            pbk.pbk_hin, pbk.pbk_eng
+            FROM ${table}
+            LEFT JOIN v_item it ON it._id = ${table}.item_id
+            LEFT JOIN v_subitem sit ON sit._id = ${table}.subitem_id
+            LEFT JOIN unit ON unit._id = ${table}.unit_id
+            LEFT JOIN support_list sl ON sl._id = ${table}.${typeCol}
+            LEFT JOIN mm ON mm._id = ${table}.${mmCol}
+            LEFT JOIN pbk ON pbk._id = ${table}.pbk_id
+            WHERE ${condition}
+            ORDER BY ${table}.date DESC, ${table}._id DESC`;
+
+        let rows = DB.db.prepare(sql).all();
+        res.json({ success: true, result: rows });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
+
+// Puppeteer PDF Generation endpoint for Type Saar Report
+router.put('/type_saar_pdf/', async (req, res, next) => {
+    try {
+        const taskId = req.body.taskId || `pdf_${Date.now()}`;
+        if (taskId) global.pdfProgress[taskId] = { status: 'Preparing PDF data...' };
+
+        let itemDetailsMap = {};
+        if (req.body.pdfType === 'detailed' && req.body.groupedReportData) {
+            if (taskId) global.pdfProgress[taskId] = { status: 'Fetching detailed item transaction records...' };
+            const mode = req.body.reportMode || 'aawak';
+            const table = mode === 'jawak' ? 'jawak' : 'aawak';
+            const typeCol = mode === 'jawak' ? 'jawak_type_id' : 'aawak_type_id';
+            const mmCol = mode === 'jawak' ? 'jawak_mm_id' : 'aawak_mm_id';
+
+            let monthsString = (req.body.filterBody?.months && req.body.filterBody.months.length > 0)
+                ? Fn.sortAndFillMonthsString(req.body.filterBody.months)
+                : [];
+
+            for (let grp of req.body.groupedReportData) {
+                const groupKey = `${grp.item_id}_${grp.subitem_id || 0}`;
+
+                let condition = `1=1`;
+                if (req.body.filterBody?.year) {
+                    condition += ` AND strftime('%Y', ${table}.date) = '${req.body.filterBody.year}'`;
+                }
+                if (monthsString.length > 0) {
+                    condition += ` AND strftime('%m', ${table}.date) IN (${Fn.join(monthsString)})`;
+                }
+                if (grp.dept_id) {
+                    condition += ` AND ${table}.dept_id = ${Number(grp.dept_id)}`;
+                }
+                condition += ` AND ${table}.item_id = ${Number(grp.item_id)}`;
+                if (grp.subitem_id) {
+                    condition += ` AND ${table}.subitem_id = ${Number(grp.subitem_id)}`;
+                } else {
+                    condition += ` AND (${table}.subitem_id IS NULL OR ${table}.subitem_id = 0)`;
+                }
+
+                let sql = `SELECT ${table}.*, 
+                    it.item_hin, it.item_eng, 
+                    sit.subitem_hin, sit.subitem_eng,
+                    unit.unit_short,
+                    sl.list_name_hin as type_hin, sl.list_name_eng as type_eng,
+                    mm.mm_hin, mm.mm_eng, mm.mm_code,
+                    pbk.pbk_hin, pbk.pbk_eng
+                    FROM ${table}
+                    LEFT JOIN v_item it ON it._id = ${table}.item_id
+                    LEFT JOIN v_subitem sit ON sit._id = ${table}.subitem_id
+                    LEFT JOIN unit ON unit._id = ${table}.unit_id
+                    LEFT JOIN support_list sl ON sl._id = ${table}.${typeCol}
+                    LEFT JOIN mm ON mm._id = ${table}.${mmCol}
+                    LEFT JOIN pbk ON pbk._id = ${table}.pbk_id
+                    WHERE ${condition}
+                    ORDER BY ${table}.date ASC, ${table}._id ASC`;
+
+                let records = DB.db.prepare(sql).all();
+                itemDetailsMap[groupKey] = records || [];
+            }
+        }
+
+        const pdfBuffer = await typeSaarPdf.generatePdf({
+            ...req.body,
+            itemDetailsMap,
+            taskId
+        });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=type_saar_${req.body.pdfType || 'summary'}_${req.body.reportMode || 'report'}.pdf`);
+        res.end(pdfBuffer, 'binary');
+    } catch (err) {
+        console.error('Puppeteer PDF Generation Error:', err);
+        res.status(500).json({ success: false, message: err.message || 'Error generating PDF' });
+    }
 });
 
 // by Store Stock 

@@ -173,6 +173,116 @@ tbody:before {
   table-layout: fixed;
 }
 
+/* ==========================================================================
+   Enhanced Table Freeze System (.table-freeze-container & [appTableFreeze])
+   Supports: Pinned Header, Footer Freeze, Multi-Column Freeze (Left & Right)
+   Native Light & Dark Mode Theme Switcher Compliant (Rule #1)
+   ========================================================================== */
+.table-freeze-container {
+  max-height: 72vh;
+  overflow: auto;
+  position: relative;
+  border-radius: 8px;
+  border: 1px solid var(--bs-border-color, #e2e8f0);
+  background-color: var(--bs-card-bg, #ffffff);
+
+  table {
+    border-collapse: separate !important;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 0;
+
+    thead {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 20 !important;
+    }
+
+    /* Pinned Header Styling - Theme Native */
+    thead th, th.freeze-header {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 20 !important;
+      font-weight: 600;
+      font-size: 0.82rem;
+      letter-spacing: 0.3px;
+      padding: 8px 10px !important;
+      vertical-align: middle;
+
+      /* Dynamically inherits active theme (Indigo, Violet, Cyan, Emerald, Rose, Amber, Dark) */
+      background: var(--thead-bg, var(--bs-card-bg, #f8fafc)) !important;
+      color: var(--thead-color, var(--bs-body-color, #1e293b)) !important;
+      border-bottom: var(--thead-border-bottom, 2px solid var(--bs-border-color, #cbd5e1)) !important;
+      border-top: var(--thead-border-top, none) !important;
+      transition: box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    /* Header Elevation Shadow on Scroll */
+    &.table-scrolled thead th,
+    &.table-scrolled th.freeze-header {
+      box-shadow: var(--thead-box-shadow, 0 4px 12px rgba(15, 23, 42, 0.12)) !important;
+    }
+
+    /* Pinned Footer Styling */
+    tfoot td, td.freeze-footer {
+      position: sticky !important;
+      bottom: 0 !important;
+      z-index: 10 !important;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 8px 10px !important;
+      background: var(--thead-bg, var(--bs-card-bg, #f8fafc)) !important;
+      color: var(--thead-color, var(--bs-body-color, #0f172a)) !important;
+      border-top: var(--thead-border-bottom, 2px solid var(--bs-border-color, #cbd5e1)) !important;
+    }
+
+    /* Frozen Left/Right Column Base Styles */
+    th[freezeCol], td[freezeCol],
+    th[freezeColRight], td[freezeColRight],
+    .freeze-col-1, .freeze-col-2, .freeze-col-right {
+      position: sticky !important;
+      z-index: 8 !important;
+      background-color: var(--bs-card-bg, #ffffff) !important;
+    }
+
+    /* Intersection Corners (Header + Frozen Column) */
+    thead th[freezeCol], thead th[freezeColRight],
+    thead th.freeze-col-1, thead th.freeze-col-2, thead th.freeze-col-right {
+      z-index: 25 !important;
+      background: var(--thead-bg, var(--bs-card-bg, #f8fafc)) !important;
+      color: var(--thead-color, var(--bs-body-color, #1e293b)) !important;
+    }
+
+    /* Intersection Corners (Footer + Frozen Column) */
+    tfoot td[freezeCol], tfoot td[freezeColRight],
+    tfoot td.freeze-col-1, tfoot td.freeze-col-2, tfoot td.freeze-col-right {
+      z-index: 15 !important;
+      background: var(--thead-bg, var(--bs-card-bg, #f8fafc)) !important;
+      color: var(--thead-color, var(--bs-body-color, #0f172a)) !important;
+    }
+  }
+}
+
+/* --- Dark Mode Theme Overrides for Enhanced Header & Freeze --- */
+body.dark-mode,
+body[data-theme-mode="dark"],
+[data-bs-theme="dark"] {
+  .table-freeze-container {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    background-color: var(--bg-color, #1c1c36) !important;
+
+    table {
+      /* Frozen Cells Dark Mode */
+      th[freezeCol], td[freezeCol],
+      th[freezeColRight], td[freezeColRight],
+      .freeze-col-1, .freeze-col-2, .freeze-col-right {
+        background-color: var(--bg-color, #1c1c36) !important;
+        color: var(--bs-body-color, #e2e8f0) !important;
+      }
+    }
+  }
+}
+
 // 1 * 25px per class increase.
 .mw-1 {
   min-width: 1.5625rem !important;
@@ -418,6 +528,18 @@ span.search-icon {
 
 .i-outline-primary:hover {
   background-color: #727cf5;
+  color: #fff;
+}
+
+.i-outline-info {
+  border: 1px solid #39affb;
+  color: #39affb;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.i-outline-info:hover {
+  background-color: #39affb;
   color: #fff;
 }
 
@@ -1021,7 +1143,8 @@ body.dark-mode {
 }
 
 /* --- Variable Quantity Aawak Global Styling --- */
-tr.var-qty, .row-var-qty {
+tr.var-qty,
+.row-var-qty {
   border-left: 4px solid #ff9800 !important;
   background-color: rgba(255, 152, 0, 0.08) !important;
 }

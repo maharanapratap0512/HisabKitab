@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -11,7 +11,7 @@ import { FormService } from 'src/app/services/form.service';
 import { SelectionService } from 'src/app/services/selection.service';
 import { TourService } from 'src/app/services/tour.service';
 import { JAWAK_NEW_TOUR_CONFIG } from './jawak-new.tour';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
 declare var $: any;
 
@@ -20,7 +20,8 @@ declare var $: any;
   templateUrl: './jawak-new.component.html',
   styleUrls: ['./jawak-new.component.scss']
 })
-export class JawakNewComponent implements OnInit {
+export class JawakNewComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('TABLE', { static: false }) el!: ElementRef<HTMLInputElement>;
 
   // Pagination and UI
@@ -107,7 +108,7 @@ export class JawakNewComponent implements OnInit {
     this.spinner.show();
     this.settings = this.auth.webUser.settings;
     this.settings.jawak.view_mode = this.settings.jawak.view_mode || 'voucher';
-    this.gs.observeList().subscribe((result: any) => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe((result: any) => {
       this.mms = result.mm || [];
       this.items = result.itemmix || [];
       this.filteredItems = this.items;
@@ -741,5 +742,23 @@ export class JawakNewComponent implements OnInit {
       this.isLoader = false;
       this.toastr.error('Failed to export Jawak data');
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.jawakData = [];
+    this.jawakAll = [];
+    this.flatJawakItems = [];
+    this.allJwkData = [];
+    this.items = [];
+    this.subitems = [];
+    this.units = [];
+    this.mms = [];
+    this.conditions = [];
+    this.departments = [];
+    this.pbks = [];
+    this.jawak_types = [];
+    this.aawak_sources = [];
   }
 }

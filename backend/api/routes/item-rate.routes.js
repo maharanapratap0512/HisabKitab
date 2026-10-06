@@ -66,4 +66,15 @@ router.get('/lookup/:dept_id', async (req, res, next) => {
     }
 });
 
+// Bulk delete item rate records
+router.post('/delete/bulk', async (req, res, next) => {
+    try {
+        const { ids } = req.body;
+        const result = await itemRateService.deleteBulkRates(ids);
+        res.json(result);
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;

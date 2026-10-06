@@ -7,6 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import { Subject, takeUntil } from 'rxjs';
 import Swal from 'sweetalert2'
 
 declare var $: any;
@@ -17,6 +18,7 @@ declare var $: any;
 	styleUrls: ['./aawak-entry.component.scss']
 })
 export class AawakEntryComponent implements OnInit {
+	private destroy$ = new Subject<void>();
 
 	@Input() getData: any;
 	@Input() isEdit: any = false;
@@ -113,7 +115,7 @@ export class AawakEntryComponent implements OnInit {
 		private spinner: NgxSpinnerService,
 		public auth: AuthService
 	) {
-		this.gs.observeList().subscribe(result => {
+		this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
 			this.items = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
 			this.itemAll = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
 			this.categories = result.category && this.auth.webUser.dept_id > 2 ? result.category : [];
@@ -143,6 +145,27 @@ export class AawakEntryComponent implements OnInit {
 		console.log(this.awkfg);
 
 		this.response.emit(this.awkfg);
+		this.destroy$.next();
+		this.destroy$.complete();
+		this.items = [];
+		this.itemsAll = [];
+		this.units = [];
+		this.states = [];
+		this.mms = [];
+		this.conditions = [];
+		this.pbks = [];
+		this.aawak_types = [];
+		this.aawak_sources = [];
+		this.jawak_types = [];
+		this.nimitts = [];
+		this.usage_lists = [];
+		this.subitems = [];
+		this.subitemsAll = [];
+		this.products = [];
+		this.productsAll = [];
+		this.categories = [];
+		this.aawaks = [];
+		this.departments = [];
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -152,7 +175,7 @@ export class AawakEntryComponent implements OnInit {
 
 		if (changes.getData.currentValue && Object.keys(changes.getData.currentValue).length > 0) {
 			if (changes.getData.currentValue.item_id) {
-				this.gs.observeList().subscribe(result => {
+				this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
 					this.itemsAll = result.itemmix ? result.itemmix : [];
 					this.items = result.itemmix ? result.itemmix : [];
 					this.categories = result.category ? result.category : [];

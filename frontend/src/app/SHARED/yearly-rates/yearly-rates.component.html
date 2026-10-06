@@ -1,8 +1,8 @@
 <div class="modal fade" [id]="modalId" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
+   <div class="modal-dialog" style="width: 95%;">
       <div class="modal-content">
          <div class="modal-header">
-            <h5 class="modal-title"><i class="uil uil-bill me-1"></i> Yearly Rates (वार्षिक दरें)</h5>
+            <h5 class="modal-title mb-0"><i class="uil uil-bill me-1"></i> Yearly Rates (वार्षिक दरें)</h5>
             <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
@@ -11,28 +11,29 @@
                <p style="color: white"> लोड हो रहा है... </p>
             </ngx-spinner>
 
-            <div class="card p-3 mb-3 border">
+            <!-- Add/Edit Entry Form Card -->
+            <div class="card p-3 mb-3 border shadow-sm">
                <h5 class="fw-bold mb-3"><i class="uil uil-edit me-1"></i> Add / Edit Yearly Rate (वार्षिक दर जोड़े/बदले)</h5>
                <div class="row g-2 align-items-end">
                   <div class="col-md-5">
-                     <label class="form-label font-weight-bold">Select Item / Subitem *</label>
+                     <label class="form-label font-weight-bold mb-1">Select Item / Subitem *</label>
                      <app-item-dropdown [items]="itemData" [(itemId)]="rateObj.item_id"
                         [(subitemId)]="rateObj.subitem_id" (change)="onRateItemChange($event)"
                         placeholder="Select Item / Subitem"></app-item-dropdown>
                   </div>
                   <div class="col-md-2">
-                     <label class="form-label font-weight-bold">Year *</label>
-                     <input type="number" class="form-control" [(ngModel)]="rateObj.year" placeholder="e.g. 2026">
+                     <label class="form-label font-weight-bold mb-1">Year *</label>
+                     <input type="number" class="form-control form-control-sm" [(ngModel)]="rateObj.year" placeholder="e.g. 2026">
                   </div>
                   <div class="col-md-2">
-                     <label class="form-label font-weight-bold">Rate (₹) *</label>
-                     <input type="number" class="form-control" [(ngModel)]="rateObj.rate" placeholder="e.g. 500">
+                     <label class="form-label font-weight-bold mb-1">Rate (₹) *</label>
+                     <input type="number" class="form-control form-control-sm" [(ngModel)]="rateObj.rate" placeholder="e.g. 500">
                   </div>
                   <div class="col-md-3 d-flex gap-1">
-                     <button class="btn btn-primary w-50" (click)="saveRate(false)" title="Save to rate master only">
+                     <button class="btn btn-primary btn-sm w-50" (click)="saveRate(false)" title="Save to rate master only">
                         <i class="uil uil-save"></i> Save
                      </button>
-                     <button class="btn btn-success w-50" (click)="saveRate(true)"
+                     <button class="btn btn-success btn-sm w-50" (click)="saveRate(true)"
                         title="Save & apply to all Aawak & Jawak entries of this year">
                         <i class="uil uil-check-circle"></i> Save & Apply
                      </button>
@@ -40,11 +41,121 @@
                </div>
             </div>
 
-            <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
-               <table class="table table-hover align-middle border">
+            <!-- Filter Bar with Right Corner Small Icon View Toggle -->
+            <div class="row align-items-center mb-2 px-1 g-2">
+               <div class="col-md-4">
+                  <app-item-dropdown [items]="itemData" [(ngModel)]="selectedItemmix" [multiple]="true"
+                     [closeOnSelect]="false" name="hdr_rate_item_mix" placeholder="Filter Items / Subitems"
+                     appendTo="body"></app-item-dropdown>
+               </div>
+               <div class="col-md-4 d-flex align-items-center justify-content-center gap-2">
+                  <span class="text-muted font-size-13 fw-bold me-1">
+                     Total: {{viewMode === 'matrix' ? filteredMatrixData.length : filteredItemRates.length}}
+                  </span>
+                  <span class="badge year-box cursor-pointer badge-outline-danger px-2 py-1"
+                     *ngIf="viewMode === 'matrix' && selectionService.hasSelection('yearly-rate-matrix')" 
+                     (click)="deleteSelectedMatrix()"
+                     title="Delete all rates for selected items">
+                     Delete ({{selectionService.getSelected('yearly-rate-matrix').length}})
+                  </span>
+                  <span class="badge year-box cursor-pointer badge-outline-success px-2 py-1"
+                     *ngIf="viewMode === 'matrix' && selectionService.hasSelection('yearly-rate-matrix')" 
+                     (click)="applySelectedMatrix()"
+                     title="Apply all rates for selected items">
+                     Apply ({{selectionService.getSelected('yearly-rate-matrix').length}})
+                  </span>
+               </div>
+               <div class="col-md-4 d-flex align-items-center justify-content-end gap-2">
+                  <span class="text-muted font-size-12 me-1" *ngIf="viewMode === 'matrix'">
+                     <i class="uil uil-info-circle text-info me-1"></i>Dbl-click cell to edit | Right-click options
+                  </span>
+
+                  <!-- Small Icon Buttons View Toggle with Tooltips -->
+                  <div class="btn-group btn-group-sm">
+                     <button type="button" class="btn py-1 px-2" [ngClass]="viewMode === 'matrix' ? 'btn-primary' : 'btn-outline-primary'" 
+                             (click)="viewMode = 'matrix'" title="Matrix View (वर्षवार तालिका)">
+                        <i class="uil uil-table font-size-14"></i>
+                     </button>
+                     <button type="button" class="btn py-1 px-2" [ngClass]="viewMode === 'list' ? 'btn-primary' : 'btn-outline-primary'" 
+                             (click)="viewMode = 'list'" title="List View (सूची)">
+                        <i class="uil uil-list-ul font-size-14"></i>
+                     </button>
+                  </div>
+               </div>
+            </div>
+
+            <!-- MODE 1: MATRIX VIEW (Header Freeze & 1st Two Columns Freeze) -->
+            <div *ngIf="viewMode === 'matrix'" class="table-container table-freeze-container shadow-sm border" appTableFreeze appHorizontalScrollWithArrows style="max-height: 440px; overflow-y: auto; overflow-x: auto;"
+                 appTableSmartCheckbox="yearly-rate-matrix" rowSelector="tbody tr.matrix-row" [selectionData]="filteredMatrixData" idField="key">
+               <table class="table table-sm table-hover table-sticky-header align-middle border mb-0 text-nowrap" style="table-layout: fixed; width: max-content; min-width: 100%;">
+                  <thead>
+                     <tr>
+                        <th freezeCol="1" style="width: 45px; min-width: 45px;" class="text-center">#</th>
+                        <th freezeCol="2" style="width: 250px; min-width: 250px;">Item - Subitem</th>
+                        <th *ngFor="let y of matrixYears" style="width: 160px; min-width: 160px;" class="text-center">
+                           <span class="badge bg-primary px-2 py-1 font-size-13">{{y}}</span>
+                        </th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr *ngFor="let row of filteredMatrixData; let i = index" class="matrix-row">
+                        <td freezeCol="1" class="text-center text-muted fw-bold">{{i + 1}}</td>
+                        <td freezeCol="2" [appContextMenu]="getItemContextMenuItems(row)" class="cursor-pointer">
+                           <div class="fw-bold text-dark">{{row.item_hin}} <small class="text-muted">({{row.item_eng || '-'}})</small></div>
+                           <div *ngIf="row.subitem_hin" class="small text-info fw-normal mt-1">
+                              <i class="uil uil-corner-down-right me-1"></i>{{row.subitem_hin}} <small class="text-muted">({{row.subitem_eng || '-'}})</small>
+                           </div>
+                        </td>
+
+                        <!-- Year Rate Cells with Double-Click Edit & Right-Click Context Menu -->
+                        <td *ngFor="let y of matrixYears" 
+                            class="text-center cursor-pointer user-select-none" 
+                            (dblclick)="startEditCell(row, y)"
+                            [appContextMenu]="getContextMenuItems(row, y)">
+
+                           <!-- Edit Mode Cell -->
+                           <div *ngIf="editingCell && editingCell.key === row.key && editingCell.year === y" 
+                                class="d-flex align-items-center justify-content-center gap-1" (click)="$event.stopPropagation()">
+                              <input type="number" class="form-control form-control-sm px-1 py-0 text-center fw-bold text-success" 
+                                     style="width: 70px; height: 26px;" 
+                                     [(ngModel)]="editingCell.rateValue"
+                                     (keyup.enter)="saveCellRate(row, y)"
+                                     (keyup.escape)="cancelEditCell()" autofocus>
+                              <button class="btn btn-sm btn-success p-0" style="width: 24px; height: 24px; line-height: 1;" 
+                                      (click)="saveCellRate(row, y)" title="Save Rate">
+                                 <i class="uil uil-check font-size-14"></i>
+                              </button>
+                              <button class="btn btn-sm btn-outline-secondary p-0" style="width: 24px; height: 24px; line-height: 1;" 
+                                      (click)="cancelEditCell()" title="Cancel">
+                                 <i class="uil uil-times font-size-14"></i>
+                              </button>
+                           </div>
+
+                           <!-- Normal Mode Cell -->
+                           <div *ngIf="!editingCell || editingCell.key !== row.key || editingCell.year !== y">
+                              <span *ngIf="row.rates && row.rates[y] && row.rates[y].rate !== undefined && row.rates[y].rate !== null" class="fw-bold text-success fs-6">
+                                 ₹{{row.rates[y].rate}}
+                              </span>
+                              <span *ngIf="!row.rates || !row.rates[y] || row.rates[y].rate === undefined || row.rates[y].rate === null" class="text-muted opacity-50">
+                                 -
+                              </span>
+                           </div>
+                        </td>
+                     </tr>
+                     <tr *ngIf="!filteredMatrixData.length">
+                        <td [attr.colspan]="2 + matrixYears.length" class="text-center py-4 text-muted">No item rates found.</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+
+            <!-- MODE 2: FLAT LIST VIEW -->
+            <div *ngIf="viewMode === 'list'" class="table-responsive" style="max-height: 440px; overflow-y: auto;">
+               <table class="table table-hover align-middle border mb-0">
                   <thead class="table-light sticky-top">
                      <tr>
                         <th style="width: 50px;">No.</th>
+                        <th style="width: 180px;" class="text-center">Actions</th>
                         <th style="width: 140px;">
                            <div class="d-flex align-items-center justify-content-between">
                               <span>Year</span>
@@ -68,34 +179,22 @@
                            </div>
                         </th>
                         <th>
-                           <div class="d-flex align-items-center justify-content-between">
-                              <span>Item - Subitem</span>
-                              <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
-                                 [isOpen]="(selectedItemmix && selectedItemmix.length > 0) || !!rateFilter.search"
-                                 (clear)="selectedItemmix = []; rateFilter.search = ''"
-                                 triggerOn="click">
-                                 <div style="width: 280px;" class="p-1">
-                                    <div class="mb-2">
-                                       <label class="form-label mb-1"><small class="fw-bold">Item & Subitem Dropdown</small></label>
-                                       <app-item-dropdown [items]="itemData" [(ngModel)]="selectedItemmix" [multiple]="true"
-                                          [closeOnSelect]="false" name="hdr_rate_item_mix"
-                                          appendTo="body"></app-item-dropdown>
-                                    </div>
-                                    <div>
-                                       <label class="form-label mb-1"><small class="fw-bold">Quick Search</small></label>
-                                       <input type="text" class="form-control form-control-sm" placeholder="Search name..." [(ngModel)]="rateFilter.search">
-                                    </div>
-                                 </div>
-                              </app-popover-filter>
-                           </div>
+                           <span>Item - Subitem</span>
                         </th>
                         <th style="width: 120px;">Rate (₹)</th>
-                        <th style="width: 180px;" class="text-center">Actions</th>
                      </tr>
                   </thead>
                   <tbody>
                      <tr *ngFor="let item of filteredItemRates; let i = index">
                         <td>{{i + 1}}</td>
+                        <td class="text-center">
+                           <button class="btn btn-sm btn-outline-primary me-2 py-0 px-2" (click)="applyRateRow(item)"
+                              title="Apply Rate to Aawak/Jawak">
+                              <i class="uil uil-check-circle me-1"></i> Apply
+                           </button>
+                           <i class="uil uil-trash i-outline-danger cursor-pointer" (click)="deleteRateRow(item._id)"
+                              title="Delete"></i>
+                        </td>
                         <td>
                            <span class="badge bg-primary px-2 py-1 fs-6">{{item.year}}</span>
                         </td>
@@ -106,15 +205,7 @@
                            </div>
                         </td>
                         <td class="fw-bold text-success">₹{{item.rate}}</td>
-                        <td class="text-center">
-                           <button class="btn btn-sm btn-outline-primary me-2 py-0 px-2" (click)="applyRateRow(item)"
-                              title="Apply Rate to Aawak/Jawak">
-                              <i class="uil uil-check-circle me-1"></i> Apply
-                           </button>
-                           <i class="uil uil-trash i-outline-danger cursor-pointer" (click)="deleteRateRow(item._id)"
-                              title="Delete"></i>
-                        </td>
-                     </tr>
+                      </tr>
                      <tr *ngIf="!filteredItemRates.length">
                         <td colspan="5" class="text-center py-4 text-muted">No yearly rates found.</td>
                      </tr>

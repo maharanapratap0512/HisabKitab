@@ -447,6 +447,9 @@ export class ExcelImportComponent implements OnInit {
   }
 
   correctionSubmit(data: any, index: any) {
+    if (data.type === 'pbk' && !data.id) {
+      data.id = data.pbk_id;
+    }
     let conf = this.headerList.filter((h: { ref_table: any; }) => h.ref_table == data.type);
 
     if (data.type == 'item') {
@@ -516,7 +519,7 @@ export class ExcelImportComponent implements OnInit {
       for (let i in this.excelArrObj) {
         for (let j in conf) {
           if (this.excelArrObj[i][conf[j].name] == data.name) {
-            this.excelArrObj[i][conf[j].ref_field] = data.id;
+            this.excelArrObj[i][conf[j].ref_field] = data.id || data.pbk_id;
           }
         }
       }

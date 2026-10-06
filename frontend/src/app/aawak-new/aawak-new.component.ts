@@ -1,5 +1,5 @@
 
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
-import { observable, Observable, of, Subject } from 'rxjs';
+import { observable, Observable, of, Subject, takeUntil } from 'rxjs';
 import { SelectionService } from '../services/selection.service';
 import { TourService } from '../services/tour.service';
 import { AAWAK_NEW_TOUR_CONFIG } from './aawak-new.tour';
@@ -24,7 +24,8 @@ declare var $: any;
   templateUrl: './aawak-new.component.html',
   styleUrls: ['./aawak-new.component.scss']
 })
-export class AawakNewComponent implements OnInit {
+export class AawakNewComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
 
   @ViewChild('TABLE') el!: ElementRef<HTMLInputElement>;
@@ -178,7 +179,7 @@ export class AawakNewComponent implements OnInit {
       this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];
     }
 
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.items = result.itemmix ? result.itemmix : [];
       this.units = result.unit ? result.unit : [];
@@ -1900,6 +1901,31 @@ export class AawakNewComponent implements OnInit {
   showImages(data: any) {
     this.editData = data;
     this.openModal('Show Images');
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.aawakData = [];
+    this.aawakAll = [];
+    this.allAJData = [];
+    this.viewData = [];
+    this.mms = [];
+    this.items = [];
+    this.nimitts = [];
+    this.units = [];
+    this.conditions = [];
+    this.subitems = [];
+    this.pbks = [];
+    this.aawak_types = [];
+    this.aawak_sources = [];
+    this.usage_lists = [];
+    this.jawak_types = [];
+    this.products = [];
+    this.categories = [];
+    this.productsAll = [];
+    this.states = [];
+    this.departments = [];
   }
 }
 

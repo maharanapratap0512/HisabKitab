@@ -107,31 +107,14 @@ export class HmpEntryComponent implements OnInit {
     }, 500);
   }
 
-  async ngOnChanges(changes: SimpleChanges) {
+  // Proportional Scaling & KPI State
+  autoScaleRecipeInputs: boolean = true;
+  baseRecipeInputs: any[] = [];
+  baseRecipeOutputs: any[] = [];
+
+  ngOnChanges(changes: SimpleChanges) {
     if (changes.getData && changes.getData.currentValue) {
       let data = structuredClone(changes.getData.currentValue);
-
-      this.isLoader = true;
-      if (data.outputs && data.outputs.length > 0) {
-        for (let i = 0; i < data.outputs.length; i++) {
-          if (data.outputs[i].aawak_ref_id) {
-            try {
-              const filterBody = { _id: data.outputs[i].aawak_ref_id };
-              const res: any = await new Promise((resolve, reject) => {
-                this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, filterBody)
-                  .subscribe((res: any) => resolve(res), (err: any) => reject(err));
-              });
-
-              if (res.result && res.result.length > 0 && res.result[0].jawak_detail) {
-                data.outputs[i].jawak_detail = res.result[0].jawak_detail;
-              }
-            } catch (e) {
-              console.error('Failed to fetch jawak details for aawak: ', data.outputs[i].aawak_ref_id);
-            }
-          }
-        }
-      }
-      this.isLoader = false;
 
       // Filter out any blank template rows if loading into modern editor, otherwise preserve
       if (this.editorMode === 'modern') {
@@ -140,6 +123,49 @@ export class HmpEntryComponent implements OnInit {
       }
 
       this.fs.patchForm(data);
+    }
+  }
+
+  // --- KPI Calculation Helpers ---
+  getTotalInputQty(): number {
+    if (!this.fs?.hmpBatchForm?.inputs) return 0;
+    return this.fs.hmpBatchForm.inputs.reduce((acc: number, row: any) => {
+      return acc + (row.item_id && row.qty ? Number(row.qty || 0) : 0);
+    }, 0);
+  }
+
+  getTotalOutputQty(): number {
+    if (!this.fs?.hmpBatchForm?.outputs) return 0;
+    return this.fs.hmpBatchForm.outputs.reduce((acc: number, row: any) => {
+      return acc + (row.item_id && row.qty ? Number(row.qty || 0) : 0);
+    }, 0);
+  }
+
+  getBatchVarianceQty(): number {
+    return this.getTotalInputQty() - this.getTotalOutputQty();
+  }
+
+  getBatchVariancePercent(): number {
+    const totalInput = this.getTotalInputQty();
+    if (totalInput <= 0) return 0;
+    return (this.getBatchVarianceQty() / totalInput) * 100;
+  }
+
+  // --- Proportional Recipe Scaling ---
+  onOutputQtyChange(outputIndex: number = 0) {
+    if (!this.autoScaleRecipeInputs || !this.baseRecipeOutputs || this.baseRecipeOutputs.length === 0) return;
+    const baseOutputQty = Number(this.baseRecipeOutputs[outputIndex]?.qty || 0);
+    const currentOutputQty = Number(this.fs.hmpBatchForm.outputs[outputIndex]?.qty || 0);
+
+    if (baseOutputQty > 0 && currentOutputQty >= 0) {
+      const ratio = currentOutputQty / baseOutputQty;
+      for (let i = 0; i < this.fs.hmpBatchForm.inputs.length; i++) {
+        const baseInputQty = Number(this.baseRecipeInputs[i]?.qty || 0);
+        if (baseInputQty > 0) {
+          const scaledQty = Number((baseInputQty * ratio).toFixed(2));
+          this.fs.hmpBatchForm.inputs[i].qty = scaledQty;
+        }
+      }
     }
   }
 
@@ -182,6 +208,9 @@ export class HmpEntryComponent implements OnInit {
           return x;
         });
 
+        this.baseRecipeInputs = structuredClone(cleanInputs);
+        this.baseRecipeOutputs = structuredClone(cleanOutputs);
+
         if (this.editorMode === 'modern') {
           this.fs.hmpBatchForm.inputs = cleanInputs.filter((x: any) => x.item_id);
           this.fs.hmpBatchForm.outputs = cleanOutputs.filter((x: any) => x.item_id);
@@ -190,12 +219,46 @@ export class HmpEntryComponent implements OnInit {
           this.fs.hmpBatchForm.outputs = cleanOutputs;
         }
       } else {
+        this.baseRecipeInputs = [];
+        this.baseRecipeOutputs = [];
         this.fs.reset();
       }
     } else {
+      this.baseRecipeInputs = [];
+      this.baseRecipeOutputs = [];
       this.fs.reset();
     }
     this.fs.formStatusChanges(this.editorMode);
+  }
+
+  // --- Lazy Loading Jawak Details on Demand ---
+  async fetchJawakDetailsForOutput(outputIndex: number) {
+    const output = this.fs?.hmpBatchForm?.outputs?.[outputIndex];
+    if (!output || !output.aawak_ref_id || (output.jawak_detail && output.jawak_detail.length > 0)) {
+      return;
+    }
+    try {
+      this.isLoader = true;
+      const filterBody = { _id: output.aawak_ref_id };
+      const res: any = await new Promise((resolve, reject) => {
+        this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, filterBody)
+          .subscribe((res: any) => resolve(res), (err: any) => reject(err));
+      });
+      if (res.result && res.result.length > 0 && res.result[0].jawak_detail) {
+        output.jawak_detail = res.result[0].jawak_detail;
+      }
+    } catch (e) {
+      console.error('Failed to fetch jawak details: ', e);
+    } finally {
+      this.isLoader = false;
+    }
+  }
+
+  async toggleJawakShow(output: any, index: number) {
+    output.show_jawak = !output.show_jawak;
+    if (output.show_jawak) {
+      await this.fetchJawakDetailsForOutput(index);
+    }
   }
 
   // --- Traditional Input Table Logic ---
@@ -495,8 +558,9 @@ export class HmpEntryComponent implements OnInit {
   }
 
   // --- Jawak Distribution Logic ---
-  addJawakToOutput(index: number) {
+  async addJawakToOutput(index: number) {
     this.editOutputIndex = index;
+    await this.fetchJawakDetailsForOutput(index);
     const output = this.fs.hmpBatchForm.outputs[index];
 
     if (!output.item_id || !output.qty) {

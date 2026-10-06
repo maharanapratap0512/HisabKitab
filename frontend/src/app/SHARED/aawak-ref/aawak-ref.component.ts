@@ -75,10 +75,6 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
   ) { }
 
   ngOnInit(): void {
-    if (this.jawakId && (!this.selectedSplitsData || this.selectedSplitsData.length === 0)) {
-      this.fetchJawakSplits();
-    }
-
     this.splitSearchSub = this.splitSearch$.pipe(
       debounceTime(300),
       distinctUntilChanged()

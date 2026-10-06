@@ -117,6 +117,7 @@ import { AawakRefDropdownComponent } from './SHARED/aawak-ref-dropdown/aawak-ref
 import { AawakRefComponent } from './SHARED/aawak-ref/aawak-ref.component';
 import { YearlyRatesComponent } from './SHARED/yearly-rates/yearly-rates.component';
 import { VirtualInfiniteScrollDirective } from './SHARED/virtual-infinite-scroll.directive';
+import { TableFreezeDirective } from './SHARED/table-freeze.directive';
 
 
 import { VariantComponent }               from './CHILD_TABLES/variant/variant.component';
@@ -230,6 +231,7 @@ import { UniversalReportComponent } from './reports/universal-report/universal-r
     ContextSettingsPanelComponent,
     SmartFocusDirective,
     VirtualInfiniteScrollDirective,
+    TableFreezeDirective,
     JoinObjPipe,
     VariantComponent,
     VariantGeneratorEntryComponent,

@@ -135,10 +135,27 @@ async function lookupItemRate(dept_id, item_id, subitem_id, year) {
     return rec ? rec.rate : null;
 }
 
+/**
+ * Bulk deletes item rate records by IDs.
+ */
+async function deleteBulkRates(ids) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+        throw new Error('No IDs provided for deletion.');
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    const result = db.prepare(`DELETE FROM item_rate WHERE _id IN (${placeholders})`).run(...ids);
+    return {
+        success: true,
+        message: `Deleted ${result.changes} records.`,
+        deletedCount: result.changes
+    };
+}
+
 module.exports = {
     getItemRates,
     saveItemRate,
     deleteItemRate,
     applyItemRate,
-    lookupItemRate
+    lookupItemRate,
+    deleteBulkRates
 };

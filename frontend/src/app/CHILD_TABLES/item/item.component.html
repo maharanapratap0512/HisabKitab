@@ -9,90 +9,88 @@
       <div class="content">
 
          <!-- First Row -->
-         <!-- Add Button, Search Field, Filter button, Total Count -->
+         <!-- Add Buttons, Yearly Rates, Excel Import & Export -->
          <div class="row align-items-center py-2 px-1 border-bottom mb-1">
-            <div class="col-md-5 d-flex">
-               <button class="btn btn-primary" onclick="$('#showModal').modal('show')" (click)="showModal = 'Add Item'"
-                  *ngIf="settings.add">
+            <div class="col-md-6 d-flex align-items-center gap-2">
+               <button class="btn btn-primary btn-sm" onclick="$('#showModal').modal('show')"
+                  (click)="showModal = 'Add Item'" *ngIf="settings.add">
                   <i class="dripicons-plus h4 icon-mx-1"> </i>Add Item
                </button>
 
-               <button class="btn btn-success ms-2" onclick="$('#showModal').modal('show')"
+               <button class="btn btn-success btn-sm ms-2" onclick="$('#showModal').modal('show')"
                   (click)="showModal = auth.isVariantMode ? 'Add Variant' : 'Add Subitem'" *ngIf="settings.add">
                   <i class="dripicons-plus h4 icon-mx-1"> </i>{{ auth.isVariantMode ? 'Add Variant' : 'Add Subitem' }}
                </button>
 
-               <button class="btn btn-warning text-dark ms-2 fw-bold" (click)="yearlyRatesComp.openModal()">
+               <button class="btn btn-warning text-dark btn-sm ms-2 fw-bold" (click)="yearlyRatesComp.openModal()">
                   <i class="uil uil-bill me-1"></i> Yearly Rates
                </button>
             </div>
 
-            <div class="col-md-2">
-               <ng-select class="custom w-100" placeholder="Select Category" [clearable]="true" [virtualScroll]="true"
-                  (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
-                  <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
-                     {{item.category_eng}} : {{item.category_roman ? item.category_roman : ''}}</ng-option>
-               </ng-select>
-            </div>
-
-            <div class="col-md-3 d-flex align-items-center">
-               <button class="file btn btn-success" style="font-weight: 700 !important;">
-                  <i class="uil uil-arrow-to-bottom"></i> Excel Import
+            <div class="col-md-6 d-flex align-items-center justify-content-end gap-2">
+               <button class="file btn btn-success btn-sm fw-bold">
+                  <i class="uil uil-arrow-to-bottom me-1"></i> Excel Import
                   <input type="file" class="inputtag"
                      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                      (change)="excelImport($event)" />
                </button>
-               <button type="button" class="btn btn-outline-success mx-2" (click)="exportToExcel()"> Export To
-                  Excel
-               </button>
-               <button type="button" class="btn btn-danger mx-2" (click)="deleteSelected()"
-                  *ngIf="selectionService.hasSelection('item')" style="font-weight: 700 !important;">
-                  <i class="uil-trash"></i> Delete Selected
-               </button>
-            </div>
-
-            <div class="col-md-2">
-               <button class="btn btn-light float-end py-0 w-100" style="font-weight: 700 !important;">
-                  <span class="float-start">Items Count : </span> <span
-                     class="float-end">{{itemData.length}}</span><br />
-                  <span class="float-start">Subitems Count : </span><span class="float-end">
-                     {{si_total_count}}</span>
+               <button type="button" class="btn btn-outline-success btn-sm fw-bold" (click)="exportToExcel()">
+                  Export To Excel
                </button>
             </div>
          </div>
 
-         <div class="row p-2">
-            <div class="col-2">
-               <div class="form-check form-switch">
-                  <input type="checkbox" class="form-check-input" [(ngModel)]="expandAll"
-                     [ngModelOptions]="{standalone: true}">
-                  <label class="form-check-label" for="customSwitch2">Expand All</label>
+         <!-- Table Control Row (Prastav Style) -->
+         <div class="row align-items-center my-2 px-2">
+            <!-- Left: Expand All Toggle, Category Filter & Search Box (Tight Grouping) -->
+            <div class="col-md-5 d-flex align-items-center gap-2">
+               <button class="badge year-box badge-outline-secondary flex-shrink-0" (click)="expandAll = !expandAll"
+                  title="Toggle Expand All">
+                  <i class="uil" [ngClass]="expandAll ? 'uil-compress-arrows' : 'uil-expand-arrows'"></i>
+               </button>
+               <div style="width: 170px;" class="flex-shrink-0">
+                  <ng-select class="custom-sm w-100" placeholder="Select Category" [clearable]="true"
+                     [virtualScroll]="true" (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                     <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                        {{item.category_eng}} : {{item.category_roman ? item.category_roman : ''}}</ng-option>
+                  </ng-select>
+               </div>
+               <div class="flex-grow-1">
+                  <input type="text" class="form-control form-control-sm" placeholder="Search Here" [(ngModel)]="term"
+                     name="search">
                </div>
             </div>
-            <div class="col-4">
-               <div class="form-group">
-                  <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term" name="search">
+
+            <!-- Center: Total Counts & Delete Selected (Ample Spacing) -->
+            <div class="col-md-3 d-flex align-items-center justify-content-center gap-2">
+               <div class="font-size-13 fw-bold text-dark d-flex align-items-center gap-2 text-nowrap">
+                  <span>Items: <span class="text-primary">{{itemData.length}}</span></span>
+                  <span class="text-muted">|</span>
+                  <span>Sub: <span class="text-primary">{{si_total_count}}</span></span>
+                  <span class="badge year-box cursor-pointer badge-outline-danger ms-2 px-2 py-1"
+                     *ngIf="selectionService.hasSelection('item')" (click)="deleteSelected()"
+                     title="Click to perform delete.">
+                     Delete ({{selectionService.getSelected('item').length}})
+                  </span>
                </div>
             </div>
-            <div class="col-6">
-               <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
+
+            <!-- Right: Wider Pagination -->
+            <div class="col-md-4 d-flex justify-content-end">
+               <pagination-controls class="pagi mb-0" (pageChange)="page = $event" [autoHide]="true">
                </pagination-controls>
             </div>
          </div>
+
          <div class="row" *ngIf="itemData.length">
-            <div class="card-body" style="overflow: auto;">
-               <div class="table-container" appHorizontalScrollWithArrows>
+            <div class="card-body p-0" style="overflow: auto;">
+               <div class="table-container table-freeze-container" appTableFreeze appHorizontalScrollWithArrows>
                   <table id="datatable-buttons" class="table table-purple table-hover table-sticky-header dt-responsive"
-                     appTableSmartCheckbox="item" [selectionData]="itemData">
+                     appTableSmartCheckbox="item" rowSelector="tbody tr.main-row" [selectionData]="itemData">
                      <thead>
                         <tr>
-                           <th style="width: 40px;">
-                              <div class="form-check">
-                                 <input class="form-check-input smart-checkbox-select-all" type="checkbox">
-                              </div>
-                           </th>
-                           <th style="width: 50px;" (click)="FilterActive()">No.</th>
-                           <th style="width: 250px;">Manage</th>
+                           <th freezeCol="1" style="width: 50px;" (click)="FilterActive()">No.</th>
+                           <th freezeCol="2" style="width: 250px;">Manage</th>
                            <th style="width: 100px;" *ngIf="settings.document">Image</th>
                            <th style="width: 150px;">Item Hin</th>
                            <th style="width: 150px;" *ngIf="settings.item_eng">Item Eng</th>
@@ -111,13 +109,7 @@
                               [attr.aria-controls]="'#collapse-' + i" class="main-row"
                               [ngClass]="{'text-light':data.restrict_year}">
                               <!-- <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row"> -->
-                              <td style="font-size: large;">
-                                 <div class="form-check" (click)="$event.stopPropagation()">
-                                    <input class="form-check-input smart-checkbox-row" type="checkbox"
-                                       [value]="data._id">
-                                 </div>
-                              </td>
-                              <td style="font-size: large;">
+                              <td freezeCol="1" style="font-size: large;">
                                  {{itemsPerPage * (page - 1) + (i+1)}}
                                  <!-- <span class="mx-1"
                                     style="font-size: x-large;position: absolute;line-height: 28px;cursor: pointer"
@@ -129,7 +121,7 @@
                                        class="uil-shield-slash text-danger"></i>
                                  </span> -->
                               </td>
-                              <td>
+                              <td freezeCol="2">
                                  <div>
                                     <button class="btn btn-sm btn-outline-success" type="button"
                                        (click)="addSubitem(data)" *ngIf="settings.add"><i
@@ -208,67 +200,59 @@
                            </tr> -->
                            <ng-container *ngFor="let si of data.subitems ;let j=index">
                               <ng-container *ngIf="si">
-                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse sub-row"
                                     [ngClass]="{'show':expandAll, 'text-light':si.restrict_year}"
                                     *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
-                                    <td style="border: none;"></td>
-                                    <td colspan="8" class="sub-row">
-                                       <table class="" style="width: 99.7%;table-layout: fixed;">
-                                          <tr>
-                                             <td style="width: 75px;">
-                                                <i class="uil-corner-down-right"></i>
-                                                <span class="mx-1">{{j+1}}</span>
-                                             </td>
-                                             <td style="width: 135px;">
-                                                <!-- <button class="btn btn-sm btn-primary mx-1" type="button"> -->
-                                                <i class=" uil uil-pen i-outline-primary me-1"
-                                                   (click)="edit(si, 'subitem')" *ngIf="settings.edit"></i>
-                                                <!-- </button> -->
-                                                <i *ngIf="!si.restrict_year && settings.edit"
-                                                   class="uil-unlock-alt i-outline-warning me-1"
-                                                   (click)="lockSubitem(si._id)"></i>
-                                                <i *ngIf="si.restrict_year && settings.edit"
-                                                   class="uil-lock-alt i-warning me-1"
-                                                   (click)="unlockSubitem(data._id, si._id)"></i>
-                                                <i *ngIf="settings.delete" class="uil-trash i-outline-danger me-1"
-                                                   (click)="deleteSubitem(data._id, si._id)"></i>
-                                                <div *ngIf="si.restrict_year" class="lock-date text-warning me-1">
-                                                   {{si.restrict_month}}/{{si.restrict_year}} से लॉक।
-                                                </div>
-                                             </td>
-                                             <td style="width: 100px;"></td>
-                                             <td style="width: 150px;" class="nav-item">
-                                                {{si.subitem_hin}}
-                                             </td>
-                                             <td style="width: 150px;" class="nav-item" *ngIf="settings.subitem_eng">
-                                                {{si.subitem_eng ? si.subitem_eng : ''}}
-                                             </td>
-                                             <td style="width: 150px;" class="nav-item" *ngIf="settings.subitem_roman">
-                                                {{si.subitem_roman ? si.subitem_roman : ''}}
-                                             </td>
-                                             <td style="width: 120px;" class="nav-item" *ngIf="settings.item_code">
-                                             </td>
-                                             <td style="width: 150px;" class="nav-item">
-                                                <div *ngIf="si.unit_id">
-                                                   <span>{{si.unit_full}}</span> <br />
-                                                   <small class="text-muted">{{si.unit_short}}</small>
-                                                </div>
-                                             </td>
-                                             <td style="width: 180px;" class="nav-item">
-                                                <span>{{ si.categories | joinObj:'category_hin' }}</span>
-                                                <br />
-                                                <small class="text-muted">{{ si.categories | joinObj:'category_eng'
-                                                   }}</small>
-                                             </td>
-                                             <td *ngIf="settings.price_range">
-                                                {{(si.min_rate || si.max_rate) ? si.min_rate + ' - ' +
-                                                si.max_rate : ''}}
-                                             </td>
-                                             <td style="width: 250px;" class="nav-item" *ngIf="settings.extra_note">
-                                                {{si.extra_note?si.extra_note:'N/A'}}
-                                             </td>
-                                          </tr>
-                                       </table>
+                                    <td freezeCol="0" style="border: none;"></td>
+                                    <td freezeCol="1">
+                                       <i class="uil-corner-down-right"></i>
+                                       <span class="mx-1">{{j+1}}</span>
+                                    </td>
+                                    <td freezeCol="2">
+                                       <!-- <button class="btn btn-sm btn-primary mx-1" type="button"> -->
+                                       <i class=" uil uil-pen i-outline-primary me-1"
+                                          (click)="edit(si, 'subitem')" *ngIf="settings.edit"></i>
+                                       <!-- </button> -->
+                                       <i *ngIf="!si.restrict_year && settings.edit"
+                                          class="uil-unlock-alt i-outline-warning me-1"
+                                          (click)="lockSubitem(si._id)"></i>
+                                       <i *ngIf="si.restrict_year && settings.edit"
+                                          class="uil-lock-alt i-warning me-1"
+                                          (click)="unlockSubitem(data._id, si._id)"></i>
+                                       <i *ngIf="settings.delete" class="uil-trash i-outline-danger me-1"
+                                          (click)="deleteSubitem(data._id, si._id)"></i>
+                                       <div *ngIf="si.restrict_year" class="lock-date text-warning me-1">
+                                          {{si.restrict_month}}/{{si.restrict_year}} से लॉक।
+                                       </div>
+                                    </td>
+                                    <td *ngIf="settings.document"></td>
+                                    <td>
+                                       {{si.subitem_hin}}
+                                    </td>
+                                    <td *ngIf="settings.item_eng">
+                                       {{si.subitem_eng ? si.subitem_eng : ''}}
+                                    </td>
+                                    <td *ngIf="settings.item_roman">
+                                       {{si.subitem_roman ? si.subitem_roman : ''}}
+                                    </td>
+                                    <td *ngIf="settings.item_code">
+                                    </td>
+                                    <td>
+                                       <div *ngIf="si.unit_id">
+                                          <span>{{si.unit_full}}</span> <br />
+                                          <small class="text-muted">{{si.unit_short}}</small>
+                                       </div>
+                                    </td>
+                                    <td>
+                                       <span>{{ si.categories | joinObj:'category_hin' }}</span>
+                                       <br />
+                                       <small class="text-muted">{{ si.categories | joinObj:'category_eng' }}</small>
+                                    </td>
+                                    <td *ngIf="settings.price_range">
+                                       {{(si.min_rate || si.max_rate) ? si.min_rate + ' - ' + si.max_rate : ''}}
+                                    </td>
+                                    <td *ngIf="settings.extra_note">
+                                       {{si.extra_note?si.extra_note:'-'}}
                                     </td>
                                  </tr>
                               </ng-container>

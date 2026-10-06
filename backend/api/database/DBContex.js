@@ -44,7 +44,10 @@ class DBContex {
         'jawak_type',
         'usage_list',
         'usage_type',
-        'aawak_source'
+        'aawak_source',
+        'status',
+        'prastav_type',
+        'jawak_status'
     ];
 
     constructor() {

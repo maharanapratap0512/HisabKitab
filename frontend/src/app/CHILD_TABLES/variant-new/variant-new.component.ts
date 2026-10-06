@@ -59,6 +59,7 @@ export class VariantNewComponent implements OnInit {
   editData: any = null;
   isEdit = false;
   activeItem: any = null;   // item context for generator/alias modals
+  guideStep = 1;
 
   constructor(
     private http: HttpService,
@@ -382,6 +383,19 @@ export class VariantNewComponent implements OnInit {
     this.activeItem = item;
     this.editData = item;
     this.openModal('Manage Item Aliases');
+  }
+
+  startGuide() {
+    this.guideStep = 1;
+    this.openModal('Full Guide');
+  }
+
+  nextGuide() {
+    if (this.guideStep < 5) this.guideStep++;
+  }
+
+  prevGuide() {
+    if (this.guideStep > 1) this.guideStep--;
   }
 
   // ════════════════════════════════════════════════════════════════════════

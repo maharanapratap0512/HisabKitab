@@ -69,6 +69,55 @@
                 </div>
             </div>
 
+            <!-- Live Production Variance & Recipe Ratio Scaling KPI Strip -->
+            <div class="card mb-3 border-0 shadow-sm rounded-3 bg-light">
+                <div class="card-body p-2 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary p-2 rounded-2"><i class="uil uil-box fs-6"></i></span>
+                        <div>
+                            <small class="text-muted d-block font-size-11 fw-semibold">INPUT CONSUMED (खपत)</small>
+                            <span class="fw-bold fs-6 text-dark">{{ getTotalInputQty() | number:'1.0-2' }}</span>
+                        </div>
+                    </div>
+                    <div class="vr my-1"></div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary p-2 rounded-2"><i class="uil uil-package fs-6"></i></span>
+                        <div>
+                            <small class="text-muted d-block font-size-11 fw-semibold">OUTPUT PRODUCED (उत्पादन)</small>
+                            <span class="fw-bold fs-6 text-primary">{{ getTotalOutputQty() | number:'1.0-2' }}</span>
+                        </div>
+                    </div>
+                    <div class="vr my-1"></div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge p-2 rounded-2"
+                            [ngClass]="getBatchVarianceQty() >= 0 ? 'bg-success' : 'bg-danger'">
+                            <i class="uil uil-scale-balance fs-6"></i>
+                        </span>
+                        <div>
+                            <small class="text-muted d-block font-size-11 fw-semibold">PRODUCTION VARIANCE / LOSS
+                                (अंतर/हानि)</small>
+                            <span class="fw-bold fs-6"
+                                [ngClass]="getBatchVarianceQty() >= 0 ? 'text-success' : 'text-danger'">
+                                {{ getBatchVarianceQty() | number:'1.0-2' }}
+                                <small class="fs-7">({{ getBatchVarianceQty() >= 0 ? '+' : '' }}{{
+                                    getBatchVariancePercent() | number:'1.0-1' }}%)</small>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 ms-auto">
+                        <div class="form-check form-switch mb-0"
+                            title="Automatically scale input quantities proportionally when output quantity changes">
+                            <input class="form-check-input" type="checkbox" id="autoScaleRecipeInputs"
+                                [(ngModel)]="autoScaleRecipeInputs" name="autoScaleRecipeInputs">
+                            <label class="form-check-label font-size-12 fw-semibold text-primary cursor-pointer"
+                                for="autoScaleRecipeInputs">
+                                <i class="uil uil-calculator me-1"></i>Auto-Scale Inputs Ratio
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <hr>
 
             <!-- Editor Mode Selector -->
@@ -106,14 +155,14 @@
                         <table class="table table-sm table-bordered">
                             <thead class="table-light">
                                 <tr>
-                                    <th width="5%">#</th>
-                                    <th width="20%">Item</th>
-                                    <th width="10%">Qty</th>
+                                    <th width="4%">#</th>
+                                    <th width="24%">Item</th>
+                                    <th width="18%">Qty</th>
                                     <th width="8%">Rate</th>
                                     <th *ngIf="auth.webUser.settings.hmp?.condition_id" width="10%">Condition</th>
                                     <th *ngIf="auth.webUser.settings.hmp?.aawak_source_id" width="10%">Aawak Source</th>
-                                    <th *ngIf="auth.webUser.settings.hmp?.auto_awk_jwk" width="17%">Auto Jawk / Awk</th>
-                                    <th *ngIf="auth.webUser.settings.hmp?.aawak_ref_id" width="15%">Ref. Aawak</th>
+                                    <th *ngIf="auth.webUser.settings.hmp?.auto_awk_jwk" width="13%">Auto Jwk/Awk</th>
+                                    <th *ngIf="auth.webUser.settings.hmp?.aawak_ref_id" width="8%">Ref. Aawak</th>
                                     <th width="5%">Action</th>
                                 </tr>
                             </thead>
@@ -130,13 +179,13 @@
                                     </td>
                                     <!-- Qty & Unit -->
                                     <td>
-                                        <div class="d-flex align-items-center">
-                                            <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
-                                                name="in_qty_{{i}}">
-                                            <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
-                                                [items]="units" bindLabel="unit_short" bindValue="_id"
-                                                [(ngModel)]="row.unit_id" name="in_unit_{{i}}" [clearable]="false"
-                                                placeholder="Unit"></ng-select>
+                                        <div class="d-flex align-items-center gap-1" style="min-width: 100px;">
+                                            <input type="number" class="form-control form-control-sm flex-fill"
+                                                style="min-width: 70px;" [(ngModel)]="row.qty" name="in_qty_{{i}}">
+                                            <ng-select appendTo="#hmpEntryForm" class="custom-sm border"
+                                                style="min-width: 75px; max-width: 65px;" [items]="units"
+                                                bindLabel="unit_short" bindValue="_id" [(ngModel)]="row.unit_id"
+                                                name="in_unit_{{i}}" [clearable]="false" placeholder="Unit"></ng-select>
                                         </div>
                                     </td>
 
@@ -169,22 +218,25 @@
                                     </td>
                                     <!-- Auto Jawk / Awk -->
                                     <td *ngIf="auth.webUser.settings.hmp?.auto_awk_jwk">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="form-check form-switch mb-0">
-                                                <input class="form-check-input" type="checkbox" id="autoJawakRow_{{i}}"
-                                                    [ngModel]="row.auto_jawak"
+                                        <div class="d-flex align-items-center gap-1">
+                                            <div class="form-check form-switch mb-0 p-0 d-flex align-items-center">
+                                                <input class="form-check-input ms-0" type="checkbox"
+                                                    id="autoJawakRow_{{i}}" [ngModel]="row.auto_jawak"
                                                     (ngModelChange)="toggleAuto(row, 'jawak', $event)"
                                                     name="in_auto_jawak_{{i}}">
-                                                <label class="form-check-label mb-0" for="autoJawakRow_{{i}}"><small
-                                                        class="text-info fw-bold">Jawk</small></label>
+                                                <label class="form-check-label mb-0 ms-1 cursor-pointer"
+                                                    for="autoJawakRow_{{i}}"><small
+                                                        class="text-info fw-bold font-size-11">Jwk</small></label>
                                             </div>
-                                            <div class="form-check form-switch mb-0" *ngIf="row.auto_jawak">
-                                                <input class="form-check-input" type="checkbox" id="autoAawakRow_{{i}}"
-                                                    [ngModel]="row.auto_aawak"
+                                            <div class="form-check form-switch mb-0 p-0 d-flex align-items-center ms-1"
+                                                *ngIf="row.auto_jawak">
+                                                <input class="form-check-input ms-0" type="checkbox"
+                                                    id="autoAawakRow_{{i}}" [ngModel]="row.auto_aawak"
                                                     (ngModelChange)="toggleAuto(row, 'aawak', $event)"
                                                     name="in_auto_aawak_{{i}}">
-                                                <label class="form-check-label mb-0" for="autoAawakRow_{{i}}"><small
-                                                        class="text-warning fw-bold">Awk</small></label>
+                                                <label class="form-check-label mb-0 ms-1 cursor-pointer"
+                                                    for="autoAawakRow_{{i}}"><small
+                                                        class="text-warning fw-bold font-size-11">Awk</small></label>
                                             </div>
                                         </div>
                                     </td>
@@ -203,7 +255,7 @@
                                             <!-- Ref Aawak Selection when Auto Awk is NOT Checked -->
                                             <app-aawak-ref *ngIf="!row.auto_aawak" [mmId]="fs.hmpBatchForm.mm_id"
                                                 [maxDate]="fs.hmpBatchForm.date" [deptId]="auth.webUser.dept_id"
-                                                [filterObj]="{
+                                                mode="tiny" size="sm" [filterObj]="{
                                                     item_id: row.item_id,
                                                     subitem_id: row.subitem_id,
                                                     condition_id: row.condition_id,
@@ -213,7 +265,7 @@
                                                 [jawakId]="row.jawak_ref_id"
                                                 (splitsSelected)="onAawakSplitsSelected($event, row)"
                                                 (splitsChange)="onAawakSplitsSelected($event, row)"
-                                                name="in_aawak_ref_id_{{i}}" size="sm" appendTo="#hmpEntryForm">
+                                                name="in_aawak_ref_id_{{i}}" appendTo="#hmpEntryForm">
                                             </app-aawak-ref>
                                         </div>
                                         <span *ngIf="!row.auto_jawak">-</span>
@@ -269,7 +321,7 @@
                                                     <button *ngIf="row.jawak_detail?.length > 0"
                                                         class="btn btn-sm btn-outline-warning p-0 lh-1"
                                                         style="font-size: 9px; min-width: 35px; line-height: 1.2;"
-                                                        (click)="row.show_jawak = !row.show_jawak"
+                                                        (click)="toggleJawakShow(row, i)"
                                                         [title]="'Total Jawak Qty: ' + getJawakQty(i)">
                                                         <div style="font-weight: bold; padding: 1px 2px;">J -
                                                             {{row.jawak_detail.length}}</div>
@@ -282,8 +334,7 @@
                                         </td>
                                         <!-- Item Dropdown -->
                                         <td>
-                                            <app-item-dropdown size="sm"
-                                                [filterObj]="{ date: fs.hmpBatchForm.date }"
+                                            <app-item-dropdown size="sm" [filterObj]="{ date: fs.hmpBatchForm.date }"
                                                 [(itemId)]="row.item_id" [(subitemId)]="row.subitem_id"
                                                 (change)="itemSubitemSelected($event, i, 'outputs')" [required]="true"
                                                 appendTo="#hmpEntryForm">
@@ -291,12 +342,14 @@
                                         </td>
                                         <!-- Qty & Unit -->
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <input type="number" class="form-control-sm flex-fill"
-                                                    [(ngModel)]="row.qty" name="out_qty_{{i}}">
-                                                <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
-                                                    [items]="units" bindLabel="unit_short" bindValue="_id"
-                                                    [(ngModel)]="row.unit_id" name="out_unit_{{i}}" [clearable]="false"
+                                            <div class="d-flex align-items-center gap-1" style="min-width: 130px;">
+                                                <input type="number" class="form-control form-control-sm flex-fill"
+                                                    style="min-width: 70px;" [(ngModel)]="row.qty"
+                                                    (ngModelChange)="onOutputQtyChange(i)" name="out_qty_{{i}}">
+                                                <ng-select appendTo="#hmpEntryForm" class="custom-sm border"
+                                                    style="min-width: 55px; max-width: 65px;" [items]="units"
+                                                    bindLabel="unit_short" bindValue="_id" [(ngModel)]="row.unit_id"
+                                                    name="out_unit_{{i}}" [clearable]="false"
                                                     placeholder="Unit"></ng-select>
                                             </div>
                                         </td>

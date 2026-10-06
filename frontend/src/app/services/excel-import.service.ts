@@ -200,6 +200,7 @@ export class ExcelImportService {
       { col_name: 'pbk', name: 'pbk', alt_names: ["pbk name", "sewadhari", "name", "नाम"], not_null: false, ref_table: 'pbk', ref_field: 'pbk_id', ref_data: 'pbk_hin' },
       { col_name: 'item', name: 'item', alt_names: ["item_name", "item name", "आइटम", "आइटम का नाम"], not_null: true, ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
       { col_name: 'subitem', name: 'subitem', alt_names: ["subitem_name", "subitem name", "सबआइटम", "सबआइटम का नाम"], not_null: false, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem_hin' },
+      { col_name: 'company_name', name: 'company', alt_names: ["company_name", "कंपनी", "company", "company name"], not_null: false },
       { col_name: 'qty', name: 'qty', alt_names: ["quantity", "संख्या", "qty"], not_null: true },
       { col_name: 'unit', name: 'unit', alt_names: ["यूनिट"], not_null: true, ref_table: 'unit', ref_field: 'unit_id', ref_data: 'unit_short' },
       { col_name: 'jawak_type', name: 'jawak_type', alt_names: ["जावक टाइप", "jawak type", "jawak_type"], not_null: true, ref_table: 'jawak_type', ref_field: 'jawak_type_id', ref_data: 'list_name_hin' },

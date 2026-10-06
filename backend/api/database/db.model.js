@@ -2704,6 +2704,7 @@ class dbModal {
               WHERE _id = OLD.aawak_id AND OLD.aawak_id IS NOT NULL;
           END;`
     },
+
     // new version migration: item_rate table
     {
       item_rate: `CREATE TABLE IF NOT EXISTS item_rate(
@@ -2717,6 +2718,29 @@ class dbModal {
           updated_at timestamp default (datetime('now', 'localtime')),
           UNIQUE(dept_id, item_id, subitem_id, year)
         );`
+    },
+    // Version 38
+    // new version migration: pbk_sewa_dept and prastav updates
+    {
+      pbk_sewa_dept: `create table pbk_sewa_dept(
+          _id integer UNIQUE primary key AUTOINCREMENT,
+          pbk_id integer,
+          dept_id integer,
+          created_at timestamp default (datetime('now', 'localtime')),
+          updated_at timestamp default (datetime('now', 'localtime')),
+          FOREIGN KEY(pbk_id) REFERENCES pbk(_id),
+          FOREIGN KEY(dept_id) REFERENCES department(_id)
+      );`,
+      alt_prastav_1: `ALTER TABLE prastav ADD COLUMN nimitt_id integer REFERENCES nimitt(_id);`,
+      alt_prastav_2: `ALTER TABLE prastav ADD COLUMN bachat_qty real;`,
+      alt_prastav_3: `ALTER TABLE prastav ADD COLUMN prastav_type integer REFERENCES support_list(_id);`,
+      alt_pj_1: `ALTER TABLE prastav_jawak ADD COLUMN jawak_status integer REFERENCES support_list(_id);`,
+      alt_pj_2: `ALTER TABLE prastav_jawak ADD COLUMN current_place integer REFERENCES mm(_id);`,
+      ins_sl: `INSERT INTO support_list(list_name_eng, list_type, lock) VALUES 
+        ('in transit', 'jawak_status', 1),
+        ('dispatched', 'jawak_status', 1),
+        ('pending', 'jawak_status', 1),
+        ('recieved', 'jawak_status', 1);`
     }
   ];
 

@@ -48,6 +48,7 @@ export class AuthService {
       { colName: 'relative_name', title: 'Relative Name' },
       { colName: 'birth_date', title: 'Birth Date' },
       { colName: 'age', title: 'Age' },
+      { colName: 'status', title: 'Status' },
       { colName: 'address', title: 'Address' },
       { colName: 'townarea', title: 'Townarea' },
       { colName: 'district_id', title: 'District' },

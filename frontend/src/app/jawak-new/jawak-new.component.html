@@ -308,14 +308,14 @@
 
 
                     <!-- Voucher View Table -->
-                    <div class="table-container" *ngIf="settings.jawak.viewMode === 'voucher'"
+                    <div class="table-container table-freeze-container" *ngIf="settings.jawak.viewMode === 'voucher'" appTableFreeze
                         [appTableSmartCheckbox]="'jawak-new-voucher'" [idField]="'temp_id'" [selectionData]="jawakData"
                         [showCheckboxes]="true" [rowSelector]="'tbody > tr.voucher-row'">
                         <table class="table table-striped table-hover table-sticky-header jawak-data-table">
                             <thead class="table-dark">
                                 <tr>
-                                    <th width="3%">#</th>
-                                    <th width="7%">Actions</th>
+                                    <th width="3%" freezeCol="1">#</th>
+                                    <th width="7%" freezeCol="2">Actions</th>
                                     <th width="10%">
                                         <div class="d-flex justify-content-between align-items-center px-1">
                                             <span>Voucher No</span>
@@ -502,8 +502,8 @@
                                     *ngFor="let row of jawakData | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index">
                                     <tr class="voucher-row" [class.expanded]="row.expanded" (click)="toggleExpand(row)"
                                         style="cursor: pointer;" [attr.data-id]="row.voucher_no">
-                                        <td>{{row.sr_no}}</td>
-                                        <td>
+                                        <td freezeCol="1">{{row.sr_no}}</td>
+                                        <td freezeCol="2">
                                             <button class="btn btn-sm btn-primary me-1" title="Edit"
                                                 (click)="editJawak(i, row); $event.stopPropagation()">
                                                 <i class="uil uil-pen"></i>
@@ -712,14 +712,14 @@
                     </div>
 
                     <!-- Individual Combined View Table -->
-                    <div class="table-container" *ngIf="settings.jawak.viewMode === 'individual'"
+                    <div class="table-container table-freeze-container" *ngIf="settings.jawak.viewMode === 'individual'" appTableFreeze
                         appHorizontalScrollWithArrows [appTableSmartCheckbox]="'jawak-new-individual'"
                         [selectionData]="flatJawakItems" [showCheckboxes]="true" [rowSelector]="'tbody > tr'">
                         <table class="table table-striped table-hover table-sticky-header jawak-data-table">
                             <thead class="table-dark">
                                 <tr>
-                                    <th class="w-50">#</th>
-                                    <th class="w-80">Actions</th>
+                                    <th class="w-50" freezeCol="1">#</th>
+                                    <th class="w-80" freezeCol="2">Actions</th>
                                     <th class="w-80">
                                         <div class="d-flex align-items-center justify-content-between"
                                             title="Show unreceived only">
@@ -1048,8 +1048,8 @@
                                     *ngFor="let row of jawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index">
                                     <tr *ngFor="let item of getFilteredJawaks(row.jawaks); let j = index"
                                         [attr.data-id]="item._id">
-                                        <td class="w-50">{{i + 1}}.{{j + 1}}</td>
-                                        <td class="w-80">
+                                        <td class="w-50" freezeCol="1">{{i + 1}}.{{j + 1}}</td>
+                                        <td class="w-80" freezeCol="2">
                                             <button class="btn btn-xs btn-primary" title="Edit Item"
                                                 (click)="editJawak(i, row)">
                                                 <i class="uil uil-pen"></i>

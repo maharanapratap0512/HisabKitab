@@ -225,29 +225,29 @@
                      [ngClass]="{'validation':pbkForm.get('bhatti_date')?.errors && (pbkForm.get('bhatti_date')?.touched || pbkForm.get ('bhatti_date')?.dirty)}">
                </div>
             </div>
-            <!-- <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.pbk.status">
                   <div class="form-group">
                      <label class="form-label">Status</label>
                      <div class="float-end">
-                        <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                            class="btn btn-sm btn-outline-primary" (click)="setView('Status')"><i
-                              class=" dripicons-view-list"></i></button>
-                        <button type="button" style="padding: 1px 6px !important;"
+                              class=" dripicons-view-list"></i></a>
+                        <a type="button" style="padding: 1px 6px !important;"
                            class="btn btn-outline-primary float-end"
                            onclick="$('#pbkEntryComponent > #showModal').modal('show')"
                            (click)="showModal='Add Status'">+
-                           Add</button>
+                           Add</a>
                      </div>
                      <ng-select class="custom" style="width: 100%;" placeholder="Select Status" [clearable]="false"
                         [virtualScroll]="true" formControlName="status"
                         [ngClass]="{'validation':pbkForm.get('status')?.errors && (pbkForm.get('status')?.touched || pbkForm.get ('status')?.dirty)}">
-                        <ng-option selected="selected" disabled value="">Gender</ng-option>
+                        <ng-option selected="selected" disabled value="">Status</ng-option>
                         <ng-option *ngFor="let item of statuses" [value]="item.list_name_eng">
                            {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                      </ng-select>
 
                   </div>
-               </div> -->
+               </div>
             <div class="col-md-4 mb-3" *ngIf="settings.pbk.document">
                <div class="form-group image-upload-group">
                   <label class="form-label">Images / Documents</label>

@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject, takeUntil } from 'rxjs';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
@@ -12,7 +13,8 @@ declare var $: any;
   templateUrl: './jawak-entry.component.html',
   styleUrls: ['./jawak-entry.component.scss']
 })
-export class JawakEntryComponent implements OnInit {
+export class JawakEntryComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   @Input() getData: any;
   @Input() aawakRef: any;
@@ -103,7 +105,7 @@ export class JawakEntryComponent implements OnInit {
       })
     });
 
-    this.jawakForm.get('auto_awk')?.valueChanges.subscribe(val => {
+    this.jawakForm.get('auto_awk')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(val => {
       if (val) {
         this.jawakForm.get('aawak_dept_id')?.setValidators([Validators.required]);
         this.jawakForm.get('aawak_type_id')?.setValidators([Validators.required]);
@@ -115,7 +117,7 @@ export class JawakEntryComponent implements OnInit {
       this.jawakForm.get('aawak_type_id')?.updateValueAndValidity();
     });
 
-    this.jawakForm.get('auto_reawk')?.valueChanges.subscribe(val => {
+    this.jawakForm.get('auto_reawk')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(val => {
       if (val) {
         this.jawakForm.get('aawak_date')?.setValidators([Validators.required]);
         this.jawakForm.get('re_aawak_type_id')?.setValidators([Validators.required]);
@@ -127,7 +129,7 @@ export class JawakEntryComponent implements OnInit {
       this.jawakForm.get('re_aawak_type_id')?.updateValueAndValidity();
     });
 
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
@@ -761,5 +763,25 @@ export class JawakEntryComponent implements OnInit {
     console.log("ev", ev);
   }
 
-
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.mms = [];
+    this.pbks = [];
+    this.products = [];
+    this.productsAll = [];
+    this.viewData = [];
+    this.departments = [];
+    this.conditions = [];
+    this.subitems = [];
+    this.items = [];
+    this.jawak_types = [];
+    this.aawak_types = [];
+    this.units = [];
+    this.nimitts = [];
+    this.states = [];
+    this.categories = [];
+    this.usage_lists = [];
+    this.usage_types = [];
+  }
 }

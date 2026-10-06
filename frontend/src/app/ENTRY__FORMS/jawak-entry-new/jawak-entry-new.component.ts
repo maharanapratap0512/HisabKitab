@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, Subscription, takeUntil } from 'rxjs';
 import { ContextMenuItem } from 'src/app/SHARED/context-menu.directive';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -16,6 +16,7 @@ declare var $: any;
   styleUrls: ['./jawak-entry-new.component.scss']
 })
 export class JawakEntryNewComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   @ViewChild('fMain') fMain!: NgForm;
   @Input() isEdit: any;
@@ -74,7 +75,7 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     public fs: FormService,) {
 
-    this.gs.observeList().subscribe(result => {
+    this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.items = result.itemmix ? result.itemmix : [];
       this.itemAll = result.itemmix ? result.itemmix : [];
       this.categories = result.category ? result.category : [];
@@ -102,7 +103,7 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
 
     setTimeout(() => {
       if (this.fMain) {
-        this.fMain.statusChanges?.pipe(debounceTime(200)).subscribe(() => {
+        this.fMain.statusChanges?.pipe(debounceTime(200), takeUntil(this.destroy$)).subscribe(() => {
           this.fs.jawakFormStatusChanges();
         });
       }
@@ -270,6 +271,29 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
     if (this.isEdit) {
       this.fs.resetJawak();
     }
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.items = [];
+    this.itemAll = [];
+    this.subitems = [];
+    this.units = [];
+    this.states = [];
+    this.mms = [];
+    this.conditions = [];
+    this.departments = [];
+    this.categories = [];
+    this.pbks = [];
+    this.aawak_types = [];
+    this.usage_lists = [];
+    this.usage_types = [];
+    this.aawak_sources = [];
+    this.jawak_types = [];
+    this.nimitts = [];
+    this.products = [];
+    this.lotNoAll = [];
+    this.lotNos = [];
+    this.aawaksAll = [];
+    this.aawaks = [];
   }
 
   getContextMenuItems(row: any): ContextMenuItem[] {
