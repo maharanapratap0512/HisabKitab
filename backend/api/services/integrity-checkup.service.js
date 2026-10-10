@@ -119,6 +119,37 @@ async function resolveMismatches(mismatches, logCallback = () => {}) {
  * Scan for Aawak Remaining Qty mismatches
  */
 function scanRemainingQtyMismatches() {
+    // STEP 1: Align rel_aawak_jawak quantities with actual jawak quantities
+    // For single-connection jawaks (not split)
+    db.prepare(`
+        UPDATE rel_aawak_jawak 
+        SET qty = (SELECT qty FROM jawak WHERE jawak._id = rel_aawak_jawak.jawak_id),
+            split_qty = (SELECT qty FROM jawak WHERE jawak._id = rel_aawak_jawak.jawak_id)
+        WHERE jawak_id IN (
+            SELECT jawak_id FROM rel_aawak_jawak GROUP BY jawak_id HAVING COUNT(*) = 1
+        )
+        AND ABS(IFNULL(split_qty, qty) - (SELECT qty FROM jawak WHERE jawak._id = rel_aawak_jawak.jawak_id)) > 0.001
+    `).run();
+
+    // For multi-connection jawaks (split) where the sum of split_qty does not match jawak.qty
+    const splitMismatches = db.prepare(`
+        SELECT j._id as jawak_id, j.qty as jawak_qty, SUM(IFNULL(raj.split_qty, raj.qty)) as sum_qty 
+        FROM jawak j 
+        JOIN rel_aawak_jawak raj ON raj.jawak_id = j._id 
+        GROUP BY j._id 
+        HAVING COUNT(raj._id) > 1 AND ABS(j.qty - SUM(IFNULL(raj.split_qty, raj.qty))) > 0.001
+    `).all();
+
+    for (const sm of splitMismatches) {
+        const diff = sm.jawak_qty - sm.sum_qty;
+        const firstRel = db.prepare(`SELECT * FROM rel_aawak_jawak WHERE jawak_id = ? LIMIT 1`).get(sm.jawak_id);
+        if (firstRel) {
+            const newSplitQty = (firstRel.split_qty || firstRel.qty) + diff;
+            db.prepare(`UPDATE rel_aawak_jawak SET split_qty = ? WHERE _id = ?`).run(newSplitQty, firstRel._id);
+        }
+    }
+
+    // STEP 2: Scan for Aawak mismatches based on corrected rel_aawak_jawak
     const query = `
         SELECT 
             a._id AS aawak_id,

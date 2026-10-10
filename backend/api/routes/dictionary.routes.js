@@ -41,8 +41,8 @@ router.post('/', async (req, res, next) => {
                 ...DB.tbInterface.dictionary,
                 ...req.body,
             }
-            if (obj.type == 'pbk') {
-                obj.name = obj.pbk ? JSON.stringify(obj.pbk) : null;
+            if (typeof obj.name === 'object') {
+                obj.name = obj.name ? JSON.stringify(obj.name) : null;
             }
             await DB.insert('dictionary', obj).then(async (data) => {
                 res.json({

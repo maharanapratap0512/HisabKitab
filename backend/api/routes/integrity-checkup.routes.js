@@ -36,11 +36,32 @@ router.post('/scan', async (req, res, next) => {
         if (testId === 'duplicate-aj-assumption') {
             mismatches = integrityService.scanDuplicateMismatches(selectedColumns);
         } else if (testId === 'aawak-remaining-qty-mismatch') {
-            mismatches = integrityService.scanRemainingQtyMismatches();
+            const raw = integrityService.scanRemainingQtyMismatches();
+            mismatches = raw.map(m => ({
+                ...m,
+                _id: m.aawak_id,
+                name: `Date: ${m.aawak_date} | Item: ${m.aawak_item_hin}${m.aawak_subitem_hin ? ' - ' + m.aawak_subitem_hin : ''} | MM: ${m.aawak_mm_hin}`,
+                issue: `Stored: ${m.stored_remaining_qty} ${m.aawak_unit_short} (Gap: ${m.difference_qty})`,
+                expected: `${m.expected_remaining_qty} ${m.aawak_unit_short}`
+            }));
         } else if (testId === 'bachat-stock-mismatch') {
-            mismatches = integrityService.scanBachatMismatches();
+            const raw = integrityService.scanBachatMismatches();
+            mismatches = raw.map(m => ({
+                ...m,
+                _id: m.bachat_id || `D${m.dept_id}-M${m.mm_id}-I${m.item_id}`,
+                name: `Dept: ${m.dept_hin} | MM: ${m.mm_hin} | Item: ${m.item_hin}`,
+                issue: `Stored Stock: ${m.stored_stock} | Used: ${m.stored_used}`,
+                expected: `Expected Stock: ${m.expected_stock} | Used: ${m.expected_used}`
+            }));
         } else {
-            mismatches = integrityService.scanMismatches();
+            const raw = integrityService.scanMismatches();
+            mismatches = raw.map(m => ({
+                ...m,
+                _id: m.jawak_id,
+                name: `Jawak Date: ${m.jawak_date} | Item: ${m.jawak_item_hin}`,
+                issue: `Jawak MM: ${m.jawak_mm_hin} | Aawak MM: ${m.aawak_mm_hin}`,
+                expected: `Sync to Aawak ID: ${m.aawak_id}`
+            }));
         }
         res.json({ success: true, result: mismatches });
     } catch (e) {
@@ -68,9 +89,35 @@ router.post('/scan-stream', async (req, res, next) => {
         } else {
             writeLog('[Notice] Legacy test scan started via stream...');
             let mismatches = [];
-            if (testId === 'aawak-remaining-qty-mismatch') mismatches = integrityService.scanRemainingQtyMismatches();
-            else if (testId === 'bachat-stock-mismatch') mismatches = integrityService.scanBachatMismatches();
-            else mismatches = integrityService.scanMismatches();
+            
+            if (testId === 'aawak-remaining-qty-mismatch') {
+                const raw = integrityService.scanRemainingQtyMismatches();
+                mismatches = raw.map(m => ({
+                    ...m,
+                    _id: m.aawak_id,
+                    name: `Date: ${m.aawak_date} | Item: ${m.aawak_item_hin}${m.aawak_subitem_hin ? ' - ' + m.aawak_subitem_hin : ''} | MM: ${m.aawak_mm_hin}`,
+                    issue: `Stored: ${m.stored_remaining_qty} ${m.aawak_unit_short} (Gap: ${m.difference_qty})`,
+                    expected: `${m.expected_remaining_qty} ${m.aawak_unit_short}`
+                }));
+            } else if (testId === 'bachat-stock-mismatch') {
+                const raw = integrityService.scanBachatMismatches();
+                mismatches = raw.map(m => ({
+                    ...m,
+                    _id: m.bachat_id || `D${m.dept_id}-M${m.mm_id}-I${m.item_id}`,
+                    name: `Dept: ${m.dept_hin} | MM: ${m.mm_hin} | Item: ${m.item_hin}`,
+                    issue: `Stored Stock: ${m.stored_stock} | Used: ${m.stored_used}`,
+                    expected: `Expected Stock: ${m.expected_stock} | Used: ${m.expected_used}`
+                }));
+            } else if (testId === 'jawak-aawak-ref-mismatch') {
+                const raw = integrityService.scanMismatches();
+                mismatches = raw.map(m => ({
+                    ...m,
+                    _id: m.jawak_id,
+                    name: `Jawak Date: ${m.jawak_date} | Item: ${m.jawak_item_hin}`,
+                    issue: `Jawak MM: ${m.jawak_mm_hin} | Aawak MM: ${m.aawak_mm_hin}`,
+                    expected: `Sync to Aawak ID: ${m.aawak_id}`
+                }));
+            }
 
             res.write(JSON.stringify({ type: 'complete', count: mismatches.length, result: mismatches }) + '\n');
         }

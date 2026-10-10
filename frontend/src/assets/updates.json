@@ -1,10 +1,35 @@
 [
     {
+        "version": "38.0",
+        "date": "10-10-2026",
+        "summary": "Database Checkup Auto-Heal & Item List Excel Category Fix",
+        "summary_hin": "डेटाबेस चेकअप स्वतः सुधार (Auto-Heal) एवं आइटम सूची एक्सेल एक्सपोर्ट श्रेणी सुधार",
+        "isNew": true,
+        "items": [
+            {
+                "type": "improved",
+                "module": "Database Checkup",
+                "title": "Smart Auto-Healing for Aawak Remaining Qty & Clear Readable Scan Reports",
+                "title_hin": "आवक शेष मात्रा (Remaining Qty) चेकअप में स्वतः सुधार (Auto-Heal) एवं स्पष्ट रिपोर्ट",
+                "desc": "Upgraded the Aawak Remaining Qty checkup to automatically fix internal quantity mismatches before scanning. The scan results table now beautifully displays properly formatted records with exact gap amounts instead of raw database columns.",
+                "desc_hin": "आवक शेष मात्रा (Remaining Qty) चेकअप टूल को और अधिक उन्नत बनाया गया है। अब यह स्कैन करने से पहले अंदरूनी मात्रा के अंतर को स्वतः सुधार (Auto-Heal) कर लेता है। साथ ही स्कैन रिपोर्ट की तालिका (Table) में अब कच्चे डेटा की बजाय स्पष्ट, सुंदर एवं आसानी से समझ आने वाले रूप में जानकारी दिखाई देती है।"
+            },
+            {
+                "type": "fix",
+                "module": "Item List Export",
+                "title": "Category Visibility in Item Excel Export for Subitem Rows",
+                "title_hin": "आइटम लिस्ट एक्सेल एक्सपोर्ट में सब-आइटम पंक्तियों की श्रेणी (Category) दृश्यता में सुधार",
+                "desc": "Fixed an issue in the Item List Excel export where the category column remained blank for subitems that didn't have their own categories assigned. It now correctly displays the parent item's category.",
+                "desc_hin": "आइटम लिस्ट को एक्सेल (Excel) में एक्सपोर्ट करते समय यदि सब-आइटम की अपनी कोई श्रेणी (Category) नहीं है, तो अब मुख्य आइटम की श्रेणी स्वतः स्पष्ट रूप से प्रदर्शित होगी।"
+            }
+        ]
+    },
+    {
         "version": "37.5",
         "date": "05-10-2026",
         "summary": "Jawak Excel Company Name Import, HMP Production KPIs & Item List UI Freeze Enhancements",
         "summary_hin": "जावक एक्सेल कंपनी नाम इम्पोर्ट, HMP लाइव लॉस KPI व रेसिपी स्केलिंग तथा आइटम लिस्ट तालिका यूआई अपग्रेड",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

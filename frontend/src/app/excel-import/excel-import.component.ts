@@ -43,7 +43,8 @@ export class ExcelImportComponent implements OnInit {
     if (ev === '+add') {
       this.handleAddOption('+add', data, 'Add Item');
     } else if (ev) {
-      data.id = ev._id;
+      data.id = ev.item_id;
+      data.id2 = ev.subitem_id;
       this.itemSelected(ev);
     }
   }
@@ -52,7 +53,7 @@ export class ExcelImportComponent implements OnInit {
     if (ev === '+add') {
       this.handleAddOption('+add', data, 'Add Subitem');
     } else if (ev) {
-      data.id2 = ev._id;
+      data.id2 = ev.subitem_id;
     }
   }
 
@@ -453,55 +454,59 @@ export class ExcelImportComponent implements OnInit {
     let conf = this.headerList.filter((h: { ref_table: any; }) => h.ref_table == data.type);
 
     if (data.type == 'item') {
-      for (let i in this.excelArrObj) {
-        let isMatch = false;
-        if (typeof data.name === 'string') {
-          const rowItem = (this.excelArrObj[i].item || this.excelArrObj[i].item_hin || '').trim().toLowerCase();
-          const nameItem = (data.name || '').trim().toLowerCase();
-          const rowSubitem = (this.excelArrObj[i].subitem || this.excelArrObj[i].subitem_hin || '').trim().toLowerCase();
-          const extraNote = (data.extra_note || '').trim().toLowerCase();
-          if (rowItem === nameItem && (extraNote ? rowSubitem === extraNote : true)) {
-            isMatch = true;
-          }
-        } else if (data.name && typeof data.name === 'object') {
-          const rowItem = (this.excelArrObj[i].item || this.excelArrObj[i].item_hin || '').trim().toLowerCase();
-          const nameItem = (data.name.item || '').trim().toLowerCase();
-          const rowSubitem = (this.excelArrObj[i].subitem || this.excelArrObj[i].subitem_hin || '').trim().toLowerCase();
-          const nameSubitem = (data.name.subitem || '').trim().toLowerCase();
-          if (rowItem === nameItem && (nameSubitem ? rowSubitem === nameSubitem : true)) {
-            isMatch = true;
-          }
-        }
+      // for (let i in this.excelArrObj) {
+      //   let isMatch = false;
+      //   console.log("data-data", data, this.excelArrObj[i]);
 
-        if (isMatch) {
-          const targetItemId = data.item_id || data.id;
-          if (targetItemId) {
-            this.excelArrObj[i].item_id = targetItemId;
-            if (data.item) {
-              this.excelArrObj[i].item_hin = typeof data.item === 'object' ? data.item.item_hin : data.item;
-            }
-          }
+      //   if (typeof data.name === 'string') {
+      //     const rowItem = (this.excelArrObj[i].item || this.excelArrObj[i].item_hin || '').trim().toLowerCase();
+      //     const nameItem = (data.name || '').trim().toLowerCase();
+      //     const rowSubitem = (this.excelArrObj[i].subitem || this.excelArrObj[i].subitem_hin || '').trim().toLowerCase();
+      //     const extraNote = (data.extra_note || '').trim().toLowerCase();
+      //     if (rowItem === nameItem && (extraNote ? rowSubitem === extraNote : true)) {
+      //       isMatch = true;
+      //     }
+      //   } else if (data.name && typeof data.name === 'object') {
+      //     const rowItem = (this.excelArrObj[i].item || this.excelArrObj[i].item_hin || '').trim().toLowerCase();
+      //     const nameItem = (data.name.item || '').trim().toLowerCase();
+      //     const rowSubitem = (this.excelArrObj[i].subitem || this.excelArrObj[i].subitem_hin || '').trim().toLowerCase();
+      //     const nameSubitem = (data.name.subitem || '').trim().toLowerCase();
+      //     if (rowItem === nameItem && (nameSubitem ? rowSubitem === nameSubitem : true)) {
+      //       isMatch = true;
+      //     }
+      //   }
 
-          if (data.subitem_id !== undefined && data.subitem_id !== null) {
-            this.excelArrObj[i].subitem_id = data.subitem_id;
-            if (data.subitem) {
-              this.excelArrObj[i].subitem_hin = typeof data.subitem === 'object' ? data.subitem.subitem_hin : data.subitem;
-            }
-          } else {
-            this.excelArrObj[i].subitem = null;
-            this.excelArrObj[i].subitem_id = null;
-            this.excelArrObj[i].subitem_hin = '-';
-          }
-          delete this.excelArrObj[i].subitem_corrected;
+      //   if (isMatch) {
+      //     const targetItemId = data.item_id || data.id;
+      //     if (targetItemId) {
+      //       this.excelArrObj[i].item_id = targetItemId;
+      //       if (data.item) {
+      //         this.excelArrObj[i].item_hin = typeof data.item === 'object' ? data.item.item_hin : data.item;
+      //       }
+      //     }
 
-          if (data.item_detail) {
-            this.excelArrObj[i].item_detail = (this.excelArrObj[i].item_detail ? this.excelArrObj[i].item_detail + ' ' : '') + data.item_detail;
-          }
-          if (data.description) {
-            this.excelArrObj[i].description = (this.excelArrObj[i].description ? this.excelArrObj[i].description + ' ' : '') + data.description;
-          }
-        }
-      }
+      //     if (data.subitem_id !== undefined && data.subitem_id !== null) {
+      //       this.excelArrObj[i].subitem_id = data.subitem_id;
+      //       if (data.subitem) {
+      //         this.excelArrObj[i].subitem_hin = typeof data.subitem === 'object' ? data.subitem.subitem_hin : data.subitem;
+      //       }
+      //     } else {
+      //       this.excelArrObj[i].subitem = null;
+      //       this.excelArrObj[i].subitem_id = null;
+      //       this.excelArrObj[i].subitem_hin = '-';
+      //     }
+      //     delete this.excelArrObj[i].subitem_corrected;
+
+      //     if (data.item_detail) {
+      //       this.excelArrObj[i].item_detail = (this.excelArrObj[i].item_detail ? this.excelArrObj[i].item_detail + ' ' : '') + data.item_detail;
+      //     }
+      //     if (data.description) {
+      //       this.excelArrObj[i].description = (this.excelArrObj[i].description ? this.excelArrObj[i].description + ' ' : '') + data.description;
+      //     }
+      //   }
+      // }
+      data.id2 = data.subitem_id || null;
+      this.applyItemCorrection(data);
     } else if (data.isArray) {
       // Array-type correction (e.g. categories): data.name is string[], data.ids is id[]
       for (let i in this.excelArrObj) {
@@ -519,7 +524,7 @@ export class ExcelImportComponent implements OnInit {
       for (let i in this.excelArrObj) {
         for (let j in conf) {
           if (this.excelArrObj[i][conf[j].name] == data.name) {
-            this.excelArrObj[i][conf[j].ref_field] = data.id || data.pbk_id;
+            this.excelArrObj[i][conf[j].ref_field] = data.id;
           }
         }
       }
@@ -535,6 +540,58 @@ export class ExcelImportComponent implements OnInit {
       }, (err) => {
         this.toastr.error('Error Occuring while inserting into Dictionary.')
       });
+    }
+  }
+
+
+
+  private norm(v: any): string {
+    const s = (v ?? '').toString().normalize('NFC').trim().replace(/\s+/g, ' ').toLowerCase();
+    return s === '-' ? '' : s;
+  }
+
+  private appendText(oldVal: string, add: string): string {
+    if (!add) return oldVal;
+    if (oldVal?.includes(add)) return oldVal;
+    return oldVal ? `${oldVal} ${add}` : add;
+  }
+
+  private applyItemCorrection(data: any): void {
+    const itemId = data.item_id ?? data.id;
+    if (itemId == null) return;
+
+    const src = typeof data.name === 'string'
+      ? { item: data.name, subitem: data.extra_note }
+      : { item: data.name?.item, subitem: data.name?.subitem };
+    const key = `${this.norm(src.item)}|${this.norm(src.subitem)}`;
+
+    const itemHin = typeof data.item === 'object' ? data.item?.item_hin : data.item;
+    const subHin = typeof data.subitem === 'object' ? data.subitem?.subitem_hin : data.subitem;
+    const hasSub = !!data.subitem_id;            // '', 0, null, undefined => item only
+
+    for (const row of this.excelArrObj) {
+      const rowKey = `${this.norm(row.item || row.item_hin)}|${this.norm(row.subitem || row.subitem_hin)}`;
+      if (rowKey !== key) continue;
+
+      row.item_id = itemId;
+      if (itemHin) row.item_hin = itemHin;
+
+      if (hasSub) {
+        row.subitem_id = data.subitem_id;
+        if (subHin) row.subitem_hin = subHin;
+      } else {
+        // item-only is final: remove every trace of subitem
+        row.subitem = null;
+        row.subitem_id = null;
+        row.subitem_hin = '-';
+        // row.subitem_eng = null;  // agar aisi koi aur subitem field hai to yahan bhi
+      }
+
+      delete row.subitem_corrected;
+      // delete row.subitem_unmatched;  // agar aisa koi flag use hota hai
+
+      row.item_detail = this.appendText(row.item_detail, data.item_detail);
+      row.description = this.appendText(row.description, data.description);
     }
   }
 
