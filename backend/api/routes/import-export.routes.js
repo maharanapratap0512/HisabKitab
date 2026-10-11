@@ -162,6 +162,8 @@ router.put('/correction', async (req, res, next) => {
                         } else {
                             await DB.runQuery('excel_correction', 'update_item', { obj: req.body[i] });
                         }
+                    } else if (type == 'aj_type') {
+                        await DB.runQuery('excel_correction', 'update_awk_type', { obj: req.body[i] });
                     } else {
                         await DB.runQuery('excel_correction', 'update_' + type, { obj: req.body[i] });
                     }
@@ -223,13 +225,13 @@ router.put('/process', async (req, res, next) => {
             let awkData = req.body.data;
             let exists = false;
             let copyIds = !!req.body.copyIds;
-            if (copyIds && awkData.awk_id) {
+            if (awkData.awk_id) {
                 const existing = DB.db.prepare('select _id from aawak where _id = ?').get(awkData.awk_id);
                 if (existing) {
                     exists = true;
+                } else if (!copyIds) {
+                    delete awkData.awk_id;
                 }
-            } else if (!copyIds && awkData.awk_id) {
-                exists = true;
             }
 
             if (exists) {
@@ -245,6 +247,8 @@ router.put('/process', async (req, res, next) => {
                     awkData.awk_id = resolve;
                     await Fn.commit();
                 }, (err) => {
+                    console.log(err);
+
                     throw err;
                 });
             }
@@ -266,37 +270,41 @@ router.put('/process', async (req, res, next) => {
                 let jwkObj = {
                     _id: (copyIds && awkData.jawak_detail[i]._id) ? awkData.jawak_detail[i]._id : null,
                     date: awkData.jawak_detail[i].date ? awkData.jawak_detail[i].date : awkData.date,
-                    mm_id: awkData.mm_id,
-                    pkt_num: awkData.jawak_detail[i].pkt_num,
-                    pbk_id: awkData.jawak_detail[i].pbk_id ? awkData.jawak_detail[i].pbk_id : null,
-                    jawak_mm_id: awkData.jawak_detail[i].aj_mm_id,
-                    item_id: awkData.item_id,
-                    subitem_id: awkData.subitem_id,
-                    product_id: awkData.product_id,
+                    mm_id: awkData.mm_id || null,
+                    pkt_num: awkData.jawak_detail[i].pkt_num || null,
+                    pbk_id: awkData.jawak_detail[i].pbk_id || null,
+                    jawak_mm_id: awkData.jawak_detail[i].aj_mm_id || null,
+                    item_id: awkData.item_id || null,
+                    subitem_id: awkData.subitem_id || null,
+                    product_id: awkData.product_id || null,
                     item_detail: null,
-                    condition_id: awkData.condition_id,
-                    qty: awkData.jawak_detail[i].qty,
-                    rate: awkData.jawak_detail[i].rate,
-                    actual_amt: awkData.jawak_detail[i].actual_amt,
-                    jawak_type_id: awkData.jawak_detail[i].aj_type_id,
-                    unit_id: awkData.unit_id,
-                    description: awkData.jawak_detail[i].description,
-                    parchi_place: awkData.jawak_detail[i].parchi_place ? awkData.jawak_detail[i].parchi_place : null,
-                    sell_repair_place: awkData.jawak_detail[i].sell_repair_place ? awkData.jawak_detail[i].sell_repair_place : null,
+                    condition_id: awkData.condition_id || null,
+                    qty: awkData.jawak_detail[i].qty || 0,
+                    rate: awkData.jawak_detail[i].rate || 0,
+                    actual_amt: awkData.jawak_detail[i].actual_amt || 0,
+                    jawak_type_id: awkData.jawak_detail[i].aj_type_id || null,
+                    unit_id: awkData.unit_id || null,
+                    description: awkData.jawak_detail[i].description || null,
+                    parchi_place: awkData.jawak_detail[i].parchi_place || null,
+                    sell_repair_place: awkData.jawak_detail[i].sell_repair_place || null,
                     nimitt_id: null, // nimitt moved to pbk in jawak imports
-                    company_name: awkData.company_name,
+                    company_name: awkData.company_name || null,
                     aawak_splits: [{ aawak_id: awkData.awk_id, split_qty: awkData.jawak_detail[i].qty, qty: awkData.jawak_detail[i].qty }],
-                    dept_id: awkData.dept_id,
-                    usage_list_id: awkData.jawak_detail[i].usage_list_id,
+                    dept_id: awkData.dept_id || null,
+                    usage_list_id: awkData.jawak_detail[i].usage_list_id || null,
                     is_xl: 1,
                 }
+                delete awkData.jawak_detail[i].error;
                 await Fn.insertAJ(jwkObj, 'jawak').then(async (jwkResult) => {
                     awkData.jawak_detail[i]._id = jwkResult;
                     await Fn.commit();
                 }, async (err) => {
+                    console.log("299", err);
+
                     await Fn.rollback();
                     awkData.jawak_detail[i].error = err.message;
                 });
+
             }
 
             res.json({
@@ -306,7 +314,6 @@ router.put('/process', async (req, res, next) => {
 
 
         } catch (err) {
-
             await Fn.rollback();
             req.body.data.error = err.message;
             res.json({
