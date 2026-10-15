@@ -65,7 +65,12 @@ export class SupportListEntryComponent implements OnInit {
       this.isLoader = true;
       this.http.post(this.api.getUrl('SUPPORTLIST') + this.auth.webUser.dept_id, this.supportListForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.gs.Lists[this.list_type].unshift(data['result']);
+          if (this.gs.Lists) {
+            if (!Array.isArray(this.gs.Lists[this.list_type])) {
+              this.gs.Lists[this.list_type] = [];
+            }
+            this.gs.Lists[this.list_type].unshift(data['result']);
+          }
           this.supportListForm.reset();
           this.isLoader = false;
           this.toastr.success("Added successfully.");

@@ -49,8 +49,11 @@ export class PrastavComponent implements OnInit {
 
   // Filter Lists
   mms: any[] = [];
+  states: any[] = [];
+  zones: any[] = [];
   pbks: any[] = [];
   items: any[] = [];
+  prastavTypes: any[] = [];
 
   isEdit = false;
   selectedPrastav: any = null;
@@ -112,9 +115,58 @@ export class PrastavComponent implements OnInit {
     // Standard approach in this app is to subscribe to GlobalService list or fetch explicitly
     this.gs.observeList().subscribe((res: any) => {
       this.mms = res.mm || [];
+      this.states = res.state || [];
+      this.zones = res.zone || [];
       this.pbks = res.pbk || [];
       this.items = res.item || [];
+      this.prastavTypes = res.prastav_type || [];
+      if (this.prastavs && this.prastavs.length > 0) {
+        this.processData();
+      }
     });
+  }
+
+  getMmZone(mm: any, mmId?: any): string {
+    if (mm?.zone_hin) return mm.zone_hin;
+    if (mm?.zone_eng) return mm.zone_eng;
+    if (mm?.zone?.zone_hin) return mm.zone.zone_hin;
+    if (mm?.zone?.zone_eng) return mm.zone.zone_eng;
+
+    const id = mmId || mm?._id;
+    if (id && this.mms?.length) {
+      const foundMm = this.mms.find((m: any) => m._id === id);
+      if (foundMm) {
+        if (foundMm.zone_hin) return foundMm.zone_hin;
+        if (foundMm.zone_eng) return foundMm.zone_eng;
+
+        // Chain: MM -> state -> zone
+        if (foundMm.state_id && this.states?.length) {
+          const foundState = this.states.find((s: any) => s._id === foundMm.state_id);
+          if (foundState?.zone_id && this.zones?.length) {
+            const foundZone = this.zones.find((z: any) => z._id === foundState.zone_id);
+            if (foundZone) {
+              return foundZone.zone_hin || foundZone.zone_eng || '';
+            }
+          }
+        }
+      }
+    }
+    return '';
+  }
+
+  getPrastavType(typeObj: any, typeId?: any): string {
+    if (typeObj?.list_name_hin && typeObj?.list_name_eng) {
+      return `${typeObj.list_name_hin} : ${typeObj.list_name_eng}`;
+    }
+    if (typeObj?.list_name_hin) return typeObj.list_name_hin;
+    if (typeObj?.list_name_eng) return typeObj.list_name_eng;
+    if (typeId && this.prastavTypes && this.prastavTypes.length > 0) {
+      const pt = this.prastavTypes.find((t: any) => t._id == typeId);
+      if (pt) {
+        return pt.list_name_hin ? `${pt.list_name_hin} : ${pt.list_name_eng}` : pt.list_name_eng;
+      }
+    }
+    return '';
   }
 
   getPrastavs() {
@@ -163,6 +215,17 @@ export class PrastavComponent implements OnInit {
   }
 
   processData() {
+    // Pre-enrich mm with zone if not already present
+    this.prastavs.forEach(p => {
+      const zName = this.getMmZone(p.mm, p.mm_id);
+      if (zName) {
+        p.zone_hin = p.zone_hin || zName;
+        if (p.mm) {
+          p.mm.zone_hin = p.mm.zone_hin || zName;
+        }
+      }
+    });
+
     // 1. Group by Voucher for Voucher Mode
     const vGroups = new Map();
     this.prastavs.forEach(p => {
@@ -173,8 +236,13 @@ export class PrastavComponent implements OnInit {
           voucher_no: p.voucher_no,
           date: p.date,
           mm: p.mm,
+          mm_id: p.mm_id,
+          zone_hin: p.zone_hin || p.mm?.zone_hin,
+          zone_eng: p.zone_eng || p.mm?.zone_eng,
           pbk: p.pbk,
           pbk_count: p.pbk_count,
+          prastav_type: p.prastav_type,
+          type: p.type,
           note_details: p.note_details, // Capture note from the first item
           is_noted: p.is_noted,
           is_rejected: p.is_rejected || 0,
@@ -186,6 +254,10 @@ export class PrastavComponent implements OnInit {
         });
       }
       const vGroup = vGroups.get(vKey);
+      if (!vGroup.prastav_type && p.prastav_type) {
+        vGroup.prastav_type = p.prastav_type;
+        vGroup.type = p.type;
+      }
       vGroup.items.push(p);
       vGroup.totalAmount += parseFloat(p.amount || 0);
     });
@@ -261,6 +333,7 @@ export class PrastavComponent implements OnInit {
       { header: 'Date', key: 'date', width: 12 },
       { header: 'Place (MM)', key: 'mm', width: 25 },
       { header: 'Person (PBK)', key: 'pbk', width: 25 },
+      { header: 'Type', key: 'type', width: 18 },
       { header: 'Item', key: 'item', width: 25 },
       { header: 'Subitem', key: 'subitem', width: 20 },
       { header: 'Qty', key: 'qty', width: 10 },
@@ -272,16 +345,17 @@ export class PrastavComponent implements OnInit {
       { header: 'Source MM', key: 'j_source', width: 20 },
       { header: 'Receiver', key: 'j_receiver', width: 20 },
       { header: 'J-Qty', key: 'j_qty', width: 8 },
+      { header: 'Bachat', key: 'j_bachat', width: 8 },
       { header: 'Status', key: 'j_status', width: 8 }
     ];
 
-    // Header styling - Split into Prastav (1-12) and Jawak (13-17)
+    // Header styling - Split into Prastav (1-13) and Jawak (14-19)
     const headerRow = ws.getRow(1);
     headerRow.eachCell((cell, colNumber) => {
       cell.font = boldWhite;
       cell.border = borderThin;
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      if (colNumber <= 12) {
+      if (colNumber <= 13) {
         cell.fill = headerFillPrastav;
       } else {
         cell.fill = headerFillJawak;
@@ -296,6 +370,7 @@ export class PrastavComponent implements OnInit {
           date: vr.isIFirst ? (v.date || '') : '',
           mm: vr.isIFirst ? (v.mm?.mm_hin || '') : '',
           pbk: vr.isIFirst ? (v.pbk?.pbk_hin || '') : '',
+          type: vr.isIFirst ? this.getPrastavType(v.type, v.prastav_type) : '',
           item: vr.isIFirst ? (vr.item.item?.item_hin || '') : '',
           subitem: vr.isIFirst ? (vr.item.subitem?.subitem_hin || '') : '',
           qty: vr.isIFirst ? (vr.item.qty || '') : '',
@@ -307,6 +382,7 @@ export class PrastavComponent implements OnInit {
           j_source: vr.jawak ? vr.jawak.source_mm?.mm_hin : '',
           j_receiver: vr.jawak ? vr.jawak.kiske_dwara : '',
           j_qty: vr.jawak ? vr.jawak.qty : '',
+          j_bachat: vr.jawak ? (vr.jawak.bachat ?? '') : '',
           j_status: vr.jawak ? (vr.jawak.is_received ? 'RCV' : 'PND') : ''
         };
 
@@ -609,25 +685,122 @@ export class PrastavComponent implements OnInit {
     });
   }
 
+  // Cycle: PND(0) -> inTransit(2) -> RCV(1) -> PND(0)
   toggleStatus(jawak: any) {
     if (!jawak) return;
-    const originalStatus = jawak.is_received;
-    jawak.is_received = jawak.is_received ? 0 : 1; // Toggle between 0 and 1
 
-    // Use the Prastav Jawak update API - only send necessary fields
-    this.http.post(this.api.getUrl('PRASTAV') + 'jawak', {
-      _id: jawak._id,
-      is_received: jawak.is_received
-    }).subscribe((res: any) => {
-      if (res.success) {
-        this.toastr.success(`Status updated to ${jawak.is_received ? 'RCV' : 'PND'}`);
-      } else {
-        jawak.is_received = originalStatus;
-        this.toastr.error('Status update failed');
+    // Determine next state
+    let nextState: number;
+    if (jawak.is_received === 0 || jawak.is_received === null || jawak.is_received === undefined) {
+      nextState = 2; // PND -> inTransit
+    } else if (jawak.is_received === 2) {
+      nextState = 1; // inTransit -> RCV
+    } else {
+      nextState = 0; // RCV -> PND
+    }
+
+    if (nextState === 2) {
+      // inTransit: MM select karna hai
+      this.setInTransit(jawak);
+    } else {
+      const originalStatus = jawak.is_received;
+      const originalPlace = jawak.current_place;
+      const originalPlaceObj = jawak.place;
+      jawak.is_received = nextState;
+      if (nextState !== 2) {
+        jawak.current_place = null;
+        jawak.place = null;
       }
-    }, err => {
-      jawak.is_received = originalStatus;
-      this.toastr.error('Status update failed');
+
+      const statusLabel = nextState === 1 ? 'RCV' : 'PND';
+      this.http.post(this.api.getUrl('PRASTAV') + 'jawak', {
+        _id: jawak._id,
+        is_received: nextState,
+        current_place: null
+      }).subscribe((res: any) => {
+        if (res.success) {
+          this.toastr.success(`Status updated to ${statusLabel}`);
+        } else {
+          jawak.is_received = originalStatus;
+          jawak.current_place = originalPlace;
+          jawak.place = originalPlaceObj;
+          this.toastr.error('Status update failed');
+        }
+      }, (err: any) => {
+        jawak.is_received = originalStatus;
+        jawak.current_place = originalPlace;
+        jawak.place = originalPlaceObj;
+        this.toastr.error('Status update failed');
+      });
+    }
+  }
+
+  setInTransit(jawak: any) {
+    // Determine colors based on active theme
+    const isDark = this.auth.webUser?.settings?.darkMode;
+    const isAmoled = this.auth.webUser?.settings?.amoledMode;
+    const bgColor = isAmoled ? '#000000' : (isDark ? '#2b3035' : '#ffffff');
+    const textColor = isDark ? '#ffffff' : '#333333';
+    const inputBgColor = isDark ? (isAmoled ? '#111111' : '#22272b') : '#ffffff';
+    const borderColor = isDark ? '#495057' : '#ced4da';
+
+    // MM options list
+    const mmOptions = this.mms.map((m: any) => `<option value="${m._id}">${m.mm_hin}${m.mm_eng ? ' : ' + m.mm_eng : ''}</option>`).join('');
+    Swal.fire({
+      title: 'In Transit - MM Select करें',
+      html: `<div class="text-start">
+        <label class="form-label fw-semibold mb-1" style="color: ${textColor}">Current Place (MM)</label>
+        <select id="swal-mm-select" class="form-select shadow-none" style="background-color: ${inputBgColor}; color: ${textColor}; border-color: ${borderColor}">
+          <option value="">-- MM चुनें --</option>
+          ${mmOptions}
+        </select>
+      </div>`,
+      background: bgColor,
+      color: textColor,
+      showCancelButton: true,
+      confirmButtonText: 'Set inTransit',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#0dcaf0',
+      preConfirm: () => {
+        const val = (document.getElementById('swal-mm-select') as HTMLSelectElement)?.value;
+        if (!val) {
+          Swal.showValidationMessage('MM select करना जरूरी है!');
+          return false;
+        }
+        return val;
+      }
+    }).then((result: any) => {
+      if (result.isConfirmed && result.value) {
+        const mmId = Number(result.value);
+        const selectedMm = this.mms.find((m: any) => m._id === mmId);
+        const originalStatus = jawak.is_received;
+        const originalPlace = jawak.current_place;
+        const originalPlaceObj = jawak.place;
+
+        jawak.is_received = 2;
+        jawak.current_place = mmId;
+        jawak.place = selectedMm ? { mm_hin: selectedMm.mm_hin, mm_eng: selectedMm.mm_eng } : null;
+
+        this.http.post(this.api.getUrl('PRASTAV') + 'jawak', {
+          _id: jawak._id,
+          is_received: 2,
+          current_place: mmId
+        }).subscribe((res: any) => {
+          if (res.success) {
+            this.toastr.success(`inTransit set - ${selectedMm?.mm_hin || ''}`);
+          } else {
+            jawak.is_received = originalStatus;
+            jawak.current_place = originalPlace;
+            jawak.place = originalPlaceObj;
+            this.toastr.error('Status update failed');
+          }
+        }, (err: any) => {
+          jawak.is_received = originalStatus;
+          jawak.current_place = originalPlace;
+          jawak.place = originalPlaceObj;
+          this.toastr.error('Status update failed');
+        });
+      }
     });
   }
 
@@ -635,21 +808,27 @@ export class PrastavComponent implements OnInit {
     const jawaks = v.vRows.map((vr: any) => vr.jawak).filter((j: any) => j !== null);
     if (jawaks.length === 0) return;
 
-    // Check if all are currently received
+    // Check if all are currently received (is_received === 1)
     const allReceived = jawaks.every((j: any) => j.is_received === 1 || j.is_received === true);
     const targetStatus = allReceived ? 0 : 1;
 
     // Save original statuses in case of failure/rollback
-    const originalStatuses = jawaks.map((j: any) => ({ jawak: j, status: j.is_received }));
+    const originalStatuses = jawaks.map((j: any) => ({ jawak: j, status: j.is_received, place: j.current_place, placeObj: j.place }));
 
     // Optimistic UI update
-    jawaks.forEach((j: any) => j.is_received = targetStatus);
+    jawaks.forEach((j: any) => {
+      j.is_received = targetStatus;
+      // toggleAll only goes to 0 or 1, so always clear place
+      j.current_place = null;
+      j.place = null;
+    });
 
     // Call update API for each jawak in parallel
     const requests = jawaks.map((j: any) => {
       return this.http.post(this.api.getUrl('PRASTAV') + 'jawak', {
         _id: j._id,
-        is_received: targetStatus
+        is_received: targetStatus,
+        current_place: null
       });
     });
 
@@ -659,12 +838,12 @@ export class PrastavComponent implements OnInit {
         if (allSuccess) {
           this.toastr.success(`Status of all items updated to ${targetStatus ? 'RCV' : 'PND'}`);
         } else {
-          originalStatuses.forEach((item: any) => item.jawak.is_received = item.status);
+          originalStatuses.forEach((item: any) => { item.jawak.is_received = item.status; item.jawak.current_place = item.place; item.jawak.place = item.placeObj; });
           this.toastr.error('Some status updates failed');
         }
       },
       (err: any) => {
-        originalStatuses.forEach((item: any) => item.jawak.is_received = item.status);
+        originalStatuses.forEach((item: any) => { item.jawak.is_received = item.status; item.jawak.current_place = item.place; item.jawak.place = item.placeObj; });
         this.toastr.error('Status update failed');
       }
     );

@@ -133,88 +133,96 @@
 
             <!-- Jawak Sub-entries Table -->
             <div class="card-body p-2">
-              <table class="table table-sm table-bordered m-0">
-                <thead class="table-light">
-                  <tr>
-                    <th width="10%">Date *</th>
-                    <th width="13%">Source MM *</th>
-                    <th width="16%">Qty & Unit *</th>
-                    <th width="8%">Rate</th>
-                    <th width="8%">Amount</th>
-                    <th width="9%">Bori</th>
-                    <th width="10%">Kiske Dwara</th>
-                    <th width="5%">Rcvd?</th>
-                    <th width="4%"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let jw of line.jawaks; let j = index">
-                    <td class="align-middle text-center p-1">
-                      <input type="date" class="form-control form-control-sm px-1 text-center" [(ngModel)]="jw.date"
-                        [name]="'ajw_date_' + i + '_' + j" required [ngClass]="{'is-invalid': pfs.submit && !jw.date}">
-                    </td>
+              <div class="table-responsive">
+                <table class="table table-sm table-bordered m-0" style="min-width: 1450px;">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 145px; min-width: 145px;" class="text-center">Date *</th>
+                      <th style="width: 280px; min-width: 280px;" class="text-center">Source MM *</th>
+                      <th style="width: 200px; min-width: 200px;" class="text-center">Qty & Unit *</th>
+                      <th style="width: 100px; min-width: 100px;" class="text-center">Bachat</th>
+                      <th style="width: 110px; min-width: 110px;" class="text-center">Rate</th>
+                      <th style="width: 120px; min-width: 120px;" class="text-center">Amount</th>
+                      <th style="width: 100px; min-width: 100px;" class="text-center">Bori</th>
+                      <th style="width: 160px; min-width: 160px;" class="text-center">Kiske Dwara</th>
+                      <th style="width: 70px; min-width: 70px;" class="text-center">Rcvd?</th>
+                      <th style="width: 60px; min-width: 60px;" class="text-center"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let jw of line.jawaks; let j = index">
+                      <td class="align-middle text-center p-1">
+                        <input type="date" class="form-control form-control-sm px-1 text-center" [(ngModel)]="jw.date"
+                          [name]="'ajw_date_' + i + '_' + j" required [ngClass]="{'is-invalid': pfs.submit && !jw.date}">
+                      </td>
 
-                    <td class="align-middle">
-                      <ng-select class="custom-sm" style="width:100%;" placeholder="Source MM"
-                        [(ngModel)]="jw.source_mm_id" [name]="'ajw_mm_' + i + '_' + j"
-                        (ngModelChange)="onJawakChange(line, jw)" [selectOnTab]="true" appendTo="body">
-                        <ng-option *ngFor="let m of mms | filterByDate: pfs.prastavForm.date" [value]="m._id">
-                          {{m.mm_hin}} : {{m.mm_eng}}{{m.mm_code ? ' : ' + m.mm_code : ''}}
-                        </ng-option>
-                      </ng-select>
-                    </td>
+                      <td class="align-middle">
+                        <ng-select class="custom-sm" style="width:100%;" placeholder="Source MM"
+                          [(ngModel)]="jw.source_mm_id" [name]="'ajw_mm_' + i + '_' + j"
+                          (ngModelChange)="onJawakChange(line, jw)" [selectOnTab]="true" appendTo="body">
+                          <ng-option *ngFor="let m of mms | filterByDate: pfs.prastavForm.date" [value]="m._id">
+                            {{m.mm_hin}} : {{m.mm_eng}}{{m.mm_code ? ' : ' + m.mm_code : ''}}
+                          </ng-option>
+                        </ng-select>
+                      </td>
 
-                    <td class="align-middle">
-                      <div class="d-flex align-items-center">
-                        <input type="number" class="form-control form-control-sm flex-fill px-1 text-center"
-                          placeholder="Qty" [(ngModel)]="jw.qty" [name]="'ajw_qty_' + i + '_' + j"
-                          (ngModelChange)="onJawakChange(line, jw)" min="0"
-                          [ngClass]="{'is-invalid': pfs.submit && !jw.qty}">
-                        <ng-select class="custom-sm border m-0" style="min-width: 60px;" [items]="units"
-                          bindLabel="unit_short" bindValue="_id" [(ngModel)]="jw.unit_id"
-                          [name]="'ajw_unit_' + i + '_' + j" [clearable]="false" placeholder="Unit"
-                          (ngModelChange)="onJawakChange(line, jw)"
-                          [ngClass]="{'is-invalid': pfs.submit && !jw.unit_id}"></ng-select>
-                      </div>
-                    </td>
+                      <td class="align-middle">
+                        <div class="d-flex align-items-center">
+                          <input type="number" class="form-control form-control-sm flex-fill px-1 text-center"
+                            placeholder="Qty" [(ngModel)]="jw.qty" [name]="'ajw_qty_' + i + '_' + j"
+                            (ngModelChange)="onJawakChange(line, jw)" min="0"
+                            [ngClass]="{'is-invalid': pfs.submit && !jw.qty}">
+                          <ng-select class="custom-sm border m-0" style="min-width: 75px;" [items]="units"
+                            bindLabel="unit_short" bindValue="_id" [(ngModel)]="jw.unit_id"
+                            [name]="'ajw_unit_' + i + '_' + j" [clearable]="false" placeholder="Unit"
+                            (ngModelChange)="onJawakChange(line, jw)"
+                            [ngClass]="{'is-invalid': pfs.submit && !jw.unit_id}"></ng-select>
+                        </div>
+                      </td>
 
-                    <td class="align-middle">
-                      <input type="number" class="form-control form-control-sm px-1 text-center" placeholder="Rate"
-                        [(ngModel)]="jw.rate" [name]="'ajw_rate_' + i + '_' + j"
-                        (ngModelChange)="onJawakChange(line, jw)" min="0">
-                    </td>
+                      <td class="align-middle p-1">
+                        <input type="number" class="form-control form-control-sm px-1 text-center"
+                          placeholder="Bachat" [(ngModel)]="jw.bachat" [name]="'ajw_bachat_' + i + '_' + j" min="0">
+                      </td>
 
-                    <td class="align-middle text-center p-1">
-                      <input type="number" class="form-control form-control-sm px-1 text-center fw-bold"
-                        placeholder="Amount" [(ngModel)]="jw.amount" [name]="'ajw_amount_' + i + '_' + j"
-                        (ngModelChange)="onJawakAmountChange(line, jw)">
-                    </td>
+                      <td class="align-middle">
+                        <input type="number" class="form-control form-control-sm px-1 text-center" placeholder="Rate"
+                          [(ngModel)]="jw.rate" [name]="'ajw_rate_' + i + '_' + j"
+                          (ngModelChange)="onJawakChange(line, jw)" min="0">
+                      </td>
 
-                    <td class="align-middle p-1">
-                      <input type="text" class="form-control form-control-sm px-1 text-center" placeholder="Bori"
-                        [(ngModel)]="jw.bori_count" [name]="'ajw_bori_' + i + '_' + j">
-                    </td>
+                      <td class="align-middle text-center p-1">
+                        <input type="number" class="form-control form-control-sm px-1 text-center fw-bold"
+                          placeholder="Amount" [(ngModel)]="jw.amount" [name]="'ajw_amount_' + i + '_' + j"
+                          (ngModelChange)="onJawakAmountChange(line, jw)">
+                      </td>
 
-                    <td class="align-middle p-1">
-                      <input type="text" class="form-control form-control-sm px-1" placeholder="Dwara"
-                        [(ngModel)]="jw.kiske_dwara" [name]="'ajw_dwara_' + i + '_' + j">
-                    </td>
+                      <td class="align-middle p-1">
+                        <input type="text" class="form-control form-control-sm px-1 text-center" placeholder="Bori"
+                          [(ngModel)]="jw.bori_count" [name]="'ajw_bori_' + i + '_' + j">
+                      </td>
 
-                    <td class="text-center align-middle">
-                      <input type="checkbox" class="form-check-input m-0" [(ngModel)]="jw.is_received"
-                        [name]="'ajw_recv_' + i + '_' + j" title="Received?">
-                    </td>
+                      <td class="align-middle p-1">
+                        <input type="text" class="form-control form-control-sm px-1" placeholder="Dwara"
+                          [(ngModel)]="jw.kiske_dwara" [name]="'ajw_dwara_' + i + '_' + j">
+                      </td>
 
-                    <td class="text-center align-middle">
-                      <button *ngIf="(jw.source_mm_id || jw.qty) && line.jawaks.length > 1" type="button"
-                        class="btn btn-sm btn-danger" style="padding: 0.2rem 0.5rem; border-radius: 4px;"
-                        (click)="pfs.removeJawak(line, j)" title="Remove">
-                        <i class="uil uil-times"></i>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                      <td class="text-center align-middle">
+                        <input type="checkbox" class="form-check-input m-0" [(ngModel)]="jw.is_received"
+                          [name]="'ajw_recv_' + i + '_' + j" title="Received?">
+                      </td>
+
+                      <td class="text-center align-middle">
+                        <button *ngIf="(jw.source_mm_id || jw.qty) && line.jawaks.length > 1" type="button"
+                          class="btn btn-sm btn-danger" style="padding: 0.2rem 0.5rem; border-radius: 4px;"
+                          (click)="pfs.removeJawak(line, j)" title="Remove">
+                          <i class="uil uil-times"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -282,6 +290,21 @@
             </div>
           </div>
 
+          <div class="col-md-2 mb-3">
+            <div class="form-group">
+              <label class="form-label">Prastav Type</label>
+              <a style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                (click)="openModal('Add Prastav Type')">+ Add</a>
+
+              <ng-select class="custom" style="width:100%;" placeholder="Select Type" [clearable]="true"
+                [virtualScroll]="true" [(ngModel)]="pfs.prastavForm.prastav_type" name="prastav_type">
+                <ng-option *ngFor="let pt of prastavTypes" [value]="pt._id">
+                  {{pt.list_name_hin ? pt.list_name_hin + ' : ' : ''}}{{pt.list_name_eng}}
+                </ng-option>
+              </ng-select>
+            </div>
+          </div>
+
           <div class="col-md-7 mb-3 d-flex flex-wrap align-items-end gap-3">
             <div class="d-flex gap-3 w-100">
               <div class="form-check mb-2">
@@ -329,19 +352,18 @@
 
           <div class="table-container">
 
-            <table class="table table-sm table-bordered">
+            <table class="table table-sm table-bordered" style="min-width: 1280px;">
 
               <thead class="table-light" *ngIf="!jawakFocusMode">
                 <tr>
-                  <th width="3%" class="text-center">#</th>
-                  <th width="27%" class="text-center">Item - Subitem *</th>
-                  <th width="8%" class="text-center">Req Qty</th>
-                  <th width="20%" class="text-center">Prastav Qty & Unit *</th>
-                  <th width="9%" class="text-center">Rate</th>
-                  <th width="9%" class="text-center">Amount</th>
-                  <th width="12%" class="text-center">Description</th>
-                  <th width="8%" class="text-center">Reject?</th>
-                  <th width="4%" class="text-center">Action</th>
+                  <th style="width: 50px; min-width: 50px;" class="text-center">#</th>
+                  <th style="width: 320px; min-width: 320px;" class="text-center">Item - Subitem *</th>
+                  <th style="width: 120px; min-width: 120px;" class="text-center">Req Qty</th>
+                  <th style="width: 220px; min-width: 220px;" class="text-center">Prastav Qty & Unit *</th>
+                  <th style="width: 110px; min-width: 110px;" class="text-center">Rate</th>
+                  <th style="width: 120px; min-width: 120px;" class="text-center">Amount</th>
+                  <th style="width: 280px; min-width: 280px;" class="text-center">Description</th>
+                  <th style="width: 60px; min-width: 60px;" class="text-center">Action</th>
                 </tr>
               </thead>
 
@@ -416,7 +438,7 @@
 
                     <td *ngIf="!jawakFocusMode"></td>
 
-                    <td [attr.colspan]="jawakFocusMode ? 8 : 7">
+                    <td [attr.colspan]="8">
 
                       <div class="p-2 border rounded bg-light">
 
@@ -425,24 +447,26 @@
                         </h6>
 
                         <div class="table-responsive">
-                          <table class="table table-sm table-bordered m-0" style="min-width: 1400px;">
+                          <table class="table table-sm table-bordered m-0" style="min-width: 2250px;">
 
                             <thead class="table-light">
                               <tr>
-                                <th width="8%">Date *</th>
-                                <th width="14%">Item</th>
-                                <th width="10%">Source MM</th>
-                                <th width="12%">Qty & Unit *</th>
-                                <th width="6%">Rate</th>
-                                <th width="6%">Amount</th>
-                                <th width="5%">Bori</th>
-                                <th width="7%">Kiske Dwara</th>
-                                <th width="7%">Pkg Dt</th>
-                                <th width="6%">Pkt No</th>
-                                <th width="7%">Rcv Dt</th>
-                                <th width="4%">Rcvd?</th>
-                                <th width="5%" class="text-center">Review</th>
-                                <th width="3%">Action</th>
+                                <th style="width: 145px; min-width: 145px;" class="text-center">Date *</th>
+                                <th style="width: 280px; min-width: 280px;" class="text-center">Item</th>
+                                <th style="width: 260px; min-width: 260px;" class="text-center">Source MM</th>
+                                <th style="width: 200px; min-width: 200px;" class="text-center">Qty & Unit *</th>
+                                <th style="width: 100px; min-width: 100px;" class="text-center">Bachat</th>
+                                <th style="width: 110px; min-width: 110px;" class="text-center">Rate</th>
+                                <th style="width: 120px; min-width: 120px;" class="text-center">Amount</th>
+                                <th style="width: 100px; min-width: 100px;" class="text-center">Bori</th>
+                                <th style="width: 160px; min-width: 160px;" class="text-center">Kiske Dwara</th>
+                                <th style="width: 140px; min-width: 140px;" class="text-center">Pkg Dt</th>
+                                <th style="width: 110px; min-width: 110px;" class="text-center">Pkt No</th>
+                                <th style="width: 140px; min-width: 140px;" class="text-center">Rcv Dt</th>
+                                <th style="width: 70px; min-width: 70px;" class="text-center">Rcvd?</th>
+                                <th style="width: 110px; min-width: 110px;" class="text-center">Review</th>
+                                <th style="width: 240px; min-width: 240px;" class="text-start">Review Reason</th>
+                                <th style="width: 60px; min-width: 60px;" class="text-center">Action</th>
                               </tr>
                             </thead>
 
@@ -479,12 +503,17 @@
                                     placeholder="Qty" [(ngModel)]="jw.qty" [name]="'jw_qty_' + i + '_' + j"
                                     (ngModelChange)="onJawakChange(line, jw)" min="0"
                                     [ngClass]="{'is-invalid': f.submitted && !jw.qty}">
-                                  <ng-select class="custom-sm border m-0" style="min-width: 60px;" [items]="units"
+                                  <ng-select class="custom-sm border m-0" style="min-width: 75px;" [items]="units"
                                     bindLabel="unit_short" bindValue="_id" [(ngModel)]="jw.unit_id"
                                     [name]="'jw_unit_' + i + '_' + j" [clearable]="false" placeholder="Unit"
                                     (ngModelChange)="onJawakChange(line, jw)"
                                     [ngClass]="{'is-invalid': f.submitted && !jw.unit_id}"></ng-select>
                                 </div>
+                              </td>
+
+                              <td class="align-middle p-1">
+                                <input type="number" class="form-control form-control-sm px-1 text-center"
+                                  placeholder="Bachat" [(ngModel)]="jw.bachat" [name]="'jw_bachat_' + i + '_' + j" min="0">
                               </td>
 
                               <td class="align-middle">
@@ -531,14 +560,19 @@
 
                               <td class="text-center align-middle p-1">
                                 <div class="d-flex justify-content-center gap-1">
-                                  <button type="button" class="btn btn-sm p-1" [ngClass]="jw.review === 1 ? 'btn-success' : 'btn-outline-success'" (click)="jw.review = 1" title="Satisfied">
+                                  <button type="button" class="btn btn-sm p-1" [ngClass]="jw.review === 1 ? 'btn-success' : 'btn-outline-success'"
+                                    (click)="setReview(jw, 1)" title="Satisfied">
                                     <i class="uil uil-thumbs-up"></i>
                                   </button>
-                                  <button type="button" class="btn btn-sm p-1" [ngClass]="jw.review === 0 ? 'btn-danger' : 'btn-outline-danger'" (click)="jw.review = 0" title="Not Satisfied">
+                                  <button type="button" class="btn btn-sm p-1" [ngClass]="jw.review === 0 ? 'btn-danger' : 'btn-outline-danger'"
+                                    (click)="setReview(jw, 0)" title="Not Satisfied">
                                     <i class="uil uil-thumbs-down"></i>
                                   </button>
                                 </div>
-                                <input *ngIf="jw.review === 0" type="text" class="form-control form-control-sm mt-1 px-1" placeholder="Reason"
+                              </td>
+
+                              <td class="align-middle p-1">
+                                <input type="text" class="form-control form-control-sm px-1" placeholder="Reason"
                                   [(ngModel)]="jw.review_reason" [name]="'jw_reason_' + i + '_' + j">
                               </td>
 
@@ -598,6 +632,8 @@
         <div class="modal-body">
           <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="addMMResponse($event)"></app-mm-entry>
           <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)="addPbkResponse($event)"></app-pbk-entry>
+          <app-support-list-entry *ngIf="showModal == 'Add Prastav Type'" (response)="addPrastavTypeResponse($event)"
+            list_type="prastav_type"></app-support-list-entry>
         </div>
       </div>
     </div>

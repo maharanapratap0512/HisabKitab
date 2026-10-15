@@ -124,6 +124,7 @@ module.exports = {
         subitem_id: col.ref('subitem._id', { as: 'subitem', select: '*', join: true }),
         unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
         qty: col.number(),
+        bachat: col.number(),
         rate: col.number(),
         amount: col.number(),
         bori_count: col.string(),

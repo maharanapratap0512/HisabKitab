@@ -11,7 +11,7 @@ const subitemList = new BaseTable('subitem_list');
 /**
  * Paginated, filtered Prastav list.
  */
-function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, month, date, pageNo, itemsPerPage, dept_id, is_noted }) {
+function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, prastav_type, year, month, date, pageNo, itemsPerPage, dept_id, is_noted }) {
     const PAGE_SIZE = itemsPerPage ? Number(itemsPerPage) : 100;
     const page = (pageNo !== undefined && pageNo !== null) ? Number(pageNo) + 1 : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -24,6 +24,7 @@ function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, month, date, pa
     if (pbk_id && pbk_id.length > 0) conds.push(`prastav.pbk_id IN (${pbk_id.join(',')})`);
     if (item_id && item_id.length > 0) conds.push(`prastav.item_id IN (${item_id.join(',')})`);
     if (subitem_id && subitem_id.length > 0) conds.push(`prastav.subitem_id IN (${subitem_id.join(',')})`);
+    if (prastav_type && prastav_type.length > 0) conds.push(`prastav.prastav_type IN (${prastav_type.join(',')})`);
 
     if (year) {
         conds.push(`strftime('%Y', prastav.date) = '${String(year)}'`);
@@ -57,6 +58,8 @@ function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, month, date, pa
         offset,
     });
 
+    injectMMZone(result);
+
     const subitemListMap = buildSubitemListMap(subitemList.getAll());
     for (const prastav of result) {
         injectSubitemList([prastav], subitemListMap);           // prastav ka apna subitem
@@ -66,11 +69,90 @@ function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, month, date, pa
 }
 
 /**
+ * Enriches prastav and jawak items with MM's state and zone information
+ * mm table -> state table (via state_id) -> zone table (via zone_id)
+ */
+function injectMMZone(prastavList) {
+    if (!prastavList || prastavList.length === 0) return;
+
+    const mmIds = new Set();
+    for (const p of prastavList) {
+        if (p.mm_id) mmIds.add(p.mm_id);
+        if (p.jawaks) {
+            for (const j of p.jawaks) {
+                if (j.mm_id) mmIds.add(j.mm_id);
+                if (j.source_mm_id) mmIds.add(j.source_mm_id);
+            }
+        }
+    }
+
+    if (mmIds.size === 0) return;
+
+    try {
+        const mmRows = db.prepare(`
+            SELECT mm._id, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng
+            FROM mm
+            LEFT JOIN state st ON st._id = mm.state_id
+            LEFT JOIN zone zn ON zn._id = st.zone_id
+            WHERE mm._id IN (${[...mmIds].join(',')})
+        `).all();
+
+        const mmMap = new Map(mmRows.map(m => [m._id, m]));
+
+        const applyZone = (target, mmId) => {
+            if (!target || !mmId || !mmMap.has(mmId)) return;
+            const m = mmMap.get(mmId);
+            target.state_id = m.state_id;
+            target.state_hin = m.state_hin;
+            target.state_eng = m.state_eng;
+            target.zone_id = m.zone_id;
+            target.zone_hin = m.zone_hin;
+            target.zone_eng = m.zone_eng;
+            if (m.zone_id || m.zone_hin) {
+                target.zone = {
+                    _id: m.zone_id,
+                    zone_hin: m.zone_hin,
+                    zone_eng: m.zone_eng
+                };
+            }
+        };
+
+        for (const p of prastavList) {
+            if (p.mm_id && mmMap.has(p.mm_id)) {
+                const m = mmMap.get(p.mm_id);
+                p.mm = p.mm || {};
+                applyZone(p.mm, p.mm_id);
+                p.zone_hin = m.zone_hin;
+                p.zone_eng = m.zone_eng;
+                p.state_hin = m.state_hin;
+                p.state_eng = m.state_eng;
+            }
+            if (p.jawaks) {
+                for (const j of p.jawaks) {
+                    if (j.mm_id) {
+                        j.mm = j.mm || {};
+                        applyZone(j.mm, j.mm_id);
+                    }
+                    if (j.source_mm_id) {
+                        j.source_mm = j.source_mm || {};
+                        applyZone(j.source_mm, j.source_mm_id);
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error('Error in injectMMZone:', err);
+    }
+}
+
+/**
  * Get full voucher data by voucher_no (multiple items)
  */
 function getVoucher(voucherNo) {
     const rows = Prastav.getAll({ voucher_no: Number(voucherNo), active: 1 });
     if (rows.length === 0) return null;
+
+    injectMMZone(rows);
 
     const subitemListMap = buildSubitemListMap(subitemList.getAll());
 
@@ -83,8 +165,13 @@ function getVoucher(voucherNo) {
     const voucher = {
         date: rows[0].date,
         mm_id: rows[0].mm_id,
+        mm: rows[0].mm,
+        zone_hin: rows[0].zone_hin,
+        zone_eng: rows[0].zone_eng,
         pbk_id: rows[0].pbk_id,
         pbk_count: rows[0].pbk_count,
+        prastav_type: rows[0].prastav_type || null,
+        type: rows[0].type || null,
         note: rows[0].note_details,
         is_rejected: rows[0].is_rejected || 0,
         reject_reason: rows[0].reject_reason || null,
@@ -164,6 +251,11 @@ function updateVoucher(voucherNo, data) {
             // Jawaks
             const jawaks = Array.isArray(line.jawaks) ? line.jawaks.filter(j => j.source_mm_id && j.qty) : [];
             for (const jw of jawaks) {
+                // Enforce business rules
+                if (jw.is_received !== 2 && jw.is_received !== '2') {
+                    jw.current_place = null;
+                }
+
                 const jwData = {
                     ...jw,
                     prastav_id: pId,
@@ -171,6 +263,7 @@ function updateVoucher(voucherNo, data) {
                     item_id: jw.item_id || line.item_id,
                     subitem_id: jw.subitem_id || line.subitem_id || null,
                     unit_id: jw.unit_id || line.unit_id || 1,
+                    is_received: jw.is_received ? Number(jw.is_received) : 0,
                     active: 1
                 };
                 delete jwData._id;
