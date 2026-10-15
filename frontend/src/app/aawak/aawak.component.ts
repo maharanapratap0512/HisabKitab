@@ -366,7 +366,7 @@ export class AawakComponent implements OnInit, OnDestroy {
   }
 
 
-  
+
   toggleDateSort() {
     if (this.dateSortState === 'default') {
       this.dateSortState = 'asc';
@@ -1466,16 +1466,51 @@ export class AawakComponent implements OnInit, OnDestroy {
   }
 
   addJawakResponse(ev: any) {
-    let awkId = (ev.aawak_splits && ev.aawak_splits.length > 0 ? (ev.aawak_splits[0].aawak_id || ev.aawak_splits[0]._id) : null);
-    if (awkId) {
-      let i = this.aawakData.findIndex((b: any) => b._id == awkId);
+    if (!ev) return;
+
+    if (typeof ev.aawak_splits === 'string') {
+      try { ev.aawak_splits = JSON.parse(ev.aawak_splits); } catch (e) { ev.aawak_splits = []; }
+    }
+
+    const awkId = (Array.isArray(ev.aawak_splits) && ev.aawak_splits.length > 0)
+      ? (ev.aawak_splits[0].aawak_id || ev.aawak_splits[0]._id)
+      : (this.editData ? this.editData._id : null);
+
+    const applyUpdatedRow = (updatedAwk: any) => {
+      if (!updatedAwk) return;
+      const i = this.aawakData.findIndex((b: any) => b._id == updatedAwk._id);
       if (i > -1) {
-        this.aawakData[i].remaining_qty = Math.round(((this.aawakData[i].remaining_qty ? this.aawakData[i].remaining_qty : 0) - ev.qty) * 1000) / 1000;
-        if (!this.aawakData[i].jawak_detail) {
-          this.aawakData[i].jawak_detail = [];
-        }
-        this.aawakData[i].jawak_detail.push(ev);
+        this.aawakData[i] = updatedAwk;
       }
+      const allIdx = this.aawakAll?.findIndex((b: any) => b._id == updatedAwk._id);
+      if (allIdx > -1) {
+        this.aawakAll[allIdx] = updatedAwk;
+      }
+      this.editData = null;
+      $('#showModal').modal('hide');
+      this.showModal = '';
+    };
+
+    if (ev.updated_aawak) {
+      applyUpdatedRow(ev.updated_aawak);
+    } else if (awkId) {
+      this.http.get(this.api.getUrl('AAWAK') + 'by-id/' + awkId).subscribe((res: any) => {
+        if (res && res.success && res.result) {
+          applyUpdatedRow(res.result);
+        } else {
+          this.toastr.error(res?.message || 'Could not fetch updated Aawak record');
+          this.editData = null;
+          $('#showModal').modal('hide');
+          this.showModal = '';
+        }
+      }, (err: any) => {
+        this.toastr.error(err?.error?.message || err?.message || 'Error updating Aawak record');
+        this.editData = null;
+        $('#showModal').modal('hide');
+        this.showModal = '';
+      });
+    } else {
+      this.editData = null;
       $('#showModal').modal('hide');
       this.showModal = '';
     }

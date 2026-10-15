@@ -839,13 +839,40 @@ class ExcelFunctions {
    }
 
 
-   async checkFullDuplication(list, data, headerList) {
+   async checkFullDuplication(list, data, headerList, dept_id = null) {
+      const activeDeptId = dept_id || this.dept_id;
       let found = false;
       for (let i in list) {
          let changes = false;
          for (let j in headerList) {
             let listData;
             let exData;
+            const hName = headerList[j].name || headerList[j].col_name;
+            const isYearlyRate = headerList[j].type === 'yearly_rate' || /^rate[_\s-]?(\d{4})$/i.test(hName);
+
+            if (isYearlyRate) {
+               const rawVal = data[hName] !== undefined ? data[hName] : (headerList[j].col_name ? data[headerList[j].col_name] : undefined);
+               // If excel cell has a valid non-empty rate value
+               if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '') {
+                  const yrMatch = hName.match(/\d{4}/);
+                  const yr = headerList[j].year || (yrMatch ? Number(yrMatch[0]) : null);
+                  if (yr && activeDeptId) {
+                     const itemId = list[i].item_id || list[i]._id;
+                     const subitemId = list[i].subitem_id || null;
+                     const itemRateService = require('../services/item-rate.service');
+                     const dbRate = await itemRateService.lookupItemRate(activeDeptId, itemId, subitemId, yr);
+                     const excelRate = Number(rawVal);
+                     // If DB rate doesn't exist (null) or differs from excelRate
+                     if (dbRate === null || Number(dbRate) !== excelRate) {
+                        changes = true;
+                        break;
+                     }
+                  }
+               }
+               // If excel cell is empty/blank, skip (do not consider as change)
+               continue;
+            }
+
             if (headerList[j].ref_table) {
                listData = list[i][headerList[j].ref_field]
                exData = data[headerList[j].ref_field]

@@ -4,6 +4,7 @@ const DB = new DBContex();
 const Fn = require('../database/functions');
 const BaseTable = require('../database/base.table');
 const relAawakJawakModel = new BaseTable('rel_aawak_jawak');
+const aawakRoutes = require('./aawak.routes');
 
 
 // get jawak
@@ -323,6 +324,21 @@ router.post('/new/:dept_id', async (req, res, next) => {
                     }
                     await DB.getById('jawak', resolve, { full: true }).then(async (data) => {
                         data.enz = (data.enz ? JSON.parse(data.enz) : {});
+                        if (typeof data.aawak_splits === 'string') {
+                            try { data.aawak_splits = JSON.parse(data.aawak_splits); } catch (e) { data.aawak_splits = []; }
+                        }
+                        if (typeof data.aawak_ref_obj === 'string') {
+                            try { data.aawak_ref_obj = JSON.parse(data.aawak_ref_obj); } catch (e) { data.aawak_ref_obj = null; }
+                        }
+
+                        const awkId = (Array.isArray(data.aawak_splits) && data.aawak_splits.length > 0)
+                            ? (data.aawak_splits[0].aawak_id || data.aawak_splits[0]._id)
+                            : null;
+
+                        if (awkId && aawakRoutes.getFullAawakById) {
+                            data.updated_aawak = await aawakRoutes.getFullAawakById(awkId, req.params.dept_id);
+                        }
+
                         await Fn.commit();
                         res.json({
                             result: data || {},
@@ -352,6 +368,18 @@ router.put('/new', async (req, res, next) => {
                 if (resolve) {
                     let jawak = await DB.getById('jawak', req.body.set._id, { full: true });
                     jawak.enz = (jawak.enz ? JSON.parse(jawak.enz) : {});
+                    if (typeof jawak.aawak_splits === 'string') {
+                        try { jawak.aawak_splits = JSON.parse(jawak.aawak_splits); } catch (e) { jawak.aawak_splits = []; }
+                    }
+                    if (typeof jawak.aawak_ref_obj === 'string') {
+                        try { jawak.aawak_ref_obj = JSON.parse(jawak.aawak_ref_obj); } catch (e) { jawak.aawak_ref_obj = null; }
+                    }
+                    const awkId = (Array.isArray(jawak.aawak_splits) && jawak.aawak_splits.length > 0)
+                        ? (jawak.aawak_splits[0].aawak_id || jawak.aawak_splits[0]._id)
+                        : null;
+                    if (awkId && aawakRoutes.getFullAawakById) {
+                        jawak.updated_aawak = await aawakRoutes.getFullAawakById(awkId);
+                    }
                     res.json({
                         success: true,
                         result: jawak || []

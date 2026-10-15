@@ -11,9 +11,9 @@ export class ExcelImportService {
     { name: 'pbk', autoUpdate: true },
     { name: 'vehicle', secondHeader: false, autoUpdate: true },
     { name: 'nimitt', autoUpdate: true },
-    { name: 'item', autoUpdate: true },
+    { name: 'item', autoUpdate: true, note: 'Columns rate_YYYY (e.g. rate_2025, rate_2026) can be imported/updated.' },
     { name: 'rel_item_category', autoUpdate: false },
-    { name: 'subitem', autoUpdate: true },
+    { name: 'subitem', autoUpdate: true, note: 'Columns rate_YYYY (e.g. rate_2025, rate_2026) can be imported/updated.' },
     { name: 'rel_subitem_category', autoUpdate: false },
     { name: 'subitem_list', autoUpdate: true },
     { name: 'product', autoUpdate: true },
@@ -217,8 +217,33 @@ export class ExcelImportService {
       { col_name: 'reg_pg_no', name: 'reg_pg_no', alt_names: ["reg pg no", "page no", "रजिस्टर पेज नं"], not_null: false },
       { col_name: 'container_qty', name: 'container_qty', alt_names: ["container qty", "कंटेनर संख्या"], not_null: false },
     ],
+  };
+
+  getYearlyRateConfigs(startOffset: number = 2, endOffset: number = 1) {
+    const currentYear = new Date().getFullYear();
+    const configs: any[] = [];
+    for (let y = currentYear - startOffset; y <= currentYear + endOffset; y++) {
+      configs.push({
+        col_name: `rate_${y}`,
+        name: `rate_${y}`,
+        alt_names: [`rate ${y}`, `rate-${y}`, `rate_${y}`, `rate${y}`],
+        type: 'yearly_rate',
+        year: y,
+        not_null: false
+      });
+    }
+    return configs;
   }
-  constructor() { }
+
+  constructor() {
+    const rateCols = this.getYearlyRateConfigs();
+    if (this.config.item) {
+      this.config.item.push(...rateCols);
+    }
+    if (this.config.subitem) {
+      this.config.subitem.push(...rateCols);
+    }
+  }
 
   generateSequencialArray(count: number) {
     return Array(count).keys();

@@ -206,8 +206,8 @@ export class ExcelImportComponent implements OnInit {
   }
 
   importTypeChanged(ev: any) {
-    this.headerConfig = this.EIService.config[ev.name];
-    this.secondHeader = ev.secondHeader
+    this.headerConfig = JSON.parse(JSON.stringify(this.EIService.config[ev.name] || []));
+    this.secondHeader = ev.secondHeader;
   }
 
   excelImport(ev: any) {
@@ -233,22 +233,69 @@ export class ExcelImportComponent implements OnInit {
   }
 
   headerChanged(index: any) {
+    // Reset headerConfig to base config clone so dynamic rate columns are fresh
+    if (this.importType && this.EIService.config[this.importType.name]) {
+      this.headerConfig = JSON.parse(JSON.stringify(this.EIService.config[this.importType.name]));
+    }
+
     // reset header found status
     for (let j in this.headerConfig) {
       this.headerConfig[j].found = false;
       this.headerConfig[j].index = null;
+      this.headerConfig[j].user_col_name = null;
     }
-    //matching incoming header with header set in config object.
+
+    if (!this.excelArr || !this.excelArr[index]) return;
+
+    // matching incoming header with header set in config object.
     for (let i in this.excelArr[index]) {
-      let header = this.excelArr[index][i].trim().toLowerCase();
+      const cellVal = this.excelArr[index][i];
+      if (cellVal === undefined || cellVal === null) continue;
+      let header = String(cellVal).trim().toLowerCase();
+      let matched = false;
+
       for (let j in this.headerConfig) {
-        if (this.headerConfig[j].name == header || this.headerConfig[j].alt_names.includes(header)) {
-          this.headerConfig[j].found = true;
-          this.headerConfig[j].index = i;
+        const col = this.headerConfig[j];
+        const colName = (col.name || col.col_name || '').toLowerCase();
+        const altNames = (col.alt_names || []).map((a: string) => a.toLowerCase());
+
+        if (colName === header || altNames.includes(header)) {
+          col.found = true;
+          col.index = i;
+          col.user_col_name = String(cellVal).trim();
+          matched = true;
+          break;
+        }
+      }
+
+      // If not matched, check if it's a yearly rate pattern for item or subitem
+      if (!matched && (this.importType?.name === 'item' || this.importType?.name === 'subitem')) {
+        const rateMatch = header.match(/^rate[_\s-]?(\d{4})$/i);
+        if (rateMatch) {
+          const yr = Number(rateMatch[1]);
+          let existingYearCol = this.headerConfig.find((c: any) => c.year === yr || c.col_name === `rate_${yr}`);
+          if (existingYearCol) {
+            existingYearCol.found = true;
+            existingYearCol.index = i;
+            existingYearCol.user_col_name = String(cellVal).trim();
+          } else {
+            this.headerConfig.push({
+              col_name: `rate_${yr}`,
+              name: `rate_${yr}`,
+              alt_names: [`rate ${yr}`, `rate-${yr}`, `rate_${yr}`, `rate${yr}`],
+              type: 'yearly_rate',
+              year: yr,
+              not_null: false,
+              found: true,
+              index: i,
+              user_col_name: String(cellVal).trim()
+            });
+          }
         }
       }
     }
-    //verifying that all required header are found or not?
+
+    // verifying that all required header are found or not?
     this.stepNo = 1;
     for (let i in this.headerConfig) {
       if (this.headerConfig[i].not_null && !this.headerConfig[i].found) {
@@ -284,7 +331,7 @@ export class ExcelImportComponent implements OnInit {
         //loop for all required coluns configured in service Config object for preparing row object.
         for (let j in this.headerConfig) {
           //verify header found in excel and excel columns index saved in config?
-          if (this.headerConfig[j].index) {
+          if (this.headerConfig[j].found && this.headerConfig[j].index !== null && this.headerConfig[j].index !== undefined) {
             //assign excel data to matched object key and prepare whole row object
             if (this.headerConfig[j].type == "array") {
               row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index] ? this.excelArr[i][this.headerConfig[j].index].split(",").map((v: string) => this.gs.cleanValue(v)).filter(Boolean) : [];

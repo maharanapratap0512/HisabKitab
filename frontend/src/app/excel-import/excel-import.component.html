@@ -60,8 +60,9 @@
                   <!-- row for header listing -->
                   <div class="row mt-2" style="display: block;" *ngIf="importType">
                      <b>Comulns List : </b>
-                     <span *ngFor="let col of headerConfig" [title]="col.alt_names.join(',  ') + ' are also supported.'"
+                     <span *ngFor="let col of headerConfig" [title]="(col.alt_names || []).join(',  ') + ' are also supported.'"
                         [ngClass]="{'fw-bold fs-5':col.not_null,'badge-outline-danger':col.not_null && !col.found, 'badge-outline-success': col.not_null && col.found, 'text-success': col.found}">{{col.name}}
+                        <span *ngIf="col.found && col.user_col_name && col.user_col_name.toLowerCase() !== col.name.toLowerCase()" class="badge bg-info text-dark ms-1">({{col.user_col_name}})</span>
                         <i class="mdi mdi-check-circle fs-4" *ngIf="col.found"></i>
                      </span>
                   </div>
@@ -140,6 +141,7 @@
                               <th>#</th>
                               <th style="width: fit-content;" *ngFor="let header of headerList">
                                  {{header.name}}
+                                 <span *ngIf="header.user_col_name && header.user_col_name.toLowerCase() !== header.name.toLowerCase()" class="badge bg-secondary ms-1">({{header.user_col_name}})</span>
                               </th>
                            </tr>
                         </thead>
@@ -251,6 +253,7 @@
                                  <th>#</th>
                                  <th *ngFor="let header of headerList">
                                     {{header.name}}
+                                    <span *ngIf="header.user_col_name && header.user_col_name.toLowerCase() !== header.name.toLowerCase()" class="badge bg-secondary ms-1">({{header.user_col_name}})</span>
                                  </th>
                               </tr>
                            </thead>
@@ -653,6 +656,7 @@
                               <tr>
                                  <th *ngFor="let header of headerList">
                                     {{header.name}}
+                                    <span *ngIf="header.user_col_name && header.user_col_name.toLowerCase() !== header.name.toLowerCase()" class="badge bg-secondary ms-1">({{header.user_col_name}})</span>
                                  </th>
                               </tr>
                            </thead>

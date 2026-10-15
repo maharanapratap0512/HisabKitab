@@ -1,10 +1,43 @@
 [
     {
+        "version": "38.1",
+        "date": "12-10-2026",
+        "summary": "Live Stock Update in Aawak Distribution & Yearly Rates Excel Import",
+        "summary_hin": "आवक डिस्ट्रीब्यूशन में लाइव बचत अपडेट एवं आइटम एक्सेल वार्षिक दर इम्पोर्ट",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Excel Import",
+                "title": "Yearly Rate Columns Support & Smart Rate Updates in Item Import",
+                "title_hin": "आइटम एक्सेल इम्पोर्ट में वर्षवार दरों (Rates) का स्वतः इम्पोर्ट एवं सुरक्षित अपडेट",
+                "desc": "Excel import now automatically detects yearly rate columns (e.g. rate_2024, rate_2025, rate_2026) with your original column names clearly visible. New items automatically receive their yearly rates, while existing items can be safely updated with a single click.",
+                "desc_hin": "आइटम एक्सेल इम्पोर्ट में अब विभिन्न वर्षों की दरों (जैसे rate_2024, rate_2025, rate_2026) के कॉलम स्वतः पहचाने जाते हैं और फाइल का कॉलम नाम भी साथ दिखता है। नए आइटम की दरें इम्पोर्ट पर तुरंत सुरक्षित हो जाती हैं और पुराने आइटम्स में बदलाव होने पर 'अपडेट करे' बटन द्वारा सुरक्षित अपडेट किया जा सकता है।"
+            },
+            {
+                "type": "fix",
+                "module": "Aawak Book",
+                "title": "Immediate Remaining Stock (बचत) Update when Adding Jawak",
+                "title_hin": "जावक जोड़ते ही आवक की शेष बचत (Stock) का तुरंत अपडेट",
+                "desc": "When adding a Jawak distribution entry directly from an Aawak row, the remaining stock (बचत) on the main row and the distribution list now update instantly without needing to refresh or reload the page.",
+                "desc_hin": "आवक सूची की किसी भी पंक्ति से सीधे जावक (Distribution) जोड़ते ही, मुख्य पंक्ति पर बची हुई बचत (Remaining Stock) और नीचे की वितरण सूची अब तुरंत बिना पेज रीलोड किए अपने-आप अपडेट हो जाती है।"
+            },
+            {
+                "type": "fix",
+                "module": "Excel Import",
+                "title": "Smooth Aawak & Jawak Excel Import",
+                "title_hin": "आवक एवं जावक एक्सेल इम्पोर्ट में सुधार",
+                "desc": "Resolved an issue during Excel import where linking related distribution entries could occasionally show an error, ensuring all imported entries are saved smoothly.",
+                "desc_hin": "एक्सेल से आवक और जावक रिकॉर्ड्स इम्पोर्ट करते समय आने वाली रुकावट को ठीक किया गया है, जिससे सभी रिकॉर्ड्स अब आसानी से सुरक्षित हो जाते हैं।"
+            }
+        ]
+    },
+    {
         "version": "38.0",
         "date": "10-10-2026",
         "summary": "Database Checkup Auto-Heal & Item List Excel Category Fix",
         "summary_hin": "डेटाबेस चेकअप स्वतः सुधार (Auto-Heal) एवं आइटम सूची एक्सेल एक्सपोर्ट श्रेणी सुधार",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "improved",

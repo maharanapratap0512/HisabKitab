@@ -4,7 +4,24 @@ const DBContex = require('../database/DBContex');
 const ExcelFunctions = require('../database/excelFunctions');
 const { product, subitem } = require('../database/query');
 const Fn = require('../database/functions');
+const itemRateService = require('../services/item-rate.service');
 const DB = new DBContex();
+
+function extractYearlyRates(row) {
+    const rates = [];
+    if (!row || typeof row !== 'object') return rates;
+    for (const key of Object.keys(row)) {
+        const match = key.match(/^rate[_\s-]?(\d{4})$/i);
+        if (match) {
+            const yr = Number(match[1]);
+            const val = row[key];
+            if (val !== undefined && val !== null && String(val).trim() !== '' && !isNaN(Number(val))) {
+                rates.push({ year: yr, rate: Number(val) });
+            }
+        }
+    }
+    return rates;
+}
 
 
 //get all unmatched or correction list
@@ -299,6 +316,18 @@ router.post('/final_insert/:dept_id', async (req, res, next) => {
             const is = require('../services/item.service');
             let fdata = await fn.setFormData(fn.item_form, req.body.excelData);
             result = await is.createItem(fdata, req.params.dept_id);
+            const newItemId = result ? (result.insertId || result._id || result.id) : null;
+            const yearlyRates = extractYearlyRates(req.body.excelData);
+            if (newItemId && yearlyRates.length > 0) {
+                for (const yr of yearlyRates) {
+                    await itemRateService.saveItemRate(req.params.dept_id, {
+                        item_id: newItemId,
+                        subitem_id: null,
+                        year: yr.year,
+                        rate: yr.rate
+                    });
+                }
+            }
             result = { status: 'inserted', data: req.body.excelData, newData: result };
         } else if (req.body.importType.name == 'attribute') {
             const vs = require('../services/variant.service');
@@ -443,11 +472,31 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                     } else if (type === 'item') {
                         const conflict = service.getItemConflict(row);
                         if (conflict) {
-                            row.duplicateItem = conflict.conflict;
-                            result = { status: 'duplicate', data: row };
+                            let fullDuplicate = await fn.checkFullDuplication([conflict.conflict], row, headerList, req.params.dept_id);
+                            if (fullDuplicate.found) {
+                                row.duplicateItem = conflict.conflict;
+                                result = { status: 'duplicate', data: row };
+                            } else {
+                                row.duplicate = fullDuplicate.list;
+                                row._id = conflict.conflict._id || conflict.conflict.item_id;
+                                row.item_id = conflict.conflict.item_id || conflict.conflict._id;
+                                result = { status: 'update', data: row };
+                            }
                         } else {
                             let insResult = await service.createItem(row, req.params.dept_id);
                             row.newData = insResult;
+                            const newItemId = insResult ? (insResult.insertId || insResult._id || insResult.id) : null;
+                            const yearlyRates = extractYearlyRates(row);
+                            if (newItemId && yearlyRates.length > 0) {
+                                for (const yr of yearlyRates) {
+                                    await itemRateService.saveItemRate(req.params.dept_id, {
+                                        item_id: newItemId,
+                                        subitem_id: null,
+                                        year: yr.year,
+                                        rate: yr.rate
+                                    });
+                                }
+                            }
                             result = { status: 'inserted', data: row };
                         }
                     } else if (type === 'category') {
@@ -482,17 +531,32 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                         let fdata = await fn.setFormData(form, row);
                         const conflict = service.getSubitemConflict(fdata);
                         if (conflict) {
-                            let fullDuplicate = await fn.checkFullDuplication([conflict.conflict], row, headerList);
+                            let fullDuplicate = await fn.checkFullDuplication([conflict.conflict], row, headerList, req.params.dept_id);
                             if (fullDuplicate.found) {
                                 result = { status: 'duplicate', data: row };
                             } else {
                                 row.duplicate = fullDuplicate.list;
                                 row._id = conflict.conflict._id;
+                                row.subitem_id = conflict.conflict.subitem_id || conflict.conflict._id;
+                                row.item_id = conflict.conflict.item_id;
                                 result = { status: 'update', data: row };
                             }
                         } else {
                             let insResult = await service.createSubitem(fdata, req.params.dept_id);
                             row.newData = insResult;
+                            const newSubitemId = insResult ? (insResult.insertId || insResult._id || insResult.id) : null;
+                            const parentItemId = insResult ? (insResult.item_id || fdata.item_id) : fdata.item_id;
+                            const yearlyRates = extractYearlyRates(row);
+                            if (newSubitemId && parentItemId && yearlyRates.length > 0) {
+                                for (const yr of yearlyRates) {
+                                    await itemRateService.saveItemRate(req.params.dept_id, {
+                                        item_id: parentItemId,
+                                        subitem_id: newSubitemId,
+                                        year: yr.year,
+                                        rate: yr.rate
+                                    });
+                                }
+                            }
                             result = { status: 'inserted', data: row };
                         }
                     } else {
@@ -529,16 +593,38 @@ router.put('/update/:dept_id', async (req, res, next) => {
     try {
         let fn = new ExcelFunctions([], req.params.dept_id);
         let result = await fn.updateExcelData(req.body.importType, req.body.excelData);
-        if (result.changes) {
+        let yearlyRateChanges = false;
+        const typeName = req.body.importType && (req.body.importType.name || req.body.importType);
+        if (typeName === 'item' || typeName === 'subitem') {
+            const yearlyRates = extractYearlyRates(req.body.excelData);
+            let itemId = req.body.excelData.item_id || req.body.excelData._id;
+            const subitemId = typeName === 'subitem' ? (req.body.excelData.subitem_id || req.body.excelData._id) : null;
+            if (typeName === 'subitem' && !itemId && subitemId) {
+                const subRec = subitem.getById(subitemId, { full: false });
+                if (subRec && subRec.item_id) itemId = subRec.item_id;
+            }
+            if (itemId && yearlyRates.length > 0) {
+                for (const yr of yearlyRates) {
+                    await itemRateService.saveItemRate(req.params.dept_id, {
+                        item_id: itemId,
+                        subitem_id: subitemId,
+                        year: yr.year,
+                        rate: yr.rate
+                    });
+                    yearlyRateChanges = true;
+                }
+            }
+        }
+        if (result.changes || yearlyRateChanges) {
             res.json({
                 success: true,
-                result: result
-            })
+                result: { ...result, changes: true }
+            });
         } else {
             res.json({
                 success: false,
                 result: result
-            })
+            });
         }
     } catch (err) { next(err) };
 });

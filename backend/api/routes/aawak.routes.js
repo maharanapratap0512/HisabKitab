@@ -39,6 +39,26 @@ async function getJawakDetailForAawak(aawakId, deptId = null, extraCondition = n
     }
 }
 
+async function getFullAawakById(aawakId, deptId = null) {
+    try {
+        const res = await DB.getList('aawak', { full: true, conditionString: `aawak._id = ${aawakId}` });
+        if (res && res.data && res.data.length > 0) {
+            const item = res.data[0];
+            item.document = item.document ? (typeof item.document === 'string' ? JSON.parse(item.document) : item.document) : {};
+            item.enz = item.enz ? (typeof item.enz === 'string' ? JSON.parse(item.enz) : item.enz) : {};
+            item.icategories = item.icategories ? (typeof item.icategories === 'string' ? JSON.parse(item.icategories) : item.icategories) : [];
+            item.scategories = item.scategories ? (typeof item.scategories === 'string' ? JSON.parse(item.scategories) : item.scategories) : [];
+            item.isbill = !!item.isbill;
+            item.jawak_detail = await getJawakDetailForAawak(item._id, deptId);
+            return item;
+        }
+        return null;
+    } catch (e) {
+        console.error('getFullAawakById error:', e);
+        return null;
+    }
+}
+
 
 //aawak post with dept
 router.post('/new/:dept_id', async (req, res, next) => {
@@ -296,6 +316,26 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
     }
 
 
+});
+
+// get single aawak by id
+router.get('/by-id/:id', async (req, res, next) => {
+    try {
+        const item = await getFullAawakById(req.params.id);
+        if (item) {
+            res.json({
+                success: true,
+                result: item
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                message: 'Aawak record not found'
+            });
+        }
+    } catch (err) {
+        next(err);
+    }
 });
 
 //aawak get dept
@@ -880,4 +920,5 @@ router.put('/update-row', async (req, res, next) => {
 });
 
 
+router.getFullAawakById = getFullAawakById;
 module.exports = router;
