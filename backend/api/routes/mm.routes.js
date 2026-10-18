@@ -184,16 +184,26 @@ router.put('/transfer/:dept_id', async (req, res, next) => {
 // mm filter
 router.put('/filter/:dept_id', async (req, res, next) => {
     try {
-        let conditionString = `1=1`;
+        const conditions = [];
         if (req.body.mm_type && req.body.mm_type.length > 0) {
             const types = req.body.mm_type.map(t => `'${t}'`).join(',');
-            conditionString += ` AND mm_type IN (${types})`;
+            conditions.push(`mm_type IN (${types})`);
         }
         if (req.body.mm_id && req.body.mm_id.length > 0) {
-            conditionString += ` AND mm._id IN (${req.body.mm_id.join(',')})`;
+            conditions.push(`mm._id IN (${req.body.mm_id.join(',')})`);
+        }
+        if (req.body.state_id && req.body.state_id.length > 0) {
+            conditions.push(`mm.state_id IN (${req.body.state_id.join(',')})`);
         }
 
-        await DB.getList('mm', { conditionString, dept_id: req.params.dept_id, limit: -1 }).then((resolve) => {
+        const conditionString = conditions.length > 0 ? conditions.join(' AND ') : null;
+
+        const options = { full: true, conditionString, limit: -1 };
+        if (!req.body.state_id) {
+            options.dept_id = req.params.dept_id;
+        }
+
+        await DB.getList('mm', options).then((resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],

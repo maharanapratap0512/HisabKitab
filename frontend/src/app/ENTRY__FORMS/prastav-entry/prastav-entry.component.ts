@@ -30,6 +30,7 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   pbks: any[] = [];
   items: any[] = [];    // itemmix list (item + subitems combined)
   units: any[] = [];
+  prastavTypes: any[] = [];
 
   commonSourceMM: any = null;
 
@@ -59,6 +60,7 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
       this.pbks = result.pbk || [];
       this.items = result.itemmix || [];   // itemmix has nested subitems[]
       this.units = result.unit || [];
+      this.prastavTypes = result.prastav_type || [];
     });
   }
 
@@ -317,6 +319,24 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     this.closeModal();
   }
 
+  addPrastavTypeResponse(ev: any) {
+    if (ev && ev._id) {
+      if (!this.prastavTypes.some((p: any) => p._id === ev._id)) {
+        this.prastavTypes.unshift(ev);
+      }
+      if (this.gs.Lists) {
+        if (!Array.isArray(this.gs.Lists['prastav_type'])) {
+          this.gs.Lists['prastav_type'] = [];
+        }
+        if (!this.gs.Lists['prastav_type'].some((p: any) => p._id === ev._id)) {
+          this.gs.Lists['prastav_type'].unshift(ev);
+        }
+      }
+      this.pfs.prastavForm.prastav_type = ev._id;
+    }
+    this.closeModal();
+  }
+
   // ── Display Helpers for Jawak Focus Mode ──────────────
   getMMDisplay(mmId: any) {
     return this.mms.find(m => m._id === mmId)?.mm_hin || '-';
@@ -342,5 +362,13 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
       return sub ? `${sub.subitem_hin} ${it.item_hin}` : it.item_hin;
     }
     return it.item_hin;
+  }
+
+  setReview(jw: any, val: number) {
+    if (jw.review === val) {
+      jw.review = null;
+    } else {
+      jw.review = val;
+    }
   }
 }

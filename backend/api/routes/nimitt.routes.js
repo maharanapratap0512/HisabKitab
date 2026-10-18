@@ -31,6 +31,29 @@ router.get('/:dept_id', async (req, res, next) => {
 });
 
 
+// nimitt filter
+router.put('/filter/:dept_id', async (req, res, next) => {
+    try {
+        const conditions = [];
+        if (req.body.state_id && req.body.state_id.length > 0) {
+            conditions.push(`nimitt.state_id IN (${req.body.state_id.join(',')})`);
+        }
+        if (req.body.nimitt_id && req.body.nimitt_id.length > 0) {
+            conditions.push(`nimitt._id IN (${req.body.nimitt_id.join(',')})`);
+        }
+
+        const conditionString = conditions.length > 0 ? conditions.join(' AND ') : null;
+
+        await DB.getList('nimitt', { full: true, conditionString, limit: -1 }).then((resolve) => {
+            res.json({
+                success: true,
+                result: resolve.data || [],
+                total_count: resolve.total_count
+            });
+        });
+    } catch (err) { next(err) };
+});
+
 // post nimitt
 router.post('/:dept_id', async (req, res, next) => {
     try {

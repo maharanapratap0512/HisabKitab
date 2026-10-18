@@ -54,12 +54,14 @@
                                         <span *ngIf="m.item_hin">{{m.item_hin}}</span>
                                         <span *ngIf="m.subitem_hin">{{m.subitem_hin}}</span>
                                         <span *ngIf="m.list_name_hin">{{m.list_name_hin}}</span>
-                                        <span *ngIf="m.mm_eng || m.item_eng || m.subitem_eng || m.list_name_eng"> :
+                                        <span *ngIf="m.state_hin">{{m.state_hin}}</span>
+                                        <span *ngIf="m.mm_eng || m.item_eng || m.subitem_eng || m.list_name_eng || m.state_eng"> :
                                         </span>
                                         <span *ngIf="m.mm_eng">{{m.mm_eng}}</span>
                                         <span *ngIf="m.item_eng">{{m.item_eng}}</span>
                                         <span *ngIf="m.subitem_eng">{{m.subitem_eng}}</span>
                                         <span *ngIf="m.list_name_eng">{{m.list_name_eng}}</span>
+                                        <span *ngIf="m.state_eng">{{m.state_eng}}</span>
                                         <span *ngIf="m.mm_code"> : {{m.mm_code}}</span>
                                         <span *ngIf="m.item_code"> : {{m.item_code}}</span>
                                     </ng-option>
@@ -105,7 +107,7 @@
                     <thead>
                         <tr>
                             <th style="width: 60px;">No.</th>
-                            <th style="width: 150px;">Manage</th>
+                            <th style="width: 100px;">Manage</th>
                             <th *ngFor="let row of fields">
                                 {{row.title}}
                             </th>
@@ -116,10 +118,8 @@
                             [ngClass]="{'highlight': data.hl == true}" [attr.data-id]="data._id">
                             <td>{{(page - 1) * itemsPerPage + i + 1}} </td>
                             <td>
-                                <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
-                                        class="uil uil-pen"></i></button>
-                                <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                        class="uil-trash"></i></button>
+                                <i class="uil uil-pen i-outline-primary cursor-pointer me-1" (click)="edit(data)"></i>
+                                <i class="uil uil-trash i-outline-danger cursor-pointer" (click)="delete(i, data._id)"></i>
                             </td>
                             <td *ngFor="let row of fields">
                                 <ng-container *ngIf="!row.isHmpIO">

@@ -20,6 +20,8 @@ import { GlobalService } from 'src/app/services/global.service';
 
 declare var $: any;
 
+import { AuthService } from 'src/app/services/auth.service';
+
 export const SEPARATORS = [
   { label: '"Space"', value: ' ' },
   { label: '"+"', value: '+' },
@@ -55,6 +57,11 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
   // ── Tab state ─────────────────────────────────────────────────────────────
   activeTab: 'single' | 'bulk' = 'single';
 
+  // ── Yearly Rates State ───────────────────────────────────────────────────
+  currentYear: number = new Date().getFullYear();
+  yearlyRatesList: { year: number; rate: any; _id?: number }[] = [];
+  newCustomYear: number | null = null;
+
   // ── Quick Single Form (Prastav Concept) ───────────────────────────────────
   singleAttrValues: any[] = [null];
   singleForm: any = {
@@ -67,6 +74,72 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
     max_rate: 0,
     category_ids: []
   };
+
+  initYearlyRates(existingRates: any[] = []) {
+    const existingMap: { [y: number]: any } = {};
+    for (const r of existingRates) {
+      if (r.year && r.rate !== null && r.rate !== undefined) {
+        existingMap[Number(r.year)] = { rate: Number(r.rate), _id: r._id };
+      }
+    }
+
+    const baseYears = [
+      this.currentYear,
+      this.currentYear - 1,
+      this.currentYear - 2,
+      this.currentYear - 3,
+      this.currentYear - 4,
+      this.currentYear - 5
+    ];
+    const allYears = Array.from(new Set([...baseYears, ...Object.keys(existingMap).map(Number)])).sort((a, b) => b - a);
+    this.yearlyRatesList = allYears.map(y => ({
+      year: y,
+      rate: existingMap[y] !== undefined ? existingMap[y].rate : null,
+      _id: existingMap[y] !== undefined ? existingMap[y]._id : undefined
+    }));
+  }
+
+  onYearlyRateChange(yrObj: any) {
+    // Handled in model
+  }
+
+  addCustomYearRate() {
+    if (!this.newCustomYear) return;
+    const yr = Number(this.newCustomYear);
+    if (isNaN(yr) || yr < 2000 || yr > 2100) {
+      this.toastr.warning('कृपया सही वर्ष दर्ज करें (उदा. 2023, 2028)');
+      return;
+    }
+    if (this.yearlyRatesList.some(y => y.year === yr)) {
+      this.toastr.info(`वर्ष ${yr} पहले से सूची में है।`);
+      return;
+    }
+    this.yearlyRatesList.push({ year: yr, rate: null });
+    this.yearlyRatesList.sort((a, b) => b.year - a.year);
+    this.newCustomYear = null;
+  }
+
+  saveYearlyRates(itemId: number, subitemId: number, callback?: () => void) {
+    const validRates = this.yearlyRatesList.filter(r => r.rate !== null && r.rate !== undefined && !isNaN(Number(r.rate)));
+    if (!validRates.length) {
+      if (callback) callback();
+      return;
+    }
+    const payload = {
+      item_id: itemId,
+      subitem_id: subitemId,
+      rates: validRates.map(r => ({ year: r.year, rate: Number(r.rate) }))
+    };
+    this.http.post(this.api.getUrl('ITEMRATE') + 'item/bulk/' + this.auth.webUser.dept_id, payload).subscribe((res: any) => {
+      if (!res.success) {
+        this.toastr.error(res.message || 'वार्षिक दर सुरक्षित करने में समस्या आई।');
+      }
+      if (callback) callback();
+    }, (err: any) => {
+      this.toastr.error(err?.error?.message || 'वार्षिक दर सुरक्षित करने में समस्या आई।');
+      if (callback) callback();
+    });
+  }
 
   addLine() {
     this.singleAttrValues.push(null);
@@ -205,7 +278,8 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
     private http: HttpService,
     private api: ApiService,
     private toastr: ToastrService,
-    private gs: GlobalService
+    private gs: GlobalService,
+    public auth: AuthService
   ) { }
 
   ngOnInit() {
@@ -299,6 +373,7 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
       category_ids: catIds
     };
     this.singleAttrValues = [null];
+    this.initYearlyRates();
   }
 
   onResetSingleClick() {
@@ -343,12 +418,25 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
         next: (d: any) => {
           this.isLoader = false;
           if (d.success) {
-            if (d.created && Array.isArray(d.created)) {
+            const createdCount = d.createdCount !== undefined ? d.createdCount : (d.created?.length || 0);
+            const skippedCount = d.skippedCount !== undefined ? d.skippedCount : (d.skipped?.length || 0);
+
+            if (createdCount === 0 && skippedCount > 0) {
+              const name = d.skipped?.[0]?.display_name ? `"${d.skipped[0].display_name}" ` : '';
+              this.toastr.warning(`${name}यह वेरिएंट पहले से मौजूद है! (Variant already exists)`);
+              return;
+            }
+
+            if (d.created && Array.isArray(d.created) && d.created.length > 0) {
               this.gs.addVariantsToItemmix(this.selectedItem._id, d.created);
             }
-            this.resetSingleForm();
-            this.focusItemDropdown();
-            this.response.emit({ reload: true, closeModal: false, ...d });
+            const subitemId = d.created?.[0]?.subitem_id || d.created?.[0]?._id;
+            const itemId = this.selectedItem._id;
+            this.saveYearlyRates(itemId, subitemId, () => {
+              this.resetSingleForm();
+              this.focusItemDropdown();
+              this.response.emit({ reload: true, closeModal: false, item_id: itemId, ...d });
+            });
           } else {
             this.toastr.error(d.message || 'Error occurred while saving variant.');
           }
@@ -656,13 +744,29 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
 
     this.isLoader = true;
     this.http.post(this.api.getUrl('VARIANT') + 'bulk', payload)
-      .subscribe((d: any) => {
-        this.isLoader = false;
-        if (d.success) {
-          if (d.created && Array.isArray(d.created)) {
-            this.gs.addVariantsToItemmix(this.selectedItem._id, d.created);
+      .subscribe({
+        next: (d: any) => {
+          this.isLoader = false;
+          if (d.success) {
+            const createdCount = d.createdCount !== undefined ? d.createdCount : (d.created?.length || 0);
+            const skippedCount = d.skippedCount !== undefined ? d.skippedCount : (d.skipped?.length || 0);
+
+            if (createdCount === 0 && skippedCount > 0) {
+              this.toastr.warning(`चुने गए सभी ${skippedCount} वेरिएंट पहले से मौजूद हैं! (All variants already exist)`);
+              return;
+            }
+
+            if (d.created && Array.isArray(d.created) && d.created.length > 0) {
+              this.gs.addVariantsToItemmix(this.selectedItem._id, d.created);
+            }
+            this.response.emit({ reload: true, item_id: this.selectedItem._id, ...d });
+          } else {
+            this.toastr.error(d.message || 'Error occurred while saving variants.');
           }
-          this.response.emit({ reload: true, ...d });
+        },
+        error: (err: any) => {
+          this.isLoader = false;
+          this.toastr.error(err?.error?.message || err?.error || err?.message || 'Error occurred while saving variants.');
         }
       });
   }

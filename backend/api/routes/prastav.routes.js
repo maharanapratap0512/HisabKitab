@@ -103,6 +103,10 @@ router.post('/', (req, res, next) => {
 
                 const jawaks = Array.isArray(line.jawaks) ? line.jawaks.filter(j => j.source_mm_id && j.qty) : [];
                 for (const jw of jawaks) {
+                    if (jw.is_received !== 2 && jw.is_received !== '2') {
+                        jw.current_place = null;
+                    }
+
                     const jawakData = {
                         prastav_id: pId,
                         date: jw.date || data.date,
@@ -111,13 +115,17 @@ router.post('/', (req, res, next) => {
                         subitem_id: jw.subitem_id || line.subitem_id || null,
                         unit_id: jw.unit_id || line.unit_id,
                         qty: jw.qty,
+                        bachat: jw.bachat !== undefined && jw.bachat !== null && jw.bachat !== '' ? Number(jw.bachat) : 0,
                         rate: jw.rate || 0,
                         amount: jw.amount || 0,
                         bori_count: jw.bori_count || null,
                         kiske_dwara: jw.kiske_dwara || null,
                         source_mm_id: jw.source_mm_id,
                         description: jw.description || null,
-                        is_received: jw.is_received ? 1 : 0,
+                        is_received: jw.is_received ? Number(jw.is_received) : 0,
+                        current_place: jw.current_place || null,
+                        review: jw.review !== undefined ? (jw.review ? 1 : 0) : null,
+                        review_reason: jw.review_reason || null,
                         active: 1
                     };
                     PrastavJawak.insert(jawakData, false);
@@ -192,6 +200,12 @@ router.get('/jawak/:id', (req, res, next) => {
 router.post('/jawak', (req, res, next) => {
     try {
         const data = req.body || {};
+        
+        // Enforce business rules
+        if (data.is_received !== undefined && data.is_received !== 2 && data.is_received !== '2') {
+            data.current_place = null;
+        }
+
         console.log('Prastav Jawak Update Request:', data);
         const lineId = data._id
             ? PrastavJawak.updateById(data, Number(data._id), false)

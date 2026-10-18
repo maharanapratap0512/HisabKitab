@@ -195,11 +195,29 @@
                       dropdownClass="custom-sm" [(ngModel)]="filterBody.pbk_id" (change)="applyFilter()"
                       style="width: 100%;">
                       <ng-option *ngFor="let item of pbks" [value]="item._id">
-                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} : {{item.relative_name}}
+                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' +
+                        item.pbk_eng : ''}} : {{item.relation}} : {{item.relative_name}}
                       </ng-option>
                     </ng-select>
                   </app-popover-filter>
 
+                </div>
+              </th>
+
+              <!-- Prastav Type Column with Filter -->
+              <th style="min-width: 140px;" class="py-2 text-start ps-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>Type</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
+                    [isOpen]="filterBody.prastav_type?.length > 0" (clear)="filterBody.prastav_type = []; applyFilter()"
+                    triggerOn="click">
+                    <ng-select [multiple]="true" placeholder="Select Type" class="custom-sm" dropdownClass="custom-sm"
+                      [(ngModel)]="filterBody.prastav_type" (change)="applyFilter()" style="width: 100%; min-width: 160px;">
+                      <ng-option *ngFor="let item of prastavTypes" [value]="item._id">
+                        {{item.list_name_hin ? item.list_name_hin + ' : ' : ''}}{{item.list_name_eng}}
+                      </ng-option>
+                    </ng-select>
+                  </app-popover-filter>
                 </div>
               </th>
 
@@ -259,9 +277,16 @@
                 <td class="py-2 opacity-85 font-size-12 fw-medium text-dark">{{v.date | date:'dd-MMM-yy'}}</td>
 
                 <td class="py-2 text-start ps-3">
-                  <div class="fw-bold font-size-12 text-dark d-flex align-items-center justify-content-between pe-1">
-                    <div><i class="uil uil-map-marker-alt me-1 text-danger"></i>{{v.mm?.mm_hin}}</div>
-                    <span class="badge badge-theme rounded-pill font-size-8" *ngIf="v.pbk_count"
+                  <div class="d-flex align-items-start justify-content-between pe-1">
+                    <div>
+                      <div class="fw-bold font-size-12 text-dark lh-sm">
+                        <i class="uil uil-map-marker-alt me-1 text-danger"></i>{{v.mm?.mm_hin}}
+                      </div>
+                      <div class="mm-zone-text mt-1" *ngIf="getMmZone(v.mm, v.mm_id)">
+                        {{getMmZone(v.mm, v.mm_id)}}
+                      </div>
+                    </div>
+                    <span class="badge badge-theme rounded-pill font-size-8 mt-1" *ngIf="v.pbk_count"
                       title="Registered PBK count at this MM">
                       count - {{v.pbk_count}}
                     </span>
@@ -272,6 +297,14 @@
                   <div class="font-size-12 text-muted fw-medium" style="max-width: 220px;">
                     <i class="uil uil-user me-1 text-info"></i>{{v.pbk?.pbk_hin || '-'}}
                   </div>
+                </td>
+
+                <td class="py-2 text-start ps-3">
+                  <span class="badge bg-soft-primary text-primary font-size-11 px-2 py-1"
+                    *ngIf="getPrastavType(v.type, v.prastav_type)">
+                    {{getPrastavType(v.type, v.prastav_type)}}
+                  </span>
+                  <span *ngIf="!getPrastavType(v.type, v.prastav_type)" class="text-muted opacity-50 font-size-11">-</span>
                 </td>
 
                 <td class="py-2 text-start ps-3 font-size-11">
@@ -305,7 +338,7 @@
 
               <!-- LEVEL 2 & 3: Integrated Internal Table -->
               <tr *ngIf="v.expanded">
-                <td colspan="9">
+                <td colspan="10">
 
                   <table class="table-compact mb-0 no-border-last-row">
                     <thead>
@@ -322,8 +355,10 @@
                         <th class="text-nowrap" style="width: 80px;">Pack Dt</th>
                         <th class="text-nowrap" style="width: 70px;">Pkt #</th>
                         <th class="text-nowrap" style="width: 80px;">Rcv Dt</th>
-                        <th class="text-nowrap" style="min-width: 130px;">Review</th>
+                        <th class="text-nowrap text-center" style="width: 85px;">Review</th>
+                        <th class="text-nowrap" style="min-width: 120px;">Review Reason</th>
                         <th class="text-nowrap" style="width: 70px;">J-Qty</th>
+                        <th class="text-nowrap" style="width: 70px;">Bachat</th>
                         <th class="text-nowrap" style="width: 70px;">J-Rate</th>
                         <th class="text-nowrap" style="width: 80px;">J-Amount</th>
                         <th class="text-nowrap" style="width: 75px;">
@@ -390,31 +425,52 @@
                             <td class="border-end text-muted text-nowrap" style="font-size: 0.78rem;">
                               {{ (vr.jawak.received_date | date:'dd-MMM-yy') || '-' }}
                             </td>
-                            <td class="text-start border-end">
+                            <td class="text-center border-end">
                               <div *ngIf="vr.jawak.review !== undefined && vr.jawak.review !== null">
                                 <span class="badge" [ngClass]="vr.jawak.review ? 'bg-success' : 'bg-danger'">
                                   {{vr.jawak.review ? 'Satisfied' : 'Unsatisfied'}}
                                 </span>
-                                <div class="font-size-9 text-danger mt-1 text-wrap lh-1" style="max-width: 120px;"
-                                  *ngIf="!vr.jawak.review && vr.jawak.review_reason">
-                                  {{vr.jawak.review_reason}}
-                                </div>
                               </div>
                               <div *ngIf="vr.jawak.review === undefined || vr.jawak.review === null"
                                 class="text-muted opacity-50 font-size-10">-</div>
                             </td>
+                            <td class="text-start border-end" style="max-width: 140px;">
+                              <div class="font-size-10 text-wrap lh-1"
+                                [ngClass]="vr.jawak.review ? 'text-muted' : 'text-danger'"
+                                *ngIf="vr.jawak.review_reason">
+                                {{vr.jawak.review_reason}}
+                              </div>
+                              <div *ngIf="!vr.jawak.review_reason"
+                                class="text-muted opacity-50 font-size-10">-</div>
+                            </td>
                             <td class="border-end fw-bold">{{vr.jawak.qty}}</td>
+                            <td class="border-end text-success fw-medium">{{vr.jawak.bachat !== null && vr.jawak.bachat !== undefined ? vr.jawak.bachat : '-'}}</td>
                             <td class="border-end text-muted">₹{{vr.jawak.rate || '-'}}</td>
                             <td class="border-end fw-bold text-theme">₹{{vr.jawak.amount || '-'}}</td>
                             <td class="border-end">
-                              <span class="badge px-1 py-0 rounded-1 cursor-pointer" (click)="toggleStatus(vr.jawak)"
-                                [ngClass]="vr.jawak.is_received ? 'bg-success' : 'bg-warning'" style="font-size: 8px;">
-                                {{vr.jawak.is_received ? 'RCV' : 'PND'}}
-                              </span>
+                              <!-- Status Badge: PND(0) -> inTransit(2) -> RCV(1) -->
+                              <ng-container *ngIf="vr.jawak.is_received === 1">
+                                <span class="badge px-1 py-0 rounded-1 cursor-pointer bg-success"
+                                  (click)="toggleStatus(vr.jawak)" style="font-size: 8px;">RCV</span>
+                              </ng-container>
+                              <ng-container *ngIf="vr.jawak.is_received === 2">
+                                <div class="d-flex flex-column align-items-center gap-0 mt-1">
+                                  <span class="badge px-1 py-0 rounded-1 cursor-pointer bg-info"
+                                    (click)="toggleStatus(vr.jawak)"
+                                    style="font-size: 9px;margin-top:-4px;">inTransit</span>
+                                  <span class="text-info lh-1 fw-bold"
+                                    style="font-size: 11px;margin-top: 3px; text-wrap: nowrap;">{{vr.jawak.place?.mm_hin
+                                    || ''}}</span>
+                                </div>
+                              </ng-container>
+                              <ng-container *ngIf="vr.jawak.is_received !== 1 && vr.jawak.is_received !== 2">
+                                <span class="badge px-1 py-0 rounded-1 cursor-pointer bg-warning"
+                                  (click)="toggleStatus(vr.jawak)" style="font-size: 8px;">PND</span>
+                              </ng-container>
                             </td>
                           </ng-container>
                           <ng-template #emptyJawakCompact>
-                            <td colspan="11"
+                            <td colspan="13"
                               class="py-0 text-center opacity-25 fst-italic font-size-10 bg-soft-light border-end">No
                               deliveries</td>
                           </ng-template>
@@ -469,6 +525,21 @@
                 </div>
               </th>
               <th style="min-width: 170px;" class="text-start ps-3">Person (PBK)</th>
+              <th style="min-width: 140px;" class="text-start ps-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>Type</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                    [isOpen]="filterBody.prastav_type?.length > 0" (clear)="filterBody.prastav_type = []; applyFilter()"
+                    triggerOn="click">
+                    <ng-select [multiple]="true" placeholder="Select Type" class="custom-sm" dropdownClass="custom-sm"
+                      [(ngModel)]="filterBody.prastav_type" (change)="applyFilter()" style="width: 100%; min-width: 160px;">
+                      <ng-option *ngFor="let item of prastavTypes" [value]="item._id">
+                        {{item.list_name_hin ? item.list_name_hin + ' : ' : ''}}{{item.list_name_eng}}
+                      </ng-option>
+                    </ng-select>
+                  </app-popover-filter>
+                </div>
+              </th>
               <th style="min-width: 350px;" class="px-3 text-start ps-3">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>Item Description</span>
@@ -547,8 +618,10 @@
               <th style="width: 100px;" class="text-center text-primary text-uppercase opacity-85">Pack Dt</th>
               <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">Pkt #</th>
               <th style="width: 100px;" class="text-center text-primary text-uppercase opacity-85">Rcv Dt</th>
-              <th style="min-width: 130px;" class="text-start ps-2 text-primary text-uppercase opacity-85">Review</th>
+              <th style="width: 95px;" class="text-center text-primary text-uppercase opacity-85">Review</th>
+              <th style="min-width: 130px;" class="text-start ps-2 text-primary text-uppercase opacity-85">Review Reason</th>
               <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">J-Qty</th>
+              <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">Bachat</th>
               <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">J-Rate</th>
               <th style="width: 90px;" class="text-center text-primary text-uppercase opacity-85">J-Amount</th>
               <th style="width: 70px;" class="text-center text-primary text-uppercase opacity-85">Status</th>
@@ -577,9 +650,14 @@
                   {{row.voucher.date | date:'dd-MMM-yy'}}
                 </td>
                 <td class="px-3 fw-bold text-dark font-size-12">
-                  <div style="max-width: 180px;" class="d-flex align-items-center justify-content-between pe-1">
-                    <div class="text-wrap">{{row.voucher.mm?.mm_hin}}</div>
-                    <span class="badge bg-soft-info text-info px-1 py-0 rounded-pill font-size-8"
+                  <div style="max-width: 180px;" class="d-flex align-items-start justify-content-between pe-1">
+                    <div>
+                      <div class="text-wrap lh-sm">{{row.voucher.mm?.mm_hin}}</div>
+                      <div class="mm-zone-text mt-1" *ngIf="getMmZone(row.voucher.mm, row.voucher.mm_id)">
+                        {{getMmZone(row.voucher.mm, row.voucher.mm_id)}}
+                      </div>
+                    </div>
+                    <span class="badge bg-soft-info text-info px-1 py-0 rounded-pill font-size-8 mt-1"
                       *ngIf="row.voucher.pbk_count" title="Registered PBK count at this MM">
                       {{row.voucher.pbk_count}}
                     </span>
@@ -587,6 +665,14 @@
                 </td>
                 <td class="px-3 font-size-12 text-muted fw-medium text-wrap" style="max-width: 200px;">
                   {{row.voucher.pbk?.pbk_hin || '-'}}
+                </td>
+                <td class="px-3 text-start">
+                  <span class="badge bg-soft-primary text-primary font-size-11 px-2 py-1"
+                    *ngIf="getPrastavType(row.voucher.type, row.voucher.prastav_type) || getPrastavType(row.item.type, row.item.prastav_type)">
+                    {{getPrastavType(row.voucher.type, row.voucher.prastav_type) || getPrastavType(row.item.type, row.item.prastav_type)}}
+                  </span>
+                  <span *ngIf="!getPrastavType(row.voucher.type, row.voucher.prastav_type) && !getPrastavType(row.item.type, row.item.prastav_type)"
+                    class="text-muted opacity-50 font-size-11">-</span>
                 </td>
 
                 <td class="px-3 text-wrap" style="min-width: 350px;">
@@ -631,31 +717,50 @@
                   <td class="text-center fw-bold font-size-13 text-nowrap">{{row.jawak.pkt_no || '-'}}</td>
                   <td class="text-center text-primary fw-bold font-size-12 text-nowrap">
                     {{ (row.jawak.received_date | date:'dd-MMM-yy') || '-'}}</td>
-                  <td class="text-start px-2">
+                  <td class="text-center px-2">
                     <div *ngIf="row.jawak.review !== undefined && row.jawak.review !== null">
                       <span class="badge px-2 py-1 rounded-1" [ngClass]="row.jawak.review ? 'bg-success' : 'bg-danger'">
                         {{row.jawak.review ? 'Satisfied' : 'Unsatisfied'}}
                       </span>
-                      <div class="font-size-11 text-danger mt-1 text-wrap lh-1" style="max-width: 120px;"
-                        *ngIf="!row.jawak.review && row.jawak.review_reason">
-                        {{row.jawak.review_reason}}
-                      </div>
                     </div>
                     <div *ngIf="row.jawak.review === undefined || row.jawak.review === null"
                       class="text-muted font-size-11">-</div>
                   </td>
+                  <td class="text-start px-2" style="max-width: 180px;">
+                    <div class="font-size-11 text-wrap lh-1"
+                      [ngClass]="row.jawak.review ? 'text-muted' : 'text-danger'"
+                      *ngIf="row.jawak.review_reason">
+                      {{row.jawak.review_reason}}
+                    </div>
+                    <div *ngIf="!row.jawak.review_reason"
+                      class="text-muted font-size-11">-</div>
+                  </td>
                   <td class="text-center fw-bold font-size-13 text-nowrap">{{row.jawak.qty}}</td>
+                  <td class="text-center font-size-13 text-nowrap text-success fw-medium">{{row.jawak.bachat !== null && row.jawak.bachat !== undefined ? row.jawak.bachat : '-'}}</td>
                   <td class="text-center text-muted font-size-12 text-nowrap">₹{{row.jawak.rate || '-'}}</td>
                   <td class="text-center fw-bold text-theme font-size-13 text-nowrap">₹{{row.jawak.amount || '-'}}</td>
                   <td class="text-center text-nowrap">
-                    <span class="badge px-2 py-1 rounded-1 cursor-pointer" (click)="toggleStatus(row.jawak)"
-                      [ngClass]="row.jawak.is_received ? 'bg-success' : 'bg-warning'" style="font-size: 10px;">
-                      {{row.jawak.is_received ? 'RCV' : 'PND'}}
-                    </span>
+                    <!-- Status Badge: PND(0) -> inTransit(2) -> RCV(1) -->
+                    <ng-container *ngIf="row.jawak.is_received === 1">
+                      <span class="badge px-2 py-1 rounded-1 cursor-pointer bg-success"
+                        (click)="toggleStatus(row.jawak)" style="font-size: 10px;">RCV</span>
+                    </ng-container>
+                    <ng-container *ngIf="row.jawak.is_received === 2">
+                      <div class="d-flex flex-column align-items-center gap-0 mt-1">
+                        <span class="badge px-2 py-1 rounded-1 cursor-pointer bg-info" (click)="toggleStatus(row.jawak)"
+                          style="font-size: 11px;">inTransit</span>
+                        <span class="text-info lh-1 fw-bold" style="font-size: 12px;">{{row.jawak.place?.mm_hin ||
+                          ''}}</span>
+                      </div>
+                    </ng-container>
+                    <ng-container *ngIf="row.jawak.is_received !== 1 && row.jawak.is_received !== 2">
+                      <span class="badge px-2 py-1 rounded-1 cursor-pointer bg-warning"
+                        (click)="toggleStatus(row.jawak)" style="font-size: 10px;">PND</span>
+                    </ng-container>
                   </td>
                 </ng-container>
                 <ng-template #emptyJawakIndiv>
-                  <td colspan="11" class="text-center opacity-25 fst-italic font-size-11 bg-soft-light text-nowrap">Not
+                  <td colspan="13" class="text-center opacity-25 fst-italic font-size-11 bg-soft-light text-nowrap">Not
                     Dispatched Yet
                   </td>
                 </ng-template>
@@ -672,7 +777,7 @@
 
 <!-- Entry Modal -->
 <div class="modal fade" id="prastavEntryModal" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static">
-  <div class="modal-dialog" role="document" style="width: 98%">
+  <div class="modal-dialog modal-xl" role="document" style="width: 98%; max-width: 98%;">
     <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
       <div class="modal-header border-0 bg-light">
         <h5 class="modal-title fw-bold text-dark font-size-16">

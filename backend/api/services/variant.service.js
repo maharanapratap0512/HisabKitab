@@ -321,8 +321,14 @@ function _createOneVariant(item_id, data, dept_id) {
         .sort((a, b) => a - b)
         .join('-');
 
-    // Check if variant with same fingerprint already exists for this item
-    const existing = variant.getOne({ item_id: Number(item_id), fingerprint, active: 1 });
+    // Check if variant with same fingerprint or display_name already exists for this item
+    let existing = null;
+    if (fingerprint) {
+        existing = variant.getOne({ item_id: Number(item_id), fingerprint, active: 1 });
+    }
+    if (!existing && display_name_hin) {
+        existing = variant.getOne({ item_id: Number(item_id), display_name: display_name_hin.trim(), active: 1 });
+    }
 
     if (existing) {
         const vId = existing._id;
@@ -330,7 +336,7 @@ function _createOneVariant(item_id, data, dept_id) {
         variant.update({ _id: vId }, {
             sku: sku || existing.sku,
             display_name: display_name_hin || existing.display_name,
-            fingerprint: fingerprint || null,
+            fingerprint: fingerprint || existing.fingerprint || null,
         });
 
         // Update categories for existing variant
@@ -363,7 +369,7 @@ function _createOneVariant(item_id, data, dept_id) {
             }
         }
 
-        return { variant_id: vId, subitem_id: existingSub?._id };
+        return { variant_id: vId, subitem_id: existingSub?._id, alreadyExists: true, display_name: existing.display_name || display_name_hin };
     }
 
     // 1. variant core (NEW)
@@ -439,7 +445,12 @@ function bulkCreateVariants(item_id, variants_data, userData) {
 
         for (const vData of variants_data) {
             try {
-                created.push(_createOneVariant(item_id, vData, dept_id));
+                const res = _createOneVariant(item_id, vData, dept_id);
+                if (res && res.alreadyExists) {
+                    skipped.push({ display_name: vData.display_name_hin || res.display_name, reason: 'Duplicate', ...res });
+                } else {
+                    created.push(res);
+                }
             } catch (err) {
                 // If it's a unique constraint violation (on fingerprint or display_name), we skip it
                 if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' || (err.message && (err.message.includes('UNIQUE') || err.message.includes('unique')))) {

@@ -97,6 +97,41 @@
                         </ng-select>
                     </div>
                 </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label mb-0">Yearly Rate ({{ currentYear }})</label>
+                            <span class="text-primary cursor-pointer small" (click)="showOtherYears = !showOtherYears">
+                                <i class="uil" [ngClass]="showOtherYears ? 'uil-angle-up' : 'uil-angle-down'"></i>
+                                {{ showOtherYears ? 'कम दिखाएं' : 'अन्य वर्ष (+)' }}
+                            </span>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" [placeholder]="'दर ' + currentYear"
+                                [(ngModel)]="currentYearRate" [ngModelOptions]="{standalone: true}"
+                                (ngModelChange)="onCurrentYearRateChange($event)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expanded other years strip -->
+                <div class="col-12 mb-3" *ngIf="showOtherYears">
+                    <div class="p-2 border rounded">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-2 col-4" *ngFor="let yr of yearlyRatesList">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span class="badge" [ngClass]="yr.year === currentYear ? 'badge-outline-primary fw-bold' : 'badge-outline-secondary'" style="font-size: 11px;">{{ yr.year }}:</span>
+                                    <div class="input-group input-group-sm flex-grow-1">
+                                        <span class="input-group-text px-1">₹</span>
+                                        <input type="number" class="form-control form-control-sm" [(ngModel)]="yr.rate"
+                                            [ngModelOptions]="{standalone: true}" (ngModelChange)="onYearlyRateChange(yr)" placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-3 mb-3" *ngIf="settings.price_range">
                     <div class="form-group">
                         <label class="form-label">Price Range</label>

@@ -29,6 +29,7 @@ export class PrastavFormService {
       unit_id: null,
       source_mm_id: null,
       qty: null,
+      bachat: null,
       rate: null,
       amount: null,
       bori_count: null,
@@ -63,6 +64,7 @@ export class PrastavFormService {
       mm_id: auth.webUser.settings.defaultMM,
       pbk_id: null,
       pbk_count: null,
+      prastav_type: null,
       is_noted: 0,
       note_details: null,
       is_rejected: 0,
@@ -78,6 +80,7 @@ export class PrastavFormService {
       mm_id: this.prastavForm.mm_id,
       pbk_id: this.prastavForm.pbk_id,
       pbk_count: null,
+      prastav_type: null,
       is_noted: 0,
       note_details: null,
       is_rejected: 0,
@@ -113,6 +116,7 @@ export class PrastavFormService {
       mm_id: data.mm_id ?? lines[0]?.mm_id,
       pbk_id: data.pbk_id ?? lines[0]?.pbk_id ?? null,
       pbk_count: data.pbk_count ?? null,
+      prastav_type: data.prastav_type ?? lines[0]?.prastav_type ?? null,
       voucher_no: data.voucher_no ?? null,
       is_noted: data.is_noted ?? 0,
       note_details: data.note_details ?? null,
@@ -137,6 +141,7 @@ export class PrastavFormService {
           for (const jw of row.jawaks) {
             jw.item_id = row.item_id;
             jw.subitem_id = row.subitem_id;
+            jw.bachat = jw.bachat ?? null;
           }
         }
 

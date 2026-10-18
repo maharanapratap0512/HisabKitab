@@ -65,6 +65,17 @@ export class VariantComponent implements OnInit {
   newAliasText = '';
   newAliasLanguage = 'hin';
 
+  // ── Yearly Rates State ───────────────────────────────────────────────────
+  currentYear: number = new Date().getFullYear();
+  ratesMap: { [key: string]: { [year: number]: number } } = {};
+  ratesRawMap: { [key: string]: any[] } = {};
+  activeRateItem: any = null;
+  activeRateSubitem: any = null;
+  activeRateVariant: any = null;
+  quickRatesList: { year: number; rate: any; _id?: number }[] = [];
+  quickRateNewYear: number | null = null;
+  isQuickRateSaving = false;
+
   separators = SEPARATORS;
 
   constructor(
@@ -83,6 +94,7 @@ export class VariantComponent implements OnInit {
       this.units = result.unit || [];
     });
     this.getItemData(1);
+    this.loadDepartmentRates();
     this.loadAttributes();
   }
 
@@ -282,4 +294,223 @@ export class VariantComponent implements OnInit {
   }
 
   trackById(_: any, item: any) { return item._id; }
+
+  // ── Yearly Rates Methods ─────────────────────────────────────────────────
+  loadDepartmentRates() {
+    this.http.get(this.api.getUrl('ITEMRATE') + this.auth.webUser.dept_id).subscribe({
+      next: (res: any) => {
+        if (res && res.success && res.result) {
+          const map: { [key: string]: { [year: number]: number } } = {};
+          const rawMap: { [key: string]: any[] } = {};
+          for (const r of res.result) {
+            const key = `${r.item_id}_${r.subitem_id || 0}`;
+            if (!map[key]) map[key] = {};
+            if (!rawMap[key]) rawMap[key] = [];
+            map[key][r.year] = Number(r.rate);
+            rawMap[key].push(r);
+          }
+          this.ratesMap = map;
+          this.ratesRawMap = rawMap;
+        }
+      },
+      error: (err: any) => {
+        this.toastr.error(err?.error?.message || 'वार्षिक दरें लोड करने में समस्या आई।');
+      }
+    });
+  }
+
+  getRate(itemId: number, subitemId?: number): number | null {
+    const key = `${itemId}_${subitemId || 0}`;
+    const itemRates = this.ratesMap[key];
+    if (itemRates && itemRates[this.currentYear] !== undefined && itemRates[this.currentYear] !== null) {
+      return itemRates[this.currentYear];
+    }
+    return null;
+  }
+
+  getRateTooltip(itemId: number, subitemId?: number): string {
+    const key = `${itemId}_${subitemId || 0}`;
+    const itemRates = this.ratesMap[key];
+    if (!itemRates) return 'कोई दर दर्ज नहीं';
+    const years = Object.keys(itemRates).sort((a, b) => Number(b) - Number(a));
+    if (!years.length) return 'कोई दर दर्ज नहीं';
+    return years.map(y => `${y}: ₹${itemRates[Number(y)]}`).join(' | ');
+  }
+
+  openQuickRateModal(item: any, subitem: any = null, variant: any = null) {
+    this.activeRateItem = item;
+    this.activeRateSubitem = subitem;
+    this.activeRateVariant = variant;
+    this.quickRateNewYear = null;
+
+    const key = `${item._id}_${subitem ? subitem._id : 0}`;
+    const existing = this.ratesMap[key] || {};
+    const existingRaw = this.ratesRawMap[key] || [];
+
+    const defaultYears = [
+      this.currentYear,
+      this.currentYear - 1,
+      this.currentYear - 2,
+      this.currentYear - 3,
+      this.currentYear - 4,
+      this.currentYear - 5
+    ];
+    const allYears = Array.from(new Set([...defaultYears, ...Object.keys(existing).map(Number)])).sort((a, b) => b - a);
+
+    this.quickRatesList = allYears.map(year => {
+      const rawObj = existingRaw.find((r: any) => Number(r.year) === year);
+      return {
+        year,
+        rate: existing[year] !== undefined ? existing[year] : null,
+        _id: rawObj ? rawObj._id : undefined
+      };
+    });
+
+    $('#quickRateModalVariant').modal('show');
+  }
+
+  closeQuickRateModal() {
+    $('#quickRateModalVariant').modal('hide');
+    this.activeRateItem = null;
+    this.activeRateSubitem = null;
+    this.activeRateVariant = null;
+    this.quickRatesList = [];
+    this.quickRateNewYear = null;
+  }
+
+  addQuickRateYear() {
+    if (!this.quickRateNewYear) return;
+    const yr = Number(this.quickRateNewYear);
+    if (isNaN(yr) || yr < 2000 || yr > 2100) {
+      this.toastr.warning('कृपया सही वर्ष दर्ज करें (उदा. 2023, 2028)');
+      return;
+    }
+    if (this.quickRatesList.some(r => r.year === yr)) {
+      this.toastr.info(`वर्ष ${yr} पहले से सूची में है।`);
+      return;
+    }
+    this.quickRatesList.push({ year: yr, rate: null });
+    this.quickRatesList.sort((a, b) => b.year - a.year);
+    this.quickRateNewYear = null;
+  }
+
+  saveSingleQuickRate(rateObj: any) {
+    if (!this.activeRateItem) return;
+    if (rateObj.rate === null || rateObj.rate === undefined || isNaN(Number(rateObj.rate))) {
+      this.toastr.warning('कृपया दर (Rate) दर्ज करें।');
+      return;
+    }
+    const payload = {
+      item_id: this.activeRateItem._id,
+      subitem_id: this.activeRateSubitem ? this.activeRateSubitem._id : null,
+      year: Number(rateObj.year),
+      rate: Number(rateObj.rate)
+    };
+    this.http.post(this.api.getUrl('ITEMRATE') + this.auth.webUser.dept_id, payload).subscribe({
+      next: (res: any) => {
+        if (res && res.success) {
+          this.toastr.success(`वर्ष ${rateObj.year} की दर ₹${rateObj.rate} सुरक्षित हो गई।`);
+          if (res.result && res.result._id) rateObj._id = res.result._id;
+          const key = `${payload.item_id}_${payload.subitem_id || 0}`;
+          if (!this.ratesMap[key]) this.ratesMap[key] = {};
+          this.ratesMap[key][payload.year] = payload.rate;
+        } else {
+          this.toastr.error(res?.message || 'दर सुरक्षित करने में समस्या आई।');
+        }
+      },
+      error: (err: any) => {
+        this.toastr.error(err?.error?.message || 'दर सुरक्षित करने में समस्या आई।');
+      }
+    });
+  }
+
+  saveAllQuickRates() {
+    if (!this.activeRateItem) return;
+    const validRates = this.quickRatesList.filter(r => r.rate !== null && r.rate !== undefined && !isNaN(Number(r.rate)));
+    if (!validRates.length) {
+      this.toastr.warning('कोई वैध दर दर्ज नहीं है।');
+      return;
+    }
+    this.isQuickRateSaving = true;
+    const payload = {
+      item_id: this.activeRateItem._id,
+      subitem_id: this.activeRateSubitem ? this.activeRateSubitem._id : null,
+      rates: validRates.map(r => ({ year: r.year, rate: Number(r.rate) }))
+    };
+    this.http.post(this.api.getUrl('ITEMRATE') + 'item/bulk/' + this.auth.webUser.dept_id, payload).subscribe({
+      next: (res: any) => {
+        this.isQuickRateSaving = false;
+        if (res && res.success) {
+          this.toastr.success('सभी दरें सफलतापूर्वक सुरक्षित कर दी गईं।');
+          const key = `${payload.item_id}_${payload.subitem_id || 0}`;
+          if (!this.ratesMap[key]) this.ratesMap[key] = {};
+          for (const r of validRates) {
+            this.ratesMap[key][r.year] = Number(r.rate);
+          }
+          this.closeQuickRateModal();
+        } else {
+          this.toastr.error(res?.message || 'दरें सुरक्षित करने में समस्या आई।');
+        }
+      },
+      error: (err: any) => {
+        this.isQuickRateSaving = false;
+        this.toastr.error(err?.error?.message || 'दरें सुरक्षित करने में समस्या आई।');
+      }
+    });
+  }
+
+  applyRateToTransactions(rateObj: any) {
+    if (!this.activeRateItem || rateObj.rate === null || rateObj.rate === undefined) return;
+    const label = this.activeRateVariant ? this.activeRateVariant.display_name : (this.activeRateSubitem ? this.activeRateSubitem.subitem_hin : this.activeRateItem.item_hin);
+    const fullName = `${label} (${this.activeRateItem.item_hin})`;
+    const confirmMsg = `क्या आप वर्ष ${rateObj.year} के सभी आवक एवं जावक रिकॉर्ड्स में '${fullName}' की दर ₹${rateObj.rate} लागू करना चाहते हैं?`;
+    if (!confirm(confirmMsg)) return;
+
+    const payload = {
+      dept_id: this.auth.webUser.dept_id,
+      item_id: this.activeRateItem._id,
+      subitem_id: this.activeRateSubitem ? this.activeRateSubitem._id : null,
+      year: Number(rateObj.year),
+      rate: Number(rateObj.rate)
+    };
+    this.http.post(this.api.getUrl('ITEMRATE') + 'apply/bulk', payload).subscribe({
+      next: (res: any) => {
+        if (res && res.success) {
+          this.toastr.success(res.message || 'दरें आवक/जावक में लागू कर दी गईं।');
+        } else {
+          this.toastr.error(res?.message || 'दरें लागू करने में समस्या आई।');
+        }
+      },
+      error: (err: any) => {
+        this.toastr.error(err?.error?.message || 'दरें लागू करने में समस्या आई।');
+      }
+    });
+  }
+
+  deleteQuickRate(rateObj: any) {
+    if (!rateObj._id) {
+      rateObj.rate = null;
+      return;
+    }
+    if (!confirm(`क्या आप वर्ष ${rateObj.year} की दर हटाना चाहते हैं?`)) return;
+
+    this.http.delete(this.api.getUrl('ITEMRATE') + rateObj._id).subscribe({
+      next: (res: any) => {
+        if (res && res.success) {
+          this.toastr.success(`वर्ष ${rateObj.year} की दर हटा दी गई।`);
+          rateObj.rate = null;
+          rateObj._id = undefined;
+          const key = `${this.activeRateItem._id}_${this.activeRateSubitem ? this.activeRateSubitem._id : 0}`;
+          if (this.ratesMap[key]) {
+            delete this.ratesMap[key][rateObj.year];
+          }
+        } else {
+          this.toastr.error(res?.message || 'दर हटाने में समस्या आई।');
+        }
+      },
+      error: (err: any) => {
+        this.toastr.error(err?.error?.message || 'दर हटाने में समस्या आई।');
+      }
+    });
+  }
 }

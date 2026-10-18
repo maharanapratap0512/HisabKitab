@@ -74,6 +74,9 @@ export class DeleteComponent {
       'HMP': api.URLS['HMP'] + 'batch/',
       'PRASTAV': api.URLS['PRASTAV'] + 'filter/',
       'VARIANT': api.URLS['VARIANT'] + 'filter/',
+      'PBK': api.URLS['PBK'] + 'filter/',
+      'NIMITT': api.URLS['NIMITT'] + 'filter/',
+      'DISTRICT': api.URLS['DISTRICT'] + 'filter/',
     }
   }
 
@@ -103,10 +106,11 @@ export class DeleteComponent {
     if (this.Type && this.ID) {
       this.relatedTables = [];
       this.relatedData = {};
-      let configKey = this.Type;
+      const typeKey = (this.Type || '').toLowerCase();
+      let configKey = typeKey;
       // Handle various support list types
-      const supportListTypes = ['aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type'];
-      if (supportListTypes.includes(this.Type)) {
+      const supportListTypes = ['aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type', 'gender', 'relation', 'status'];
+      if (supportListTypes.includes(typeKey)) {
         configKey = 'support_list';
       }
 
@@ -143,7 +147,10 @@ export class DeleteComponent {
             'aawak_source': { relatedTables: ['AAWAK', 'JAWAK'], transferField: 'aawak_source_id' },
             'condition': { relatedTables: ['AAWAK', 'JAWAK', 'BACHATNEW', 'PRODUCT'], transferField: 'condition_id' },
             'usage_list': { relatedTables: ['AAWAK', 'JAWAK'], transferField: 'usage_list_id' },
-            'mm_type': { relatedTables: ['MM'], transferField: 'mm_type', matchBy: 'list_name_hin' }
+            'mm_type': { relatedTables: ['MM'], transferField: 'mm_type', matchBy: 'list_name_hin' },
+            'gender': { relatedTables: [], transferField: 'gender_id' },
+            'relation': { relatedTables: [], transferField: 'relation_id' },
+            'status': { relatedTables: [], transferField: 'status_id' }
           }
         },
         'category': {
@@ -160,6 +167,76 @@ export class DeleteComponent {
           transferAPI: 'UNIT',
           listAPI: 'UNIT'
         },
+        'state': {
+          apiName: 'STATE',
+          filterBody: { state_id: [this.ID] },
+          relatedTables: ['MM', 'PBK', 'NIMITT', 'DISTRICT'],
+          transferAPI: 'STATE',
+          listAPI: 'STATE'
+        },
+        'zone': {
+          apiName: 'ZONE',
+          filterBody: { zone_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: 'ZONE'
+        },
+        'country': {
+          apiName: 'COUNTRY',
+          filterBody: { country_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: 'COUNTRY'
+        },
+        'district': {
+          apiName: 'DISTRICT',
+          filterBody: { district_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: 'DISTRICT'
+        },
+        'city': {
+          apiName: 'CITY',
+          filterBody: { city_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: 'CITY'
+        },
+        'department': {
+          apiName: 'DEPARTMENT',
+          filterBody: { dept_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: 'DEPARTMENT'
+        },
+        'dict': {
+          apiName: 'DICT',
+          filterBody: { dict_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: null
+        },
+        'point': {
+          apiName: 'POINT',
+          filterBody: { point_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: 'POINT'
+        },
+        'nimitt': {
+          apiName: 'NIMITT',
+          filterBody: { nimitt_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: 'NIMITT'
+        },
+        'vehicle': {
+          apiName: 'VEHICLE',
+          filterBody: { vehicle_id: [this.ID] },
+          relatedTables: [],
+          transferAPI: null,
+          listAPI: 'VEHICLE'
+        },
         'attribute': {
           apiName: 'VARIANT',
           apiPath: 'attributes/',
@@ -175,31 +252,44 @@ export class DeleteComponent {
           relatedTables: ['VARIANT'],
           transferAPI: null,
           listAPI: null
+        },
+        'subitem_list': {
+          apiName: 'SUBITEMLIST',
+          filterBody: { subitem_list_id: [this.ID] },
+          relatedTables: ['SUBITEM'],
+          transferAPI: null,
+          listAPI: null
         }
       };
 
       const config = this.configMapping[configKey];
       if (config) {
         this.apiName = config.apiName;
-        this.relatedTables = config.relatedTables;
+        this.relatedTables = config.relatedTables || [];
 
         // Unified handling for standard and support list types
         if (configKey === 'support_list') {
-          const sub = config.subTypes[this.Type] || { relatedTables: [], transferField: 'support_list_id' };
-          this.relatedTables = sub.relatedTables;
+          const sub = config.subTypes[typeKey] || { relatedTables: [], transferField: 'support_list_id' };
+          this.relatedTables = sub.relatedTables || [];
 
           if (sub.matchBy) {
             // Special case for types like mm_type: match by name string (e.g. list_name_hin) instead of ID
             this.isLoader = true;
-            this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.ID).subscribe((res: any) => {
-              if (res?.result?.[0]) {
-                const name = res.result[0][sub.matchBy];
-                this.filterBody = { [sub.transferField]: [name] };
-                this.getRelatedData();
-              } else {
+            this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.ID).subscribe({
+              next: (res: any) => {
+                if (res?.result?.[0]) {
+                  const name = res.result[0][sub.matchBy];
+                  this.filterBody = { [sub.transferField]: [name] };
+                  this.getRelatedData();
+                } else {
+                  this.isLoader = false;
+                }
+              },
+              error: (err: any) => {
                 this.isLoader = false;
+                this.toastr.error('Failed to load support list info.');
               }
-            }, err => { this.isLoader = false; });
+            });
             return; // Wait for async name fetch
           } else {
             this.filterBody = { [sub.transferField]: Array.isArray(this.ID) ? this.ID : [this.ID] };
@@ -207,7 +297,7 @@ export class DeleteComponent {
         } else {
           // If ID is an array, spread it or use it directly, but config.filterBody uses [this.ID] statically in the definition!
           // We must dynamically map the filterBody arrays to use the selected IDs
-          this.filterBody = JSON.parse(JSON.stringify(config.filterBody));
+          this.filterBody = JSON.parse(JSON.stringify(config.filterBody || {}));
           for (let k in this.filterBody) {
             if (Array.isArray(this.filterBody[k])) {
               this.filterBody[k] = Array.isArray(this.ID) ? this.ID : [this.ID];
@@ -215,27 +305,37 @@ export class DeleteComponent {
           }
         }
 
-        // Load transfer list
-        if (config.listAPI) {
+        // Load transfer list only if transfer is supported for this entity
+        if (config.transferAPI && config.listAPI) {
           let listUrl = this.api.getUrl(config.listAPI);
           if (configKey === 'support_list') {
             listUrl = this.api.getUrl('SUPPORTLIST') + 'splists/';
           }
-          this.http.get(listUrl + this.auth.webUser.dept_id).subscribe((data: any) => {
-            if (data?.result) {
-              if (configKey === 'support_list') {
-                this.transferList = data.result.filter((m: any) => m._id != this.ID && m.list_type === this.Type);
-              } else {
-                this.transferList = data.result.filter((m: any) => m._id != this.ID);
+          if (listUrl) {
+            this.http.get(listUrl + this.auth.webUser.dept_id).subscribe({
+              next: (data: any) => {
+                if (data?.result) {
+                  if (configKey === 'support_list') {
+                    this.transferList = data.result.filter((m: any) => m._id != this.ID && m.list_type === this.Type);
+                  } else {
+                    this.transferList = data.result.filter((m: any) => m._id != this.ID);
+                  }
+                }
+              },
+              error: (err: any) => {
+                console.warn('[DeleteComponent] Could not fetch transfer list:', err);
               }
-            }
-          });
+            });
+          }
         }
         this.page = 1;
-      } else if (this.Type === 'subitem_list') {
-        this.apiName = 'SUBITEMLIST';
-        this.filterBody = { subitem_list_id: [this.ID] };
-        this.relatedTables = ['SUBITEM'];
+      } else {
+        // Universal fallback for any other unmapped entity
+        let upperType = (this.Type || '').toUpperCase();
+        if (upperType === 'DEPARTMENT') upperType = 'DEPT';
+        this.apiName = upperType;
+        this.relatedTables = [];
+        this.filterBody = { [typeKey + '_id']: Array.isArray(this.ID) ? this.ID : [this.ID] };
         this.page = 1;
       }
 
@@ -300,6 +400,13 @@ export class DeleteComponent {
       // Auto-trigger SWAL if no references are found
       if (this.canDelete) {
         this.finalDelete();
+      } else {
+        if (!this.relatedData[this.selectedTable] || this.relatedData[this.selectedTable].length === 0) {
+          const firstWithData = this.relatedTables.find((t: any) => this.relatedData[t] && this.relatedData[t].length > 0);
+          if (firstWithData) {
+            this.configureFields(firstWithData);
+          }
+        }
       }
     } else {
       this.canDelete = false;
@@ -324,26 +431,54 @@ export class DeleteComponent {
   }
 
   executeFinalDelete() {
-    if (!['SUBITEMLIST'].includes(this.apiName)) {
-      // Background cleanup for related tables
-      this.http.delete(this.api.getUrl('BACHAT') + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe();
-      this.http.delete(this.api.getUrl('BACHATNEW') + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe();
+    if (['MM', 'ITEM', 'SUBITEM'].includes(this.apiName) && this.filterBody && Object.keys(this.filterBody).length > 0) {
+      // Background cleanup for related tables only when relevant filterBody exists
+      const bachatUrl = this.api.getUrl('BACHAT');
+      const bachatNewUrl = this.api.getUrl('BACHATNEW');
+      if (bachatUrl) {
+        this.http.delete(bachatUrl + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe({
+          error: (err: any) => console.warn('Bachat cleanup warning:', err)
+        });
+      }
+      if (bachatNewUrl) {
+        this.http.delete(bachatNewUrl + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe({
+          error: (err: any) => console.warn('BachatNew cleanup warning:', err)
+        });
+      }
     }
 
-    const configKey = this.configMapping[this.Type] ? this.Type : 'support_list';
-    const config = this.configMapping[configKey];
+    const typeKey = (this.Type || '').toLowerCase();
+    const supportListTypes = ['aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type', 'gender', 'relation', 'status'];
+    const configKey = supportListTypes.includes(typeKey)
+      ? 'support_list'
+      : (this.configMapping[typeKey] ? typeKey : null);
+    const config = configKey ? this.configMapping[configKey] : null;
     const apiPath = config?.apiPath || '';
+
+    if (!this.apiName) {
+      this.apiName = config?.apiName || (this.Type || '').toUpperCase();
+      if (this.apiName === 'DEPARTMENT') this.apiName = 'DEPT';
+    }
+
+    const baseUrl = this.api.getUrl(this.apiName);
+    if (!baseUrl) {
+      this.toastr.error(`Cannot find API URL for type: ${this.Type || this.apiName}`);
+      return;
+    }
 
     // Main deletion
     const finalId = Array.isArray(this.ID) ? this.ID.join(',') : this.ID;
-    this.http.delete(this.api.getUrl(this.apiName) + apiPath + finalId).subscribe((data: any) => {
-      if (data['success']) {
-        this.response.emit(true);
-      } else {
-        this.toastr.error(data['message'] || 'Delete failed.');
+    this.http.delete(baseUrl + apiPath + finalId).subscribe({
+      next: (data: any) => {
+        if (data && (data.success || data.status)) {
+          this.response.emit(true);
+        } else {
+          this.toastr.error(data?.message || 'Delete failed.');
+        }
+      },
+      error: (err: any) => {
+        this.toastr.error(err?.error?.message || err?.message || 'Server error while deleting.');
       }
-    }, err => {
-      this.toastr.error(err.error?.message || 'Server error while deleting.');
     });
   }
 
@@ -369,8 +504,82 @@ export class DeleteComponent {
         break;
       case 'VARIANT': this.setVariantFields();
         break;
+      case 'MM': this.setMmFields();
+        break;
+      case 'PBK': this.setPbkFields();
+        break;
+      case 'NIMITT': this.setNimittFields();
+        break;
+      case 'DISTRICT': this.setDistrictFields();
+        break;
       default:
     }
+  }
+
+  setMmFields() {
+    this.fields = [
+      {
+        title: "MM",
+        columns: ["mm_hin", "mm_eng"]
+      }, {
+        title: "MM Code",
+        columns: ["mm_code"]
+      }, {
+        title: "MM Type",
+        columns: ["mm_type"]
+      }, {
+        title: "State",
+        columns: ["state_hin", "state_eng"]
+      }
+    ];
+  }
+
+  setPbkFields() {
+    this.fields = [
+      {
+        title: "Roll No",
+        columns: ["roll_no"]
+      }, {
+        title: "Name",
+        columns: ["pbk_hin", "pbk_eng"]
+      }, {
+        title: "Father / Husband",
+        columns: ["relative_name"]
+      }, {
+        title: "State",
+        columns: ["state_hin", "state_eng"]
+      }
+    ];
+  }
+
+  setNimittFields() {
+    this.fields = [
+      {
+        title: "Roll No",
+        columns: ["roll_no"]
+      }, {
+        title: "Name",
+        columns: ["nimitt_hin", "nimitt_eng"]
+      }, {
+        title: "Relative Name",
+        columns: ["relative_name"]
+      }, {
+        title: "State",
+        columns: ["state_hin", "state_eng"]
+      }
+    ];
+  }
+
+  setDistrictFields() {
+    this.fields = [
+      {
+        title: "District",
+        columns: ["district_hin", "district_eng"]
+      }, {
+        title: "State",
+        columns: ["state_hin", "state_eng"]
+      }
+    ];
   }
 
   setAawakFields() {
@@ -638,21 +847,26 @@ export class DeleteComponent {
         confirmButtonText: 'Yes, delete it!'
       }).then((result: any) => {
         if (result.isConfirmed) {
-          this.http.delete(this.api.getUrl(this.selectedTable) + '/' + id).subscribe((data: any) => {
-            if (data['success']) {
+          const baseUrl = (this.api.getUrl(this.selectedTable) || '').replace(/\/+$/, '');
+          const deleteUrl = `${baseUrl}/${id}`;
+          this.http.delete(deleteUrl).subscribe((data: any) => {
+            if (data['success'] || data['status']) {
               this.isLoader = false;
               this.relatedData[this.selectedTable].splice(i, 1);
+              if (this.relatedData[this.selectedTable + '_count']) {
+                this.relatedData[this.selectedTable + '_count']--;
+              }
               if (this.relatedData[this.selectedTable].length <= 0) {
                 this.getRelatedData();
               }
               this.toastr.success('deleted successfully.');
             }
             else {
-              this.toastr.error(data['message']);
+              this.toastr.error(data['message'] || 'Delete failed.');
               this.isLoader = false;
             }
           }, err => {
-            this.toastr.error(err['error']);
+            this.toastr.error(err['error']?.message || err['message'] || 'Delete failed.');
           });
         }
       });
@@ -692,7 +906,9 @@ export class DeleteComponent {
           // We can just use the standard API call for all if backend supports it.
         }
 
-        this.http.delete(this.api.getUrl(this.selectedTable) + '/' + idsStr).subscribe((data: any) => {
+        const baseUrl = (this.api.getUrl(this.selectedTable) || '').replace(/\/+$/, '');
+        const deleteUrl = `${baseUrl}/${idsStr}`;
+        this.http.delete(deleteUrl).subscribe((data: any) => {
           this.isLoader = false;
           if (data['success']) {
             this.selectionService.clear(this.selectedTable);
@@ -703,7 +919,7 @@ export class DeleteComponent {
           }
         }, err => {
           this.isLoader = false;
-          this.toastr.error(err['error']?.message || 'Server error.');
+          this.toastr.error(err['error']?.message || err['message'] || 'Server error.');
         });
       }
     });
@@ -732,39 +948,54 @@ export class DeleteComponent {
     }).then((result: any) => {
       if (result.isConfirmed) {
         this.transferring = true;
-        let configKey = this.Type;
-        const supportListTypes = ['unit', 'aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type'];
-        if (supportListTypes.includes(this.Type)) {
+        let typeKey = (this.Type || '').toLowerCase();
+        let configKey = typeKey;
+        const supportListTypes = ['aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type', 'gender', 'relation', 'status'];
+        if (supportListTypes.includes(typeKey)) {
           configKey = 'support_list';
         }
 
         const config = this.configMapping[configKey];
-        if (config) {
-          const sub = configKey === 'support_list' ? config.subTypes[this.Type] : null;
+        if (config && config.transferAPI) {
+          const sub = configKey === 'support_list' ? config.subTypes[typeKey] : null;
 
           if (sub && sub.matchBy) {
             // Special case for name-based transfer
             this.transferring = true;
-            this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.ID).subscribe((res: any) => {
-              if (res?.result?.[0]) {
-                const fromName = res.result[0][sub.matchBy];
-                this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.targetID).subscribe((res2: any) => {
-                  if (res2?.result?.[0]) {
-                    const toName = res2.result[0][sub.matchBy];
-                    const body = {
-                      list_type: this.Type,
-                      from_id: fromName,
-                      to_id: toName
-                    };
-                    this.executeTransfer(body, config.transferAPI);
-                  } else {
-                    this.transferring = false;
-                  }
-                }, err => { this.transferring = false; });
-              } else {
+            this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.ID).subscribe({
+              next: (res: any) => {
+                if (res?.result?.[0]) {
+                  const fromName = res.result[0][sub.matchBy];
+                  this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.targetID).subscribe({
+                    next: (res2: any) => {
+                      if (res2?.result?.[0]) {
+                        const toName = res2.result[0][sub.matchBy];
+                        const body = {
+                          list_type: this.Type,
+                          from_id: fromName,
+                          to_id: toName
+                        };
+                        this.executeTransfer(body, config.transferAPI);
+                      } else {
+                        this.transferring = false;
+                        this.toastr.error('Target item not found.');
+                      }
+                    },
+                    error: (err: any) => {
+                      this.transferring = false;
+                      this.toastr.error('Failed to load target item.');
+                    }
+                  });
+                } else {
+                  this.transferring = false;
+                  this.toastr.error('Source item not found.');
+                }
+              },
+              error: (err: any) => {
                 this.transferring = false;
+                this.toastr.error('Failed to load source item.');
               }
-            }, err => { this.transferring = false; });
+            });
           } else {
             let body: any = { from_id: this.ID, to_id: this.targetID };
             if (['item', 'subitem'].includes(this.Type.toLowerCase())) {
@@ -780,26 +1011,38 @@ export class DeleteComponent {
             }
             this.executeTransfer(body, config.transferAPI);
           }
+        } else {
+          this.transferring = false;
+          this.toastr.info('Transfer is not supported for this entity type.');
         }
       }
     });
   }
 
   executeTransfer(body: any, apiName: string) {
+    const transferUrl = this.api.getUrl(apiName);
+    if (!transferUrl) {
+      this.transferring = false;
+      this.toastr.error('Transfer API endpoint not found.');
+      return;
+    }
     this.http.put(
-      this.api.getUrl(apiName) + 'transfer/' + this.auth.webUser.dept_id,
+      transferUrl + 'transfer/' + this.auth.webUser.dept_id,
       body
-    ).subscribe((data: any) => {
-      this.transferring = false;
-      if (data?.success) {
-        this.toastr.success('References transferred successfully!');
-        this.getRelatedData();
-      } else {
-        this.toastr.error('Transfer failed.');
+    ).subscribe({
+      next: (data: any) => {
+        this.transferring = false;
+        if (data?.success || data?.status) {
+          this.toastr.success('References transferred successfully!');
+          this.getRelatedData();
+        } else {
+          this.toastr.error(data?.message || 'Transfer failed.');
+        }
+      },
+      error: (err: any) => {
+        this.transferring = false;
+        this.toastr.error(err?.error?.message || err?.message || 'Transfer error.');
       }
-    }, err => {
-      this.transferring = false;
-      this.toastr.error('Transfer error.');
     });
   }
 }

@@ -17,6 +17,29 @@ router.get('/:dept_id?', async (req, res, next) => {
 });
 
 
+// district filter
+router.put('/filter/:dept_id?', async (req, res, next) => {
+    try {
+        const conditions = [];
+        if (req.body.state_id && req.body.state_id.length > 0) {
+            conditions.push(`district.state_id IN (${req.body.state_id.join(',')})`);
+        }
+        if (req.body.district_id && req.body.district_id.length > 0) {
+            conditions.push(`district._id IN (${req.body.district_id.join(',')})`);
+        }
+
+        const conditionString = conditions.length > 0 ? conditions.join(' AND ') : null;
+
+        await DB.getList('district', { full: true, conditionString, limit: -1 }).then((resolve) => {
+            res.json({
+                success: true,
+                result: resolve.data || [],
+                total_count: resolve.total_count
+            });
+        });
+    } catch (err) { next(err) };
+});
+
 // post district 
 router.post('/', async (req, res, next) => {
     try {

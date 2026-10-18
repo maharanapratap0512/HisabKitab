@@ -141,7 +141,23 @@
             </ng-select>
         </div>
 
-        <!-- 4. Submit Buttons -->
+        <!-- 4. Yearly Rates (6 Years: Current + 5 Past) -->
+        <div class="mb-3 p-2 border rounded">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-2 col-4" *ngFor="let yr of yearlyRatesList">
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge" [ngClass]="yr.year === currentYear ? 'badge-outline-primary fw-bold' : 'badge-outline-secondary'" style="font-size: 11px;">{{ yr.year }}:</span>
+                        <div class="input-group input-group-sm flex-grow-1">
+                            <span class="input-group-text px-1">₹</span>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="yr.rate"
+                                [ngModelOptions]="{standalone: true}" (ngModelChange)="onYearlyRateChange(yr)" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Submit Buttons -->
         <div class="d-flex justify-content-end gap-2 pt-2 border-top">
             <button type="button" class="btn btn-outline-secondary btn-sm" (click)="onResetSingleClick()">
                 Reset

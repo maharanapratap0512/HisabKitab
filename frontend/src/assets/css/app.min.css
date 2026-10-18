@@ -16662,7 +16662,8 @@ button {
 }
 
 label {
-   font-weight: 600
+   font-weight: 1000;
+   margin-top: 4px;
 }
 
 address.address-lg {

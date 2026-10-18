@@ -151,9 +151,54 @@ async function deleteBulkRates(ids) {
     };
 }
 
+/**
+ * Fetches all yearly rates for a specific item (and optionally subitem) in a department.
+ */
+async function getItemRatesByItem(deptId, itemId, subitemId = null) {
+    let sql = `
+        SELECT item_rate.*
+        FROM item_rate
+        WHERE item_rate.dept_id = ? AND item_rate.item_id = ?
+    `;
+    const params = [Number(deptId), Number(itemId)];
+    if (subitemId) {
+        sql += ` AND item_rate.subitem_id = ?`;
+        params.push(Number(subitemId));
+    } else {
+        sql += ` AND (item_rate.subitem_id IS NULL OR item_rate.subitem_id = 0)`;
+    }
+    sql += ` ORDER BY item_rate.year DESC`;
+    return db.prepare(sql).all(...params);
+}
+
+/**
+ * Saves multiple rates for an item or subitem in a single call.
+ */
+async function saveBulkRates(deptId, data) {
+    const { item_id, subitem_id, rates } = data;
+    if (!item_id || !Array.isArray(rates)) {
+        throw new Error('item_id and rates array are required.');
+    }
+    const results = [];
+    for (const r of rates) {
+        if (r.year && r.rate !== null && r.rate !== undefined && r.rate !== '') {
+            const res = await saveItemRate(deptId, {
+                item_id: Number(item_id),
+                subitem_id: subitem_id ? Number(subitem_id) : null,
+                year: Number(r.year),
+                rate: Number(r.rate)
+            });
+            results.push(res);
+        }
+    }
+    return results;
+}
+
 module.exports = {
     getItemRates,
+    getItemRatesByItem,
     saveItemRate,
+    saveBulkRates,
     deleteItemRate,
     applyItemRate,
     lookupItemRate,

@@ -67,6 +67,32 @@ router.put('/', async (req, res, next) => {
 });
 
 
+// transfer all state references from one state to another
+router.put('/transfer/:dept_id?', async (req, res, next) => {
+    try {
+        const { from_id, to_id } = req.body;
+        if (!from_id || !to_id) return next(new Error('from_id and to_id are required'));
+
+        const tables = [
+            { table: 'mm', col: 'state_id' },
+            { table: 'pbk', col: 'state_id' },
+            { table: 'nimitt', col: 'state_id' },
+            { table: 'district', col: 'state_id' },
+            { table: 'city', col: 'state_id' }
+        ];
+
+        for (const t of tables) {
+            try {
+                DB.db.prepare(`UPDATE ${t.table} SET ${t.col} = ? WHERE ${t.col} = ?`).run(parseInt(to_id), parseInt(from_id));
+            } catch (e) {
+                console.log(`State transfer error for ${t.table}:`, e.message);
+            }
+        }
+
+        res.json({ success: true, message: `All references transferred from State ${from_id} to State ${to_id}` });
+    } catch (err) { next(err); }
+});
+
 // delete state 
 router.delete('/:id', async (req, res, next) => {
     try {

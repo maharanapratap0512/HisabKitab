@@ -5,9 +5,6 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: '500mb' }));
 
-//public folder
-app.use('/api/public', express.static(path.join(__dirname + '/../../Data/Documents')));
-
 // Cors
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -20,6 +17,9 @@ app.use((req, res, next) => {
     res.setTimeout(900000);
     next();
 });
+
+//public folder
+app.use('/api/public', express.static(path.join(__dirname + '/../../Data/Documents')));
 
 
 // Routes

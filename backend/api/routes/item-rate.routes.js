@@ -2,6 +2,34 @@
 const router = require('express').Router();
 const itemRateService = require('../services/item-rate.service');
 
+// GET rates for a specific item (and optionally subitem)
+router.get('/item/:dept_id/:item_id', async (req, res, next) => {
+    try {
+        const subitemId = req.query.subitem_id || null;
+        const list = await itemRateService.getItemRatesByItem(req.params.dept_id, req.params.item_id, subitemId);
+        res.json({
+            success: true,
+            result: list || []
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// Save bulk rates for an item or subitem
+router.post('/item/bulk/:dept_id', async (req, res, next) => {
+    try {
+        const results = await itemRateService.saveBulkRates(req.params.dept_id, req.body);
+        res.json({
+            success: true,
+            message: 'Rates saved successfully.',
+            result: results
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
 // GET all item rates for a department
 router.get('/:dept_id', async (req, res, next) => {
     try {

@@ -92,3 +92,24 @@ ng-select.is-invalid .ng-select-container,
   }
 
 }
+
+// Smooth, visible horizontal scrollbar
+.table-container::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.table-container::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+.table-container::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+.table-container::-webkit-scrollbar-thumb:hover,
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}

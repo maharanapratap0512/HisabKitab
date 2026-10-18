@@ -33,6 +33,13 @@ export class ItemEntryComponent implements OnInit {
   docFile: any = [];
   auto_close: any = true;
 
+  // Yearly Rates UI state
+  currentYear: number = new Date().getFullYear();
+  currentYearRate: any = null;
+  showOtherYears: boolean = false;
+  yearlyRatesList: { year: number; rate: any; _id?: number }[] = [];
+  newCustomYear: number | null = null;
+
   constructor(private fb: FormBuilder,
     private http: HttpService,
     public api: ApiService,
@@ -64,6 +71,102 @@ export class ItemEntryComponent implements OnInit {
     });
     this.settings = this.auth.webUser.settings.item;
     this.mainSettings = this.auth.webUser.settings;
+    if (!this.getData || !this.getData._id) {
+      this.initYearlyRates();
+    }
+  }
+
+  initYearlyRates(existingRates: any[] = []) {
+    const existingMap: { [y: number]: any } = {};
+    for (const r of existingRates) {
+      if (r.year && r.rate !== null && r.rate !== undefined) {
+        existingMap[Number(r.year)] = { rate: Number(r.rate), _id: r._id };
+      }
+    }
+    this.currentYearRate = existingMap[this.currentYear] !== undefined ? existingMap[this.currentYear].rate : null;
+
+    const baseYears = [
+      this.currentYear,
+      this.currentYear - 1,
+      this.currentYear - 2,
+      this.currentYear - 3,
+      this.currentYear - 4,
+      this.currentYear - 5
+    ];
+    const allYears = Array.from(new Set([...baseYears, ...Object.keys(existingMap).map(Number)])).sort((a, b) => b - a);
+    this.yearlyRatesList = allYears.map(y => ({
+      year: y,
+      rate: existingMap[y] !== undefined ? existingMap[y].rate : null,
+      _id: existingMap[y] !== undefined ? existingMap[y]._id : undefined
+    }));
+  }
+
+  loadItemRates(itemId: number) {
+    this.http.get(this.api.getUrl('ITEMRATE') + 'item/' + this.auth.webUser.dept_id + '/' + itemId).subscribe((res: any) => {
+      if (res && res.success) {
+        this.initYearlyRates(res.result || []);
+      } else {
+        this.initYearlyRates();
+      }
+    }, () => {
+      this.initYearlyRates();
+    });
+  }
+
+  onCurrentYearRateChange(val: any) {
+    const num = (val !== null && val !== undefined && val !== '') ? Number(val) : null;
+    this.currentYearRate = num;
+    let found = this.yearlyRatesList.find(y => y.year === this.currentYear);
+    if (found) {
+      found.rate = num;
+    } else {
+      this.yearlyRatesList.push({ year: this.currentYear, rate: num });
+      this.yearlyRatesList.sort((a, b) => b.year - a.year);
+    }
+  }
+
+  onYearlyRateChange(yrObj: any) {
+    if (yrObj.year === this.currentYear) {
+      this.currentYearRate = yrObj.rate !== null && yrObj.rate !== undefined && yrObj.rate !== '' ? Number(yrObj.rate) : null;
+    }
+  }
+
+  addCustomYearRate() {
+    if (!this.newCustomYear) return;
+    const yr = Number(this.newCustomYear);
+    if (isNaN(yr) || yr < 2000 || yr > 2100) {
+      this.toastr.warning('कृपया सही वर्ष दर्ज करें (उदा. 2023, 2028)');
+      return;
+    }
+    if (this.yearlyRatesList.some(y => y.year === yr)) {
+      this.toastr.info(`वर्ष ${yr} पहले से सूची में है।`);
+      return;
+    }
+    this.yearlyRatesList.push({ year: yr, rate: null });
+    this.yearlyRatesList.sort((a, b) => b.year - a.year);
+    this.newCustomYear = null;
+  }
+
+  saveYearlyRates(itemId: number, callback?: () => void) {
+    const validRates = this.yearlyRatesList.filter(r => r.rate !== null && r.rate !== undefined && !isNaN(Number(r.rate)));
+    if (!validRates.length) {
+      if (callback) callback();
+      return;
+    }
+    const payload = {
+      item_id: itemId,
+      subitem_id: null,
+      rates: validRates
+    };
+    this.http.post(this.api.getUrl('ITEMRATE') + 'item/bulk/' + this.auth.webUser.dept_id, payload).subscribe((res: any) => {
+      if (!res.success) {
+        this.toastr.error(res.message || 'Error saving yearly rates.');
+      }
+      if (callback) callback();
+    }, (err: any) => {
+      this.toastr.error(err?.error?.message || 'Error saving yearly rates.');
+      if (callback) callback();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -99,6 +202,12 @@ export class ItemEntryComponent implements OnInit {
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
       this.imagepath = (changes.getData.currentValue.document && changes.getData.currentValue.document.images) ? changes.getData.currentValue.document.images : null;
+
+      if (changes.getData.currentValue._id) {
+        this.loadItemRates(changes.getData.currentValue._id);
+      } else {
+        this.initYearlyRates();
+      }
     }
     console.log("this.itemForm.value.document", this.imagepath);
 
@@ -121,14 +230,18 @@ export class ItemEntryComponent implements OnInit {
       // console.log(this.itemForm.value);
       this.http.post(this.api.getUrl('ITEM') + this.auth.webUser.dept_id, this.itemForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.gs.Lists.itemmix.unshift(data['result']);
-          this.itemForm.reset({
-            unit_id: data['result'].unit_id,
-            categories: data['result'].categories
+          const newItem = data['result'];
+          this.saveYearlyRates(newItem._id, () => {
+            this.gs.Lists.itemmix.unshift(newItem);
+            this.itemForm.reset({
+              unit_id: newItem.unit_id,
+              categories: newItem.categories
+            });
+            this.initYearlyRates();
+            this.isLoader = false;
+            this.toastr.success("Item Added Successfully.");
+            this.response.emit(newItem);
           });
-          this.isLoader = false;
-          this.toastr.success("Item Added Successfully.");
-          this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
           this.isLoader = false;
@@ -166,11 +279,14 @@ export class ItemEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('ITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.itemmix.splice(this.gs.Lists.itemmix.indexOf((i: { _id: any }) => i._id == this.getData._id), 1, data['result'])
-          this.itemForm.reset();
-          this.isLoader = false;
-          this.toastr.success("Item Updated successfully.");
-          this.response.emit(data['result']);
+          this.saveYearlyRates(this.getData._id, () => {
+            this.gs.Lists.itemmix.splice(this.gs.Lists.itemmix.indexOf((i: { _id: any }) => i._id == this.getData._id), 1, data['result']);
+            this.itemForm.reset();
+            this.initYearlyRates();
+            this.isLoader = false;
+            this.toastr.success("Item Updated successfully.");
+            this.response.emit(data['result']);
+          });
         } else {
           this.toastr.error(data['message']);
           this.isLoader = false;

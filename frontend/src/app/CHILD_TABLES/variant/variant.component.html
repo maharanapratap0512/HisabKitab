@@ -185,7 +185,7 @@
                                                 <th>Attributes</th>
                                                 <th style="width:100px;">SKU</th>
                                                 <th style="width:80px;">Unit</th>
-                                                <th style="width:120px;">Rate Range</th>
+                                                <th style="width:120px;">Rate (दर)</th>
                                                 <th style="width:150px;">Aliases</th>
                                                 <th style="width:140px;">Categories</th>
                                                 <th style="width:70px;">Status</th>
@@ -232,13 +232,26 @@
                                                     {{ v.subitem?.unit?.unit_short || '—' }}
                                                 </td>
 
-                                                <!-- Rate Range -->
-                                                <td style="font-size:12px;">
-                                                    <span *ngIf="v.subitem?.min_rate || v.subitem?.max_rate">
-                                                        {{ v.subitem?.min_rate }} – {{ v.subitem?.max_rate }}
-                                                    </span>
-                                                    <span *ngIf="!v.subitem?.min_rate && !v.subitem?.max_rate"
-                                                        class="text-muted">—</span>
+                                                <!-- Rate -->
+                                                <td style="font-size:12px;" (click)="$event.stopPropagation()">
+                                                    <div class="d-flex flex-column align-items-start gap-1">
+                                                        <span *ngIf="getRate(selectedItem._id, v.subitem?._id) !== null"
+                                                            class="badge bg-info-lighten text-info cursor-pointer font-12 px-2 py-1"
+                                                            (click)="openQuickRateModal(selectedItem, v.subitem, v)"
+                                                            [title]="getRateTooltip(selectedItem._id, v.subitem?._id)">
+                                                            ₹{{ getRate(selectedItem._id, v.subitem?._id) }}
+                                                            <i class="uil uil-edit-alt ms-1 font-10"></i>
+                                                        </span>
+                                                        <button *ngIf="getRate(selectedItem._id, v.subitem?._id) === null"
+                                                            class="btn btn-xs btn-outline-secondary py-0 px-1 font-10"
+                                                            (click)="openQuickRateModal(selectedItem, v.subitem, v)"
+                                                            title="वार्षिक दर जोड़ें">
+                                                            + दर डालें
+                                                        </button>
+                                                        <small class="text-muted" *ngIf="v.subitem?.min_rate || v.subitem?.max_rate" style="font-size:10px;">
+                                                            {{ v.subitem?.min_rate }} – {{ v.subitem?.max_rate }}
+                                                        </small>
+                                                    </div>
                                                 </td>
 
                                                 <!-- Aliases -->
@@ -384,3 +397,91 @@
 </div>
 
 <app-yearly-rates #yearlyRatesComp></app-yearly-rates>
+
+<!-- Quick Yearly Rates Modal for Variant / Item -->
+<div class="modal fade" id="quickRateModalVariant" data-bs-backdrop="static" tabindex="-1" aria-labelledby="quickRateModalVariantLabel" aria-hidden="true">
+   <div class="modal-dialog" style="width: 98%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title d-flex align-items-center" id="quickRateModalVariantLabel">
+               <i class="uil uil-bill me-2 text-primary font-20"></i>
+               <span *ngIf="activeRateItem">
+                  {{ activeRateVariant ? activeRateVariant.display_name + ' (' + activeRateItem.item_hin + ')' : (activeRateSubitem ? activeRateSubitem.subitem_hin + ' (' + activeRateItem.item_hin + ')' : activeRateItem.item_hin) }}
+               </span>
+               <span class="badge bg-primary ms-2 font-12" *ngIf="activeRateVariant">वैरिएंट (Variant)</span>
+               <span class="badge bg-info-lighten text-info ms-2 font-12" *ngIf="!activeRateVariant && activeRateSubitem">उप-वस्तु (Subitem)</span>
+               <span class="badge bg-primary-lighten text-primary ms-2 font-12" *ngIf="!activeRateVariant && !activeRateSubitem">मुख्य वस्तु (Item)</span>
+               <small class="text-muted ms-2 fw-normal">- वार्षिक दरें (Yearly Rates)</small>
+            </h5>
+            <button type="button" class="btn-close" (click)="closeQuickRateModal()" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <!-- Rates Table -->
+            <div class="table-responsive">
+               <table class="table table-sm table-hover align-middle mb-0">
+                  <thead>
+                     <tr>
+                        <th style="width: 120px;">वर्ष (Year)</th>
+                        <th style="width: 200px;">दर (Rate ₹)</th>
+                        <th style="width: 120px;">स्थिति (Status)</th>
+                        <th class="text-end">कार्य (Actions)</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr *ngFor="let r of quickRatesList">
+                        <td>
+                           <span class="fw-bold font-14" [ngClass]="{'text-primary': r.year === currentYear}">
+                              {{ r.year }}
+                              <span *ngIf="r.year === currentYear" class="badge badge-outline-primary font-10 ms-1">चालू</span>
+                           </span>
+                        </td>
+                        <td>
+                           <div class="input-group input-group-sm">
+                              <span class="input-group-text">₹</span>
+                              <input type="number" class="form-control font-13" [(ngModel)]="r.rate" placeholder="0.00" (keyup.enter)="saveSingleQuickRate(r)">
+                           </div>
+                        </td>
+                        <td>
+                           <span *ngIf="r._id" class="badge bg-success-lighten text-success">
+                              <i class="uil uil-check-circle me-1"></i>सुरक्षित
+                           </span>
+                           <span *ngIf="!r._id && r.rate != null && r.rate !== ''" class="badge bg-warning-lighten text-warning">
+                              <i class="uil uil-exclamation-triangle me-1"></i>असुरक्षित
+                           </span>
+                           <span *ngIf="!r._id && (r.rate == null || r.rate === '')" class="badge bg-secondary-lighten text-muted">
+                              खाली
+                           </span>
+                        </td>
+                        <td class="text-end">
+                           <button class="btn btn-xs btn-outline-success me-1" (click)="saveSingleQuickRate(r)" title="यह दर सुरक्षित करें">
+                              <i class="uil uil-check"></i> सेव
+                           </button>
+                           <button *ngIf="r.rate !== null && r.rate !== undefined && r.rate > 0"
+                                   class="btn btn-xs btn-outline-info me-1"
+                                   (click)="applyRateToTransactions(r)"
+                                   title="वर्ष {{ r.year }} के सभी आवक/जावक में यह दर लागू करें">
+                              <i class="uil uil-sync"></i> आवक/जावक में लागू करें
+                           </button>
+                           <button *ngIf="r._id" class="btn btn-xs btn-outline-danger" (click)="deleteQuickRate(r)" title="दर हटाएं">
+                              <i class="uil uil-trash"></i>
+                           </button>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <div class="modal-footer d-flex justify-content-between">
+            <small class="text-muted">
+               <i class="uil uil-info-circle me-1"></i>दर दर्ज करके Enter दबाएं या 'सभी दरें सुरक्षित करें' पर क्लिक करें।
+            </small>
+            <div>
+               <button type="button" class="btn btn-secondary me-2" (click)="closeQuickRateModal()">बंद करें</button>
+               <button type="button" class="btn btn-primary" [disabled]="isQuickRateSaving" (click)="saveAllQuickRates()">
+                  <i class="uil uil-save me-1"></i> {{ isQuickRateSaving ? 'सुरक्षित हो रहा है...' : 'सभी दरें सुरक्षित करें' }}
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

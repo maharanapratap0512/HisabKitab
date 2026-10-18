@@ -2,10 +2,18 @@
     {
         "version": "38.1",
         "date": "12-10-2026",
-        "summary": "Live Stock Update in Aawak Distribution & Yearly Rates Excel Import",
-        "summary_hin": "आवक डिस्ट्रीब्यूशन में लाइव बचत अपडेट एवं आइटम एक्सेल वार्षिक दर इम्पोर्ट",
+        "summary": "Item Yearly Rates in Forms & List, Live Stock Update & Excel Rates Import",
+        "summary_hin": "आइटम फॉर्म व सूची में वार्षिक दरें (Yearly Rates), लाइव बचत अपडेट एवं एक्सेल इम्पोर्ट",
         "isNew": true,
         "items": [
+            {
+                "type": "feature",
+                "module": "Item Master & Rates",
+                "title": "Direct Yearly Rates in Item Form & Quick Rate Window in Item List",
+                "title_hin": "आइटम फॉर्म में वार्षिक दरें (Yearly Rates) एवं आइटम सूची में क्विक रेट विंडो",
+                "desc": "Easily set current and previous years' rates directly while creating or editing items and subitems. The Item List table now displays current year rates with one-click quick editing, history view, and instant rate application to transactions.",
+                "desc_hin": "नया आइटम या सब-आइटम बनाते व बदलते समय अब सीधे चालू वर्ष एवं अन्य वर्षों की दरें दर्ज की जा सकती हैं। साथ ही आइटम सूची (Item List) में चालू वर्ष की दर सामने दिखाई देगी, जहाँ से सीधे क्लिक करके किसी भी वर्ष की दर तुरंत बदल सकते हैं और पुरानी आवक-जावक में भी लागू कर सकते हैं।"
+            },
             {
                 "type": "feature",
                 "module": "Excel Import",
@@ -29,6 +37,22 @@
                 "title_hin": "आवक एवं जावक एक्सेल इम्पोर्ट में सुधार",
                 "desc": "Resolved an issue during Excel import where linking related distribution entries could occasionally show an error, ensuring all imported entries are saved smoothly.",
                 "desc_hin": "एक्सेल से आवक और जावक रिकॉर्ड्स इम्पोर्ट करते समय आने वाली रुकावट को ठीक किया गया है, जिससे सभी रिकॉर्ड्स अब आसानी से सुरक्षित हो जाते हैं।"
+            },
+            {
+                "type": "feature",
+                "module": "Masters & State Management",
+                "title": "Smart Related Data Check & Transfer on State Deletion",
+                "title_hin": "राज्य (State) डिलीट करते समय संबंधित रिकॉर्ड्स की जाँच व ट्रांसफर",
+                "desc": "When deleting a state, the system now automatically scans for all related records across MM, PBK, Nimitt, and District. You can easily view, manage, or transfer all related entries to another state before deleting, preventing accidental data loss.",
+                "desc_hin": "राज्य को डिलीट करते समय अब सिस्टम स्वतः चेक करता है कि उस राज्य से जुड़े कोई MM, PBK, निमित्त या जिले (District) तो नहीं हैं। आप उन सभी जुड़े रिकॉर्ड्स को सीधे देख सकते हैं, हटा सकते हैं या किसी अन्य राज्य में एक साथ ट्रांसफर कर सकते हैं।"
+            },
+            {
+                "type": "fix",
+                "module": "Variant Management",
+                "title": "Instant Table Row & Variant List Refresh on Item/Variant Save",
+                "title_hin": "वेरिएंट पेज में आइटम सुधारने या नया वेरिएंट जोड़ने पर तुरंत नया विवरण दिखना",
+                "desc": "When editing an item or creating variants from the Variant page, the table row and nested variant list now update immediately upon saving without needing to reload the page. Adding an existing variant now clearly alerts you that it already exists instead of showing a false success message.",
+                "desc_hin": "वेरिएंट पेज में जब आप आइटम सुधारते हैं या नया वेरिएंट जोड़ते हैं, तो सेव या मॉडल बंद करते ही आइटम पंक्ति एवं नीचे की वेरिएंट सूची तुरंत अपडेट हो जाती है। यदि कोई वेरिएंट पहले से मौजूद हो, तो अब भ्रमित करने वाले सफल संदेश की जगह स्पष्ट चेतावनी दिखाई देती है कि यह वेरिएंट पहले से मौजूद है।"
             }
         ]
     },

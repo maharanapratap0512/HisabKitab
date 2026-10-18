@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 import { Workbook } from 'exceljs';
+import * as JSZip from 'jszip';
 import { AuthService } from './auth.service';
 import { GlobalService } from './global.service';
 import { log } from 'console';
@@ -82,8 +83,27 @@ export class ExcelExportService {
     this.saveAsExcelFile(excelBuffer, excelFileName);
   }
 
-  public exportStyledExcel(json: any[], excelFileName: string, titleText: string = ''): void {
-    if (!json || json.length === 0) return;
+  public exportTblToExcelFile(table: any, excelFileName: string): void {
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(table, { raw: false });
+    console.log('worksheet', worksheet);
+    const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    this.saveAsExcelFile(excelBuffer, excelFileName);
+  }
+
+  private saveAsExcelFile(buffer: any, fileName: string): void {
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE
+    });
+    if (fileName && fileName.trim() == '') {
+      FileSaver.saveAs(data, `HK_export_` + new Date().getTime() + EXCEL_EXTENSION);
+    } else {
+      FileSaver.saveAs(data, fileName + EXCEL_EXTENSION);
+    }
+  }
+
+  public async generateStyledExcelBuffer(json: any[], titleText: string = ''): Promise<ArrayBuffer> {
+    if (!json || json.length === 0) return new ArrayBuffer(0);
     const workbook = new Workbook();
     const worksheet = workbook.addWorksheet('Sheet1');
 
@@ -131,8 +151,8 @@ export class ExcelExportService {
       const isTotal = Object.values(rowObj).some(v => String(v).includes('--TOTAL--'));
 
       row.eachCell((cell) => {
-        const valStr = cell.value !== null && cell.value !== undefined ? String(cell.value) : '';
-        cell.font = { name: 'Calibri', size: 9.5, color: { argb: 'FF000000' } };
+        const isHyperlink = cell.value && typeof cell.value === 'object' && (cell.value as any).hyperlink;
+        const valStr = cell.value !== null && cell.value !== undefined ? (isHyperlink ? (cell.value as any).text : String(cell.value)) : '';
         cell.border = border;
 
         let align: any = { vertical: 'middle', horizontal: 'left' };
@@ -143,94 +163,146 @@ export class ExcelExportService {
         }
         cell.alignment = align;
 
-        if (isTotal) {
+        if (isHyperlink) {
+          cell.font = { name: 'Calibri', size: 9.5, color: { argb: 'FF0563C1' }, underline: true };
+        } else if (isTotal) {
           cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: 'FF0F5132' } };
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD4EDDA' } };
+        } else {
+          cell.font = { name: 'Calibri', size: 9.5, color: { argb: 'FF000000' } };
         }
       });
     });
 
-    const fileName = (excelFileName ? excelFileName : 'HK_Export') + '.xlsx';
-    workbook.xlsx.writeBuffer().then((buffer: any) => {
+    // Auto-fit column widths (excluding merged title banner)
+    keys.forEach((key, colIndex) => {
+      const col = worksheet.getColumn(colIndex + 1);
+      let maxLen = key ? String(key).length : 5;
+
+      const sampleLimit = Math.min(json.length, 500);
+      for (let i = 0; i < sampleLimit; i++) {
+        const val = json[i][key];
+        if (val !== null && val !== undefined) {
+          const str = (typeof val === 'object' && val.text) ? String(val.text) : String(val);
+          const lines = str.split('\n');
+          for (const line of lines) {
+            if (line.length > maxLen) {
+              maxLen = line.length;
+            }
+          }
+        }
+      }
+
+      const lowerKey = String(key).toLowerCase();
+      if (lowerKey === 'no' || lowerKey === 'sr' || lowerKey === 'sr.' || lowerKey === 's.no' || key === 'क्र.') {
+        col.width = Math.max(maxLen + 3, 6);
+      } else if (lowerKey === 'unit' || lowerKey === 'यूनिट') {
+        col.width = Math.max(maxLen + 3, 8);
+      } else {
+        const optimalWidth = Math.min(maxLen + 3, 45);
+        col.width = Math.max(optimalWidth, 10);
+      }
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer as ArrayBuffer;
+  }
+
+  public exportStyledExcel(json: any[], excelFileName: string, titleText: string = ''): void {
+    if (!json || json.length === 0) return;
+    this.generateStyledExcelBuffer(json, titleText).then((buffer: ArrayBuffer) => {
+      const fileName = (excelFileName ? excelFileName : 'HK_Export') + '.xlsx';
       const data: Blob = new Blob([buffer], { type: EXCEL_TYPE });
       FileSaver.saveAs(data, fileName);
     });
   }
 
+  /**
+   * Packages the styled Excel sheet and all related images into a ZIP archive.
+   * Inside the zip, the excel sheet is placed alongside an `images/` directory.
+   * Cells containing relative hyperlinks (e.g. `images/item_1_1.jpg`) can be clicked
+   * directly inside Excel after extracting the archive.
+   *
+   * @param json Data rows for the Excel file
+   * @param imageDownloadList Array of { relPath, fullUrl }
+   * @param zipFileName Base name for the .zip file
+   * @param excelFileName Base name for the inner .xlsx file
+   * @param titleText Banner title in Excel
+   * @param onProgress Callback (current, total, message)
+   */
+  public async exportPackageWithImages(
+    json: any[],
+    imageDownloadList: { relPath: string; fullUrl: string }[],
+    zipFileName: string,
+    excelFileName: string,
+    titleText: string = '',
+    onProgress?: (current: number, total: number, message: string) => void
+  ): Promise<{ success: boolean; imageCount: number }> {
+    const zip = new JSZip();
 
+    // 1. Generate clean styled Excel file
+    if (onProgress) onProgress(0, imageDownloadList ? imageDownloadList.length : 0, 'एक्सेल फाइल तैयार की जा रही है...');
+    const excelBuffer = await this.generateStyledExcelBuffer(json, titleText);
+    zip.file((excelFileName || 'export') + '.xlsx', excelBuffer);
 
-  public exportTblToExcelFile(table: any, excelFileName: string): void {
+    // 2. ALWAYS create images folder so zip package has consistent structure
+    const imgFolder = zip.folder('images');
+    let successfulImages = 0;
+    const total = imageDownloadList ? imageDownloadList.length : 0;
 
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(table, { raw: false });
-    console.log('worksheet', worksheet);
-    const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
-    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    //const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
-    this.saveAsExcelFile(excelBuffer, excelFileName);
-  }
+    if (total > 0 && imgFolder) {
+      if (onProgress) onProgress(0, total, 'फोटो एकत्रित की जा रही हैं...');
 
-  private saveAsExcelFile(buffer: any, fileName: string): void {
-    const data: Blob = new Blob([buffer], {
-      type: EXCEL_TYPE
-    });
-    if (fileName && fileName.trim() == '') {
-      FileSaver.saveAs(data, `HK_export_` + new Date().getTime() + EXCEL_EXTENSION);
-    } else {
-      FileSaver.saveAs(data, fileName + EXCEL_EXTENSION);
+      // Process in concurrent batches of 5 for optimal speed and reliability
+      const batchSize = 5;
+      for (let i = 0; i < total; i += batchSize) {
+        const batch = imageDownloadList.slice(i, i + batchSize);
+        await Promise.all(batch.map(async (item) => {
+          try {
+            const res = await fetch(item.fullUrl);
+            if (res.ok) {
+              const blob = await res.blob();
+              imgFolder.file(item.relPath, blob);
+              successfulImages++;
+            } else {
+              console.warn(`[exportPackageWithImages] Image HTTP ${res.status}: ${item.fullUrl}`);
+            }
+          } catch (e) {
+            console.warn(`[exportPackageWithImages] Failed to fetch image ${item.fullUrl}:`, e);
+          }
+        }));
+
+        const currentCount = Math.min(i + batch.length, total);
+        if (onProgress) onProgress(currentCount, total, 'फोटो एकत्रित की जा रही हैं...');
+      }
+
+      // If no images could be downloaded (e.g. 404s), provide a note inside images folder
+      if (successfulImages === 0) {
+        imgFolder.file('README.txt', 'The images could not be retrieved from the server.');
+      }
+    } else if (imgFolder) {
+      // If no images were associated with items in the list, keep the folder with a note
+      imgFolder.file('README.txt', 'इस सूची के आइटम्स में कोई फोटो उपलब्ध नहीं है (No images available for exported items).');
     }
+
+    // 3. Compress ZIP
+    if (onProgress) onProgress(total, total, 'ज़िप पैकेज (.zip) कंप्रेस किया जा रहा है...');
+    const zipBlob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
+
+    // 4. Trigger download
+    const finalZipName = (zipFileName ? zipFileName : 'Package_With_Images') + '.zip';
+    FileSaver.saveAs(zipBlob, finalZipName);
+
+    return { success: true, imageCount: successfulImages };
   }
 
   async exportWithImages(json: any[], excelFileName: string, sheetName: string = 'sheet 1', options = {}) {
-
-    const worksheet = XLSX.utils.json_to_sheet(json);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-
-    const workbookBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const exceljsWorkbook = new Workbook();
-    await exceljsWorkbook.xlsx.load(workbookBuffer);
-    const exceljsWorksheet = exceljsWorkbook.getWorksheet(sheetName);
-
-
-    // const workbook = new Workbook();
-    // const worksheet = workbook.addWorksheet(sheetName);
-    json.forEach((row, rowIndex) => {
-
-      if (row.document && row.document.images && row.document.images.length > 0) {
-        row.document.images.forEach((imageUrl: any, imageIndex: any) => {
-          fetch(imageUrl)
-            .then(res => res.blob())
-            .then(blob => {
-              const reader = new FileReader();
-              reader.onload = () => {
-                console.log(reader);
-
-                const base64Image = ''
-                // const base64Image = reader?.result?.split(',')[1];
-
-                // Add the image to the workbook without specifying dimensions
-                const imageId = exceljsWorkbook.addImage({
-                  base64: base64Image,
-                  extension: 'png', // Or jpg, etc.
-                });
-
-                // Position the image in the worksheet
-                exceljsWorksheet?.addImage(imageId, {
-                  tl: { col: imageIndex, row: rowIndex },
-                  ext: { width: 10, height: 10 }, // No fixed size
-                  editAs: 'absolute' // Image floats over cells
-                });
-              };
-              reader.readAsDataURL(blob);
-            });
-        });
-      }
-    });
-
-    exceljsWorkbook.xlsx.writeBuffer().then(buffer => {
-      const blob = new Blob([buffer], { type: 'application/octet-stream' });
-      FileSaver.saveAs(blob, 'DataWithImages.xlsx');
-    });
+    // Forward to exportStyledExcel to ensure consistent, uncorrupted Excel files
+    this.exportStyledExcel(json, excelFileName || 'item_export', sheetName);
   }
 
 
