@@ -109,7 +109,7 @@ export class DeleteComponent {
       const typeKey = (this.Type || '').toLowerCase();
       let configKey = typeKey;
       // Handle various support list types
-      const supportListTypes = ['aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type', 'gender', 'relation', 'status'];
+      const supportListTypes = ['aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type', 'gender', 'relation', 'status', 'prastav_type'];
       if (supportListTypes.includes(typeKey)) {
         configKey = 'support_list';
       }
@@ -150,7 +150,8 @@ export class DeleteComponent {
             'mm_type': { relatedTables: ['MM'], transferField: 'mm_type', matchBy: 'list_name_hin' },
             'gender': { relatedTables: [], transferField: 'gender_id' },
             'relation': { relatedTables: [], transferField: 'relation_id' },
-            'status': { relatedTables: [], transferField: 'status_id' }
+            'status': { relatedTables: [], transferField: 'status_id' },
+            'prastav_type': { relatedTables: ['PRASTAV'], transferField: 'prastav_type' }
           }
         },
         'category': {

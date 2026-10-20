@@ -30,6 +30,26 @@ router.get('/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// get vehicle documents by vehicle_id
+router.get('/by_vehicle/:vehicle_id', async (req, res, next) => {
+    try {
+        const stmt = DB.db.prepare(`
+            SELECT *,
+                (doc_date * 1000) as doc_date,
+                (exp_date * 1000) as exp_date,
+                (created_at * 1000) as created_at
+            FROM vehicle_document
+            WHERE vehicle_id = ?
+            ORDER BY exp_date DESC, _id DESC
+        `);
+        const docs = stmt.all(req.params.vehicle_id);
+        res.json({
+            success: true,
+            result: docs || []
+        });
+    } catch (err) { next(err) };
+});
+
 
 // delete vehicle_document 
 router.delete('/:id', async (req, res, next) => {

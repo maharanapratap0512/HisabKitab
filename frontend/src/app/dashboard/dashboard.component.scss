@@ -29,3 +29,35 @@
    right: 0;
    top: 0;
 }
+
+.stat-card {
+   transition: transform 0.2s ease, box-shadow 0.2s ease;
+   border-radius: 12px;
+   &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+   }
+}
+
+.stat-icon-box {
+   width: 52px;
+   height: 52px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.cursor-pointer {
+   cursor: pointer;
+}
+
+.monthly-chart-grid {
+   .chart-bar {
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+      &:hover {
+         filter: brightness(1.15);
+         transform: scaleY(1.02);
+      }
+   }
+}

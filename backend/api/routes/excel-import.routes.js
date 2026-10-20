@@ -559,6 +559,9 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                             }
                             result = { status: 'inserted', data: row };
                         }
+                    } else if (type === 'vehicle') {
+                        const vehicleService = require('../services/vehicle.service');
+                        result = await vehicleService.processVehicleImportRow(DB.db, row, req.params.dept_id);
                     } else {
                         result = await fn.verifyAndInsert(importType, row, headerList);
                     }

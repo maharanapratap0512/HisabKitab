@@ -201,6 +201,10 @@
                     <app-support-list-entry *ngIf="showModal == 'usage_list'" (response)='editResponse($event)'
                         [getData]="editData" [isEdit]="isEdit" list_type="usage_list">
                     </app-support-list-entry>
+                    <!-- prastav_type -->
+                    <app-support-list-entry *ngIf="showModal == 'prastav_type'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="prastav_type">
+                    </app-support-list-entry>
 
                     <app-delete *ngIf='showModal == "delete_advance"' [Type]="delType" [ID]="delID"
                         (response)="deleteResponse($event)"></app-delete>

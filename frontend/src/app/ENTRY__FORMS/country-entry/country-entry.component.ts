@@ -38,32 +38,38 @@ export class CountryEntryComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log("country-changes", changes);
-    if (changes.getData.currentValue) {
+    if (changes['getData'] && changes['getData'].currentValue) {
       this.countryForm.patchValue({
-        country_eng: changes.getData.currentValue.country_eng,
-        country_hin: changes.getData.currentValue.country_hin
+        country_eng: changes['getData'].currentValue.country_eng,
+        country_hin: changes['getData'].currentValue.country_hin
       });
+    } else if (changes['getData'] && !changes['getData'].currentValue) {
+      this.countryForm.reset();
     }
   }
 
   countryFormSubmit() {
     if (this.countryForm.valid) {
       this.isLoader = true;
-      this.http.post(this.api.getUrl('COUNTRY') + this.auth.webUser.dept_id, this.countryForm.value).subscribe((data: any) => {
-        if (data['result'] && data['success']) {
-          this.gs.Lists.country.unshift(data['result']);
-          this.countryForm.reset();
-          this.isLoader = false;
-          this.toastr.success("Country added successfully.");
-          this.response.emit(data['result']);
-        } else {
-          this.toastr.error(data['message']);
+      this.http.post(this.api.getUrl('COUNTRY') + this.auth.webUser.dept_id, this.countryForm.value).subscribe({
+        next: (data: any) => {
+          if (data && data['result'] && data['success']) {
+            if (this.gs.Lists && this.gs.Lists.country) {
+              this.gs.Lists.country.unshift(data['result']);
+            }
+            this.countryForm.reset();
+            this.isLoader = false;
+            this.toastr.success("Country added successfully.");
+            this.response.emit(data['result']);
+          } else {
+            this.toastr.error(data?.['message'] || 'Failed to add country');
+            this.isLoader = false;
+          }
+        },
+        error: (err: any) => {
+          this.toastr.error(err?.['error']?.message || err?.['error'] || 'Error adding country');
           this.isLoader = false;
         }
-      }, err => {
-        this.toastr.error(err['error']);
-        this.isLoader = false;
       });
     }
     else {
@@ -82,21 +88,29 @@ export class CountryEntryComponent implements OnInit {
         country_eng: this.countryForm.value.country_eng,
         country_hin: this.countryForm.value.country_hin
       };
-      this.http.put(this.api.getUrl('COUNTRY'), body).subscribe((data: any) => {
-        if (data && data['success']) {
-          this.gs.Lists.country.splice(this.gs.Lists.country.indexOf((i: { _id: any }) => i._id == this.getData._id), 1, data['result']);
-          this.countryForm.reset();
+      this.http.put(this.api.getUrl('COUNTRY'), body).subscribe({
+        next: (data: any) => {
+          if (data && data['success']) {
+            if (this.gs.Lists && this.gs.Lists.country) {
+              const idx = this.gs.Lists.country.findIndex((i: { _id: any }) => i._id == this.getData._id);
+              if (idx > -1) {
+                this.gs.Lists.country.splice(idx, 1, data['result']);
+              }
+            }
+            this.countryForm.reset();
+            this.isLoader = false;
+            this.toastr.success("Country updated successfully.");
+            this.response.emit(data['result']);
+          }
+          else {
+            this.toastr.error(data?.['message'] || 'Failed to update country');
+            this.isLoader = false;
+          }
+        },
+        error: (err: any) => {
+          this.toastr.error(err?.['error']?.message || err?.['error'] || 'Error updating country');
           this.isLoader = false;
-          this.toastr.success("COUNTRY updated successfully.");
-          this.response.emit(data['result']);
         }
-        else {
-          this.toastr.error(data['message']);
-          this.isLoader = false;
-        }
-      }, err => {
-        this.toastr.error(err['error']);
-        this.isLoader = false;
       });
     }
     else {

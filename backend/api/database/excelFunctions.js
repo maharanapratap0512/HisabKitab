@@ -884,8 +884,8 @@ class ExcelFunctions {
                   exData = new Date(exData).getTime();
                }
                else if (headerList[j].type == 'unix_date') {
-                  listData = new Date(new Date(listData).toDateString()).getTime()
-                  exData = new Date(listData).getTime()
+                  listData = listData ? new Date(new Date(listData).toDateString()).getTime() : 0;
+                  exData = exData ? new Date(new Date(exData).toDateString()).getTime() : 0;
                }
             }
 

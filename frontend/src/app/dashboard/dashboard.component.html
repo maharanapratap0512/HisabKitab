@@ -5,28 +5,563 @@
          <div class="container-fluid">
 
 
-            <div class="row mt-2" style="padding: 10px 50px;">
-               <ul class="nav nav-pills bg-nav-pills">
+            <div class="row mt-2 px-3">
+               <ul class="nav nav-pills bg-nav-pills gap-1">
                   <li class="nav-item">
-                     <a href="#stock" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
-                        Stock Summary
+                     <a href="#overview" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0 active">
+                        <i class="uil uil-dashboard me-1"></i> Dashboard Overview
                      </a>
                   </li>
                   <li class="nav-item">
-                     <a href="#history" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
-                        Import History
+                     <a href="#stock" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                        <i class="uil uil-box me-1"></i> Stock Summary
                      </a>
                   </li>
-                  <!-- <li class="nav-item">
-                     <a href="#closing" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
-                        Closing
+                  <li class="nav-item">
+                     <a href="#history" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                        <i class="uil uil-history me-1"></i> Import History
                      </a>
-                  </li> -->
+                  </li>
+                  <li class="nav-item">
+                     <a href="#analytics" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0" (click)="loadStatistics()">
+                        <i class="uil uil-chart-bar me-1"></i> सांख्यिकी एवं विश्लेषण (Analytics)
+                     </a>
+                  </li>
                </ul>
             </div>
 
 
             <div class="tab-content">
+
+               <!-- TAB 1: MODERN DASHBOARD OVERVIEW (SAMPLE) -->
+               <div class="tab-pane show active" id="overview">
+                  <div class="row mt-3">
+                     <!-- Department & Greeting Banner -->
+                     <div class="col-12 mb-3">
+                        <div class="card card-body p-3 border-0 shadow-sm" style="border-radius: 12px; background: linear-gradient(135deg, rgba(114, 124, 245, 0.08) 0%, rgba(10, 207, 151, 0.05) 100%); border-left: 4px solid #727cf5 !important;">
+                           <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                              <div>
+                                 <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                                    <i class="uil uil-store text-primary fs-3"></i>
+                                    <span>{{auth.webUser?.dept_hin || 'स्टोर विभाग'}}</span>
+                                    <small class="text-muted fs-6" *ngIf="auth.webUser?.dept_eng">({{auth.webUser?.dept_eng}})</small>
+                                 </h4>
+                                 <p class="text-muted mb-0 font-size-13">
+                                    <i class="uil uil-calendar-alt me-1"></i>HisabKitab ERP Store & Logistics Command Center
+                                 </p>
+                              </div>
+                              <div class="d-flex align-items-center gap-2">
+                                 <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill font-size-12" *ngIf="auth.webUser?.settings?.defaultMM">
+                                    <i class="uil uil-map-pin me-1"></i>{{defaultMM}}
+                                 </span>
+                                 <button class="btn btn-sm btn-outline-primary" (click)="getBachat()" title="Refresh Dashboard">
+                                    <i class="uil uil-sync"></i> Refresh
+                                 </button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- KPI Row: 4 Metric Cards -->
+                     <div class="col-xl-3 col-md-6 mb-3">
+                        <div class="card card-body p-3 h-100 shadow-sm border-0 stat-card cursor-pointer" 
+                             (click)="scrollToDispenser()" 
+                             title="स्टॉक आवक विवरण एवं सीधा जावक वितरण सेक्शन पर जाएं">
+                           <div class="d-flex align-items-center justify-content-between">
+                              <div>
+                                 <p class="text-muted text-uppercase fw-semibold font-size-12 mb-1">कुल स्टॉक प्रकार (Items)</p>
+                                 <h3 class="my-1 fw-bold">{{positiveStockCount}}</h3>
+                                 <p class="mb-0 text-muted font-size-12">
+                                    <span class="text-success fw-medium"><i class="uil uil-check-circle me-1"></i>{{positiveStockCount}} उपलब्ध</span>
+                                    <span class="text-primary ms-1"><i class="uil uil-arrow-down"></i> विवरण देखें</span>
+                                 </p>
+                              </div>
+                              <div class="stat-icon-box bg-soft-primary text-primary rounded-circle p-3">
+                                 <i class="uil uil-box fs-2"></i>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-xl-3 col-md-6 mb-3">
+                        <div class="card card-body p-3 h-100 shadow-sm border-0 stat-card">
+                           <div class="d-flex align-items-center justify-content-between">
+                              <div>
+                                 <p class="text-muted text-uppercase fw-semibold font-size-12 mb-1">इस माह आवक (Aawak Entries)</p>
+                                 <h3 class="my-1 fw-bold text-info">{{thisMonthAawakCount}}</h3>
+                                 <p class="mb-0 text-muted font-size-12">
+                                    <span class="text-info fw-medium"><i class="uil uil-arrow-down-left me-1"></i>{{thisMonthAawakCount}} आवक एंट्रियां</span> | चालू माह
+                                 </p>
+                              </div>
+                              <div class="stat-icon-box bg-soft-info text-info rounded-circle p-3">
+                                 <i class="uil uil-arrow-down-left fs-2"></i>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-xl-3 col-md-6 mb-3">
+                        <div class="card card-body p-3 h-100 shadow-sm border-0 stat-card">
+                           <div class="d-flex align-items-center justify-content-between">
+                              <div>
+                                 <p class="text-muted text-uppercase fw-semibold font-size-12 mb-1">इस माह कुल जावक (Jawak Entries)</p>
+                                 <h3 class="my-1 fw-bold text-warning">{{thisMonthJawakCount}}</h3>
+                                 <p class="mb-0 text-muted font-size-12">
+                                    <span class="text-warning fw-medium"><i class="uil uil-arrow-up-right me-1"></i>{{thisMonthJawakCount}} जावक एंट्रियां</span> | चालू माह
+                                 </p>
+                              </div>
+                              <div class="stat-icon-box bg-soft-warning text-warning rounded-circle p-3">
+                                 <i class="uil uil-arrow-up-right fs-2"></i>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-xl-3 col-md-6 mb-3">
+                        <div class="card card-body p-3 h-100 shadow-sm border-0 stat-card cursor-pointer"
+                             (click)="scrollToPrastavAlerts()"
+                             title="लॉजिस्टिक्स अलर्ट्स (डेड स्टॉक व अटके ट्रांजिट) पर जाएं">
+                           <div class="d-flex align-items-center justify-content-between">
+                              <div>
+                                 <p class="text-muted text-uppercase fw-semibold font-size-12 mb-1">प्रस्ताव स्थिति (Prastav Status)</p>
+                                 <h3 class="my-1 fw-bold text-success">{{activePrastavCount}}</h3>
+                                 <p class="mb-0 text-muted font-size-12">
+                                    <span class="text-warning fw-medium"><i class="uil uil-truck me-1"></i>{{prastavTransitCount}} ट्रांजिट</span>
+                                    <span class="mx-1">|</span>
+                                    <span class="text-secondary"><i class="uil uil-clock me-1"></i>{{prastavPendingCount}} पेंडिंग</span>
+                                 </p>
+                              </div>
+                              <div class="stat-icon-box bg-soft-success text-success rounded-circle p-3">
+                                 <i class="uil uil-file-check-alt fs-2"></i>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Quick Actions Hub -->
+                     <div class="col-12 mb-3">
+                        <div class="card card-body p-3 shadow-sm border-0">
+                           <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                              <span class="fw-bold text-muted font-size-13 text-uppercase">
+                                 <i class="uil uil-bolt-alt me-1 text-warning"></i>त्वरित कार्य (Quick Actions)
+                              </span>
+                              <div class="d-flex flex-wrap gap-2">
+                                 <button class="btn btn-primary btn-sm d-flex align-items-center gap-1 px-3" (click)="openModal('Add Aawak')">
+                                    <i class="uil uil-plus-circle font-size-15"></i> नई आवक (Add Aawak)
+                                 </button>
+                                 <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 px-3" (click)="navigateTo('jawakN')">
+                                    <i class="uil uil-arrow-up-right font-size-15"></i> जावक वितरण (Jawak)
+                                 </button>
+                                 <button class="btn btn-outline-info btn-sm d-flex align-items-center gap-1 px-3" (click)="navigateTo('bachat_new')">
+                                    <i class="uil uil-clipboard-notes font-size-15"></i> बचत रिपोर्ट (Bachat)
+                                 </button>
+                                 <button class="btn btn-success btn-sm d-flex align-items-center gap-1 px-3" (click)="openModal('excel_import')">
+                                    <i class="uil uil-arrow-to-bottom font-size-15"></i> एक्सेल इम्पोर्ट (Import)
+                                 </button>
+                                 <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 px-3" (click)="navigateTo('report-universal')">
+                                    <i class="uil uil-chart-line font-size-15"></i> रिपोर्ट्स (Reports)
+                                 </button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Full Screen: Stock & Aawak-to-Jawak Dispenser -->
+                     <div class="col-12 mb-3" id="quickDispenserSection">
+                        <div class="card shadow-sm border-0">
+                           <div class="card-header bg-transparent border-bottom p-3">
+                              <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                 <div>
+                                    <h5 class="card-title mb-0 font-size-15 d-flex align-items-center gap-2">
+                                       <span class="badge bg-soft-warning text-warning p-1 rounded"><i class="uil uil-bolt-alt fs-5"></i></span>
+                                       <span>स्टॉक आवक विवरण एवं सीधा जावक वितरण (Stock & Aawak-to-Jawak Dispenser)</span>
+                                    </h5>
+                                    <small class="text-muted font-size-12">उपलब्ध स्टॉक जांचें, 'लॉट्स' पर क्लिक करके प्रत्येक आवक की शेष बचत (Remaining Qty) देखें और सीधे जावक जोड़ें।</small>
+                                 </div>
+                                 <a href="#stock" data-bs-toggle="tab" class="btn btn-sm btn-soft-primary">
+                                    पूरा स्टॉक देखें <i class="uil uil-arrow-right ms-1"></i>
+                                 </a>
+                              </div>
+                              <!-- Search & Filter Bar -->
+                              <div class="d-flex flex-wrap align-items-center gap-2">
+                                 <div class="input-group input-group-sm flex-grow-1" style="min-width: 220px; max-width: 400px;">
+                                    <span class="input-group-text bg-transparent border-end-0"><i class="uil uil-search"></i></span>
+                                    <input type="text" class="form-control border-start-0" placeholder="आइटम / MM नाम खोजें..." [(ngModel)]="dispenserSearchTerm" (ngModelChange)="filterDispenserItems()">
+                                 </div>
+                                 <ng-select class="custom flex-shrink-0" style="width: 200px;" placeholder="सभी केंद्र (MM)" [clearable]="true" [virtualScroll]="true" [(ngModel)]="dispenserSelectedMM" (change)="filterDispenserItems()">
+                                    <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code ? ' : ' + item.mm_code : ''}}</ng-option>
+                                 </ng-select>
+                                 <button *ngIf="dispenserSearchTerm || dispenserSelectedMM" class="btn btn-sm btn-outline-secondary py-1 px-2" (click)="dispenserSearchTerm = ''; dispenserSelectedMM = null; filterDispenserItems()" title="फ़िल्टर हटाएं">
+                                    <i class="uil uil-times"></i> साफ़ करें
+                                 </button>
+                              </div>
+                           </div>
+                           <div class="card-body p-0">
+                              <div class="table-responsive">
+                                 <table class="table table-hover table-centered mb-0 font-size-13">
+                                    <thead>
+                                       <tr>
+                                          <th class="ps-3">आइटम नाम (Item)</th>
+                                          <th>केंद्र (MM)</th>
+                                          <th class="text-center">उपयोग (Used)</th>
+                                          <th class="text-center">उपलब्ध स्टॉक (Stock)</th>
+                                          <th style="width: 140px;" class="text-center">अनुपात (वितरित %)</th>
+                                          <th class="text-center" style="width: 140px;">आवक लॉट्स</th>
+                                       </tr>
+                                    </thead>
+                                    <tbody>
+                                       <ng-container *ngFor="let item of dispenserItems; let i = index">
+                                          <tr class="cursor-pointer" [class.table-active]="expandedItemId === item._id" (click)="toggleItemAawakLots(item._id)">
+                                             <td class="ps-3">
+                                                <div class="fw-bold">{{item.item_hin}} {{item.subitem_hin ? ' : ' + item.subitem_hin : ''}}</div>
+                                                <small class="text-muted" *ngIf="item.item_eng">{{item.item_eng}}</small>
+                                             </td>
+                                             <td>
+                                                <span>{{item.mm_hin}}</span>
+                                             </td>
+                                             <td class="text-center text-muted">
+                                                {{item.Used ? item.Used + ' ' + (item.unit_short || '') : '-'}}
+                                             </td>
+                                             <td class="text-center fw-bold text-success">
+                                                {{(item.effectiveStock || item.Stock) | number:'1.0-3'}} {{item.unit_short || ''}}
+                                             </td>
+                                             <td class="align-middle">
+                                                <div class="d-flex align-items-center gap-2"
+                                                   [title]="'कुल आवक: ' + getDistributionMetrics(item).originalQty + ' ' + (item.unit_short || '') + ' | वितरित: ' + getDistributionMetrics(item).distributedQty + ' ' + (item.unit_short || '') + ' | शेष: ' + getDistributionMetrics(item).remainingQty + ' ' + (item.unit_short || '')">
+                                                   <div class="progress flex-grow-1" style="height: 6px; min-width: 50px;">
+                                                      <div class="progress-bar"
+                                                         [ngClass]="{
+                                                            'bg-success': getDistributedPercentage(item) < 50,
+                                                            'bg-warning': getDistributedPercentage(item) >= 50 && getDistributedPercentage(item) < 85,
+                                                            'bg-danger': getDistributedPercentage(item) >= 85
+                                                         }"
+                                                         [style.width.%]="getDistributedPercentage(item)">
+                                                      </div>
+                                                   </div>
+                                                   <span class="font-size-11 fw-bold text-nowrap" style="min-width: 32px; text-align: right;">{{getDistributedPercentage(item)}}%</span>
+                                                </div>
+                                             </td>
+                                             <td class="text-center" (click)="$event.stopPropagation()">
+                                                <div class="d-flex align-items-center justify-content-center gap-1">
+                                                   <button class="btn btn-sm py-1 px-2 font-size-11 d-flex align-items-center gap-1"
+                                                      [ngClass]="expandedItemId === item._id ? 'btn-primary' : 'btn-soft-primary'"
+                                                      (click)="toggleItemAawakLots(item._id)"
+                                                      title="इस आइटम के आवक लॉट्स देखें व जावक जोड़ें">
+                                                      <i class="uil uil-receipt"></i>
+                                                      <span>{{item.aawaks?.length || 0}} लॉट्स</span>
+                                                      <i class="uil" [ngClass]="expandedItemId === item._id ? 'uil-angle-up' : 'uil-angle-down'"></i>
+                                                   </button>
+                                                   <button *ngIf="item.aawaks && item.aawaks.length > 0" class="btn btn-sm btn-soft-warning py-1 px-1 font-size-11"
+                                                      (click)="openItemAawakModal(item)" title="पॉपअप विंडो में सभी आवक लॉट्स देखें">
+                                                      <i class="uil uil-external-link-alt"></i>
+                                                   </button>
+                                                </div>
+                                             </td>
+                                          </tr>
+
+                                          <!-- Expandable Sub-Row: Aawak lots for this item -->
+                                          <tr *ngIf="expandedItemId === item._id">
+                                             <td colspan="6" class="p-2 border-start border-3 border-warning">
+                                                <div *ngIf="item.aawaks && item.aawaks.length > 0" class="table-responsive">
+                                                   <table class="table table-sm table-bordered align-middle mb-0 font-size-12">
+                                                      <thead>
+                                                         <tr>
+                                                            <th style="width: 35px;" class="text-center">#</th>
+                                                            <th style="width: 100px;">आवक तारीख</th>
+                                                            <th>आवक केंद्र</th>
+                                                            <th>पैकेट / विवरण</th>
+                                                            <th style="width: 100px;">स्थिति</th>
+                                                            <th class="text-end" style="width: 95px;">मूल आवक</th>
+                                                            <th class="text-end" style="width: 140px;">शेष बचत (Remaining)</th>
+                                                            <th class="text-center" style="width: 180px;">जावक कार्य</th>
+                                                         </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                         <tr *ngFor="let awk of item.aawaks; let j = index">
+                                                            <td class="text-center">
+                                                               <i class="uil uil-corner-down-right text-muted me-1"></i>{{j + 1}}
+                                                            </td>
+                                                            <td class="fw-semibold">{{awk.date | date:'dd-MM-yyyy'}}</td>
+                                                            <td>{{awk.aawak_mm_hin || item.mm_hin || '-'}}</td>
+                                                            <td>
+                                                               <span *ngIf="awk.pkt_num" class="badge bg-soft-secondary text-muted me-1">Pkt: {{awk.pkt_num}}</span>
+                                                               <small class="text-muted" *ngIf="awk.item_detail">{{awk.item_detail}}</small>
+                                                               <span *ngIf="!awk.pkt_num && !awk.item_detail">-</span>
+                                                            </td>
+                                                            <td>{{awk.condition_hin || '-'}}</td>
+                                                            <td class="text-end text-muted">{{awk.qty}} {{item.unit_short}}</td>
+                                                            <td class="text-end">
+                                                               <span class="badge bg-warning text-dark font-size-11 fw-bold px-2 py-1" *ngIf="awk.remaining_qty > 0 || awk.is_variable_qty">
+                                                                  {{awk.remaining_qty | number:'1.0-3'}} {{item.unit_short}}
+                                                               </span>
+                                                               <span class="text-muted" *ngIf="awk.remaining_qty <= 0 && !awk.is_variable_qty">0</span>
+                                                            </td>
+                                                            <td class="text-center">
+                                                               <div class="d-flex align-items-center justify-content-center gap-1">
+                                                                  <button *ngIf="awk.remaining_qty > 0 || awk.is_variable_qty"
+                                                                     class="btn btn-warning btn-sm py-1 px-2 fw-semibold d-flex align-items-center gap-1 font-size-11"
+                                                                     (click)="addJawak(awk, item)" title="इस आवक से जावक वितरण जोड़ें">
+                                                                     <i class="mdi mdi-plus font-size-12"></i> जावक जोड़ें
+                                                                  </button>
+                                                                  <button *ngIf="awk.jawak_detail?.length > 0 || awk._id"
+                                                                     class="btn btn-outline-info btn-sm py-1 px-2 font-size-11"
+                                                                     (click)="showJawak(awk._id)" title="इस आवक की पूर्व जावक देखें">
+                                                                     <i class="dripicons-view-list font-size-11"></i>
+                                                                  </button>
+                                                               </div>
+                                                            </td>
+                                                         </tr>
+                                                      </tbody>
+                                                   </table>
+                                                </div>
+                                                <div *ngIf="!item.aawaks || item.aawaks.length === 0" class="text-center text-muted py-2 font-size-12">
+                                                   इस आइटम का कोई अलग आवक वाउचर उपलब्ध नहीं है (समग्र स्टॉक उपलब्ध है)।
+                                                </div>
+                                             </td>
+                                          </tr>
+                                       </ng-container>
+
+                                       <tr *ngIf="dispenserItems.length === 0">
+                                          <td colspan="6" class="text-center text-muted py-3">
+                                             <i class="uil uil-search-alt fs-3 d-block mb-1"></i>
+                                             <span>कोई स्टॉक या आवक आइटम नहीं मिला।</span>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Side-by-Side Row: Active Aawak Batches (Left) & Store Navigation Up / Low Stock Alert Down (Right) -->
+                     <div class="col-lg-7 mb-3">
+                        <!-- Active Aawak Batches with Remaining Qty -->
+                        <div class="card shadow-sm border-0 h-100" *ngIf="activeAawakBatches.length > 0">
+                           <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between p-3">
+                              <h5 class="card-title mb-0 font-size-15 text-info">
+                                 <i class="uil uil-receipt me-1"></i>एक्टिव आवक लॉट्स एवं शेष बचत (Aawak Batches with Remaining Qty)
+                              </h5>
+                              <button class="btn btn-sm btn-soft-info" (click)="navigateTo('aawakN')">
+                                 आवक रजिस्टर <i class="uil uil-arrow-right ms-1"></i>
+                              </button>
+                           </div>
+                           <div class="card-body p-2">
+                              <div class="row g-2">
+                                 <div class="col-md-6" *ngFor="let awk of activeAawakBatches">
+                                    <div class="border rounded p-2 bg-soft-info border-info border-opacity-25 h-100 d-flex flex-column justify-content-between">
+                                       <div>
+                                          <div class="d-flex justify-content-between align-items-start mb-1">
+                                             <div>
+                                                <span class="fw-bold font-size-13">{{awk.item_hin}} {{awk.subitem_hin ? ' : ' + awk.subitem_hin : ''}}</span>
+                                                <div class="text-muted font-size-11" *ngIf="awk.item_eng">{{awk.item_eng}}</div>
+                                             </div>
+                                             <span class="badge bg-warning text-dark font-size-11 fw-bold">
+                                                बचत: {{awk.remaining_qty | number:'1.0-3'}} {{awk.unit_short}}
+                                             </span>
+                                          </div>
+                                          <div class="font-size-12 text-muted mt-1">
+                                             मूल आवक: <strong>{{awk.qty}} {{awk.unit_short}}</strong>
+                                             <span *ngIf="awk.pkt_num" class="ms-1 text-muted">(पैकेट: {{awk.pkt_num}})</span>
+                                             <span *ngIf="awk.condition_hin" class="ms-2 badge bg-soft-secondary text-muted">{{awk.condition_hin}}</span>
+                                          </div>
+                                          <div class="d-flex justify-content-between align-items-center font-size-11 mt-1 text-muted">
+                                             <span><i class="uil uil-map-pin me-1"></i>{{awk.aawak_mm_hin || '-'}}</span>
+                                             <span><i class="uil uil-calendar-alt me-1"></i>{{awk.date | date:'dd-MM-yyyy'}}</span>
+                                          </div>
+                                       </div>
+                                       <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                          <button class="btn btn-outline-info btn-sm py-1 px-2 font-size-11" (click)="showJawak(awk._id)" title="इस आवक की पूर्व जावक देखें">
+                                             <i class="dripicons-view-list font-size-11 me-1"></i>पूर्व जावक
+                                          </button>
+                                          <button class="btn btn-warning btn-sm py-1 px-2 fw-semibold d-flex align-items-center gap-1 font-size-11" (click)="addJawak(awk, awk.bachatRef || awk)" title="इस आवक से जावक वितरण जोड़ें">
+                                             <i class="mdi mdi-plus font-size-12"></i> जावक जोड़ें
+                                          </button>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Right Column: Store Navigation (Up) & Low Stock Alert (Down) -->
+                     <div class="col-lg-5 mb-3">
+                        <!-- Store Navigation (Up) -->
+                        <div class="card shadow-sm border-0 mb-3">
+                           <div class="card-header bg-transparent border-bottom p-3">
+                              <h5 class="card-title mb-0 font-size-15">
+                                 <i class="uil uil-apps me-1 text-primary"></i>मुख्य मॉड्यूल्स (Store Navigation)
+                              </h5>
+                           </div>
+                           <div class="card-body p-2">
+                              <div class="list-group list-group-flush font-size-13">
+                                 <a (click)="navigateTo('aawakN')" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between border-0 px-2 py-2 cursor-pointer">
+                                    <span><i class="uil uil-box text-primary me-2"></i>आवक रजिस्टर (Aawak Bunch)</span>
+                                    <i class="uil uil-angle-right text-muted"></i>
+                                 </a>
+                                 <a (click)="navigateTo('jawakN')" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between border-0 px-2 py-2 cursor-pointer">
+                                    <span><i class="uil uil-truck-loading text-success me-2"></i>जावक वितरण (Jawak)</span>
+                                    <i class="uil uil-angle-right text-muted"></i>
+                                 </a>
+                                 <a (click)="navigateTo('bachat_new')" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between border-0 px-2 py-2 cursor-pointer">
+                                    <span><i class="uil uil-clipboard-notes text-info me-2"></i>बचत रिपोर्ट (Bachat New)</span>
+                                    <i class="uil uil-angle-right text-muted"></i>
+                                 </a>
+                                 <a (click)="navigateTo('hmp')" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between border-0 px-2 py-2 cursor-pointer">
+                                    <span><i class="uil uil-flask text-warning me-2"></i>HMP बैचेज (Honey / Production)</span>
+                                    <i class="uil uil-angle-right text-muted"></i>
+                                 </a>
+                                 <a (click)="navigateTo('pbk_closing')" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between border-0 px-2 py-2 cursor-pointer">
+                                    <span><i class="uil uil-user-check text-secondary me-2"></i>PBK क्लोजिंग (PBK Closing)</span>
+                                    <i class="uil uil-angle-right text-muted"></i>
+                                 </a>
+                              </div>
+                           </div>
+                        </div>
+
+                        <!-- Critical / Low Stock Alert (Down) -->
+                        <div class="card shadow-sm border-0">
+                           <div class="card-header bg-transparent border-bottom p-3">
+                              <h5 class="card-title mb-0 font-size-15 text-danger d-flex align-items-center justify-content-between">
+                                 <span><i class="uil uil-exclamation-triangle me-1"></i>कम / समाप्त स्टॉक अलर्ट</span>
+                                 <span class="badge bg-soft-danger text-danger rounded-pill">{{zeroStockCount}}</span>
+                              </h5>
+                           </div>
+                           <div class="card-body p-2">
+                              <div *ngIf="lowStockItems.length > 0" class="d-flex flex-column gap-2">
+                                 <div *ngFor="let it of lowStockItems" class="p-2 border rounded bg-soft-light d-flex justify-content-between align-items-center">
+                                    <div>
+                                       <div class="fw-semibold font-size-13">{{it.item_hin}}</div>
+                                       <small class="text-muted">{{it.mm_hin}}</small>
+                                    </div>
+                                    <span class="badge bg-danger px-2 py-1 font-size-11">
+                                       {{it.Stock ? it.Stock : '0'}} {{it.unit_short || ''}}
+                                    </span>
+                                 </div>
+                              </div>
+                              <div *ngIf="lowStockItems.length === 0" class="text-center text-success py-3 font-size-13">
+                                 <i class="uil uil-check-circle fs-3 d-block mb-1"></i> सभी आइटम्स में पर्याप्त स्टॉक उपलब्ध है
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Section: Prastav & Logistics Alerts (Dead Stock > 6 Months & Delayed In-Transit > 5 Days) -->
+                     <div class="col-12 mb-3" id="prastavAlertsSection">
+                        <div class="card shadow-sm border-0">
+                           <div class="card-header bg-transparent border-bottom p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                              <div>
+                                 <h5 class="card-title mb-0 font-size-15 d-flex align-items-center gap-2">
+                                    <span class="badge bg-soft-warning text-warning p-1 rounded"><i class="uil uil-bell fs-5"></i></span>
+                                    <span>लॉजिस्टिक्स अलर्ट्स एवं प्रस्ताव स्थिति (Logistics Alerts & Prastav)</span>
+                                 </h5>
+                                 <small class="text-muted font-size-12">लंबे समय से रुके लॉट्स (Dead Stock) और 5 दिन से अधिक के अटके ट्रांजिट प्रेषण की लाइव स्थिति।</small>
+                              </div>
+                              <div class="d-flex align-items-center gap-2">
+                                 <button class="btn btn-sm btn-outline-primary" (click)="navigateTo('prastav')">
+                                    <i class="uil uil-file-check-alt me-1"></i>प्रस्ताव मॉड्यूल खोलें
+                                 </button>
+                              </div>
+                           </div>
+                           <div class="card-body p-3">
+                              <div class="row g-3">
+                                 <!-- Alert Box 1: लंबे समय से रुके लॉट्स (Dead Stock > 6 Months) -->
+                                 <div class="col-lg-7">
+                                    <div class="border rounded p-3 h-100 bg-soft-danger border-danger border-opacity-25">
+                                       <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom border-danger border-opacity-25">
+                                          <div class="d-flex align-items-center gap-2">
+                                             <i class="uil uil-exclamation-octagon text-danger fs-4"></i>
+                                             <div>
+                                                <h6 class="mb-0 fw-bold text-danger">लंबे समय से रुके लॉट्स (Dead Stock)</h6>
+                                                <small class="text-muted">जो आवक 6 माह (180+ दिन) से 0% वितरित हुई है</small>
+                                             </div>
+                                          </div>
+                                          <span class="badge bg-danger font-size-12 px-2 py-1">{{deadStockCount}} लॉट्स</span>
+                                       </div>
+
+                                       <div *ngIf="deadStockLots.length > 0" class="table-responsive">
+                                          <table class="table table-sm table-hover mb-0 font-size-12 align-middle">
+                                             <thead>
+                                                <tr>
+                                                   <th>आइटम नाम</th>
+                                                   <th>केंद्र (MM)</th>
+                                                   <th>आवक दिनांक</th>
+                                                   <th class="text-end">मात्रा</th>
+                                                   <th class="text-center">ठहराव (आयु)</th>
+                                                </tr>
+                                             </thead>
+                                             <tbody>
+                                                <tr *ngFor="let lot of deadStockLots">
+                                                   <td class="fw-bold">{{lot.item_hin}}</td>
+                                                   <td><small class="text-muted">{{lot.mm_hin}}</small></td>
+                                                   <td>{{lot.date | date:'dd-MM-yyyy'}}</td>
+                                                   <td class="text-end fw-semibold">{{lot.qty}} {{lot.unit_short}}</td>
+                                                   <td class="text-center">
+                                                      <span class="badge bg-soft-danger text-danger fw-bold">{{lot.days_old}} दिन</span>
+                                                   </td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+
+                                       <div *ngIf="deadStockLots.length === 0" class="text-center py-4 text-muted">
+                                          <i class="uil uil-check-circle text-success fs-2 d-block mb-1"></i>
+                                          <span class="fw-semibold">कोई पुराना अछूता लॉट नहीं है। स्टॉक का वितरण समय पर हो रहा है।</span>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <!-- Alert Box 2: अटके ट्रांजिट (Delayed Shipments > 5 Days) -->
+                                 <div class="col-lg-5">
+                                    <div class="border rounded p-3 h-100 bg-soft-warning border-warning border-opacity-25">
+                                       <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom border-warning border-opacity-25">
+                                          <div class="d-flex align-items-center gap-2">
+                                             <i class="uil uil-truck text-warning fs-4"></i>
+                                             <div>
+                                                <h6 class="mb-0 fw-bold text-warning">🚚 अटके ट्रांजिट (Delayed Shipments)</h6>
+                                                <small class="text-muted">जावक जो 5 दिन से अधिक 'मार्गस्थ (in-transit)' है</small>
+                                             </div>
+                                          </div>
+                                          <span class="badge bg-warning text-dark font-size-12 px-2 py-1">{{inTransitCount}} पार्सल</span>
+                                       </div>
+
+                                       <div *ngIf="inTransitLots.length > 0" class="table-responsive">
+                                          <table class="table table-sm table-hover mb-0 font-size-12 align-middle">
+                                             <thead>
+                                                <tr>
+                                                   <th>आइटम</th>
+                                                   <th>मार्ग (From ➔ To)</th>
+                                                   <th class="text-end">मात्रा</th>
+                                                   <th class="text-center">विलंब</th>
+                                                </tr>
+                                             </thead>
+                                             <tbody>
+                                                <tr *ngFor="let tr of inTransitLots">
+                                                   <td class="fw-bold">{{tr.item_hin}}</td>
+                                                   <td><small>{{tr.from_mm}} ➔ {{tr.to_mm}}</small></td>
+                                                   <td class="text-end">{{tr.qty}}</td>
+                                                   <td class="text-center">
+                                                      <span class="badge bg-warning text-dark">{{tr.days_elapsed}} दिन</span>
+                                                   </td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+
+                                       <div *ngIf="inTransitLots.length === 0" class="text-center py-4 text-muted">
+                                          <i class="uil uil-check-circle text-success fs-1 mb-2 d-block"></i>
+                                          <div class="fw-bold text-dark font-size-13">सभी प्रेषण समय पर वितरित हैं</div>
+                                          <small class="text-muted">वर्तमान में 5 दिन से अधिक का कोई अटका हुआ ट्रांजिट पार्सल नहीं है।</small>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
 
                <div class="tab-pane" id="history" style="overflow: auto;">
                   <div class="row mt-3">
@@ -156,7 +691,7 @@
                   </div>
                </div>
 
-               <div class="tab-pane show active" id="stock" style="overflow: auto;">
+               <div class="tab-pane" id="stock" style="overflow: auto;">
                   <div class="row mt-3">
                      <!-- Stock/bachat Card -->
                      <div class="col-md-12 col-12">
@@ -390,10 +925,250 @@
 
                </div>
 
-               <!-- <div class="tab-pane" id="closing" style="overflow: auto;">
-                  <app-closing></app-closing>
-               </div> -->
+               <!-- TAB 4: STATISTICS & ANALYTICS -->
+               <div class="tab-pane" id="analytics">
+                  <div class="row mt-3">
+                     <!-- Analytics Header & Filter Bar -->
+                     <div class="col-12 mb-3">
+                        <div class="card card-body p-3 border-0 shadow-sm">
+                           <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                              <div>
+                                 <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                                    <i class="uil uil-chart-bar text-primary fs-3"></i>
+                                    <span>सांख्यिकी एवं विज़ुअल विश्लेषण (Analytics & Charts)</span>
+                                 </h4>
+                                 <p class="text-muted mb-0 font-size-13">
+                                    केंद्र-वार स्टॉक, 12-मासिक आवक-जावक प्रवाह एवं वार्षिक तुलनात्मक चार्ट्स
+                                 </p>
+                              </div>
 
+                              <!-- Filter Controls: MM & Year Selectors -->
+                              <div class="d-flex flex-wrap align-items-center gap-2">
+                                 <div style="min-width: 240px;">
+                                    <ng-select class="custom" placeholder="सभी केंद्र (Overall All MMs)" [clearable]="true" [virtualScroll]="true"
+                                       [(ngModel)]="statsSelectedMM" (change)="onStatsFilterChange()">
+                                       <ng-option [value]="null">🌐 सभी केंद्र (Overall All MMs)</ng-option>
+                                       <ng-option *ngFor="let item of mms" [value]="item._id">
+                                          {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code ? ' : ' + item.mm_code : ''}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </div>
+
+                                 <div style="width: 140px;">
+                                    <ng-select class="custom" placeholder="वर्ष चुनें" [clearable]="false"
+                                       [(ngModel)]="statsSelectedYear" (change)="onStatsFilterChange()">
+                                       <ng-option *ngFor="let yr of statsYears" [value]="yr">
+                                          वर्ष: {{yr}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </div>
+
+                                 <button class="btn btn-sm btn-outline-primary py-1 px-2" (click)="loadStatistics()" title="चार्ट्स रीलोड करें">
+                                    <i class="uil uil-sync" [class.fa-spin]="statsLoading"></i> रीफ़्रेश
+                                 </button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Row 1: 12-Month Flow Trend (Jan - Dec) & Yearly Comparison -->
+                     <div class="col-xl-8 mb-3">
+                        <div class="card shadow-sm border-0 h-100">
+                           <div class="card-header bg-transparent border-bottom p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                              <div>
+                                 <h5 class="card-title mb-0 font-size-15">
+                                    <i class="uil uil-chart-growth text-primary me-1"></i>12-मासिक आवक बनाम जावक प्रवाह (वर्ष: {{statsSelectedYear}})
+                                 </h5>
+                                 <small class="text-muted font-size-12" *ngIf="!statsSelectedMM">समस्त केंद्रों का संयुक्त मासिक प्रवाह</small>
+                                 <small class="text-info font-size-12 fw-medium" *ngIf="statsSelectedMM">चयनित केंद्र का मासिक आवक-जावक विवरण</small>
+                              </div>
+                              <div class="d-flex align-items-center gap-3 font-size-12">
+                                 <span class="d-flex align-items-center gap-1">
+                                    <span class="d-inline-block rounded-circle bg-info" style="width: 10px; height: 10px;"></span> आवक (Aawak)
+                                 </span>
+                                 <span class="d-flex align-items-center gap-1">
+                                    <span class="d-inline-block rounded-circle bg-warning" style="width: 10px; height: 10px;"></span> जावक (Jawak)
+                                 </span>
+                              </div>
+                           </div>
+                           <div class="card-body p-3">
+                              <!-- Responsive SVG/CSS Monthly Bar Chart -->
+                              <div class="monthly-chart-grid pt-2">
+                                 <div class="d-flex align-items-end justify-content-between gap-2" style="height: 220px;">
+                                    <div *ngFor="let m of statsMonthlyTrend" class="d-flex flex-column align-items-center flex-grow-1 h-100 justify-content-end"
+                                       [title]="m.monthName + ': आवक = ' + m.aawakQty + ' (' + m.aawakCount + ' entries) | जावक = ' + m.jawakQty + ' (' + m.jawakCount + ' entries)'">
+                                       
+                                       <!-- Bar Columns Side-by-Side -->
+                                       <div class="d-flex align-items-end gap-1 w-100 justify-content-center" style="height: 180px;">
+                                          <!-- Aawak Bar -->
+                                          <div class="chart-bar bg-info rounded-top"
+                                             [style.height.%]="(m.aawakQty / maxMonthlyAawakQty) * 100"
+                                             style="width: 40%; min-height: 3px; transition: height 0.3s ease;">
+                                          </div>
+                                          <!-- Jawak Bar -->
+                                          <div class="chart-bar bg-warning rounded-top"
+                                             [style.height.%]="(m.jawakQty / maxMonthlyAawakQty) * 100"
+                                             style="width: 40%; min-height: 3px; transition: height 0.3s ease;">
+                                          </div>
+                                       </div>
+                                       
+                                       <!-- Month Label -->
+                                       <span class="font-size-11 text-muted text-truncate mt-2 text-center" style="max-width: 45px;">
+                                          {{m.monthName.substring(0, 3)}}
+                                       </span>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Row 1 Right: Yearly Volume Comparison (2024, 2025, 2026) -->
+                     <div class="col-xl-4 mb-3">
+                        <div class="card shadow-sm border-0 h-100">
+                           <div class="card-header bg-transparent border-bottom p-3">
+                              <h5 class="card-title mb-0 font-size-15">
+                                 <i class="uil uil-comparison text-primary me-1"></i>वार्षिक तुलना (Yearly Comparison)
+                              </h5>
+                              <small class="text-muted font-size-12">विगत वर्षों में आवक व जावक की कुल मात्रा</small>
+                           </div>
+                           <div class="card-body p-3 d-flex flex-column justify-content-between">
+                              <div *ngFor="let y of statsYearlyComparison" class="mb-3 p-2 rounded border border-light">
+                                 <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold font-size-14">{{y.year}}</span>
+                                    <small class="text-muted">आवक: {{y.aawakCount}} | जावक: {{y.jawakCount}}</small>
+                                 </div>
+                                 <!-- Aawak Bar -->
+                                 <div class="mb-1">
+                                    <div class="d-flex justify-content-between font-size-11 text-muted">
+                                       <span>आवक मात्रा</span>
+                                       <span class="fw-semibold text-info">{{y.aawakQty | number:'1.0-2'}}</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                       <div class="progress-bar bg-info" [style.width.%]="(y.aawakQty / maxYearlyQty) * 100"></div>
+                                    </div>
+                                 </div>
+                                 <!-- Jawak Bar -->
+                                 <div>
+                                    <div class="d-flex justify-content-between font-size-11 text-muted">
+                                       <span>जावक मात्रा</span>
+                                       <span class="fw-semibold text-warning">{{y.jawakQty | number:'1.0-2'}}</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                       <div class="progress-bar bg-warning" [style.width.%]="(y.jawakQty / maxYearlyQty) * 100"></div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Row 2 (When NO MM Selected): Top Centers & Top Distributed Items -->
+                     <ng-container *ngIf="!statsSelectedMM">
+                        <div class="col-lg-6 mb-3">
+                           <div class="card shadow-sm border-0 h-100">
+                              <div class="card-header bg-transparent border-bottom p-3">
+                                 <h5 class="card-title mb-0 font-size-15">
+                                    <i class="uil uil-building text-primary me-1"></i>प्रमुख केंद्र स्टॉक तुलना (Top Centers by Stock)
+                                 </h5>
+                                 <small class="text-muted font-size-12">किस केंद्र के पास सर्वाधिक सामग्री उपलब्ध है</small>
+                              </div>
+                              <div class="card-body p-3">
+                                 <div *ngFor="let mm of statsMmComparison" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                       <span class="fw-semibold font-size-13">{{mm.mm_hin}}</span>
+                                       <span class="badge bg-soft-primary text-primary">{{mm.total_stock | number:'1.0-2'}} स्टॉक ({{mm.item_count}} प्रकार)</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                       <div class="progress-bar bg-primary" [style.width.%]="(mm.total_stock / (statsMmComparison[0]?.total_stock || 1)) * 100"></div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-3">
+                           <div class="card shadow-sm border-0 h-100">
+                              <div class="card-header bg-transparent border-bottom p-3">
+                                 <h5 class="card-title mb-0 font-size-15">
+                                    <i class="uil uil-truck-loading text-success me-1"></i>सर्वाधिक वितरित सामग्री (Top Consumed Items)
+                                 </h5>
+                                 <small class="text-muted font-size-12">स्टोर से सर्वाधिक उपयोग/वितरित हुए आइटम्स</small>
+                              </div>
+                              <div class="card-body p-3">
+                                 <div *ngFor="let it of statsTopDistributedItems" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                       <div>
+                                          <span class="fw-semibold font-size-13">{{it.item_hin}}</span>
+                                          <small class="text-muted ms-1" *ngIf="it.item_eng">({{it.item_eng}})</small>
+                                       </div>
+                                       <span class="badge bg-soft-success text-success fw-bold font-size-12">
+                                          {{it.used | number:'1.0-2'}} {{it.unit_short || ''}}
+                                       </span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                       <div class="progress-bar bg-success" [style.width.%]="(it.used / (statsTopDistributedItems[0]?.used || 1)) * 100"></div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </ng-container>
+
+                     <!-- Row 2 (When MM IS Selected): Selected MM's Stock & Distribution Breakdown -->
+                     <ng-container *ngIf="statsSelectedMM">
+                        <div class="col-lg-6 mb-3">
+                           <div class="card shadow-sm border-0 h-100">
+                              <div class="card-header bg-transparent border-bottom p-3">
+                                 <h5 class="card-title mb-0 font-size-15 text-primary">
+                                    <i class="uil uil-box me-1"></i>इस केंद्र का शीर्ष उपलब्ध स्टॉक (Available Stock)
+                                 </h5>
+                                 <small class="text-muted font-size-12">चयनित केंद्र में उपलब्ध प्रमुख सामग्री</small>
+                              </div>
+                              <div class="card-body p-3">
+                                 <div *ngFor="let it of statsTopStockItems" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                       <span class="fw-semibold font-size-13">{{it.item_hin}}</span>
+                                       <span class="badge bg-soft-info text-info fw-bold">{{it.stock | number:'1.0-2'}} {{it.unit_short || ''}}</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                       <div class="progress-bar bg-info" [style.width.%]="(it.stock / (statsTopStockItems[0]?.stock || 1)) * 100"></div>
+                                    </div>
+                                 </div>
+                                 <div *ngIf="statsTopStockItems.length === 0" class="text-center py-4 text-muted">
+                                    इस केंद्र पर कोई उपलब्ध स्टॉक रिकॉर्ड नहीं है।
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-3">
+                           <div class="card shadow-sm border-0 h-100">
+                              <div class="card-header bg-transparent border-bottom p-3">
+                                 <h5 class="card-title mb-0 font-size-15 text-warning">
+                                    <i class="uil uil-truck me-1"></i>इस केंद्र की सर्वाधिक वितरित सामग्री (Distributed Items)
+                                 </h5>
+                                 <small class="text-muted font-size-12">इस केंद्र से जावक हुई प्रमुख सामग्री</small>
+                              </div>
+                              <div class="card-body p-3">
+                                 <div *ngFor="let it of statsTopDistributedItems" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                       <span class="fw-semibold font-size-13">{{it.item_hin}}</span>
+                                       <span class="badge bg-soft-warning text-warning fw-bold">{{it.used | number:'1.0-2'}} {{it.unit_short || ''}}</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                       <div class="progress-bar bg-warning" [style.width.%]="(it.used / (statsTopDistributedItems[0]?.used || 1)) * 100"></div>
+                                    </div>
+                                 </div>
+                                 <div *ngIf="statsTopDistributedItems.length === 0" class="text-center py-4 text-muted">
+                                    इस केंद्र से कोई जावक वितरण रिकॉर्ड नहीं है।
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </ng-container>
+                  </div>
+               </div>
 
             </div>
          </div>
@@ -405,7 +1180,7 @@
 <!-- Modal -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
    aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
+   <div class="modal-dialog" style="width: 98%;">
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
@@ -430,6 +1205,80 @@
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"
                onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Item Aawak Batches Dedicated Modal -->
+<div class="modal fade" id="itemAawakModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="itemAawakModalLabel" aria-hidden="true">
+   <div class="modal-dialog" style="width: 98%;">
+      <div class="modal-content" *ngIf="selectedItemForLots">
+         <div class="modal-header">
+            <div>
+               <h5 class="modal-title mb-0" id="itemAawakModalLabel">
+                  <i class="uil uil-receipt text-primary me-2"></i>{{selectedItemForLots.item_hin}} {{selectedItemForLots.subitem_hin ? ' : ' + selectedItemForLots.subitem_hin : ''}}
+                  <span class="badge bg-soft-success text-success font-size-13 ms-2">कुल स्टॉक: {{selectedItemForLots.effectiveStock || selectedItemForLots.Stock}} {{selectedItemForLots.unit_short}}</span>
+               </h5>
+               <small class="text-muted" *ngIf="selectedItemForLots.item_eng">{{selectedItemForLots.item_eng}} | केंद्र: {{selectedItemForLots.mm_hin}}</small>
+            </div>
+            <button type="button" onclick="$('#itemAawakModal').modal('hide')" class="btn-close" aria-label="Close"></button>
+         </div>
+         <div class="modal-body p-2">
+            <div class="table-responsive">
+               <table class="table table-bordered table-hover mb-0 font-size-12">
+                  <thead>
+                     <tr>
+                        <th style="width: 40px;" class="text-center">#</th>
+                        <th style="width: 100px;">तारीख</th>
+                        <th>आवक केंद्र</th>
+                        <th>पैकेट / विवरण</th>
+                        <th>स्थिति</th>
+                        <th class="text-end">मूल आवक</th>
+                        <th class="text-end">शेष बचत (Remaining)</th>
+                        <th class="text-center" style="width: 180px;">जावक कार्य</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr *ngFor="let awk of selectedItemForLots.aawaks; let j = index">
+                        <td class="text-center">{{j + 1}}</td>
+                        <td>{{awk.date | date:'dd-MM-yyyy'}}</td>
+                        <td>{{awk.aawak_mm_hin || selectedItemForLots.mm_hin || '-'}}</td>
+                        <td>
+                           <span>{{awk.pkt_num ? 'Pkt: ' + awk.pkt_num : '-'}}</span>
+                           <small class="text-muted d-block" *ngIf="awk.item_detail">{{awk.item_detail}}</small>
+                        </td>
+                        <td>{{awk.condition_hin || '-'}}</td>
+                        <td class="text-end">{{awk.qty}} {{selectedItemForLots.unit_short}}</td>
+                        <td class="text-end">
+                           <span class="badge bg-warning text-dark font-size-12 fw-bold px-2 py-1">
+                              {{awk.remaining_qty | number:'1.0-3'}} {{selectedItemForLots.unit_short}}
+                           </span>
+                        </td>
+                        <td class="text-center">
+                           <div class="d-flex align-items-center justify-content-center gap-1">
+                              <button *ngIf="awk.remaining_qty > 0 || awk.is_variable_qty"
+                                 class="btn btn-warning btn-sm py-1 px-2 fw-semibold d-flex align-items-center gap-1 font-size-11"
+                                 (click)="addJawak(awk, selectedItemForLots)" title="इस आवक से जावक वितरण जोड़ें">
+                                 <i class="mdi mdi-plus font-size-12"></i> जावक जोड़ें
+                              </button>
+                              <button *ngIf="awk.jawak_detail?.length > 0 || awk._id"
+                                 class="btn btn-outline-info btn-sm py-1 px-2 font-size-11"
+                                 (click)="showJawak(awk._id)" title="पूर्व जावक देखें">
+                                 <i class="dripicons-view-list font-size-11"></i> पूर्व जावक
+                              </button>
+                           </div>
+                        </td>
+                     </tr>
+                     <tr *ngIf="!selectedItemForLots.aawaks || selectedItemForLots.aawaks.length === 0">
+                        <td colspan="8" class="text-center text-muted py-3">कोई आवक लॉट रिकॉर्ड नहीं मिला।</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;" onclick="$('#itemAawakModal').modal('hide')">Close</button>
          </div>
       </div>
    </div>

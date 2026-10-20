@@ -133,14 +133,30 @@ export class ExcelExportService {
       startRow = 2;
     }
 
-    // 2. Universal Column Headers (Matching HMP Header Style)
+    // 2. Universal Column Headers (with Vehicle Document Color Inheritance)
     const headerRow = worksheet.getRow(startRow);
     headerRow.values = keys;
-    headerRow.height = 22;
-    headerRow.eachCell((cell) => {
-      cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: 'FF000000' } };
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFBDD7EE' } };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    headerRow.height = 24;
+    headerRow.eachCell((cell, colNumber) => {
+      const colName = String(cell.value || '');
+      let headerFill = 'FFBDD7EE'; // Default universal soft blue
+      let headerTextColor = 'FF000000';
+
+      // Rule 10: Vehicle Document Color Coding
+      if (/\brc\b/i.test(colName)) {
+        headerFill = 'FFE0E4FC'; // Soft Indigo Blue (#E0E4FC)
+        headerTextColor = 'FF3A47CD'; // Deep Indigo Font
+      } else if (/insurance|बीमा/i.test(colName)) {
+        headerFill = 'FFD2F4EA'; // Soft Emerald Green (#D2F4EA)
+        headerTextColor = 'FF087B59'; // Deep Green Font
+      } else if (/\bpuc\b|प्रदूषण/i.test(colName)) {
+        headerFill = 'FFFFF1D2'; // Soft Amber Orange (#FFF1D2)
+        headerTextColor = 'FFB36B00'; // Deep Amber Font
+      }
+
+      cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: headerTextColor } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: headerFill } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
       cell.border = border;
     });
 
@@ -150,7 +166,8 @@ export class ExcelExportService {
       row.height = 20;
       const isTotal = Object.values(rowObj).some(v => String(v).includes('--TOTAL--'));
 
-      row.eachCell((cell) => {
+      row.eachCell((cell, colNumber) => {
+        const colKey = keys[colNumber - 1] || '';
         const isHyperlink = cell.value && typeof cell.value === 'object' && (cell.value as any).hyperlink;
         const valStr = cell.value !== null && cell.value !== undefined ? (isHyperlink ? (cell.value as any).text : String(cell.value)) : '';
         cell.border = border;
@@ -168,6 +185,20 @@ export class ExcelExportService {
         } else if (isTotal) {
           cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: 'FF0F5132' } };
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD4EDDA' } };
+        } else if (/status/i.test(colKey)) {
+          // Status cell highlights
+          if (/expired/i.test(valStr)) {
+            cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: 'FFB91C1C' } };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFDE8E8' } };
+          } else if (/left|due|today/i.test(valStr)) {
+            cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: 'FFB45309' } };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } };
+          } else if (/valid/i.test(valStr)) {
+            cell.font = { name: 'Calibri', bold: true, size: 9.5, color: { argb: 'FF047857' } };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1FAE5' } };
+          } else {
+            cell.font = { name: 'Calibri', size: 9.5, color: { argb: 'FF000000' } };
+          }
         } else {
           cell.font = { name: 'Calibri', size: 9.5, color: { argb: 'FF000000' } };
         }

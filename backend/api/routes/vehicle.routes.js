@@ -17,6 +17,8 @@ router.get('/', async (req, res, next) => {
 });
 
 
+const vehicleService = require('../services/vehicle.service');
+
 // get vehicle 
 router.get('/:dept_id', async (req, res, next) => {
     try {
@@ -24,8 +26,7 @@ router.get('/:dept_id', async (req, res, next) => {
             let time = DB.db.prepare('select UNIXEPOCH() * 1000 as time').get().time;
             if (time) {
                 for (let i in resolve.data) {
-                    resolve.data[i] = await verifyExpiryDate(resolve.data[i], time);
-                    // console.log(resolve[i]);
+                    resolve.data[i] = vehicleService.enrichVehicleExpiry(resolve.data[i], time);
                 }
             }
             res.json({
@@ -48,7 +49,7 @@ router.post('/:dept_id', async (req, res, next) => {
 
                 res.json({
                     success: true,
-                    result: await verifyExpiryDate(data, time) || {}
+                    result: vehicleService.enrichVehicleExpiry(data, time) || {}
                 });
             });
         }
@@ -62,8 +63,8 @@ router.post('/:dept_id', async (req, res, next) => {
 router.post('/import', async (req, res, next) => {
     try {
         if (req.body && req.body.length > 0) {
-            let istmt = DB.db.prepare(DB.query.vehicle.import);
-            let ustmt = DB.db.prepare(DB.query.vehicle.update);
+            let istmt = DB.db.prepare(DB.query.vehicle.insert);
+            let ustmt = DB.db.prepare(DB.query.vehicle.import_update);
             for (let i in req.body) {
                 if (req.body[i].yes) {
                     if (req.body[i].status == 'insert') {
@@ -75,7 +76,7 @@ router.post('/import', async (req, res, next) => {
                     else if (req.body[i].status == 'update') {
                         let ures = ustmt.run(req.body[i]);
                         if (ures) {
-                            req.body[i].new_id == ures.lastInsertRowid;
+                            req.body[i].new_id = ures.lastInsertRowid;
                         }
                     }
                 }
@@ -100,7 +101,7 @@ router.put('/', async (req, res, next) => {
                 let time = DB.db.prepare('select UNIXEPOCH() * 1000 as time').get().time;
                 res.json({
                     success: true,
-                    result: await verifyExpiryDate(data, time) || {}
+                    result: vehicleService.enrichVehicleExpiry(data, time) || {}
                 });
             });
         }

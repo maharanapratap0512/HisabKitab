@@ -1,0 +1,9 @@
+.form-control:focus,
+.ng-select.custom.ng-select-focused ::ng-deep .ng-select-container {
+    border-color: #727cf5 !important;
+    box-shadow: 0 0 0 0.15rem rgba(114, 124, 245, 0.25) !important;
+}
+
+.validation {
+    border-color: #fa5c7c !important;
+}

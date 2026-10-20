@@ -9,208 +9,749 @@
       <div class="content">
          <div class="container-fluid">
 
-            <!-- First Row -->
-            <!-- Add Button, Search Field, Filter button, Total Count -->
-            <div class="row border-bottom border-secondary">
-               <div class="card-body">
-                  <div class="row d-flex justify-content-between">
-                     <div class="col-2">
-                        <button class="btn btn-primary w-100" (click)="openModal('Add Vehicle', 'full')"
-                           *ngIf="settings.vehicle.add">
-                           <i class="dripicons-plus h4 icon-mx-2"> </i>Add Vehicle
-                        </button>
-                     </div>
-                     <div class="col-3">
-                        <div class="form-group">
-                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                              name="search">
+            <!-- Executive Fleet Dashboard KPI Row -->
+            <div class="row pt-3 g-3">
+               <!-- Total Fleet -->
+               <div class="col-xl-3 col-md-6">
+                  <div class="card card-body p-3 h-100 shadow-sm border-0 stat-card cursor-pointer"
+                       [class.active-card]="activeStatusFilter === 'all'"
+                       (click)="setStatusFilter('all')"
+                       title="सभी वाहन देखें">
+                     <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                           <p class="text-muted text-uppercase fw-semibold font-size-12 mb-1">कुल वाहन (Total Fleet)</p>
+                           <h3 class="my-1 fw-bold">{{vehDataAll.length}}</h3>
+                           <p class="mb-0 text-muted font-size-12">
+                              <span class="text-primary fw-medium"><i class="uil uil-car-sideview me-1"></i>सक्रिय वाहन</span>
+                              <span class="ms-1">| विभाग फ्लीट</span>
+                           </p>
+                        </div>
+                        <div class="stat-icon-box bg-soft-primary text-primary rounded-circle p-3">
+                           <i class="uil uil-car-sideview fs-2"></i>
                         </div>
                      </div>
+                  </div>
+               </div>
 
-                     <div class="col-2">
-                        <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter MM" [clearable]="true"
-                           [virtualScroll]="true" (change)="mmSelected($event)">
-                           <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}} :
-                              {{item.mm_eng}} ({{item.mm_code}})</ng-option>
-                        </ng-select>
-                     </div>
-                     <!-- <div class="col-2">
-                        <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter Department"
-                           [clearable]="true" [virtualScroll]="true" (change)="mmDeptSelected($event)">
-                           <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}} :
-                              {{item.dept_code}}</ng-option>
-                        </ng-select>
-                     </div> -->
-                     <div class="col-3">
-                        <div class="d-flex justify-content-between">
-                           <button class="btn btn-outline-success mr-1" (click)="exportToExcel()">Export To
-                              Excel</button>
-                           <button class="btn btn-outline-info" (click)="openModal('Excel Import')">Import
-                              Excel</button>
+               <!-- Critical Expired -->
+               <div class="col-xl-3 col-md-6">
+                  <div class="card card-body p-3 h-100 shadow-sm border-0 stat-card cursor-pointer"
+                       [class.active-card]="activeStatusFilter === 'expired'"
+                       (click)="setStatusFilter('expired')"
+                       title="अमान्य / समाप्त दस्तावेज़ वाले वाहन देखें">
+                     <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                           <p class="text-muted text-uppercase fw-semibold font-size-12 mb-1">समाप्त (Expired Alert)</p>
+                           <h3 class="my-1 fw-bold text-danger">{{expiredCount}}</h3>
+                           <p class="mb-0 text-muted font-size-12">
+                              <span class="text-danger fw-semibold"><i class="uil uil-exclamation-triangle me-1"></i>तत्काल ध्यान आवश्यक</span>
+                           </p>
+                        </div>
+                        <div class="stat-icon-box bg-soft-danger text-danger rounded-circle p-3">
+                           <i class="uil uil-exclamation-octagon fs-2"></i>
                         </div>
                      </div>
-                     <div class="col-2">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
-                           Count : {{total_count}}
-                        </button>
+                  </div>
+               </div>
+
+               <!-- Expiring Soon (30 Days) -->
+               <div class="col-xl-3 col-md-6">
+                  <div class="card card-body p-3 h-100 shadow-sm border-0 stat-card cursor-pointer"
+                       [class.active-card]="activeStatusFilter === 'upcoming' || activeStatusFilter === 'critical'"
+                       (click)="setStatusFilter('upcoming')"
+                       title="आगामी 30 दिनों में समाप्त होने वाले दस्तावेज़">
+                     <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                           <p class="text-muted text-uppercase fw-semibold font-size-12 mb-1">नवीनीकरण निकट (Due <= 30d)</p>
+                           <h3 class="my-1 fw-bold text-warning">{{upcomingCount + criticalCount}}</h3>
+                           <p class="mb-0 text-muted font-size-12">
+                              <span class="text-warning fw-semibold"><i class="uil uil-clock-eight me-1"></i>{{criticalCount}} अतिशीघ्र (<=7d)</span>
+                              <span class="ms-1">| {{upcomingCount}} आगामी</span>
+                           </p>
+                        </div>
+                        <div class="stat-icon-box bg-soft-warning text-warning rounded-circle p-3">
+                           <i class="uil uil-hourglass fs-2"></i>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Fully Compliant -->
+               <div class="col-xl-3 col-md-6">
+                  <div class="card card-body p-3 h-100 shadow-sm border-0 stat-card cursor-pointer"
+                       [class.active-card]="activeStatusFilter === 'valid'"
+                       (click)="setStatusFilter('valid')"
+                       title="पूर्णतः वैध दस्तावेज़ वाले वाहन">
+                     <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                           <p class="text-muted text-uppercase fw-semibold font-size-12 mb-1">पूर्णतः वैध (100% Compliant)</p>
+                           <h3 class="my-1 fw-bold text-success">{{compliantCount}}</h3>
+                           <p class="mb-0 text-muted font-size-12">
+                              <span class="text-success fw-medium"><i class="uil uil-check-circle me-1"></i>सुरक्षित एवं प्रमाणित</span>
+                              <span class="ms-1 text-muted" *ngIf="vehDataAll.length">({{((compliantCount / vehDataAll.length) * 100) | number:'1.0-0'}}%)</span>
+                           </p>
+                        </div>
+                        <div class="stat-icon-box bg-soft-success text-success rounded-circle p-3">
+                           <i class="uil uil-shield-check fs-2"></i>
+                        </div>
                      </div>
                   </div>
                </div>
             </div>
 
-            <div class="row" *ngIf="vehData.length">
-               <div class="row">
-
+            <!-- Urgent Compliance Alert Banner -->
+            <div class="alert alert-danger alert-dismissible fade show mt-3 mb-1 shadow-sm border-0 d-flex align-items-center justify-content-between flex-wrap gap-2"
+                 role="alert"
+                 *ngIf="(expiredCount > 0 || criticalCount > 0) && !isAlertDismissed">
+               <div class="d-flex align-items-center gap-2">
+                  <i class="uil uil-exclamation-triangle fs-3 text-danger"></i>
+                  <div>
+                     <strong class="d-block font-size-14">वाहन दस्तावेज़ अनुपालन चेतावनी (Fleet Compliance Alert)</strong>
+                     <span class="font-size-13 text-muted">
+                        <span class="text-danger fw-bold" *ngIf="expiredCount > 0">{{expiredCount}} वाहनों के दस्तावेज़ समाप्त हो चुके हैं!</span>
+                        <span *ngIf="expiredCount > 0 && criticalCount > 0"> एवं </span>
+                        <span class="text-warning fw-bold" *ngIf="criticalCount > 0">{{criticalCount}} वाहनों के दस्तावेज़ आगामी 7 दिनों में समाप्त हो रहे हैं।</span>
+                        चालान व असुविधा से बचने हेतु कृपया तुरंत नवीनीकरण कराएं।
+                     </span>
+                  </div>
                </div>
-               <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
-               </pagination-controls>
-               <div class="card-body" style="overflow: auto;">
-                  <table class="table table-hover dt-responsive">
-                     <thead>
-                        <tr>
-                           <th style="width: 60px;">No.</th>
-                           <th style="width: 120px;">Manage</th>
-                           <th style="width: 150px;">MM</th>
-                           <th style="width: 150px;">Vehicle Type</th>
-                           <th style="width: 100px;">Gadi Name</th>
-                           <th style="width: 100px;">Gadi No.</th>
-                           <th style="width: 150px;">Fuel Type</th>
-                           <th style="width: 100px;">Seating Capacity</th>
-                           <th style="width: 130px;">Owner Name</th>
-                           <th style="width: 200px;">Nominee</th>
-                           <th style="width: 150px;">Aawak Type</th>
-                           <!-- <th style="width: 200px;">RC</th>
-                           <th style="width: 200px;">RC Exp.</th>
-                           <th style="width: 200px;">RC Amount</th>
-                           <th style="width: 200px;">Insurance</th>
-                           <th style="width: 200px;">Insurance Exp.</th>
-                           <th style="width: 200px;">Insurance Type</th>
-                           <th style="width: 200px;">Insurance Company</th>
-                           <th style="width: 200px;">Insurance Ammount</th>
-                           <th style="width: 200px;">PUC</th>
-                           <th style="width: 200px;">PUC Exp.</th>
-                           <th style="width: 200px;">PUC Amount</th> -->
-                        </tr>
-                     </thead>
-                     <tbody class="accordion">
-                        <ng-container class="accordion-item"
-                           *ngFor="let data of vehData | search:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
-                           <tr>
-                              <td rowspan="2" style="font-size: large;">
-                                 {{itemsPerPage * (page-1) + i+1}}
-                                 <!-- <span class="mx-1" style="font-size: x-large;position: relative;;line-height: 28px;"
-                                    (click)="protectionToggle(data._id, data.active)">
-                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                       title="Protected" class="uil-shield-check text-warning"></i>
-                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
-                                       title="Unprotected" class="uil-shield-slash text-danger"></i>
-                                 </span> -->
-                              </td>
-                              <td>
-                                 <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
-                                    <button class="btn btn-sm btn-primary mx-1" type="button"
-                                       (click)="edit(data,'full')"><i class="uil uil-pen"></i></button>
-                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                          class="uil-trash"></i></button>
-                                 </div>
-                              </td>
-                              <td>{{data.mm_hin}}:{{data.mm_eng}}-{{data.mm_code}}</td>
-                              <td>{{data.vehicle_type ? data.vehicle_type:''}}</td>
-                              <td>{{data.gadi_name}}</td>
-                              <td>{{data.gadi_num}}</td>
-                              <td>{{data.fuel_type}}</td>
-                              <td>{{data.seating_capacity}}</td>
-                              <td>{{data.owner_name}}</td>
-                              <td>{{data.nominee}}</td>
-                              <td>{{data.aawak_type}}</td>
-                           </tr>
-                           <tr class="accordion-collapse collapse show " aria-labelledby="headingOne">
-                              <td colspan="10">
-                                 <div class="row">
-                                    <table class="">
-                                       <thead>
-                                          <th style="width: 100px;" class="rc">RC Date</th>
-                                          <th style="width: 100px;" class="rc">RC Exp.</th>
-                                          <th style="width: 100px;" class="rc">RC Amt.</th>
-                                          <th style="width: 100px;" class="insurance">Ins.. Date</th>
-                                          <th style="width: 100px;" class="insurance">Ins.. Exp.</th>
-                                          <th style="width: 100px;" class="insurance">Ins.. Type</th>
-                                          <th style="width: 100px;" class="insurance">Ins.. Company</th>
-                                          <th style="width: 100px;" class="insurance">Ins.. Amt.</th>
-                                          <th style="width: 100px;" class="puc">PUC Date</th>
-                                          <th style="width: 100px;" class="puc">PUC Exp.</th>
-                                          <th style="width: 100px;" class="puc">PUC Amt.</th>
-                                       </thead>
-                                       <tr>
-
-                                          <td class="rc" (click)="edit(data,'rc')">{{data.rc_date | date: 'dd-MM-yyyy'}}
-                                          </td>
-                                          <td class="rc" (click)="edit(data,'rc')"
-                                             [class]="{'warning':data.rc_warning, 'error':data.rc_error}">
-                                             {{data.rc_exp_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="rc" (click)="edit(data,'rc')">{{data.rc_amount}}</td>
-
-                                          <td class="insurance" (click)="edit(data,'ins')">{{data.insurance_date | date:
-                                             'dd-MM-yyyy'}}</td>
-                                          <td class="insurance" (click)="edit(data,'ins')"
-                                             [class]="{'warning':data.insurance_warning, 'error':data.insurance_error}">
-                                             {{data.insurance_exp_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="insurance" (click)="edit(data,'ins')">{{data.insurance_type}}</td>
-                                          <td class="insurance" (click)="edit(data,'ins')">{{data.insurance_company}}
-                                          </td>
-                                          <td class="insurance" (click)="edit(data,'ins')">{{data.insurance_amount}}
-                                          </td>
-
-                                          <td class="puc" (click)="edit(data,'puc')">{{data.puc_date | date:
-                                             'dd-MM-yyyy'}}</td>
-                                          <td class="puc" (click)="edit(data,'puc')"
-                                             [class]="{'warning':data.puc_warning, 'error':data.puc_error}">
-                                             {{data.puc_exp_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="puc" (click)="edit(data,'puc')">{{data.puc_amount}}</td>
-                                       </tr>
-                                    </table>
-                                 </div>
-                              </td>
-                           </tr>
-                        </ng-container>
-
-                     </tbody>
-                  </table>
+               <div class="d-flex align-items-center gap-2">
+                  <button class="btn btn-sm btn-danger" *ngIf="expiredCount > 0" (click)="setStatusFilter('expired')">
+                     <i class="uil uil-filter me-1"></i>समाप्त वाहन देखें ({{expiredCount}})
+                  </button>
+                  <button class="btn btn-sm btn-warning" *ngIf="criticalCount > 0" (click)="setStatusFilter('critical')">
+                     <i class="uil uil-clock me-1"></i>7 दिन शेष ({{criticalCount}})
+                  </button>
+                  <button type="button" class="btn-close position-relative p-2" aria-label="Close" (click)="isAlertDismissed = true"></button>
                </div>
-               <pagination-controls class="pagi text-center" (pageChange)="page = $event" [autoHide]="true">
-               </pagination-controls>
             </div>
 
-            <h2 class="text-center m-5" *ngIf="!vehData.length">No Data!</h2>
+            <!-- Action Bar & Filter Controls Row -->
+            <div class="card card-body mt-3 p-3 shadow-sm border-0">
+               <div class="row g-2 align-items-center">
+                  <div class="col-lg-2 col-md-3">
+                     <button class="btn btn-primary w-100" (click)="openModal('Add Vehicle', 'full')"
+                        *ngIf="settings?.vehicle?.add">
+                        <i class="uil uil-plus me-1"></i>Add Vehicle
+                     </button>
+                  </div>
+
+                  <div class="col-lg-3 col-md-4">
+                     <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0"><i class="uil uil-search"></i></span>
+                        <input type="text" class="form-control border-start-0" placeholder="Search Vehicle No, Name, Owner..."
+                               [(ngModel)]="term" (input)="applyFilters()">
+                     </div>
+                  </div>
+
+                  <div class="col-lg-2 col-md-3">
+                     <ng-select class="custom w-100" placeholder="Filter MM" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="selectedMM" (change)="mmSelected($event)">
+                        <ng-option *ngFor="let item of mms" [value]="item._id">
+                           {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code ? ' : ' + item.mm_code : ''}}
+                        </ng-option>
+                     </ng-select>
+                  </div>
+
+                  <div class="col-lg-2 col-md-3">
+                     <ng-select class="custom w-100" placeholder="Fuel Type" [clearable]="true"
+                        [(ngModel)]="selectedFuel" (change)="applyFilters()">
+                        <ng-option *ngFor="let f of fuelTypes" [value]="f">{{f}}</ng-option>
+                     </ng-select>
+                  </div>
+
+                  <div class="col-lg-3 col-md-6 d-flex justify-content-end gap-2">
+                     <button class="btn btn-outline-success" (click)="exportToExcel()" title="Export Styled Fleet Report">
+                        <i class="uil uil-file-download me-1"></i>Export
+                     </button>
+                     <button class="btn btn-outline-info" (click)="openModal('Excel Import')" title="Import from Excel">
+                        <i class="uil uil-file-upload me-1"></i>Import
+                     </button>
+                     <button class="btn btn-outline-secondary" (click)="resetFilters()" title="Reset All Filters">
+                        <i class="uil uil-sync"></i>
+                     </button>
+                  </div>
+               </div>
+
+               <!-- Quick Status Filter Pills -->
+               <div class="d-flex flex-wrap align-items-center gap-1 mt-3 pt-2 border-top">
+                  <span class="text-muted font-size-12 fw-semibold me-1"><i class="uil uil-sliders-v-alt me-1"></i>त्वरित फ़िल्टर:</span>
+                  
+                  <span class="filter-pill badge" 
+                        [ngClass]="activeStatusFilter === 'all' ? 'bg-primary text-white' : 'bg-soft-primary text-primary'"
+                        (click)="setStatusFilter('all')">
+                     सभी वाहन ({{vehDataAll.length}})
+                  </span>
+
+                  <span class="filter-pill badge"
+                        [ngClass]="activeStatusFilter === 'expired' ? 'bg-danger text-white' : 'bg-soft-danger text-danger'"
+                        (click)="setStatusFilter('expired')">
+                     🚨 समाप्त ({{expiredCount}})
+                  </span>
+
+                  <span class="filter-pill badge"
+                        [ngClass]="activeStatusFilter === 'critical' ? 'bg-warning text-dark' : 'bg-soft-warning text-warning'"
+                        (click)="setStatusFilter('critical')">
+                     ⚠️ 7 दिन शेष ({{criticalCount}})
+                  </span>
+
+                  <span class="filter-pill badge"
+                        [ngClass]="activeStatusFilter === 'upcoming' ? 'bg-info text-white' : 'bg-soft-info text-info'"
+                        (click)="setStatusFilter('upcoming')">
+                     📅 30 दिन शेष ({{upcomingCount}})
+                  </span>
+
+                  <span class="filter-pill badge"
+                        [ngClass]="activeStatusFilter === 'valid' ? 'bg-success text-white' : 'bg-soft-success text-success'"
+                        (click)="setStatusFilter('valid')">
+                     ✅ पूर्णतः वैध ({{compliantCount}})
+                  </span>
+
+                  <span class="filter-pill badge"
+                        [ngClass]="activeStatusFilter === 'rc_due' ? 'bg-primary text-white' : 'bg-soft-primary text-primary'"
+                        (click)="setStatusFilter('rc_due')">
+                     <i class="uil uil-file-alt me-1"></i>RC देय
+                  </span>
+
+                  <span class="filter-pill badge"
+                        [ngClass]="activeStatusFilter === 'ins_due' ? 'bg-success text-white' : 'bg-soft-success text-success'"
+                        (click)="setStatusFilter('ins_due')">
+                     <i class="uil uil-shield-check me-1"></i>बीमा देय (Ins Due)
+                  </span>
+
+                  <span class="filter-pill badge"
+                        [ngClass]="activeStatusFilter === 'puc_due' ? 'bg-warning text-dark' : 'bg-soft-warning text-warning'"
+                        (click)="setStatusFilter('puc_due')">
+                     <i class="uil uil-wind me-1"></i>PUC देय
+                  </span>
+
+                  <span class="ms-auto font-size-12 text-muted fw-semibold" *ngIf="projectedExpense > 0">
+                     <i class="uil uil-rupee-sign me-1 text-warning"></i>अनुमानित नवीनीकरण व्यय: 
+                     <span class="text-warning fw-bold">₹{{projectedExpense | number:'1.2-2'}}</span>
+                  </span>
+               </div>
+            </div>
+
+            <!-- Vehicle Fleet Table Section -->
+            <div class="row mt-2" id="vehicleTableSection">
+               <div class="col-12">
+                  <div class="card shadow-sm border-0">
+                     <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2 px-3 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                           <i class="uil uil-list-ui-alt text-primary fs-4"></i>
+                           <h5 class="my-0 fw-bold">वाहन सूची एवं दस्तावेज़ अनुपालन (Vehicle Fleet & Documents)</h5>
+                           <span class="badge bg-soft-primary text-primary ms-1">{{vehData.length}} वाहन प्रदर्शित</span>
+                        </div>
+                        <pagination-controls class="pagi text-end my-0" (pageChange)="page = $event" [autoHide]="true"></pagination-controls>
+                     </div>
+
+                     <div class="card-body p-0" style="overflow-x: auto;">
+                        <table class="table table-hover align-middle mb-0" *ngIf="vehData.length">
+                           <thead>
+                              <tr>
+                                 <th style="width: 50px;" class="text-center">#</th>
+                                 <th style="width: 110px;" class="text-center">Manage</th>
+                                 <th style="width: 170px;">वाहन विवरण (Vehicle Info)</th>
+                                 <th style="width: 160px;">स्थान / MM</th>
+                                 <th style="width: 140px;">स्वामी / Owner</th>
+                                 <th style="width: 180px;"><span class="badge bg-soft-primary text-primary me-1">RC</span>RC (पंजीकरण)</th>
+                                 <th style="width: 220px;"><span class="badge bg-soft-success text-success me-1">INS</span>बीमा (Insurance)</th>
+                                 <th style="width: 170px;"><span class="badge bg-soft-warning text-warning me-1">PUC</span>PUC (प्रदूषण)</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let data of vehData | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
+                                 <!-- Index -->
+                                 <td class="text-center font-monospace font-size-12">
+                                    {{itemsPerPage * (page - 1) + i + 1}}
+                                 </td>
+
+                                 <!-- Action Buttons (Manage Cell: Click renew icon opens ALL 3 cards) -->
+                                 <td class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                       <i class="uil uil-pen i-outline-primary cursor-pointer me-1" 
+                                          (click)="edit(data, 'full')" 
+                                          title="Edit Vehicle Details"></i>
+                                       <i class="uil uil-sync i-outline-info cursor-pointer me-1" 
+                                          (click)="openQuickRenew(data, 'all')" 
+                                          title="Renew All Documents (3 Cards)"></i>
+                                       <i class="uil uil-history i-outline-warning cursor-pointer me-1" 
+                                          (click)="openDocHistory(data)" 
+                                          title="View Renewal History"></i>
+                                       <i class="uil uil-trash i-outline-danger cursor-pointer" 
+                                          (click)="delete(data)" 
+                                          title="Delete Vehicle"></i>
+                                    </div>
+                                 </td>
+
+                                 <!-- Vehicle Plate & Specs -->
+                                 <td>
+                                    <div>
+                                       <span class="license-plate font-size-13 mb-1">{{data.gadi_num}}</span>
+                                       <div class="font-size-12 fw-semibold text-truncate" style="max-width: 160px;" title="{{data.gadi_name}}">
+                                          {{data.gadi_name || 'वाहन नाम उपलब्ध नहीं'}}
+                                       </div>
+                                       <div class="d-flex align-items-center gap-1 font-size-11 text-muted">
+                                          <span *ngIf="data.vehicle_type">{{data.vehicle_type}}</span>
+                                          <span *ngIf="data.vehicle_type && data.fuel_type">•</span>
+                                          <span class="badge bg-soft-info text-info py-0 px-1" *ngIf="data.fuel_type">{{data.fuel_type}}</span>
+                                          <span *ngIf="data.seating_capacity" class="text-muted">({{data.seating_capacity}} Seat)</span>
+                                       </div>
+                                    </div>
+                                 </td>
+
+                                 <!-- MM / Location -->
+                                 <td>
+                                    <div class="font-size-13 fw-semibold">{{data.mm_hin}}</div>
+                                    <div class="font-size-11 text-muted">
+                                       <span>{{data.mm_eng}}</span>
+                                       <span *ngIf="data.mm_code" class="ms-1 font-monospace">({{data.mm_code}})</span>
+                                    </div>
+                                 </td>
+
+                                 <!-- Owner & Aawak -->
+                                 <td>
+                                    <div class="font-size-13">{{data.owner_name || '-'}}</div>
+                                    <div class="font-size-11 text-muted" *ngIf="data.nominee">Nominee: {{data.nominee}}</div>
+                                    <span class="badge bg-soft-secondary text-secondary py-0 px-1 font-size-10" *ngIf="data.aawak_type">
+                                       {{data.aawak_type}}
+                                    </span>
+                                 </td>
+
+                                 <!-- RC Details (Clicking opens ONLY RC card) -->
+                                 <td>
+                                    <div class="d-flex flex-column gap-1 cursor-pointer" (click)="openQuickRenew(data, 'rc')" title="Click to renew RC (Only RC Card)">
+                                       <div>
+                                          <span [class]="getDocBadge('rc', data).class">
+                                             <i [class]="'uil ' + getDocBadge('rc', data).icon + ' me-1'"></i>{{getDocBadge('rc', data).text}}
+                                          </span>
+                                       </div>
+                                       <div class="font-size-11 text-muted">
+                                          Exp: <span class="fw-semibold">{{(data.rc_exp_date | date:'dd-MM-yyyy') || '-'}}</span>
+                                       </div>
+                                       <div class="font-size-11 text-muted" *ngIf="data.rc_amount">
+                                          Amt: ₹{{data.rc_amount | number:'1.2-2'}}
+                                       </div>
+                                    </div>
+                                 </td>
+
+                                 <!-- Insurance Details (Clicking opens ONLY Insurance card) -->
+                                 <td>
+                                    <div class="d-flex flex-column gap-1 cursor-pointer" (click)="openQuickRenew(data, 'insurance')" title="Click to renew Insurance (Only Insurance Card)">
+                                       <div>
+                                          <span [class]="getDocBadge('insurance', data).class">
+                                             <i [class]="'uil ' + getDocBadge('insurance', data).icon + ' me-1'"></i>{{getDocBadge('insurance', data).text}}
+                                          </span>
+                                       </div>
+                                       <div class="font-size-11 text-muted">
+                                          Exp: <span class="fw-semibold">{{(data.insurance_exp_date | date:'dd-MM-yyyy') || '-'}}</span>
+                                       </div>
+                                       <div class="font-size-11 text-muted" *ngIf="data.insurance_company || data.insurance_amount">
+                                          <span *ngIf="data.insurance_company" class="fw-medium">{{data.insurance_company}}</span>
+                                          <span *ngIf="data.insurance_company && data.insurance_amount"> - </span>
+                                          <span *ngIf="data.insurance_amount">₹{{data.insurance_amount | number:'1.2-2'}}</span>
+                                       </div>
+                                    </div>
+                                 </td>
+
+                                 <!-- PUC Details (Clicking opens ONLY PUC card) -->
+                                 <td>
+                                    <div class="d-flex flex-column gap-1 cursor-pointer" (click)="openQuickRenew(data, 'puc')" title="Click to renew PUC (Only PUC Card)">
+                                       <div>
+                                          <span [class]="getDocBadge('puc', data).class">
+                                             <i [class]="'uil ' + getDocBadge('puc', data).icon + ' me-1'"></i>{{getDocBadge('puc', data).text}}
+                                          </span>
+                                       </div>
+                                       <div class="font-size-11 text-muted">
+                                          Exp: <span class="fw-semibold">{{(data.puc_exp_date | date:'dd-MM-yyyy') || '-'}}</span>
+                                       </div>
+                                       <div class="font-size-11 text-muted" *ngIf="data.puc_amount">
+                                          Amt: ₹{{data.puc_amount | number:'1.2-2'}}
+                                       </div>
+                                    </div>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+
+                        <div class="text-center py-5" *ngIf="!vehData.length">
+                           <i class="uil uil-car-sideview text-muted fs-1 mb-2"></i>
+                           <h5 class="text-muted">कोई वाहन डेटा नहीं मिला (No Vehicles Found)</h5>
+                           <p class="text-muted font-size-13 mb-3">दिए गए फ़िल्टर या खोज के अनुरूप कोई रिकॉर्ड उपलब्ध नहीं है।</p>
+                           <button class="btn btn-sm btn-outline-primary" (click)="resetFilters()">
+                              <i class="uil uil-sync me-1"></i>फ़िल्टर रीसेट करें
+                           </button>
+                        </div>
+                     </div>
+
+                     <div class="card-footer bg-transparent d-flex justify-content-between align-items-center py-2 px-3 border-top" *ngIf="vehData.length">
+                        <span class="font-size-13 text-muted">कुल रिकॉर्ड: {{vehData.length}}</span>
+                        <pagination-controls class="pagi text-end my-0" (pageChange)="page = $event" [autoHide]="true"></pagination-controls>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
          </div>
       </div>
    </div>
 </div>
 
 
-
-<!-- addVehicle Modal -->
-<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
-   aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
+<!-- Main Modal (Add / Edit Vehicle & Excel Import) -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="showModalLabel" aria-hidden="true">
+   <div class="modal-dialog" style="width: 98%;">
       <div class="modal-content">
-         <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
-               aria-label="Close"></button>
+         <div class="modal-header py-2 px-3">
+            <h5 class="modal-title fw-bold" id="showModalLabel">
+               <i class="uil uil-car me-1 text-primary"></i>{{showModal}}
+            </h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal = ''" class="btn-close" aria-label="Close"></button>
          </div>
-         <div class="modal-body">
-            <app-vehicle-entry *ngIf="showModal == 'Add Vehicle'" [mode]="mode"
-               (response)='addVehicleResponse($event)'></app-vehicle-entry>
+         <div class="modal-body p-3">
+            <app-vehicle-entry *ngIf="showModal === 'Add Vehicle'" [mode]="mode" (response)="addVehicleResponse($event)"></app-vehicle-entry>
+            <app-vehicle-entry *ngIf="showModal === 'Edit Vehicle'" [getData]="editData" [mode]="mode" [isEdit]="true" (response)="editVehicleResponse($event)"></app-vehicle-entry>
+            <app-excel-import *ngIf="showModal === 'Excel Import'" importType="vehicle" (response)="onImportResponse($event)"></app-excel-import>
+         </div>
+         <div class="modal-footer py-2">
+            <button type="button" class="btn btn-secondary px-3" onclick="$('#showModal').modal('hide')" (click)="showModal = ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
 
-            <app-vehicle-entry *ngIf="showModal == 'Edit Vehicle'" (response)='editVehicleResponse($event)'
-               [getData]="editData" [mode]="mode" [isEdit]="true"></app-vehicle-entry>
-               
-            <app-excel-import *ngIf="showModal == 'Excel Import'" importType="vehicle"></app-excel-import>
+
+<!-- Full-Screen Multi-Card Renewal Modal (width: 98% adhering to Rule 2) -->
+<div class="modal fade" id="quickRenewModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="quickRenewModalLabel" aria-hidden="true">
+   <div class="modal-dialog" style="width: 98%;">
+      <div class="modal-content">
+         <!-- Modal Header with Vehicle Plate & Card Toggle Switcher -->
+         <div class="modal-header py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2 border-bottom">
+            <div class="d-flex align-items-center gap-2">
+               <i class="uil uil-sync text-primary fs-3"></i>
+               <div>
+                  <h5 class="modal-title fw-bold my-0" id="quickRenewModalLabel">वाहन दस्तावेज़ नवीनीकरण (Vehicle Documents Renewal)</h5>
+                  <div class="d-flex align-items-center gap-2 mt-1" *ngIf="quickRenewVehicle">
+                     <span class="license-plate font-size-12">{{quickRenewVehicle.gadi_num}}</span>
+                     <span class="fw-semibold font-size-13">{{quickRenewVehicle.gadi_name || quickRenewVehicle.vehicle_type}}</span>
+                     <span class="badge bg-soft-secondary font-size-11" *ngIf="quickRenewVehicle.mm_hin">
+                        {{quickRenewVehicle.mm_hin}} : {{quickRenewVehicle.mm_eng}}
+                     </span>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Card View Tabs -->
+            <div class="d-flex align-items-center gap-1">
+               <button type="button" class="btn btn-sm" 
+                       [ngClass]="activeRenewCard === 'all' ? 'btn-primary' : 'btn-outline-primary'"
+                       (click)="setRenewCardView('all')">
+                  <i class="uil uil-apps me-1"></i>All Documents (तीनों कार्ड्स)
+               </button>
+               <button type="button" class="btn btn-sm" 
+                       [ngClass]="activeRenewCard === 'rc' ? 'btn-primary' : 'btn-outline-primary'"
+                       (click)="setRenewCardView('rc')">
+                  <i class="uil uil-file-alt me-1"></i>RC (पंजीकरण)
+               </button>
+               <button type="button" class="btn btn-sm" 
+                       [ngClass]="activeRenewCard === 'insurance' ? 'btn-primary' : 'btn-outline-primary'"
+                       (click)="setRenewCardView('insurance')">
+                  <i class="uil uil-shield-check me-1"></i>बीमा (Insurance)
+               </button>
+               <button type="button" class="btn btn-sm" 
+                       [ngClass]="activeRenewCard === 'puc' ? 'btn-primary' : 'btn-outline-primary'"
+                       (click)="setRenewCardView('puc')">
+                  <i class="uil uil-wind me-1"></i>PUC (प्रदूषण)
+               </button>
+               <button type="button" class="btn-close ms-2" onclick="$('#quickRenewModal').modal('hide')" aria-label="Close"></button>
+            </div>
          </div>
-         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+
+         <!-- Modal Body with 3 Distinct Cards -->
+         <div class="modal-body p-3" *ngIf="quickRenewVehicle">
+            <div class="row g-3">
+
+               <!-- ========================================== -->
+               <!-- CARD 1: RC (पंजीकरण) -->
+               <!-- ========================================== -->
+               <div [ngClass]="activeRenewCard === 'all' ? 'col-xl-4 col-md-6 col-12' : (activeRenewCard === 'rc' ? 'col-lg-6 col-md-8 mx-auto' : 'd-none')">
+                  <div class="card h-100 shadow-sm border" style="border-top: 4px solid #727cf5 !important;">
+                     <div class="card-header bg-transparent py-2 px-3 d-flex align-items-center justify-content-between border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                           <i class="uil uil-file-alt text-primary fs-4"></i>
+                           <div>
+                              <h6 class="my-0 fw-bold">RC (पंजीकरण प्रमाणपत्र)</h6>
+                              <small class="text-muted">Registration Certificate</small>
+                           </div>
+                        </div>
+                        <span [class]="getDocBadge('rc', quickRenewVehicle).class">
+                           <i [class]="'uil ' + getDocBadge('rc', quickRenewVehicle).icon + ' me-1'"></i>
+                           {{getDocBadge('rc', quickRenewVehicle).text}}
+                        </span>
+                     </div>
+
+                     <div class="card-body p-3">
+                        <!-- Current Details Alert Box -->
+                        <div class="p-2 mb-3 rounded bg-soft-primary font-size-12">
+                           <div class="d-flex justify-content-between mb-1">
+                              <span class="text-muted">वर्तमान समाप्ति (Current Exp):</span>
+                              <span class="fw-bold">{{(quickRenewVehicle.rc_exp_date | date:'dd-MM-yyyy') || 'उपलब्ध नहीं'}}</span>
+                           </div>
+                           <div class="d-flex justify-content-between">
+                              <span class="text-muted">पिछली राशि (Last Amount):</span>
+                              <span class="fw-bold">₹{{quickRenewVehicle.rc_amount || 0 | number:'1.2-2'}}</span>
+                           </div>
+                        </div>
+
+                        <!-- RC Renewal Fields -->
+                        <div class="mb-2">
+                           <label class="form-label font-size-12 fw-semibold">नवीन जारी दिनांक (Issue Date)</label>
+                           <input type="date" class="form-control" [(ngModel)]="renewForm.rc_date">
+                        </div>
+
+                        <div class="mb-2">
+                           <label class="form-label font-size-12 fw-semibold text-primary">नवीन समाप्ति दिनांक (Expiry Date) *</label>
+                           <input type="date" class="form-control border-primary" [(ngModel)]="renewForm.rc_exp_date" required>
+                        </div>
+
+                        <div class="mb-2">
+                           <label class="form-label font-size-12 fw-semibold">नवीनीकरण शुल्क (Renewal Amount ₹)</label>
+                           <input type="number" class="form-control" placeholder="RC Fees / Amount" [(ngModel)]="renewForm.rc_amount">
+                        </div>
+                     </div>
+
+                     <div class="card-footer bg-transparent py-2 px-3 d-flex justify-content-end border-top" *ngIf="activeRenewCard === 'rc'">
+                        <button type="button" class="btn btn-sm btn-primary" (click)="saveQuickRenew('rc')" [disabled]="renewSaving">
+                           <i class="uil uil-check me-1"></i>RC नवीनीकरण सहेजें
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+
+               <!-- ========================================== -->
+               <!-- CARD 2: बीमा (Insurance) -->
+               <!-- ========================================== -->
+               <div [ngClass]="activeRenewCard === 'all' ? 'col-xl-4 col-md-6 col-12' : (activeRenewCard === 'insurance' ? 'col-lg-6 col-md-8 mx-auto' : 'd-none')">
+                  <div class="card h-100 shadow-sm border" style="border-top: 4px solid #0acf97 !important;">
+                     <div class="card-header bg-transparent py-2 px-3 d-flex align-items-center justify-content-between border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                           <i class="uil uil-shield-check text-success fs-4"></i>
+                           <div>
+                              <h6 class="my-0 fw-bold">वाहन बीमा (Vehicle Insurance)</h6>
+                              <small class="text-muted">Motor Insurance Policy</small>
+                           </div>
+                        </div>
+                        <span [class]="getDocBadge('insurance', quickRenewVehicle).class">
+                           <i [class]="'uil ' + getDocBadge('insurance', quickRenewVehicle).icon + ' me-1'"></i>
+                           {{getDocBadge('insurance', quickRenewVehicle).text}}
+                        </span>
+                     </div>
+
+                     <div class="card-body p-3">
+                        <!-- Current Details Alert Box -->
+                        <div class="p-2 mb-3 rounded bg-soft-success font-size-12">
+                           <div class="d-flex justify-content-between mb-1">
+                              <span class="text-muted">वर्तमान समाप्ति (Current Exp):</span>
+                              <span class="fw-bold">{{(quickRenewVehicle.insurance_exp_date | date:'dd-MM-yyyy') || 'उपलब्ध नहीं'}}</span>
+                           </div>
+                           <div class="d-flex justify-content-between mb-1" *ngIf="quickRenewVehicle.insurance_company">
+                              <span class="text-muted">कंपनी (Company):</span>
+                              <span class="fw-bold">{{quickRenewVehicle.insurance_company}}</span>
+                           </div>
+                           <div class="d-flex justify-content-between">
+                              <span class="text-muted">प्रीमियम राशि (Premium):</span>
+                              <span class="fw-bold">₹{{quickRenewVehicle.insurance_amount || 0 | number:'1.2-2'}}</span>
+                           </div>
+                        </div>
+
+                        <!-- Insurance Renewal Fields -->
+                        <div class="row g-2">
+                           <div class="col-6 mb-2">
+                              <label class="form-label font-size-12 fw-semibold">पॉलिसी दिनांक (Date)</label>
+                              <input type="date" class="form-control" [(ngModel)]="renewForm.insurance_date">
+                           </div>
+                           <div class="col-6 mb-2">
+                              <label class="form-label font-size-12 fw-semibold text-success">समाप्ति दिनांक (Expiry) *</label>
+                              <input type="date" class="form-control border-success" [(ngModel)]="renewForm.insurance_exp_date" required>
+                           </div>
+                        </div>
+
+                        <div class="mb-2">
+                           <label class="form-label font-size-12 fw-semibold">बीमा कंपनी (Insurance Company)</label>
+                           <input type="text" class="form-control" placeholder="उदा: SBI General, TATA AIG, New India" 
+                                  [(ngModel)]="renewForm.insurance_company">
+                        </div>
+
+                        <div class="row g-2">
+                           <div class="col-6 mb-2">
+                              <label class="form-label font-size-12 fw-semibold">बीमा प्रकार (Type)</label>
+                              <input type="text" class="form-control" placeholder="Comprehensive, 3rd Party" 
+                                     [(ngModel)]="renewForm.insurance_type">
+                           </div>
+                           <div class="col-6 mb-2">
+                              <label class="form-label font-size-12 fw-semibold">प्रीमियम राशि (₹)</label>
+                              <input type="number" class="form-control" placeholder="Amount" 
+                                     [(ngModel)]="renewForm.insurance_amount">
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="card-footer bg-transparent py-2 px-3 d-flex justify-content-end border-top" *ngIf="activeRenewCard === 'insurance'">
+                        <button type="button" class="btn btn-sm btn-success" (click)="saveQuickRenew('insurance')" [disabled]="renewSaving">
+                           <i class="uil uil-check me-1"></i>बीमा नवीनीकरण सहेजें
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+
+               <!-- ========================================== -->
+               <!-- CARD 3: PUC (प्रदूषण प्रमाणपत्र) -->
+               <!-- ========================================== -->
+               <div [ngClass]="activeRenewCard === 'all' ? 'col-xl-4 col-md-6 col-12' : (activeRenewCard === 'puc' ? 'col-lg-6 col-md-8 mx-auto' : 'd-none')">
+                  <div class="card h-100 shadow-sm border" style="border-top: 4px solid #ffbc00 !important;">
+                     <div class="card-header bg-transparent py-2 px-3 d-flex align-items-center justify-content-between border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                           <i class="uil uil-wind text-warning fs-4"></i>
+                           <div>
+                              <h6 class="my-0 fw-bold">PUC (प्रदूषण नियंत्रण)</h6>
+                              <small class="text-muted">Pollution Under Control</small>
+                           </div>
+                        </div>
+                        <span [class]="getDocBadge('puc', quickRenewVehicle).class">
+                           <i [class]="'uil ' + getDocBadge('puc', quickRenewVehicle).icon + ' me-1'"></i>
+                           {{getDocBadge('puc', quickRenewVehicle).text}}
+                        </span>
+                     </div>
+
+                     <div class="card-body p-3">
+                        <!-- Current Details Alert Box -->
+                        <div class="p-2 mb-3 rounded bg-soft-warning font-size-12">
+                           <div class="d-flex justify-content-between mb-1">
+                              <span class="text-muted">वर्तमान समाप्ति (Current Exp):</span>
+                              <span class="fw-bold">{{(quickRenewVehicle.puc_exp_date | date:'dd-MM-yyyy') || 'उपलब्ध नहीं'}}</span>
+                           </div>
+                           <div class="d-flex justify-content-between">
+                              <span class="text-muted">पिछली राशि (Last Amount):</span>
+                              <span class="fw-bold">₹{{quickRenewVehicle.puc_amount || 0 | number:'1.2-2'}}</span>
+                           </div>
+                        </div>
+
+                        <!-- PUC Renewal Fields -->
+                        <div class="mb-2">
+                           <label class="form-label font-size-12 fw-semibold">प्रमाणपत्र दिनांक (Date)</label>
+                           <input type="date" class="form-control" [(ngModel)]="renewForm.puc_date">
+                        </div>
+
+                        <div class="mb-2">
+                           <label class="form-label font-size-12 fw-semibold text-warning">समाप्ति दिनांक (Expiry Date) *</label>
+                           <input type="date" class="form-control border-warning" [(ngModel)]="renewForm.puc_exp_date" required>
+                        </div>
+
+                        <div class="mb-2">
+                           <label class="form-label font-size-12 fw-semibold">PUC शुल्क (Amount ₹)</label>
+                           <input type="number" class="form-control" placeholder="PUC Fees" [(ngModel)]="renewForm.puc_amount">
+                        </div>
+                     </div>
+
+                     <div class="card-footer bg-transparent py-2 px-3 d-flex justify-content-end border-top" *ngIf="activeRenewCard === 'puc'">
+                        <button type="button" class="btn btn-sm btn-warning" (click)="saveQuickRenew('puc')" [disabled]="renewSaving">
+                           <i class="uil uil-check me-1"></i>PUC नवीनीकरण सहेजें
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+
+         <!-- Modal Footer with Master Actions -->
+         <div class="modal-footer py-2 px-3 d-flex justify-content-between align-items-center border-top">
+            <span class="text-muted font-size-12">
+               <i class="uil uil-info-circle me-1"></i>नवीनीकरण सहेजने पर यह विवरण वाहन के साथ अपडेट होगा और इतिहास तालिका में स्वतः जुड़ जाएगा।
+            </span>
+            <div class="d-flex align-items-center gap-2">
+               <button type="button" class="btn btn-secondary px-3" onclick="$('#quickRenewModal').modal('hide')">Close</button>
+               <button type="button" class="btn btn-success px-4 fw-bold" (click)="saveQuickRenew()" [disabled]="renewSaving">
+                  <i class="uil uil-check-circle me-1" *ngIf="!renewSaving"></i>
+                  <span *ngIf="renewSaving" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  {{activeRenewCard === 'all' ? 'Save All Documents (सभी 3 दस्तावेज़ सहेजें)' : 'Save Renewal (नवीनीकरण सहेजें)'}}
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+<!-- Document Renewal History Modal -->
+<div class="modal fade" id="docHistoryModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="docHistoryModalLabel" aria-hidden="true">
+   <div class="modal-dialog" style="width: 820px; max-width: 95%;">
+      <div class="modal-content">
+         <div class="modal-header py-2 px-3">
+            <div class="d-flex align-items-center gap-2">
+               <i class="uil uil-history text-warning fs-4"></i>
+               <div>
+                  <h5 class="modal-title fw-bold my-0" id="docHistoryModalLabel">दस्तावेज़ इतिहास (Document Renewal History)</h5>
+                  <small class="text-muted" *ngIf="historyVehicle">{{historyVehicle.gadi_num}} - {{historyVehicle.gadi_name}}</small>
+               </div>
+            </div>
+            <button type="button" class="btn-close" onclick="$('#docHistoryModal').modal('hide')" aria-label="Close"></button>
+         </div>
+         <div class="modal-body p-3">
+            <div *ngIf="historyLoader" class="text-center py-4">
+               <div class="spinner-border text-primary" role="status"></div>
+               <p class="text-muted font-size-13 mt-2">दस्तावेज़ इतिहास लोड हो रहा है...</p>
+            </div>
+
+            <div *ngIf="!historyLoader && documentHistory.length">
+               <table class="table table-sm table-hover align-middle">
+                  <thead>
+                     <tr>
+                        <th>#</th>
+                        <th>प्रकार (Type)</th>
+                        <th>दिनांक (Date)</th>
+                        <th>समाप्ति (Expiry)</th>
+                        <th>कंपनी / विवरण</th>
+                        <th class="text-end">राशि (Amount)</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr *ngFor="let doc of documentHistory; let i=index">
+                        <td class="font-monospace text-muted">{{i + 1}}</td>
+                        <td>
+                           <span class="badge" [ngClass]="{
+                              'bg-soft-primary text-primary': doc.doc_type === 'rc',
+                              'bg-soft-info text-info': doc.doc_type === 'insurance',
+                              'bg-soft-success text-success': doc.doc_type === 'puc'
+                           }">
+                              {{doc.doc_type ? doc.doc_type.toUpperCase() : '-'}}
+                           </span>
+                        </td>
+                        <td>{{(doc.doc_date | date:'dd-MM-yyyy') || '-'}}</td>
+                        <td class="fw-semibold">{{(doc.exp_date | date:'dd-MM-yyyy') || '-'}}</td>
+                        <td>
+                           <span *ngIf="doc.insurance_type">{{doc.insurance_type}}</span>
+                           <span *ngIf="!doc.insurance_type" class="text-muted">-</span>
+                        </td>
+                        <td class="text-end font-monospace">
+                           <span *ngIf="doc.amount">₹{{doc.amount | number:'1.2-2'}}</span>
+                           <span *ngIf="!doc.amount" class="text-muted">-</span>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+
+            <div *ngIf="!historyLoader && !documentHistory.length" class="text-center py-4">
+               <i class="uil uil-folder-open text-muted fs-1 mb-2"></i>
+               <h6 class="text-muted">कोई पिछला नवीनीकरण इतिहास उपलब्ध नहीं है।</h6>
+               <p class="text-muted font-size-12">जैसे ही नए नवीनीकरण दर्ज होंगे, उनका ऑडिट इतिहास यहाँ स्वतः प्रदर्शित होगा।</p>
+            </div>
+         </div>
+         <div class="modal-footer py-2">
+            <button type="button" class="btn btn-sm btn-secondary px-3" onclick="$('#docHistoryModal').modal('hide')">Close</button>
          </div>
       </div>
    </div>

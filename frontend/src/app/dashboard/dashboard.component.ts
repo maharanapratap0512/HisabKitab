@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { resourceLimits } from 'worker_threads';
@@ -62,13 +63,58 @@ export class DashboardComponent implements OnInit {
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   dictionary: any = [];
 
+  // Modern Dashboard KPI & Operational Metrics (Calculated strictly from Bachat & Aawak remaining_qty)
+  totalAawakRemainingQty: number = 0;
+  activeAawakBatchesCount: number = 0;
+  activeAawakBatches: any[] = [];
+  topStockItems: any[] = [];
+  lowStockItems: any[] = [];
+  positiveStockCount: number = 0;
+  zeroStockCount: number = 0;
+  totalUsedCount: number = 0;
+  maxStockVal: number = 1;
+  defaultMM: string = '';
+  thisMonthAawakCount: number = 0;
+  thisMonthJawakCount: number = 0;
+  activePrastavCount: number = 0;
+  prastavTransitCount: number = 0;
+  prastavPendingCount: number = 0;
+  prastavReceivedCount: number = 0;
+
+  // Dead Stock & In-Transit Logistics Alerts
+  deadStockCount: number = 0;
+  deadStockLots: any[] = [];
+  inTransitCount: number = 0;
+  inTransitLots: any[] = [];
+
+  // Statistics & Analytics Tab Properties
+  statsSelectedMM: any = null;
+  statsSelectedYear: string = '2026';
+  statsYears: string[] = ['2026', '2025', '2024'];
+  statsMonthlyTrend: any[] = [];
+  statsYearlyComparison: any[] = [];
+  statsMmComparison: any[] = [];
+  statsTopStockItems: any[] = [];
+  statsTopDistributedItems: any[] = [];
+  statsLoading: boolean = false;
+  maxMonthlyAawakQty: number = 1;
+  maxYearlyQty: number = 1;
+
+  // Quick Stock & Aawak Dispenser Properties
+  dispenserSearchTerm: string = '';
+  dispenserSelectedMM: any = null;
+  dispenserItems: any[] = [];
+  selectedItemForLots: any = null;
+  expandedItemId: any = null;
+
   constructor(private fb: FormBuilder,
     private http: HttpService,
     private api: ApiService,
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService) { }
+    public auth: AuthService,
+    public router: Router) { }
 
   ngOnInit(): void {
     this.spinner.show();
@@ -86,6 +132,8 @@ export class DashboardComponent implements OnInit {
       this.products = result.product ? result.product : [];
       this.categories = result.category ? result.category : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
+      this.updateDefaultMMLabel();
+      this.computeDashboardMetrics();
     });
     this.months = this.gs.months;
     this.settings = this.auth.webUser?.settings || {};
@@ -94,8 +142,10 @@ export class DashboardComponent implements OnInit {
       this.filterObj.mm_id = [defMM];
       this.historySelectedMM = defMM;
     }
+    this.updateDefaultMMLabel();
     this.getBachat();
     this.getImportHistory();
+    this.loadStatistics();
     // this.getPendingAawak();
   }
 
@@ -154,38 +204,345 @@ export class DashboardComponent implements OnInit {
 
   getBachat() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('BACHATHOME') + this.auth.webUser.dept_id).subscribe((data: any) => {
-      if (data['result'] && data['success']) {
-
-        this.bachatDataAll = data['result'];
-        for (let i in this.bachatDataAll) {
-          this.bachatDataAll[i].categories_hin = '';
-          this.bachatDataAll[i].categories_eng = '';
-          if (this.bachatDataAll[i].scategories && this.bachatDataAll[i].scategories.length > 0) {
-
-            for (let j in this.categories) {
-              if (this.bachatDataAll[i].scategories.includes(this.categories[j]._id)) {
-                this.bachatDataAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.bachatDataAll[i].categories_eng += this.categories[j].category_eng + ', ';
+    this.http.get(this.api.getUrl('BACHATHOME') + this.auth.webUser.dept_id).subscribe({
+      next: (data: any) => {
+        if (data && data['success'] && data['result']) {
+          this.bachatDataAll = data['result'];
+          for (let i in this.bachatDataAll) {
+            this.bachatDataAll[i].categories_hin = '';
+            this.bachatDataAll[i].categories_eng = '';
+            if (this.bachatDataAll[i].scategories && this.bachatDataAll[i].scategories.length > 0) {
+              for (let j in this.categories) {
+                if (this.bachatDataAll[i].scategories.includes(this.categories[j]._id)) {
+                  this.bachatDataAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                  this.bachatDataAll[i].categories_eng += this.categories[j].category_eng + ', ';
+                }
+              }
+            } else if (this.bachatDataAll[i].icategories && this.bachatDataAll[i].icategories.length > 0) {
+              for (let j in this.categories) {
+                if (this.bachatDataAll[i].icategories.includes(this.categories[j]._id)) {
+                  this.bachatDataAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                  this.bachatDataAll[i].categories_eng += this.categories[j].category_eng + ', ';
+                }
               }
             }
-            // console.log(this.bachatDataAll[i].scategories, this.categories);
-          } else {
-            for (let j in this.categories) {
-              if (this.bachatDataAll[i].icategories.includes(this.categories[j]._id)) {
-                this.bachatDataAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.bachatDataAll[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
-            // console.log(this.bachatDataAll[i].icategories, this.categories);
+          }
+          this.bachatData = this.bachatDataAll;
+          if (data['this_month_aawak_count'] !== undefined) {
+            this.thisMonthAawakCount = Number(data['this_month_aawak_count']) || 0;
+          }
+          if (data['this_month_jawak_count'] !== undefined) {
+            this.thisMonthJawakCount = Number(data['this_month_jawak_count']) || 0;
+          }
+          if (data['active_prastav_count'] !== undefined) {
+            this.activePrastavCount = Number(data['active_prastav_count']) || 0;
+          }
+          if (data['prastav_transit_count'] !== undefined) {
+            this.prastavTransitCount = Number(data['prastav_transit_count']) || 0;
+          }
+          if (data['prastav_pending_count'] !== undefined) {
+            this.prastavPendingCount = Number(data['prastav_pending_count']) || 0;
+          }
+          if (data['prastav_received_count'] !== undefined) {
+            this.prastavReceivedCount = Number(data['prastav_received_count']) || 0;
+          }
+          if (data['dead_stock_count'] !== undefined) {
+            this.deadStockCount = Number(data['dead_stock_count']) || 0;
+          }
+          if (data['dead_stock_lots']) {
+            this.deadStockLots = data['dead_stock_lots'];
+          }
+          if (data['in_transit_count'] !== undefined) {
+            this.inTransitCount = Number(data['in_transit_count']) || 0;
+          }
+          if (data['in_transit_lots']) {
+            this.inTransitLots = data['in_transit_lots'];
+          }
+          this.filterBachat();
+          this.computeDashboardMetrics();
+        } else {
+          this.toastr.error(data?.message || 'बचत डेटा प्राप्त करने में त्रुटि आई।');
+        }
+        this.isLoader = false;
+      },
+      error: (err: any) => {
+        this.isLoader = false;
+        this.toastr.error('सर्वर से बचत डेटा लोड करने में त्रुटि आई।');
+      }
+    });
+  }
+
+  computeDashboardMetrics() {
+    if (!this.bachatDataAll || this.bachatDataAll.length === 0) return;
+
+    let pos = 0;
+    let usedSum = 0;
+    let maxStock = 1;
+    let totalAwkRemaining = 0;
+    let awkBatchesCount = 0;
+    const allActiveBatches: any[] = [];
+    const positiveItemIds = new Set<string>();
+
+    for (const item of this.bachatDataAll) {
+      const bachatStock = Number(item.Stock) || 0;
+      let itemAwkRemainingSum = 0;
+
+      if (item.aawaks && Array.isArray(item.aawaks)) {
+        for (const awk of item.aawaks) {
+          const rem = Number(awk.remaining_qty) || 0;
+          if (rem > 0 || awk.is_variable_qty) {
+            awkBatchesCount++;
+            totalAwkRemaining += rem;
+            itemAwkRemainingSum += rem;
+            allActiveBatches.push({
+              _id: awk._id,
+              aawak_id: awk._id,
+              item_id: item.item_id,
+              item_hin: item.item_hin,
+              item_eng: item.item_eng,
+              subitem_hin: item.subitem_hin,
+              subitem_eng: item.subitem_eng,
+              unit_short: item.unit_short || awk.unit_short || '',
+              date: awk.date,
+              aawak_mm_hin: awk.aawak_mm_hin || item.mm_hin || '',
+              pkt_num: awk.pkt_num,
+              qty: awk.qty,
+              remaining_qty: rem,
+              is_variable_qty: awk.is_variable_qty,
+              condition_hin: awk.condition_hin,
+              item_detail: awk.item_detail,
+              bachatRef: item
+            });
           }
         }
-        this.bachatData = this.bachatDataAll;
-        this.filterBachat();
-        this.isLoader = false;
       }
-      this.isLoader = false;
+
+      const effectiveStock = bachatStock > 0 ? bachatStock : itemAwkRemainingSum;
+      item.effectiveStock = effectiveStock;
+      if (effectiveStock > 0) {
+        pos++;
+        if (effectiveStock > maxStock) maxStock = effectiveStock;
+        if (item.item_id) positiveItemIds.add(String(item.item_id));
+      }
+      usedSum += Number(item.Used) || 0;
+    }
+
+    this.positiveStockCount = pos;
+    this.totalUsedCount = usedSum;
+    this.maxStockVal = maxStock;
+    this.totalAawakRemainingQty = Math.round(totalAwkRemaining * 1000) / 1000;
+    this.activeAawakBatchesCount = awkBatchesCount;
+
+    // Latest active Aawak lots with remaining stock (sorted by date descending)
+    this.activeAawakBatches = allActiveBatches
+      .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+      .slice(0, 6);
+
+    // Calculate Top Stock Items (based on Bachat stock & Aawak remaining qty)
+    const sorted = [...this.bachatDataAll].sort((a: any, b: any) => {
+      const stockA = Number(a.Stock) > 0 ? Number(a.Stock) : ((a.aawaks || []).reduce((acc: number, w: any) => acc + (Number(w.remaining_qty) || 0), 0));
+      const stockB = Number(b.Stock) > 0 ? Number(b.Stock) : ((b.aawaks || []).reduce((acc: number, w: any) => acc + (Number(w.remaining_qty) || 0), 0));
+      return stockB - stockA;
     });
+    this.topStockItems = sorted.filter((i: any) => {
+      const st = Number(i.Stock) > 0 ? Number(i.Stock) : ((i.aawaks || []).reduce((acc: number, w: any) => acc + (Number(w.remaining_qty) || 0), 0));
+      return st > 0;
+    }).slice(0, 6);
+
+    // Calculate Zero / Low Stock Items:
+    // 1. Records in bachatDataAll where stock <= 0 and no remaining aawak
+    const zeroBachat = this.bachatDataAll.filter((i: any) => {
+      const bStock = Number(i.Stock) || 0;
+      const awkRem = (i.aawaks || []).reduce((acc: number, w: any) => acc + (Number(w.remaining_qty) || 0), 0);
+      return bStock <= 0 && awkRem <= 0;
+    });
+
+    // 2. Catalog items from this.items that have no positive stock in bachat
+    const zeroCatalogItems: any[] = [];
+    if (this.items && this.items.length > 0) {
+      for (const it of this.items) {
+        const id = String(it._id || it.item_id);
+        if (!positiveItemIds.has(id)) {
+          zeroCatalogItems.push({
+            item_hin: it.item_hin || it.list_name_hin,
+            item_eng: it.item_eng || it.list_name_eng,
+            mm_hin: 'स्टोर कैटलॉग',
+            Stock: 0,
+            unit_short: it.unit_short || ''
+          });
+        }
+      }
+    }
+
+    this.zeroStockCount = zeroCatalogItems.length > 0 ? zeroCatalogItems.length : zeroBachat.length;
+    this.lowStockItems = [...zeroBachat, ...zeroCatalogItems].slice(0, 5);
+    this.filterDispenserItems();
+  }
+
+  filterDispenserItems() {
+    if (!this.bachatDataAll || this.bachatDataAll.length === 0) {
+      this.dispenserItems = [];
+      return;
+    }
+
+    let list = this.bachatDataAll;
+
+    if (this.dispenserSelectedMM) {
+      list = list.filter((b: any) => b.mm_id == this.dispenserSelectedMM);
+    }
+
+    if (this.dispenserSearchTerm && this.dispenserSearchTerm.trim()) {
+      const term = this.dispenserSearchTerm.trim().toLowerCase();
+      list = list.filter((b: any) => {
+        const hin = (b.item_hin || '').toLowerCase();
+        const eng = (b.item_eng || '').toLowerCase();
+        const subHin = (b.subitem_hin || '').toLowerCase();
+        const subEng = (b.subitem_eng || '').toLowerCase();
+        const mm = (b.mm_hin || '').toLowerCase();
+        const code = (b.item_code || '').toLowerCase();
+        return hin.includes(term) || eng.includes(term) || subHin.includes(term) || subEng.includes(term) || mm.includes(term) || code.includes(term);
+      });
+    }
+
+    const isFiltered = !!(this.dispenserSearchTerm?.trim() || this.dispenserSelectedMM);
+
+    // Filter items with positive stock or active lots unless user explicitly searches
+    this.dispenserItems = [...list]
+      .filter((item: any) => {
+        if (isFiltered) return true;
+        const st = Number(item.effectiveStock || item.Stock) || 0;
+        return st > 0 || (item.aawaks && item.aawaks.length > 0);
+      })
+      .sort((a: any, b: any) => {
+        const stockA = Number(a.effectiveStock || a.Stock) || 0;
+        const stockB = Number(b.effectiveStock || b.Stock) || 0;
+        return stockB - stockA;
+      })
+      .slice(0, isFiltered ? 30 : 8);
+
+    if (this.dispenserSearchTerm && this.dispenserItems.length > 0) {
+      this.expandedItemId = this.dispenserItems[0]._id;
+    }
+  }
+
+  toggleItemAawakLots(itemId: any) {
+    this.expandedItemId = this.expandedItemId === itemId ? null : itemId;
+  }
+
+  openItemAawakModal(item: any) {
+    this.selectedItemForLots = item;
+    $('#itemAawakModal').modal('show');
+  }
+
+  selectItemForAawakJawak(item: any) {
+    this.dispenserSearchTerm = item.item_hin || item.item_eng || '';
+    this.filterDispenserItems();
+    this.expandedItemId = item._id;
+    this.gs.smoothScrollTo('#quickDispenserSection', 20, 300);
+  }
+
+  scrollToDispenser() {
+    this.gs.smoothScrollTo('#quickDispenserSection', 20, 300);
+  }
+
+  scrollToPrastavAlerts() {
+    this.gs.smoothScrollTo('#prastavAlertsSection', 20, 300);
+  }
+
+  loadStatistics() {
+    this.statsLoading = true;
+    const payload = {
+      year: this.statsSelectedYear,
+      mm_id: this.statsSelectedMM || null
+    };
+    this.http.post(this.api.getUrl('BACHAT') + 'statistics/' + this.auth.webUser.dept_id, payload).subscribe({
+      next: (res: any) => {
+        if (res && res.success) {
+          this.statsYears = res.years && res.years.length > 0 ? res.years : this.statsYears;
+          this.statsMonthlyTrend = res.monthlyTrend || [];
+          this.statsYearlyComparison = res.yearlyComparison || [];
+          this.statsMmComparison = res.mmComparison || [];
+          this.statsTopStockItems = res.topStockItems || [];
+          this.statsTopDistributedItems = res.topDistributedItems || [];
+
+          // Compute max scales for responsive chart bar heights
+          const maxAwk = Math.max(...this.statsMonthlyTrend.map((m: any) => m.aawakQty || 0), 1);
+          const maxJwk = Math.max(...this.statsMonthlyTrend.map((m: any) => m.jawakQty || 0), 1);
+          this.maxMonthlyAawakQty = Math.max(maxAwk, maxJwk, 1);
+
+          const maxYAwk = Math.max(...this.statsYearlyComparison.map((y: any) => y.aawakQty || 0), 1);
+          const maxYJwk = Math.max(...this.statsYearlyComparison.map((y: any) => y.jawakQty || 0), 1);
+          this.maxYearlyQty = Math.max(maxYAwk, maxYJwk, 1);
+        } else {
+          this.toastr.error(res?.message || 'सांख्यिकी डेटा प्राप्त करने में त्रुटि आई।');
+        }
+        this.statsLoading = false;
+      },
+      error: (err: any) => {
+        this.statsLoading = false;
+        this.toastr.error('सांख्यिकी लोड करने में सर्वर त्रुटि आई।');
+      }
+    });
+  }
+
+  onStatsFilterChange() {
+    this.loadStatistics();
+  }
+
+  getDistributionMetrics(item: any): { originalQty: number; distributedQty: number; remainingQty: number; percent: number } {
+    let original = 0;
+    let distributed = 0;
+    let remaining = 0;
+
+    if (item.aawaks && Array.isArray(item.aawaks) && item.aawaks.length > 0) {
+      for (const awk of item.aawaks) {
+        const oQty = Number(awk.qty) || 0;
+        const rQty = Number(awk.remaining_qty) || 0;
+        original += oQty;
+        remaining += rQty;
+      }
+      distributed = Math.max(0, original - remaining);
+    }
+
+    if (original === 0) {
+      const stock = Number(item.effectiveStock || item.Stock) || 0;
+      const used = Number(item.Used) || 0;
+      original = stock + used;
+      distributed = used;
+      remaining = stock;
+    }
+
+    const percent = original > 0 ? Math.round((distributed / original) * 100) : 0;
+    return {
+      originalQty: Math.round(original * 1000) / 1000,
+      distributedQty: Math.round(distributed * 1000) / 1000,
+      remainingQty: Math.round(remaining * 1000) / 1000,
+      percent: Math.min(100, Math.max(0, percent))
+    };
+  }
+
+  getDistributedPercentage(item: any): number {
+    return this.getDistributionMetrics(item).percent;
+  }
+
+  getStockPercentage(stock: any): number {
+    return this.getDistributedPercentage(stock);
+  }
+
+  updateDefaultMMLabel() {
+    const defMM = this.auth.webUser?.settings?.defaultMM;
+    if (defMM && this.mms?.length) {
+      const found = this.mms.find((m: any) => m._id == defMM);
+      if (found) {
+        this.defaultMM = found.mm_hin + (found.mm_code ? ' : ' + found.mm_code : '');
+        return;
+      }
+    }
+    this.defaultMM = 'डिफ़ॉल्ट MM';
+  }
+
+  navigateTo(path: string) {
+    this.router.navigate([path]);
   }
 
   filterBachat() {
@@ -289,61 +646,57 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  addJawak(awk: any, bachat: any) {
-
+  addJawak(awk: any, bachat?: any) {
+    const parentBachat = bachat || awk.bachatRef || {};
     this.editData = {
-      bachat_id: bachat._id,
-      mm_id: bachat.mm_id,
-      mm_hin: bachat.mm_hin,
-      item_id: bachat.item_id,
-      item_hin: bachat.item_hin,
-      subitem_id: bachat.subitem_id,
-      subitem_hin: bachat.subitem_hin,
-      unit_id: bachat.unit_id,
-      unit_short: bachat.unit_short,
-      dept_id: bachat.dept_id,
+      bachat_id: parentBachat._id,
+      mm_id: parentBachat.mm_id || awk.mm_id || awk.aawak_mm_id,
+      mm_hin: parentBachat.mm_hin || awk.aawak_mm_hin,
+      item_id: parentBachat.item_id || awk.item_id,
+      item_hin: parentBachat.item_hin || awk.item_hin,
+      subitem_id: parentBachat.subitem_id || awk.subitem_id,
+      subitem_hin: parentBachat.subitem_hin || awk.subitem_hin,
+      unit_id: parentBachat.unit_id || awk.unit_id,
+      unit_short: parentBachat.unit_short || awk.unit_short,
+      dept_id: parentBachat.dept_id || awk.dept_id || this.auth.webUser?.dept_id,
+      aawak_id: awk._id || awk.aawak_id,
       ...awk
     };
+    $('#itemAawakModal').modal('hide');
     this.showModal = "Add Jawak";
     $('#showModal').modal('show');
   }
 
   showJawak(id: any) {
     if (id) {
-      this.http.get(this.api.getUrl('JAWAKBYAWK') + id).subscribe((data: any) => {
-        if (data['result'] && data['success']) {
-          if (data['result'].length > 0) {
-            this.viewData = data['result'];
-            this.openModal('Show Jawak');
+      this.http.get(this.api.getUrl('JAWAKBYAWK') + id).subscribe({
+        next: (data: any) => {
+          if (data && data['success'] && data['result']) {
+            if (data['result'].length > 0) {
+              this.viewData = data['result'];
+              $('#itemAawakModal').modal('hide');
+              this.openModal('Show Jawak');
+            } else {
+              this.toastr.warning("इस आवक की कोई पूर्व जावक नहीं मिली।");
+            }
+          } else {
+            this.toastr.error('जावक विवरण प्राप्त करने में त्रुटि आई।');
           }
-          else {
-            this.toastr.warning("No any jawak Found")
-          }
+        },
+        error: () => {
+          this.toastr.error('सर्वर से जावक विवरण लोड नहीं हो सका।');
         }
       });
     }
   }
 
   addJawakResponse(ev: any) {
-    // this.isLoader = true;
-    console.log(ev);
-
-    if (ev.aawak_ref_id) {
-      let bindex = this.bachatData.findIndex((b: { _id: any; }) => b._id == this.editData.bachat_id);
-      console.log("bachat index", bindex);
-      console.log("bachat", this.editData);
-      console.log("bachatAll", this.bachatData);
-
-      // if(bindex && this.bachatData[bindex].aawaks){
-      //   let index = this.bachatData[bindex].aawaks.indexOf((a: { _id: any; })=>a._id == ev.aawak_ref_id);
-      //   if(index){
-      //     this.bachatData[bindex].aawaks[index].remaining_qty -= ev.qty;
-      //   }
-      // }
+    if (ev) {
+      this.toastr.success('जावक सफलतापूर्वक दर्ज कर ली गई है।');
+      this.getBachat();
     }
     $('#showModal').modal('hide');
     this.showModal = '';
-    // this.isLoader = false;
   }
 
   excelImport(ev: any) {

@@ -93,6 +93,7 @@ export class ApiService {
     REPORTAJ: base_url + 'reports/aj/',
     IMPORTHISTORY: base_url + 'import_history/',
     VEHICLE: base_url + 'vehicle/',
+    VEHICLE_DOCUMENT: base_url + 'vehicle_document/',
     COMMENT: base_url + 'comment/',
     INTEGRITY: base_url + 'integrity-checkup/',
     UNIVERSAL_REPORT: base_url + 'universal-report/'

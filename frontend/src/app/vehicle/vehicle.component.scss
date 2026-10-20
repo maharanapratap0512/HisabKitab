@@ -1,48 +1,68 @@
-.insurance {
-   background-color: #9c9c9c81;
-   padding: 3px;
-   text-align: center;
-   cursor: pointer;
+.stat-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border-radius: 10px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  &.active-card {
+    border: 2px solid #727cf5 !important;
+  }
 }
 
-.puc {
-   background-color: #68ba5185;
-   padding: 3px;
-   text-align: center;
-   cursor: pointer
+.license-plate {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 5px;
+  border: 1.5px solid currentColor;
 }
 
-.rc {
-   background-color: #b7681880;
-   padding: 3px;
-   text-align: center;
-   cursor: pointer
+.filter-pill {
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  border-radius: 20px;
+  padding: 4px 12px;
+
+  &:hover {
+    opacity: 0.85;
+  }
 }
 
-thead>.insurance {
-   color: #dddddd;
-   cursor: default;
-}
+.doc-history-timeline {
+  position: relative;
+  padding-left: 20px;
 
-thead>.puc {
-   color: #05ff00;
-   cursor: default;
-}
+  &::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: rgba(114, 124, 245, 0.3);
+  }
 
-thead>.rc {
-   color: #ff8500;
-   cursor: default;
-}
+  .timeline-item {
+    position: relative;
+    margin-bottom: 16px;
 
-.warning {
-   color: #ff8100;
-   font-weight: bold;
-   border: 1px solid;
-}
-
-.error {
-   color: #ff0000;
-   font-weight: bolder;
-   font-size: large;
-   border: 2px solid;
+    &::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #727cf5;
+      border: 2px solid var(--bs-card-bg, #fff);
+    }
+  }
 }

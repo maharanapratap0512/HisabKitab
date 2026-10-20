@@ -111,7 +111,8 @@ export class DataViewComponent implements OnInit {
       case 'aawak_source':
       case 'usage_list':
       case 'jawak_type':
-      case 'condition': this.settings = this.auth.webUser.settings.support_list;
+      case 'condition':
+      case 'prastav_type': this.settings = this.auth.webUser.settings.support_list;
         this.apiName = 'SUPPORTLIST';
         this.importType = 'support_list';
         tableName = 'support_list';
@@ -158,14 +159,22 @@ export class DataViewComponent implements OnInit {
         this.isLoader = false;
       });
     } else {
-      this.http.get(this.api.getUrl(this.apiName) + this.auth.webUser.dept_id).subscribe((data) => {
-        if (data['result'] && data['success']) {
-          this.recordsAll = data['result'];
-          this.records = this.recordsAll;
-          // console.log("hi", new Set(this.recordsAll.map((item: { type: any; }) => item.type)));
-          this.dictTypes = [...new Set(this.recordsAll.map((item: { type: any; }) => item.type))]
+      this.http.get(this.api.getUrl(this.apiName) + this.auth.webUser.dept_id).subscribe({
+        next: (data: any) => {
+          if (data['result'] && data['success']) {
+            this.recordsAll = data['result'];
+            this.records = this.recordsAll;
+            // console.log("hi", new Set(this.recordsAll.map((item: { type: any; }) => item.type)));
+            this.dictTypes = [...new Set(this.recordsAll.map((item: { type: any; }) => item.type))];
+          } else {
+            this.toastr.error(data?.message || 'Failed to load data');
+          }
+          this.isLoader = false;
+        },
+        error: (err: any) => {
+          this.toastr.error(err?.error?.message || err?.message || 'Error loading data');
+          this.isLoader = false;
         }
-        this.isLoader = false;
       });
     }
     this.isLoader = false;
@@ -214,8 +223,18 @@ export class DataViewComponent implements OnInit {
             this.records[i] = ev;
           }
         }
+        if (this.recordsAll && this.recordsAll !== this.records) {
+          for (let i in this.recordsAll) {
+            if (this.recordsAll[i]._id == ev._id) {
+              this.recordsAll[i] = ev;
+            }
+          }
+        }
       } else if (this.apiName != 'SUPPORTLIST') {
         this.records.unshift(ev);
+        if (this.recordsAll && this.recordsAll !== this.records) {
+          this.recordsAll.unshift(ev);
+        }
       }
     }
     this.closeModal();

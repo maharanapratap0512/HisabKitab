@@ -22,14 +22,10 @@ const country = {
         `insert into country (
             country_hin,
             country_eng,
-            add_by_dept_id,
-            verify,
             active) 
         values (
             @country_hin,
             @country_eng,
-            @add_by_dept_id,
-            @verify,
             @active)`
     , insert_ignore:
         `insert or ignore into country (
@@ -65,8 +61,10 @@ const country = {
         `update country set 
         country_hin=@country_hin,
         country_eng=@country_eng,
-        update_by_dept_id=@update_by_dept_id,
-        verify=@verify,
+        updated_at=datetime('now', 'localtime')`
+    , update_active:
+        `update country set
+        active=@active,
         updated_at=datetime('now', 'localtime')`
     , order:
         `country_hin, country_eng`

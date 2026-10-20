@@ -1,10 +1,43 @@
 [
     {
+        "version": "38.2",
+        "date": "20-10-2026",
+        "summary": "Modern Dashboard Design, Vehicle UI/UX & Document Upgrade, and Country Management",
+        "summary_hin": "नया आधुनिक डैशबोर्ड डिज़ाइन, वाहन (Vehicle) प्रबंधन व दस्तावेज़ अपग्रेड, एवं देश (Country) सूची",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Dashboard",
+                "title": "New Modern Dashboard Design & Analytics Command Center",
+                "title_hin": "नया आधुनिक डैशबोर्ड डिज़ाइन एवं आँकड़े (Analytics) कमांड सेंटर",
+                "desc": "Redesigned the main dashboard with an overview banner, real-time stock KPI metric cards, and dedicated tab navigation across Stock Summary, Import History, and In-depth Analytics. Quick action cards allow instant navigation to stock distribution.",
+                "desc_hin": "डैशबोर्ड को एक नए और सुंदर रूप में तैयार किया गया है। इसमें विभाग का मुख्य बैनर, तुरंत दिखने वाले स्टॉक कार्ड्स, और स्टॉक सारांश, इम्पोर्ट इतिहास व सांख्यिकी (Analytics) के बीच आसान टैब दिए गए हैं। कार्ड पर क्लिक करके आप सीधे स्टॉक वितरण तक पहुँच सकते हैं।"
+            },
+            {
+                "type": "feature",
+                "module": "Vehicle Management",
+                "title": "Modern Vehicle UI/UX, Document Uploads & Quick Renewals",
+                "title_hin": "आधुनिक वाहन (Vehicle) प्रबंधन, दस्तावेज़ अपलोड व त्वरित नवीनीकरण",
+                "desc": "Enhanced vehicle management with standard color-coded badges for RC (Blue), Insurance (Green), and PUC (Orange). You can now attach scanned copies or photos of vehicle papers with instant download/preview, track expiry dates with clear alerts, and renew documents with one click.",
+                "desc_hin": "वाहन प्रबंधन को और अधिक सुविधाजनक बनाया गया है जिसमें RC (नीला), बीमा (हरा) और प्रदूषण (नारंगी) के लिए स्पष्ट रंग दिए गए हैं। अब आप गाड़ी के दस्तावेज़ों (RC, Insurance, PUC) की फोटो या PDF सीधे जोड़ सकते हैं, एक्सपायरी अलर्ट देख सकते हैं और एक क्लिक में नवीनीकरण (Renewal) कर सकते हैं।"
+            },
+            {
+                "type": "feature",
+                "module": "Masters & Main Lists",
+                "title": "Dedicated Country Management in Main Lists",
+                "title_hin": "मुख्य सूची (Main Lists) में देश (Country) प्रबंधन",
+                "desc": "Country is now easily accessible under the Main Lists menu. Easily view, search, add, and edit countries with full support for Excel export, multi-selection, and safe deletion.",
+                "desc_hin": "मुख्य सूची (Main Lists) में अब देश (Country) का विकल्प उपलब्ध है। यहाँ से आप आसानी से सभी देशों की सूची देख सकते हैं, खोज सकते हैं, नया देश जोड़ सकते हैं, सुधार कर सकते हैं और एक्सेल में एक्सपोर्ट कर सकते हैं।"
+            }
+        ]
+    },
+    {
         "version": "38.1",
         "date": "12-10-2026",
         "summary": "Item Yearly Rates in Forms & List, Live Stock Update & Excel Rates Import",
         "summary_hin": "आइटम फॉर्म व सूची में वार्षिक दरें (Yearly Rates), लाइव बचत अपडेट एवं एक्सेल इम्पोर्ट",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",
@@ -51,8 +84,8 @@
                 "module": "Variant Management",
                 "title": "Instant Table Row & Variant List Refresh on Item/Variant Save",
                 "title_hin": "वेरिएंट पेज में आइटम सुधारने या नया वेरिएंट जोड़ने पर तुरंत नया विवरण दिखना",
-                "desc": "When editing an item or creating variants from the Variant page, the table row and nested variant list now update immediately upon saving without needing to reload the page. Adding an existing variant now clearly alerts you that it already exists instead of showing a false success message.",
-                "desc_hin": "वेरिएंट पेज में जब आप आइटम सुधारते हैं या नया वेरिएंट जोड़ते हैं, तो सेव या मॉडल बंद करते ही आइटम पंक्ति एवं नीचे की वेरिएंट सूची तुरंत अपडेट हो जाती है। यदि कोई वेरिएंट पहले से मौजूद हो, तो अब भ्रमित करने वाले सफल संदेश की जगह स्पष्ट चेतावनी दिखाई देती है कि यह वेरिएंट पहले से मौजूद है।"
+                "desc": "When editing an item or creating new variants from the Variant page, the table row and nested variant list now update immediately upon saving or closing the modal without requiring a manual page refresh.",
+                "desc_hin": "वेरिएंट पेज में जब आप आइटम सुधारते हैं या नया वेरिएंट जोड़ते हैं, तो सेव या मॉडल बंद करते ही आइटम पंक्ति एवं नीचे की वेरिएंट सूची तुरंत अपडेट हो जाती है और पेज को रीलोड करने की ज़रूरत नहीं होती।"
             }
         ]
     },

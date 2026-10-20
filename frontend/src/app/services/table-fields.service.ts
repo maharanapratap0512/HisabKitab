@@ -29,6 +29,7 @@ export class TableFieldsService {
          case 'usage_list':
          case 'jawak_type':
          case 'condition':
+         case 'prastav_type':
          case 'support_list': return this.setSupportListFields(settings);
          case 'jawak': return this.setJawakFields();
          case 'aawak': return this.setAawakFields();

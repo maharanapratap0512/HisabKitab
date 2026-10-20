@@ -2,245 +2,276 @@
     [fullScreen]="true">
     <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
 </ngx-spinner>
+
 <div class="row" id="vehEntryComponent">
     <form [formGroup]="vehForm">
-        <div class="card card-body" *ngIf="mode == 'full'">
-            <h5 class="card-title">
-                Vehicle Information
-            </h5>
-            <!-- vehicle Information -->
-            <div class="row">
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">MM</label>
-                        <a style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end" (click)="openModal('Add MM')">+ Add</a>
-                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
-                            [virtualScroll]="true" formControlName="mm_id"
-                            [ngClass]="{'validation':vehForm.get('mm_id')?.errors && (vehForm.get('mm_id')?.touched || vehForm.get ('mm_id')?.dirty)}">
-                            <ng-option selected="selected" disabled value="">Select MM</ng-option>
-                            <ng-option *ngFor="let item of mms" [value]="item._id">
-                                {{item.mm_hin}}:{{item.mm_eng}}{{item.mm_code? ' :
-                                '+item.mm_code:''}}</ng-option>
-                        </ng-select>
+        <!-- ============================================== -->
+        <!-- SECTION 1: VEHICLE PRIMARY INFORMATION -->
+        <!-- ============================================== -->
+        <div class="card shadow-sm border mb-3" *ngIf="mode == 'full'">
+            <div class="card-header bg-transparent py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="uil uil-car text-primary fs-4"></i>
+                    <div>
+                        <h6 class="my-0 fw-bold">वाहन प्राथमिक विवरण (Primary Vehicle Details)</h6>
+                        <small class="text-muted">Enter basic vehicle registration & ownership details</small>
                     </div>
                 </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Vehicle Type</label>
-                        <input type="text" class="form-control" placeholder="Vehicle Type"
-                            formControlName="vehicle_type"
-                            [ngClass]="{'validation':vehForm.get('vehicle_type')?.errors && (vehForm.get('vehicle_type')?.touched || vehForm.get ('vehicle_type')?.dirty)}">
-                    </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Gadi Name</label>
-                        <input type="text" class="form-control" placeholder="Gadi Name" formControlName="gadi_name"
-                            [ngClass]="{'validation':vehForm.get('gadi_name')?.errors && (vehForm.get('gadi_name')?.touched || vehForm.get ('gadi_name')?.dirty)}">
-                    </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Gadi No.</label>
-                        <input type="text" class="form-control" placeholder="Gadi No." formControlName="gadi_num"
-                            [ngClass]="{'validation':vehForm.get('gadi_num')?.errors && (vehForm.get('gadi_num')?.touched || vehForm.get ('gadi_num')?.dirty)}">
-                    </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Fuel Type</label>
-                        <ng-select class="custom" style="width: 100%;" placeholder="Select Fuel Type"
-                            [clearable]="false" [virtualScroll]="true" formControlName="fuel_type"
-                            [ngClass]="{'validation':vehForm.get('fuel_type')?.errors && (vehForm.get('fuel_type')?.touched || vehForm.get ('fuel_type')?.dirty)}">
-                            <ng-option selected="selected" disabled value="">Select Fuel Type</ng-option>
-                            <ng-option value="PETROL">PETROL</ng-option>
-                            <ng-option value="PETROL+CNG">PETROL+CNG</ng-option>
-                            <ng-option value="CNG">CNG</ng-option>
-                            <ng-option value="DIESEL">DIESEL</ng-option>
-                        </ng-select>
-                    </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Seating Capacity</label>
-                        <input type="number" class="form-control" placeholder="Seating Capacity"
-                            formControlName="seating_capacity"
-                            [ngClass]="{'validation':vehForm.get('seating_capacity')?.errors && (vehForm.get('seating_capacity')?.touched || vehForm.get ('seating_capacity')?.dirty)}">
-                    </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Owner Name</label>
-                        <input type="text" class="form-control" placeholder="Owner Name" formControlName="owner_name"
-                            [ngClass]="{'validation':vehForm.get('owner_name')?.errors && (vehForm.get('owner_name')?.touched || vehForm.get ('owner_name')?.dirty)}">
-                    </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Nominee</label>
-                        <input type="text" class="form-control" placeholder="Nominee" formControlName="nominee"
-                            [ngClass]="{'validation':vehForm.get('nominee')?.errors && (vehForm.get('nominee')?.touched || vehForm.get ('nominee')?.dirty)}">
-                    </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Aawak Type</label>
-                        <input type="text" class="form-control" placeholder="Aawak Type" formControlName="aawak_type"
-                            [ngClass]="{'validation':vehForm.get('aawak_type')?.errors && (vehForm.get('aawak_type')?.touched || vehForm.get ('aawak_type')?.dirty)}">
-                    </div>
-                </div>
-
-
-            </div>
-        </div>
-
-        <!-- Vehicle Information Card -->
-
-        <div class="card card-body">
-            <h5 class="card-title">
-                Vehicle Document Information
-            </h5>
-            <!-- RC And PUC Detail -->
-            <div class="row">
-                <ng-container *ngIf="mode == 'full' || mode == 'rc'">
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">RC</label>
-                        <input class="form-control" type="date" formControlName="rc_date">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">RC Exp.</label>
-                        <input class="form-control" type="date" formControlName="rc_exp_date"
-                            [ngClass]="{'validation':vehForm.get('rc_exp_date')?.errors && (vehForm.get('rc_exp_date')?.touched || vehForm.get ('rc_exp_date')?.dirty)}">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <div class="form-group">
-                            <label class="form-label">RC Amount</label>
-                            <input type="number" class="form-control" placeholder="RC Amount"
-                                formControlName="rc_amount">
-                        </div>
-                    </div>
-                    <div class="col-md-2 mb-3" *ngIf="mode != 'full'">
-                        <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
-                            (click)="vehFormSubmit()">Submit</button>
-                        <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
-                            (click)="vehFormUpdate()">Update</button>
-                        <!-- <button class="btn btn-light submit mx-3" type="button" (click)="vehForm.reset()">clear</button> -->
-                    </div>
-                </ng-container>
-                <ng-container *ngIf="mode == 'full' || mode == 'puc'">
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">PUC</label>
-                        <input class="form-control" type="date" formControlName="puc_date">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">PUC Exp.</label>
-                        <input class="form-control" type="date" formControlName="puc_exp_date"
-                            [ngClass]="{'validation':vehForm.get('puc_exp_date')?.errors && (vehForm.get('puc_exp_date')?.touched || vehForm.get ('puc_exp_date')?.dirty)}">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <div class="form-group">
-                            <label class="form-label">PUC Amount</label>
-                            <input type="number" class="form-control" placeholder="PUC Amount"
-                                formControlName="puc_amount">
-                        </div>
-                    </div>
-                    <div class="col-md-2 mb-3" *ngIf="mode != 'full'">
-                        <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
-                            (click)="vehFormSubmit()">Submit</button>
-                        <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
-                            (click)="vehFormUpdate()">Update</button>
-                        <!-- <button class="btn btn-light submit mx-3" type="button" (click)="vehForm.reset()">clear</button> -->
-                    </div>
-                </ng-container>
+                <span class="badge bg-soft-primary text-primary" *ngIf="isEdit">Editing Vehicle</span>
             </div>
 
-            <!-- Inssurance -->
-            <div class="row" *ngIf="mode == 'ins' || mode == 'full'">
-                <div class="col-md-2 mb-3">
-                    <label for="date" class="form-label">Insurance</label>
-                    <input class="form-control" type="date" formControlName="insurance_date">
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label for="date" class="form-label">Insurance Exp.</label>
-                    <input class="form-control" type="date" formControlName="insurance_exp_date"
-                        [ngClass]="{'validation':vehForm.get('insurance_exp_date')?.errors && (vehForm.get('insurance_exp_date')?.touched || vehForm.get ('insurance_exp_date')?.dirty)}">
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Insurance Type</label>
-                        <input type="text" class="form-control" placeholder="Insurance Type"
-                            formControlName="insurance_type"
-                            [ngClass]="{'validation':vehForm.get('insurance_type')?.errors && (vehForm.get('insurance_type')?.touched || vehForm.get ('insurance_type')?.dirty)}">
+            <div class="card-body p-3">
+                <div class="row g-2">
+                    <!-- MM Selection -->
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label my-0 font-size-12 fw-semibold">स्थान / मिनी मधुबन (MM) *</label>
+                                <a class="badge bg-soft-primary text-primary cursor-pointer text-decoration-none" (click)="openModal('Add MM')">+ Add MM</a>
+                            </div>
+                            <ng-select class="custom" placeholder="Select MM" [clearable]="true"
+                                [virtualScroll]="true" formControlName="mm_id"
+                                [ngClass]="{'validation':vehForm.get('mm_id')?.errors && (vehForm.get('mm_id')?.touched || vehForm.get('mm_id')?.dirty)}">
+                                <ng-option *ngFor="let item of mms" [value]="item._id">
+                                    {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code ? ' : ' + item.mm_code : ''}}
+                                </ng-option>
+                            </ng-select>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Insurance Company</label>
-                        <input type="text" class="form-control" placeholder="Insurance Company"
-                            formControlName="insurance_company"
-                            [ngClass]="{'validation':vehForm.get('insurance_company')?.errors && (vehForm.get('insurance_company')?.touched || vehForm.get ('insurance_company')?.dirty)}">
+
+                    <!-- Gadi Number -->
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <label class="form-label font-size-12 fw-semibold">गाड़ी नंबर (Vehicle Plate No.) *</label>
+                            <input type="text" class="form-control text-uppercase fw-bold font-monospace" placeholder="e.g. RJ27PA1234" formControlName="gadi_num"
+                                [ngClass]="{'validation':vehForm.get('gadi_num')?.errors && (vehForm.get('gadi_num')?.touched || vehForm.get('gadi_num')?.dirty)}">
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Insurance Amount</label>
-                        <input type="number" class="form-control" placeholder="Insurance Amount"
-                            formControlName="insurance_amount">
+
+                    <!-- Gadi Name -->
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <label class="form-label font-size-12 fw-semibold">गाड़ी का नाम (Vehicle Model / Name)</label>
+                            <input type="text" class="form-control" placeholder="e.g. Innova Crysta, Bolero, Ertiga" formControlName="gadi_name"
+                                [ngClass]="{'validation':vehForm.get('gadi_name')?.errors && (vehForm.get('gadi_name')?.touched || vehForm.get('gadi_name')?.dirty)}">
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
-                        (click)="vehFormSubmit()">Submit</button>
-                    <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
-                        (click)="vehFormUpdate()">Update</button>
-                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="vehForm.reset()">clear</button> -->
+
+                    <!-- Vehicle Type -->
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <label class="form-label font-size-12 fw-semibold">वाहन प्रकार (Vehicle Type)</label>
+                            <input type="text" class="form-control" placeholder="e.g. Car, Bus, Tractor, Ambulance"
+                                formControlName="vehicle_type"
+                                [ngClass]="{'validation':vehForm.get('vehicle_type')?.errors && (vehForm.get('vehicle_type')?.touched || vehForm.get('vehicle_type')?.dirty)}">
+                        </div>
+                    </div>
+
+                    <!-- Fuel Type -->
+                    <div class="col-md-2 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <label class="form-label font-size-12 fw-semibold">ईंधन (Fuel Type)</label>
+                            <ng-select class="custom" placeholder="Select Fuel"
+                                [clearable]="true" formControlName="fuel_type">
+                                <ng-option value="PETROL">PETROL</ng-option>
+                                <ng-option value="DIESEL">DIESEL</ng-option>
+                                <ng-option value="CNG">CNG</ng-option>
+                                <ng-option value="PETROL+CNG">PETROL+CNG</ng-option>
+                                <ng-option value="ELECTRIC">ELECTRIC</ng-option>
+                            </ng-select>
+                        </div>
+                    </div>
+
+                    <!-- Seating Capacity -->
+                    <div class="col-md-2 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <label class="form-label font-size-12 fw-semibold">सीटिंग क्षमता (Seats)</label>
+                            <input type="number" class="form-control" placeholder="Capacity"
+                                formControlName="seating_capacity">
+                        </div>
+                    </div>
+
+                    <!-- Owner Name -->
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <label class="form-label font-size-12 fw-semibold">स्वामी का नाम (Owner Name)</label>
+                            <input type="text" class="form-control" placeholder="Owner Name" formControlName="owner_name">
+                        </div>
+                    </div>
+
+                    <!-- Nominee -->
+                    <div class="col-md-2 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <label class="form-label font-size-12 fw-semibold">नामित व्यक्ति (Nominee)</label>
+                            <input type="text" class="form-control" placeholder="Nominee" formControlName="nominee">
+                        </div>
+                    </div>
+
+                    <!-- Aawak Type -->
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <div class="form-group">
+                            <label class="form-label font-size-12 fw-semibold">आवक प्रकार (Aawak Type) *</label>
+                            <input type="text" class="form-control" placeholder="e.g. Kharid, Dan, Seva" formControlName="aawak_type"
+                                [ngClass]="{'validation':vehForm.get('aawak_type')?.errors && (vehForm.get('aawak_type')?.touched || vehForm.get('aawak_type')?.dirty)}">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- ============================================== -->
+        <!-- SECTION 2: VEHICLE DOCUMENT & COMPLIANCE CARDS -->
+        <!-- ============================================== -->
+        <div class="card shadow-sm border mb-3">
+            <div class="card-header bg-transparent py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="uil uil-file-shield-alt text-success fs-4"></i>
+                    <div>
+                        <h6 class="my-0 fw-bold">वाहन दस्तावेज़ एवं वैधता विवरण (Document Compliance & Expiry)</h6>
+                        <small class="text-muted">RC, Insurance, and PUC certificates & expiry tracking</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-3">
+                <div class="row g-3">
+                    <!-- RC Card Block -->
+                    <div class="col-lg-4 col-md-6" *ngIf="mode == 'full' || mode == 'rc'">
+                        <div class="card h-100 shadow-none border" style="border-top: 3px solid #727cf5 !important;">
+                            <div class="card-header bg-transparent py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
+                                <span class="fw-bold font-size-13 text-primary"><i class="uil uil-file-alt me-1"></i>RC (पंजीकरण)</span>
+                                <span class="badge bg-soft-primary text-primary font-size-11">Registration</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="mb-2">
+                                    <label class="form-label font-size-12 fw-semibold">RC दिनांक (Issue Date)</label>
+                                    <input class="form-control" type="date" formControlName="rc_date">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label font-size-12 fw-semibold text-primary">RC समाप्ति दिनांक (Exp Date)</label>
+                                    <input class="form-control border-primary" type="date" formControlName="rc_exp_date">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label font-size-12 fw-semibold">RC शुल्क / राशि (Amount ₹)</label>
+                                    <input type="number" class="form-control" placeholder="RC Fees" formControlName="rc_amount">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insurance Card Block -->
+                    <div class="col-lg-4 col-md-6" *ngIf="mode == 'full' || mode == 'ins'">
+                        <div class="card h-100 shadow-none border" style="border-top: 3px solid #0acf97 !important;">
+                            <div class="card-header bg-transparent py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
+                                <span class="fw-bold font-size-13 text-success"><i class="uil uil-shield-check me-1"></i>बीमा (Insurance)</span>
+                                <span class="badge bg-soft-success text-success font-size-11">Motor Policy</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-2">
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label font-size-12 fw-semibold">पॉलिसी दिनांक (Date)</label>
+                                        <input class="form-control" type="date" formControlName="insurance_date">
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label font-size-12 fw-semibold text-success">समाप्ति दिनांक (Expiry)</label>
+                                        <input class="form-control border-success" type="date" formControlName="insurance_exp_date">
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label font-size-12 fw-semibold">बीमा कंपनी (Company)</label>
+                                    <input type="text" class="form-control" placeholder="e.g. SBI General, New India" formControlName="insurance_company">
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label font-size-12 fw-semibold">प्रकार (Type)</label>
+                                        <input type="text" class="form-control" placeholder="Comprehensive" formControlName="insurance_type">
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label font-size-12 fw-semibold">प्रीमियम राशि (₹)</label>
+                                        <input type="number" class="form-control" placeholder="Amount" formControlName="insurance_amount">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PUC Card Block -->
+                    <div class="col-lg-4 col-md-12" *ngIf="mode == 'full' || mode == 'puc'">
+                        <div class="card h-100 shadow-none border" style="border-top: 3px solid #ffbc00 !important;">
+                            <div class="card-header bg-transparent py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
+                                <span class="fw-bold font-size-13 text-warning"><i class="uil uil-wind me-1"></i>PUC (प्रदूषण)</span>
+                                <span class="badge bg-soft-warning text-warning font-size-11">Emissions</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="mb-2">
+                                    <label class="form-label font-size-12 fw-semibold">PUC दिनांक (Issue Date)</label>
+                                    <input class="form-control" type="date" formControlName="puc_date">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label font-size-12 fw-semibold text-warning">PUC समाप्ति दिनांक (Exp Date)</label>
+                                    <input class="form-control border-warning" type="date" formControlName="puc_exp_date">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label font-size-12 fw-semibold">PUC शुल्क (Amount ₹)</label>
+                                    <input type="number" class="form-control" placeholder="PUC Fees" formControlName="puc_amount">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Action Footer -->
+            <div class="card-footer bg-transparent py-2 px-3 border-top d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3" (click)="vehForm.reset()">
+                    <i class="uil uil-times me-1"></i>Reset Form
+                </button>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-primary px-4 fw-bold" *ngIf="!isEdit" type="submit" (click)="vehFormSubmit()">
+                        <i class="uil uil-check-circle me-1"></i>वाहन सहेजें (Save Vehicle)
+                    </button>
+                    <button class="btn btn-warning px-4 fw-bold text-dark" *ngIf="isEdit" type="submit" (click)="vehFormUpdate()">
+                        <i class="uil uil-sync me-1"></i>अपडेट करें (Update Vehicle)
+                    </button>
+                </div>
+            </div>
+        </div>
     </form>
 </div>
 
 
-
-<!-- Modal -->
-<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" style="width: 90%;">
+<!-- Add MM Child Modal (Adhering to Rule 2: width: 98%) -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="showModalChildLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 98%;">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <div class="modal-header py-2 px-3">
+                <h5 class="modal-title fw-bold" id="showModalChildLabel">{{showModal}}</h5>
                 <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-3">
                 <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="addMMResponse($event)"></app-mm-entry>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" style="width: 120px;" (click)="closeModal()">Close</button>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary px-3" (click)="closeModal()">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 
-
-<!-- Data View For Small List -->
-<div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" style="width: 90%;">
+<!-- Data View Modal (Adhering to Rule 2: width: 98%) -->
+<div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="dataViewLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 98%;">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
-                <button type="button" class="btn-close" onclick="$('#mmEntryComponent > #dataView').modal('hide')"
-                    aria-label="Close"></button>
+            <div class="modal-header py-2 px-3">
+                <h5 class="modal-title fw-bold" id="dataViewLabel">{{viewType}} Data View</h5>
+                <button type="button" class="btn-close" onclick="$('#vehEntryComponent > #dataView').modal('hide')" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <!-- Department List -->
+            <div class="modal-body p-3">
                 <app-data-view *ngIf="viewType == 'Department'" [getData]="viewData" Type="dept_id"></app-data-view>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" style="width: 120px;"
-                    onclick="$('#mmEntryComponent > #dataView').modal('hide')">Close</button>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary px-3" onclick="$('#vehEntryComponent > #dataView').modal('hide')">Close</button>
             </div>
         </div>
     </div>
