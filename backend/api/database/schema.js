@@ -105,7 +105,7 @@ module.exports = {
         is_noted: col.boolean().default(0),
         note_details: col.string(),
         description: col.string(),
-        nimitt_id: col.ref('nimitt._id', { as: 'nimitt', select: ['nimitt_hin', 'nimitt_eng'] }),
+        nimitt_id: col.ref('pbk._id', { as: 'nimitt', select: ['pbk_hin', 'pbk_eng', 'pbk_roman', 'roll_no'] }),
         bachat_qty: col.number(),
         prastav_type: col.ref('support_list._id', { as: 'type', select: ['list_name_hin', 'list_name_eng'] }),
         is_rejected: col.boolean().default(0),

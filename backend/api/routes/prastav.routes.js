@@ -86,9 +86,14 @@ router.post('/', (req, res, next) => {
                     item_id: line.item_id,
                     subitem_id: line.subitem_id || null,
                     unit_id: line.unit_id,
+                    pbk_id: data.pbk_id ? Number(data.pbk_id) : null,
+                    nimitt_id: data.nimitt_id ? Number(data.nimitt_id) : null,
+                    prastav_type: (line.prastav_type !== undefined && line.prastav_type !== null && line.prastav_type !== '')
+                        ? Number(line.prastav_type)
+                        : (data.prastav_type ? Number(data.prastav_type) : null),
                     qty_needs: line.qty_needs || null,
                     qty: line.qty,
-                    bachat: line.bachat || 0,
+                    bachat: (line.bachat !== undefined && line.bachat !== null && line.bachat !== '') ? Number(line.bachat) : null,
                     monthly_uses: line.monthly_uses || 0,
                     rate: line.rate || 0,
                     amount: line.amount || 0,

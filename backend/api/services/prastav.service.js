@@ -11,7 +11,7 @@ const subitemList = new BaseTable('subitem_list');
 /**
  * Paginated, filtered Prastav list.
  */
-function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, prastav_type, year, month, date, pageNo, itemsPerPage, dept_id, is_noted }) {
+function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, prastav_type, nimitt_id, year, month, date, pageNo, itemsPerPage, dept_id, is_noted }) {
     const PAGE_SIZE = itemsPerPage ? Number(itemsPerPage) : 100;
     const page = (pageNo !== undefined && pageNo !== null) ? Number(pageNo) + 1 : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -22,6 +22,7 @@ function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, prastav_type, year, m
     // if (dept_id) conds.push(`prastav.dept_id = ${Number(dept_id)}`);
     if (mm_id && mm_id.length > 0) conds.push(`prastav.mm_id IN (${mm_id.join(',')})`);
     if (pbk_id && pbk_id.length > 0) conds.push(`prastav.pbk_id IN (${pbk_id.join(',')})`);
+    if (nimitt_id && nimitt_id.length > 0) conds.push(`prastav.nimitt_id IN (${nimitt_id.join(',')})`);
     if (item_id && item_id.length > 0) conds.push(`prastav.item_id IN (${item_id.join(',')})`);
     if (subitem_id && subitem_id.length > 0) conds.push(`prastav.subitem_id IN (${subitem_id.join(',')})`);
     if (prastav_type && prastav_type.length > 0) conds.push(`prastav.prastav_type IN (${prastav_type.join(',')})`);
@@ -170,6 +171,8 @@ function getVoucher(voucherNo) {
         zone_eng: rows[0].zone_eng,
         pbk_id: rows[0].pbk_id,
         pbk_count: rows[0].pbk_count,
+        nimitt_id: rows[0].nimitt_id || null,
+        nimitt: rows[0].nimitt || null,
         prastav_type: rows[0].prastav_type || null,
         type: rows[0].type || null,
         note: rows[0].note_details,
@@ -229,11 +232,16 @@ function updateVoucher(voucherNo, data) {
                 item_id: line.item_id,
                 subitem_id: line.subitem_id || null,
                 unit_id: line.unit_id,
+                pbk_id: data.pbk_id ? Number(data.pbk_id) : null,
+                nimitt_id: data.nimitt_id ? Number(data.nimitt_id) : null,
+                prastav_type: (line.prastav_type !== undefined && line.prastav_type !== null && line.prastav_type !== '')
+                    ? Number(line.prastav_type)
+                    : (data.prastav_type ? Number(data.prastav_type) : null),
                 qty: line.qty || 0,
                 qty_needs: line.qty_needs || null,
                 rate: line.rate || 0,
                 amount: line.amount || 0,
-                bachat: line.bachat || 0,
+                bachat: (line.bachat !== undefined && line.bachat !== null && line.bachat !== '') ? Number(line.bachat) : null,
                 monthly_uses: line.monthly_uses || 0,
                 description: line.description || null,
                 active: 1

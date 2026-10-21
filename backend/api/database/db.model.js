@@ -2741,6 +2741,40 @@ class dbModal {
         ('dispatched', 'jawak_status', 1),
         ('pending', 'jawak_status', 1),
         ('recieved', 'jawak_status', 1);`
+    },
+    // Version 39
+    // Fix prastav.nimitt_id foreign key constraint to reference pbk(_id)
+    {
+      create_prastav_new: `CREATE TABLE prastav_new(
+        _id integer primary key AUTOINCREMENT,
+        voucher_no integer not null,
+        date date,
+        mm_id integer references mm(_id),
+        pbk_id integer references pbk(_id),
+        pbk_count varchar(50),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        rate decimal(10,2),
+        amount decimal(10,2),
+        qty decimal(10,2) not null,
+        bachat decimal(10,2),
+        monthly_uses decimal(10,2),
+        qty_needs decimal(10,2),
+        is_noted tinyint default 0,
+        note_details text,
+        description text,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        is_rejected TINYINT(1) DEFAULT 0,
+        reject_reason TEXT,
+        nimitt_id integer REFERENCES pbk(_id),
+        bachat_qty real,
+        prastav_type integer REFERENCES support_list(_id)
+      );`,
+      copy_prastav: `INSERT INTO prastav_new SELECT * FROM prastav;`,
+      drop_prastav: `DROP TABLE prastav;`,
+      rename_prastav: `ALTER TABLE prastav_new RENAME TO prastav;`
     }
   ];
 

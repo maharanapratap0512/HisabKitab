@@ -255,6 +255,10 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     // Lock Save button for the duration of the HTTP call only
     this.pfs.submit = true;
 
+    if (this.pfs.prastavForm?.lines?.length > 0) {
+      this.pfs.prastavForm.prastav_type = this.pfs.prastavForm.lines[0]?.prastav_type || this.pfs.prastavForm.prastav_type || null;
+    }
+
     const url = this.api.getUrl('PRASTAV');
     const payload = this.pfs.prastavForm;
 
@@ -291,6 +295,12 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   }
 
   showModal: string = '';
+  activeLineIndexForType: number | null = null;
+
+  openPrastavTypeModal(index?: number) {
+    this.activeLineIndexForType = index !== undefined ? index : null;
+    this.openModal('Add Prastav Type');
+  }
 
   openModal(title: string) {
     this.showModal = title;
@@ -303,6 +313,7 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     $('#prastavEntryModal').modal('hide');
     $('#prastavEntryComponent > #showModal').modal('hide');
     this.showModal = '';
+    this.activeLineIndexForType = null;
   }
 
   addMMResponse(ev: any) {
@@ -332,9 +343,27 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
           this.gs.Lists['prastav_type'].unshift(ev);
         }
       }
+      if (this.activeLineIndexForType !== null && this.pfs.prastavForm?.lines?.[this.activeLineIndexForType]) {
+        this.pfs.prastavForm.lines[this.activeLineIndexForType].prastav_type = ev._id;
+      } else {
+        const lines = this.pfs.prastavForm?.lines;
+        if (lines && lines.length > 0) {
+          lines[lines.length - 1].prastav_type = ev._id;
+        }
+      }
       this.pfs.prastavForm.prastav_type = ev._id;
     }
     this.closeModal();
+  }
+
+  onHeaderPrastavTypeChange(val: any) {
+    if (this.pfs.prastavForm?.lines) {
+      for (const line of this.pfs.prastavForm.lines) {
+        if (!line.prastav_type) {
+          line.prastav_type = val;
+        }
+      }
+    }
   }
 
   // ── Display Helpers for Jawak Focus Mode ──────────────
@@ -350,6 +379,13 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
 
   getUnitShort(unitId: any) {
     return this.units.find(u => u._id === unitId)?.unit_short || '';
+  }
+
+  getPrastavTypeDisplay(typeId: any) {
+    if (!typeId) return '';
+    const pt = this.prastavTypes.find((p: any) => p._id === typeId);
+    if (!pt) return '';
+    return pt.list_name_hin ? `${pt.list_name_hin} : ${pt.list_name_eng}` : pt.list_name_eng;
   }
 
   getItemDisplay(item_id: any, subitem_id: any) {
