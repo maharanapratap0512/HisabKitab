@@ -49,7 +49,11 @@ export class HeaderComponent implements AfterViewInit {
     'aawak': 'aawak', 'aawakN': 'aawak',
     'jawak': 'jawak', 'jawakN': 'jawak',
     'hmp': 'hmp',
+    'prastav': 'prastav',
     'pbk': 'pbk',
+    'pbk_closing': 'pbk_closing',
+    'pbk_closing_entry': 'pbk_closing',
+    'pbk_bachat': 'pbk_bachat',
     'mm': 'mm',
     'nimitt': 'nimitt',
     'bachat': 'bachat', 'bachat_new': 'bachat',
@@ -61,9 +65,18 @@ export class HeaderComponent implements AfterViewInit {
     'product': 'product',
     'repairing': 'repairing',
     'report': 'report',
+    'report-universal': 'report',
     'point': 'point',
     'vehicle': 'vehicle',
-    'support_list': 'support_list'
+    'support_list': 'support_list',
+    'country': 'country',
+    'zone': 'zone',
+    'state': 'state',
+    'district': 'district',
+    'city': 'city',
+    'unit': 'unit',
+    'subitem_list': 'subitem_list',
+    'integrity-checkup': 'integrity_checkup'
   };
 
   constructor(
@@ -140,7 +153,16 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   detectContextKey(url: string) {
-    const segment = url.replace(/^\//, '').split('/')[0].split('?')[0];
+    const parts = url.replace(/^\//, '').split('?')[0].split('/');
+    const segment = parts[0];
+    if (segment === 'view' && parts[1]) {
+      this.contextKey = this.routeKeyMap[parts[1]] || 'support_list';
+      return;
+    }
+    if (segment === 'report') {
+      this.contextKey = 'report';
+      return;
+    }
     this.contextKey = this.routeKeyMap[segment] || null;
   }
 
@@ -197,15 +219,15 @@ export class HeaderComponent implements AfterViewInit {
         dropdown: true,
         visible: true,
         children: [
-          { title: 'Aawak', link: 'aawak', visible: this.auth.webUser.settings?.aawak?.visible },
-          { title: 'Aawak (Bunch)', link: 'aawakN', visible: this.auth.webUser.settings?.aawak?.visible },
+          { title: 'Aawak', link: 'aawak', visible: this.auth.webUser.settings?.aawak?.visible ?? true },
+          { title: 'Aawak (Bunch)', link: 'aawakN', visible: this.auth.webUser.settings?.aawak?.visible ?? true },
           // { title: 'Jawak', link: 'jawak', visible: this.auth.webUser.settings?.jawak?.visible },
-          { title: 'Jawak', link: 'jawakN', visible: this.auth.webUser.settings?.jawak?.visible },
-          { title: 'HMP', link: 'hmp', visible: true },
-          { title: 'Prastav', link: 'prastav', visible: true },
-          { title: 'PBK Closing', link: 'pbk_closing', visible: true },
-          { title: 'Product', link: 'product', visible: this.auth.webUser.settings?.product?.visible },
-          { title: 'Vehicle', link: 'vehicle', visible: this.auth.webUser.settings?.vehicle?.visible },
+          { title: 'Jawak', link: 'jawakN', visible: this.auth.webUser.settings?.jawak?.visible ?? true },
+          { title: 'HMP', link: 'hmp', visible: this.auth.webUser.settings?.hmp?.visible ?? true },
+          { title: 'Prastav', link: 'prastav', visible: this.auth.webUser.settings?.prastav?.visible ?? true },
+          { title: 'PBK Closing', link: 'pbk_closing', visible: this.auth.webUser.settings?.pbk_closing?.visible ?? true },
+          { title: 'Product', link: 'product', visible: this.auth.webUser.settings?.product?.visible ?? true },
+          { title: 'Vehicle', link: 'vehicle', visible: this.auth.webUser.settings?.vehicle?.visible ?? true },
         ]
       },
 
@@ -215,55 +237,55 @@ export class HeaderComponent implements AfterViewInit {
         dropdown: true,
         visible: true,
         children: [
-          { title: 'LOT Nos', link: 'view/lot_no', visible: this.auth.webUser.settings?.aawak?.lot_no },
+          { title: 'LOT Nos', link: 'view/lot_no', visible: this.auth.webUser.settings?.aawak?.lot_no ?? true },
           itemOrVariantChild,
-          { title: 'MM', link: 'mm', visible: this.auth.webUser.settings?.mm?.visible },
-          { title: 'PBK', link: 'pbk', visible: this.auth.webUser.settings?.pbk?.visible },
-          { title: 'Nimitt', link: 'nimitt', visible: this.auth.webUser.settings?.nimitt?.visible },
-          { title: 'Country', link: 'view/country', visible: true },
-          { title: 'Zone', link: 'view/zone', visible: true },
-          { title: 'State', link: 'view/state', visible: true },
-          { title: 'District', link: 'view/district', visible: true },
-          { title: 'Unit', link: 'view/unit', visible: true },
-          { title: 'Category', link: 'category', visible: this.auth.webUser.settings?.category?.visible },
-          { title: 'Subitem List', link: 'view/subitem_list', visible: !isVariantMode },
+          { title: 'MM', link: 'mm', visible: this.auth.webUser.settings?.mm?.visible ?? true },
+          { title: 'PBK', link: 'pbk', visible: this.auth.webUser.settings?.pbk?.visible ?? true },
+          { title: 'Nimitt', link: 'nimitt', visible: this.auth.webUser.settings?.nimitt?.visible ?? true },
+          { title: 'Country', link: 'view/country', visible: this.auth.webUser.settings?.country?.visible ?? true },
+          { title: 'Zone', link: 'view/zone', visible: this.auth.webUser.settings?.zone?.visible ?? true },
+          { title: 'State', link: 'view/state', visible: this.auth.webUser.settings?.state?.visible ?? true },
+          { title: 'District', link: 'view/district', visible: this.auth.webUser.settings?.district?.visible ?? true },
+          { title: 'City', link: 'city', visible: this.auth.webUser.settings?.city?.visible ?? true },
+          { title: 'Unit', link: 'view/unit', visible: this.auth.webUser.settings?.unit?.visible ?? true },
+          { title: 'Category', link: 'category', visible: this.auth.webUser.settings?.category?.visible ?? true },
+          { title: 'Subitem List', link: 'view/subitem_list', visible: !isVariantMode && (this.auth.webUser.settings?.subitem_list?.visible ?? true) },
         ]
       },
       {
         title: 'Lists',
         icon: 'uil-list-ui-alt',
         dropdown: true,
-        visible: true,
+        visible: this.auth.webUser.settings?.support_list?.visible ?? true,
         children: [
-          { title: 'Aawak Type', link: 'view/aawak_type', visible: true },
-          { title: 'Aawak Source', link: 'view/aawak_source', visible: true },
-          { title: 'Jawak Type', link: 'view/jawak_type', visible: true },
-          { title: 'Usage List', link: 'view/usage_list', visible: true },
-          { title: 'Condition', link: 'view/condition', visible: true },
-          { title: 'MM Type', link: 'view/mm_type', visible: true },
-          { title: 'Prastav Type', link: 'view/prastav_type', visible: true },
-          { title: 'Dictionary', link: 'view/dict', visible: true },
-          { title: 'Gender', link: 'view/gender', visible: true },
-          { title: 'Relation', link: 'view/relation', visible: true },
-          // { title: 'Word Correction', link: 'view/word_correction', visible: true },
+          { title: 'Aawak Type', link: 'view/aawak_type', visible: this.auth.webUser.settings?.aawak_type?.visible ?? true },
+          { title: 'Aawak Source', link: 'view/aawak_source', visible: this.auth.webUser.settings?.aawak_source?.visible ?? true },
+          { title: 'Jawak Type', link: 'view/jawak_type', visible: this.auth.webUser.settings?.jawak_type?.visible ?? true },
+          { title: 'Usage List', link: 'view/usage_list', visible: this.auth.webUser.settings?.usage_list?.visible ?? true },
+          { title: 'Condition', link: 'view/condition', visible: this.auth.webUser.settings?.condition?.visible ?? true },
+          { title: 'MM Type', link: 'view/mm_type', visible: this.auth.webUser.settings?.mm_type?.visible ?? true },
+          { title: 'Prastav Type', link: 'view/prastav_type', visible: this.auth.webUser.settings?.prastav_type?.visible ?? true },
+          { title: 'Dictionary', link: 'view/dict', visible: this.auth.webUser.settings?.dict?.visible ?? true },
+          { title: 'Gender', link: 'view/gender', visible: this.auth.webUser.settings?.gender?.visible ?? true },
+          { title: 'Relation', link: 'view/relation', visible: this.auth.webUser.settings?.relation?.visible ?? true },
         ]
       },
       {
         title: 'Reports',
         icon: 'uil-apps',
         dropdown: true,
-        visible: true,
+        visible: this.auth.webUser.settings?.report?.visible ?? true,
         children: [
-          { title: 'Bachat', link: 'bachat_new', visible: true },
-          { title: 'All Time Bachat', link: 'bachat', visible: this.auth.webUser.settings?.bachat?.visible },
-          { title: 'Generate Reports', link: 'report-universal', visible: true },
-          { title: 'Ledger Report', link: 'report/report-item-ledger', visible: true },
-          { title: 'Aawak Jawak Check', link: 'report/report-aj-check', visible: this.auth.webUser.settings?.report?.report_aj_check },
-          { title: 'AJ Type Saar (आवक जावक प्रकार सार)', link: 'report/report-at', visible: this.auth.webUser.settings?.report?.report_at },
-          { title: 'Store Stock', link: 'report/report-str-stk', visible: this.auth.webUser.settings?.report?.report_str_stk },
-          { title: 'Khet Saar', link: 'report/report-kh-saar', visible: this.auth.webUser.settings?.report?.report_kh },
-          { title: 'Khet Saar (Item Wise)', link: 'report/report-kh-itemwise', visible: this.auth.webUser.settings?.report?.report_kh },
-          { title: 'Khet AJ saar', link: 'report/report-kh-ajsaar', visible: this.auth.webUser.settings?.report?.report_kh },
+          { title: 'Bachat', link: 'bachat_new', visible: this.auth.webUser.settings?.bachat?.visible ?? true },
+          { title: 'All Time Bachat', link: 'bachat', visible: this.auth.webUser.settings?.bachat?.visible ?? true },
+          { title: 'Generate Reports', link: 'report-universal', visible: this.auth.webUser.settings?.report?.report_universal ?? true },
+          { title: 'Ledger Report', link: 'report/report-item-ledger', visible: this.auth.webUser.settings?.report?.report_item_ledger ?? true },
+          { title: 'Aawak Jawak Check', link: 'report/report-aj-check', visible: this.auth.webUser.settings?.report?.report_aj_check ?? true },
+          { title: 'AJ Type Saar (आवक जावक प्रकार सार)', link: 'report/report-at', visible: this.auth.webUser.settings?.report?.report_at ?? true },
+          { title: 'Store Stock', link: 'report/report-str-stk', visible: this.auth.webUser.settings?.report?.report_str_stk ?? true },
+          { title: 'Khet Saar', link: 'report/report-kh-saar', visible: this.auth.webUser.settings?.report?.report_kh ?? true },
+          { title: 'Khet Saar (Item Wise)', link: 'report/report-kh-itemwise', visible: this.auth.webUser.settings?.report?.report_kh ?? true },
+          { title: 'Khet AJ saar', link: 'report/report-kh-ajsaar', visible: this.auth.webUser.settings?.report?.report_kh ?? true },
         ]
       },
       {
@@ -272,13 +294,13 @@ export class HeaderComponent implements AfterViewInit {
         dropdown: true,
         visible: true,
         children: [
-          { title: 'Department', link: 'department', visible: this.auth.webUser.settings?.department?.visible },
+          { title: 'Department', link: 'department', visible: this.auth.webUser.settings?.department?.visible ?? true },
           { title: 'NetDrop', link: 'netdrop', visible: true, target: '_blank' },
           { title: 'FeedBack', link: 'feedback', visible: true },
-          { title: 'Integrity Checkup', link: 'integrity-checkup', visible: true },
+          { title: 'Integrity Checkup', link: 'integrity-checkup', visible: this.auth.webUser.settings?.integrity_checkup?.visible ?? true },
         ]
       },
-      { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible },
+      { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible ?? true },
       { title: 'MySQL', icon: 'uil-layer-group', link: 'mysql', visible: true },
     ];
   }

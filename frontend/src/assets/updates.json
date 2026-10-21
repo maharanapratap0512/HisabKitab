@@ -1,10 +1,43 @@
 [
     {
+        "version": "38.3",
+        "date": "21-10-2026",
+        "summary": "Comprehensive Department Settings Control, Custom Column Visibility & Permission Management",
+        "summary_hin": "सम्पूर्ण विभाग सेटिंग्स नियंत्रण, कॉलम छिपाने/दिखाने की सुविधा एवं अनुमति प्रबंधन",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Department Settings",
+                "title": "Complete Department Page & Menu Customization",
+                "title_hin": "विभाग अनुसार सभी पेज व मेन्यू पर पूर्ण नियंत्रण",
+                "desc": "All system pages—including Vehicle, Prastav, HMP, PBK Closing, PBK Bachat, City, and Master lists—now fully respect your department's visibility settings. Easily tailor which menus and screens are displayed.",
+                "desc_hin": "अब विभाग सेटिंग्स से आप अपनी आवश्यकतानुसार किसी भी पेज या मेन्यू (जैसे वाहन, प्रस्ताव, HMP, PBK क्लोजिंग, PBK बचत, शहर एवं अन्य मुख्य सूचियाँ) को आसानी से चालू या बंद कर सकते हैं।"
+            },
+            {
+                "type": "feature",
+                "module": "Permissions",
+                "title": "Granular Add, Edit & Delete Access Controls",
+                "title_hin": "जोड़ने, सुधारने व हटाने (Add, Edit, Delete) की अनुमति पर नियंत्रण",
+                "desc": "Add, Edit, and Delete permissions are now consistently applied across all data entry forms and management tables, keeping your data secure according to department preferences.",
+                "desc_hin": "प्रत्येक पेज और टेबल के लिए नया रिकॉर्ड जोड़ने, सुधार करने और हटाने के बटनों पर सुरक्षित नियंत्रण लागू किया गया है।"
+            },
+            {
+                "type": "feature",
+                "module": "Table & Form Customization",
+                "title": "Flexible Column & Field Display Options",
+                "title_hin": "तालिका और फॉर्म में कॉलम छिपाने व दिखाने की नई सुविधा",
+                "desc": "Easily configure optional columns—such as Vehicle specifications, Rates, Amounts, Conditions, and Stock totals—directly through the quick Settings Panel to keep your screens clean and relevant.",
+                "desc_hin": "टेबल और फॉर्म में अतिरिक्त कॉलम (जैसे वाहन का विवरण, दर, कुल राशि, स्थिति, स्टॉक आदि) को सेटिंग्स पैनल से सीधे अपनी पसंद के अनुसार ऑन या ऑफ कर सकते हैं।"
+            }
+        ]
+    },
+    {
         "version": "38.2",
         "date": "20-10-2026",
         "summary": "Modern Dashboard Design, Vehicle UI/UX & Document Upgrade, and Country Management",
         "summary_hin": "नया आधुनिक डैशबोर्ड डिज़ाइन, वाहन (Vehicle) प्रबंधन व दस्तावेज़ अपग्रेड, एवं देश (Country) सूची",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

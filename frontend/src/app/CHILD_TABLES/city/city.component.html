@@ -15,7 +15,7 @@
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" *ngIf="settings.city.add"
+                        <button class="btn btn-primary w-100" *ngIf="settings?.city?.add !== false"
                            onclick="$('#showModal').modal('show')" (click)="showModal = 'Add City'">
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add City
                         </button>
@@ -48,8 +48,8 @@
                            <th style="width: 40px;">No.</th>
                            <th style="width: 120px;">Manage</th>
                            <th style="width: 150px;">City(Hin)</th>
-                           <th style="width: 150px;">City(Eng)</th>
-                           <th style="width: 100px;">State(Hin-Eng)</th>
+                           <th *ngIf="settings?.city?.city_eng !== false" style="width: 150px;">City(Eng)</th>
+                           <th *ngIf="settings?.city?.state_id !== false" style="width: 100px;">State(Hin-Eng)</th>
                         </tr>
                      </thead>
                      <!-- <div style="height: 25px; box-shadow: none; border: none;"></div> -->
@@ -70,19 +70,19 @@
                            <td>
                               <div>
                                  <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"
-                                    *ngIf="settings.city.edit"><i class="uil uil-pen"></i></button>
+                                    *ngIf="settings?.city?.edit !== false"><i class="uil uil-pen"></i></button>
                                  <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
-                                    *ngIf="settings.city.delete"><i class="uil-trash"></i></button>
+                                    *ngIf="settings?.city?.delete !== false"><i class="uil-trash"></i></button>
                               </div>
-                              <span *ngIf="!settings.city.edit && !settings.city.delete" data-toggle="tooltip"
+                              <span *ngIf="settings?.city?.edit === false && settings?.city?.delete === false" data-toggle="tooltip"
                                  title="Protected" class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>
                               </span>
                            </td>
                            <td>{{data.city_hin}}</td>
-                           <td>{{data.city_eng}}</td>
-                           <td>{{data.state_id?(data.state_hin + ' : ' + data.state_eng):'-'}}</td>
+                           <td *ngIf="settings?.city?.city_eng !== false">{{data.city_eng}}</td>
+                           <td *ngIf="settings?.city?.state_id !== false">{{data.state_id?(data.state_hin + ' : ' + data.state_eng):'-'}}</td>
                         </tr>
                      </tbody>
                   </table>

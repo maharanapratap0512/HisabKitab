@@ -2122,6 +2122,7 @@ const district = {
     , select_full:
         `select district.*, 
         st.state_hin, st.state_eng,
+        st.country_id,
         cnt.country_hin, cnt.country_eng from district 
         left join state st on st._id = district.state_id
         left join country cnt on cnt._id = st.country_id  ? limit @limit offset @offset`

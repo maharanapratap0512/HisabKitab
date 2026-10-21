@@ -90,6 +90,16 @@ export class HmpComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.settings = this.auth.webUser?.settings || {};
+    if (!this.settings.hmp) {
+      this.settings.hmp = { viewMode: 'voucher' };
+    }
+    this.auth.settingsUpdated$?.subscribe((newSettings: any) => {
+      this.settings = newSettings || this.auth.webUser?.settings || {};
+      if (!this.settings.hmp) {
+        this.settings.hmp = { viewMode: 'voucher' };
+      }
+    });
     this.selection.clear('hmp');
     if (this.auth.webUser?.settings?.defaultMM) {
       this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];

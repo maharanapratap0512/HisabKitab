@@ -47,7 +47,10 @@ export class CityComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getcityData();
-    this.settings = this.auth.webUser.settings;
+    this.settings = this.auth.webUser?.settings || {};
+    this.auth.settingsUpdated$?.subscribe((newSettings: any) => {
+      this.settings = newSettings || this.auth.webUser?.settings || {};
+    });
     this.gs.observeList().subscribe(result => {
       this.states = result.state ? result.state : [];
     });

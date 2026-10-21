@@ -223,8 +223,20 @@ export class DepartmentComponent implements OnInit {
         report_at: false,
         report_jt: false,
         report_str_stk: false,
-        report_kh: false
-      }
+        report_kh: false,
+        report_universal: true,
+        report_item_ledger: true
+      },
+      country: { visible: true, add: true, edit: true, delete: true },
+      zone: { visible: true, add: true, edit: true, delete: true },
+      state: { visible: true, add: true, edit: true, delete: true },
+      unit: { visible: true, add: true, edit: true, delete: true },
+      subitem_list: { visible: true, add: true, edit: true, delete: true },
+      prastav: { visible: true, add: true, edit: true, delete: true },
+      hmp: { visible: true, add: true, edit: true, delete: true },
+      pbk_closing: { visible: true, add: true, edit: true, delete: true },
+      pbk_bachat: { visible: true },
+      integrity_checkup: { visible: true }
     }
 
     this.deptSelected(null);
@@ -900,6 +912,7 @@ export class DepartmentComponent implements OnInit {
   }
 
   applySettings(configValue: any) {
+    if (!configValue) configValue = {};
     configValue.aawak && configValue.aawak.nimmit_id ? delete configValue.aawak.nimmit_id : console.log('');
     configValue.jawak && configValue.jawak.nimmit_id ? delete configValue.jawak.nimmit_id : console.log('');
     configValue.product && configValue.product.nimmit_id ? delete configValue.product.nimmit_id : console.log('');
@@ -907,6 +920,18 @@ export class DepartmentComponent implements OnInit {
 
     for (let key of Object.keys(configValue)) {
       this.settingsAll[key] = configValue[key];
+    }
+
+    if (this.auth?.settingsUI?.pageList) {
+      for (let p of this.auth.settingsUI.pageList) {
+        if (!this.settingsAll[p.key]) {
+          this.settingsAll[p.key] = { visible: true };
+        }
+        if (this.settingsAll[p.key].visible === undefined) this.settingsAll[p.key].visible = true;
+        if (p.add && this.settingsAll[p.key].add === undefined) this.settingsAll[p.key].add = true;
+        if (p.edit && this.settingsAll[p.key].edit === undefined) this.settingsAll[p.key].edit = true;
+        if (p.delete && this.settingsAll[p.key].delete === undefined) this.settingsAll[p.key].delete = true;
+      }
     }
   }
 

@@ -10,12 +10,13 @@ export class TableFieldsService {
   getFieldsForTable(tableName: string, settings: any = null): any[] {
      switch (tableName.toLowerCase()) {
          case 'mm': return this.setMMFields(settings);
-         case 'country': return this.setCountryFields();
-         case 'zone': return this.setZoneFields();
-         case 'state': return this.setStateFields();
-         case 'district': return this.setDistrictFields();
+         case 'country': return this.setCountryFields(settings);
+         case 'zone': return this.setZoneFields(settings);
+         case 'state': return this.setStateFields(settings);
+         case 'district': return this.setDistrictFields(settings);
+         case 'city': return this.setCityFields(settings);
          case 'category': return this.setCategoryFields(settings);
-         case 'unit': return this.setUnitFields();
+         case 'unit': return this.setUnitFields(settings);
          case 'subitem_list': 
          case 'subitem': return this.setSubitemListFields(settings);
          case 'item': return this.setItemFields(settings);
@@ -40,7 +41,7 @@ export class TableFieldsService {
          case 'dict': return this.setDictFields();
          case 'pbk': return this.setPbkFields(settings);
          case 'nimitt': return this.setNimittFields(settings);
-         case 'vehicle': return this.setVehicleFields();
+         case 'vehicle': return this.setVehicleFields(settings);
          case 'vehicle_document': return this.setVehicleDocumentFields();
          case 'point': return this.setPointFields();
          default: return [{ title: "Details", columns: [`${tableName}_hin`, `${tableName}_eng`] }];
@@ -89,25 +90,30 @@ export class TableFieldsService {
     return fields;
   }
 
-  setCountryFields() {
-    return [
-      { title: "Country(Hin)", columns: ["country_hin"] }, 
-      { title: "Country(Eng)", columns: ["country_eng"] }
+  setCountryFields(settings: any = null) {
+    let fields: any = [
+      { title: "Country(Hin)", columns: ["country_hin"] }
     ];
+    if (!settings || settings.country_eng !== false) fields.push({ title: "Country(Eng)", columns: ["country_eng"] });
+    if (settings && settings.country_roman) fields.push({ title: "Country(Roman)", columns: ["country_roman"] });
+    if (settings && settings.country_code) fields.push({ title: "Country Code", columns: ["country_code"] });
+    if (settings && settings.dial_code) fields.push({ title: "Dial Code", columns: ["dial_code"] });
+    return fields;
   }
 
-  setUnitFields() {
-    return [
-      { title: "Unit(Full)", columns: ["unit_full"] }, 
-      { title: "Unit(Short)", columns: ["unit_short"] }
-    ];
+  setUnitFields(settings: any = null) {
+    let fields: any[] = [];
+    if (!settings || settings.unit_full !== false) fields.push({ title: "Unit(Full)", columns: ["unit_full"] });
+    if (!settings || settings.unit_short !== false) fields.push({ title: "Unit(Short)", columns: ["unit_short"] });
+    if (settings && settings.unit_roman) fields.push({ title: "Unit(Roman)", columns: ["unit_roman"] });
+    return fields.length ? fields : [{ title: "Unit(Short)", columns: ["unit_short"] }];
   }
 
   setMMFields(settings: any) {
     let fields: any = [
       { title: "MM(Hin)", columns: ["mm_hin"] }
     ];
-    if (settings && settings.mm_eng) fields.push({ title: "MM(Eng)", columns: ["mm_eng"] });
+    if (!settings || settings.mm_eng !== false) fields.push({ title: "MM(Eng)", columns: ["mm_eng"] });
     if (settings && settings.mm_roman) fields.push({ title: "MM(Roman)", columns: ["mm_roman"] });
     if (settings && settings.mm_code) fields.push({ title: "MM Code", columns: ["mm_code"] });
     
@@ -120,46 +126,78 @@ export class TableFieldsService {
     return fields;
   }
 
-  setZoneFields() {
-    return [
-      { title: "Zone(Hin)", columns: ["zone_hin"] }, 
-      { title: "Zone(Eng)", columns: ["zone_eng"] }, 
-      { title: "Country", columns: ["country_hin", "country_eng"] }
+  setZoneFields(settings: any = null) {
+    let fields: any = [
+      { title: "Zone(Hin)", columns: ["zone_hin"] }
     ];
+    if (!settings || settings.zone_eng !== false) fields.push({ title: "Zone(Eng)", columns: ["zone_eng"] });
+    if (settings && settings.zone_roman) fields.push({ title: "Zone(Roman)", columns: ["zone_roman"] });
+    if (settings && settings.zone_code) fields.push({ title: "Zone Code", columns: ["zone_code"] });
+    fields.push({ title: "Country", columns: ["country_hin", "country_eng"] });
+    return fields;
   }
 
-  setDistrictFields() {
-    return [
-      { title: "District(Hin)", columns: ["district_hin"] }, 
-      { title: "District(Eng)", columns: ["district_eng"] }, 
-      { title: "State", columns: ["state_hin", "state_eng"] }, 
-      { title: "Country", columns: ["country_hin", "country_eng"] }
+  setDistrictFields(settings: any = null) {
+    let fields: any = [
+      { title: "District(Hin)", columns: ["district_hin"] }
     ];
+    if (!settings || settings.district_eng !== false) fields.push({ title: "District(Eng)", columns: ["district_eng"] });
+    if (settings && settings.district_roman) fields.push({ title: "District(Roman)", columns: ["district_roman"] });
+    if (settings && settings.district_code) fields.push({ title: "District Code", columns: ["district_code"] });
+    if (!settings || settings.state_id !== false) fields.push({ title: "State", columns: ["state_hin", "state_eng"] });
+    fields.push({ title: "Country", columns: ["country_hin", "country_eng"] });
+    return fields;
   }
 
-  setStateFields() {
-    return [
-      { title: "State(Hin)", columns: ["state_hin"] }, 
-      { title: "State(Eng)", columns: ["state_eng"] }, 
-      { title: "Zone", columns: ["zone_hin", "zone_eng"] }, 
-      { title: "Country", columns: ["country_hin", "country_eng"] }
+  setStateFields(settings: any = null) {
+    let fields: any = [
+      { title: "State(Hin)", columns: ["state_hin"] }
     ];
+    if (!settings || settings.state_eng !== false) fields.push({ title: "State(Eng)", columns: ["state_eng"] });
+    if (settings && settings.state_roman) fields.push({ title: "State(Roman)", columns: ["state_roman"] });
+    if (settings && settings.state_code) fields.push({ title: "State Code", columns: ["state_code"] });
+    if (!settings || settings.zone_id !== false) fields.push({ title: "Zone", columns: ["zone_hin", "zone_eng"] });
+    if (!settings || settings.country_id !== false) fields.push({ title: "Country", columns: ["country_hin", "country_eng"] });
+    return fields;
   }
 
-  setSubitemListFields(settings: any) {
-    return [
-      { title: "Subitem(Hin)", columns: ["subitem_hin"] },
-      { title: "Subitem(Eng)", columns: ["subitem_eng"] },
-      { title: "Subitem(Roman)", columns: ["subitem_roman"] }
+  setCityFields(settings: any = null) {
+    let fields: any = [
+      { title: "City(Hin)", columns: ["city_hin"] }
     ];
+    if (!settings || settings.city_eng !== false) fields.push({ title: "City(Eng)", columns: ["city_eng"] });
+    if (settings && settings.city_roman) fields.push({ title: "City(Roman)", columns: ["city_roman"] });
+    if (settings && settings.city_code) fields.push({ title: "City Code", columns: ["city_code"] });
+    if (!settings || settings.district_id !== false) fields.push({ title: "District", columns: ["district_hin", "district_eng"] });
+    if (!settings || settings.state_id !== false) fields.push({ title: "State", columns: ["state_hin", "state_eng"] });
+    if (settings && settings.zone_id) fields.push({ title: "Zone", columns: ["zone_hin", "zone_eng"] });
+    return fields;
+  }
+
+  setSubitemListFields(settings: any = null) {
+    let fields: any = [
+      { title: "Subitem(Hin)", columns: ["subitem_hin"] }
+    ];
+    if (!settings || (settings.subitem_list_eng !== false && settings.subitem_eng !== false)) {
+      fields.push({ title: "Subitem(Eng)", columns: ["subitem_eng"] });
+    }
+    if (settings && (settings.subitem_list_roman || settings.subitem_roman)) {
+      fields.push({ title: "Subitem(Roman)", columns: ["subitem_roman"] });
+    }
+    if (settings && (settings.subitem_code || settings.subitem_list_code)) {
+      fields.push({ title: "Code", columns: ["subitem_code"] });
+    }
+    return fields;
   }
 
   setItemFields(settings: any) {
-    return [
-      { title: "Item(Hin)", columns: ["item_hin"] },
-      { title: "Item(Eng)", columns: ["item_eng"] },
-      { title: "Item(Roman)", columns: ["item_roman"] }
+    let fields: any = [
+      { title: "Item(Hin)", columns: ["item_hin"] }
     ];
+    if (!settings || settings.item_eng !== false) fields.push({ title: "Item(Eng)", columns: ["item_eng"] });
+    if (settings && settings.item_roman) fields.push({ title: "Item(Roman)", columns: ["item_roman"] });
+    if (settings && settings.item_code) fields.push({ title: "Item Code", columns: ["item_code"] });
+    return fields;
   }
 
   setPbkFields(settings: any) {
@@ -177,11 +215,15 @@ export class TableFieldsService {
       ];
   }
 
-  setVehicleFields() {
-      return [
-          { title: "Vehicle No", columns: ["vehicle_no"] },
-          { title: "Type", columns: ["vehicle_type"] }
+  setVehicleFields(settings: any = null) {
+      let fields: any = [
+          { title: "Vehicle No", columns: ["gadi_num", "vehicle_no"] }
       ];
+      if (!settings || settings.gadi_name !== false) fields.push({ title: "Vehicle Name", columns: ["gadi_name"] });
+      if (!settings || settings.vehicle_type !== false) fields.push({ title: "Type", columns: ["vehicle_type"] });
+      if (!settings || settings.fuel_type !== false) fields.push({ title: "Fuel", columns: ["fuel_type"] });
+      if (!settings || settings.owner_name !== false) fields.push({ title: "Owner", columns: ["owner_name"] });
+      return fields;
   }
   
   setVehicleDocumentFields() {

@@ -24,6 +24,7 @@ export class CityEntryComponent implements OnInit {
   isLoader: boolean = false;
   viewType: any;
   viewData: any = [];
+  settings: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -41,9 +42,24 @@ export class CityEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.settings = this.auth.webUser?.settings || {};
+    this.applySettingsValidators();
+    this.auth.settingsUpdated$?.subscribe((newSettings: any) => {
+      this.settings = newSettings || this.auth.webUser?.settings || {};
+      this.applySettingsValidators();
+    });
     this.gs.observeList().subscribe(result => {
       this.states = result.state ? result.state : [];
     });
+  }
+
+  applySettingsValidators() {
+    if (this.settings?.city?.state_id === false) {
+      this.cityForm.get('state_id')?.clearValidators();
+    } else {
+      this.cityForm.get('state_id')?.setValidators([Validators.required]);
+    }
+    this.cityForm.get('state_id')?.updateValueAndValidity();
   }
 
   ngOnChanges(changes: SimpleChanges) {

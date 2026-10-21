@@ -14,14 +14,14 @@
                             [ngClass]="{'validation':cityForm.get('city_hin')?.errors && (cityForm.get('city_hin')?.touched || cityForm.get ('city_hin')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings?.city?.city_eng !== false">
                     <div class="form-group">
                         <label class="form-label">City Name (Eng)</label>
                         <input type="text" class="form-control" placeholder="City Name (Eng)" formControlName="city_eng"
                             [ngClass]="{'validation':cityForm.get('city_eng')?.errors && (cityForm.get('city_eng')?.touched || cityForm.get ('city_eng')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings?.city?.state_id !== false">
                     <div class="form-group">
                         <label class="form-label">State</label>
                         <div class="float-end">

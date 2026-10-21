@@ -96,6 +96,9 @@ export class VehicleComponent implements OnInit {
       }
     });
     this.settings = this.auth.webUser ? this.auth.webUser.settings : {};
+    this.auth.settingsUpdated$.subscribe((s: any) => {
+      this.settings = s || {};
+    });
   }
 
   openModal(type: string, mode: string = '') {

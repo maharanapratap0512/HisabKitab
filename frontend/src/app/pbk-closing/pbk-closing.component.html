@@ -22,7 +22,7 @@
                 </div>
                 <input type="date" class="form-control border-0 bg-light" style="width: auto;"
                   [(ngModel)]="filterBody.date" (change)="getClosingData()">
-                <button class="btn btn-primary shadow-sm" style="width: 250px;" (click)="openModal('Add Closing')">
+                <button *ngIf="settings?.pbk_closing?.add !== false" class="btn btn-primary shadow-sm" style="width: 250px;" (click)="openModal('Add Closing')">
                   <i class="uil uil-plus me-1"></i> Add Closing
                 </button>
 
@@ -115,8 +115,8 @@
 
                   <!-- Right: Actions -->
                   <div class="d-flex align-items-center gap-1" (click)="$event.stopPropagation()">
-                    <i class="uil uil-pen i-outline-primary cursor-pointer me-1" (click)="openModal('Edit Closing', group)" title="Edit"></i>
-                    <i class="uil uil-trash i-outline-danger cursor-pointer me-1" (click)="deleteVoucher(group)" title="Delete"></i>
+                    <i *ngIf="settings?.pbk_closing?.edit !== false" class="uil uil-pen i-outline-primary cursor-pointer me-1" (click)="openModal('Edit Closing', group)" title="Edit"></i>
+                    <i *ngIf="settings?.pbk_closing?.delete !== false" class="uil uil-trash i-outline-danger cursor-pointer me-1" (click)="deleteVoucher(group)" title="Delete"></i>
                     <button class="btn btn-sm btn-icon transition-icon py-0" [ngClass]="{'rotate-180': group.expanded}"
                       (click)="toggleExpand(group)">
                       <i class="uil uil-angle-down h5 mb-0"></i>
@@ -134,10 +134,10 @@
                       <tr>
                         <th>Item Name</th>
                         <th>Unit</th>
-                        <th>Condition</th>
-                        <th class="text-center">System Qty</th>
+                        <th *ngIf="settings?.pbk_closing?.condition_id !== false">Condition</th>
+                        <th *ngIf="settings?.pbk_closing?.sw_bachat !== false" class="text-center">System Qty</th>
                         <th class="text-center">Actual (Closing)</th>
-                        <th class="text-center">Difference</th>
+                        <th *ngIf="settings?.pbk_closing?.difference !== false" class="text-center">Difference</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -147,11 +147,11 @@
                           <small class="text-muted">{{item.item_eng}}</small>
                         </td>
                         <td>{{item.unit_short}}</td>
-                        <td><span class="badge bg-soft-secondary text-secondary">{{item.condition_hin || '-'}}</span>
+                        <td *ngIf="settings?.pbk_closing?.condition_id !== false"><span class="badge bg-soft-secondary text-secondary">{{item.condition_hin || '-'}}</span>
                         </td>
-                        <td class="text-center text-muted">{{item.sw_bachat}}</td>
+                        <td *ngIf="settings?.pbk_closing?.sw_bachat !== false" class="text-center text-muted">{{item.sw_bachat}}</td>
                         <td class="text-center fw-bold">{{item.qty}}</td>
-                        <td class="text-center">
+                        <td *ngIf="settings?.pbk_closing?.difference !== false" class="text-center">
                           <span class="badge" [ngClass]="{
                                                             'bg-soft-success text-success': item.difference > 0,
                                                             'bg-soft-danger text-danger': item.difference < 0,

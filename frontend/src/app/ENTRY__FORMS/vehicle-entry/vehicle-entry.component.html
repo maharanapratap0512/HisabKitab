@@ -49,7 +49,7 @@
                     </div>
 
                     <!-- Gadi Name -->
-                    <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="col-md-3 col-sm-6 mb-2" *ngIf="settings?.vehicle?.gadi_name !== false">
                         <div class="form-group">
                             <label class="form-label font-size-12 fw-semibold">गाड़ी का नाम (Vehicle Model / Name)</label>
                             <input type="text" class="form-control" placeholder="e.g. Innova Crysta, Bolero, Ertiga" formControlName="gadi_name"
@@ -58,7 +58,7 @@
                     </div>
 
                     <!-- Vehicle Type -->
-                    <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="col-md-3 col-sm-6 mb-2" *ngIf="settings?.vehicle?.vehicle_type !== false">
                         <div class="form-group">
                             <label class="form-label font-size-12 fw-semibold">वाहन प्रकार (Vehicle Type)</label>
                             <input type="text" class="form-control" placeholder="e.g. Car, Bus, Tractor, Ambulance"
@@ -68,7 +68,7 @@
                     </div>
 
                     <!-- Fuel Type -->
-                    <div class="col-md-2 col-sm-6 mb-2">
+                    <div class="col-md-2 col-sm-6 mb-2" *ngIf="settings?.vehicle?.fuel_type !== false">
                         <div class="form-group">
                             <label class="form-label font-size-12 fw-semibold">ईंधन (Fuel Type)</label>
                             <ng-select class="custom" placeholder="Select Fuel"
@@ -83,7 +83,7 @@
                     </div>
 
                     <!-- Seating Capacity -->
-                    <div class="col-md-2 col-sm-6 mb-2">
+                    <div class="col-md-2 col-sm-6 mb-2" *ngIf="settings?.vehicle?.seating_capacity !== false">
                         <div class="form-group">
                             <label class="form-label font-size-12 fw-semibold">सीटिंग क्षमता (Seats)</label>
                             <input type="number" class="form-control" placeholder="Capacity"
@@ -92,7 +92,7 @@
                     </div>
 
                     <!-- Owner Name -->
-                    <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="col-md-3 col-sm-6 mb-2" *ngIf="settings?.vehicle?.owner_name !== false">
                         <div class="form-group">
                             <label class="form-label font-size-12 fw-semibold">स्वामी का नाम (Owner Name)</label>
                             <input type="text" class="form-control" placeholder="Owner Name" formControlName="owner_name">
@@ -100,7 +100,7 @@
                     </div>
 
                     <!-- Nominee -->
-                    <div class="col-md-2 col-sm-6 mb-2">
+                    <div class="col-md-2 col-sm-6 mb-2" *ngIf="settings?.vehicle?.nominee !== false">
                         <div class="form-group">
                             <label class="form-label font-size-12 fw-semibold">नामित व्यक्ति (Nominee)</label>
                             <input type="text" class="form-control" placeholder="Nominee" formControlName="nominee">
@@ -108,7 +108,7 @@
                     </div>
 
                     <!-- Aawak Type -->
-                    <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="col-md-3 col-sm-6 mb-2" *ngIf="settings?.vehicle?.aawak_type !== false">
                         <div class="form-group">
                             <label class="form-label font-size-12 fw-semibold">आवक प्रकार (Aawak Type) *</label>
                             <input type="text" class="form-control" placeholder="e.g. Kharid, Dan, Seva" formControlName="aawak_type"
@@ -151,7 +151,7 @@
                                     <label class="form-label font-size-12 fw-semibold text-primary">RC समाप्ति दिनांक (Exp Date)</label>
                                     <input class="form-control border-primary" type="date" formControlName="rc_exp_date">
                                 </div>
-                                <div class="mb-2">
+                                <div class="mb-2" *ngIf="settings?.vehicle?.rc_amount !== false">
                                     <label class="form-label font-size-12 fw-semibold">RC शुल्क / राशि (Amount ₹)</label>
                                     <input type="number" class="form-control" placeholder="RC Fees" formControlName="rc_amount">
                                 </div>
@@ -177,7 +177,7 @@
                                         <input class="form-control border-success" type="date" formControlName="insurance_exp_date">
                                     </div>
                                 </div>
-                                <div class="mb-2">
+                                <div class="mb-2" *ngIf="settings?.vehicle?.insurance_company !== false">
                                     <label class="form-label font-size-12 fw-semibold">बीमा कंपनी (Company)</label>
                                     <input type="text" class="form-control" placeholder="e.g. SBI General, New India" formControlName="insurance_company">
                                 </div>
@@ -186,7 +186,7 @@
                                         <label class="form-label font-size-12 fw-semibold">प्रकार (Type)</label>
                                         <input type="text" class="form-control" placeholder="Comprehensive" formControlName="insurance_type">
                                     </div>
-                                    <div class="col-6 mb-2">
+                                    <div class="col-6 mb-2" *ngIf="settings?.vehicle?.insurance_amount !== false">
                                         <label class="form-label font-size-12 fw-semibold">प्रीमियम राशि (₹)</label>
                                         <input type="number" class="form-control" placeholder="Amount" formControlName="insurance_amount">
                                     </div>
@@ -211,7 +211,7 @@
                                     <label class="form-label font-size-12 fw-semibold text-warning">PUC समाप्ति दिनांक (Exp Date)</label>
                                     <input class="form-control border-warning" type="date" formControlName="puc_exp_date">
                                 </div>
-                                <div class="mb-2">
+                                <div class="mb-2" *ngIf="settings?.vehicle?.puc_amount !== false">
                                     <label class="form-label font-size-12 fw-semibold">PUC शुल्क (Amount ₹)</label>
                                     <input type="number" class="form-control" placeholder="PUC Fees" formControlName="puc_amount">
                                 </div>

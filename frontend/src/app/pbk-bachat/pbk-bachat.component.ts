@@ -32,6 +32,7 @@ export class PbkBachatComponent implements OnInit {
     category_id: null,
     state_id: null
   };
+  settings: any = {};
 
   constructor(
     private http: HttpService,
@@ -44,6 +45,10 @@ export class PbkBachatComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.settings = this.auth.webUser?.settings || {};
+    this.auth.settingsUpdated$?.subscribe((newSettings: any) => {
+      this.settings = newSettings || this.auth.webUser?.settings || {};
+    });
     this.spinner.show();
     this.gs.observeList().subscribe(result => {
       this.states = result.state || [];
