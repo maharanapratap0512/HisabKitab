@@ -21,6 +21,9 @@ router.get('/:dept_id?', async (req, res, next) => {
 router.put('/filter/:dept_id?', async (req, res, next) => {
     try {
         const conditions = [];
+        if (req.body.country_id && req.body.country_id.length > 0) {
+            conditions.push(`st.country_id IN (${req.body.country_id.join(',')})`);
+        }
         if (req.body.state_id && req.body.state_id.length > 0) {
             conditions.push(`district.state_id IN (${req.body.state_id.join(',')})`);
         }

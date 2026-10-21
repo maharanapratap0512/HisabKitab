@@ -81,6 +81,13 @@ export class PbkClosingComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.settings = this.auth.webUser?.settings || {};
+    this.auth.settingsUpdated$?.subscribe((newSettings: any) => {
+      this.settings = newSettings || this.auth.webUser?.settings || {};
+      if (!this.settings.pbk_closing) {
+        this.settings.pbk_closing = { samePageEntryForm: false, viewMode: 'voucher' };
+      }
+    });
     this.getClosingData();
   }
 

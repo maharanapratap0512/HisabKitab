@@ -25,6 +25,7 @@ export class VehicleEntryComponent implements OnInit {
   isLoader: boolean = false;
   viewType: any;
   viewData: any = [];
+  settings: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -35,7 +36,7 @@ export class VehicleEntryComponent implements OnInit {
     public auth: AuthService
   ) {
     this.vehForm = this.fb.group({
-      mm_id: [auth.webUser.settings.defaultMM, Validators.required],
+      mm_id: [auth.webUser?.settings?.defaultMM, Validators.required],
       vehicle_type: [null],
       gadi_name: [null],
       gadi_num: [null, Validators.required],
@@ -59,6 +60,18 @@ export class VehicleEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.settings = this.auth.webUser?.settings || {};
+    if (this.settings?.vehicle?.aawak_type === false) {
+      this.vehForm.get('aawak_type')?.clearValidators();
+      this.vehForm.get('aawak_type')?.updateValueAndValidity();
+    }
+    this.auth.settingsUpdated$.subscribe((s: any) => {
+      this.settings = s || {};
+      if (this.settings?.vehicle?.aawak_type === false) {
+        this.vehForm.get('aawak_type')?.clearValidators();
+        this.vehForm.get('aawak_type')?.updateValueAndValidity();
+      }
+    });
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
     });

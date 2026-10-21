@@ -30,7 +30,7 @@
             </ul>
           </app-popover-filter>
         </div>
-        <button id="tour-add-hmp-btn" class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add HMP</button>
+        <button *ngIf="settings?.hmp?.add !== false" id="tour-add-hmp-btn" class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add HMP</button>
 
         <!-- Tour Hub Menu Dropdown -->
         <div class="dropdown d-inline-block ms-1">
@@ -123,7 +123,7 @@
               </div>
             </div>
             <span class="badge year-box cursor-pointer badge-outline-danger"
-               *ngIf="selection.getSelected('hmp').length > 0"
+               *ngIf="settings?.hmp?.delete !== false && selection.getSelected('hmp').length > 0"
                (click)="deleteMultiple()"
                title="Click to perform delete.">Delete ({{selection.getSelected('hmp').length}})</span>
           </div>
@@ -168,10 +168,10 @@
                       [ngClass]="{'bg-success': batch.status === 'completed', 'bg-warning': batch.status === 'pending'}">
                       {{batch.status}}
                     </span>
-                    <i class="uil uil-pen i-outline-primary shadow-sm"
+                    <i *ngIf="settings?.hmp?.edit !== false" class="uil uil-pen i-outline-primary shadow-sm"
                       style="background: rgba(255,255,255,0.1); border-color: transparent; color: white; padding: 4px 6px; cursor: pointer; border-radius: 4px;"
                       (click)="$event.stopPropagation(); openEntryModal(batch)" title="Edit Batch"></i>
-                    <i class="uil uil-trash i-outline-danger shadow-sm"
+                    <i *ngIf="settings?.hmp?.delete !== false" class="uil uil-trash i-outline-danger shadow-sm"
                       style="background: #fa5c7c; border-color: transparent; color: white; padding: 4px 6px; cursor: pointer; border-radius: 4px;"
                       (click)="$event.stopPropagation(); delete(batch._id, batchIndex)" title="Delete Batch"></i>
                   </div>
@@ -195,7 +195,7 @@
                             <th width="8%" class="ps-2">#</th>
                             <th width="52%">Item</th>
                             <th width="20%">Qty</th>
-                            <th width="10%">Rate</th>
+                            <th *ngIf="settings?.hmp?.rate !== false" width="10%">Rate</th>
                             <th *ngIf="settings.hmp?.condition_id" width="10%">Cond.</th>
                           </tr>
                         </thead>
@@ -204,7 +204,7 @@
                             [class.row-auto-awk]="input.is_auto_awk">
                             <td class="ps-2">
                               {{i+1}}
-                              <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.inputs.length > 1"
+                              <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="settings?.hmp?.delete !== false && batch.inputs.length > 1"
                                 (click)="deleteInput(input._id, i)"></i>
                             </td>
                             <td>
@@ -215,7 +215,7 @@
                               </span>{{input.item.item_eng}}
                             </td>
                             <td><strong>{{input.qty}}</strong> <small>{{input.unit_short}}</small></td>
-                            <td><span style="opacity: 0.6;">{{input.rate || '-'}}</span></td>
+                            <td *ngIf="settings?.hmp?.rate !== false"><span style="opacity: 0.6;">{{input.rate || '-'}}</span></td>
                             <td *ngIf="settings.hmp?.condition_id"><small
                                 style="color: #f0a500;">{{input.condition?.list_name_hin}}</small></td>
                           </tr>
@@ -242,7 +242,7 @@
                             <th width="8%" class="ps-2">#</th>
                             <th width="42%">Item</th>
                             <th width="20%">Qty</th>
-                            <th width="10%">Rate</th>
+                            <th *ngIf="settings?.hmp?.rate !== false" width="10%">Rate</th>
                             <th *ngIf="settings.hmp?.condition_id" width="10%">Cond.</th>
                             <th width="10%">Destr.</th>
                           </tr>
@@ -252,7 +252,7 @@
                             [class.row-auto-awk]="output.is_auto_awk || output.aawak_ref_id">
                             <td class="ps-2">
                               {{i+1}}
-                              <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.outputs.length > 1"
+                              <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="settings?.hmp?.delete !== false && batch.outputs.length > 1"
                                 (click)="deleteOutput(output._id, i)"></i>
                             </td>
                             <td>
@@ -263,7 +263,7 @@
                               </span>{{output.item?.item_eng}}
                             </td>
                             <td><strong>{{output.qty}}</strong> <small>{{output.unit_short}}</small></td>
-                            <td><span style="opacity: 0.6;">{{output.rate || '-'}}</span></td>
+                            <td *ngIf="settings?.hmp?.rate !== false"><span style="opacity: 0.6;">{{output.rate || '-'}}</span></td>
                             <td *ngIf="settings.hmp?.condition_id"><small
                                 style="color: #f0a500;">{{output.condition?.list_name_hin}}</small></td>
                             <td>
@@ -330,7 +330,7 @@
                 <th style="min-width: 60px;">Type</th>
                 <th style="min-width: 200px;">Item (HIN · ENG)</th>
                 <th style="min-width: 75px;">Qty</th>
-                <th style="min-width: 60px;">Rate</th>
+                <th *ngIf="settings?.hmp?.rate !== false" style="min-width: 60px;">Rate</th>
                 <th *ngIf="settings.hmp?.condition_id" style="min-width: 100px;">Condition</th>
                 <th style="min-width: 80px; text-align: center;">Action</th>
               </tr>
@@ -402,7 +402,7 @@
                       <strong>{{$any(batch.inputs[0])?.qty}}</strong>
                       <small>{{$any(batch.inputs[0])?.unit_short}}</small>
                     </td>
-                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
+                    <td *ngIf="settings?.hmp?.rate !== false" [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
                       [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><span
                         style="opacity: 0.6;">{{$any(batch.inputs[0])?.rate || '-'}}</span></td>
                     <td *ngIf="settings.hmp?.condition_id" [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
@@ -410,8 +410,8 @@
                         style="color: #f0a500;">{{$any(batch.inputs[0])?.condition?.list_name_hin}}</small></td>
                     <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
                       [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk" style="text-align: center;">
-                      <i class="uil uil-pen i-outline-primary me-1" (click)="openEntryModal(batch)" title="Edit"></i>
-                      <i class="uil uil-trash i-outline-danger" (click)="deleteInput($any(batch.inputs[0])._id, 0)"
+                      <i *ngIf="settings?.hmp?.edit !== false" class="uil uil-pen i-outline-primary me-1" (click)="openEntryModal(batch)" title="Edit"></i>
+                      <i *ngIf="settings?.hmp?.delete !== false" class="uil uil-trash i-outline-danger" (click)="deleteInput($any(batch.inputs[0])._id, 0)"
                         title="Delete Item"></i>
                     </td>
                   </ng-container>
@@ -437,11 +437,11 @@
                     </small>
                   </td>
                   <td><strong>{{$any(input)?.qty}}</strong> <small>{{$any(input)?.unit_short}}</small></td>
-                  <td><span style="opacity: 0.6;">{{$any(input)?.rate || '-'}}</span></td>
+                  <td *ngIf="settings?.hmp?.rate !== false"><span style="opacity: 0.6;">{{$any(input)?.rate || '-'}}</span></td>
                   <td *ngIf="settings.hmp?.condition_id"><small
                       style="color: #f0a500;">{{$any(input)?.condition?.list_name_hin}}</small></td>
                   <td style="text-align: center;">
-                    <i class="uil uil-trash i-outline-danger" (click)="deleteInput($any(input)._id, i + 1)"
+                    <i *ngIf="settings?.hmp?.delete !== false" class="uil uil-trash i-outline-danger" (click)="deleteInput($any(input)._id, i + 1)"
                       title="Delete Item">
                     </i>
                   </td>
@@ -464,11 +464,11 @@
                       </small>
                     </td>
                     <td><strong>{{$any(output)?.qty}}</strong> <small>{{$any(output)?.unit_short}}</small></td>
-                    <td><span style="opacity: 0.6;">{{$any(output)?.rate || '-'}}</span></td>
+                    <td *ngIf="settings?.hmp?.rate !== false"><span style="opacity: 0.6;">{{$any(output)?.rate || '-'}}</span></td>
                     <td *ngIf="settings.hmp?.condition_id"><small
                         style="color: #f0a500;">{{$any(output)?.condition?.list_name_hin}}</small></td>
                     <td style="text-align: center;">
-                      <i class="uil uil-trash i-outline-danger" (click)="deleteOutput($any(output)._id, i)"
+                      <i *ngIf="settings?.hmp?.delete !== false" class="uil uil-trash i-outline-danger" (click)="deleteOutput($any(output)._id, i)"
                         title="Delete Item">
                       </i>
                     </td>

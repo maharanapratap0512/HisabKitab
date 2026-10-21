@@ -43,46 +43,65 @@ export class ContextSettingsPanelComponent implements OnInit, OnChanges {
 
     // --- Core Settings ---
     getSetting(key: string, colName: string): boolean {
-        return this.auth.webUser?.settings?.[key]?.[colName] || false;
+        const val = this.auth.webUser?.settings?.[key]?.[colName];
+        return val !== undefined ? !!val : true;
     }
 
     toggleSetting(key: string, colName: string) {
         this.ensureKey(key);
-        this.auth.webUser.settings[key][colName] = !this.auth.webUser.settings[key][colName];
+        const current = this.getSetting(key, colName);
+        this.auth.webUser.settings[key][colName] = !current;
         this.auth.updateSettings();
     }
 
     // --- Permissions ---
     togglePermission(key: string, perm: 'add' | 'edit' | 'delete') {
         this.ensureKey(key);
-        this.auth.webUser.settings[key][perm] = !this.auth.webUser.settings[key][perm];
+        const current = this.getPermission(key, perm);
+        this.auth.webUser.settings[key][perm] = !current;
         this.auth.updateSettings();
     }
 
     getPermission(key: string, perm: 'add' | 'edit' | 'delete'): boolean {
-        return this.auth.webUser?.settings?.[key]?.[perm] || false;
+        const val = this.auth.webUser?.settings?.[key]?.[perm];
+        return val !== undefined ? !!val : true;
     }
 
     // --- Page Visibility ---
     togglePageVisible(key: string) {
         this.ensureKey(key);
-        this.auth.webUser.settings[key].visible = !this.auth.webUser.settings[key].visible;
+        const current = this.getPageVisible(key);
+        this.auth.webUser.settings[key].visible = !current;
         this.auth.updateSettings();
     }
 
     getPageVisible(key: string): boolean {
-        return this.auth.webUser?.settings?.[key]?.visible || false;
+        const val = this.auth.webUser?.settings?.[key]?.visible;
+        return val !== undefined ? !!val : true;
     }
 
     // --- UI Modes (Radio style) ---
     setUIMode(key: string, settingKey: string, value: string) {
         this.ensureKey(key);
-        this.auth.webUser.settings[key][settingKey] = value;
+        if (value === 'true') {
+            this.auth.webUser.settings[key][settingKey] = true;
+        } else if (value === 'false') {
+            this.auth.webUser.settings[key][settingKey] = false;
+        } else {
+            this.auth.webUser.settings[key][settingKey] = value;
+        }
         this.auth.updateSettings();
     }
 
     getUIMode(key: string, settingKey: string): string {
-        return this.auth.webUser?.settings?.[key]?.[settingKey] || '';
+        const val = this.auth.webUser?.settings?.[key]?.[settingKey];
+        if (val !== undefined && val !== null) {
+            return String(val);
+        }
+        if (settingKey === 'item_mode') return 'subitem';
+        if (settingKey === 'viewMode') return 'voucher';
+        if (settingKey === 'samePageEntryForm') return 'false';
+        return '';
     }
 
     private ensureKey(key: string) {

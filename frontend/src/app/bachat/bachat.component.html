@@ -93,13 +93,13 @@
                         <th>MM</th>
                         <th>Category</th>
                         <th>Item</th>
-                        <th>Used</th>
+                        <th *ngIf="settings?.used !== false">Used</th>
                         <th *ngIf="settings.new">New</th>
                         <th *ngIf="settings.old">Old</th>
                         <th *ngIf="settings.repairing">IN Repairing</th>
                         <th *ngIf="settings.defective">Defective</th>
                         <th *ngIf="settings.scrap">Scrap</th>
-                        <th>Stock</th>
+                        <th *ngIf="settings?.stock !== false">Stock</th>
                         <th>Difference</th>
                         <th>Jawak</th>
                      </tr>
@@ -142,7 +142,7 @@
                               <span>{{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}</span> <br />
                               <small class="text-muted">{{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}</small>
                            </td>
-                           <td>
+                           <td *ngIf="settings?.used !== false">
                               {{data.Used ? data.Used + " " + data.unit_short : "-"}}
                            </td>
                            <td *ngIf="settings.new">
@@ -170,7 +170,7 @@
                                  {{data.Scrap ? data.Scrap + " " + data.unit_short : "-"}}
                               </span>
                            </td>
-                           <td>
+                           <td *ngIf="settings?.stock !== false">
                               <span class="px-1" [ngClass]="{'error': data.Stock < 0, 'fw-bold':data.Stock > 0}">
                                  {{data.Stock ? data.Stock + " " + data.unit_short : "-"}}
                               </span>

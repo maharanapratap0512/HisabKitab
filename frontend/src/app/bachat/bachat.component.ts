@@ -58,10 +58,14 @@ export class BachatComponent implements OnInit {
     private excelExportService: ExcelExportService,
     private domSanitizer: DomSanitizer
   ) {
-    this.settings = this.auth.webUser.settings.bachat;
+    this.settings = this.auth.webUser?.settings?.bachat || {};
   }
 
   ngOnInit(): void {
+    this.settings = this.auth.webUser?.settings?.bachat || {};
+    this.auth.settingsUpdated$?.subscribe((newSettings: any) => {
+      this.settings = newSettings?.bachat || this.auth.webUser?.settings?.bachat || {};
+    });
     this.spinner.show();
     if (this.auth.webUser?.settings?.defaultMM) {
       this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];

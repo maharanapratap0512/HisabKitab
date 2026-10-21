@@ -38,6 +38,10 @@ export class DataViewComponent implements OnInit {
   delType: any = null;
   delID: any = null;
   dictTypes: any = null;
+  states: any[] = [];
+  countries: any[] = [];
+  filterStateIds: any[] = [];
+  filterCountryIds: any[] = [];
 
 
   constructor(private fb: FormBuilder,
@@ -62,14 +66,28 @@ export class DataViewComponent implements OnInit {
         this.configureType();
       }
     });
+
+    this.auth.settingsUpdated$.subscribe(() => {
+      this.configureType();
+    });
+
+    this.gs.observeList().subscribe((lists: any) => {
+      if (lists) {
+        this.states = lists.state ? [...lists.state] : [];
+        this.countries = lists.country ? [...lists.country] : [];
+        if (this.Type === 'district') {
+          this.enrichFilterListsFromRecords();
+        }
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("changes", changes);
-    if (changes.getData.currentValue) {
+    if (changes.getData?.currentValue) {
       this.records = changes.getData.currentValue;
     }
-    if (changes.Type.currentValue) {
+    if (changes.Type?.currentValue) {
       this.Type = changes.Type.currentValue;
       this.configureType();
     }
@@ -79,29 +97,44 @@ export class DataViewComponent implements OnInit {
 
   configureType() {
     this.settings = null;
+    this.filterStateIds = [];
+    this.filterCountryIds = [];
     let tableName = this.Type;
 
     switch (this.Type) {
-      case 'mm': this.settings = this.auth.webUser.settings.mm;
+      case 'mm': this.settings = this.auth.webUser?.settings?.mm;
         this.apiName = 'MM';
         break;
       case 'country':
+        this.settings = this.auth.webUser?.settings?.country;
         this.apiName = 'COUNTRY';
         break;
       case 'zone':
+        this.settings = this.auth.webUser?.settings?.zone;
         this.apiName = 'ZONE';
         break;
       case 'district':
+        this.settings = this.auth.webUser?.settings?.district;
         this.apiName = 'DISTRICT';
         break;
       case 'state':
+        this.settings = this.auth.webUser?.settings?.state;
         this.apiName = 'STATE';
         break;
-      case 'category': this.settings = this.auth.webUser.settings.category;
+      case 'city':
+        this.settings = this.auth.webUser?.settings?.city;
+        this.apiName = 'CITY';
+        break;
+      case 'category': this.settings = this.auth.webUser?.settings?.category;
         this.apiName = 'CATEGORY';
         break;
       case 'unit':
+        this.settings = this.auth.webUser?.settings?.unit;
         this.apiName = 'UNIT';
+        break;
+      case 'point':
+        this.settings = this.auth.webUser?.settings?.point;
+        this.apiName = 'POINT';
         break;
       case 'gender':
       case 'mm_type':
@@ -112,15 +145,15 @@ export class DataViewComponent implements OnInit {
       case 'usage_list':
       case 'jawak_type':
       case 'condition':
-      case 'prastav_type': this.settings = this.auth.webUser.settings.support_list;
+      case 'prastav_type': this.settings = this.auth.webUser?.settings?.support_list;
         this.apiName = 'SUPPORTLIST';
         this.importType = 'support_list';
         tableName = 'support_list';
         break;
-      case 'subitem_list': this.settings = this.auth.webUser.settings.item;
+      case 'subitem_list': this.settings = this.auth.webUser?.settings?.subitem_list || this.auth.webUser?.settings?.item;
         this.apiName = 'SUBITEMLIST';
         break;
-      case 'department': this.settings = this.auth.webUser.settings.department;
+      case 'department': this.settings = this.auth.webUser?.settings?.department;
         this.apiName = 'DEPARTMENT';
         break;
       case 'jawak':
@@ -166,6 +199,12 @@ export class DataViewComponent implements OnInit {
             this.records = this.recordsAll;
             // console.log("hi", new Set(this.recordsAll.map((item: { type: any; }) => item.type)));
             this.dictTypes = [...new Set(this.recordsAll.map((item: { type: any; }) => item.type))];
+            if (this.Type === 'district') {
+              this.enrichFilterListsFromRecords();
+              if (this.filterStateIds?.length || this.filterCountryIds?.length) {
+                this.applyCustomFilters();
+              }
+            }
           } else {
             this.toastr.error(data?.message || 'Failed to load data');
           }
@@ -217,6 +256,9 @@ export class DataViewComponent implements OnInit {
 
   editResponse(ev: any) {
     if (ev._id) {
+      if (this.Type === 'district' && ev.state_id) {
+        this.enrichRecordWithLocation(ev);
+      }
       if (this.isEdit) {
         for (let i in this.records) {
           if (this.records[i]._id == ev._id) {
@@ -235,6 +277,9 @@ export class DataViewComponent implements OnInit {
         if (this.recordsAll && this.recordsAll !== this.records) {
           this.recordsAll.unshift(ev);
         }
+      }
+      if (this.Type === 'district' && (this.filterStateIds?.length || this.filterCountryIds?.length)) {
+        this.applyCustomFilters();
       }
     }
     this.closeModal();
@@ -383,6 +428,146 @@ export class DataViewComponent implements OnInit {
         });
       }
     });
+  }
+
+  // --- District Custom Filter Logic (State & Country) ---
+
+  get filteredStates(): any[] {
+    if (!this.filterCountryIds || this.filterCountryIds.length === 0) {
+      return this.states;
+    }
+    const countryIds = this.filterCountryIds.map((id: any) => String(id));
+    return (this.states || []).filter((st: any) => countryIds.includes(String(st.country_id)));
+  }
+
+  onCountryFilterChange() {
+    if (this.filterCountryIds?.length && this.filterStateIds?.length) {
+      const validStateIds = new Set(this.filteredStates.map((s: any) => String(s._id)));
+      this.filterStateIds = this.filterStateIds.filter((id: any) => validStateIds.has(String(id)));
+    }
+    this.applyCustomFilters();
+  }
+
+  applyCustomFilters() {
+    if (!this.recordsAll) return;
+    let filtered = [...this.recordsAll];
+
+    if (this.filterCountryIds && this.filterCountryIds.length > 0) {
+      const countryIds = this.filterCountryIds.map((id: any) => String(id));
+      filtered = filtered.filter((r: any) => {
+        if (r.country_id != null) {
+          return countryIds.includes(String(r.country_id));
+        }
+        const st = this.states.find((s: any) => String(s._id) === String(r.state_id));
+        return st && countryIds.includes(String(st.country_id));
+      });
+    }
+
+    if (this.filterStateIds && this.filterStateIds.length > 0) {
+      const stateIds = this.filterStateIds.map((id: any) => String(id));
+      filtered = filtered.filter((r: any) => stateIds.includes(String(r.state_id)));
+    }
+
+    this.records = filtered;
+    this.selectionService.clear('data-view-' + this.Type);
+  }
+
+  clearStateFilter() {
+    this.filterStateIds = [];
+    this.applyCustomFilters();
+  }
+
+  clearCountryFilter() {
+    this.filterCountryIds = [];
+    this.applyCustomFilters();
+  }
+
+  clearAllCustomFilters() {
+    this.filterStateIds = [];
+    this.filterCountryIds = [];
+    this.applyCustomFilters();
+  }
+
+  getSelectedCountryNames(): string[] {
+    if (!this.filterCountryIds?.length) return [];
+    return this.filterCountryIds.map((id: any) => {
+      const c = this.countries.find((item: any) => String(item._id) === String(id));
+      return c ? (c.country_hin ? `${c.country_hin} : ${c.country_eng}` : c.country_eng) : String(id);
+    });
+  }
+
+  getSelectedStateNames(): string[] {
+    if (!this.filterStateIds?.length) return [];
+    return this.filterStateIds.map((id: any) => {
+      const s = this.states.find((item: any) => String(item._id) === String(id));
+      return s ? (s.state_hin ? `${s.state_hin} : ${s.state_eng}` : s.state_eng) : String(id);
+    });
+  }
+
+  removeSelectedCountry(index: number) {
+    this.filterCountryIds.splice(index, 1);
+    this.onCountryFilterChange();
+  }
+
+  removeSelectedState(index: number) {
+    this.filterStateIds.splice(index, 1);
+    this.applyCustomFilters();
+  }
+
+  enrichFilterListsFromRecords() {
+    if (this.Type !== 'district' || !Array.isArray(this.recordsAll)) return;
+
+    if (!this.states || this.states.length === 0) {
+      const stateMap = new Map();
+      for (const r of this.recordsAll) {
+        if (r.state_id && !stateMap.has(r.state_id)) {
+          stateMap.set(r.state_id, {
+            _id: r.state_id,
+            state_hin: r.state_hin,
+            state_eng: r.state_eng,
+            country_id: r.country_id
+          });
+        }
+      }
+      this.states = Array.from(stateMap.values());
+    } else {
+      for (const st of this.states) {
+        if (!st.country_id) {
+          const match = this.recordsAll.find((r: any) => String(r.state_id) === String(st._id) && r.country_id);
+          if (match) {
+            st.country_id = match.country_id;
+          }
+        }
+      }
+    }
+
+    if (!this.countries || this.countries.length === 0) {
+      const countryMap = new Map();
+      for (const r of this.recordsAll) {
+        if (r.country_id && !countryMap.has(r.country_id)) {
+          countryMap.set(r.country_id, {
+            _id: r.country_id,
+            country_hin: r.country_hin,
+            country_eng: r.country_eng
+          });
+        }
+      }
+      this.countries = Array.from(countryMap.values());
+    }
+  }
+
+  enrichRecordWithLocation(rec: any) {
+    const matchedState = this.states.find((s: any) => String(s._id) === String(rec.state_id));
+    if (matchedState) {
+      rec.state_hin = rec.state_hin || matchedState.state_hin;
+      rec.state_eng = rec.state_eng || matchedState.state_eng;
+      rec.country_id = rec.country_id || matchedState.country_id;
+      const matchedCountry = this.countries.find((c: any) => String(c._id) === String(rec.country_id));
+      if (matchedCountry) {
+        rec.country_hin = rec.country_hin || matchedCountry.country_hin;
+        rec.country_eng = rec.country_eng || matchedCountry.country_eng;
+      }
+    }
   }
 
 }

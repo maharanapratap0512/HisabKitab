@@ -50,7 +50,7 @@
         </ul>
       </app-popover-filter>
     </div>
-    <button id="tour-add-prastav-btn" class="btn btn-primary px-3 shadow-sm border-0" (click)="openEntryModal()">
+    <button *ngIf="settings?.prastav?.add !== false" id="tour-add-prastav-btn" class="btn btn-primary px-3 shadow-sm border-0" (click)="openEntryModal()">
       <i class="uil uil-plus me-1 font-size-16"></i> Prastav
     </button>
 
@@ -127,7 +127,7 @@
     <div class="font-size-14 fw-bold text-dark d-flex align-items-center">
       Total Count : <span class="text-primary ms-1">{{total_count}}</span>
       <span class="badge year-box cursor-pointer badge-outline-danger ms-3"
-        *ngIf="selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' : 'prastav-individual').length > 0"
+        *ngIf="settings?.prastav?.delete !== false && selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' : 'prastav-individual').length > 0"
         (click)="deleteMultiple()" title="Click to perform delete.">Delete
         ({{selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' :
         'prastav-individual').length}})</span>
@@ -284,11 +284,11 @@
                 <td class="py-2 fw-bold opacity-50">{{ (page - 1) * itemsPerPage + vIdx + 1 }}</td>
                 <td class="py-2" [id]="vIdx === 0 ? 'tour-row-manage' : null" (click)="$event.stopPropagation()">
                   <div class="d-flex justify-content-center gap-2">
-                    <i class="uil uil-pen text-primary opacity-60 hover-opacity-100 cursor-pointer font-size-16"
+                    <i *ngIf="settings?.prastav?.edit !== false" class="uil uil-pen text-primary opacity-60 hover-opacity-100 cursor-pointer font-size-16"
                       (click)="editVoucher(v)"></i>
                     <i class="uil uil-truck text-success opacity-60 hover-opacity-100 cursor-pointer font-size-16"
                       title="Jawak for all items" (click)="openAllJawakEdit(v)"></i>
-                    <i class="uil uil-trash text-danger opacity-60 hover-opacity-100 cursor-pointer font-size-16"
+                    <i *ngIf="settings?.prastav?.delete !== false" class="uil uil-trash text-danger opacity-60 hover-opacity-100 cursor-pointer font-size-16"
                       (click)="deleteVoucher(v)"></i>
                   </div>
                 </td>
@@ -371,10 +371,16 @@
                         <th style="width: 35px;" class="ps-2">Sr</th>
                         <th class="text-nowrap" style="width: 70px;">Act</th>
                         <th class="text-nowrap" style="min-width: 250px;">Item-Subitem</th>
+<<<<<<< HEAD
                         <th class="text-nowrap" style="width: 75px;">Bachat</th>
                         <th class="text-nowrap" style="width: 90px;">Qty</th>
                         <th class="text-nowrap" style="width: 80px;">Rate</th>
                         <th class="text-nowrap" style="width: 100px;">Amount</th>
+=======
+                        <th style="width: 90px;" class="text-nowrap">Qty</th>
+                        <th *ngIf="settings?.prastav?.rate !== false" class="text-nowrap" style="width: 80px;">Rate</th>
+                        <th *ngIf="settings?.prastav?.amount !== false" class="text-nowrap" style="width: 100px;">Amount</th>
+>>>>>>> 8184b1e9e4c173978d6dae8e8c6e3e01ff11f435
                         <th class="text-nowrap" style="width: 85px;">Jwk Date</th>
                         <th class="text-nowrap" style="min-width: 120px;">कहाँ से भेजा</th>
                         <th class="text-nowrap" style="min-width: 120px;">किसके द्वारा</th>
@@ -408,7 +414,7 @@
                               <div class="d-flex justify-content-center gap-2 align-items-center">
                                 <i class="uil uil-truck text-info opacity-40 hover-opacity-100 cursor-pointer font-size-16"
                                   title="Edit Deliveries (Jawak Focus)" (click)="openJawakEdit(v, vr.sr - 1)"></i>
-                                <i *ngIf="v.items?.length > 1"
+                                <i *ngIf="v.items?.length > 1 && settings?.prastav?.delete !== false"
                                   class="uil uil-trash text-danger opacity-40 hover-opacity-100 cursor-pointer font-size-13"
                                   title="Delete item" (click)="delete(vr.item._id)"></i>
                               </div>
@@ -432,10 +438,10 @@
                               {{vr.item.qty}} <span
                                 class="font-size-9 fw-normal opacity-50">{{vr.item.unit?.unit_short}}</span>
                             </td>
-                            <td [attr.rowspan]="vr.iRowSpan" class="py-0 border-end text-muted">₹{{vr.item.rate ||
+                            <td *ngIf="settings?.prastav?.rate !== false" [attr.rowspan]="vr.iRowSpan" class="py-0 border-end text-muted">₹{{vr.item.rate ||
                               '-'}}
                             </td>
-                            <td [attr.rowspan]="vr.iRowSpan" class="text-end pe-3 py-0 fw-bold border-end text-theme">
+                            <td *ngIf="settings?.prastav?.amount !== false" [attr.rowspan]="vr.iRowSpan" class="text-end pe-3 py-0 fw-bold border-end text-theme">
                               ₹{{vr.item.amount ||
                               '-'}}</td>
                           </ng-container>
@@ -590,8 +596,8 @@
               </th>
               <th style="width: 80px;" class="text-center">Bachat</th>
               <th style="width: 80px;" class="text-center">Qty</th>
-              <th style="width: 90px;" class="text-center">Rate</th>
-              <th style="width: 100px;" class="text-end pe-3">Amount</th>
+              <th *ngIf="settings?.prastav?.rate !== false" style="width: 90px;" class="text-center">Rate</th>
+              <th *ngIf="settings?.prastav?.amount !== false" style="width: 100px;" class="text-end pe-3">Amount</th>
               <th style="min-width: 200px;" class="text-start ps-3">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>Note</span>
@@ -672,7 +678,7 @@
                   <div class="d-flex justify-content-center gap-3 align-items-center opacity-60 hover-opacity-100">
                     <i class="uil uil-truck text-info cursor-pointer font-size-16" title="Edit Deliveries (Jawak Focus)"
                       (click)="openJawakEdit(row.voucher, row.sr - 1)"></i>
-                    <i *ngIf="row.voucher.items?.length > 1"
+                    <i *ngIf="row.voucher.items?.length > 1 && settings?.prastav?.delete !== false"
                       class="uil uil-trash-alt text-danger cursor-pointer font-size-14" title="Delete item"
                       (click)="delete(row.item._id)"></i>
                   </div>
@@ -722,9 +728,9 @@
                 <td class="text-center fw-bold text-theme font-size-13 text-nowrap">
                   {{row.item.qty}} <span class="font-size-11 fw-normal opacity-50">{{row.item.unit?.unit_short}}</span>
                 </td>
-                <td class="text-center text-muted text-nowrap">
+                <td *ngIf="settings?.prastav?.rate !== false" class="text-center text-muted text-nowrap">
                   ₹{{row.item.rate || '-'}}</td>
-                <td class="text-end fw-bold pe-3 text-dark font-size-13 text-nowrap">₹{{row.item.amount || '-'}}
+                <td *ngIf="settings?.prastav?.amount !== false" class="text-end fw-bold pe-3 text-dark font-size-13 text-nowrap">₹{{row.item.amount || '-'}}
                 </td>
                 <td class="px-3 font-size-12 text-wrap" style="max-width: 220px;">
                   {{row.voucher.note_details || '-'}}

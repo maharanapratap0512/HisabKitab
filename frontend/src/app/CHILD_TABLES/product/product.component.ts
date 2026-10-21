@@ -47,10 +47,14 @@ export class ProductComponent implements OnInit {
     public auth: AuthService,
     private excelExportService: ExcelExportService
   ) {
-    this.settings = this.auth.webUser.settings.product;
+    this.settings = this.auth.webUser?.settings?.product || {};
   }
 
   ngOnInit(): void {
+    this.settings = this.auth.webUser?.settings?.product || {};
+    this.auth.settingsUpdated$?.subscribe((newSettings: any) => {
+      this.settings = newSettings?.product || this.auth.webUser?.settings?.product || {};
+    });
     this.spinner.show();
     this.getFilteredData();
     this.baseurl = this.api.getUrl('BASE');

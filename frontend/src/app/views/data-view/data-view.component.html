@@ -1,7 +1,7 @@
 <div class="row" id="dataViewComponent">
     <div class="card-body">
         <div class="row align-items-center pb-2 border-bottom mb-2">
-            <div class="col-2" *ngIf="Type != 'dict'">
+            <div class="col-2" *ngIf="Type != 'dict' && (!settings || settings.add !== false)">
                 <button class="btn btn-primary w-100" (click)="add()">
                     <i class="dripicons-plus h4 icon-mx-2"> </i>Add {{Type}}
                 </button>
@@ -29,7 +29,7 @@
                     <i class="uil uil-sliders-v"></i> Auto Assign Zones
                 </button>
                 <button type="button" class="btn btn-danger mx-2" (click)="deleteSelected()"
-                    *ngIf="selectionService.hasSelection('data-view-' + Type)" style="font-weight: 700 !important;">
+                    *ngIf="(!settings || settings.delete !== false) && selectionService.hasSelection('data-view-' + Type)" style="font-weight: 700 !important;">
                     <i class="uil-trash"></i> Delete Selected
                 </button>
             </div>
@@ -38,10 +38,38 @@
                 <!-- <button type="button" style="font-weight: 700 !important;" class="btn btn-primary mx-3"
                          (click)="mmtype()">Set MM Type = MM</button> -->
                 <button type="button" style="font-weight: 700 !important;" class="btn btn-light text-nowrap">Total Count :
-                    {{records.length}} </button>
+                    {{records.length}}<span *ngIf="recordsAll && recordsAll.length !== records.length" class="text-muted small"> / {{recordsAll.length}}</span> </button>
             </div>
         </div>
-        <div class="row p-2" style="overflow-y: auto; max-height: 30vw;">
+
+        <!-- Active Filter Pills (District State & Country) -->
+        <div class="row px-2 pb-2" *ngIf="Type === 'district' && ((filterCountryIds?.length || 0) > 0 || (filterStateIds?.length || 0) > 0)">
+            <div class="col-12 d-flex align-items-center flex-wrap gap-1">
+                <span class="text-muted small me-1"><i class="uil uil-filter"></i> Active Filters:</span>
+
+                <!-- Country Filter Pills -->
+                <span *ngFor="let name of getSelectedCountryNames(); let idx = index"
+                    class="badge bg-soft-primary text-primary border border-primary d-inline-flex align-items-center py-1 px-2 font-12">
+                    <span class="me-1">Country: {{name}}</span>
+                    <i class="uil uil-times cursor-pointer" (click)="removeSelectedCountry(idx)"></i>
+                </span>
+
+                <!-- State Filter Pills -->
+                <span *ngFor="let name of getSelectedStateNames(); let idx = index"
+                    class="badge bg-soft-success text-success border border-success d-inline-flex align-items-center py-1 px-2 font-12">
+                    <span class="me-1">State: {{name}}</span>
+                    <i class="uil uil-times cursor-pointer" (click)="removeSelectedState(idx)"></i>
+                </span>
+
+                <!-- Clear All Button -->
+                <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-2 font-12 text-decoration-none"
+                    (click)="clearAllCustomFilters()">
+                    <i class="uil uil-trash-alt me-1"></i>Clear All
+                </button>
+            </div>
+        </div>
+
+        <div class="row p-2" style="overflow-y: auto; max-height: 30vw; min-height: 350px;">
             <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive" style="width:98%;"
                 appTableSmartCheckbox="data-view-{{Type}}" [selectionData]="records">
                 <thead>
@@ -49,7 +77,49 @@
                         <th style="width: 60px;">No.</th>
                         <th style="width: 150px;">Manage</th>
                         <th *ngFor="let row of fields">
-                            {{row.title}}
+                            <ng-container *ngIf="Type === 'district' && row.title === 'State'">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>{{row.title}}</span>
+                                    <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="auto"
+                                        [isOpen]="(filterStateIds?.length || 0) > 0"
+                                        (clear)="clearStateFilter()" triggerOn="click">
+                                        <div style="min-width: 250px;">
+                                            <div class="fw-bold small mb-1">Select State</div>
+                                            <ng-select class="custom-sm" [multiple]="true" placeholder="Select State"
+                                                [items]="filteredStates" bindLabel="state_hin" bindValue="_id" [virtualScroll]="true"
+                                                [(ngModel)]="filterStateIds" (change)="applyCustomFilters()">
+                                                <ng-template ng-option-tmp let-item="item">
+                                                    {{item.state_hin}} : {{item.state_eng}}
+                                                </ng-template>
+                                            </ng-select>
+                                        </div>
+                                    </app-popover-filter>
+                                </div>
+                            </ng-container>
+
+                            <ng-container *ngIf="Type === 'district' && row.title === 'Country'">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>{{row.title}}</span>
+                                    <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="auto"
+                                        [isOpen]="(filterCountryIds?.length || 0) > 0"
+                                        (clear)="clearCountryFilter()" triggerOn="click">
+                                        <div style="min-width: 250px;">
+                                            <div class="fw-bold small mb-1">Select Country</div>
+                                            <ng-select class="custom-sm" [multiple]="true" placeholder="Select Country"
+                                                [items]="countries" bindLabel="country_hin" bindValue="_id" [virtualScroll]="true"
+                                                [(ngModel)]="filterCountryIds" (change)="onCountryFilterChange()">
+                                                <ng-template ng-option-tmp let-item="item">
+                                                    {{item.country_hin}} : {{item.country_eng}}
+                                                </ng-template>
+                                            </ng-select>
+                                        </div>
+                                    </app-popover-filter>
+                                </div>
+                            </ng-container>
+
+                            <ng-container *ngIf="Type !== 'district' || (row.title !== 'State' && row.title !== 'Country')">
+                                {{row.title}}
+                            </ng-container>
                         </th>
                     </tr>
                 </thead>
@@ -70,14 +140,14 @@
                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                         class="uil-trash"></i></button>
                             </ng-container> -->
-                            <button *ngIf="!data.lock && (!settings || (settings && settings.edit)) && Type!='dict'"
+                            <button *ngIf="!data.lock && (!settings || settings.edit !== false) && Type!='dict'"
                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
-                            <button *ngIf="!data.lock && (!settings || (settings && settings.edit))"
+                            <button *ngIf="!data.lock && (!settings || settings.delete !== false)"
                                 class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                     class="uil-trash"></i></button>
                             <span
-                                *ngIf="(data.lock || (settings && !settings.edit && !settings.delete) && Type!='jawak')"
+                                *ngIf="(data.lock || (settings && settings.edit === false && settings.delete === false) && Type!='jawak')"
                                 data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                 <i class="uil-shield-check"></i>

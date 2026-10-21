@@ -15,7 +15,7 @@
                <div class="card-body" style="overflow: auto;">
                   <div class="row justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
+                        <button class="btn btn-primary w-100" *ngIf="settings?.add !== false" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Product'">
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add Product
                         </button>
@@ -106,10 +106,10 @@
                            <tr>
                               <td>{{i+1}}</td>
                               <td>
-                                 <div class="d-flex justify-content-between mb-1">
-                                    <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
+                                 <div class="d-flex justify-content-between mb-1" *ngIf="settings?.edit !== false || settings?.delete !== false">
+                                    <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)" *ngIf="settings?.edit !== false"><i
                                           class="uil uil-pen"></i></button>
-                                    <button class="btn btn-sm btn-danger ml-1" type="button"
+                                    <button class="btn btn-sm btn-danger ml-1" type="button" *ngIf="settings?.delete !== false"
                                        (click)="delete(i,data.voucher_no)"><i class="uil-trash"></i></button>
                                  </div>
                                  <div class="d-flex justify-content-between mb-1">

@@ -131,7 +131,7 @@
                <div class="row g-2 align-items-center">
                   <div class="col-lg-2 col-md-3">
                      <button class="btn btn-primary w-100" (click)="openModal('Add Vehicle', 'full')"
-                        *ngIf="settings?.vehicle?.add">
+                        *ngIf="settings?.vehicle?.add !== false">
                         <i class="uil uil-plus me-1"></i>Add Vehicle
                      </button>
                   </div>
@@ -250,10 +250,10 @@
                            <thead>
                               <tr>
                                  <th style="width: 50px;" class="text-center">#</th>
-                                 <th style="width: 110px;" class="text-center">Manage</th>
+                                 <th style="width: 110px;" class="text-center" *ngIf="settings?.vehicle?.edit !== false || settings?.vehicle?.delete !== false">Manage</th>
                                  <th style="width: 170px;">वाहन विवरण (Vehicle Info)</th>
                                  <th style="width: 160px;">स्थान / MM</th>
-                                 <th style="width: 140px;">स्वामी / Owner</th>
+                                 <th style="width: 140px;" *ngIf="settings?.vehicle?.owner_name !== false || settings?.vehicle?.nominee !== false || settings?.vehicle?.aawak_type !== false">स्वामी / Owner</th>
                                  <th style="width: 180px;"><span class="badge bg-soft-primary text-primary me-1">RC</span>RC (पंजीकरण)</th>
                                  <th style="width: 220px;"><span class="badge bg-soft-success text-success me-1">INS</span>बीमा (Insurance)</th>
                                  <th style="width: 170px;"><span class="badge bg-soft-warning text-warning me-1">PUC</span>PUC (प्रदूषण)</th>
@@ -267,18 +267,21 @@
                                  </td>
 
                                  <!-- Action Buttons (Manage Cell: Click renew icon opens ALL 3 cards) -->
-                                 <td class="text-center">
+                                 <td class="text-center" *ngIf="settings?.vehicle?.edit !== false || settings?.vehicle?.delete !== false">
                                     <div class="d-flex align-items-center justify-content-center">
                                        <i class="uil uil-pen i-outline-primary cursor-pointer me-1" 
+                                          *ngIf="settings?.vehicle?.edit !== false"
                                           (click)="edit(data, 'full')" 
                                           title="Edit Vehicle Details"></i>
                                        <i class="uil uil-sync i-outline-info cursor-pointer me-1" 
+                                          *ngIf="settings?.vehicle?.edit !== false"
                                           (click)="openQuickRenew(data, 'all')" 
                                           title="Renew All Documents (3 Cards)"></i>
                                        <i class="uil uil-history i-outline-warning cursor-pointer me-1" 
                                           (click)="openDocHistory(data)" 
                                           title="View Renewal History"></i>
                                        <i class="uil uil-trash i-outline-danger cursor-pointer" 
+                                          *ngIf="settings?.vehicle?.delete !== false"
                                           (click)="delete(data)" 
                                           title="Delete Vehicle"></i>
                                     </div>
@@ -288,14 +291,14 @@
                                  <td>
                                     <div>
                                        <span class="license-plate font-size-13 mb-1">{{data.gadi_num}}</span>
-                                       <div class="font-size-12 fw-semibold text-truncate" style="max-width: 160px;" title="{{data.gadi_name}}">
+                                       <div class="font-size-12 fw-semibold text-truncate" style="max-width: 160px;" title="{{data.gadi_name}}" *ngIf="settings?.vehicle?.gadi_name !== false">
                                           {{data.gadi_name || 'वाहन नाम उपलब्ध नहीं'}}
                                        </div>
                                        <div class="d-flex align-items-center gap-1 font-size-11 text-muted">
-                                          <span *ngIf="data.vehicle_type">{{data.vehicle_type}}</span>
-                                          <span *ngIf="data.vehicle_type && data.fuel_type">•</span>
-                                          <span class="badge bg-soft-info text-info py-0 px-1" *ngIf="data.fuel_type">{{data.fuel_type}}</span>
-                                          <span *ngIf="data.seating_capacity" class="text-muted">({{data.seating_capacity}} Seat)</span>
+                                          <span *ngIf="settings?.vehicle?.vehicle_type !== false && data.vehicle_type">{{data.vehicle_type}}</span>
+                                          <span *ngIf="settings?.vehicle?.vehicle_type !== false && data.vehicle_type && settings?.vehicle?.fuel_type !== false && data.fuel_type">•</span>
+                                          <span class="badge bg-soft-info text-info py-0 px-1" *ngIf="settings?.vehicle?.fuel_type !== false && data.fuel_type">{{data.fuel_type}}</span>
+                                          <span *ngIf="settings?.vehicle?.seating_capacity !== false && data.seating_capacity" class="text-muted">({{data.seating_capacity}} Seat)</span>
                                        </div>
                                     </div>
                                  </td>
@@ -310,10 +313,10 @@
                                  </td>
 
                                  <!-- Owner & Aawak -->
-                                 <td>
-                                    <div class="font-size-13">{{data.owner_name || '-'}}</div>
-                                    <div class="font-size-11 text-muted" *ngIf="data.nominee">Nominee: {{data.nominee}}</div>
-                                    <span class="badge bg-soft-secondary text-secondary py-0 px-1 font-size-10" *ngIf="data.aawak_type">
+                                 <td *ngIf="settings?.vehicle?.owner_name !== false || settings?.vehicle?.nominee !== false || settings?.vehicle?.aawak_type !== false">
+                                    <div class="font-size-13" *ngIf="settings?.vehicle?.owner_name !== false">{{data.owner_name || '-'}}</div>
+                                    <div class="font-size-11 text-muted" *ngIf="settings?.vehicle?.nominee !== false && data.nominee">Nominee: {{data.nominee}}</div>
+                                    <span class="badge bg-soft-secondary text-secondary py-0 px-1 font-size-10" *ngIf="settings?.vehicle?.aawak_type !== false && data.aawak_type">
                                        {{data.aawak_type}}
                                     </span>
                                  </td>
@@ -329,7 +332,7 @@
                                        <div class="font-size-11 text-muted">
                                           Exp: <span class="fw-semibold">{{(data.rc_exp_date | date:'dd-MM-yyyy') || '-'}}</span>
                                        </div>
-                                       <div class="font-size-11 text-muted" *ngIf="data.rc_amount">
+                                       <div class="font-size-11 text-muted" *ngIf="settings?.vehicle?.rc_amount !== false && data.rc_amount">
                                           Amt: ₹{{data.rc_amount | number:'1.2-2'}}
                                        </div>
                                     </div>
@@ -346,10 +349,10 @@
                                        <div class="font-size-11 text-muted">
                                           Exp: <span class="fw-semibold">{{(data.insurance_exp_date | date:'dd-MM-yyyy') || '-'}}</span>
                                        </div>
-                                       <div class="font-size-11 text-muted" *ngIf="data.insurance_company || data.insurance_amount">
-                                          <span *ngIf="data.insurance_company" class="fw-medium">{{data.insurance_company}}</span>
-                                          <span *ngIf="data.insurance_company && data.insurance_amount"> - </span>
-                                          <span *ngIf="data.insurance_amount">₹{{data.insurance_amount | number:'1.2-2'}}</span>
+                                       <div class="font-size-11 text-muted" *ngIf="(settings?.vehicle?.insurance_company !== false && data.insurance_company) || (settings?.vehicle?.insurance_amount !== false && data.insurance_amount)">
+                                          <span *ngIf="settings?.vehicle?.insurance_company !== false && data.insurance_company" class="fw-medium">{{data.insurance_company}}</span>
+                                          <span *ngIf="settings?.vehicle?.insurance_company !== false && data.insurance_company && settings?.vehicle?.insurance_amount !== false && data.insurance_amount"> - </span>
+                                          <span *ngIf="settings?.vehicle?.insurance_amount !== false && data.insurance_amount">₹{{data.insurance_amount | number:'1.2-2'}}</span>
                                        </div>
                                     </div>
                                  </td>
@@ -365,7 +368,7 @@
                                        <div class="font-size-11 text-muted">
                                           Exp: <span class="fw-semibold">{{(data.puc_exp_date | date:'dd-MM-yyyy') || '-'}}</span>
                                        </div>
-                                       <div class="font-size-11 text-muted" *ngIf="data.puc_amount">
+                                       <div class="font-size-11 text-muted" *ngIf="settings?.vehicle?.puc_amount !== false && data.puc_amount">
                                           Amt: ₹{{data.puc_amount | number:'1.2-2'}}
                                        </div>
                                     </div>

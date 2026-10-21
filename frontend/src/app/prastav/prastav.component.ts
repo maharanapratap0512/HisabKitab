@@ -97,7 +97,10 @@ export class PrastavComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.settings = this.auth.webUser.settings;
+    this.settings = this.auth.webUser?.settings || {};
+    this.auth.settingsUpdated$?.subscribe((newSettings: any) => {
+      this.settings = newSettings || this.auth.webUser?.settings || {};
+    });
     if (this.settings.prastav) {
       this.settings.prastav.view_mode = this.settings?.prastav?.view_mode || 'voucher';
       this.settings.prastav.samePageEntryForm = this.settings?.prastav?.samePageEntryForm || false;

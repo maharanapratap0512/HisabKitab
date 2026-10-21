@@ -101,9 +101,9 @@
                                                 <th>PBK Name</th>
                                                 <th>State</th>
                                                 <th>Item Name</th>
-                                                <th>Condition</th>
-                                                <th class="text-end">Qty</th>
-                                                <th style="width: 80px;">Unit</th>
+                                                <th *ngIf="settings?.pbk_bachat?.condition_id !== false">Condition</th>
+                                                <th *ngIf="settings?.pbk_bachat?.qty !== false" class="text-end">Qty</th>
+                                                <th *ngIf="settings?.pbk_bachat?.unit_id !== false" style="width: 80px;">Unit</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -125,12 +125,12 @@
                                                         {{data.subitem_hin}}
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td *ngIf="settings?.pbk_bachat?.condition_id !== false">
                                                     <span class="badge bg-soft-info text-info">{{data.condition_hin ||
                                                         data.condition_eng}}</span>
                                                 </td>
-                                                <td class="text-end fw-bold">{{data.qty}}</td>
-                                                <td>{{data.unit_short}}</td>
+                                                <td *ngIf="settings?.pbk_bachat?.qty !== false" class="text-end fw-bold">{{data.qty}}</td>
+                                                <td *ngIf="settings?.pbk_bachat?.unit_id !== false">{{data.unit_short}}</td>
                                             </tr>
                                         </tbody>
                                     </table>
