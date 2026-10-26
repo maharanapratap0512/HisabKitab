@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ExcelImportService } from '../services/excel-import.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import * as XLSX from 'xlsx';
@@ -17,7 +17,7 @@ declare var $: any;
   templateUrl: './excel-import.component.html',
   styleUrls: ['./excel-import.component.scss']
 })
-export class ExcelImportComponent implements OnInit {
+export class ExcelImportComponent implements OnInit, OnChanges {
   @Input() importType: any;
   @Input() lockType: boolean = false;
   @Input() stepNo: any = 0;
@@ -183,16 +183,113 @@ export class ExcelImportComponent implements OnInit {
     }
 
     if (this.excelFile) {
-      this.excelImport(this.excelFile)
+      this.excelImport(this.excelFile);
     }
 
+    if (this.importedData && this.importedData.length) {
+      this.loadImportedData(this.importedData);
+    }
   }
 
-  ngOnChange(changes: SimpleChanges) {
-    console.log(changes);
-    if (changes.excelFile) {
-      this.excelImport(changes.excelFile)
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.excelFile && changes.excelFile.currentValue) {
+      this.excelImport(changes.excelFile.currentValue);
     }
+    if (changes.importedData && changes.importedData.currentValue) {
+      this.loadImportedData(changes.importedData.currentValue);
+    }
+  }
+
+  loadImportedData(data: any[]): void {
+    if (!data || !data.length) return;
+
+    if (this.importType) {
+      if (typeof this.importType === 'string') {
+        const found = this.EIService.importList.find((item: any) => item.name === this.importType);
+        if (found) {
+          this.importType = found;
+        }
+      }
+      this.importTypeChanged(this.importType);
+    }
+
+    if (!this.headerConfig || !this.headerConfig.length) return;
+
+    // Reset header found status
+    for (let j in this.headerConfig) {
+      this.headerConfig[j].found = false;
+      this.headerConfig[j].index = null;
+      this.headerConfig[j].user_col_name = null;
+    }
+
+    const sampleRow = data[0] || {};
+    const sampleKeys = Object.keys(sampleRow);
+
+    for (let j in this.headerConfig) {
+      const col = this.headerConfig[j];
+      const colName = (col.col_name || '').toLowerCase().trim();
+      const name = (col.name || '').toLowerCase().trim();
+      const altNames = (col.alt_names || []).map((a: string) => a.toLowerCase().trim());
+
+      const matchedKey = sampleKeys.find(k => {
+        const lk = k.toLowerCase().trim();
+        return lk === colName || lk === name || altNames.includes(lk);
+      });
+
+      if (matchedKey) {
+        col.found = true;
+        col.index = col.col_name;
+        col.user_col_name = col.name || matchedKey;
+      }
+    }
+
+    // Prepare excelArrObj with clean values
+    this.excelArrObj = data.map((item: any) => {
+      const row: any = {};
+      for (const col of this.headerConfig) {
+        if (col.found) {
+          let val = item[col.col_name];
+          if (val === undefined || val === '') val = item[col.name];
+          if (val === undefined || val === '') val = item[col.key];
+          if (val === undefined || val === '') {
+            if (col.alt_names) {
+              for (const alt of col.alt_names) {
+                if (item[alt] !== undefined && item[alt] !== '') {
+                  val = item[alt];
+                  break;
+                }
+              }
+            }
+          }
+          row[col.col_name] = this.gs.cleanValue(val !== undefined && val !== null ? val : '');
+        }
+      }
+      return row;
+    });
+
+    // Filter valid rows according to standard import rules
+    if (this.importType?.name == 'subitem_list') {
+      this.excelArrObj = this.excelArrObj.filter((e: any) => e.subitem_hin);
+    } else if (this.importType?.name == 'item') {
+      this.excelArrObj = this.excelArrObj.filter((e: any) => e.item_hin);
+    } else if (this.importType?.name == 'subitem') {
+      this.excelArrObj = this.excelArrObj.filter((e: any) => e.subitem_hin);
+    } else if (this.importType?.name == 'bachat') {
+      this.excelArrObj = this.excelArrObj.filter((e: any) => e.date && e.mm && e.item && e.qty != null && e.qty !== '' && e.unit);
+    } else if (this.importType?.name == 'jawak') {
+      this.excelArrObj = this.excelArrObj.filter((e: any) => e.date && e.mm && e.item && e.qty != null && e.qty !== '' && e.unit && e.jawak_type);
+    }
+
+    // Build excelArr for fallback and headerList
+    const activeHeaders = this.headerConfig.filter((h: any) => h.found);
+    const headerRow = activeHeaders.map((h: any) => h.name);
+    const dataRows = this.excelArrObj.map((r: any) => activeHeaders.map((h: any) => r[h.col_name] !== undefined ? r[h.col_name] : ''));
+    this.excelArr = [headerRow, ...dataRows];
+    this.header1 = 0;
+    this.headerList = this.getHeaderList();
+
+    // Directly advance to Step 2 (Data Verification Preview)
+    this.stepNo = 2;
   }
 
 

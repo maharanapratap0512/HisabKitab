@@ -131,6 +131,8 @@ import { DbGenerateComponent } from './department/db-generate/db-generate.compon
 import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
 import { ReportItemLedgerComponent } from './reports/report-item-ledger/report-item-ledger.component';
 import { UniversalReportComponent } from './reports/universal-report/universal-report.component';
+import { ExcelStudioUiComponent } from './modules/excel-studio/components/excel-studio-ui/excel-studio-ui.component';
+import { FormatScannerModalComponent } from './modules/excel-studio/components/format-scanner-modal/format-scanner-modal.component';
 
 
 // import { FilterPipeModule } from 'ngx-filter-pipe';
@@ -247,7 +249,9 @@ import { UniversalReportComponent } from './reports/universal-report/universal-r
     DbGenerateComponent,
     P2pFeedbackComponent,
     ReportItemLedgerComponent,
-    UniversalReportComponent
+    UniversalReportComponent,
+    ExcelStudioUiComponent,
+    FormatScannerModalComponent
   ],
 
   imports: [

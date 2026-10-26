@@ -39,11 +39,7 @@ function scanMismatches() {
             COALESCE(splits.split_count, 0) AS split_count,
             COALESCE(splits.is_split, 0) AS is_split
         FROM jawak j
-        INNER JOIN (
-            SELECT jawak_id, MIN(aawak_id) AS aawak_id 
-            FROM rel_aawak_jawak 
-            GROUP BY jawak_id
-        ) raj ON raj.jawak_id = j._id
+        INNER JOIN rel_aawak_jawak raj ON raj.jawak_id = j._id
         INNER JOIN aawak a ON a._id = raj.aawak_id
         LEFT JOIN (
             SELECT jawak_id, COUNT(*) AS split_count, MAX(IFNULL(is_split, 0)) AS is_split
@@ -63,6 +59,7 @@ function scanMismatches() {
             COALESCE(j.item_id, 0) != COALESCE(a.item_id, 0) OR
             COALESCE(j.subitem_id, 0) != COALESCE(a.subitem_id, 0) OR
             COALESCE(j.unit_id, 0) != COALESCE(a.unit_id, 0)
+        GROUP BY j._id
     `;
     return db.prepare(query).all();
 }
@@ -91,16 +88,20 @@ async function resolveMismatches(mismatches, logCallback = () => {}) {
                 continue;
             }
 
-            // Create updated Jawak payload
+            // Fetch existing split relations so Fn.updateAJ preserves them!
+            const existingSplits = db.prepare(`SELECT aawak_id, IFNULL(split_qty, qty) as split_qty FROM rel_aawak_jawak WHERE jawak_id = ?`).all(mismatch.jawak_id);
+
+            // Create updated Jawak payload preserving relations
             const updatedJawak = {
                 ...oldJawak,
                 mm_id: aawak.mm_id,
                 item_id: aawak.item_id,
                 subitem_id: aawak.subitem_id,
-                unit_id: aawak.unit_id
+                unit_id: aawak.unit_id,
+                aawak_splits: existingSplits.length > 0 ? existingSplits : [{ aawak_id: mismatch.aawak_id, split_qty: oldJawak.qty }]
             };
 
-            // Fn.updateAJ maintains stock stability and parses enzymes/usage reports
+            // Fn.updateAJ maintains stock stability, triggers rel_aawak_jawak, and handles enzymes/usage reports
             await Fn.updateAJ(updatedJawak, 'jawak', oldJawak);
             resolvedCount++;
             logCallback(`[Success] Jawak ID ${mismatch.jawak_id} resolved.`);
@@ -116,40 +117,9 @@ async function resolveMismatches(mismatches, logCallback = () => {}) {
 }
 
 /**
- * Scan for Aawak Remaining Qty mismatches
+ * Scan for Aawak Remaining Qty mismatches (100% Read-Only)
  */
 function scanRemainingQtyMismatches() {
-    // STEP 1: Align rel_aawak_jawak quantities with actual jawak quantities
-    // For single-connection jawaks (not split)
-    db.prepare(`
-        UPDATE rel_aawak_jawak 
-        SET qty = (SELECT qty FROM jawak WHERE jawak._id = rel_aawak_jawak.jawak_id),
-            split_qty = (SELECT qty FROM jawak WHERE jawak._id = rel_aawak_jawak.jawak_id)
-        WHERE jawak_id IN (
-            SELECT jawak_id FROM rel_aawak_jawak GROUP BY jawak_id HAVING COUNT(*) = 1
-        )
-        AND ABS(IFNULL(split_qty, qty) - (SELECT qty FROM jawak WHERE jawak._id = rel_aawak_jawak.jawak_id)) > 0.001
-    `).run();
-
-    // For multi-connection jawaks (split) where the sum of split_qty does not match jawak.qty
-    const splitMismatches = db.prepare(`
-        SELECT j._id as jawak_id, j.qty as jawak_qty, SUM(IFNULL(raj.split_qty, raj.qty)) as sum_qty 
-        FROM jawak j 
-        JOIN rel_aawak_jawak raj ON raj.jawak_id = j._id 
-        GROUP BY j._id 
-        HAVING COUNT(raj._id) > 1 AND ABS(j.qty - SUM(IFNULL(raj.split_qty, raj.qty))) > 0.001
-    `).all();
-
-    for (const sm of splitMismatches) {
-        const diff = sm.jawak_qty - sm.sum_qty;
-        const firstRel = db.prepare(`SELECT * FROM rel_aawak_jawak WHERE jawak_id = ? LIMIT 1`).get(sm.jawak_id);
-        if (firstRel) {
-            const newSplitQty = (firstRel.split_qty || firstRel.qty) + diff;
-            db.prepare(`UPDATE rel_aawak_jawak SET split_qty = ? WHERE _id = ?`).run(newSplitQty, firstRel._id);
-        }
-    }
-
-    // STEP 2: Scan for Aawak mismatches based on corrected rel_aawak_jawak
     const query = `
         SELECT 
             a._id AS aawak_id,
@@ -315,17 +285,28 @@ async function resolveBachatMismatches(mismatches, logCallback = () => {}) {
             db.prepare(`DELETE FROM bachat WHERE dept_id = ?`).run(deptId);
             db.prepare(`DELETE FROM bachat_new WHERE dept_id = ?`).run(deptId);
 
-            // Fetch all Aawak and Jawak entries in chronological order
-            const aawaks = db.prepare(`SELECT * FROM aawak WHERE dept_id = ? ORDER BY date ASC, _id ASC`).all(deptId);
-            const jawaks = db.prepare(`SELECT * FROM jawak WHERE dept_id = ? ORDER BY date ASC, _id ASC`).all(deptId);
+            // Fetch all Aawak and Jawak entries in unified chronological order
+            const aawaks = db.prepare(`SELECT * FROM aawak WHERE dept_id = ?`).all(deptId).map(r => ({ ...r, entry_type: 'aawak', sort_priority: 1 }));
+            const jawaks = db.prepare(`SELECT * FROM jawak WHERE dept_id = ?`).all(deptId).map(r => ({ ...r, entry_type: 'jawak', sort_priority: 2 }));
 
-            logCallback(`Processing ${aawaks.length} Aawaks and ${jawaks.length} Jawaks for Department ID ${deptId}...`);
+            const entries = [...aawaks, ...jawaks].sort((a, b) => {
+                const d1 = a.date || '';
+                const d2 = b.date || '';
+                if (d1 < d2) return -1;
+                if (d1 > d2) return 1;
+                if (a.sort_priority !== b.sort_priority) return a.sort_priority - b.sort_priority;
+                return a._id - b._id;
+            });
 
-            for (const awk of aawaks) {
-                await DB.updateBachatFromAJInsert(awk, 'aawak');
-            }
-            for (const jwk of jawaks) {
-                await DB.updateBachatFromAJInsert(jwk, 'jawak');
+            logCallback(`Processing ${entries.length} entries (${aawaks.length} Aawak, ${jawaks.length} Jawak) for Department ID ${deptId}...`);
+
+            let count = 0;
+            for (const entry of entries) {
+                await DB.updateBachatFromAJInsert(entry, entry.entry_type);
+                count++;
+                if (count % 50 === 0 || count === entries.length) {
+                    logCallback(`Department ID ${deptId}: processed ${count} / ${entries.length} entries...`);
+                }
             }
             resolvedCount += mismatches.filter(m => m.dept_id === deptId).length;
             logCallback(`[Success] Rebuilt Bachat and Bachat_New tables for Department ID ${deptId}.`);
@@ -353,30 +334,32 @@ async function rebuildAllBachat(logCallback = () => {}) {
         db.prepare(`DELETE FROM bachat_new`).run();
         logCallback(`[Notice] Cleared existing bachat and bachat_new summary tables.`);
 
-        // 2. Fetch all Aawak and Jawak entries in chronological order
-        const aawaks = db.prepare(`SELECT * FROM aawak ORDER BY date ASC, _id ASC`).all();
-        const jawaks = db.prepare(`SELECT * FROM jawak ORDER BY date ASC, _id ASC`).all();
+        // 2. Fetch all Aawak and Jawak entries in unified chronological order
+        const aawaks = db.prepare(`SELECT * FROM aawak`).all().map(r => ({ ...r, entry_type: 'aawak', sort_priority: 1 }));
+        const jawaks = db.prepare(`SELECT * FROM jawak`).all().map(r => ({ ...r, entry_type: 'jawak', sort_priority: 2 }));
 
-        logCallback(`Processing ${aawaks.length} total Aawaks and ${jawaks.length} total Jawaks across all departments...`);
+        const entries = [...aawaks, ...jawaks].sort((a, b) => {
+            const d1 = a.date || '';
+            const d2 = b.date || '';
+            if (d1 < d2) return -1;
+            if (d1 > d2) return 1;
+            if (a.sort_priority !== b.sort_priority) return a.sort_priority - b.sort_priority;
+            return a._id - b._id;
+        });
+
+        logCallback(`Processing ${entries.length} total entries (${aawaks.length} Aawak, ${jawaks.length} Jawak) across all departments...`);
 
         let count = 0;
-        for (const awk of aawaks) {
-            await DB.updateBachatFromAJInsert(awk, 'aawak');
+        for (const entry of entries) {
+            await DB.updateBachatFromAJInsert(entry, entry.entry_type);
             count++;
-            if (count % 50 === 0) {
-                logCallback(`Processed ${count} / ${aawaks.length + jawaks.length} entries...`);
-            }
-        }
-        for (const jwk of jawaks) {
-            await DB.updateBachatFromAJInsert(jwk, 'jawak');
-            count++;
-            if (count % 50 === 0) {
-                logCallback(`Processed ${count} / ${aawaks.length + jawaks.length} entries...`);
+            if (count % 50 === 0 || count === entries.length) {
+                logCallback(`Processed ${count} / ${entries.length} entries...`);
             }
         }
 
         await Fn.commit();
-        logCallback(`[Success] Successfully rebuilt Bachat & Bachat_New tables for all ${aawaks.length} Aawak and ${jawaks.length} Jawak entries.`);
+        logCallback(`[Success] Successfully rebuilt Bachat & Bachat_New tables for all ${entries.length} entries (${aawaks.length} Aawak, ${jawaks.length} Jawak).`);
         return count;
     } catch (err) {
         await Fn.rollback();

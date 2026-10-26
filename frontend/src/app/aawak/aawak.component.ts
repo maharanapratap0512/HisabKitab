@@ -1272,10 +1272,20 @@ export class AawakComponent implements OnInit, OnDestroy {
   }
 
   editJawakResponse(ev: any) {
-    if (ev._id > 0) {
+    if (ev && ev._id > 0) {
       this.isLoader = true;
-      this.aawakData[this.editIndex.i].jawak_detail.splice(this.editIndex.j, 1, ev);
-      this.aawakData[this.editIndex.i].remaining_qty = Math.round((this.aawakData[this.editIndex.i].remaining_qty - (ev.qty - this.editData.qty)) * 1000) / 1000;
+      const list = ev.updated_aawaks || (ev.updated_aawak ? [ev.updated_aawak] : []);
+      if (list.length > 0) {
+        for (const awk of list) {
+          const i = this.aawakData.findIndex((b: any) => b._id == awk._id);
+          if (i > -1) this.aawakData[i] = awk;
+          const allIdx = this.aawakAll?.findIndex((b: any) => b._id == awk._id);
+          if (allIdx > -1) this.aawakAll[allIdx] = awk;
+        }
+      } else if (this.editIndex && this.aawakData[this.editIndex.i]) {
+        this.aawakData[this.editIndex.i].jawak_detail.splice(this.editIndex.j, 1, ev);
+        this.aawakData[this.editIndex.i].remaining_qty = Math.round((this.aawakData[this.editIndex.i].remaining_qty - (ev.qty - this.editData.qty)) * 1000) / 1000;
+      }
       this.editData = null;
       this.editIndex = null;
       this.closeModal();
@@ -1466,54 +1476,17 @@ export class AawakComponent implements OnInit, OnDestroy {
   }
 
   addJawakResponse(ev: any) {
-    if (!ev) return;
-
-    if (typeof ev.aawak_splits === 'string') {
-      try { ev.aawak_splits = JSON.parse(ev.aawak_splits); } catch (e) { ev.aawak_splits = []; }
-    }
-
-    const awkId = (Array.isArray(ev.aawak_splits) && ev.aawak_splits.length > 0)
-      ? (ev.aawak_splits[0].aawak_id || ev.aawak_splits[0]._id)
-      : (this.editData ? this.editData._id : null);
-
-    const applyUpdatedRow = (updatedAwk: any) => {
-      if (!updatedAwk) return;
-      const i = this.aawakData.findIndex((b: any) => b._id == updatedAwk._id);
-      if (i > -1) {
-        this.aawakData[i] = updatedAwk;
+    if (ev) {
+      const list = ev.updated_aawaks || (ev.updated_aawak ? [ev.updated_aawak] : []);
+      for (const awk of list) {
+        const i = this.aawakData.findIndex((b: any) => b._id == awk._id);
+        if (i > -1) this.aawakData[i] = awk;
+        const allIdx = this.aawakAll?.findIndex((b: any) => b._id == awk._id);
+        if (allIdx > -1) this.aawakAll[allIdx] = awk;
       }
-      const allIdx = this.aawakAll?.findIndex((b: any) => b._id == updatedAwk._id);
-      if (allIdx > -1) {
-        this.aawakAll[allIdx] = updatedAwk;
-      }
-      this.editData = null;
-      $('#showModal').modal('hide');
-      this.showModal = '';
-    };
-
-    if (ev.updated_aawak) {
-      applyUpdatedRow(ev.updated_aawak);
-    } else if (awkId) {
-      this.http.get(this.api.getUrl('AAWAK') + 'by-id/' + awkId).subscribe((res: any) => {
-        if (res && res.success && res.result) {
-          applyUpdatedRow(res.result);
-        } else {
-          this.toastr.error(res?.message || 'Could not fetch updated Aawak record');
-          this.editData = null;
-          $('#showModal').modal('hide');
-          this.showModal = '';
-        }
-      }, (err: any) => {
-        this.toastr.error(err?.error?.message || err?.message || 'Error updating Aawak record');
-        this.editData = null;
-        $('#showModal').modal('hide');
-        this.showModal = '';
-      });
-    } else {
-      this.editData = null;
-      $('#showModal').modal('hide');
-      this.showModal = '';
     }
+    this.closeModal();
+    this.editData = null;
   }
 
   openModal(type: any) {

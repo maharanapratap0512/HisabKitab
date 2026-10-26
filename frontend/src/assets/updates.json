@@ -1,10 +1,67 @@
 [
     {
+        "version": "38.4",
+        "date": "26-10-2026",
+        "summary": "Brand New Inbuilt HK Excel Studio, Live Split Jawak Updates & Accurate Stock Synchronization",
+        "summary_hin": "नया इनबिल्ट एक्सेल स्टूडियो, स्प्लिट जावक लाइव अपडेट एवं सटीक स्टॉक सिंक्रोनाइज़ेशन",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Excel Studio",
+                "title": "Inbuilt Excel Studio & Preformatted Smart Templates",
+                "title_hin": "इनबिल्ट एक्सेल स्टूडियो एवं रेडीमेड फॉर्मेट्स",
+                "desc": "Introducing a high-speed inbuilt Excel spreadsheet with preformatted templates for Bachat, Vehicles, Items, Jawak, and PBK lists, allowing direct file loading, editing, row copy-paste, and styled Excel exports.",
+                "desc_hin": "सॉफ्टवेयर के अंदर ही नया एक्सेल स्टूडियो उपलब्ध कराया गया है जिसमें बचत, वाहन, आइटम, जावक और सेवाधारी के रेडीमेड फॉर्मेट्स सीधे लोड, एडिट, रो कॉपी-पेस्ट व एक्सपोर्ट किए जा सकते हैं।"
+            },
+            {
+                "type": "feature",
+                "module": "Excel Studio",
+                "title": "Dual-Mode 1-Click Toggle: Fast Typing & Smart Audit",
+                "title_hin": "फास्ट टाइपिंग और स्मार्ट एरर ऑडिट का 1-क्लिक टॉगल",
+                "desc": "Switch effortlessly between Normal Mode for distraction-free ultra-fast typing or bulk copy-paste, and Intelligent Mode for instant master list checks and red bad-cell highlighting.",
+                "desc_hin": "तेज़ टाइपिंग व कॉपी-पेस्ट के लिए 'नॉर्मल मोड' और मास्टर लिस्ट से गलत नाम व अधूरी जानकारी तुरंत लाल रंग में पहचानने के लिए 'स्मार्ट मोड' के बीच 1-क्लिक में स्विच करने की सुविधा।"
+            },
+            {
+                "type": "improved",
+                "module": "Excel Studio",
+                "title": "Header Scanner & Direct Step-2 Safe Software Import",
+                "title_hin": "हेडर स्कैनर एवं सीधे स्टेप 2 सुरक्षित सॉफ्टवेयर इम्पोर्ट",
+                "desc": "Scan any raw spreadsheet to auto-detect and match columns, with clean data seamlessly transferring directly into Step 2 of the software import wizard without manual file re-uploading.",
+                "desc_hin": "किसी भी बाहरी एक्सेल शीट के कॉलम स्वतः पहचानकर फॉर्मेट से लिंक करें और बिना फाइल दोबारा चुने सीधे सॉफ्टवेयर इम्पोर्ट विज़ार्ड के स्टेप 2 में डेटा ट्रांसफर करके आगे बढ़ें।"
+            },
+            {
+                "type": "fix",
+                "module": "Aawak",
+                "title": "Instant Screen Update for Split Jawak",
+                "title_hin": "स्प्लिट जावक जोड़ने पर आवक रिकॉर्ड तुरंत अपडेट",
+                "desc": "When adding or editing a split Jawak linked to multiple Aawaks, all connected Aawak records and remaining balances now refresh immediately on the screen without reloading the page.",
+                "desc_hin": "एक से अधिक आवक से जुड़ी स्प्लिट जावक प्रविष्टि जोड़ने या सुधारने पर अब स्क्रीन पर सभी संबंधित आवक और बची हुई मात्रा तुरंत बिना पेज रीफ्रेश किए अपडेट हो जाती है।"
+            },
+            {
+                "type": "fix",
+                "module": "Integrity Checkup",
+                "title": "Accurate Stock Summary Rebuild & Split Resolution",
+                "title_hin": "स्टॉक सारांश रीबिल्ड एवं स्प्लिट गणना में सुधार",
+                "desc": "Enhanced 'Rebuild All Bachat Summary' to accurately calculate stock balances and split entries in proper order, while preventing unexpected automatic duplicate scans after completion.",
+                "desc_hin": "'Rebuild All Bachat Summary' में सुधार किया गया है जिससे स्टॉक व स्प्लिट प्रविष्टियों का हिसाब सही क्रम में सटीक बनता है, और रीबिल्ड पूरा होने के बाद अवांछित डुप्लिकेट जाँच स्वतः चालू नहीं होती।"
+            },
+            {
+                "type": "improved",
+                "module": "Bachat Import",
+                "title": "Reliable Stock Matching & Synchronization",
+                "title_hin": "स्टॉक मिलान एवं सिंक्रोनाइज़ेशन में सुधार",
+                "desc": "Comparing physical stock against software balances now matches accurately and synchronizes smoothly with live progress tracking and zero calculation discrepancies.",
+                "desc_hin": "इक्सेल शीट से भौतिक स्टॉक का मिलान और सिंक्रोनाइज़ेशन अब बिना किसी रुकावट के लाइव प्रगति और सटीक संतुलन के साथ सुचारू रूप से कार्य करता है।"
+            }
+        ]
+    },
+    {
         "version": "38.3",
         "date": "21-10-2026",
         "summary": "Comprehensive Department Settings Control, Custom Column Visibility & Permission Management",
         "summary_hin": "सम्पूर्ण विभाग सेटिंग्स नियंत्रण, कॉलम छिपाने/दिखाने की सुविधा एवं अनुमति प्रबंधन",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

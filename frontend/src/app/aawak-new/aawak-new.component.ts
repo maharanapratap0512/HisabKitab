@@ -1323,19 +1323,30 @@ export class AawakNewComponent implements OnInit, OnDestroy {
   }
 
   addJawakResponse(ev: any) {
-    let awkId = (ev.aawak_splits && ev.aawak_splits.length > 0 ? (ev.aawak_splits[0].aawak_id || ev.aawak_splits[0]._id) : null);
-    if (awkId) {
-      let i = this.aawakData.findIndex((b: any) => b._id == awkId);
-      if (i > -1) {
-        this.aawakData[i].remaining_qty = Math.round(((this.aawakData[i].remaining_qty ? this.aawakData[i].remaining_qty : 0) - ev.qty) * 1000) / 1000;
-        if (!this.aawakData[i].jawak_detail) {
-          this.aawakData[i].jawak_detail = [];
+    if (ev) {
+      const list = ev.updated_aawaks || (ev.updated_aawak ? [ev.updated_aawak] : []);
+      for (const awk of list) {
+        const i = this.aawakData.findIndex((b: any) => b._id == awk._id);
+        if (i > -1) this.aawakData[i] = awk;
+        for (const grp of this.aawakData || []) {
+          if (Array.isArray(grp.aawaks)) {
+            const j = grp.aawaks.findIndex((b: any) => b._id == awk._id);
+            if (j > -1) grp.aawaks[j] = awk;
+          }
         }
-        this.aawakData[i].jawak_detail.push(ev);
+        for (const grp of this.aawakAll || []) {
+          if (Array.isArray(grp.aawaks)) {
+            const j = grp.aawaks.findIndex((b: any) => b._id == awk._id);
+            if (j > -1) grp.aawaks[j] = awk;
+          } else if (grp._id == awk._id) {
+            const allIdx = this.aawakAll.findIndex((b: any) => b._id == awk._id);
+            if (allIdx > -1) this.aawakAll[allIdx] = awk;
+          }
+        }
       }
-      $('#showModal').modal('hide');
-      this.showModal = '';
     }
+    this.closeModal();
+    this.editData = null;
   }
 
   openModal(type: any) {

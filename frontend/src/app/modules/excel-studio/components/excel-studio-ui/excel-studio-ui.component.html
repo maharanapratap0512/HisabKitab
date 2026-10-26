@@ -1,0 +1,539 @@
+<div class="studio-app-container" [class.dark-studio]="isDarkMode" [class.light-studio]="!isDarkMode">
+  
+  <!-- ROW 1: CONSOLIDATED COMMAND HEADER (Option B: Ultra-Compact 3-Row Layout) -->
+  <header class="studio-header px-3 py-1 border-bottom">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      
+      <!-- Left: Logo & Title -->
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <div class="studio-logo d-flex align-items-center justify-content-center">
+          <i class="uil uil-table fs-4 text-success"></i>
+        </div>
+        <div>
+          <div class="d-flex align-items-center gap-1">
+            <h6 class="mb-0 fw-bold font-14 studio-title">HK Excel Studio</h6>
+            <span class="badge bg-soft-success text-success font-9 px-1 rounded-pill">v2.0</span>
+          </div>
+          <small class="text-muted font-10 d-block" style="margin-top: -2px;">लाइव एडिटर</small>
+        </div>
+      </div>
+
+      <!-- Center: Smart Mode / Normal Mode Switcher -->
+      <div class="d-flex align-items-center justify-content-center">
+        <div class="mode-pill-toggle d-flex p-1 rounded-pill">
+          <button type="button" class="btn btn-sm rounded-pill px-3 py-1 font-11"
+            [class.active-mode-btn]="mode === 'normal'"
+            (click)="setMode('normal')"
+            title="तेज़ टाइपिंग और बिना किसी रुकावट के बल्क पेस्ट के लिए">
+            <i class="uil uil-edit me-1"></i>नॉर्मल (Normal)
+          </button>
+          <button type="button" class="btn btn-sm rounded-pill px-3 py-1 font-11"
+            [class.active-mode-btn-smart]="mode === 'intelligent'"
+            (click)="setMode('intelligent')"
+            title="लाइव मास्टर ड्रॉपडाउन, वैलिडेशन और बैड-सेल हाइलाइटिंग">
+            <i class="uil uil-bolt me-1"></i>स्मार्ट (Intelligent)
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Action Buttons, Audit Badge, Import & Theme Switch -->
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <!-- File & Format Actions Group -->
+        <div class="btn-group btn-group-sm">
+          <!-- Load Format Dropdown Menu -->
+          <div class="btn-group btn-group-sm position-relative">
+            <button type="button" class="btn btn-outline-primary py-1 px-2 font-11 dropdown-toggle shadow-sm"
+              (click)="isFormatMenuOpen = !isFormatMenuOpen; $event.stopPropagation()"
+              title="सिस्टम इम्पोर्ट फॉर्मेट चुनें या बदलें">
+              <i class="uil uil-layer-group me-1"></i>Load Format
+              <span *ngIf="currentFormat" class="badge bg-soft-primary text-primary font-10 ms-1 fw-bold">{{ currentFormat.title_hin }}</span>
+            </button>
+            
+            <div class="dropdown-menu show shadow-lg py-1 format-picker-menu" *ngIf="isFormatMenuOpen"
+              (click)="$event.stopPropagation()">
+              <div class="dropdown-header text-muted font-10 text-uppercase fw-bold pb-1">
+                <i class="uil uil-database me-1"></i>सिस्टम इम्पोर्ट फॉर्मेट्स
+              </div>
+              <button *ngFor="let fmt of studioService.formats" type="button"
+                class="dropdown-item d-flex align-items-center py-2 font-12"
+                [class.active-format-item]="currentFormat?.id === fmt.id"
+                (click)="loadFormat(fmt, mode, false); isFormatMenuOpen = false">
+                <i [class]="'uil ' + fmt.icon + ' me-2 fs-5 text-primary'"></i>
+                <div>
+                  <div class="fw-bold">{{ fmt.title_hin }}</div>
+                  <small class="text-muted font-10">{{ fmt.title }}</small>
+                </div>
+                <i *ngIf="currentFormat?.id === fmt.id" class="uil uil-check text-success ms-auto fs-5"></i>
+              </button>
+              <div class="dropdown-divider my-1"></div>
+              <button type="button" class="dropdown-item d-flex align-items-center py-2 font-12"
+                [class.active-format-item]="!currentFormat"
+                (click)="initGenericNormalSheet(); isFormatMenuOpen = false">
+                <i class="uil uil-table me-2 fs-5 text-secondary"></i>
+                <div>
+                  <div class="fw-bold">स्वतंत्र खाली शीट (Blank Sheet)</div>
+                  <small class="text-muted font-10">बिना किसी फॉर्मेट के स्वतंत्र टेबल (कस्टम हेडर)</small>
+                </div>
+                <i *ngIf="!currentFormat" class="uil uil-check text-success ms-auto fs-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Scan Button -->
+          <button type="button" class="btn btn-outline-info py-1 px-2 font-11" (click)="openScannerModal()"
+            title="फाइल के हेडर स्कैन करके सिस्टम फॉर्मेट से लिंक करें">
+            <i class="uil uil-search-alt me-1"></i>Scan
+          </button>
+
+          <!-- Open File Button (Real button triggering file dialog) -->
+          <button type="button" class="btn btn-outline-secondary py-1 px-2 font-11" (click)="openFileInput.click()"
+            title="बाहरी Excel (.xlsx, .xls) या CSV फाइल खोलें">
+            <i class="uil uil-folder-open me-1"></i>Open
+          </button>
+          <input #openFileInput type="file" accept=".xlsx, .xls, .csv" class="d-none" (change)="onFileSelected($event)" />
+
+          <!-- Export Button -->
+          <button type="button" class="btn btn-outline-primary py-1 px-2 font-11" (click)="exportToExcel()"
+            title="एक्सेल फाइल डाउनलोड करें">
+            <i class="uil uil-arrow-to-bottom me-1"></i>Export
+          </button>
+
+          <!-- Clear Button -->
+          <button type="button" class="btn btn-outline-danger py-1 px-2 font-11" (click)="clearAllRows()"
+            title="शीट की सामग्री खाली करें">
+            <i class="uil uil-trash-alt me-1"></i>Clear
+          </button>
+        </div>
+
+        <!-- Smart Mode Audit Badge (Summary only) -->
+        <div *ngIf="mode === 'intelligent'" class="audit-summary-chip d-flex align-items-center px-2 py-1 rounded font-11">
+          <span *ngIf="auditSummary.badCells === 0" class="text-success fw-semibold">
+            <i class="uil uil-check-circle me-1"></i>100% Clean
+          </span>
+          <span *ngIf="auditSummary.badCells > 0" class="text-danger fw-semibold">
+            <i class="uil uil-exclamation-triangle me-1"></i>{{ auditSummary.badCells }} Bad Cells
+          </span>
+        </div>
+
+        <!-- Theme Switcher Button -->
+        <button type="button" class="btn btn-outline-secondary btn-sm p-1 rounded-circle theme-btn"
+          (click)="toggleTheme()"
+          [title]="isDarkMode ? 'स्विच टू लाइट मोड' : 'स्विच टू डार्क मोड'">
+          <i [class]="isDarkMode ? 'uil uil-sun fs-5 text-warning' : 'uil uil-moon fs-5 text-primary'"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ROW 2: EXCEL-STYLE FORMULA BAR (fx) - 100% WIDE -->
+  <div class="formula-bar d-flex align-items-center px-3 py-1 border-bottom">
+    <div class="active-cell-box text-center fw-bold font-12 px-2 py-1 border-end me-2">
+      {{ activeCellCoordinate }}
+    </div>
+
+    <span *ngIf="activeColumnName" class="badge bg-soft-info text-info font-11 me-2 py-1 px-2 text-truncate" style="max-width: 220px;">
+      {{ activeColumnName }}
+    </span>
+
+    <span class="formula-symbol fw-bold fst-italic text-muted me-2">fx</span>
+
+    <div class="flex-grow-1 d-flex align-items-center">
+      <input #formulaInput
+        type="text"
+        class="form-control form-control-sm formula-input"
+        [ngModel]="activeCellEditorValue"
+        (ngModelChange)="onEditorInput($event)"
+        (keydown)="onEditorKeydown($event)"
+        placeholder="Select a cell or type value here..." />
+    </div>
+  </div>
+
+  <!-- ROW 3: DEDICATED LIVE STATUS, BAD CELL DETAILS & BATCH FIX SUGGESTION ROW -->
+  <div class="studio-status-strip px-3 py-1 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2"
+       [class.strip-suggestion]="batchFixSuggestion"
+       [class.strip-error]="!batchFixSuggestion && activeCellIsBad"
+       [class.strip-clean]="!batchFixSuggestion && !activeCellIsBad && mode === 'intelligent' && auditSummary.badCells === 0"
+       [class.strip-normal]="!batchFixSuggestion && !activeCellIsBad && (mode === 'normal' || auditSummary.badCells > 0)">
+    
+    <!-- STATE 1: BATCH CHANGE SUGGESTION (Direct inline action - replaces annoying popup) -->
+    <ng-container *ngIf="batchFixSuggestion">
+      <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate">
+        <span class="badge bg-warning text-dark font-11 py-1 px-2 fw-bold">
+          <i class="uil uil-lightbulb-alt me-1"></i>समान मान सुधार सुझाव (Batch Fix)
+        </span>
+        <span class="font-12">
+          कॉलम <strong>{{ batchFixSuggestion.colTitle }}</strong> में मान
+          <span class="badge bg-soft-danger text-danger font-12 fw-bold mx-1">'{{ batchFixSuggestion.oldVal }}'</span>
+          अन्य <strong>{{ batchFixSuggestion.otherMatches }} जगह</strong> भी लिखा है।
+          क्या सभी जगह इसे सही मान 
+          <span class="badge bg-soft-success text-success font-12 fw-bold mx-1">'{{ batchFixSuggestion.newVal }}'</span>
+          से बदलना चाहते हैं?
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center gap-1 flex-shrink-0">
+        <button type="button" class="btn btn-sm btn-success py-1 px-3 fw-bold font-12 shadow-sm"
+          (click)="applyBatchFix()" title="सभी जगह एक साथ अपडेट करें">
+          <i class="uil uil-check-circle me-1"></i>हाँ, सभी {{ batchFixSuggestion.otherMatches + 1 }} जगह बदलें
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 font-12"
+          (click)="dismissBatchFix()" title="यह सुझाव बंद करें">
+          <i class="uil uil-times me-1"></i>खारिज करें
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- STATE 2: ACTIVE BAD CELL DETAILS (When active cell has error & no batch fix alert) -->
+    <ng-container *ngIf="!batchFixSuggestion && activeCellIsBad">
+      <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate">
+        <span class="badge bg-danger text-white font-11 py-1 px-2 fw-bold">
+          <i class="uil uil-exclamation-octagon me-1"></i>बैड सेल ({{ activeCellCoordinate }})
+        </span>
+        <span class="font-12">
+          <strong>{{ activeColumnName }}:</strong>
+          <span class="text-danger fw-semibold ms-1">{{ activeCellErrorMessage }}</span>
+        </span>
+        <span *ngIf="activeColRefTable" class="badge bg-soft-info text-info font-10">
+          <i class="uil uil-database me-1"></i>मास्टर लिस्ट: {{ activeColRefTable }}
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center gap-1 flex-shrink-0">
+        <span class="text-muted font-11 me-2 d-none d-md-inline">त्रुटि सुधारने के लिए सही मान चुनें या टाइप करें</span>
+        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 font-11"
+          (click)="jumpToPrevError()" title="पिछला एरर">◀ पिछला</button>
+        <span class="badge bg-soft-danger text-danger font-11 px-2 py-1">
+          {{ currentErrorPointer >= 0 ? currentErrorPointer + 1 : 1 }}/{{ errorCellsList.length }}
+        </span>
+        <button type="button" class="btn btn-sm btn-danger py-0 px-2 font-11"
+          (click)="jumpToNextError()" title="अगला एरर">अगला ▶</button>
+      </div>
+    </ng-container>
+
+    <!-- STATE 3: AUDIT SUMMARY & STATUS (When cell is valid and no suggestion) -->
+    <ng-container *ngIf="!batchFixSuggestion && !activeCellIsBad">
+      
+      <!-- Smart Mode: Has Bad Cells -->
+      <ng-container *ngIf="mode === 'intelligent' && auditSummary.badCells > 0">
+        <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate">
+          <span class="badge bg-warning text-dark font-11 py-1 px-2 fw-semibold">
+            <i class="uil uil-exclamation-triangle me-1"></i>ऑडिट स्टेटस
+          </span>
+          <span class="font-12 text-warning">
+            शीट में कुल <strong>{{ auditSummary.badCells }}</strong> गलत सेल्स (Bad Cells) मिले। किसी भी रेड सेल पर क्लिक करें या एरर नेविगेटर दबाएं।
+          </span>
+        </div>
+        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+          <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2 font-11"
+            (click)="jumpToPrevError()">◀ पहला एरर</button>
+          <span class="badge bg-soft-warning text-warning font-11 px-2 py-1">
+            {{ currentErrorPointer >= 0 ? currentErrorPointer + 1 : 1 }}/{{ errorCellsList.length }}
+          </span>
+          <button type="button" class="btn btn-sm btn-warning py-0 px-2 font-11"
+            (click)="jumpToNextError()">अगला एरर ▶</button>
+        </div>
+      </ng-container>
+
+      <!-- Smart Mode: 100% Clean Data -->
+      <ng-container *ngIf="mode === 'intelligent' && auditSummary.badCells === 0">
+        <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate">
+          <span class="badge bg-success text-white font-11 py-1 px-2 fw-semibold">
+            <i class="uil uil-check-circle me-1"></i>100% वैध डेटा (Clean)
+          </span>
+          <span class="font-12 text-success">
+            सभी प्रविष्टियां वैध हैं। शीट सॉफ्टवेयर में सुरक्षित रूप से इम्पोर्ट के लिए तैयार है।
+          </span>
+        </div>
+        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+          <button type="button" class="btn btn-sm btn-success py-0 px-3 font-11 fw-bold shadow-sm"
+            (click)="proceedToSoftwareImport()">
+            <i class="uil uil-shield-check me-1"></i>Proceed to Import
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- Normal Mode -->
+      <ng-container *ngIf="mode === 'normal'">
+        <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate">
+          <span class="badge bg-secondary font-11 py-1 px-2">
+            <i class="uil uil-edit me-1"></i>नॉर्मल मोड
+          </span>
+          <span class="font-12 text-muted">
+            बिना किसी रुकावट के डेटा टाइप या एक्सेल से पेस्ट करें। मास्टर सूची सत्यापन और लाइव बैड-सेल हाइलाइटिंग के लिए ऊपर <strong>'स्मार्ट मोड'</strong> ऑन करें।
+          </span>
+        </div>
+        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+          <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 font-11"
+            (click)="setMode('intelligent')">
+            <i class="uil uil-bolt me-1"></i>स्मार्ट मोड चालू करें
+          </button>
+        </div>
+      </ng-container>
+
+    </ng-container>
+
+  </div>
+
+  <!-- SPREADSHEET CANVAS WORKSPACE (WITH DRAGGABLE COLUMN RESIZING) -->
+  <main class="spreadsheet-workspace" #gridContainer (paste)="onGridPaste($event)">
+    <table class="table spreadsheet-table mb-0">
+      
+      <!-- COLUMN HEADERS (A, B, C... + Draggable Resizer) -->
+      <thead>
+        <tr>
+          <!-- Row Corner Cell -->
+          <th class="corner-header-cell text-center">
+            <i class="uil uil-apps font-12 text-muted"></i>
+          </th>
+
+          <!-- Data Column Headers with Resizers -->
+          <th *ngFor="let col of columns; let cIdx = index"
+              class="col-header"
+              [class.mandatory-col]="col.not_null"
+              [style.width.px]="columnWidths[col.key] || 160"
+              [style.min-width.px]="columnWidths[col.key] || 160">
+            <div class="d-flex align-items-center justify-content-between h-100 position-relative">
+              <span class="col-letter text-muted me-1 font-11 fw-bold">{{ studioService.getColumnLetter(cIdx) }}</span>
+              
+              <!-- When a predefined format is loaded, show system column title -->
+              <span *ngIf="currentFormat" class="col-title text-truncate" [title]="col.name">
+                {{ col.name }}
+                <span *ngIf="col.not_null" class="text-danger fw-bold ms-1">*</span>
+              </span>
+              <span *ngIf="currentFormat && col.ref_table" class="badge bg-soft-info text-info font-9 ms-1" [title]="'मास्टर सूची: ' + col.ref_table">
+                {{ col.ref_table }}
+              </span>
+
+              <!-- Excel-like Mouse Drag Resizer Handle -->
+              <div class="col-resizer-handle"
+                   (mousedown)="onColResizeStart($event, col.key)"
+                   title="कॉलम चौड़ाई बदलने के लिए ड्रैग करें">
+              </div>
+            </div>
+          </th>
+        </tr>
+
+        <!-- CUSTOM EDITABLE HEADER ROW (Shown when NO predefined format is loaded - Point 4) -->
+        <tr *ngIf="!currentFormat" class="custom-heading-row border-bottom">
+          <th class="row-num-cell text-center font-10 text-muted fw-bold" style="background: rgba(125,125,125,0.08);" title="शीर्षक पंक्ति (Header Row)">
+            <span class="badge bg-soft-primary text-primary font-9">हेडर</span>
+          </th>
+          <th *ngFor="let col of columns; let cIdx = index"
+              class="p-0 border custom-header-input-cell"
+              [style.width.px]="columnWidths[col.key] || 160"
+              [style.min-width.px]="columnWidths[col.key] || 160">
+            <input type="text"
+              class="form-control form-control-sm border-0 shadow-none px-2 py-1 font-12 fw-semibold custom-header-field"
+              [(ngModel)]="col.name"
+              [placeholder]="'हेडर ' + studioService.getColumnLetter(cIdx) + ' लिखें...'"
+              title="कॉलम शीर्षक लिखें" />
+          </th>
+        </tr>
+      </thead>
+
+      <!-- ROWS & CELLS -->
+      <tbody>
+        <tr *ngFor="let r of rows; let rIdx = index"
+            class="spreadsheet-row"
+            [class.row-error-line]="mode === 'intelligent' && rowHasData(r) && r.hasError"
+            [class.selected-row]="selectedRowIndex === rIdx">
+          
+          <!-- Row Number (Click to select full row, Right-click triggers context menu) -->
+          <td class="row-num-cell text-center font-11 text-muted fw-semibold cursor-pointer"
+              (click)="onRowHeaderClick(rIdx, $event)"
+              (contextmenu)="onRowNumberContextMenu($event, rIdx)"
+              [title]="'रो ' + r.rowNum + ' चुनने व कॉपी करने के लिए क्लिक करें'">
+            {{ r.rowNum }}
+          </td>
+
+          <!-- Data Cells -->
+          <td *ngFor="let col of columns"
+              class="studio-cell"
+              [style.width.px]="columnWidths[col.key] || 160"
+              [style.min-width.px]="columnWidths[col.key] || 160"
+              [class.cell-active]="activeRowIndex === rIdx && activeColKey === col.key"
+              [class.cell-bad]="mode === 'intelligent' && rowHasData(r) && r.cells[col.key] && !r.cells[col.key].isValid"
+              [class.cell-warning]="mode === 'intelligent' && rowHasData(r) && r.cells[col.key] && r.cells[col.key].isWarning"
+              [attr.title]="mode === 'intelligent' && rowHasData(r) ? r.cells[col.key]?.errorMessage : null"
+              (click)="onCellClick(rIdx, col.key)"
+              (contextmenu)="onCellContextMenu($event, rIdx, col.key)">
+            
+            <!-- Inactive Display Value (Only shows required warning if row has data!) -->
+            <div *ngIf="activeRowIndex !== rIdx || activeColKey !== col.key" class="cell-text">
+              <span *ngIf="r.cells[col.key]?.value !== '' && r.cells[col.key]?.value !== null && r.cells[col.key]?.value !== undefined">
+                {{ r.cells[col.key].value }}
+              </span>
+              <span *ngIf="rowHasData(r) && (r.cells[col.key]?.value === '' || r.cells[col.key]?.value === null || r.cells[col.key]?.value === undefined) && mode === 'intelligent' && col.not_null"
+                    class="text-danger small fst-italic font-11">
+                (आवश्यक*)
+              </span>
+            </div>
+
+            <!-- ACTIVE IN-CELL EDITOR (Mounted only when cell is active) -->
+            <div *ngIf="activeRowIndex === rIdx && activeColKey === col.key" class="in-cell-editor-box">
+              <input #activeCellInput
+                type="text"
+                class="form-control form-control-sm cell-input-raw"
+                [ngModel]="activeCellEditorValue"
+                (ngModelChange)="onEditorInput($event)"
+                (keydown)="onEditorKeydown($event)"
+                (blur)="commitActiveEditor()"
+                placeholder="" />
+
+              <!-- PROFESSIONAL THEME-ADAPTIVE DROPDOWN (Solid background, Elegant UI) -->
+              <div *ngIf="isAutocompleteOpen && autocompleteSuggestions.length > 0"
+                class="pro-autocomplete-dropdown shadow-lg"
+                [class.open-upwards]="openDropdownUpwards"
+                (click)="$event.stopPropagation()">
+                
+                <div class="pro-dropdown-header px-3 py-2 border-bottom d-flex align-items-center justify-content-between">
+                  <span class="pro-header-label">{{ col.ref_table ? col.ref_table.toUpperCase() : 'SUGGESTIONS' }}</span>
+                  <span class="badge bg-soft-primary text-primary font-10">{{ autocompleteSuggestions.length }} उपलब्ध</span>
+                </div>
+
+                <div class="pro-dropdown-list">
+                  <div *ngFor="let sug of autocompleteSuggestions; let sIdx = index"
+                    class="pro-dropdown-item px-3 py-2 d-flex align-items-center justify-content-between"
+                    [class.item-active]="sIdx === selectedSuggestionIndex"
+                    (mousedown)="selectSuggestion(sug)">
+                    <div class="item-text-group">
+                      <div class="item-main-title">{{ sug.label }}</div>
+                      <div *ngIf="sug.secondary" class="item-sub-title">{{ sug.secondary }}</div>
+                    </div>
+                    <span *ngIf="sug.code" class="item-code-badge font-10">{{ sug.code }}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </main>
+
+  <!-- BOTTOM STATUS BAR & SHEET TABS -->
+  <footer class="studio-footer px-3 py-1 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-1">
+      <div class="sheet-tab active-tab px-3 py-1 font-12 fw-semibold">
+        <i class="uil uil-file-alt me-1 text-success"></i>Sheet 1
+      </div>
+      <span *ngIf="currentFormat" class="badge bg-soft-primary text-primary font-11 ms-2 px-2 py-1">
+        <i class="uil uil-file-bookmark-alt me-1"></i>{{ currentFormat.title_hin }}
+      </span>
+      <span class="text-muted font-11 ms-3">
+        मोड: <strong>{{ mode === 'intelligent' ? 'स्मार्ट ऑडिट' : 'नॉर्मल' }}</strong>
+      </span>
+      <span class="text-muted font-11 ms-2">
+        डेटा प्रविष्टियां: <strong>{{ auditSummary.total }}</strong>
+      </span>
+      <span *ngIf="mode === 'intelligent'" class="text-success font-11 ms-2">
+        वैध: <strong>{{ auditSummary.valid }}</strong>
+      </span>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      <!-- Freedom Navigation Guidance -->
+      <div class="text-muted font-11 d-none d-lg-flex align-items-center gap-2">
+        <span><kbd>Enter</kbd> अगली रो</span>
+        <span><kbd>Tab</kbd> अगला कॉलम</span>
+        <span>कॉलम बॉर्डर <strong>ड्रैग</strong> करके चौड़ाई बदलें</span>
+        <span>रो/सेल पर <strong>राइट-क्लिक</strong> करें मेनू के लिए</span>
+      </div>
+
+      <!-- Proceed to Software Import Button -->
+      <button type="button"
+        class="btn btn-success btn-sm py-1 px-3 fw-bold font-12 shadow-sm d-flex align-items-center proceed-import-btn"
+        (click)="proceedToSoftwareImport()"
+        title="सॉफ्टवेयर के सुरक्षित इम्पोर्ट विज़ार्ड में भेजें">
+        <i class="uil uil-shield-check me-1 fs-6"></i>
+        <span>Proceed to Import</span>
+        <span *ngIf="(mode === 'intelligent' ? auditSummary.valid : auditSummary.total) > 0"
+          class="badge bg-white text-success font-10 ms-1 rounded-pill fw-bold">
+          {{ mode === 'intelligent' ? auditSummary.valid : auditSummary.total }}
+        </span>
+        <i class="uil uil-arrow-right ms-1 font-13"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- FLOATING CONTEXT MENU (RIGHT-CLICK) -->
+  <div *ngIf="isContextMenuOpen"
+    class="custom-context-menu shadow-lg"
+    [style.top.px]="contextMenuPos.y"
+    [style.left.px]="contextMenuPos.x"
+    (click)="$event.stopPropagation()">
+    
+    <div class="context-menu-item" (click)="copySelectedRow(); closeContextMenu()">
+      <i class="uil uil-copy me-2 text-primary font-14"></i>
+      <span>रो कॉपी करें (Copy Row - Ctrl+C)</span>
+    </div>
+    <div class="context-menu-item" (click)="pasteIntoSelectedRow(); closeContextMenu()">
+      <i class="uil uil-clipboard-notes me-2 text-primary font-14"></i>
+      <span>रो पेस्ट करें (Paste Row - Ctrl+V)</span>
+    </div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" (click)="insertRowAbove()">
+      <i class="uil uil-arrow-up me-2 text-primary font-14"></i>
+      <span>ऊपर नई रो जोड़ें (Insert Above)</span>
+    </div>
+    <div class="context-menu-item" (click)="insertRowBelow()">
+      <i class="uil uil-arrow-down me-2 text-primary font-14"></i>
+      <span>नीचे नई रो जोड़ें (Insert Below)</span>
+    </div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" (click)="duplicateTargetRow()">
+      <i class="uil uil-copy me-2 text-info font-14"></i>
+      <span>रो की कॉपी बनाएं (Duplicate)</span>
+    </div>
+    <div class="context-menu-item" (click)="clearTargetRow()">
+      <i class="uil uil-eraser me-2 text-warning font-14"></i>
+      <span>सामग्री मिटाएं (Clear Row)</span>
+    </div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item text-danger" (click)="deleteTargetRow()">
+      <i class="uil uil-trash-alt me-2 font-14"></i>
+      <span>यह रो हटाएं (Delete Row)</span>
+    </div>
+  </div>
+
+  <!-- MODAL: FORMAT SCANNER & MATCHER -->
+  <app-format-scanner-modal
+    *ngIf="showScannerModal"
+    [rawRows]="rawSheetMatrix"
+    [currentFormat]="currentFormat"
+    (apply)="onScannerApply($event)"
+    (close)="showScannerModal = false">
+  </app-format-scanner-modal>
+
+  <!-- MODAL: EMBEDDED STANDARD IMPORT WIZARD (SAFE SOFTWARE PIPELINE) -->
+  <div *ngIf="showImportModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.6); z-index: 1060;">
+    <div class="modal-dialog" style="width: 98%;">
+      <div class="modal-content shadow-lg border-0">
+        
+        <div class="modal-header border-bottom py-2">
+          <h5 class="modal-title d-flex align-items-center">
+            <i class="uil uil-shield-check text-success me-2 fs-4"></i>
+            <span>Software Import Verification Wizard (सॉफ्टवेयर सुरक्षित इम्पोर्ट)</span>
+          </h5>
+          <button type="button" class="btn-close" (click)="showImportModal = false"></button>
+        </div>
+
+        <div class="modal-body p-0" style="max-height: 85vh; overflow-y: auto;">
+          <app-excel-import
+            [importType]="importTypeForModal"
+            [importedData]="importPayload"
+            [lockType]="true"
+            [stepNo]="2"
+            (response)="onImportWizardResponse($event)">
+          </app-excel-import>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

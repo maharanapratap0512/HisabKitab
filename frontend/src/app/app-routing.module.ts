@@ -51,6 +51,7 @@ import { NetdropUiComponent } from './modules/netdrop/components/netdrop-ui/netd
 import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.component';
 import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
 import { UniversalReportComponent } from './reports/universal-report/universal-report.component';
+import { ExcelStudioUiComponent } from './modules/excel-studio/components/excel-studio-ui/excel-studio-ui.component';
 
 const routes: Routes = [
    {
@@ -61,6 +62,12 @@ const routes: Routes = [
       ]
    },
    { path: "netdrop", component: NetdropUiComponent },
+   { 
+      path: "excel-studio", 
+      component: ExcelStudioUiComponent, 
+      canActivate: [AuthGuard],
+      resolve: { lists: listsResolver }
+   },
    {
       path: "", component: HomeComponent,
       canActivate: [AuthGuard],

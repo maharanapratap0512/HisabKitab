@@ -506,7 +506,7 @@
                                     </thead>
                                     <tbody>
                                         <ng-container
-                                            *ngFor="let data of newInsertedAwk | paginate: {id:'NIJPagination', itemsPerPage: 100,currentPage: page_jwk,totalItems: newInsertedAwk.length}; let i=index">
+                                            *ngFor="let data of newInsertedJwk | paginate: {id:'NIJPagination', itemsPerPage: 100,currentPage: page_jwk,totalItems: newInsertedJwk.length}; let i=index">
                                             <tr>
                                                 <td>{{100 * (page_jwk - 1) + (i+1)}}</td>
                                                 <td>{{data.pkt_num ? data.pkt_num : '-'}} </td>

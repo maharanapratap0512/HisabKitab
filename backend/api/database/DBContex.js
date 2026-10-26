@@ -486,7 +486,6 @@ class DBContex {
         obj.year = objDate.getFullYear();
         obj.difference = 0;
         let bachat = await this.getBachatFromAJ(obj, 'bachat');
-        console.log(bachat);
 
         bachat.difference = Number(bachat.difference);
         obj.qty = Number(obj.qty);

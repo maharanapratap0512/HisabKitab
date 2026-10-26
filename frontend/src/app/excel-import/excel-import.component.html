@@ -22,7 +22,7 @@
                         </ng-select>
                         <!-- </div> -->
                      </div>
-                     <div class="col-md-3" *ngIf="headerConfig && headerConfig.length">
+                     <div class="col-md-3" *ngIf="headerConfig && headerConfig.length && (!lockType || stepNo === 0)">
                         <button *ngIf="importType" class="file btn btn-success" style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Select Excel File
                            <input type="file" class="inputtag"

@@ -1,0 +1,110 @@
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog" style="width: 98%;">
+    <div class="modal-content shadow-lg border-0">
+      
+      <div class="modal-header border-bottom py-2">
+        <h5 class="modal-title d-flex align-items-center">
+          <i class="uil uil-search-alt me-2 text-primary fs-4"></i>
+          <span>Scan & Attach to Predefined Format (फॉर्मेट मैचिंग)</span>
+        </h5>
+        <button type="button" class="btn-close" (click)="dismiss()"></button>
+      </div>
+
+      <div class="modal-body p-3">
+        <!-- Controls: Select Target Format & Header Row -->
+        <div class="row g-2 mb-3 align-items-center">
+          <div class="col-md-5">
+            <label class="form-label small fw-bold mb-1">Target Import Format (लक्ष्य फॉर्मेट)</label>
+            <ng-select class="custom" [virtualScroll]="true" [clearable]="false"
+              [(ngModel)]="selectedFormatId" (change)="onFormatChange()">
+              <ng-option *ngFor="let fmt of formats" [value]="fmt.id">
+                <i [class]="'uil ' + fmt.icon + ' me-1'"></i>{{ fmt.title_hin }} ({{ fmt.title }})
+              </ng-option>
+            </ng-select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label small fw-bold mb-1">Header Row (हेडर लाइन)</label>
+            <ng-select class="custom" [virtualScroll]="true" [clearable]="false"
+              [ngModel]="headerRowIndex" (ngModelChange)="onHeaderRowChange($event)">
+              <ng-option *ngFor="let row of rawRows.slice(0, 10); let idx = index" [value]="idx">
+                Row {{ idx + 1 }} : {{ (row.slice(0, 3).join(', ')) || 'Empty' }}...
+              </ng-option>
+            </ng-select>
+          </div>
+
+          <div class="col-md-4 text-end pt-3">
+            <span class="badge bg-soft-info text-info me-2 p-2">
+              <i class="uil uil-columns me-1"></i>{{ scanReport?.matches?.length || 0 }} Columns Found
+            </span>
+            <span *ngIf="scanReport?.missingMandatory?.length" class="badge bg-soft-danger text-danger p-2">
+              <i class="uil uil-exclamation-triangle me-1"></i>{{ scanReport?.missingMandatory?.length }} Required Missing
+            </span>
+          </div>
+        </div>
+
+        <!-- Missing Required Fields Alert -->
+        <div *ngIf="scanReport?.missingMandatory?.length" class="alert alert-warning py-2 mb-3">
+          <div class="d-flex align-items-center">
+            <i class="uil uil-exclamation-octagon fs-4 text-danger me-2"></i>
+            <div>
+              <strong>अनिवार्य कॉलम अनुपस्थित (Missing Mandatory): </strong>
+              <span *ngFor="let col of scanReport?.missingMandatory" class="badge bg-danger me-1">
+                {{ col.name }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column Matching Table -->
+        <div class="table-responsive" style="max-height: 52vh; overflow-y: auto;">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width: 80px;">Col #</th>
+                <th>Sheet Header (फाइल का हेडर)</th>
+                <th style="width: 140px;">Status</th>
+                <th>Map to Target Column (सिस्टम कॉलम)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let m of scanReport?.matches">
+                <td class="fw-bold">{{ m.sheetColIndex + 1 }}</td>
+                <td>
+                  <span class="fw-semibold">{{ m.sheetHeader || '(खाली / No Header)' }}</span>
+                </td>
+                <td>
+                  <span *ngIf="m.status === 'matched'" class="badge bg-soft-success text-success">
+                    <i class="uil uil-check-circle me-1"></i>ऑटो-मैच
+                  </span>
+                  <span *ngIf="m.status === 'manual'" class="badge bg-soft-primary text-primary">
+                    <i class="uil uil-pen me-1"></i>कस्टम मैप
+                  </span>
+                  <span *ngIf="m.status === 'unmatched'" class="badge bg-soft-secondary text-muted">
+                    <i class="uil uil-minus-circle me-1"></i>अनमैच्ड
+                  </span>
+                </td>
+                <td>
+                  <ng-select class="custom" [virtualScroll]="true" [clearable]="true" placeholder="-- छोड़ें / Ignore --"
+                    [ngModel]="m.targetColKey" (ngModelChange)="onManualMapChange(m, $event)">
+                    <ng-option *ngFor="let col of scanReport?.targetFormat?.columns" [value]="col.key">
+                      {{ col.name }} {{ col.not_null ? '*' : '' }}
+                    </ng-option>
+                  </ng-select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer border-top py-2">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="dismiss()">रद्द करें (Cancel)</button>
+        <button type="button" class="btn btn-primary btn-sm" (click)="applyMapping()">
+          <i class="uil uil-bolt me-1"></i>लागू करें और इंटेलिजेंट मोड में बदलें (Apply & Switch to Intelligent)
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

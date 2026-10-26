@@ -406,7 +406,7 @@ export class IntegrityCheckupComponent implements OnInit, OnDestroy {
             } else if (data.type === 'complete') {
               this.logs.push(`[Complete] Full Bachat Rebuild complete. Processed count: ${data.count}`);
               this.toastr.success(`Full Bachat Summary Rebuilt successfully! (${data.count} entries processed)`);
-              if (this.selectedTest) {
+              if (this.selectedTest?.id === 'bachat-stock-mismatch') {
                 this.runScan();
               }
               this.scrollConsoleToBottom();

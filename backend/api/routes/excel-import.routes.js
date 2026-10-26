@@ -676,16 +676,11 @@ router.post('/', async (req, res, next) => {
 router.post('/match_bachat/:dept_id', async (req, res, next) => {
     if (req.body && req.body.length > 0) {
         try {
-            let placeholders = [], paramsdata = [];
-            req.body.forEach((data, index) => {
-                placeholders.push(`(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-                paramsdata.push(data.date, data.sn, req.params.dept_id, data.mm_id, data.item_id, data.subitem_id ? data.subitem_id : 0, data.condition_id ? data.condition_id : 0, data.unit_id, data.qty, data.company_name, data.actual_amt, data.item_detail, data.description, data.nimitt_id);
-            });
+            const deptId = parseInt(req.params.dept_id);
 
-            // DB.db.prepare('delete from bachat_import').run();
-            DB.db.prepare('drop table if exists bachat_import; ').run();
+            DB.db.prepare('drop table if exists bachat_import;').run();
 
-            let sql1 = `create table if not exists bachat_import
+            const sql1 = `create table if not exists bachat_import
                 (
                     _id integer primary key,
                     date date, 
@@ -705,26 +700,53 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
                     usage_list_id integer,
                     UNIQUE(dept_id, mm_id, item_id, unit_id, subitem_id, condition_id)
                 )`;
-            await DB.db.prepare(sql1).run();
-            sql1 = `insert into bachat_import(date, sn, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, qty, company_name, actual_amt, item_detail, description, nimitt_id) 
-                VALUES ${placeholders.join(', ')} ON CONFLICT(dept_id, mm_id, item_id, subitem_id, condition_id, unit_id) 
-                DO UPDATE SET qty = qty + excluded.qty;`
-            await DB.db.prepare(sql1).run(paramsdata);
+            DB.db.prepare(sql1).run();
 
+            const insertStmt = DB.db.prepare(`insert into bachat_import(date, sn, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, qty, company_name, actual_amt, item_detail, description, nimitt_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(dept_id, mm_id, item_id, subitem_id, condition_id, unit_id) 
+                DO UPDATE SET qty = ROUND(qty + excluded.qty, 3)`);
 
-            let sql = `WITH
+            const insertMany = DB.db.transaction((rows) => {
+                for (const data of rows) {
+                    insertStmt.run(
+                        data.date || null,
+                        data.sn || null,
+                        deptId,
+                        data.mm_id,
+                        data.item_id,
+                        data.subitem_id ? data.subitem_id : 0,
+                        data.condition_id ? data.condition_id : 0,
+                        data.unit_id,
+                        data.qty != null ? Number(data.qty) : 0,
+                        data.company_name || null,
+                        data.actual_amt != null ? Number(data.actual_amt) : null,
+                        data.item_detail || null,
+                        data.description || null,
+                        data.nimitt_id ? data.nimitt_id : null
+                    );
+                }
+            });
+            insertMany(req.body);
+
+            const sql = `WITH
                 bcht(_id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, bachat) AS (
-                    select _id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, SUM(bachat) as t_bachat from bachat_new bn
+                    select _id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, ROUND(SUM(bachat), 3) as t_bachat from bachat_new bn
                     where bn.dept_id = ? group by mm_id, item_id, subitem_id, condition_id, unit_id
                 ) 
-                select bcht._id, bi.date, bi.sn, bi.dept_id, bi.mm_id, bi.item_id, bi.subitem_id, bi.condition_id, bi.unit_id, IFNULL(bi.qty, 0) as qty, IFNULL(bcht.bachat, 0) as bachat, CASE WHEN bcht._id IS NOT NULL THEN 'MATCH' ELSE 'EXCEL' END AS status, IFNULL(bi.qty, 0) - IFNULL(bcht.bachat, 0) as difference,
-                bi.company_name, bi.actual_amt, bi.item_detail, bi.description, bi.nimitt_id,
-                mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-                it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
-                sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
-                slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
-                dept.dept_hin, dept.dept_eng, dept.dept_code,
-                unit.unit_short, unit.unit_full from bachat_import bi
+                select bcht._id, bi.date, bi.sn, bi.dept_id, bi.mm_id, bi.item_id, bi.subitem_id, bi.condition_id, bi.unit_id, 
+                       ROUND(IFNULL(bi.qty, 0), 3) as qty, 
+                       ROUND(IFNULL(bcht.bachat, 0), 3) as bachat, 
+                       CASE WHEN bcht._id IS NOT NULL THEN 'MATCH' ELSE 'EXCEL' END AS status, 
+                       ROUND(IFNULL(bi.qty, 0) - IFNULL(bcht.bachat, 0), 3) as difference,
+                       bi.company_name, bi.actual_amt, bi.item_detail, bi.description, bi.nimitt_id,
+                       mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+                       it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+                       sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
+                       slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
+                       dept.dept_hin, dept.dept_eng, dept.dept_code,
+                       unit.unit_short, unit.unit_full 
+                from bachat_import bi
                 LEFT JOIN bcht on bcht.mm_id = bi.mm_id AND bcht.item_id = bi.item_id AND IFNULL(bcht.subitem_id, 0) = IFNULL(bi.subitem_id, 0) AND IFNULL(bcht.condition_id, 0) = IFNULL(bi.condition_id, 0) AND bcht.unit_id = bi.unit_id
                 LEFT JOIN mm on mm._id = bi.mm_id
                 LEFT JOIN state st on st._id = mm.state_id
@@ -732,23 +754,28 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
                 LEFT JOIN v_subitem sit on sit._id = bi.subitem_id
                 LEFT JOIN support_list slc on slc._id = bi.condition_id
                 LEFT JOIN department dept on dept._id = bi.dept_id
-                LEFT JOIN unit on unit._id = bi.unit_id order by status DESC`;
+                LEFT JOIN unit on unit._id = bi.unit_id 
+                order by status DESC`;
 
-            let stmt = DB.db.prepare(sql).all(req.params.dept_id);
+            const stmt = DB.db.prepare(sql).all(deptId);
 
-
-            let sqlDB = `WITH
+            const sqlDB = `WITH
                 bcht(_id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, bachat) AS (
-                    select _id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, SUM(bachat) as t_bachat from bachat_new bn
-                    where bn.dept_id = ? group by mm_id, item_id, subitem_id, condition_id, unit_id HAVING t_bachat <> 0
+                    select _id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, ROUND(SUM(bachat), 3) as t_bachat from bachat_new bn
+                    where bn.dept_id = ? group by mm_id, item_id, subitem_id, condition_id, unit_id HAVING ROUND(t_bachat, 3) <> 0
                 ) 
-                select bcht._id, bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id, 0 AS qty, IFNULL(bcht.bachat, 0) as bachat, 'DB' AS status, 0 - IFNULL(bcht.bachat, 0) as difference, 
-                mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-                it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
-                sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
-                slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
-                dept.dept_hin, dept.dept_eng, dept.dept_code,
-                unit.unit_short, unit.unit_full from bcht 
+                select bcht._id, bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id, 
+                       0 AS qty, 
+                       ROUND(IFNULL(bcht.bachat, 0), 3) as bachat, 
+                       'DB' AS status, 
+                       ROUND(0 - IFNULL(bcht.bachat, 0), 3) as difference, 
+                       mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+                       it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+                       sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
+                       slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
+                       dept.dept_hin, dept.dept_eng, dept.dept_code,
+                       unit.unit_short, unit.unit_full 
+                from bcht 
                 LEFT JOIN mm on mm._id = bcht.mm_id
                 LEFT JOIN state st on st._id = mm.state_id
                 LEFT JOIN v_item it on it._id = bcht.item_id
@@ -758,19 +785,19 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
                 LEFT JOIN unit on unit._id = bcht.unit_id
                 WHERE NOT EXISTS ( SELECT 1 FROM bachat_import bi 
                         WHERE bi.mm_id = bcht.mm_id AND bi.item_id = bcht.item_id AND IFNULL(bi.subitem_id, 0) = IFNULL(bcht.subitem_id, 0) AND IFNULL(bi.condition_id, 0) = IFNULL(bcht.condition_id, 0) AND bi.unit_id = bcht.unit_id)`;
-            let stmtDB = DB.db.prepare(sqlDB).all(req.params.dept_id);
+            const stmtDB = DB.db.prepare(sqlDB).all(deptId);
 
             res.json({
                 success: true,
                 resultED: stmt,
                 resultDB: stmtDB,
-            })
+            });
         }
         catch (err) {
             return next(err);
         }
     } else {
-        return next(new Error("no data found, please solve all corrections first."))
+        return next(new Error("no data found, please solve all corrections first."));
     }
 });
 
@@ -779,51 +806,79 @@ router.put('/final_bachat/:dept_id', async (req, res, next) => {
     if (req.body) {
         try {
             await Fn.begin();
-            let obj, op, result;
+            let obj, op, result = [];
+            const deptId = parseInt(req.params.dept_id);
+
             if (req.body.difference > 0) {
-                // do aawak entry
+                // Incoming Excel stock is greater than software stock -> Create Aawak entry to add the difference
                 op = 'aawak';
                 obj = DB.tbInterface.getAawakFromBachatImport(req.body);
-                await Fn.insertAJ(obj, 'aawak').then(async (rs) => {
-                    await DB.getList('aawak', { full: true, conditionString: ` aawak._id = ${rs}` }).then(async (data) => {
-                        for (let i in data.data) {
-                            data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
-                            data.data[i].isbill = data.data[i].isbill ? true : false;
-                        }
-                        result = data.data
-                    });
-                });
+                delete obj._id;
+                obj.dept_id = deptId;
+                if (!obj.date) obj.date = new Date().toISOString().split('T')[0];
+                obj.qty = Math.round(Number(obj.qty) * 1000) / 1000;
+
+                const rs = await Fn.insertAJ(obj, 'aawak');
+                const data = await DB.getList('aawak', { full: true, conditionString: `aawak._id = ${rs}` });
+                for (let i in data.data) {
+                    data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
+                    data.data[i].isbill = data.data[i].isbill ? true : false;
+                }
+                result = data.data || [];
 
             } else if (req.body.difference < 0) {
-                // do jawak entry
-                op = 'jawak'
-                obj = DB.tbInterface.getJawakFromBachatImport(req.body);
-                let jwkQty = obj.qty;
-                let newIds = [], conditionString = `remaining_qty <> 0 AND mm_id = ${obj.mm_id} AND item_id = ${obj.item_id} AND IFNULL(subitem_id, 0) = IFNULL(${obj.subitem_id}, 0) AND IFNULL(condition_id, 0) = IFNULL(${obj.condition_id}, 0) AND unit_id = ${obj.unit_id}`
-                await DB.getList('aawak', { conditionString: conditionString, order: ` date desc` }).then(async (data) => {
-                    for (let i in data.data) {
-                        obj.aawak_splits = [{ aawak_id: data.data[i]._id, split_qty: obj.qty, qty: obj.qty }];
-                        if (jwkQty > data.data[i].remaining_qty) {
-                            obj.qty = data.data[i].remaining_qty;
-                            jwkQty = jwkQty - obj.qty;
-                        }
-                        await Fn.insertAJ(obj, 'jawak').then(async (rs) => {
-                            newIds.push(rs);
-                        });
-                        obj.qty = jwkQty;
-                    }
-                    await DB.getList('aawak', { full: true, conditionString: ` aawak._id in (${newIds.join(',')})` }).then(async (data) => {
-                        for (let i in data.data) {
-                            data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
-                            data.data[i].isbill = data.data[i].isbill ? true : false;
-                        }
-                        result = data.data
-                    });
-                    result = data.data
-                });
-            } else {
+                // Incoming Excel stock is less than software stock -> Create Jawak entry to deduct the difference
+                op = 'jawak';
+                const baseObj = DB.tbInterface.getJawakFromBachatImport(req.body);
+                delete baseObj._id;
+                baseObj.dept_id = deptId;
+                if (!baseObj.date) baseObj.date = new Date().toISOString().split('T')[0];
 
+                const totalTargetQty = Math.round(Number(baseObj.qty) * 1000) / 1000;
+                let remainingToDeduct = totalTargetQty;
+                const newIds = [];
+
+                // Find candidate Aawak records with remaining_qty > 0 to deduct from (FIFO order: oldest date first)
+                const subitemCond = baseObj.subitem_id ? `subitem_id = ${baseObj.subitem_id}` : `(subitem_id IS NULL OR subitem_id = 0)`;
+                const conditionCond = baseObj.condition_id ? `condition_id = ${baseObj.condition_id}` : `(condition_id IS NULL OR condition_id = 0)`;
+                const conditionString = `remaining_qty > 0 AND mm_id = ${baseObj.mm_id} AND item_id = ${baseObj.item_id} AND ${subitemCond} AND ${conditionCond} AND unit_id = ${baseObj.unit_id} AND dept_id = ${deptId}`;
+
+                const candidateAawaks = await DB.getList('aawak', { conditionString: conditionString, order: `date asc, _id asc` });
+
+                for (const awk of (candidateAawaks.data || [])) {
+                    if (remainingToDeduct <= 0) break;
+                    const take = Math.min(remainingToDeduct, awk.remaining_qty);
+                    if (take > 0) {
+                        const jwkEntry = {
+                            ...baseObj,
+                            qty: take,
+                            aawak_id: awk._id,
+                            aawak_splits: [{ aawak_id: awk._id, split_qty: take, qty: take }]
+                        };
+                        const id = await Fn.insertAJ(jwkEntry, 'jawak');
+                        newIds.push(id);
+                        remainingToDeduct = Math.round((remainingToDeduct - take) * 1000) / 1000;
+                    }
+                }
+
+                // If stock still remains to deduct after candidate Aawaks are exhausted
+                if (remainingToDeduct > 0) {
+                    const jwkEntry = {
+                        ...baseObj,
+                        qty: remainingToDeduct,
+                        aawak_id: null,
+                        aawak_splits: []
+                    };
+                    const id = await Fn.insertAJ(jwkEntry, 'jawak');
+                    newIds.push(id);
+                }
+
+                if (newIds.length > 0) {
+                    const jwkData = await DB.getList('jawak', { full: true, conditionString: `jawak._id IN (${newIds.join(',')})` });
+                    result = jwkData.data || [];
+                }
             }
+
             await Fn.commit();
             res.json({
                 success: true,
@@ -832,16 +887,14 @@ router.put('/final_bachat/:dept_id', async (req, res, next) => {
             });
         }
         catch (err) {
-            // console.log(err.message);
             await Fn.rollback();
             res.json({
                 success: false,
                 error: err.message,
-            })
+            });
         }
-
     } else {
-        return next(new Error("no data found, please solve all corrections first."))
+        return next(new Error("no data found, please solve all corrections first."));
     }
 });
 

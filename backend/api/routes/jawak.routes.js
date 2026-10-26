@@ -331,12 +331,16 @@ router.post('/new/:dept_id', async (req, res, next) => {
                             try { data.aawak_ref_obj = JSON.parse(data.aawak_ref_obj); } catch (e) { data.aawak_ref_obj = null; }
                         }
 
-                        const awkId = (Array.isArray(data.aawak_splits) && data.aawak_splits.length > 0)
-                            ? (data.aawak_splits[0].aawak_id || data.aawak_splits[0]._id)
-                            : null;
+                        let splitList = Array.isArray(data.aawak_splits) ? data.aawak_splits : [];
+                        if (typeof data.aawak_splits === 'string') {
+                            try { splitList = JSON.parse(data.aawak_splits); } catch (e) { splitList = []; }
+                        }
+                        const awkIds = [...new Set([...splitList.map(s => s.aawak_id || s._id), data.aawak_id].filter(Boolean))];
 
-                        if (awkId && aawakRoutes.getFullAawakById) {
-                            data.updated_aawak = await aawakRoutes.getFullAawakById(awkId, req.params.dept_id);
+                        if (awkIds.length > 0 && aawakRoutes.getFullAawakById) {
+                            const updatedAawaks = (await Promise.all(awkIds.map(id => aawakRoutes.getFullAawakById(id, req.params.dept_id)))).filter(Boolean);
+                            data.updated_aawaks = updatedAawaks;
+                            data.updated_aawak = updatedAawaks[0] || null;
                         }
 
                         await Fn.commit();
@@ -374,11 +378,13 @@ router.put('/new', async (req, res, next) => {
                     if (typeof jawak.aawak_ref_obj === 'string') {
                         try { jawak.aawak_ref_obj = JSON.parse(jawak.aawak_ref_obj); } catch (e) { jawak.aawak_ref_obj = null; }
                     }
-                    const awkId = (Array.isArray(jawak.aawak_splits) && jawak.aawak_splits.length > 0)
-                        ? (jawak.aawak_splits[0].aawak_id || jawak.aawak_splits[0]._id)
-                        : null;
-                    if (awkId && aawakRoutes.getFullAawakById) {
-                        jawak.updated_aawak = await aawakRoutes.getFullAawakById(awkId);
+                    let splitList = Array.isArray(jawak.aawak_splits) ? jawak.aawak_splits : [];
+                    const awkIds = [...new Set([...splitList.map(s => s.aawak_id || s._id), jawak.aawak_id].filter(Boolean))];
+
+                    if (awkIds.length > 0 && aawakRoutes.getFullAawakById) {
+                        const updatedAawaks = (await Promise.all(awkIds.map(id => aawakRoutes.getFullAawakById(id, jawak.dept_id)))).filter(Boolean);
+                        jawak.updated_aawaks = updatedAawaks;
+                        jawak.updated_aawak = updatedAawaks[0] || null;
                     }
                     res.json({
                         success: true,

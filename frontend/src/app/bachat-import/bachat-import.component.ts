@@ -159,125 +159,98 @@ export class BachatImportComponent {
     }
   }
 
-  async processSync(i: number = 0) {
-
-    this.http.put(this.api.getUrl('EXCELIMPORT') + 'final_bachat/' + this.auth.webUser.dept_id, this.combinedBachat[i]).subscribe((res: any) => {
-      this.import$.next(res);
-    }, (err: any) => {
-      this.rejected.push(this.combinedBachat[i]);
-      this.rejectedStyle = "width:" + (this.rejected.length * 100) / this.combinedBachat.length + "%;";
-      this.import$.next(0);
-    });
-
-  }
-
-
   async syncBachat() {
-    this.processedCount = 0;
-    this.processing = true;
     this.combinedBachat = this.combinedBachat.filter((c: { selected: any, difference: number }) => c.selected && c.difference != 0);
 
-    this.import$.subscribe((res: any) => {
-
-      if (res && res.success) {
-
-        switch (res.status) {
-          case 'aawak': this.newInsertedAwk.push(...res.result)
-            this.insertAwkStyle = "width:" + (this.newInsertedAwk.length * 100) / this.combinedBachat.length + "%;";
-            break;
-          case 'jawak': this.newInsertedJwk.push(...res.result)
-            this.insertJwkStyle = "width:" + ((this.processedCount - this.newInsertedAwk.length - this.rejected.length + 1) * 100) / this.combinedBachat.length + "%;";
-            break;
-          default: this.rejected.push(this.combinedBachat[this.processedCount]);
-            this.rejectedStyle = "width:" + (this.rejected.length * 100) / this.combinedBachat.length + "%;";
-        }
-      }
-      this.processedCount++;
-      if (this.combinedBachat.length > this.processedCount) {
-        this.processSync(this.processedCount);
-      } else {
-        this.import$.complete();
-        this.getLatestBachatData();
-        this.toastr.success("Synchronyzation complete. test your result");
-      }
-
-    });
-
-    if (this.combinedBachat.length > 0) {
-      await this.processSync();
-    } else {
-      this.toastr.info('No data with difference was found.')
+    if (this.combinedBachat.length === 0) {
+      this.toastr.info('No data with difference was selected.');
+      return;
     }
+
+    this.processedCount = 0;
+    this.processing = true;
+    this.newInsertedAwk = [];
+    this.newInsertedJwk = [];
+    this.rejected = [];
+
+    for (let i = 0; i < this.combinedBachat.length; i++) {
+      const item = this.combinedBachat[i];
+      try {
+        const res: any = await this.http.put(this.api.getUrl('EXCELIMPORT') + 'final_bachat/' + this.auth.webUser.dept_id, item).toPromise();
+        if (res && res.success) {
+          if (res.status === 'aawak' && res.result) {
+            this.newInsertedAwk.push(...res.result);
+          } else if (res.status === 'jawak' && res.result) {
+            this.newInsertedJwk.push(...res.result);
+          } else {
+            this.rejected.push(item);
+          }
+        } else {
+          this.rejected.push(item);
+        }
+      } catch (err) {
+        this.rejected.push(item);
+      }
+      this.processedCount = i + 1;
+      this.insertAwkStyle = "width:" + (this.newInsertedAwk.length * 100) / this.combinedBachat.length + "%;";
+      this.insertJwkStyle = "width:" + (this.newInsertedJwk.length * 100) / this.combinedBachat.length + "%;";
+      this.rejectedStyle = "width:" + (this.rejected.length * 100) / this.combinedBachat.length + "%;";
+    }
+
+    this.processing = false;
+    this.getLatestBachatData();
+    this.toastr.success("Synchronization complete. Test your result.");
   }
-
-  async processReset(i: number = 0) {
-
-    this.http.put(this.api.getUrl('EXCELIMPORT') + 'final_bachat/' + this.auth.webUser.dept_id, this.DBOnlyBachat[i]).subscribe((res: any) => {
-      this.importReset$.next(res);
-    }, (err: any) => {
-      this.rejected.push(this.DBOnlyBachat[i]);
-      this.rejectedStyle = "width:" + (this.rejected.length * 100) / this.DBOnlyBachat.length + "%;";
-      this.importReset$.next(0);
-    });
-
-  }
-
 
   async resetBachat() {
-    this.DBOnlyBachat = this.DBOnlyBachat.filter((c: { selected: any }) => c.selected);
+    const selected = this.DBOnlyBachat.filter((c: { selected: any }) => c.selected);
 
-    if (this.DBOnlyBachat.length > 0) {
-
-      Swal.fire({
-        title: 'Select a Date For Aawak Jawak Entry.',
-        input: 'date',   //  shows date picker
-        showCancelButton: true,
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel',
-        preConfirm: (selectedDate) => {
-          if (!selectedDate) {
-            Swal.showValidationMessage('Please select a date');
-          }
-          return selectedDate;
-        }
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          this.processedCount = 0;
-          this.processingReset = true;
-
-          this.importReset$.subscribe((res: any) => {
-
-            if (res && res.success) {
-              switch (res.status) {
-                case 'jawak':
-                case 'aawak': this.resetSucceed.push(...res.result)
-                  this.succeedStyle = "width:" + (this.resetSucceed.length * 100) / this.DBOnlyBachat.length + "%;";
-                  break;
-                default: this.rejectedReset.push(this.DBOnlyBachat[this.processedCount]);
-                  this.rejectedResetStyle = "width:" + (this.rejectedReset.length * 100) / this.DBOnlyBachat.length + "%;";
-              }
-            }
-            this.processedCount++;
-            if (this.DBOnlyBachat.length > this.processedCount) {
-              this.processReset(this.processedCount);
-            } else {
-              this.importReset$.complete();
-              this.getLatestBachatData();
-              this.toastr.success("Synchronyzation complete. test your result");
-            }
-
-          });
-          for (let i in this.DBOnlyBachat) {
-            this.DBOnlyBachat[i].date = result.value;
-          }
-          await this.processReset();
-        }
-      });
-
-    } else {
-      this.toastr.error("Please Select minimum 1 row.");
-
+    if (selected.length === 0) {
+      this.toastr.error("Please select at least 1 row.");
+      return;
     }
+
+    Swal.fire({
+      title: 'Select a Date For Aawak Jawak Entry.',
+      input: 'date',
+      showCancelButton: true,
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
+      preConfirm: (selectedDate) => {
+        if (!selectedDate) {
+          Swal.showValidationMessage('Please select a date');
+        }
+        return selectedDate;
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        this.processedCount = 0;
+        this.processingReset = true;
+        this.resetSucceed = [];
+        this.rejectedReset = [];
+
+        for (let i = 0; i < selected.length; i++) {
+          const item = { ...selected[i], date: result.value };
+          try {
+            const res: any = await this.http.put(this.api.getUrl('EXCELIMPORT') + 'final_bachat/' + this.auth.webUser.dept_id, item).toPromise();
+            if (res && res.success && res.result) {
+              this.resetSucceed.push(...res.result);
+            } else {
+              this.rejectedReset.push(item);
+            }
+          } catch (err) {
+            this.rejectedReset.push(item);
+          }
+          this.processedCount = i + 1;
+          this.succeedStyle = "width:" + (this.resetSucceed.length * 100) / selected.length + "%;";
+          this.rejectedResetStyle = "width:" + (this.rejectedReset.length * 100) / selected.length + "%;";
+        }
+
+        this.processingReset = false;
+        this.getLatestBachatData();
+        this.toastr.success("Reset synchronization complete. Test your result.");
+      }
+    });
   }
 
   exportRejected() {
