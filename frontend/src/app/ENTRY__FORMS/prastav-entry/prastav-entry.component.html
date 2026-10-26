@@ -20,6 +20,12 @@
             <div class="text-muted font-size-12" *ngIf="pfs.prastavForm.pbk_id">
               <i class="uil uil-user me-1 text-success"></i>{{getPBKDisplay(pfs.prastavForm.pbk_id)}}
             </div>
+            <div class="text-muted font-size-12" *ngIf="pfs.prastavForm.nimitt_id">
+              <i class="uil uil-tag-alt me-1 text-primary"></i>Nimitt: {{getPBKDisplay(pfs.prastavForm.nimitt_id)}}
+            </div>
+            <div class="text-muted font-size-12" *ngIf="pfs.prastavForm.prastav_type">
+              Type: <span class="text-dark fw-medium">{{getPrastavTypeDisplay(pfs.prastavForm.prastav_type)}}</span>
+            </div>
           </div>
           <div class="d-flex gap-2">
             <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
@@ -39,6 +45,12 @@
                   <span class="badge bg-primary text-white font-size-11">Item {{i+1}}</span>
                   <span class="fw-bold text-primary font-size-13">{{getItemDisplay(line.item_id,
                     line.subitem_id)}}</span>
+                  <span class="text-muted font-size-12 fw-medium" *ngIf="getPrastavTypeDisplay(line.prastav_type)">
+                    ({{getPrastavTypeDisplay(line.prastav_type)}})
+                  </span>
+                  <span class="text-success fw-bold font-size-12" *ngIf="line.bachat !== null && line.bachat !== undefined">
+                    Bachat: {{line.bachat}}
+                  </span>
                   <span class="text-success fw-bold font-size-12">Qty: {{line.qty}}
                     {{getUnitShort(line.unit_id)}}</span>
                   <span class="text-primary font-size-12">Rate: ₹{{line.rate || 0}} </span>
@@ -78,6 +90,9 @@
             <div class="text-muted font-size-12" *ngIf="pfs.prastavForm.pbk_id">
               <i class="uil uil-user me-1 text-success"></i>{{getPBKDisplay(pfs.prastavForm.pbk_id)}}
             </div>
+            <div class="text-muted font-size-12" *ngIf="pfs.prastavForm.nimitt_id">
+              <i class="uil uil-tag-alt me-1 text-primary"></i>Nimitt: {{getPBKDisplay(pfs.prastavForm.nimitt_id)}}
+            </div>
           </div>
           <div class="d-flex align-items-center gap-3">
             <div class="d-flex align-items-center gap-2">
@@ -109,8 +124,15 @@
               <div class="d-flex align-items-center gap-3">
                 <span class="badge bg-primary text-white font-size-11">Item {{i+1}}</span>
                 <span class="fw-bold text-primary font-size-13">{{getItemDisplay(line.item_id, line.subitem_id)}}</span>
+                <span class="text-muted font-size-12 fw-medium" *ngIf="getPrastavTypeDisplay(line.prastav_type)">
+                  ({{getPrastavTypeDisplay(line.prastav_type)}})
+                </span>
               </div>
               <div class="d-flex align-items-center gap-3 text-center">
+                <div *ngIf="line.bachat !== null && line.bachat !== undefined">
+                  <div class="text-uppercase opacity-50 fw-bold" style="font-size: 9px;">Bachat</div>
+                  <div class="fw-bold text-success font-size-12">{{line.bachat}}</div>
+                </div>
                 <div>
                   <div class="text-uppercase opacity-50 fw-bold" style="font-size: 9px;">Prastav Qty</div>
                   <div class="fw-bold text-success font-size-12">{{line.qty}} {{getUnitShort(line.unit_id)}}</div>
@@ -140,7 +162,6 @@
                       <th style="width: 145px; min-width: 145px;" class="text-center">Date *</th>
                       <th style="width: 280px; min-width: 280px;" class="text-center">Source MM *</th>
                       <th style="width: 200px; min-width: 200px;" class="text-center">Qty & Unit *</th>
-                      <th style="width: 100px; min-width: 100px;" class="text-center">Bachat</th>
                       <th style="width: 110px; min-width: 110px;" class="text-center">Rate</th>
                       <th style="width: 120px; min-width: 120px;" class="text-center">Amount</th>
                       <th style="width: 100px; min-width: 100px;" class="text-center">Bori</th>
@@ -178,11 +199,6 @@
                             (ngModelChange)="onJawakChange(line, jw)"
                             [ngClass]="{'is-invalid': pfs.submit && !jw.unit_id}"></ng-select>
                         </div>
-                      </td>
-
-                      <td class="align-middle p-1">
-                        <input type="number" class="form-control form-control-sm px-1 text-center"
-                          placeholder="Bachat" [(ngModel)]="jw.bachat" [name]="'ajw_bachat_' + i + '_' + j" min="0">
                       </td>
 
                       <td class="align-middle">
@@ -284,9 +300,15 @@
 
           <div class="col-md-2 mb-3">
             <div class="form-group">
-              <label class="form-label">PBK Count</label>
-              <input type="text" class="form-control" placeholder="PBK Count" [(ngModel)]="pfs.prastavForm.pbk_count"
-                name="pbk_count">
+              <label class="form-label">Nimitt</label>
+              <ng-select class="custom" style="width:100%;" placeholder="Select Nimitt" [clearable]="true"
+                [virtualScroll]="true" [(ngModel)]="pfs.prastavForm.nimitt_id" name="nimitt_id">
+
+                <ng-option *ngFor="let p of pbks | filterByDate: pfs.prastavForm.date" [value]="p._id">
+                  {{p.roll_no ? p.roll_no : '______'}} - {{p.pbk_hin}}{{p.pbk_eng ? ' : ' + p.pbk_eng : ''}}
+                </ng-option>
+
+              </ng-select>
             </div>
           </div>
 
@@ -297,7 +319,8 @@
                 (click)="openModal('Add Prastav Type')">+ Add</a>
 
               <ng-select class="custom" style="width:100%;" placeholder="Select Type" [clearable]="true"
-                [virtualScroll]="true" [(ngModel)]="pfs.prastavForm.prastav_type" name="prastav_type">
+                [virtualScroll]="true" [(ngModel)]="pfs.prastavForm.prastav_type" name="prastav_type"
+                (change)="onHeaderPrastavTypeChange($event)">
                 <ng-option *ngFor="let pt of prastavTypes" [value]="pt._id">
                   {{pt.list_name_hin ? pt.list_name_hin + ' : ' : ''}}{{pt.list_name_eng}}
                 </ng-option>
@@ -305,7 +328,15 @@
             </div>
           </div>
 
-          <div class="col-md-7 mb-3 d-flex flex-wrap align-items-end gap-3">
+          <div class="col-md-2 mb-3">
+            <div class="form-group">
+              <label class="form-label">PBK Count</label>
+              <input type="text" class="form-control" placeholder="PBK Count" [(ngModel)]="pfs.prastavForm.pbk_count"
+                name="pbk_count">
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3 d-flex flex-wrap align-items-end gap-3">
             <div class="d-flex gap-3 w-100">
               <div class="form-check mb-2">
                 <input class="form-check-input" type="checkbox" id="isNoted" [(ngModel)]="pfs.prastavForm.is_noted"
@@ -331,7 +362,7 @@
             </div>
           </div>
 
-          <div class="col-md-5 mb-3 d-flex align-items-end justify-content-end gap-2">
+          <div class="col-md-4 mb-3 d-flex align-items-end justify-content-end gap-2">
             <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
             <button type="submit" class="btn btn-primary btn-sm px-4" [disabled]="pfs.submit">
               {{ isEdit ? 'Update' : 'Save' }}
@@ -340,6 +371,7 @@
 
         </div>
         <!-- END HEADER -->
+
 
 
 
@@ -352,18 +384,24 @@
 
           <div class="table-container">
 
-            <table class="table table-sm table-bordered" style="min-width: 1280px;">
+            <table class="table table-sm table-bordered" style="min-width: 1320px;">
 
               <thead class="table-light" *ngIf="!jawakFocusMode">
                 <tr>
-                  <th style="width: 50px; min-width: 50px;" class="text-center">#</th>
-                  <th style="width: 320px; min-width: 320px;" class="text-center">Item - Subitem *</th>
-                  <th style="width: 120px; min-width: 120px;" class="text-center">Req Qty</th>
+                  <th style="width: 45px; min-width: 45px;" class="text-center">#</th>
+                  <th style="width: 260px; min-width: 260px;" class="text-center">Item - Subitem *</th>
+                  <th style="width: 170px; min-width: 170px;" class="text-center text-nowrap">
+                    Prastav Type
+                    <a style="padding: 1px 4px !important; font-size: 10px;" class="btn btn-outline-primary py-0 px-1 float-end"
+                      (click)="openPrastavTypeModal()">+ Add</a>
+                  </th>
+                  <th style="width: 110px; min-width: 110px;" class="text-center">Req Qty</th>
                   <th style="width: 220px; min-width: 220px;" class="text-center">Prastav Qty & Unit *</th>
-                  <th style="width: 110px; min-width: 110px;" class="text-center">Rate</th>
-                  <th style="width: 120px; min-width: 120px;" class="text-center">Amount</th>
-                  <th style="width: 280px; min-width: 280px;" class="text-center">Description</th>
-                  <th style="width: 60px; min-width: 60px;" class="text-center">Action</th>
+                  <th style="width: 100px; min-width: 100px;" class="text-center">Rate</th>
+                  <th style="width: 110px; min-width: 110px;" class="text-center">Amount</th>
+                  <th style="width: 100px; min-width: 100px;" class="text-center">Bachat</th>
+                  <th style="width: 240px; min-width: 240px;" class="text-center">Description</th>
+                  <th style="width: 55px; min-width: 55px;" class="text-center">Action</th>
                 </tr>
               </thead>
 
@@ -377,11 +415,20 @@
 
                     <td class="text-center align-middle">{{i+1}}</td>
 
-                    <td>
+                    <td style="width: 260px; min-width: 260px;">
                       <app-item-dropdown size="sm" [filterObj]="{ date: pfs.prastavForm.date }"
                         [(itemId)]="line.item_id" [(subitemId)]="line.subitem_id" (change)="onItemChange(line)"
                         [required]="true" placeholder="Item - Subitem">
                       </app-item-dropdown>
+                    </td>
+
+                    <td style="width: 170px; min-width: 170px;">
+                      <ng-select class="custom-sm border" style="width:100%; min-width: 120px;" placeholder="Select Type" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="line.prastav_type" [name]="'prastav_type_'+i" [appendTo]="'body'" dropdownClass="custom-sm">
+                        <ng-option *ngFor="let pt of prastavTypes" [value]="pt._id">
+                          {{pt.list_name_hin ? pt.list_name_hin + ' : ' : ''}}{{pt.list_name_eng}}
+                        </ng-option>
+                      </ng-select>
                     </td>
 
                     <td>
@@ -397,7 +444,7 @@
 
                         <ng-select class="custom-sm border" style="min-width:80px;" [items]="units"
                           bindLabel="unit_short" bindValue="_id" [(ngModel)]="line.unit_id" [name]="'unit_'+i"
-                          (ngModelChange)="onUnitChange(line)" placeholder="Unit">
+                          (ngModelChange)="onUnitChange(line)" placeholder="Unit" [appendTo]="'body'">
                         </ng-select>
 
                       </div>
@@ -411,6 +458,16 @@
                     <td>
                       <input type="number" class="form-control form-control-sm text-center" [(ngModel)]="line.amount"
                         [name]="'amount_'+i" readonly placeholder="Amount">
+                    </td>
+
+                    <td>
+                      <input type="number" class="form-control form-control-sm text-center" [(ngModel)]="line.bachat"
+                        [name]="'bachat_'+i" placeholder="Bachat" min="0">
+                    </td>
+
+                    <td>
+                      <input type="text" class="form-control form-control-sm" [(ngModel)]="line.description"
+                        [name]="'desc_'+i" placeholder="Description">
                     </td>
 
                     <td>
@@ -438,7 +495,7 @@
 
                     <td *ngIf="!jawakFocusMode"></td>
 
-                    <td [attr.colspan]="8">
+                    <td [attr.colspan]="10">
 
                       <div class="p-2 border rounded bg-light">
 
@@ -455,7 +512,6 @@
                                 <th style="width: 280px; min-width: 280px;" class="text-center">Item</th>
                                 <th style="width: 260px; min-width: 260px;" class="text-center">Source MM</th>
                                 <th style="width: 200px; min-width: 200px;" class="text-center">Qty & Unit *</th>
-                                <th style="width: 100px; min-width: 100px;" class="text-center">Bachat</th>
                                 <th style="width: 110px; min-width: 110px;" class="text-center">Rate</th>
                                 <th style="width: 120px; min-width: 120px;" class="text-center">Amount</th>
                                 <th style="width: 100px; min-width: 100px;" class="text-center">Bori</th>
@@ -509,11 +565,6 @@
                                     (ngModelChange)="onJawakChange(line, jw)"
                                     [ngClass]="{'is-invalid': f.submitted && !jw.unit_id}"></ng-select>
                                 </div>
-                              </td>
-
-                              <td class="align-middle p-1">
-                                <input type="number" class="form-control form-control-sm px-1 text-center"
-                                  placeholder="Bachat" [(ngModel)]="jw.bachat" [name]="'jw_bachat_' + i + '_' + j" min="0">
                               </td>
 
                               <td class="align-middle">

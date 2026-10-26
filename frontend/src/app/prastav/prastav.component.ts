@@ -243,7 +243,10 @@ export class PrastavComponent implements OnInit {
           zone_hin: p.zone_hin || p.mm?.zone_hin,
           zone_eng: p.zone_eng || p.mm?.zone_eng,
           pbk: p.pbk,
+          pbk_id: p.pbk_id,
           pbk_count: p.pbk_count,
+          nimitt: p.nimitt,
+          nimitt_id: p.nimitt_id,
           prastav_type: p.prastav_type,
           type: p.type,
           note_details: p.note_details, // Capture note from the first item
@@ -257,6 +260,10 @@ export class PrastavComponent implements OnInit {
         });
       }
       const vGroup = vGroups.get(vKey);
+      if (!vGroup.nimitt_id && p.nimitt_id) {
+        vGroup.nimitt_id = p.nimitt_id;
+        vGroup.nimitt = p.nimitt;
+      }
       if (!vGroup.prastav_type && p.prastav_type) {
         vGroup.prastav_type = p.prastav_type;
         vGroup.type = p.type;
@@ -336,9 +343,11 @@ export class PrastavComponent implements OnInit {
       { header: 'Date', key: 'date', width: 12 },
       { header: 'Place (MM)', key: 'mm', width: 25 },
       { header: 'Person (PBK)', key: 'pbk', width: 25 },
+      { header: 'Nimitt', key: 'nimitt', width: 25 },
       { header: 'Type', key: 'type', width: 18 },
       { header: 'Item', key: 'item', width: 25 },
       { header: 'Subitem', key: 'subitem', width: 20 },
+      { header: 'Bachat', key: 'bachat', width: 10 },
       { header: 'Qty', key: 'qty', width: 10 },
       { header: 'Unit', key: 'unit', width: 8 },
       { header: 'Rate', key: 'rate', width: 10 },
@@ -348,17 +357,16 @@ export class PrastavComponent implements OnInit {
       { header: 'Source MM', key: 'j_source', width: 20 },
       { header: 'Receiver', key: 'j_receiver', width: 20 },
       { header: 'J-Qty', key: 'j_qty', width: 8 },
-      { header: 'Bachat', key: 'j_bachat', width: 8 },
       { header: 'Status', key: 'j_status', width: 8 }
     ];
 
-    // Header styling - Split into Prastav (1-13) and Jawak (14-19)
+    // Header styling - Split into Prastav (1-15) and Jawak (16-20)
     const headerRow = ws.getRow(1);
     headerRow.eachCell((cell, colNumber) => {
       cell.font = boldWhite;
       cell.border = borderThin;
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      if (colNumber <= 13) {
+      if (colNumber <= 15) {
         cell.fill = headerFillPrastav;
       } else {
         cell.fill = headerFillJawak;
@@ -373,9 +381,11 @@ export class PrastavComponent implements OnInit {
           date: vr.isIFirst ? (v.date || '') : '',
           mm: vr.isIFirst ? (v.mm?.mm_hin || '') : '',
           pbk: vr.isIFirst ? (v.pbk?.pbk_hin || '') : '',
-          type: vr.isIFirst ? this.getPrastavType(v.type, v.prastav_type) : '',
+          nimitt: vr.isIFirst ? (v.nimitt?.pbk_hin || '') : '',
+          type: vr.isIFirst ? (this.getPrastavType(vr.item.type, vr.item.prastav_type) || this.getPrastavType(v.type, v.prastav_type)) : '',
           item: vr.isIFirst ? (vr.item.item?.item_hin || '') : '',
           subitem: vr.isIFirst ? (vr.item.subitem?.subitem_hin || '') : '',
+          bachat: vr.isIFirst ? (vr.item.bachat ?? '') : '',
           qty: vr.isIFirst ? (vr.item.qty || '') : '',
           unit: vr.isIFirst ? (vr.item.unit?.unit_short || '') : '',
           rate: vr.isIFirst ? (vr.item.rate || '') : '',
@@ -385,7 +395,6 @@ export class PrastavComponent implements OnInit {
           j_source: vr.jawak ? vr.jawak.source_mm?.mm_hin : '',
           j_receiver: vr.jawak ? vr.jawak.kiske_dwara : '',
           j_qty: vr.jawak ? vr.jawak.qty : '',
-          j_bachat: vr.jawak ? (vr.jawak.bachat ?? '') : '',
           j_status: vr.jawak ? (vr.jawak.is_received ? 'RCV' : 'PND') : ''
         };
 

@@ -29,7 +29,6 @@ export class PrastavFormService {
       unit_id: null,
       source_mm_id: null,
       qty: null,
-      bachat: null,
       rate: null,
       amount: null,
       bori_count: null,
@@ -48,6 +47,7 @@ export class PrastavFormService {
       item_id: null,
       subitem_id: null,
       unit_id: null,
+      prastav_type: null,
       qty_needs: null,
       qty: null,
       rate: null,
@@ -64,6 +64,7 @@ export class PrastavFormService {
       mm_id: auth.webUser.settings.defaultMM,
       pbk_id: null,
       pbk_count: null,
+      nimitt_id: null,
       prastav_type: null,
       is_noted: 0,
       note_details: null,
@@ -80,6 +81,7 @@ export class PrastavFormService {
       mm_id: this.prastavForm.mm_id,
       pbk_id: this.prastavForm.pbk_id,
       pbk_count: null,
+      nimitt_id: this.prastavForm.nimitt_id,
       prastav_type: null,
       is_noted: 0,
       note_details: null,
@@ -116,6 +118,7 @@ export class PrastavFormService {
       mm_id: data.mm_id ?? lines[0]?.mm_id,
       pbk_id: data.pbk_id ?? lines[0]?.pbk_id ?? null,
       pbk_count: data.pbk_count ?? null,
+      nimitt_id: data.nimitt_id ?? lines[0]?.nimitt_id ?? null,
       prastav_type: data.prastav_type ?? lines[0]?.prastav_type ?? null,
       voucher_no: data.voucher_no ?? null,
       is_noted: data.is_noted ?? 0,
@@ -130,7 +133,7 @@ export class PrastavFormService {
     } else {
       for (const row of lines) {
         // IDs are already present in the API object
-
+        row.prastav_type = row.prastav_type ?? data.prastav_type ?? null;
         row.bachat = row.bachat ?? null;
         row.monthly_uses = row.monthly_uses ?? null;
 
@@ -141,7 +144,6 @@ export class PrastavFormService {
           for (const jw of row.jawaks) {
             jw.item_id = row.item_id;
             jw.subitem_id = row.subitem_id;
-            jw.bachat = jw.bachat ?? null;
           }
         }
 
@@ -187,7 +189,12 @@ export class PrastavFormService {
   }
 
   addLine() {
-    this.prastavForm.lines.push(structuredClone(this.lineTemplate));
+    const newLine = structuredClone(this.lineTemplate);
+    const lastLine = this.prastavForm?.lines?.[this.prastavForm.lines.length - 1];
+    if (lastLine && lastLine.prastav_type) {
+      newLine.prastav_type = lastLine.prastav_type;
+    }
+    this.prastavForm.lines.push(newLine);
   }
 
   // Nested Jawak Handlers
