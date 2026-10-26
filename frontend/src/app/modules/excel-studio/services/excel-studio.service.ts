@@ -168,6 +168,238 @@ export class ExcelStudioService {
       sampleRows: [
         { roll_no: '101', pbk_hin: 'रमेश भाई', _gender: 'Male', state: 'महाराष्ट्र', district: 'मुम्बई', mo_no: '9876543210' }
       ]
+    },
+    {
+      id: 'product',
+      name: 'product',
+      title: 'Product & Assets (उपकरण एवं संपत्ति रजिस्टर)',
+      title_hin: 'उत्पाद / उपकरण रजिस्टर (मशीनरी, फ़र्नीचर, संपत्ति)',
+      icon: 'uil-desktop',
+      badgeColor: 'primary',
+      desc: 'Asset, machinery, and equipment register with warranty and purchase details.',
+      desc_hin: 'उत्पाद कोड, मि.म., आइटम, कंपनी, मॉडल, स्थिति, वारंटी व खरीद विवरण।',
+      columns: [
+        { key: 'sr_num', name: 'क्र.सं. (Sr No)', col_name: 'sr_num', not_null: false, alt_names: ['sr no', 'sr number', 'sr num', 'serial no'] },
+        { key: 'product_code', name: 'उत्पाद कोड (Product Code)', col_name: 'product_code', not_null: false, alt_names: ['product code', 'pr_code', 'pr code'] },
+        { key: 'purchase_date', name: 'खरीद तारीख (Purchase Date)', col_name: 'purchase_date', not_null: false, type: 'date', alt_names: ['date', 'तारीख', 'purchase date'] },
+        { key: 'mm', name: 'मि.म. (MM)*', col_name: 'mm', not_null: true, ref_table: 'mm', alt_names: ['mm', 'mm_name', 'मि.म.', 'मि म', 'मिनी मधुबन'] },
+        { key: 'item', name: 'आइटम (Item)*', col_name: 'item', not_null: true, ref_table: 'item', alt_names: ['item', 'item_name', 'आइटम'] },
+        { key: 'subitem', name: 'सबआइटम (Subitem)', col_name: 'subitem', not_null: false, ref_table: 'subitem', alt_names: ['subitem', 'subitem_name', 'सबआइटम'] },
+        { key: 'qty', name: 'संख्या (Qty)*', col_name: 'qty', not_null: true, type: 'number', alt_names: ['qty', 'quantity', 'संख्या'] },
+        { key: 'unit', name: 'यूनिट (Unit)*', col_name: 'unit', not_null: true, ref_table: 'unit', alt_names: ['unit', 'यूनिट'] },
+        { key: 'aawak_type', name: 'आवक प्रकार*', col_name: 'aawak_type', not_null: true, ref_table: 'aawak_type', alt_names: ['aawak type', 'awk type', 'आवक टाइप'] },
+        { key: 'company_name', name: 'कंपनी (Company)', col_name: 'company', not_null: false, alt_names: ['company', 'company_name', 'कंपनी'] },
+        { key: 'modal_name', name: 'मॉडल (Model)', col_name: 'modal', not_null: false, alt_names: ['modal', 'modal_name', 'मॉडल'] },
+        { key: 'condition', name: 'स्थिति (Condition)*', col_name: 'condition', not_null: true, ref_table: 'condition', alt_names: ['condition', 'कन्डिशन'] },
+        { key: 'warranty_period', name: 'वारंटी समय (Warranty)', col_name: 'warranty_period', not_null: false, alt_names: ['warranty', 'warranty period', 'वारंटी'] },
+        { key: 'warranty_from', name: 'वारंटी कहाँ से', col_name: 'warranty_from', not_null: false, alt_names: ['warranty from'] },
+        { key: 'purchase_from', name: 'कहाँ से खरीदा', col_name: 'purchase_from', not_null: false, alt_names: ['purchase from'] },
+        { key: 'purchased_by', name: 'किसके द्वारा खरीदा', col_name: 'purchased_by', not_null: false, alt_names: ['purchased by', 'purchase by'] },
+        { key: 'product_detail', name: 'विवरण (Details)', col_name: 'product_detail', not_null: false, alt_names: ['product detail', 'details'] },
+        { key: 'accessories', name: 'सहायक सामग्री (Accessories)', col_name: 'accessories', not_null: false, alt_names: ['accessories'] },
+        { key: 'nimmit', name: 'निमित्त (Nimitt)', col_name: 'nimmit', not_null: false, ref_table: 'nimitt', alt_names: ['nimitt', 'nimmit', 'निमित्त'] },
+      ],
+      sampleRows: [
+        { product_code: 'EQ-001', purchase_date: '15-10-2026', mm: 'मुम्बई', item: 'कंप्यूटर', subitem: 'डेस्कटॉप', qty: 1, unit: 'नग', aawak_type: 'खरीद', company_name: 'Dell', modal_name: 'OptiPlex', condition: 'नया' }
+      ]
+    },
+    {
+      id: 'nimitt',
+      name: 'nimitt',
+      title: 'Nimitt (निमित्त भाई-बहन)',
+      title_hin: 'निमित्त सूची (जिम्मेवार सेवाधारी विवरण)',
+      icon: 'uil-user-check',
+      badgeColor: 'success',
+      desc: 'Nimitt sewadhari directory with gender, state, and contact details.',
+      desc_hin: 'निमित्त भाई-बहनों का रोल नं, नाम, जेंडर, राज्य व निवास क्षेत्र।',
+      columns: [
+        { key: 'roll_no', name: 'रोल नं (Roll No)', col_name: 'roll_no', not_null: false, alt_names: ['roll no', 'ro no', 'रोल नं'] },
+        { key: 'nimitt_hin', name: 'नाम (हिंदी)*', col_name: 'nimitt_hin', not_null: true, alt_names: ['nimitt hin', 'namehin', 'नाम'] },
+        { key: 'nimitt_eng', name: 'नाम (English)', col_name: 'nimitt_eng', not_null: false, alt_names: ['nimitt eng', 'nameeng'] },
+        { key: 'gender', name: 'जेंडर (Gender)*', col_name: 'gender', not_null: true, ref_table: 'gender', alt_names: ['gender', 'लिंग'] },
+        { key: 'state', name: 'राज्य (State)*', col_name: 'state', not_null: true, ref_table: 'state', alt_names: ['state', 'राज्य'] },
+        { key: 'relative_name', name: 'पिता / सम्बन्धी नाम', col_name: 'father_name', not_null: false, alt_names: ['father name', 'relative name'] },
+        { key: 'townarea', name: 'गाँव / क्षेत्र (Town/Area)', col_name: 'townarea', not_null: false, alt_names: ['town area', 'town_area', 'गाव', 'village'] }
+      ],
+      sampleRows: [
+        { roll_no: '201', nimitt_hin: 'सुरेश भाई', nimitt_eng: 'Suresh Bhai', gender: 'Male', state: 'राजस्थान', townarea: 'आबू रोड' }
+      ]
+    },
+    {
+      id: 'category',
+      name: 'category',
+      title: 'Category Master (श्रेणी मास्टर)',
+      title_hin: 'सामग्री श्रेणी मास्टर (मुख्य एवं उप-श्रेणी)',
+      icon: 'uil-folder-open',
+      badgeColor: 'warning',
+      desc: 'Category hierarchy with Hindi, English, and Roman titles.',
+      desc_hin: 'वस्तुओं के वर्गीकरण हेतु मुख्य श्रेणी एवं उप-श्रेणी की सूची।',
+      columns: [
+        { key: 'category_hin', name: 'श्रेणी नाम (हिंदी)*', col_name: 'category_hin', not_null: true, alt_names: ['category hin', 'category', 'श्रेणी'] },
+        { key: 'category_eng', name: 'श्रेणी नाम (English)', col_name: 'category_eng', not_null: false, alt_names: ['category eng', 'category_eng'] },
+        { key: 'category_roman', name: 'श्रेणी नाम (Roman)', col_name: 'category_roman', not_null: false, alt_names: ['category roman', 'category_roman'] },
+        { key: 'parent_category', name: 'मुख्य श्रेणी (Parent)', col_name: 'parent_category', not_null: false, ref_table: 'category', alt_names: ['parent category', 'parent', 'मुख्य श्रेणी'] }
+      ],
+      sampleRows: [
+        { category_hin: 'अनाज एवं दालें', category_eng: 'Grains & Pulses', category_roman: 'Anaaj evam Daale' },
+        { category_hin: 'दालें', category_eng: 'Pulses', parent_category: 'अनाज एवं दालें' }
+      ]
+    },
+    {
+      id: 'district',
+      name: 'district',
+      title: 'District Master (ज़िला मास्टर)',
+      title_hin: 'ज़िला सूची (राज्य अनुसार)',
+      icon: 'uil-map-marker',
+      badgeColor: 'info',
+      desc: 'District directory linked to corresponding state.',
+      desc_hin: 'राज्य अनुसार जिलों के हिंदी, English व Roman नामों की सूची।',
+      columns: [
+        { key: 'district_hin', name: 'ज़िला नाम (हिंदी)*', col_name: 'district_hin', not_null: true, alt_names: ['district hin', 'namehin', 'जिला', 'ज़िला'] },
+        { key: 'district_eng', name: 'ज़िला नाम (English)*', col_name: 'district_eng', not_null: true, alt_names: ['district eng', 'nameeng'] },
+        { key: 'state', name: 'राज्य (State)*', col_name: 'state', not_null: true, ref_table: 'state', alt_names: ['state', 'राज्य'] }
+      ],
+      sampleRows: [
+        { district_hin: 'सिरोही', district_eng: 'Sirohi', state: 'राजस्थान' },
+        { district_hin: 'मुम्बई', district_eng: 'Mumbai', state: 'महाराष्ट्र' }
+      ]
+    },
+    {
+      id: 'support_list',
+      name: 'support_list',
+      title: 'Support Lists (सहायक सूचियां)',
+      title_hin: 'सिस्टम ड्रॉपडाउन मान (आवक प्रकार, जेंडर, स्थिति आदि)',
+      icon: 'uil-list-ul',
+      badgeColor: 'secondary',
+      desc: 'System lookup values: aawak_type, jawak_type, gender, relation, condition.',
+      desc_hin: 'सिस्टम ड्रॉपडाउन के सहायक विकल्प (जैसे aawak_type, jawak_type, gender आदि)।',
+      note: 'list_type में aawak_type, jawak_type, gender, relation, condition आदि लोअरकेस में लिखें।',
+      columns: [
+        { key: 'list_type', name: 'लिस्ट प्रकार (Type)*', col_name: 'list_type', not_null: true, alt_names: ['list type', 'list_type', 'प्रकार'] },
+        { key: 'list_name_hin', name: 'नाम (हिंदी)', col_name: 'list_name_hin', not_null: false, alt_names: ['list name hin', 'नाम हिंदी'] },
+        { key: 'list_name_eng', name: 'नाम (English)*', col_name: 'list_name_eng', not_null: true, alt_names: ['list name eng', 'नाम english'] },
+        { key: 'list_name_roman', name: 'नाम (Roman)', col_name: 'list_name_roman', not_null: false, alt_names: ['list name roman'] }
+      ],
+      sampleRows: [
+        { list_type: 'aawak_type', list_name_hin: 'भेंट / दान', list_name_eng: 'Donation', list_name_roman: 'Bhent' }
+      ]
+    },
+    {
+      id: 'attribute',
+      name: 'attribute',
+      title: 'Attributes Master (विशेषता मास्टर)',
+      title_hin: 'सामग्री विशेषता मास्टर (रंग, साइज़, माप आदि)',
+      icon: 'uil-tag-alt',
+      badgeColor: 'primary',
+      desc: 'Product attribute definitions such as Color, Size, Weight, Brand.',
+      desc_hin: 'वेरिएंट निर्माण हेतु विशेषता श्रेणियां (जैसे रंग, साइज़, माप, ब्रांड)।',
+      columns: [
+        { key: 'attribute_hin', name: 'विशेषता नाम (हिंदी)*', col_name: 'attribute_hin', not_null: true, alt_names: ['attribute hin', 'attr hin', 'attribute_name', 'विशेषता'] },
+        { key: 'attribute_eng', name: 'विशेषता नाम (English)', col_name: 'attribute_eng', not_null: false, alt_names: ['attribute eng', 'attr eng'] },
+        { key: 'attribute_roman', name: 'विशेषता नाम (Roman)', col_name: 'attribute_roman', not_null: false, alt_names: ['attribute roman', 'attr roman'] }
+      ],
+      sampleRows: [
+        { attribute_hin: 'रंग', attribute_eng: 'Color', attribute_roman: 'Rang' },
+        { attribute_hin: 'साइज़', attribute_eng: 'Size', attribute_roman: 'Size' }
+      ]
+    },
+    {
+      id: 'attributes_value',
+      name: 'attributes_value',
+      title: 'Attribute Values (विशेषता मान)',
+      title_hin: 'विशेषता मान सूची (लाल, नीला, 500gm, XL आदि)',
+      icon: 'uil-brackets-curly',
+      badgeColor: 'info',
+      desc: 'Values assigned to attributes, e.g., Red, Blue for Color, 500gm for Weight.',
+      desc_hin: 'किसी विशेषता के अंतर्गत आने वाले विकल्प (जैसे रंग के लिए लाल, सफेद)।',
+      columns: [
+        { key: 'attribute', name: 'मूल विशेषता (Attribute)*', col_name: 'attribute', not_null: true, ref_table: 'attribute', alt_names: ['attribute', 'attribute_hin', 'एट्रीब्यूट'] },
+        { key: 'attribute_value_hin', name: 'मान (हिंदी)*', col_name: 'attribute_value_hin', not_null: true, alt_names: ['attribute value hin', 'value hin', 'मान'] },
+        { key: 'attribute_value_eng', name: 'मान (English)', col_name: 'attribute_value_eng', not_null: false, alt_names: ['attribute value eng', 'value eng'] },
+        { key: 'attribute_value_roman', name: 'मान (Roman)', col_name: 'attribute_value_roman', not_null: false, alt_names: ['attribute value roman', 'value roman'] }
+      ],
+      sampleRows: [
+        { attribute: 'रंग', attribute_value_hin: 'सफेद', attribute_value_eng: 'White' },
+        { attribute: 'रंग', attribute_value_hin: 'नीला', attribute_value_eng: 'Blue' }
+      ]
+    },
+    {
+      id: 'variant',
+      name: 'variant',
+      title: 'Variant Master (वेरिएंट मास्टर)',
+      title_hin: 'उत्पाद वेरिएंट (विशेषता संयोजन, SKU, दरें)',
+      icon: 'uil-apps',
+      badgeColor: 'warning',
+      desc: 'Product variants with comma-separated attributes, SKU, and price ranges.',
+      desc_hin: 'मूल आइटम के अंतर्गत विभिन्न विशेषताओं के संयोजन से बने वेरिएंट्स।',
+      columns: [
+        { key: 'item', name: 'मूल आइटम (Item)*', col_name: 'item', not_null: true, ref_table: 'item', alt_names: ['item', 'item_hin', 'आइटम'] },
+        { key: 'display_name_hin', name: 'वेरिएंट नाम (हिंदी)*', col_name: 'display_name_hin', not_null: true, alt_names: ['variant_hin', 'display name hin', 'वेरिएंट'] },
+        { key: 'display_name_eng', name: 'वेरिएंट नाम (English)', col_name: 'display_name_eng', not_null: false, alt_names: ['variant_eng', 'display name eng'] },
+        { key: 'display_name_roman', name: 'वेरिएंट नाम (Roman)', col_name: 'display_name_roman', not_null: false, alt_names: ['variant_roman'] },
+        { key: 'attributes_hin', name: 'विशेषताएं (Attributes)*', col_name: 'attributes_hin', not_null: true, type: 'array', alt_names: ['attributes hin', 'attrs hin', 'विशेषताएं'] },
+        { key: 'sku', name: 'एसकेयू (SKU)', col_name: 'sku', not_null: false, alt_names: ['sku', 'variant sku'] },
+        { key: 'unit', name: 'यूनिट (Unit)', col_name: 'unit', not_null: false, ref_table: 'unit', alt_names: ['unit', 'यूनिट'] },
+        { key: 'min_rate', name: 'न्यूनतम दर (Min Rate)', col_name: 'min_rate', not_null: false, type: 'number', alt_names: ['min rate', 'min_rate'] },
+        { key: 'max_rate', name: 'अधिकतम दर (Max Rate)', col_name: 'max_rate', not_null: false, type: 'number', alt_names: ['max rate', 'max_rate'] }
+      ],
+      sampleRows: [
+        { item: 'दाल', display_name_hin: 'तुअर दाल (प्रीमियम 1kg)', attributes_hin: '1kg, प्रीमियम', sku: 'DAL-TUR-1K', unit: 'पैकेट', min_rate: 150, max_rate: 180 }
+      ]
+    },
+    {
+      id: 'rel_item_category',
+      name: 'rel_item_category',
+      title: 'Item-Category Link (आइटम-श्रेणी संबंध)',
+      title_hin: 'आइटम और श्रेणी मैपिंग (संबंध सूची)',
+      icon: 'uil-link',
+      badgeColor: 'info',
+      desc: 'Map existing items to multiple categories.',
+      desc_hin: 'आइटम को उचित श्रेणी अथवा बहु-श्रेणी से जोड़ने की सूची।',
+      columns: [
+        { key: 'item', name: 'आइटम (Item)*', col_name: 'item', not_null: true, ref_table: 'item', alt_names: ['item', 'itemhin', 'item hin', 'आइटम'] },
+        { key: 'category', name: 'श्रेणी (Category)*', col_name: 'category', not_null: true, ref_table: 'category', alt_names: ['category', 'categories', 'श्रेणी'] }
+      ],
+      sampleRows: [
+        { item: 'चीनी', category: 'किराना' }
+      ]
+    },
+    {
+      id: 'rel_subitem_category',
+      name: 'rel_subitem_category',
+      title: 'Subitem-Category Link (सबआइटम-श्रेणी संबंध)',
+      title_hin: 'सबआइटम और श्रेणी मैपिंग (संबंध सूची)',
+      icon: 'uil-link-alt',
+      badgeColor: 'secondary',
+      desc: 'Map specific subitems under items to categories.',
+      desc_hin: 'मूल आइटम के सबआइटम को विशिष्ट श्रेणी से सम्बद्ध करने की सूची।',
+      columns: [
+        { key: 'item', name: 'मूल आइटम (Item)*', col_name: 'item', not_null: true, ref_table: 'item', alt_names: ['item', 'itemhin', 'item hin', 'आइटम'] },
+        { key: 'subitem', name: 'सबआइटम (Subitem)*', col_name: 'subitem', not_null: true, ref_table: 'subitem', alt_names: ['subitem', 'subitemhin', 'सबआइटम'] },
+        { key: 'category', name: 'श्रेणी (Category)*', col_name: 'category', not_null: true, ref_table: 'category', alt_names: ['category', 'categories', 'श्रेणी'] }
+      ],
+      sampleRows: [
+        { item: 'दाल', subitem: 'अरहर (तुअर)', category: 'किराना' }
+      ]
+    },
+    {
+      id: 'subitem_list',
+      name: 'subitem_list',
+      title: 'Subitem Directory (मानक सबआइटम मास्टर)',
+      title_hin: 'मानक सबआइटम डायरेक्टरी (सामान्य शब्दकोश)',
+      icon: 'uil-list-ol',
+      badgeColor: 'success',
+      desc: 'Standard global dictionary of subitem names in Hindi, English, and Roman.',
+      desc_hin: 'सामान्य सबआइटम नामों का केंद्रीय शब्दकोश (हिंदी, English व Roman)।',
+      columns: [
+        { key: 'subitem_hin', name: 'सबआइटम (हिंदी)*', col_name: 'subitem_hin', not_null: true, alt_names: ['subitem hin', 'subitemhin', 'namehin', 'सबआइटम'] },
+        { key: 'subitem_eng', name: 'सबआइटम (English)', col_name: 'subitem_eng', not_null: false, alt_names: ['subitem eng', 'subitemeng', 'nameeng'] },
+        { key: 'subitem_roman', name: 'सबआइटम (Roman)', col_name: 'subitem_roman', not_null: false, alt_names: ['subitem roman', 'subitemroman'] },
+        { key: 'extra_note', name: 'अतिरिक्त नोट (Note)', col_name: 'extra_note', not_null: false, alt_names: ['extra note', 'note', 'नोट'] }
+      ],
+      sampleRows: [
+        { subitem_hin: 'बासमती', subitem_eng: 'Basmati', subitem_roman: 'Basmati' }
+      ]
     }
   ];
 
@@ -307,13 +539,25 @@ export class ExcelStudioService {
 
       // 2. Ref Table Master validity check (O(1))
       if (col.ref_table) {
-        const ok = this.masterIndexer.isValid(col.ref_table, strVal);
-        if (!ok) {
-          cell.isValid = false;
-          cell.isWarning = false;
-          cell.errorMessage = `'${strVal}' मास्टर लिस्ट में नहीं मिला`;
-          errorCount++;
-          continue;
+        if (col.ref_table === 'subitem') {
+          const parentItemVal = this.getParentItemValueFromRow(row, columns);
+          const check = this.masterIndexer.isSubitemValidForParent(parentItemVal, strVal);
+          if (!check.valid) {
+            cell.isValid = false;
+            cell.isWarning = false;
+            cell.errorMessage = check.message || `'${strVal}' मास्टर लिस्ट में नहीं मिला`;
+            errorCount++;
+            continue;
+          }
+        } else {
+          const ok = this.masterIndexer.isValid(col.ref_table, strVal);
+          if (!ok) {
+            cell.isValid = false;
+            cell.isWarning = false;
+            cell.errorMessage = `'${strVal}' मास्टर लिस्ट में नहीं मिला`;
+            errorCount++;
+            continue;
+          }
         }
       }
 
@@ -337,6 +581,27 @@ export class ExcelStudioService {
 
     row.hasError = errorCount > 0;
     row.errorCount = errorCount;
+  }
+
+  /**
+   * Helper to retrieve the parent item value from a row for subitem contextual filtering & validation
+   */
+  public getParentItemValueFromRow(row: StudioRow, columns: StudioColumn[]): string {
+    if (!row || !row.cells) return '';
+    for (const k of ['item', 'item_hin', 'item_name']) {
+      const val = row.cells[k]?.value;
+      if (val !== null && val !== undefined && String(val).trim() !== '') {
+        return String(val).trim();
+      }
+    }
+    const itemCol = columns.find(c => c.ref_table === 'item');
+    if (itemCol) {
+      const val = row.cells[itemCol.key]?.value;
+      if (val !== null && val !== undefined && String(val).trim() !== '') {
+        return String(val).trim();
+      }
+    }
+    return '';
   }
 
   /**

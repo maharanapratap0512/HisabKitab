@@ -301,7 +301,7 @@ export class HeaderComponent implements AfterViewInit {
           { title: 'Integrity Checkup', link: 'integrity-checkup', visible: this.auth.webUser.settings?.integrity_checkup?.visible ?? true },
         ]
       },
-      { title: 'Excel Studio', icon: 'uil-table', link: 'excel-studio', visible: true, target: '_blank' },
+      { title: 'Excel Studio', icon: 'uil-table', link: 'excel-studio', visible: true },
       { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible ?? true },
       { title: 'MySQL', icon: 'uil-layer-group', link: 'mysql', visible: true },
     ];

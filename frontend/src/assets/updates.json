@@ -9,10 +9,10 @@
             {
                 "type": "feature",
                 "module": "Excel Studio",
-                "title": "Inbuilt Excel Studio & Preformatted Smart Templates",
-                "title_hin": "इनबिल्ट एक्सेल स्टूडियो एवं रेडीमेड फॉर्मेट्स",
-                "desc": "Introducing a high-speed inbuilt Excel spreadsheet with preformatted templates for Bachat, Vehicles, Items, Jawak, and PBK lists, allowing direct file loading, editing, row copy-paste, and styled Excel exports.",
-                "desc_hin": "सॉफ्टवेयर के अंदर ही नया एक्सेल स्टूडियो उपलब्ध कराया गया है जिसमें बचत, वाहन, आइटम, जावक और सेवाधारी के रेडीमेड फॉर्मेट्स सीधे लोड, एडिट, रो कॉपी-पेस्ट व एक्सपोर्ट किए जा सकते हैं।"
+                "title": "All 17 System Formats & Intelligent Item-Linked Subitem Dropdown",
+                "title_hin": "सभी 17 सिस्टम फॉर्मेट्स एवं आइटम-अनुसार सबआइटम सुझाव",
+                "desc": "Excel Studio now supports all 17 system formats (Products, Assets, Categories, Districts, Attributes, Variants, etc.). The subitem dropdown now smartly shows only subitems belonging to the selected item with automatic item linkage.",
+                "desc_hin": "एक्सेल स्टूडियो में उपकरण, संपत्ति, श्रेणी, ज़िला, एट्रीब्यूट, वेरिएंट सहित सभी 17 सिस्टम फॉर्मेट्स जोड़े गए हैं। साथ ही सबआइटम ड्रॉपडाउन अब प्रत्येक पंक्ति में चुने गए मुख्य आइटम के अनुसार ही संबंधित सबआइटम सुझाव दिखाता है।"
             },
             {
                 "type": "feature",

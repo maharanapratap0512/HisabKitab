@@ -355,16 +355,16 @@
               [class.cell-active]="activeRowIndex === rIdx && activeColKey === col.key"
               [class.cell-bad]="mode === 'intelligent' && rowHasData(r) && r.cells[col.key] && !r.cells[col.key].isValid"
               [class.cell-warning]="mode === 'intelligent' && rowHasData(r) && r.cells[col.key] && r.cells[col.key].isWarning"
-              [attr.title]="mode === 'intelligent' && rowHasData(r) ? r.cells[col.key]?.errorMessage : null"
+              [attr.title]="mode === 'intelligent' && rowHasData(r) ? r.cells[col.key].errorMessage : null"
               (click)="onCellClick(rIdx, col.key)"
               (contextmenu)="onCellContextMenu($event, rIdx, col.key)">
             
             <!-- Inactive Display Value (Only shows required warning if row has data!) -->
             <div *ngIf="activeRowIndex !== rIdx || activeColKey !== col.key" class="cell-text">
-              <span *ngIf="r.cells[col.key]?.value !== '' && r.cells[col.key]?.value !== null && r.cells[col.key]?.value !== undefined">
+              <span *ngIf="r.cells[col.key].value !== '' && r.cells[col.key].value !== null && r.cells[col.key].value !== undefined">
                 {{ r.cells[col.key].value }}
               </span>
-              <span *ngIf="rowHasData(r) && (r.cells[col.key]?.value === '' || r.cells[col.key]?.value === null || r.cells[col.key]?.value === undefined) && mode === 'intelligent' && col.not_null"
+              <span *ngIf="rowHasData(r) && (r.cells[col.key].value === '' || r.cells[col.key].value === null || r.cells[col.key].value === undefined) && mode === 'intelligent' && col.not_null"
                     class="text-danger small fst-italic font-11">
                 (आवश्यक*)
               </span>
@@ -388,7 +388,9 @@
                 (click)="$event.stopPropagation()">
                 
                 <div class="pro-dropdown-header px-3 py-2 border-bottom d-flex align-items-center justify-content-between">
-                  <span class="pro-header-label">{{ col.ref_table ? col.ref_table.toUpperCase() : 'SUGGESTIONS' }}</span>
+                  <span class="pro-header-label">
+                    {{ (col.ref_table === 'subitem' && currentSubitemParentItem) ? 'सबआइटम (आइटम: ' + currentSubitemParentItem + ')' : (col.ref_table ? col.ref_table.toUpperCase() : 'SUGGESTIONS') }}
+                  </span>
                   <span class="badge bg-soft-primary text-primary font-10">{{ autocompleteSuggestions.length }} उपलब्ध</span>
                 </div>
 

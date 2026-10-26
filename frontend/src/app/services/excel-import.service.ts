@@ -22,7 +22,7 @@ export class ExcelImportService {
     { name: 'district', autoUpdate: true },
     { name: 'attribute', autoUpdate: true },
     { name: 'attributes_value', autoUpdate: true },
-    { col_name: 'variant', autoUpdate: true, note: 'Import variants with comma-separated attributes.' },
+    { name: 'variant', col_name: 'variant', autoUpdate: true, note: 'Import variants with comma-separated attributes.' },
     { name: 'jawak', autoUpdate: true, note: 'Either PBK (Sewadhari) or Jawak MM (Destination) is mandatory.' },
   ];
   config: any = {
@@ -153,6 +153,12 @@ export class ExcelImportService {
       { col_name: 'district_hin', name: 'district_hin', alt_names: ["district hin", "namehin"], not_null: true, },
       { col_name: 'district_eng', name: 'district_eng', alt_names: ["district eng", "nameeng"], not_null: true, },
       { col_name: 'state', name: 'state', alt_names: ["स्टेट", "राज्य"], not_null: true, ref_table: 'state', ref_field: 'state_id', ref_data: 'state_hin' },
+    ],
+    subitem_list: [
+      { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitem hin", "subitemhin", "namehin", "सबआइटम"], not_null: true },
+      { col_name: 'subitem_eng', name: 'subitem_eng', alt_names: ["subitem eng", "subitemeng", "nameeng"], not_null: false },
+      { col_name: 'subitem_roman', name: 'subitem_roman', alt_names: ["subitem roman", "subitemroman"], not_null: false },
+      { col_name: 'extra_note', name: 'extra_note', alt_names: ["extra note", "extranote", "note", "नोट"], not_null: false },
     ],
     bachat: [
       { col_name: 'sn', name: 'sn', alt_names: ["sr no", "sr number", "sr num", "sr_num", "serial no"], not_null: false },

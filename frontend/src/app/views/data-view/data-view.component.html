@@ -43,7 +43,7 @@
         </div>
 
         <!-- Active Filter Pills (District State & Country) -->
-        <div class="row px-2 pb-2" *ngIf="Type === 'district' && ((filterCountryIds?.length || 0) > 0 || (filterStateIds?.length || 0) > 0)">
+        <div class="row px-2 pb-2" *ngIf="Type === 'district' && (filterCountryIds.length > 0 || filterStateIds.length > 0)">
             <div class="col-12 d-flex align-items-center flex-wrap gap-1">
                 <span class="text-muted small me-1"><i class="uil uil-filter"></i> Active Filters:</span>
 
@@ -81,7 +81,7 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span>{{row.title}}</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="auto"
-                                        [isOpen]="(filterStateIds?.length || 0) > 0"
+                                        [isOpen]="filterStateIds.length > 0"
                                         (clear)="clearStateFilter()" triggerOn="click">
                                         <div style="min-width: 250px;">
                                             <div class="fw-bold small mb-1">Select State</div>
@@ -101,7 +101,7 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span>{{row.title}}</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="auto"
-                                        [isOpen]="(filterCountryIds?.length || 0) > 0"
+                                        [isOpen]="filterCountryIds.length > 0"
                                         (clear)="clearCountryFilter()" triggerOn="click">
                                         <div style="min-width: 250px;">
                                             <div class="fw-bold small mb-1">Select Country</div>

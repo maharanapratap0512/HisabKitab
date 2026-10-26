@@ -40,6 +40,7 @@ export class ExcelStudioUiComponent implements OnInit {
   isAutocompleteOpen: boolean = false;
   selectedSuggestionIndex: number = 0;
   openDropdownUpwards: boolean = false;
+  currentSubitemParentItem: string = '';
 
   // Formula Bar / Active Coordinate
   activeCellCoordinate: string = 'A1';
@@ -399,10 +400,17 @@ export class ExcelStudioUiComponent implements OnInit {
 
     const col = this.getColumn(colKey);
     if (this.mode === 'intelligent' && col?.ref_table) {
-      this.autocompleteSuggestions = this.masterIndexer.getSuggestions(col.ref_table, this.activeCellEditorValue, 20);
+      if (col.ref_table === 'subitem') {
+        this.currentSubitemParentItem = this.getParentItemValue(this.rows[rowIndex]);
+        this.autocompleteSuggestions = this.masterIndexer.getSubitemSuggestions(this.currentSubitemParentItem, this.activeCellEditorValue, 20);
+      } else {
+        this.currentSubitemParentItem = '';
+        this.autocompleteSuggestions = this.masterIndexer.getSuggestions(col.ref_table, this.activeCellEditorValue, 20);
+      }
       this.isAutocompleteOpen = this.autocompleteSuggestions.length > 0;
       this.selectedSuggestionIndex = 0;
     } else {
+      this.currentSubitemParentItem = '';
       this.isAutocompleteOpen = false;
     }
 
@@ -418,6 +426,10 @@ export class ExcelStudioUiComponent implements OnInit {
         this.activeCellInput.nativeElement.select();
       }
     }, 40);
+  }
+
+  getParentItemValue(row: StudioRow | null | undefined): string {
+    return this.studioService.getParentItemValueFromRow(row as StudioRow, this.columns);
   }
 
   updateCoordinate(rowIndex: number, colKey?: string): void {
@@ -437,7 +449,14 @@ export class ExcelStudioUiComponent implements OnInit {
 
     const col = this.getColumn(this.activeColKey || '');
     if (this.mode === 'intelligent' && col?.ref_table) {
-      this.autocompleteSuggestions = this.masterIndexer.getSuggestions(col.ref_table, val, 20);
+      if (col.ref_table === 'subitem') {
+        const row = this.activeRowIndex !== null ? this.rows[this.activeRowIndex] : null;
+        this.currentSubitemParentItem = this.getParentItemValue(row);
+        this.autocompleteSuggestions = this.masterIndexer.getSubitemSuggestions(this.currentSubitemParentItem, val, 20);
+      } else {
+        this.currentSubitemParentItem = '';
+        this.autocompleteSuggestions = this.masterIndexer.getSuggestions(col.ref_table, val, 20);
+      }
       this.isAutocompleteOpen = this.autocompleteSuggestions.length > 0;
       this.selectedSuggestionIndex = 0;
     }
@@ -471,13 +490,27 @@ export class ExcelStudioUiComponent implements OnInit {
     const oldVal = this.previousCellValueBeforeEdit;
     const newVal = opt.label;
     const colKey = this.activeColKey;
+    const currentRow = this.rows[this.activeRowIndex];
 
     this.activeCellEditorValue = newVal;
-    this.rows[this.activeRowIndex].cells[colKey].value = newVal;
+    currentRow.cells[colKey].value = newVal;
     this.isAutocompleteOpen = false;
 
+    // Contextual Subitem Auto-fill: If subitem selected and parent item on this row is empty, auto-fill parent item!
+    const col = this.getColumn(colKey);
+    if (col?.ref_table === 'subitem' && opt.raw?.parent_item) {
+      const pIt = opt.raw.parent_item;
+      const pLabel = pIt.item_hin || pIt.item_eng || '';
+      if (currentRow.cells['item'] && (!currentRow.cells['item'].value || String(currentRow.cells['item'].value).trim() === '')) {
+        currentRow.cells['item'].value = pLabel;
+      }
+      if (currentRow.cells['item_hin'] && (!currentRow.cells['item_hin'].value || String(currentRow.cells['item_hin'].value).trim() === '')) {
+        currentRow.cells['item_hin'].value = pIt.item_hin || pLabel;
+      }
+    }
+
     if (this.mode === 'intelligent') {
-      this.studioService.validateRow(this.rows[this.activeRowIndex], this.columns);
+      this.studioService.validateRow(currentRow, this.columns);
       this.rebuildErrorCellsList();
     }
     if (oldVal !== newVal) {
