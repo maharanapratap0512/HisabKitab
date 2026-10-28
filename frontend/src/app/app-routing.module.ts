@@ -52,6 +52,7 @@ import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.comp
 import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
 import { UniversalReportComponent } from './reports/universal-report/universal-report.component';
 import { ExcelStudioUiComponent } from './modules/excel-studio/components/excel-studio-ui/excel-studio-ui.component';
+import { SutramStudioComponent } from './modules/sutram-studio/sutram-studio.component';
 
 const routes: Routes = [
    {
@@ -121,6 +122,7 @@ const routes: Routes = [
          { path: "import_export", component: ImportExportComponent },
          { path: "mysql", component: MysqlComponent },
          { path: "feedback", component: P2pFeedbackComponent },
+         { path: "sutram-studio", component: SutramStudioComponent },
       ],
       resolve: {
          lists: listsResolver

@@ -79,10 +79,40 @@ class RefMatcher {
         const matchFields = header.matchFields ?? this._guessMatchFields(header.ref_table, refRows);
 
         // 1. direct match against ref table
+        const tbl = (header.ref_table || '').toLowerCase();
         for (const row of refRows) {
+            // Check raw ID match if numeric
+            if (String(row._id) === clean) {
+                return row._id;
+            }
+
+            // Check full combination display match (e.g. "भारत : India")
+            if (tbl) {
+                const hin = row[`${tbl}_hin`];
+                const eng = row[`${tbl}_eng`];
+                const code = row[`${tbl}_code`];
+                if (hin && eng) {
+                    if (this._clean(`${hin} : ${eng}`) === clean) return row._id;
+                    if (code && this._clean(`${hin} : ${eng} : ${code}`) === clean) return row._id;
+                }
+            }
+
+            // Check individual match fields
             for (const field of matchFields) {
                 if (this._clean(row[field]) === clean) {
                     return row._id;
+                }
+            }
+
+            // If input is composite like "भारत : India", check individual parts
+            if (clean.includes(':')) {
+                const parts = clean.split(':').map(p => this._clean(p)).filter(Boolean);
+                for (const p of parts) {
+                    for (const field of matchFields) {
+                        if (this._clean(row[field]) === p) {
+                            return row._id;
+                        }
+                    }
                 }
             }
         }
@@ -228,16 +258,61 @@ class RefMatcher {
     _guessMatchFields(refTable, refRows) {
         if (!refRows.length) return ['name'];
         const sample = refRows[0];
-        const keys   = Object.keys(sample).filter(k => k !== '_id');
-        const patterns = ['_hin', '_eng', '_roman', '_code', '_short', '_full', 'name', 'roll_no'];
-        const matched = keys.filter(k => patterns.some(p => k.includes(p)));
-        return matched.length ? matched : keys.slice(0, 3);
+        const keys   = Object.keys(sample).filter(k => k !== '_id' && !k.includes('_by_dept_id') && k !== 'verify');
+        const tblPrefix = (refTable || '').toLowerCase() + '_';
+
+        // 1. Prioritize fields that start with the reference table name: ${refTable}_hin, ${refTable}_eng, etc.
+        const tblFields = keys.filter(k => k.startsWith(tblPrefix));
+        tblFields.sort((a, b) => {
+            const getW = (n) => {
+                if (n === `${tblPrefix}hin`) return 1;
+                if (n === `${tblPrefix}eng`) return 2;
+                if (n === `${tblPrefix}roman`) return 3;
+                if (n === `${tblPrefix}code` || n === `${tblPrefix}roll` || n === `${tblPrefix}full`) return 4;
+                if (n === `${tblPrefix}short` || n === `${tblPrefix}name`) return 5;
+                return 6;
+            };
+            return getW(a) - getW(b);
+        });
+
+        // 2. Secondary patterns
+        const otherPatterns = ['_hin', '_eng', '_roman', '_code', '_short', '_full', 'name', 'roll_no'];
+        const otherFields = keys.filter(k => !k.startsWith(tblPrefix) && otherPatterns.some(p => k.includes(p)));
+
+        const combined = [...tblFields, ...otherFields];
+        return combined.length ? combined : keys.slice(0, 3);
     }
 
     _getRefDisplay(rawValue, header, id) {
         const refRows = this._refCache[header.ref_table] ?? [];
         const row = refRows.find(r => r._id == id);
-        return row ? (row[header.ref_data] ?? rawValue) : rawValue;
+        if (!row) return rawValue;
+        if (header.ref_data && row[header.ref_data]) return row[header.ref_data];
+
+        const tbl = (header.ref_table || '').toLowerCase();
+        if (tbl) {
+            const hin = row[`${tbl}_hin`];
+            const eng = row[`${tbl}_eng`];
+            const code = row[`${tbl}_code`];
+            const full = row[`${tbl}_full`];
+            const short = row[`${tbl}_short`];
+            const name = row[`${tbl}_name`];
+
+            if (hin && eng) return code ? `${hin} : ${eng} : ${code}` : `${hin} : ${eng}`;
+            if (hin && code) return `${hin} : ${code}`;
+            if (hin) return hin;
+            if (full) return short ? `${full} (${short})` : full;
+            if (name) return name;
+        }
+
+        const hinKey = Object.keys(row).find(k => k.endsWith('_hin'));
+        if (hinKey) {
+            const prefix = hinKey.slice(0, -4);
+            const engVal = row[`${prefix}_eng`];
+            return engVal ? `${row[hinKey]} : ${engVal}` : row[hinKey];
+        }
+
+        return row.name || row.title || rawValue;
     }
 
     _clean(str) {

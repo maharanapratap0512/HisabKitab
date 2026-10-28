@@ -10,6 +10,20 @@
   &.dark-studio {
     background-color: #13122b;
     color: #e2e1ff;
+
+    .format-select-btn {
+      .selected-format-chip {
+        background: rgba(114, 124, 245, 0.22);
+        color: #a5b4fc;
+        border-color: rgba(114, 124, 245, 0.45);
+      }
+
+      &:hover .selected-format-chip {
+        background-color: #ffffff !important;
+        color: #312e81 !important;
+        border-color: #ffffff !important;
+      }
+    }
   }
 
   &.light-studio {
@@ -76,6 +90,39 @@
   .audit-summary-chip {
     background: rgba(125, 125, 125, 0.1);
     border: 1px solid rgba(125, 125, 125, 0.2);
+  }
+
+  .format-select-btn {
+    transition: all 0.15s ease-in-out;
+
+    .btn-format-prefix {
+      opacity: 0.9;
+    }
+
+    .selected-format-chip {
+      background: rgba(114, 124, 245, 0.12);
+      color: #727cf5;
+      border: 1px solid rgba(114, 124, 245, 0.3);
+      border-radius: 4px;
+      transition: all 0.15s ease-in-out;
+    }
+
+    &:hover {
+      background-color: #727cf5 !important;
+      border-color: #727cf5 !important;
+      color: #ffffff !important;
+
+      .btn-format-prefix {
+        color: #ffffff !important;
+      }
+
+      .selected-format-chip {
+        background-color: #ffffff !important;
+        color: #4338ca !important;
+        border-color: #ffffff !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+    }
   }
 
   .active-format-badge {
@@ -183,12 +230,13 @@
     top: 0;
     z-index: 20;
     white-space: nowrap;
-    padding: 5px 8px;
-    font-weight: 600;
+    padding: 7px 10px;
+    font-size: 13px;
+    font-weight: 700;
     border-right: 1px solid rgba(125, 125, 125, 0.2);
     border-bottom: 2px solid rgba(125, 125, 125, 0.35);
     background: inherit;
-    height: 32px;
+    height: 38px;
     user-select: none;
 
     &.corner-header-cell {
@@ -237,7 +285,8 @@
       background: inherit;
       border-right: 2px solid rgba(125, 125, 125, 0.35);
       user-select: none;
-      height: 28px;
+      height: 23px;
+      font-size: 10.5px;
 
       &:hover {
         background-color: rgba(59, 130, 246, 0.15);
@@ -246,15 +295,15 @@
   }
 
   tr.custom-heading-row th {
-    top: 32px !important;
-    height: 30px;
+    top: 38px !important;
+    height: 32px;
     padding: 0;
     z-index: 19;
     background: inherit;
   }
 
   .custom-header-field {
-    height: 30px;
+    height: 32px;
     border-radius: 0;
     background: transparent;
     color: inherit;
@@ -280,19 +329,21 @@
 }
 
 .studio-cell {
-  height: 28px;
+  height: 23px;
   position: relative;
   cursor: cell;
   transition: background-color 0.1s ease;
+  font-size: 11.5px;
 
   .cell-text {
-    padding: 3px 8px;
+    padding: 1px 6px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: 28px;
+    height: 23px;
     display: flex;
     align-items: center;
+    font-size: 11.5px;
   }
 
   &:hover {
@@ -325,11 +376,11 @@
 
   .cell-input-raw {
     width: 100%;
-    height: 28px;
+    height: 23px;
     border-radius: 0;
     border: none;
-    padding: 2px 7px;
-    font-size: 12px;
+    padding: 1px 6px;
+    font-size: 11.5px;
     outline: none;
     box-shadow: none;
     background: inherit;
@@ -340,7 +391,7 @@
 /* 5. PROFESSIONAL THEME-ADAPTIVE DROPDOWN (SOLID, OPAQUE, MODERN) */
 .pro-autocomplete-dropdown {
   position: absolute;
-  top: 30px;
+  top: 24px;
   left: 0;
   min-width: 280px;
   max-width: 400px;
@@ -756,18 +807,96 @@
   }
 }
 
-/* 7. BOTTOM FOOTER */
+/* 7. BOTTOM FOOTER & MULTI-SHEET TABS */
 .studio-footer {
   flex-shrink: 0;
   background: inherit;
-  min-height: 36px;
 
-  .sheet-tab {
-    border-radius: 4px 4px 0 0;
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-    border-bottom: 2px solid #10b981;
-    cursor: pointer;
+  .sheet-tabs-container {
+    background: rgba(125, 125, 125, 0.05);
+
+    .scroll-tab-btn {
+      color: inherit;
+      opacity: 0.7;
+      background: transparent;
+
+      &:hover {
+        opacity: 1;
+        background: rgba(125, 125, 125, 0.15);
+      }
+    }
+
+    .sheet-tabs-strip {
+      scrollbar-width: none; /* Firefox */
+      &::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+      }
+    }
+
+    .excel-tab-pill {
+      border-radius: 4px 4px 0 0;
+      padding: 4px 12px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      color: inherit;
+      opacity: 0.75;
+      border: 1px solid transparent;
+      border-bottom: 2px solid transparent;
+
+      &:hover {
+        opacity: 1;
+        background: rgba(125, 125, 125, 0.1);
+      }
+
+      &.active-sheet-tab {
+        opacity: 1;
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
+        border-color: rgba(16, 185, 129, 0.25);
+        border-bottom: 2px solid #10b981;
+        font-weight: 700;
+      }
+    }
+
+    .add-sheet-btn {
+      border: 1px dashed rgba(125, 125, 125, 0.4);
+      background: transparent;
+      line-height: 1;
+
+      &:hover {
+        background: rgba(99, 102, 241, 0.15);
+        border-color: #6366f1;
+      }
+    }
+  }
+
+  .sheet-status-bar {
+    min-height: 32px;
+
+    .zoom-pill-controls {
+      background: rgba(125, 125, 125, 0.08);
+      border-color: rgba(125, 125, 125, 0.2) !important;
+
+      .btn-icon {
+        color: inherit;
+        opacity: 0.75;
+        background: transparent;
+
+        &:hover {
+          opacity: 1;
+          color: #3b82f6;
+        }
+      }
+
+      .zoom-display-btn {
+        background: transparent;
+        color: inherit;
+
+        &:hover {
+          color: #10b981;
+        }
+      }
+    }
   }
 
   .proceed-import-btn {
@@ -778,5 +907,16 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35) !important;
     }
+  }
+}
+
+.spin {
+  display: inline-block;
+  animation: studioSpin 1s linear infinite;
+}
+
+@keyframes studioSpin {
+  100% {
+    transform: rotate(360deg);
   }
 }

@@ -12,17 +12,18 @@ const BaseTable = require('../database/base.table');
 const Fn = require('../database/functions');
 const { sutramDB } = require('../database/db.model');
 
-// ── Table instances  (schema in schema.js drives all joins automatically) ──────
-const attributes = new BaseTable('attributes');
-const attributes_value = new BaseTable('attributes_value');
-const variant = new BaseTable('variant');
-const variant_attr_map = new BaseTable('variant_attribute_map');
-const variant_cat_map = new BaseTable('variant_category_map');
-const variant_aliases = new BaseTable('variant_aliases');
-const item_aliases = new BaseTable('item_aliases');
-const subitem = new BaseTable('subitem');
-const rel_subitem_cat = new BaseTable('rel_subitem_category');
-const item = new BaseTable('item');
+// ── Sutram Table instances (schema in schema.js drives all operations & joins) ──
+const attributes = sutramDB.table('attributes');
+const attributes_value = sutramDB.table('attributes_value');
+const variant = sutramDB.table('variant');
+const variant_attr_map = sutramDB.table('variant_attribute_map');
+const variant_cat_map = sutramDB.table('variant_category_map');
+const variant_aliases = sutramDB.table('variant_aliases');
+const subitem_aliases = sutramDB.table('subitem_aliases');
+const item_aliases = sutramDB.table('item_aliases');
+const subitem = sutramDB.table('subitem');
+const rel_subitem_cat = sutramDB.table('rel_subitem_category');
+const item = sutramDB.table('item');
 
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -224,20 +225,20 @@ function getItemVariantData(item_id) {
             { orderBy: '_id ASC' }
         );
 
-        v.aliases = variant_aliases.getAll(
-            { variant_id: v._id },
+        // the mirrored subitem row
+        const si = subitem.getOne({ variant_id: v._id, active: 1 }, { full: true });
+        v.subitem = si || null;
+
+        v.aliases = si ? subitem_aliases.getAll(
+            { subitem_id: si._id },
             { orderBy: '_id ASC' }
-        );
+        ) : [];
 
         // variant_category_map: schema joins → category auto-included
         v.categories = variant_cat_map.getAll(
             { variant_id: v._id },
             { orderBy: '_id ASC' }
         );
-
-        // the mirrored subitem row
-        const si = subitem.getOne({ variant_id: v._id, active: 1 }, { full: true });
-        v.subitem = si || null;
     }
 
     // all global attributes for the generator dropdowns
@@ -259,6 +260,9 @@ function getItemVariantData(item_id) {
         `subitem.item_id = ${id} AND (subitem.variant_id IS NULL) AND subitem.active = 1`,
         { orderBy: 'subitem_hin ASC' }
     );
+    for (const us of unlinked_subitems) {
+        us.aliases = subitem_aliases.getAll({ subitem_id: us._id }, { orderBy: '_id ASC' });
+    }
 
     return { variants, all_attributes, attr_value_map, item_aliases: aliases, unlinked_subitems };
 }
@@ -483,6 +487,7 @@ function updateVariant(variant_id, data, userData) {
         }, id);
 
         // sync subitem mirror
+        const si = subitem.getOne({ variant_id: id, active: 1 }, { full: false });
         subitem.update({
             subitem_hin: data.display_name_hin || null,
             subitem_eng: data.display_name_eng || null,
@@ -498,7 +503,6 @@ function updateVariant(variant_id, data, userData) {
         // re-sync categories (delete + re-insert)
         if (Array.isArray(data.category_ids)) {
             variant_cat_map.delete({ variant_id: id });
-            const si = subitem.getOne({ variant_id: id, active: 1 }, { full: false });
             if (si) rel_subitem_cat.delete({ subitem_id: si._id });
 
             for (const cat_id of data.category_ids) {
@@ -507,11 +511,11 @@ function updateVariant(variant_id, data, userData) {
             }
         }
 
-        // re-sync aliases (delete + re-insert)
-        if (Array.isArray(data.aliases)) {
-            variant_aliases.delete({ variant_id: id });
+        // re-sync aliases (delete + re-insert into subitem_aliases)
+        if (Array.isArray(data.aliases) && si) {
+            subitem_aliases.delete({ subitem_id: si._id });
             for (const a of data.aliases) {
-                if (a.alias) variant_aliases.insert({ variant_id: id, alias: a.alias, created_at: new Date().toISOString() }, false);
+                if (a.alias) subitem_aliases.insert({ subitem_id: si._id, alias: a.alias.trim(), created_at: new Date().toISOString() }, false);
             }
         }
 
@@ -533,6 +537,7 @@ function deleteVariant(variant_id) {
         const subs = subitem.getAll({ variant_id: id });
         for (const s of subs) {
             rel_subitem_cat.delete({ subitem_id: s._id });
+            subitem_aliases.delete({ subitem_id: s._id });
         }
         // 2. Delete linked subitem mirror rows FIRST to prevent Foreign Key constraint failure
         subitem.delete({ variant_id: id });
@@ -564,23 +569,39 @@ function getVariantsByItem(item_id) {
 
 
 // ═════════════════════════════════════════════════════════════════════════════
-//  VARIANT ALIASES
+//  SUBITEM & VARIANT ALIASES (Consolidated into subitem_aliases)
 // ═════════════════════════════════════════════════════════════════════════════
 
-function getVariantAliases(variant_id) {
-    return variant_aliases.getAll({ variant_id: Number(variant_id) }, { orderBy: '_id ASC' });
+function getSubitemAliases(subitemId) {
+    return subitem_aliases.getAll({ subitem_id: Number(subitemId) }, { orderBy: '_id ASC' });
 }
 
-function insertVariantAlias(data) {
-    return variant_aliases.insert({
-        variant_id: Number(data.variant_id),
-        alias: data.alias,
+function insertSubitemAlias(data) {
+    return subitem_aliases.insert({
+        subitem_id: Number(data.subitem_id),
+        alias: data.alias.trim(),
         created_at: new Date().toISOString(),
     });
 }
 
+function deleteSubitemAlias(id) {
+    return subitem_aliases.deleteById(id);
+}
+
+function getVariantAliases(variant_id) {
+    const si = subitem.getOne({ variant_id: Number(variant_id) }, { full: false });
+    if (!si) return [];
+    return getSubitemAliases(si._id);
+}
+
+function insertVariantAlias(data) {
+    const si = subitem.getOne({ variant_id: Number(data.variant_id) }, { full: false });
+    if (!si) throw new Error('Subitem for variant not found');
+    return insertSubitemAlias({ subitem_id: si._id, alias: data.alias });
+}
+
 function deleteVariantAlias(id) {
-    return variant_aliases.deleteById(id);
+    return deleteSubitemAlias(id);
 }
 
 
@@ -644,4 +665,7 @@ module.exports = {
     getVariantAliases,
     insertVariantAlias,
     deleteVariantAlias,
+    getSubitemAliases,
+    insertSubitemAlias,
+    deleteSubitemAlias,
 };

@@ -8,6 +8,9 @@ const hmp_batch = new BaseTable('hmp_batch');
 const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 const Fn = require('../database/functions');
+const { sutramDB } = require('../database/db.model');
+const subitemAliasesTable = sutramDB.table('subitem_aliases');
+const relSubitemCatTable = sutramDB.table('rel_subitem_category');
 
 
 
@@ -214,6 +217,11 @@ router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
             let idStr = req.params.id;
+            const ids = idStr.includes(',') ? idStr.split(',').map(Number) : [Number(idStr)];
+            for (const sid of ids) {
+                try { relSubitemCatTable.delete({ subitem_id: sid }); } catch (e) { }
+                try { subitemAliasesTable.delete({ subitem_id: sid }); } catch (e) { }
+            }
             if (idStr.includes(',')) {
                 await DB.deleteManyIds('subitem', idStr).then((data) => {
                     res.json({

@@ -133,6 +133,7 @@ import { ReportItemLedgerComponent } from './reports/report-item-ledger/report-i
 import { UniversalReportComponent } from './reports/universal-report/universal-report.component';
 import { ExcelStudioUiComponent } from './modules/excel-studio/components/excel-studio-ui/excel-studio-ui.component';
 import { FormatScannerModalComponent } from './modules/excel-studio/components/format-scanner-modal/format-scanner-modal.component';
+import { SutramStudioModule } from './modules/sutram-studio/sutram-studio.module';
 
 
 // import { FilterPipeModule } from 'ngx-filter-pipe';
@@ -277,7 +278,8 @@ import { FormatScannerModalComponent } from './modules/excel-studio/components/f
     NetdropModule.forRoot({
       // Dynamically get the host IP and calculate backend port (Frontend Port - 1000)
       serverUrl: window.location.protocol + '//' + window.location.hostname + ':' + ((parseInt(window.location.port) || 5000) - 1000)
-    })
+    }),
+    SutramStudioModule
   ],
   providers: [GlobalService, AuthService, ThemeService, SelectionService],
   bootstrap: [AppComponent],

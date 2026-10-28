@@ -102,6 +102,10 @@ export class BachatImportComponent {
     });
   }
 
+  get hasSwQty(): boolean {
+    return Array.isArray(this.excelArrObj) && this.excelArrObj.some((x: any) => x.sw_qty != null && x.sw_qty !== '');
+  }
+
   hideZero(key: any, ev: any) {
     if (ev.checked) {
       this.filterObj[key] = true;

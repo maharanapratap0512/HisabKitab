@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { HttpService } from 'src/app/services/http.service';
@@ -8,9 +8,10 @@ import { HttpService } from 'src/app/services/http.service';
     templateUrl: './item-alias-entry.component.html',
     styleUrls: ['./item-alias-entry.component.scss'],
 })
-export class ItemAliasEntryComponent implements OnInit {
+export class ItemAliasEntryComponent implements OnInit, OnChanges {
 
-    @Input()  getData: any = null;   // the item object
+    @Input()  getData: any = null;   // the item or subitem object
+    @Input()  type: 'item' | 'subitem' = 'item';
     @Output() response = new EventEmitter<any>();
 
     aliasForm = { alias: '' };
@@ -24,19 +25,36 @@ export class ItemAliasEntryComponent implements OnInit {
 
     ngOnInit(): void { this.loadAliases(); }
 
+    ngOnChanges(): void { this.loadAliases(); }
+
     loadAliases() {
         if (!this.getData?._id) return;
-        this.http.get(this.api.getUrl('VARIANT') + 'item-aliases/' + this.getData._id)
+        const url = this.type === 'subitem'
+            ? this.api.getUrl('VARIANT') + 'subitem-aliases/' + this.getData._id
+            : this.api.getUrl('VARIANT') + 'item-aliases/' + this.getData._id;
+        this.http.get(url)
             .subscribe((d: any) => { 
-                this.rows = d.success ? d.result : []; 
-                // Ensure rows only show alias and _id as per new schema
+                if (d.success) {
+                    this.rows = d.result || [];
+                } else {
+                    this.toastr.error(d.message || 'Aliases load nahi ho sake');
+                }
+            }, (err) => {
+                this.toastr.error(err.error?.message || err.message || 'Aliases load karte samay error aaya');
             });
     }
 
     save() {
         if (!this.aliasForm.alias.trim()) { this.toastr.warning('Alias required hai'); return; }
-        const payload = { item_id: this.getData._id, ...this.aliasForm };
-        this.http.post(this.api.getUrl('VARIANT') + 'item-aliases', payload)
+        const isSub = this.type === 'subitem';
+        const url = isSub
+            ? this.api.getUrl('VARIANT') + 'subitem-aliases'
+            : this.api.getUrl('VARIANT') + 'item-aliases';
+        const payload = isSub
+            ? { subitem_id: this.getData._id, alias: this.aliasForm.alias.trim() }
+            : { item_id: this.getData._id, alias: this.aliasForm.alias.trim() };
+
+        this.http.post(url, payload)
             .subscribe((d: any) => {
                 if (d.success) {
                     this.toastr.success('Alias add ho gaya!');
@@ -53,9 +71,18 @@ export class ItemAliasEntryComponent implements OnInit {
     }
 
     delete(row: any) {
-        this.http.delete(this.api.getUrl('VARIANT') + 'item-aliases/' + row._id)
+        const url = this.type === 'subitem'
+            ? this.api.getUrl('VARIANT') + 'subitem-aliases/' + row._id
+            : this.api.getUrl('VARIANT') + 'item-aliases/' + row._id;
+        this.http.delete(url)
             .subscribe((d: any) => {
-                if (d.success) { this.loadAliases(); this.response.emit({ reload: true }); }
+                if (d.success) { 
+                    this.toastr.success('Alias delete ho gaya');
+                    this.loadAliases(); 
+                    this.response.emit({ reload: true }); 
+                } else {
+                    this.toastr.error(d.message || 'Delete fail ho gaya');
+                }
             }, (err) => {
                 this.toastr.error(err.error?.message || err.message || 'Delete fail ho gaya');
             });

@@ -54,6 +54,7 @@ export class ItemEntryComponent implements OnInit {
       item_code: [null],
       unit_id: [null],
       categories: [[], Validators.required],
+      aliases: [[]],
       extra_note: [null],
       restrict_month: [null],
       restrict_year: [null],
@@ -110,6 +111,18 @@ export class ItemEntryComponent implements OnInit {
       }
     }, () => {
       this.initYearlyRates();
+    });
+  }
+
+  loadItemAliases(itemId: number) {
+    this.http.get(this.api.getUrl('VARIANT') + 'item-aliases/' + itemId).subscribe((res: any) => {
+      if (res && res.success && res.result) {
+        const aliasStrings = res.result.map((a: any) => a.alias).filter(Boolean);
+        this.itemForm.patchValue({ aliases: aliasStrings });
+        if (this.getData) {
+          this.getData.item_aliases = res.result;
+        }
+      }
     });
   }
 
@@ -187,6 +200,12 @@ export class ItemEntryComponent implements OnInit {
       } else {
         categoriesVal = [];
       }
+      let aliasesVal: string[] = [];
+      if (changes.getData.currentValue.item_aliases && Array.isArray(changes.getData.currentValue.item_aliases)) {
+        aliasesVal = changes.getData.currentValue.item_aliases.map((a: any) => typeof a === 'object' ? a.alias : a).filter(Boolean);
+      } else if (changes.getData.currentValue.aliases && Array.isArray(changes.getData.currentValue.aliases)) {
+        aliasesVal = changes.getData.currentValue.aliases.map((a: any) => typeof a === 'object' ? a.alias : a).filter(Boolean);
+      }
       this.itemForm.patchValue({
         item_hin: changes.getData.currentValue.item_hin,
         item_eng: changes.getData.currentValue.item_eng ? changes.getData.currentValue.item_eng : null,
@@ -194,6 +213,7 @@ export class ItemEntryComponent implements OnInit {
         item_code: changes.getData.currentValue.item_code ? changes.getData.currentValue.item_code : null,
         unit_id: changes.getData.currentValue.unit_id ? changes.getData.currentValue.unit_id : null,
         categories: categoriesVal,
+        aliases: aliasesVal,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
         restrict_year: changes.getData.currentValue.restrict_year ? changes.getData.currentValue.restrict_year : null,
@@ -205,6 +225,7 @@ export class ItemEntryComponent implements OnInit {
 
       if (changes.getData.currentValue._id) {
         this.loadItemRates(changes.getData.currentValue._id);
+        this.loadItemAliases(changes.getData.currentValue._id);
       } else {
         this.initYearlyRates();
       }
@@ -235,7 +256,8 @@ export class ItemEntryComponent implements OnInit {
             this.gs.Lists.itemmix.unshift(newItem);
             this.itemForm.reset({
               unit_id: newItem.unit_id,
-              categories: newItem.categories
+              categories: newItem.categories,
+              aliases: []
             });
             this.initYearlyRates();
             this.isLoader = false;
@@ -270,6 +292,7 @@ export class ItemEntryComponent implements OnInit {
         item_code: this.itemForm.value.item_code,
         unit_id: this.itemForm.value.unit_id,
         categories: this.itemForm.value.categories,
+        aliases: this.itemForm.value.aliases || [],
         extra_note: this.itemForm.value.extra_note,
         document: this.itemForm.value.document ? this.itemForm.value.document : [],
         restrict_month: this.itemForm.value.restrict_month ? this.itemForm.value.restrict_month : null,
@@ -365,6 +388,12 @@ export class ItemEntryComponent implements OnInit {
         this.viewData = this.gs.Lists.category;
         $('#itemComponent > #dataView').modal('show');
         break;
+    }
+  }
+
+  aliasManagerResponse(ev: any) {
+    if (ev && ev.reload && this.getData?._id) {
+      this.loadItemAliases(this.getData._id);
     }
   }
 

@@ -1,0 +1,199 @@
+<!-- sutram-excel-studio.component.html -->
+<div class="sutram-excel-container card m-0 border-0 shadow-none">
+
+  <!-- 1. Top Action Toolbar -->
+  <div class="sutram-toolbar">
+    <!-- Left: Table Selection & Upload -->
+    <div class="toolbar-left">
+      <!-- Table Selector Dropdown -->
+      <p-dropdown [options]="tablesList"
+                  optionLabel="display_name"
+                  optionValue="table"
+                  [(ngModel)]="selectedTableName"
+                  (onChange)="onTableSelect($event.value)"
+                  [style]="{ width: '220px' }"
+                  styleClass="p-inputtext-sm"
+                  placeholder="टेबल चुनें (Select Table)">
+      </p-dropdown>
+
+      <!-- Excel File Upload Button -->
+      <button pButton
+              label="Excel अपलोड"
+              icon="pi pi-upload"
+              class="p-button-sm p-button-outlined"
+              (click)="fileInput.click()">
+      </button>
+      <input #fileInput type="file" accept=".xlsx, .xls, .csv" (change)="onFileUpload($event)" hidden>
+
+      <!-- Audit Mode Switch -->
+      <button pButton
+              [label]="state.isAuditMode() ? 'ऑडिट मोड: ON' : 'ऑडिट मोड: OFF'"
+              [icon]="state.isAuditMode() ? 'pi pi-eye' : 'pi pi-eye-slash'"
+              class="p-button-sm"
+              [class.p-button-secondary]="!state.isAuditMode()"
+              [class.p-button-info]="state.isAuditMode()"
+              (click)="state.toggleAuditMode()">
+      </button>
+
+      <!-- Add New Row Button -->
+      <button pButton
+              label="+ पंक्ति जोड़ें"
+              icon="pi pi-plus"
+              class="p-button-sm p-button-outlined p-button-success"
+              [disabled]="!selectedTableName"
+              (click)="addNewRow()"
+              title="शीट में नई पंक्ति जोड़ें">
+      </button>
+    </div>
+
+    <!-- Right: Verification, Corrections, & Import -->
+    <div class="toolbar-right">
+      <!-- Correction Sidebar Toggle Button -->
+      <button pButton
+              [label]="'गलतियाँ (' + state.unresolvedCorrectionsCount() + ')'"
+              icon="pi pi-bolt"
+              class="p-button-sm p-button-outlined"
+              [class.p-button-warning]="state.unresolvedCorrectionsCount() > 0"
+              [class.p-button-secondary]="state.unresolvedCorrectionsCount() === 0"
+              (click)="showSidebar = !showSidebar">
+      </button>
+
+      <!-- Load Data from Database Button -->
+      <button pButton
+              label="डेटा लोड करें (Load Data)"
+              icon="pi pi-database"
+              class="p-button-sm p-button-success"
+              [disabled]="!selectedTableName"
+              (click)="loadTableDataFromDb()">
+      </button>
+
+      <!-- Server Verify Button -->
+      <button pButton
+              label="सत्यापित करें (Verify)"
+              icon="pi pi-check-circle"
+              class="p-button-sm p-button-outlined p-button-primary"
+              [loading]="state.isVerifying()"
+              [disabled]="state.rows().length === 0"
+              (click)="verifyData()">
+      </button>
+
+      <!-- Import / Sync to DB Button -->
+      <button pButton
+              [label]="state.modifiedRowsCount() > 0 ? 'डेटाबेस में सिंक (' + state.modifiedRowsCount() + ')' : 'डेटाबेस में सिंक'"
+              icon="pi pi-cloud-upload"
+              class="p-button-sm p-button-primary"
+              [disabled]="state.rows().length === 0 || state.hasErrors()"
+              (click)="startImport()">
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Stats Bar -->
+  <div class="sutram-stats-bar">
+    <span class="stat-pill bg-light text-dark">
+      कुल पंक्तियाँ: <strong>{{ state.stats().totalRows }}</strong>
+    </span>
+    <span class="stat-pill bg-soft-success text-success">
+      वैध: <strong>{{ state.stats().validRows }}</strong>
+    </span>
+    <span *ngIf="state.modifiedRowsCount() > 0" class="stat-pill" style="background-color: var(--cell-edited-bg, #fff9db); color: var(--cell-edited-text, #854d0e);">
+      संशोधित/नई: <strong>{{ state.modifiedRowsCount() }}</strong>
+    </span>
+    <span *ngIf="state.stats().errorRows > 0" class="stat-pill bg-soft-danger text-danger">
+      त्रुटियाँ: <strong>{{ state.stats().errorRows }}</strong>
+    </span>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <div *ngIf="state.stats().errorRows > 0" class="form-check form-switch m-0">
+        <input class="form-check-input" type="checkbox" id="errFilter"
+               [checked]="state.filterOnlyErrors()"
+               (change)="state.toggleFilterErrors()">
+        <label class="form-check-label small" for="errFilter">केवल गलतियाँ दिखाएं</label>
+      </div>
+
+      <button *ngIf="state.rows().length > 0"
+              pButton
+              icon="pi pi-trash"
+              class="p-button-text p-button-danger p-button-sm p-0 px-2"
+              label="शीट साफ़ करें"
+              (click)="state.clearGrid()">
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. PrimeNG Virtual Grid wrapped in Scalable Canvas -->
+  <div class="sutram-grid-container flex-grow-1 overflow-auto" [style.zoom]="zoomLevel">
+    <sutram-grid [headers]="state.headers()"
+                 [rows]="state.rows()"
+                 [filterOnlyErrors]="state.filterOnlyErrors()"
+                 (solveAllTriggered)="onGridSolveAll($event)">
+    </sutram-grid>
+  </div>
+
+  <!-- 4. Bottom Multi-Sheet Tab Bar & Zoom Controls -->
+  <footer class="sutram-footer">
+    <!-- Sub-row A: Sheet Tabs Strip -->
+    <div class="sutram-sheet-tabs-bar">
+      <div *ngFor="let tab of sheetTabs"
+           class="sheet-tab-pill"
+           [class.active-sheet]="activeSheetId === tab.id"
+           (click)="switchSheet(tab.id)">
+        <i class="pi" [ngClass]="tab.icon" style="font-size: 11px;"></i>
+        <span>{{ tab.title }}</span>
+        <span *ngIf="tab.isLoaded && (tab.recordCount || 0) > 0" class="sheet-tab-badge">
+          {{ tab.recordCount }}
+        </span>
+      </div>
+
+      <button class="add-sheet-btn" (click)="addNewBlankSheet()" title="Add Blank Sheet">
+        <i class="pi pi-plus" style="font-size: 10px;"></i>
+      </button>
+    </div>
+
+    <!-- Sub-row B: Status & Scale Controls -->
+    <div class="sutram-status-subrow">
+      <div class="d-flex align-items-center gap-3">
+        <span class="sheet-info-text">शीट: <strong>{{ activeSheetId }}</strong></span>
+        <span class="sheet-info-text">पंक्तियाँ: <strong>{{ state.rows().length }}</strong></span>
+        <span class="text-success small fw-semibold" *ngIf="state.stats().errorRows === 0">✓ स्वच्छ (100% Valid)</span>
+        <span class="text-danger small fw-semibold" *ngIf="state.stats().errorRows > 0">{{ state.stats().errorRows }} त्रुटियाँ</span>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <!-- Scale / Zoom Controls -->
+        <div class="zoom-controls">
+          <button class="zoom-btn" (click)="zoomOut()" title="Zoom Out (-10%)">
+            <i class="pi pi-minus"></i>
+          </button>
+          <span class="zoom-display" (click)="resetZoom()" title="Reset to 100%">
+            {{ (zoomLevel * 100).toFixed(0) }}%
+          </span>
+          <button class="zoom-btn" (click)="zoomIn()" title="Zoom In (+10%)">
+            <i class="pi pi-plus"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 5. Smart Header Scanner Modal -->
+  <sutram-header-scanner [(visible)]="showScannerModal"
+                         [report]="scanReport"
+                         [availableHeaders]="state.headers()"
+                         (confirmed)="onScannerConfirmed($event)">
+  </sutram-header-scanner>
+
+  <!-- 6. Batch Correction Sidebar -->
+  <sutram-correction-sidebar [(visible)]="showSidebar"
+                             [groups]="state.correctionGroups()">
+  </sutram-correction-sidebar>
+
+  <!-- 7. Streaming Import Progress Modal -->
+  <sutram-import-progress [(visible)]="showProgressModal"
+                          [progress]="state.importProgress()"
+                          [tableName]="selectedTableName"
+                          [rejectedRows]="rejectedRowsDuringImport"
+                          (cancelRequested)="cancelImport()">
+  </sutram-import-progress>
+
+</div>

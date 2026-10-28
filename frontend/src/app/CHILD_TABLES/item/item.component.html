@@ -127,6 +127,18 @@
                            <th style="width: 180px;">Category</th>
                            <th style="width: 120px;" *ngIf="settings.price_range">Price</th>
                            <th style="width: 130px;">Rate ({{ currentYear }})</th>
+                           <th style="width: 180px;">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Aliases</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
+                                    [isOpen]="conditionObj.aliasSearch?.length > 0"
+                                    (clear)="conditionObj.aliasSearch = undefined; applyFilter()" triggerOn="click">
+                                    <input type="text" class="form-control form-control-sm"
+                                       placeholder="Alias search..." [(ngModel)]="conditionObj.aliasSearch"
+                                       (keyup.enter)="applyFilter()" />
+                                 </app-popover-filter>
+                              </div>
+                           </th>
                            <th style="width: 250px;" *ngIf="settings.extra_note">Extra Note</th>
                         </tr>
                      </thead>
@@ -229,6 +241,23 @@
                                     + दर डालें
                                  </button>
                               </td>
+                              <!-- Aliases -->
+                              <td (click)="$event.stopPropagation()">
+                                 <ng-container *ngIf="!aliasDisplay(data)">
+                                    <button class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                       (click)="openAliasManager(data)" style="font-size:11px;">
+                                       <i class="uil uil-plus me-1"></i>Add Alias
+                                    </button>
+                                 </ng-container>
+                                 <ng-container *ngIf="aliasDisplay(data)">
+                                    <span class="text-muted small me-1">{{ aliasDisplay(data) }}</span>
+                                    <button class="btn btn-sm btn-outline-secondary py-0 px-1"
+                                       (click)="openAliasManager(data)" style="font-size:10px;"
+                                       title="Alias add/manage karo">
+                                       <i class="uil uil-plus"></i>
+                                    </button>
+                                 </ng-container>
+                              </td>
                               <td *ngIf="settings.extra_note">{{data.extra_note?data.extra_note:'-'}}</td>
                            </tr>
                            <!-- <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
@@ -309,6 +338,23 @@
                                           + दर डालें
                                        </button>
                                     </td>
+                                    <!-- Aliases -->
+                                    <td (click)="$event.stopPropagation()">
+                                       <ng-container *ngIf="!subitemAliasDisplay(si)">
+                                          <button class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                             (click)="openSubitemAliasManager(si)" style="font-size:11px;">
+                                             <i class="uil uil-plus me-1"></i>Add Alias
+                                          </button>
+                                       </ng-container>
+                                       <ng-container *ngIf="subitemAliasDisplay(si)">
+                                          <span class="text-muted small me-1">{{ subitemAliasDisplay(si) }}</span>
+                                          <button class="btn btn-sm btn-outline-secondary py-0 px-1"
+                                             (click)="openSubitemAliasManager(si)" style="font-size:10px;"
+                                             title="Alias add/manage karo">
+                                             <i class="uil uil-plus"></i>
+                                          </button>
+                                       </ng-container>
+                                    </td>
                                     <td *ngIf="settings.extra_note">
                                        {{si.extra_note?si.extra_note:'-'}}
                                     </td>
@@ -369,6 +415,14 @@
                (response)="importResponse('rel_subitem_category')"></app-excel-import>
             <app-delete *ngIf='showModal == "delete_item"' [Type]="delType" [ID]="delID"
                (response)="deleteResponse($event)"></app-delete>
+
+            <app-item-alias-entry *ngIf="showModal === 'Manage Item Aliases'" [getData]="editData" [type]="'item'"
+               (response)="onAliasSaved($event)">
+            </app-item-alias-entry>
+
+            <app-item-alias-entry *ngIf="showModal === 'Manage Subitem Aliases'" [getData]="editData" [type]="'subitem'"
+               (response)="onAliasSaved($event)">
+            </app-item-alias-entry>
 
 
          </div>

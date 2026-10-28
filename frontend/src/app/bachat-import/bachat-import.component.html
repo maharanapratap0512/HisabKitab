@@ -101,6 +101,7 @@
                                                 <th>Subitem</th>
                                                 <th>Condition</th>
                                                 <th>Qty</th>
+                                                <th *ngIf="hasSwQty">SW Qty</th>
                                                 <th>Unit</th>
                                             </tr>
                                         </thead>
@@ -114,6 +115,7 @@
                                                 <td>{{data.subitem_hin ? data.subitem_hin : data.subitem}}</td>
                                                 <td>{{data.condition}}</td>
                                                 <td>{{data.qty}}</td>
+                                                <td *ngIf="hasSwQty">{{data.sw_qty}}</td>
                                                 <td>{{data.unit}}</td>
                                             </tr>
                                         </tbody>

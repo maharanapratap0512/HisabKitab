@@ -117,8 +117,11 @@ app.use('/api/universal-report', universalReportRoutes);
 
 
 
+const { sutramExcel } = require('./api/database/sutram-excel-init');
 
 app.use('/api/sutram', sutramEngine.router());
+app.use('/api/sutram/excel', sutramExcel.router());
+app.use('/_sutram/excel', sutramExcel.router());
 
 
 // app.use((req, res, next) => {

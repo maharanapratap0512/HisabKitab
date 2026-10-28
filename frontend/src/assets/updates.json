@@ -1,11 +1,85 @@
 [
     {
+        "version": "38.6",
+        "date": "27-10-2026",
+        "summary": "Item Master Alias (Search Nicknames) System & Integrated Alias Manager",
+        "summary_hin": "आइटम मास्टर उपनाम (सर्च उपनाम) प्रणाली एवं एकीकृत उपनाम प्रबंधक",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Item & Subitem",
+                "title": "Interactive Alias Column with Dedicated Filter",
+                "title_hin": "आइटम सूची में उपनाम कॉलम एवं समर्पित फ़िल्टर",
+                "desc": "Easily view, add, and search alternative item names or local nicknames right from the Item table. Operators can now filter items by their alias with ease.",
+                "desc_hin": "मुख्य वस्तु सूची में अब सीधे उपनाम देख सकते हैं, नए उपनाम जोड़ सकते हैं और उपनाम खोज फ़िल्टर से मनचाही वस्तु तुरंत ढूंढ सकते हैं।"
+            },
+            {
+                "type": "feature",
+                "module": "Item Entry",
+                "title": "Direct Alias Entry & Quick Manage Modal",
+                "title_hin": "आइटम फॉर्म में उपनाम प्रविष्टि एवं त्वरित उपनाम प्रबंधक",
+                "desc": "Add multiple search aliases directly when creating or editing items using simple keyboard tags, or manage all registered nicknames with the convenient Manage button.",
+                "desc_hin": "नया आइटम बनाते समय या बदलते समय सीधे उपनाम टाइप करके Enter दबाएं, अथवा 'Manage' बटन दबाकर सभी उपनामों को आसानी से प्रबंधित करें।"
+            },
+            {
+                "type": "feature",
+                "module": "Item & Subitem",
+                "title": "Subitem Row Aliases & In-Row Quick Add",
+                "title_hin": "सब-आइटम पंक्ति में उपनाम एवं त्वरित जोड़ने की सुविधा",
+                "desc": "Subitems now display their registered aliases in the Aliases column with a one-click Add Alias button right in the subitem row.",
+                "desc_hin": "सब-आइटम पंक्तियों में भी अब उपनाम कॉलम दिखेगा और वहीं से सीधे नया उपनाम जोड़ने की आसान सुविधा उपलब्ध है।"
+            }
+        ]
+    },
+    {
+        "version": "38.5",
+        "date": "27-10-2026",
+        "summary": "Smart In-Cell Master Dropdown, Pre-Sync Clean Data Verification & Visual Change Tracking",
+        "summary_hin": "स्मार्ट इन-सेल मास्टर ड्रॉपडाउन, प्री-सिंक स्वच्छ डेटा जांच एवं विजुअल बदलाव ट्रैकिंग",
+        "isNew": false,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Excel Studio",
+                "title": "Smart In-Cell Reference Dropdown with Bilingual Search",
+                "title_hin": "द्विभाषी खोज के साथ स्मार्ट इन-सेल मास्टर ड्रॉपडाउन",
+                "desc": "When typing into any master-linked column in Smart Mode, a responsive dropdown now appears showing Hindi and English options with instant keyboard navigation (Arrow keys and Enter).",
+                "desc_hin": "स्मार्ट मोड में किसी भी मास्टर कॉलम (जैसे श्रेणी, मिनी मधुबन, आइटम आदि) में टाइप करते ही हिंदी और अंग्रेजी नाम का सुंदर ड्रॉपडाउन खुलता है, जिसे कीबोर्ड के एरो बटन व एंटर से आसानी से चुना जा सकता है।"
+            },
+            {
+                "type": "feature",
+                "module": "Excel Studio",
+                "title": "Visual Change Tracking (Eye-Protect Warm Yellow & Soft Green)",
+                "title_hin": "विजुअल बदलाव ट्रैकिंग (आई-प्रोटेक्ट पीला एवं हल्का हरा रंग)",
+                "desc": "Edited cells now gently illuminate in an eye-protect warm yellow tint, and newly added rows in light green. When syncing to the database, only modified or new rows are sent, keeping operations fast and efficient.",
+                "desc_hin": "संशोधित सेल्स अब आंखों को आराम देने वाले हल्के पीले रंग में और नई जोड़ी गई पंक्तियां हल्के हरे रंग में स्वतः चिन्हित होती हैं। डेटाबेस में सिंक करते समय केवल बदली गई पंक्तियों को ही भेजा जाता है, जिससे काम और तेज हो जाता है।"
+            },
+            {
+                "type": "improved",
+                "module": "Excel Studio",
+                "title": "Pre-Sync Clean Data Verification",
+                "title_hin": "डेटाबेस में सुरक्षित एवं स्वच्छ डेटा सिंक",
+                "desc": "Before saving to the database, Excel Studio rigorously validates all mandatory fields and master table references. Any incomplete or unmatched entries are prevented from syncing, keeping your records 100% clean and error-free.",
+                "desc_hin": "डेटाबेस में सेव करने से पहले सभी आवश्यक जानकारी व मास्टर नामों की स्वतः पूरी जांच होती है। किसी भी अधूरी या गलत प्रविष्टि को रोककर स्क्रीन पर स्पष्ट सूचना दी जाती है, जिससे डेटाबेस हमेशा सुरक्षित और स्वच्छ रहता है।"
+            }
+        ]
+    },
+    {
         "version": "38.4",
         "date": "26-10-2026",
         "summary": "Brand New Inbuilt HK Excel Studio, Live Split Jawak Updates & Accurate Stock Synchronization",
         "summary_hin": "नया इनबिल्ट एक्सेल स्टूडियो, स्प्लिट जावक लाइव अपडेट एवं सटीक स्टॉक सिंक्रोनाइज़ेशन",
-        "isNew": true,
+        "isNew": false,
         "items": [
+            {
+                "type": "feature",
+                "module": "Excel Studio",
+                "title": "Live Database Loading & Physical Stock Counting Sheet with SW Balance",
+                "title_hin": "डेटाबेस से लाइव डेटा लोडिंग एवं सॉफ्टवेयर स्टॉक के साथ भौतिक गणना शीट",
+                "desc": "Users can now load live database records directly into Excel Studio for any active format (All MMs, Items, Subitems, Vehicles, PBKs, Products, etc.). For Bachat, software balance (SW Qty) is loaded alongside a blank physical quantity column, perfectly designed for physical stock tallying and seamless Bachat import.",
+                "desc_hin": "एक्सेल स्टूडियो में अब किसी भी फॉर्मेट (सभी मिनी मधुबन, आइटम, सबआइटम, वाहन, सेवाधारी, उत्पाद आदि) का लाइव डेटा सीधे 1-क्लिक में लोड किया जा सकता है। बचत फॉर्मेट में सॉफ्टवेयर बैलेंस (SW Qty) के साथ भौतिक मात्रा (Qty) का कॉलम खाली मिलता है, जिससे वास्तविक गणना लिखकर बचत इम्पोर्ट में सटीक मिलान करना बेहद आसान हो गया है।"
+            },
             {
                 "type": "feature",
                 "module": "Excel Studio",

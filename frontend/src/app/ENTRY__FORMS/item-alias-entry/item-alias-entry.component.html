@@ -1,5 +1,5 @@
 <div class="p-3">
-    <h6 class="mb-3">Item: {{ getData?.item_hin }}</h6>
+    <h6 class="mb-3">{{ type === 'subitem' ? 'Subitem: ' + (getData?.subitem_hin || getData?.display_name || getData?.subitem_eng) : 'Item: ' + (getData?.item_hin || getData?.item_eng) }}</h6>
 
     <div class="row g-2 align-items-end mb-3 border-bottom pb-3">
         <div class="col-5">

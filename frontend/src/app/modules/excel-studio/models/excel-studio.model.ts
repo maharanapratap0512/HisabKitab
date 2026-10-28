@@ -68,3 +68,23 @@ export interface AutocompleteOption {
   code?: string;
   raw?: any;
 }
+
+export interface StudioSheetTab {
+  id: string;
+  title: string;
+  title_hin?: string;
+  icon: string;
+  formatId?: string | null;
+  isLoaded?: boolean;
+  recordCount?: number;
+  isCustom?: boolean;
+}
+
+export interface SheetWorkbookData {
+  rows: StudioRow[];
+  columns: StudioColumn[];
+  format: StudioFormat | null;
+  columnWidths: { [key: string]: number };
+  isLoaded: boolean;
+  recordCount: number;
+}

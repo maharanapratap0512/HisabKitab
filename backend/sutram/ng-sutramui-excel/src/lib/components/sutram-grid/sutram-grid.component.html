@@ -1,0 +1,162 @@
+<!-- sutram-grid.component.html -->
+<div class="sutram-grid-wrapper">
+
+  <!-- Right Click Context Menu -->
+  <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
+
+  <!-- PrimeNG Virtual Table -->
+  <p-table [value]="visibleRows"
+           [columns]="headers"
+           [virtualScroll]="true"
+           [virtualScrollItemSize]="36"
+           [scrollable]="true"
+           scrollHeight="calc(100vh - 270px)"
+           [resizableColumns]="true"
+           columnResizeMode="expand"
+           [reorderableColumns]="true"
+           [contextMenu]="cm"
+           [(contextMenuSelection)]="contextSelectedRow"
+           styleClass="p-datatable-gridlines p-datatable-sm sutram-grid-table">
+
+    <!-- Table Header Row -->
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <!-- Frozen Row Number Column -->
+        <th style="width: 50px; text-align: center;" pFrozenColumn>#</th>
+
+        <!-- Dynamic Schema Columns -->
+        <th *ngFor="let col of columns"
+            pResizableColumn
+            pReorderableColumn
+            [style.min-width.px]="col.width || 140">
+          <div class="d-flex align-items-center justify-content-between">
+            <span>{{ col.name }}</span>
+            <small *ngIf="col.not_null" class="text-danger ms-1">*</small>
+            <span *ngIf="col.type === 'ref'" class="badge bg-light text-muted ms-1" style="font-size: 9px;">FK</span>
+          </div>
+        </th>
+      </tr>
+    </ng-template>
+
+    <!-- Table Body Rows -->
+    <ng-template pTemplate="body" let-row let-rowIndex="rowIndex" let-columns="columns">
+      <tr [pContextMenuRow]="row"
+          [class.row-has-error]="row.hasError"
+          [class.row-new]="row.isNew">
+
+        <!-- Row Number & Error Dot -->
+        <td class="cell-frozen" style="width: 50px; text-align: center;" pFrozenColumn>
+          <span class="row-num">{{ row.rowNum }}</span>
+          <span *ngIf="row.hasError" class="error-indicator-dot" [title]="row.errorCount + ' त्रुटियां'"></span>
+        </td>
+
+        <!-- Column Cells -->
+        <td *ngFor="let col of columns"
+            [pEditableColumn]="row.cells[col.name]?.value"
+            [class.cell-error]="!row.cells[col.name]?.isValid"
+            [class.cell-edited]="row.cells[col.name]?.isModified"
+            (click)="onCellClick(rowIndex, col.name)">
+
+          <p-cellEditor>
+            <!-- In-Cell Edit Mode -->
+            <ng-template pTemplate="input">
+              <p-autoComplete *ngIf="col.type === 'ref' || col.ref_table; else plainInput"
+                              [(ngModel)]="row.cells[col.name].value"
+                              [suggestions]="filteredSuggestions"
+                              (completeMethod)="searchRefOptions($event, col, row)"
+                              field="display"
+                              [dropdown]="true"
+                              [forceSelection]="false"
+                              [virtualScroll]="true"
+                              [virtualScrollItemSize]="30"
+                              styleClass="w-100 sutram-cell-autocomplete"
+                              inputStyleClass="p-inputtext-sm in-cell-input"
+                              (onSelect)="onRefSuggestionSelect($event, rowIndex, col.name, row.cells[col.name], col, row)"
+                              (onBlur)="onCellValueCommit(rowIndex, col.name, row.cells[col.name], col, row)"
+                              (keydown.enter)="onCellValueCommit(rowIndex, col.name, row.cells[col.name], col, row)">
+                <ng-template let-opt pTemplate="item">
+                  <div class="d-flex align-items-center justify-content-between w-100 py-1">
+                    <span class="small fw-semibold">{{ opt.display }}</span>
+                    <span *ngIf="opt.code" class="badge bg-light text-muted ms-2 small">{{ opt.code }}</span>
+                  </div>
+                </ng-template>
+              </p-autoComplete>
+
+              <ng-template #plainInput>
+                <input type="text"
+                       pInputText
+                       class="p-inputtext-sm w-100 in-cell-input"
+                       [(ngModel)]="row.cells[col.name].value"
+                       (keydown.enter)="onCellValueCommit(rowIndex, col.name, row.cells[col.name], col, row)"
+                       (blur)="onCellValueCommit(rowIndex, col.name, row.cells[col.name], col, row)" />
+              </ng-template>
+            </ng-template>
+
+            <!-- Display Mode -->
+            <ng-template pTemplate="output">
+              <div class="cell-content" [title]="row.cells[col.name]?.errorMessage || ''">
+                <span class="cell-text">{{ row.cells[col.name]?.value }}</span>
+                <i *ngIf="!row.cells[col.name]?.isValid" class="pi pi-exclamation-circle text-danger ms-1"></i>
+              </div>
+            </ng-template>
+          </p-cellEditor>
+
+          <!-- Inline "Solve All Same Mistake" Overlay Prompt -->
+          <div *ngIf="promptState.visible && promptState.rowIdx === rowIndex && promptState.colKey === col.name"
+               class="inline-correction-popup shadow-lg animate__animated animate__fadeIn">
+            <div class="solve-all-header">
+              <i class="pi pi-bolt text-warning"></i>
+              <span><strong>{{ promptState.matchingCount }}</strong> अन्य सेल्स में भी <em>"{{ promptState.originalBadValue }}"</em> है</span>
+            </div>
+
+            <div class="p-2 bg-light rounded mb-2">
+              <small class="text-muted d-block">नया मान (New Value):</small>
+              <strong class="text-primary">{{ promptState.newSelectedDisplay }}</strong>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="form-check m-0">
+                <input class="form-check-input" type="checkbox" id="dictCheck" [(ngModel)]="promptState.saveToDictionary">
+                <label class="form-check-label small" for="dictCheck">
+                  डिक्शनरी में सेव करें
+                </label>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button pButton
+                      label="सभी बदलें (Solve All)"
+                      icon="pi pi-check"
+                      class="p-button-sm p-button-success flex-grow-1"
+                      (click)="confirmSolveAll()">
+              </button>
+              <button pButton
+                      label="सिर्फ यह"
+                      class="p-button-sm p-button-outlined"
+                      (click)="applySingleCellOnly()">
+              </button>
+              <button pButton
+                      icon="pi pi-times"
+                      class="p-button-sm p-button-text p-button-danger"
+                      (click)="dismissPrompt()">
+              </button>
+            </div>
+          </div>
+
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Empty State -->
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="headers.length + 1" class="text-center p-4 text-muted">
+          <i class="pi pi-file-excel fs-1 d-block mb-2 text-secondary"></i>
+          <span>कोई डेटा उपलब्ध नहीं है। ऊपर से Excel फ़ाइल अपलोड करें या डेटा लोड करें।</span>
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</div>

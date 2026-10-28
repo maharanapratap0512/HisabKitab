@@ -1,12 +1,14 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
-import { AutocompleteOption, StudioCell, StudioColumn, StudioFormat, StudioMode, StudioRow } from '../../models/excel-studio.model';
+import { AutocompleteOption, StudioCell, StudioColumn, StudioFormat, StudioMode, StudioRow, StudioSheetTab, SheetWorkbookData } from '../../models/excel-studio.model';
 import { ExcelStudioService } from '../../services/excel-studio.service';
 import { MasterIndexerService } from '../../services/master-indexer.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ThemeService } from 'src/app/services/theme.service';
+import { ApiService } from 'src/app/services/api.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -19,8 +21,23 @@ export class ExcelStudioUiComponent implements OnInit {
   @ViewChild('formulaInput') formulaInput?: ElementRef<HTMLInputElement>;
   @ViewChild('gridContainer') gridContainer?: ElementRef<HTMLDivElement>;
 
+  Math = Math;
+
+  // Multi-Sheet Workbook State (Excel-like Sheet Tabs at Bottom)
+  sheetTabs: StudioSheetTab[] = [];
+  activeSheetId: string = 'blank';
+  sheetWorkbooks: { [sheetId: string]: SheetWorkbookData } = {};
+
+  // Zoom / Scale State (User Scale Feature)
+  zoomLevel: number = 1.0;
+
+  // Writing & Formatting Toolbar State
+  isTextBold: boolean = false;
+  textAlign: 'left' | 'center' | 'right' = 'left';
+  sheetSearchQuery: string = '';
+
   // Current State
-  mode: StudioMode = 'normal'; // 'normal' | 'intelligent'
+  mode: StudioMode = 'intelligent'; // 'normal' | 'intelligent'
   currentFormat: StudioFormat | null = null;
   columns: StudioColumn[] = [];
   rows: StudioRow[] = [];
@@ -81,6 +98,10 @@ export class ExcelStudioUiComponent implements OnInit {
   rawSheetMatrix: any[][] = [];
   importPayload: any = null;
   importTypeForModal: string = 'bachat';
+  isLoadingData: boolean = false;
+  showMmSelectModal: boolean = false;
+  selectedMmIdForLoad: string = 'ALL';
+  mms: any[] = [];
 
   constructor(
     public studioService: ExcelStudioService,
@@ -88,15 +109,167 @@ export class ExcelStudioUiComponent implements OnInit {
     private toastr: ToastrService,
     public gs: GlobalService,
     public auth: AuthService,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private http: HttpClient,
+    private api: ApiService
   ) {}
 
   ngOnInit(): void {
-    const bachatFmt = this.studioService.getFormat('bachat');
-    if (bachatFmt) {
-      this.loadFormat(bachatFmt, 'normal', true); // true = initial sample preview
+    this.initMmsList();
+    this.initSheetTabs();
+    this.initGenericNormalSheet(10, 40);
+  }
+
+  // ==========================================
+  // MULTI-SHEET WORKBOOK MANAGEMENT
+  // ==========================================
+
+  initSheetTabs(): void {
+    this.sheetTabs = [
+      { id: 'blank', title: 'Blank Sheet', title_hin: 'खाली शीट', icon: 'uil-table', formatId: null },
+      ...this.studioService.formats.map(f => ({
+        id: f.id,
+        title: f.title,
+        title_hin: f.title_hin,
+        icon: f.icon || 'uil-layer-group',
+        formatId: f.id,
+        isLoaded: false,
+        recordCount: 0
+      }))
+    ];
+    this.activeSheetId = 'blank';
+  }
+
+  switchSheet(tab: StudioSheetTab): void {
+    if (this.activeSheetId === tab.id) return;
+
+    this.closeActiveEditor();
+    this.closeContextMenu();
+    this.batchFixSuggestion = null;
+
+    // Save current active sheet data into workbook memory
+    this.sheetWorkbooks[this.activeSheetId] = {
+      rows: this.rows,
+      columns: this.columns,
+      format: this.currentFormat,
+      columnWidths: { ...this.columnWidths },
+      isLoaded: this.sheetTabs.find(t => t.id === this.activeSheetId)?.isLoaded || false,
+      recordCount: this.rows.filter(r => this.rowHasData(r)).length
+    };
+
+    this.activeSheetId = tab.id;
+
+    // Restore from workbook memory or initialize clean empty format
+    if (this.sheetWorkbooks[tab.id]) {
+      const saved = this.sheetWorkbooks[tab.id];
+      this.currentFormat = saved.format;
+      this.columns = saved.columns;
+      this.rows = saved.rows;
+      this.columnWidths = saved.columnWidths;
+      if (this.mode === 'intelligent') {
+        this.runAudit();
+      } else {
+        this.resetAudit();
+      }
+      this.updateCoordinate(0, this.columns[0]?.key);
+      this.toastr.info(`'${tab.title}' शीट पर स्विच किया गया।`, 'Sheet Switched');
     } else {
-      this.initGenericNormalSheet();
+      if (tab.id === 'blank' || !tab.formatId) {
+        this.initGenericNormalSheet(10, 40);
+      } else {
+        const fmt = this.studioService.getFormat(tab.formatId);
+        if (fmt) {
+          // Clean empty format with blank rows ready for typing or loading data
+          this.loadFormat(fmt, this.mode, false);
+        } else {
+          this.initGenericNormalSheet(10, 40);
+        }
+      }
+    }
+  }
+
+  addNewBlankSheet(): void {
+    const customCount = this.sheetTabs.filter(t => t.isCustom).length + 2;
+    const newTab: StudioSheetTab = {
+      id: 'sheet_custom_' + Date.now(),
+      title: `Sheet ${customCount}`,
+      title_hin: `शीट ${customCount}`,
+      icon: 'uil-table',
+      formatId: null,
+      isCustom: true
+    };
+    this.sheetTabs.push(newTab);
+    this.switchSheet(newTab);
+    this.toastr.success(`नई शीट '${newTab.title}' जोड़ी गई।`, 'Sheet Added');
+  }
+
+  scrollSheetTabs(direction: 'left' | 'right'): void {
+    const el = document.getElementById('sheetTabsStrip');
+    if (el) {
+      el.scrollBy({ left: direction === 'left' ? -220 : 220, behavior: 'smooth' });
+    }
+  }
+
+  markActiveSheetLoaded(count: number): void {
+    const tab = this.sheetTabs.find(t => t.id === this.activeSheetId);
+    if (tab) {
+      tab.isLoaded = true;
+      tab.recordCount = count;
+    }
+  }
+
+  // ==========================================
+  // SCALE / ZOOM CONTROLS (User Scale Feature)
+  // ==========================================
+
+  zoomIn(): void {
+    if (this.zoomLevel < 1.6) {
+      this.zoomLevel = Math.min(1.6, Math.round((this.zoomLevel + 0.1) * 10) / 10);
+    }
+  }
+
+  zoomOut(): void {
+    if (this.zoomLevel > 0.6) {
+      this.zoomLevel = Math.max(0.6, Math.round((this.zoomLevel - 0.1) * 10) / 10);
+    }
+  }
+
+  resetZoom(): void {
+    this.zoomLevel = 1.0;
+  }
+
+  // ==========================================
+  // WRITING & FORMATTING TOOLBAR
+  // ==========================================
+
+  toggleBold(): void {
+    this.isTextBold = !this.isTextBold;
+  }
+
+  setTextAlign(align: 'left' | 'center' | 'right'): void {
+    this.textAlign = align;
+  }
+
+  // ==========================================
+  // FORMAT & SHEET INITIALIZATION
+  // ==========================================
+
+  private initMmsList(): void {
+    if (this.gs.Lists && this.gs.Lists.mm) {
+      this.mms = this.gs.Lists.mm;
+    } else {
+      this.gs.observeList().subscribe({
+        next: (result: any) => {
+          if (result && result.mm) {
+            this.mms = result.mm;
+          } else if (this.gs.Lists && this.gs.Lists.mm) {
+            this.mms = this.gs.Lists.mm;
+          }
+        },
+        error: (err: any) => {
+          this.toastr.error('मास्टर सूचियां लोड करने में त्रुटि आई: ' + (err?.error?.message || err?.message || 'Network error'));
+        }
+      });
     }
   }
 
@@ -119,7 +292,7 @@ export class ExcelStudioUiComponent implements OnInit {
   // FORMAT & SHEET INITIALIZATION
   // ==========================================
 
-  loadFormat(format: StudioFormat, targetMode: StudioMode = 'normal', includeSample: boolean = false): void {
+  loadFormat(format: StudioFormat, targetMode: StudioMode = 'intelligent', includeSample: boolean = false): void {
     this.closeActiveEditor();
     this.closeContextMenu();
     this.batchFixSuggestion = null;
@@ -135,7 +308,7 @@ export class ExcelStudioUiComponent implements OnInit {
     } else {
       this.resetAudit();
     }
-    this.toastr.info(`'${format.title_hin}' लोड हो गया है।`, 'Format Loaded');
+    this.toastr.info(`'${format.title}' लोड हो गया है।`, 'Format Loaded');
     this.updateCoordinate(0, this.columns[0]?.key);
   }
 
@@ -160,7 +333,7 @@ export class ExcelStudioUiComponent implements OnInit {
         errorCount: 0
       });
     }
-    this.mode = 'normal';
+    this.mode = 'intelligent';
     this.resetAudit();
     this.toastr.info('स्वतंत्र खाली शीट तैयार है। आप अपने हेडर लिख सकते हैं।', 'Blank Sheet Ready');
     this.updateCoordinate(0, this.columns[0]?.key);
@@ -1028,13 +1201,820 @@ export class ExcelStudioUiComponent implements OnInit {
     }
 
     this.setMode('intelligent');
-    this.toastr.success(`फॉर्मेट '${format.title_hin}' सफलतापूर्वक अटैच हो गया!`);
+    this.toastr.success(`फॉर्मेट '${format.title}' सफलतापूर्वक अटैच हो गया!`);
   }
 
   exportToExcel(): void {
     const filename = this.currentFormat ? `HK_${this.currentFormat.id}` : 'HK_Excel_Sheet';
     this.studioService.exportExcel(this.columns, this.rows, filename);
     this.toastr.success('एक्सेल फाइल सफलतापूर्वक डाउनलोड हो गई!', 'Export Done');
+  }
+
+  // ==========================================
+  // DATABASE DATA LOADING PIPELINE (All Formats)
+  // ==========================================
+
+  async loadDatabaseData(): Promise<void> {
+    if (!this.currentFormat) {
+      this.toastr.warning('कृपया पहले कोई फॉर्मेट चुनें (Please select a format first)', 'No Format Selected');
+      return;
+    }
+
+    if (this.rows.some(r => this.rowHasData(r))) {
+      const confirm = await Swal.fire({
+        title: 'डेटाबेस से लोड करें?',
+        text: `वर्तमान शीट में डेटा मौजूद है। डेटाबेस से लोड करने पर यह डेटा बदल जाएगा। क्या आप जारी रखना चाहते हैं?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'हाँ, लोड करें',
+        cancelButtonText: 'रद्द करें'
+      });
+      if (!confirm.isConfirmed) return;
+    }
+
+    const fmtId = this.currentFormat.id;
+
+    if (fmtId === 'bachat') {
+      await this.loadBachatDataFromDb();
+    } else if (fmtId === 'mm') {
+      this.loadMmDataFromDb();
+    } else if (fmtId === 'item') {
+      this.loadItemDataFromDb();
+    } else if (fmtId === 'subitem') {
+      this.loadSubitemDataFromDb();
+    } else if (fmtId === 'vehicle') {
+      this.loadVehicleDataFromDb();
+    } else if (fmtId === 'pbk') {
+      this.loadPbkDataFromDb();
+    } else if (fmtId === 'nimitt') {
+      this.loadNimittDataFromDb();
+    } else if (fmtId === 'product') {
+      this.loadProductDataFromDb();
+    } else if (fmtId === 'category') {
+      this.loadCategoryDataFromDb();
+    } else if (fmtId === 'unit') {
+      this.loadUnitDataFromDb();
+    } else if (fmtId === 'state') {
+      this.loadStateDataFromDb();
+    } else if (fmtId === 'city') {
+      this.loadCityDataFromDb();
+    } else if (fmtId === 'district') {
+      this.loadDistrictDataFromDb();
+    } else if (fmtId === 'support_list') {
+      this.loadSupportListDataFromDb();
+    } else if (fmtId === 'subitem_list') {
+      this.loadSubitemListDataFromDb();
+    } else if (fmtId === 'variant') {
+      this.loadVariantDataFromDb();
+    } else if (fmtId === 'attribute') {
+      this.loadAttributeDataFromDb();
+    } else if (fmtId === 'attributes_value') {
+      this.loadAttributeValueDataFromDb();
+    } else if (fmtId === 'rel_item_category') {
+      this.loadRelItemCategoryDataFromDb();
+    } else if (fmtId === 'rel_subitem_category') {
+      this.loadRelSubitemCategoryDataFromDb();
+    } else if (fmtId === 'jawak') {
+      this.loadJawakDataFromDb();
+    } else {
+      this.toastr.info(`'${this.currentFormat.title}' के लिए डेटाबेस लोडिंग उपलब्ध नहीं है।`);
+    }
+  }
+
+  private async loadBachatDataFromDb(): Promise<void> {
+    if ((!this.mms || this.mms.length === 0) && (!this.gs.Lists?.mm || this.gs.Lists.mm.length === 0)) {
+      await this.ensureListsLoaded();
+    }
+    const mms: any[] = (this.mms && this.mms.length > 0) ? this.mms : (this.gs.Lists?.mm || []);
+
+    if (mms.length > 0) {
+      this.selectedMmIdForLoad = this.auth.webUser?.settings?.defaultMM ? String(this.auth.webUser.settings.defaultMM) : 'ALL';
+      this.showMmSelectModal = true;
+      return;
+    }
+
+    this.executeFetchBachat('ALL');
+  }
+
+  confirmMmAndLoadBachat(): void {
+    this.showMmSelectModal = false;
+    this.executeFetchBachat(this.selectedMmIdForLoad || 'ALL');
+  }
+
+  private async ensureListsLoaded(): Promise<any> {
+    if (this.gs.Lists && this.gs.Lists.mm) {
+      this.mms = this.gs.Lists.mm;
+      return this.gs.Lists;
+    }
+    return new Promise((resolve) => {
+      this.gs.observeList().subscribe({
+        next: (res: any) => {
+          if (res && res.mm) {
+            this.mms = res.mm;
+          } else if (this.gs.Lists && this.gs.Lists.mm) {
+            this.mms = this.gs.Lists.mm;
+          }
+          resolve(res);
+        },
+        error: (err: any) => {
+          this.toastr.error('मास्टर सूचियां लोड करने में त्रुटि आई: ' + (err?.error?.message || err?.message || 'Network error'));
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  private executeFetchBachat(selectedMmId: string): void {
+    this.isLoadingData = true;
+    this.http.get(this.api.getUrl('BACHAT') + this.auth.webUser.dept_id).subscribe({
+      next: (res: any) => {
+        this.isLoadingData = false;
+        if (res && res.success) {
+          let stockList: any[] = res.result || [];
+          if (selectedMmId !== 'ALL') {
+            stockList = stockList.filter((s: any) => String(s.mm_id) === String(selectedMmId));
+          }
+
+          if (stockList.length === 0) {
+            this.toastr.info('चयनित मिनी मधुबन के लिए कोई स्टॉक रिकॉर्ड्स नहीं मिले।');
+            return;
+          }
+
+          const todayStr = this.getTodayDateFormatted();
+          const mappedRows = stockList.map((row: any, idx: number) => ({
+            sn: idx + 1,
+            date: todayStr,
+            mm: row.mm_hin || row.mm_eng || '',
+            item: row.item_hin || row.item_eng || '',
+            subitem: row.subitem_hin || '',
+            unit: row.unit_short || row.unit_full || '',
+            condition: row.condition_hin || 'अच्छा',
+            sw_qty: row.Stock != null ? row.Stock : (row.bachat != null ? row.bachat : 0),
+            qty: '', // Blank for user physical count entry
+            company_name: row.company_name || '',
+            actual_amt: row.actual_amt || '',
+            item_detail: row.item_detail || '',
+            description: row.description || '',
+            nimmit: row.nimitt_hin || ''
+          }));
+
+          this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mappedRows);
+          if (this.mode === 'intelligent') {
+            this.runAudit();
+          } else {
+            this.resetAudit();
+          }
+          this.toastr.success(
+            `${mappedRows.length} स्टॉक रिकॉर्ड्स लोड किए गए। भौतिक मात्रा (Qty) कॉलम खाली रखा गया है ताकि आप गणना दर्ज कर सकें।`,
+            'Bachat Stock Loaded'
+          );
+        } else {
+          this.toastr.error('स्टॉक डेटा प्राप्त नहीं हो सका।');
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingData = false;
+        this.toastr.error('स्टॉक डेटा लोड करने में त्रुटि आई: ' + (err?.error?.message || err?.message || 'Network error'));
+      }
+    });
+  }
+
+  private loadMmDataFromDb(): void {
+    const mms = this.gs.Lists?.mm || [];
+    if (mms.length === 0) {
+      this.toastr.info('डेटाबेस में कोई मि.म. रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+    const mapped = mms.map((m: any) => ({
+      mm_hin: m.mm_hin || '',
+      mm_eng: m.mm_eng || '',
+      mm_roman: m.mm_roman || '',
+      mm_code: m.mm_code || '',
+      state: m.state_hin || m.state || '',
+      opening_date: m.opening_date ? this.gs.formatDisplayDate(m.opening_date) : '',
+      nimitt: m.nimitt_hin || m.nimitt || ''
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} मि.म. रिकॉर्ड्स डेटाबेस से लोड किए गए।`);
+  }
+
+  private loadItemDataFromDb(): void {
+    const items = this.gs.Lists?.itemmix;
+    if (items && items.length > 0) {
+      this.applyLoadedItems(items);
+    } else {
+      this.isLoadingData = true;
+      this.http.get(this.api.getUrl('ITEMMIX') + this.auth.webUser.dept_id).subscribe({
+        next: (res: any) => {
+          this.isLoadingData = false;
+          if (res && res.success && res.result) {
+            this.applyLoadedItems(res.result);
+          } else {
+            this.toastr.error('आइटम सूची प्राप्त नहीं हो सकी।');
+          }
+        },
+        error: (err: any) => {
+          this.isLoadingData = false;
+          this.toastr.error('आइटम लोड करने में त्रुटि आई: ' + (err?.error?.message || err?.message || 'Network error'));
+        }
+      });
+    }
+  }
+
+  private applyLoadedItems(items: any[]): void {
+    const mapped = items.map((it: any) => ({
+      item_hin: it.item_hin || '',
+      item_eng: it.item_eng || '',
+      item_roman: it.item_roman || '',
+      item_code: it.item_code || '',
+      unit: it.unit_short || it.unit || '',
+      aliases: Array.isArray(it.aliases) ? it.aliases.join(', ') : (it.aliases || ''),
+      min_rate: it.min_rate || '',
+      max_rate: it.max_rate || '',
+      rate_2025: it.rate_2025 || '',
+      rate_2026: it.rate_2026 || it.rate || '',
+      extra_note: it.extra_note || ''
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} आइटम्स डेटाबेस से लोड किए गए।`);
+  }
+
+  private loadSubitemDataFromDb(): void {
+    const items = this.gs.Lists?.itemmix || [];
+    const mapped: any[] = [];
+    for (const it of items) {
+      if (it.subitems && Array.isArray(it.subitems)) {
+        for (const sub of it.subitems) {
+          mapped.push({
+            item_hin: it.item_hin || it.item_eng || '',
+            subitem_hin: sub.subitem_hin || '',
+            subitem_eng: sub.subitem_eng || '',
+            unit: sub.unit_short || it.unit_short || '',
+            rate_2026: sub.rate_2026 || sub.rate || ''
+          });
+        }
+      }
+    }
+    if (mapped.length === 0) {
+      this.toastr.info('कोई सबआइटम रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} सबआइटम्स लोड किए गए।`);
+  }
+
+  private loadVehicleDataFromDb(): void {
+    this.isLoadingData = true;
+    this.http.get(this.api.getUrl('VEHICLE') + this.auth.webUser.dept_id).subscribe({
+      next: (res: any) => {
+        this.isLoadingData = false;
+        if (res && res.success) {
+          const vList = res.result || [];
+          const mapped = vList.map((v: any) => ({
+            mm: v.mm_hin || v.mm_eng || '',
+            gadi_num: v.gadi_num || '',
+            gadi_name: v.gadi_name || '',
+            vehicle_type: v.vehicle_type || '',
+            fuel_type: v.fuel_type || '',
+            owner_name: v.owner_name || '',
+            aawak_type: v.aawak_type_hin || v.aawak_type || '',
+            rc_date: v.rc_date ? this.gs.formatDisplayDate(v.rc_date) : '',
+            rc_exp_date: v.rc_exp_date ? this.gs.formatDisplayDate(v.rc_exp_date) : '',
+            rc_amount: v.rc_amount || '',
+            insurance_date: v.insurance_date ? this.gs.formatDisplayDate(v.insurance_date) : '',
+            insurance_exp_date: v.insurance_exp_date ? this.gs.formatDisplayDate(v.insurance_exp_date) : '',
+            insurance_amount: v.insurance_amount || '',
+            puc_date: v.puc_date ? this.gs.formatDisplayDate(v.puc_date) : '',
+            puc_exp_date: v.puc_exp_date ? this.gs.formatDisplayDate(v.puc_exp_date) : '',
+            puc_amount: v.puc_amount || ''
+          }));
+          this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+          if (this.mode === 'intelligent') {
+            this.runAudit();
+          } else {
+            this.resetAudit();
+          }
+          this.toastr.success(`${mapped.length} वाहन रिकॉर्ड्स लोड किए गए।`);
+        } else {
+          this.toastr.error('वाहन रिकॉर्ड्स लोड नहीं हो सके।');
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingData = false;
+        this.toastr.error('वाहन लोड करने में त्रुटि आई: ' + (err?.error?.message || err?.message || 'Network error'));
+      }
+    });
+  }
+
+  private loadPbkDataFromDb(): void {
+    const pbks = this.gs.Lists?.pbk || [];
+    if (pbks.length === 0) {
+      this.toastr.info('कोई सेवाधारी रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+
+    const states = this.gs.Lists?.state || [];
+    const districts = this.gs.Lists?.district || [];
+    const mms = this.gs.Lists?.mm || [];
+
+    const stateMap = new Map<string, string>();
+    for (const s of states) {
+      const name = s.state_hin || s.state_eng || s.state || '';
+      if (s._id != null) stateMap.set(String(s._id), name);
+      if (s.state_id != null) stateMap.set(String(s.state_id), name);
+    }
+
+    const distMap = new Map<string, string>();
+    for (const d of districts) {
+      const name = d.district_hin || d.district_eng || d.district || '';
+      if (d._id != null) distMap.set(String(d._id), name);
+      if (d.district_id != null) distMap.set(String(d.district_id), name);
+    }
+
+    const mmMap = new Map<string, string>();
+    for (const m of mms) {
+      const name = m.mm_hin || m.mm_eng || '';
+      if (m._id != null) mmMap.set(String(m._id), name);
+      if (m.mm_id != null) mmMap.set(String(m.mm_id), name);
+    }
+
+    const mapped = pbks.map((p: any) => ({
+      roll_no: p.roll_no || '',
+      pbk_hin: p.pbk_hin || '',
+      pbk_eng: p.pbk_eng || '',
+      _gender: p._gender || p.gender || '',
+      state: p.state_hin || p.state || (p.state_id != null ? stateMap.get(String(p.state_id)) || '' : ''),
+      district: p.district_hin || p.district || (p.district_id != null ? distMap.get(String(p.district_id)) || '' : ''),
+      mo_no: p.mo_no || '',
+      class_mm: p.class_mm_hin || p.class_mm || (p.class_mm_id != null ? mmMap.get(String(p.class_mm_id)) || '' : '')
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} सेवाधारी रिकॉर्ड्स लोड किए गए।`);
+  }
+
+  private loadNimittDataFromDb(): void {
+    const nimitts = this.gs.Lists?.nimitt || [];
+    if (nimitts.length === 0) {
+      this.toastr.info('कोई निमित्त रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+    const states = this.gs.Lists?.state || [];
+    const stateMap = new Map<string, string>();
+    for (const s of states) {
+      const name = s.state_hin || s.state_eng || s.state || '';
+      if (s._id != null) stateMap.set(String(s._id), name);
+      if (s.state_id != null) stateMap.set(String(s.state_id), name);
+    }
+    const mapped = nimitts.map((n: any) => ({
+      roll_no: n.roll_no || '',
+      nimitt_hin: n.nimitt_hin || '',
+      nimitt_eng: n.nimitt_eng || '',
+      gender: n.gender || '',
+      state: n.state_hin || n.state || (n.state_id != null ? stateMap.get(String(n.state_id)) || '' : ''),
+      relative_name: n.relative_name || '',
+      townarea: n.townarea || ''
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} निमित्त रिकॉर्ड्स लोड किए गए।`);
+  }
+
+  private loadProductDataFromDb(): void {
+    this.isLoadingData = true;
+    this.http.get(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id).subscribe({
+      next: (res: any) => {
+        this.isLoadingData = false;
+        if (res && res.success) {
+          const prList = res.result || [];
+          const mapped = prList.map((pr: any) => ({
+            sr_num: pr.sr_num || '',
+            product_code: pr.product_code || '',
+            purchase_date: pr.purchase_date ? this.gs.formatDisplayDate(pr.purchase_date) : '',
+            mm: pr.mm_hin || pr.mm || '',
+            item: pr.item_hin || pr.item || '',
+            subitem: pr.subitem_hin || pr.subitem || '',
+            qty: pr.qty != null ? pr.qty : '',
+            unit: pr.unit_short || pr.unit || '',
+            aawak_type: pr.aawak_type_hin || pr.aawak_type || '',
+            company_name: pr.company_name || '',
+            modal_name: pr.modal_name || '',
+            condition: pr.condition_hin || pr.condition || '',
+            warranty_period: pr.warranty_period || '',
+            warranty_from: pr.warranty_from || '',
+            purchase_from: pr.purchase_from || '',
+            purchased_by: pr.purchased_by || '',
+            product_detail: pr.product_detail || '',
+            accessories: pr.accessories || '',
+            nimmit: pr.nimitt_hin || pr.nimmit || ''
+          }));
+          this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+          if (this.mode === 'intelligent') {
+            this.runAudit();
+          } else {
+            this.resetAudit();
+          }
+          this.toastr.success(`${mapped.length} उत्पाद / उपकरण रिकॉर्ड्स लोड किए गए।`);
+        } else {
+          this.toastr.error('उत्पाद रिकॉर्ड्स लोड नहीं हो सके।');
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingData = false;
+        this.toastr.error('उत्पाद लोड करने में त्रुटि: ' + (err?.error?.message || err?.message || 'Network error'));
+      }
+    });
+  }
+
+  private loadCategoryDataFromDb(): void {
+    const cats = this.gs.Lists?.category || [];
+    if (cats.length === 0) {
+      this.toastr.info('कोई श्रेणी उपलब्ध नहीं है।');
+      return;
+    }
+    const mapped = cats.map((c: any) => ({
+      category_hin: c.category_hin || '',
+      category_eng: c.category_eng || '',
+      category_roman: c.category_roman || '',
+      parent_category: c.parent_category_hin || c.parent_category || ''
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.markActiveSheetLoaded(mapped.length);
+    this.toastr.success(`${mapped.length} श्रेणियां लोड की गईं।`);
+  }
+
+  private loadUnitDataFromDb(): void {
+    const units = this.gs.Lists?.unit || [];
+    if (units.length === 0) {
+      this.toastr.info('कोई इकाई रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+    const mapped = units.map((u: any) => ({
+      unit_short: u.unit_short || u.unit || '',
+      unit_full: u.unit_full || u.full_name || ''
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.markActiveSheetLoaded(mapped.length);
+    this.toastr.success(`${mapped.length} इकाइयां लोड की गईं।`);
+  }
+
+  private loadStateDataFromDb(): void {
+    const states = this.gs.Lists?.state || [];
+    if (states.length === 0) {
+      this.toastr.info('कोई राज्य रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+    const mapped = states.map((s: any) => ({
+      state_hin: s.state_hin || s.state || '',
+      state_eng: s.state_eng || s.nameeng || ''
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.markActiveSheetLoaded(mapped.length);
+    this.toastr.success(`${mapped.length} राज्य लोड किए गए।`);
+  }
+
+  private loadCityDataFromDb(): void {
+    const cities = this.gs.Lists?.city || [];
+    if (cities.length === 0) {
+      this.toastr.info('कोई शहर रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+    const states = this.gs.Lists?.state || [];
+    const stateMap = new Map<string, string>();
+    for (const s of states) {
+      const name = s.state_hin || s.state_eng || s.state || '';
+      if (s._id != null) stateMap.set(String(s._id), name);
+      if (s.state_id != null) stateMap.set(String(s.state_id), name);
+    }
+    const mapped = cities.map((c: any) => ({
+      city_hin: c.city_hin || c.city || '',
+      city_eng: c.city_eng || c.nameeng || '',
+      state: c.state_hin || c.state || (c.state_id != null ? stateMap.get(String(c.state_id)) || '' : '')
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.markActiveSheetLoaded(mapped.length);
+    this.toastr.success(`${mapped.length} शहर लोड किए गए।`);
+  }
+
+  private loadDistrictDataFromDb(): void {
+    const dists = this.gs.Lists?.district || [];
+    if (dists.length === 0) {
+      this.toastr.info('कोई जिला उपलब्ध नहीं है।');
+      return;
+    }
+    const states = this.gs.Lists?.state || [];
+    const stateMap = new Map<string, string>();
+    for (const s of states) {
+      const name = s.state_hin || s.state_eng || s.state || '';
+      if (s._id != null) stateMap.set(String(s._id), name);
+      if (s.state_id != null) stateMap.set(String(s.state_id), name);
+    }
+    const mapped = dists.map((d: any) => ({
+      district_hin: d.district_hin || '',
+      district_eng: d.district_eng || '',
+      state: d.state_hin || d.state || (d.state_id != null ? stateMap.get(String(d.state_id)) || '' : '')
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} जिले लोड किए गए।`);
+  }
+
+  private loadSupportListDataFromDb(): void {
+    const mapped: any[] = [];
+    const types = ['aawak_type', 'jawak_type', 'condition', 'gender', 'relation', 'usage_list'];
+    for (const t of types) {
+      const list = this.gs.Lists?.[t] || [];
+      for (const sl of list) {
+        mapped.push({
+          list_type: t,
+          list_name_hin: sl.list_name_hin || '',
+          list_name_eng: sl.list_name_eng || '',
+          list_name_roman: sl.list_name_roman || '',
+          active: sl.active != null ? sl.active : 1
+        });
+      }
+    }
+    if (mapped.length === 0) {
+      this.toastr.info('कोई सपोर्ट लिस्ट रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} सपोर्ट लिस्ट रिकॉर्ड्स लोड किए गए।`);
+  }
+
+  private loadSubitemListDataFromDb(): void {
+    const sList = this.gs.Lists?.subitem_list || [];
+    if (sList.length === 0) {
+      this.toastr.info('कोई सबआइटम लिस्ट रिकॉर्ड्स उपलब्ध नहीं हैं।');
+      return;
+    }
+    const mapped = sList.map((s: any) => ({
+      subitem_hin: s.subitem_hin || '',
+      subitem_eng: s.subitem_eng || '',
+      subitem_roman: s.subitem_roman || '',
+      extra_note: s.extra_note || ''
+    }));
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} सबआइटम लिस्ट रिकॉर्ड्स लोड किए गए।`);
+  }
+
+  private loadVariantDataFromDb(): void {
+    this.isLoadingData = true;
+    this.http.get(this.api.getUrl('VARIANT') + this.auth.webUser.dept_id).subscribe({
+      next: (res: any) => {
+        this.isLoadingData = false;
+        if (res && res.success) {
+          const vList = res.result || [];
+          const mapped = vList.map((v: any) => ({
+            item: v.item_hin || v.item || '',
+            display_name_hin: v.display_name_hin || '',
+            display_name_eng: v.display_name_eng || '',
+            display_name_roman: v.display_name_roman || '',
+            attributes_hin: v.attributes_hin || v.attribute_values || '',
+            sku: v.sku || '',
+            unit: v.unit_short || v.unit || '',
+            min_rate: v.min_rate || '',
+            max_rate: v.max_rate || ''
+          }));
+          this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+          if (this.mode === 'intelligent') {
+            this.runAudit();
+          } else {
+            this.resetAudit();
+          }
+          this.toastr.success(`${mapped.length} वेरिएंट रिकॉर्ड्स लोड किए गए।`);
+        } else {
+          this.toastr.error('वेरिएंट लोड नहीं हो सके।');
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingData = false;
+        this.toastr.error('वेरिएंट लोड करने में त्रुटि: ' + (err?.error?.message || err?.message || 'Network error'));
+      }
+    });
+  }
+
+  private loadAttributeDataFromDb(): void {
+    this.isLoadingData = true;
+    this.http.get(this.api.getUrl('VARIANT') + 'attributes').subscribe({
+      next: (res: any) => {
+        this.isLoadingData = false;
+        if (res && res.success) {
+          const aList = res.result || [];
+          const mapped = aList.map((a: any) => ({
+            attribute_hin: a.attribute_hin || '',
+            attribute_eng: a.attribute_eng || '',
+            attribute_roman: a.attribute_roman || ''
+          }));
+          this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+          if (this.mode === 'intelligent') {
+            this.runAudit();
+          } else {
+            this.resetAudit();
+          }
+          this.toastr.success(`${mapped.length} एट्रीब्यूट्स लोड किए गए।`);
+        } else {
+          this.toastr.error('एट्रीब्यूट्स लोड नहीं हो सके।');
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingData = false;
+        this.toastr.error('एट्रीब्यूट्स लोड करने में त्रुटि: ' + (err?.error?.message || err?.message || 'Network error'));
+      }
+    });
+  }
+
+  private loadAttributeValueDataFromDb(): void {
+    this.isLoadingData = true;
+    this.http.get(this.api.getUrl('VARIANT') + 'attr_values').subscribe({
+      next: (res: any) => {
+        this.isLoadingData = false;
+        if (res && res.success) {
+          const avList = res.result || [];
+          const mapped = avList.map((av: any) => ({
+            attribute: av.attribute_hin || av.attribute || '',
+            attribute_value_hin: av.attribute_value_hin || '',
+            attribute_value_eng: av.attribute_value_eng || '',
+            attribute_value_roman: av.attribute_value_roman || ''
+          }));
+          this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+          if (this.mode === 'intelligent') {
+            this.runAudit();
+          } else {
+            this.resetAudit();
+          }
+          this.toastr.success(`${mapped.length} एट्रीब्यूट वैल्यूज लोड की गईं।`);
+        } else {
+          this.toastr.error('एट्रीब्यूट वैल्यूज लोड नहीं हो सकीं।');
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingData = false;
+        this.toastr.error('एट्रीब्यूट वैल्यूज लोड करने में त्रुटि: ' + (err?.error?.message || err?.message || 'Network error'));
+      }
+    });
+  }
+
+  private loadRelItemCategoryDataFromDb(): void {
+    const items = this.gs.Lists?.itemmix || [];
+    const mapped: any[] = [];
+    for (const it of items) {
+      if (it.icategories && Array.isArray(it.icategories)) {
+        for (const cat of it.icategories) {
+          mapped.push({
+            item: it.item_hin || it.item_eng || '',
+            category: cat.category_hin || cat.category_eng || ''
+          });
+        }
+      }
+    }
+    if (mapped.length === 0) {
+      this.toastr.info('कोई आइटम-श्रेणी संबंध रिकॉर्ड्स नहीं मिले।');
+      return;
+    }
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} आइटम-श्रेणी संबंध लोड किए गए।`);
+  }
+
+  private loadRelSubitemCategoryDataFromDb(): void {
+    const items = this.gs.Lists?.itemmix || [];
+    const mapped: any[] = [];
+    for (const it of items) {
+      if (it.subitems && Array.isArray(it.subitems)) {
+        for (const sub of it.subitems) {
+          const scats = sub.scategories || sub.categories || [];
+          if (Array.isArray(scats)) {
+            for (const cat of scats) {
+              mapped.push({
+                item: it.item_hin || it.item_eng || '',
+                subitem: sub.subitem_hin || sub.subitem_eng || '',
+                category: cat.category_hin || cat.category_eng || ''
+              });
+            }
+          }
+        }
+      }
+    }
+    if (mapped.length === 0) {
+      this.toastr.info('कोई सबआइटम-श्रेणी संबंध रिकॉर्ड्स नहीं मिले।');
+      return;
+    }
+    this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+    if (this.mode === 'intelligent') {
+      this.runAudit();
+    } else {
+      this.resetAudit();
+    }
+    this.toastr.success(`${mapped.length} सबआइटम-श्रेणी संबंध लोड किए गए।`);
+  }
+
+  private loadJawakDataFromDb(): void {
+    this.isLoadingData = true;
+    this.http.get(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id).subscribe({
+      next: (res: any) => {
+        this.isLoadingData = false;
+        if (res && res.success) {
+          const jList = res.result || [];
+          const mapped = jList.map((jw: any) => ({
+            date: jw.date ? this.gs.formatDisplayDate(jw.date) : '',
+            mm: jw.mm_hin || '',
+            jawak_mm: jw.jawak_mm_hin || '',
+            pbk: jw.pbk_hin || '',
+            item: jw.item_hin || '',
+            subitem: jw.subitem_hin || '',
+            qty: jw.qty || '',
+            unit: jw.unit_short || '',
+            condition: jw.condition_hin || '',
+            jawak_type: jw.jawak_type_hin || '',
+            voucher_no: jw.vch_num || jw.voucher_no || '',
+            company_name: jw.company_name || ''
+          }));
+          this.rows = this.studioService.buildRowsFromRawObjects(this.currentFormat!, mapped);
+          if (this.mode === 'intelligent') {
+            this.runAudit();
+          } else {
+            this.resetAudit();
+          }
+          this.toastr.success(`${mapped.length} जावक रिकॉर्ड्स लोड किए गए।`);
+        } else {
+          this.toastr.error('जावक रिकॉर्ड्स लोड नहीं हो सके।');
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingData = false;
+        this.toastr.error('जावक लोड करने में त्रुटि: ' + (err?.error?.message || err?.message || 'Network error'));
+      }
+    });
+  }
+
+  private getTodayDateFormatted(): string {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   // ==========================================

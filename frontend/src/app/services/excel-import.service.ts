@@ -22,10 +22,20 @@ export class ExcelImportService {
     { name: 'district', autoUpdate: true },
     { name: 'attribute', autoUpdate: true },
     { name: 'attributes_value', autoUpdate: true },
+    { name: 'mm', autoUpdate: true },
     { name: 'variant', col_name: 'variant', autoUpdate: true, note: 'Import variants with comma-separated attributes.' },
     { name: 'jawak', autoUpdate: true, note: 'Either PBK (Sewadhari) or Jawak MM (Destination) is mandatory.' },
   ];
   config: any = {
+    mm: [
+      { col_name: 'mm_hin', name: 'mm_hin', alt_names: ["mm hin", "mm_name", "मि.म.", "मिनी मधुबन", "नाम"], not_null: true },
+      { col_name: 'mm_eng', name: 'mm_eng', alt_names: ["mm eng", "name eng", "mm name eng"], not_null: false },
+      { col_name: 'mm_roman', name: 'mm_roman', alt_names: ["mm roman", "roman"], not_null: false },
+      { col_name: 'mm_code', name: 'mm_code', alt_names: ["mm code", "code", "कोड"], not_null: false },
+      { col_name: 'state', name: 'state', alt_names: ["state", "राज्य", "स्टेट"], not_null: true, ref_table: 'state', ref_field: 'state_id', ref_data: 'state_hin' },
+      { col_name: 'opening_date', name: 'opening_date', type: 'date', alt_names: ["opening date", "तारीख"], not_null: false },
+      { col_name: 'nimitt', name: 'nimitt', alt_names: ["nimitt", "निमित्त"], not_null: false, ref_table: 'nimitt', ref_field: 'nimitt_id', ref_data: 'nimitt_hin' },
+    ],
     vehicle: [
       { col_name: 'mm', name: 'mm', alt_names: ["mm_name", "mm name", "मि.म.", "मि म", "मिनी मधुबन"], not_null: true, ref_table: 'mm', ref_field: 'mm_id', ref_data: 'mm_hin' },
       { col_name: 'vehicle_type', name: 'vehicle_type', alt_names: ["vehicle type", "gadi type", "gadi_type"], not_null: false },
@@ -167,7 +177,8 @@ export class ExcelImportService {
       { col_name: 'item', name: 'item', alt_names: ["item_name", "item name", "आइटम", "आइटम का नाम"], not_null: true, type: 'mix', ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
       { col_name: 'subitem', name: 'subitem', alt_names: ["subitem_name", "subitem name", "सबआइटम", "सबआइटम का नाम"], not_null: false, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem_hin' },
       { col_name: 'company_name', name: 'company', alt_names: ["company_name", "कंपनी", "company", "company name"], not_null: false },
-      { col_name: 'qty', name: 'qty', alt_names: ["quantity", "संख्या", "number"], not_null: true },
+      { col_name: 'sw_qty', name: 'sw_qty', alt_names: ["sw qty", "sw_qty", "software qty", "सॉफ्टवेयर स्टॉक", "सॉफ्टवेयर मात्रा", "स्टॉक", "sw stock", "सॉफ्टवेयर स्टॉक (sw qty)"], not_null: false },
+      { col_name: 'qty', name: 'qty', alt_names: ["quantity", "संख्या", "number", "भौतिक मात्रा", "physical qty", "मात्रा", "भौतिक मात्रा (physical qty)*", "भौतिक मात्रा (physical qty)"], not_null: true },
       { col_name: 'unit', name: 'unit', alt_names: ["यूनिट"], not_null: true, ref_table: 'unit', ref_field: 'unit_id', ref_data: 'unit_short' },
       { col_name: 'condition', name: 'condition', alt_names: ["कन्डिशन"], not_null: false, ref_table: 'condition', ref_field: 'condition_id', ref_data: 'list_name_hin' },
       { col_name: 'actual_amt', name: 'amount', alt_names: ["अमाउन्ट", "amt", "amount"], not_null: false },

@@ -52,6 +52,8 @@ export class ItemComponent implements OnInit {
   ratesRawMap: { [key: string]: any[] } = {};
   activeRateItem: any = null;
   activeRateSubitem: any = null;
+  activeItem: any = null;
+  aliasManagerType: 'item' | 'subitem' = 'item';
   quickRatesList: { year: number; rate: any; _id?: number }[] = [];
   quickRateNewYear: number | null = null;
   isQuickRateSaving: boolean = false;
@@ -329,6 +331,7 @@ export class ItemComponent implements OnInit {
         "Item Eng": itm.item_eng || null,
         "Item Roman": itm.item_roman || null,
         "Item Code": itm.item_code || null,
+        "Aliases": this.aliasDisplay(itm) || null,
         "Subitem Hin": null,
         "Subitem Eng": null,
         "Subitem Roman": null,
@@ -364,6 +367,7 @@ export class ItemComponent implements OnInit {
             "Item Eng": itm.item_eng || null,
             "Item Roman": itm.item_roman || null,
             "Item Code": itm.item_code || null,
+            "Aliases": this.subitemAliasDisplay(si) || null,
             "Subitem Hin": si.subitem_hin || null,
             "Subitem Eng": si.subitem_eng || null,
             "Subitem Roman": si.subitem_roman || null,
@@ -930,6 +934,41 @@ export class ItemComponent implements OnInit {
     else {
       console.log("message", ev);
     }
+  }
+
+  openAliasManager(item: any) {
+    this.activeItem = item;
+    this.editData = item;
+    this.aliasManagerType = 'item';
+    this.openModal('Manage Item Aliases');
+  }
+
+  openSubitemAliasManager(subitem: any) {
+    this.editData = subitem;
+    this.aliasManagerType = 'subitem';
+    this.openModal('Manage Subitem Aliases');
+  }
+
+  onAliasSaved(result: any) {
+    if (!result?.reload) return;
+    this.closeModal();
+    this.getItemData(this.page);
+  }
+
+  aliasDisplay(item: any): string {
+    const aliases = item?.item_aliases;
+    if (!Array.isArray(aliases) || aliases.length === 0) return '';
+    return aliases.map((a: any) => typeof a === 'object' ? a.alias : a).filter(Boolean).join(', ');
+  }
+
+  subitemAliasDisplay(si: any): string {
+    const aliases = si?.aliases;
+    if (!Array.isArray(aliases) || aliases.length === 0) return '';
+    return aliases.map((a: any) => typeof a === 'object' ? a.alias : a).filter(Boolean).join(', ');
+  }
+
+  applyFilter() {
+    this.getItemData(1);
   }
 
   edit(data: any, type: any = null) {

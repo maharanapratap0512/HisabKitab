@@ -2745,6 +2745,7 @@ class dbModal {
     // Version 39
     // Fix prastav.nimitt_id foreign key constraint to reference pbk(_id)
     {
+      drop_prastav_new: `DROP TABLE IF EXISTS prastav_new;`,
       create_prastav_new: `CREATE TABLE prastav_new(
         _id integer primary key AUTOINCREMENT,
         voucher_no integer not null,
@@ -2772,9 +2773,26 @@ class dbModal {
         bachat_qty real,
         prastav_type integer REFERENCES support_list(_id)
       );`,
-      copy_prastav: `INSERT INTO prastav_new SELECT * FROM prastav;`,
+      copy_prastav: `INSERT INTO prastav_new (_id, voucher_no, date, mm_id, pbk_id, pbk_count, item_id, subitem_id, unit_id, rate, amount, qty, bachat, monthly_uses, qty_needs, is_noted, note_details, description, active, created_at, is_rejected, reject_reason)
+        SELECT _id, voucher_no, date, mm_id, pbk_id, pbk_count, item_id, subitem_id, unit_id, rate, amount, qty, bachat, monthly_uses, qty_needs, is_noted, note_details, description, active, created_at, is_rejected, reject_reason FROM prastav;`,
       drop_prastav: `DROP TABLE prastav;`,
       rename_prastav: `ALTER TABLE prastav_new RENAME TO prastav;`
+    },
+    // Version 40
+    // Create subitem_aliases table and transfer existing variant aliases
+    {
+      create_subitem_aliases: `CREATE TABLE IF NOT EXISTS subitem_aliases(
+        _id INTEGER PRIMARY KEY AUTOINCREMENT,
+        subitem_id INTEGER NOT NULL REFERENCES subitem(_id),
+        alias VARCHAR(150) NOT NULL,
+        created_at TIMESTAMP DEFAULT(DATETIME('now', 'localtime')),
+        UNIQUE(subitem_id, alias)
+      );`,
+      migrate_variant_aliases: `INSERT OR IGNORE INTO subitem_aliases (subitem_id, alias, created_at)
+        SELECT s._id, va.alias, va.created_at
+        FROM variant_aliases va
+        JOIN subitem s ON s.variant_id = va.variant_id
+        WHERE s._id IS NOT NULL;`
     }
   ];
 

@@ -1,0 +1,38 @@
+<div class="container-fluid p-3">
+  <!-- Top Host Bar -->
+  <div class="card mb-2 p-2 px-3 border-0 shadow-sm d-flex flex-row align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <i class="uil uil-bolt-alt text-primary fs-4"></i>
+      <div>
+        <h6 class="mb-0 fw-bold">Sutram Excel Studio <span class="badge bg-soft-primary text-primary ms-1">Isolated Sandbox</span></h6>
+        <small class="text-muted" style="font-size: 11px;">PrimeNG Template • Live Schema Matching • Zero HisabKitab Bloat</small>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-outline-secondary" (click)="reloadStudio()" title="Reload Studio">
+        <i class="uil uil-redo me-1"></i> Reload
+      </button>
+      <button class="btn btn-sm btn-outline-primary" (click)="openSeparateTab()" title="Open in dedicated browser window">
+        <i class="uil uil-external-link-alt me-1"></i> Open in New Tab
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="text-center py-4">
+    <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+    <span class="text-muted" style="font-size: 13px;">Connecting to Sutram Studio backend (port 3200)...</span>
+  </div>
+
+  <!-- Sandboxed Studio Frame -->
+  <div class="w-100 rounded overflow-hidden shadow-sm border" style="height: calc(100vh - 165px); min-height: 600px; background: #ffffff;">
+    <iframe 
+      *ngIf="safeStudioUrl"
+      [src]="safeStudioUrl" 
+      (load)="onIframeLoad()"
+      class="w-100 h-100 border-0"
+      allow="clipboard-read; clipboard-write">
+    </iframe>
+  </div>
+</div>

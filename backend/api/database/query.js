@@ -378,7 +378,9 @@ const item = {
         `select * from item ?`
     , select_full:
         `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
-        unit.unit_full, unit.unit_short from item
+        unit.unit_full, unit.unit_short,
+        (select json_group_array(json_object('_id', ia._id, 'alias', ia.alias)) from item_aliases ia where ia.item_id = item._id) as item_aliases
+        from item
         left join rel_item_category ric on ric.item_id = item._id
         left join category ct on ct._id = ric.category_id
         left join unit on unit._id = item.unit_id ? group by item._id limit @limit offset @offset`
@@ -451,7 +453,8 @@ const itemmix = {
         'categories', si.categories, 'unit_full', si.unit_full, 'unit_short', si.unit_short,
         'extra_note', si.extra_note, 'unit_id', si.unit_id,
         'restrict_month', si.restrict_month, 'restrict_year', si.restrict_year,
-        'min_rate', si.min_rate, 'max_rate', si.max_rate, 'active', si.active
+        'min_rate', si.min_rate, 'max_rate', si.max_rate, 'active', si.active,
+        'aliases', json((select json_group_array(json_object('_id', sa._id, 'alias', sa.alias)) from subitem_aliases sa where sa.subitem_id = si._id))
     )) from (
         select subitem.*,
         json_group_array(json_object('_id', cat._id, 'category_hin', cat.category_hin, 'category_eng', cat.category_eng)) as categories,

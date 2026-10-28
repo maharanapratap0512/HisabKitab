@@ -42,39 +42,40 @@
         <div class="btn-group btn-group-sm">
           <!-- Load Format Dropdown Menu -->
           <div class="btn-group btn-group-sm position-relative">
-            <button type="button" class="btn btn-outline-primary py-1 px-2 font-11 dropdown-toggle shadow-sm"
+            <button type="button" class="btn btn-outline-primary py-1 px-2 font-11 dropdown-toggle shadow-sm d-flex align-items-center format-select-btn"
               (click)="isFormatMenuOpen = !isFormatMenuOpen; $event.stopPropagation()"
-              title="सिस्टम इम्पोर्ट फॉर्मेट चुनें या बदलें">
-              <i class="uil uil-layer-group me-1"></i>Load Format
-              <span *ngIf="currentFormat" class="badge bg-soft-primary text-primary font-10 ms-1 fw-bold">{{ currentFormat.title_hin }}</span>
+              [attr.title]="'वर्तमान फॉर्मेट: ' + (currentFormat ? currentFormat.title : 'Blank Sheet') + ' — फॉर्मेट बदलने के लिए क्लिक करें'">
+              <i class="uil uil-layer-group me-1 font-12"></i>
+              <span class="btn-format-prefix me-1">Format:</span>
+              <span class="badge selected-format-chip font-11 fw-bold px-2 py-05">
+                {{ currentFormat ? currentFormat.title : 'Blank Sheet' }}
+              </span>
             </button>
             
             <div class="dropdown-menu show shadow-lg py-1 format-picker-menu" *ngIf="isFormatMenuOpen"
               (click)="$event.stopPropagation()">
               <div class="dropdown-header text-muted font-10 text-uppercase fw-bold pb-1">
-                <i class="uil uil-database me-1"></i>सिस्टम इम्पोर्ट फॉर्मेट्स
+                <i class="uil uil-layer-group me-1"></i>Formats
               </div>
               <button *ngFor="let fmt of studioService.formats" type="button"
                 class="dropdown-item d-flex align-items-center py-2 font-12"
                 [class.active-format-item]="currentFormat?.id === fmt.id"
-                (click)="loadFormat(fmt, mode, false); isFormatMenuOpen = false">
+                (click)="loadFormat(fmt, mode, false); isFormatMenuOpen = false"
+                [attr.title]="'फ़ॉर्मेट लोड करें: ' + fmt.title">
                 <i [class]="'uil ' + fmt.icon + ' me-2 fs-5 text-primary'"></i>
-                <div>
-                  <div class="fw-bold">{{ fmt.title_hin }}</div>
-                  <small class="text-muted font-10">{{ fmt.title }}</small>
-                </div>
-                <i *ngIf="currentFormat?.id === fmt.id" class="uil uil-check text-success ms-auto fs-5"></i>
+                <span class="fw-semibold">{{ fmt.title }}</span>
+                <span *ngIf="currentFormat?.id === fmt.id" class="badge bg-soft-primary text-primary font-10 ms-auto fw-bold px-2 py-1">Active</span>
+                <i *ngIf="currentFormat?.id === fmt.id" class="uil uil-check text-primary ms-1 fs-5"></i>
               </button>
               <div class="dropdown-divider my-1"></div>
               <button type="button" class="dropdown-item d-flex align-items-center py-2 font-12"
                 [class.active-format-item]="!currentFormat"
-                (click)="initGenericNormalSheet(); isFormatMenuOpen = false">
+                (click)="initGenericNormalSheet(); isFormatMenuOpen = false"
+                title="स्वतंत्र खाली शीट (Blank Sheet) लोड करें">
                 <i class="uil uil-table me-2 fs-5 text-secondary"></i>
-                <div>
-                  <div class="fw-bold">स्वतंत्र खाली शीट (Blank Sheet)</div>
-                  <small class="text-muted font-10">बिना किसी फॉर्मेट के स्वतंत्र टेबल (कस्टम हेडर)</small>
-                </div>
-                <i *ngIf="!currentFormat" class="uil uil-check text-success ms-auto fs-5"></i>
+                <span class="fw-semibold">Blank Sheet</span>
+                <span *ngIf="!currentFormat" class="badge bg-soft-secondary text-secondary font-10 ms-auto fw-bold px-2 py-1">Active</span>
+                <i *ngIf="!currentFormat" class="uil uil-check text-secondary ms-1 fs-5"></i>
               </button>
             </div>
           </div>
@@ -91,6 +92,14 @@
             <i class="uil uil-folder-open me-1"></i>Open
           </button>
           <input #openFileInput type="file" accept=".xlsx, .xls, .csv" class="d-none" (change)="onFileSelected($event)" />
+
+          <!-- Load Data From Database Button -->
+          <button type="button" class="btn btn-outline-success py-1 px-2 font-11" (click)="loadDatabaseData()"
+            [disabled]="isLoadingData || !currentFormat"
+            title="डेटाबेस से इस फॉर्मेट का लाइव डेटा लोड करें">
+            <i class="uil me-1" [ngClass]="isLoadingData ? 'uil-spinner-alt spin' : 'uil-database'"></i>
+            <span>{{ isLoadingData ? 'लोडिंग...' : 'Load Data' }}</span>
+          </button>
 
           <!-- Export Button -->
           <button type="button" class="btn btn-outline-primary py-1 px-2 font-11" (click)="exportToExcel()"
@@ -135,6 +144,28 @@
     <span *ngIf="activeColumnName" class="badge bg-soft-info text-info font-11 me-2 py-1 px-2 text-truncate" style="max-width: 220px;">
       {{ activeColumnName }}
     </span>
+
+    <div class="d-flex align-items-center me-2 flex-shrink-0">
+      <button type="button" class="btn btn-sm py-0 px-2 font-11 me-1 border"
+        [class.btn-primary]="isTextBold" [class.btn-outline-secondary]="!isTextBold"
+        (click)="toggleBold()" title="Bold Text (Ctrl+B)">
+        <strong>B</strong>
+      </button>
+      <div class="btn-group btn-group-sm">
+        <button type="button" class="btn btn-outline-secondary py-0 px-1 font-11"
+          [class.active]="textAlign === 'left'" (click)="setTextAlign('left')" title="Align Left">
+          <i class="uil uil-align-left font-12"></i>
+        </button>
+        <button type="button" class="btn btn-outline-secondary py-0 px-1 font-11"
+          [class.active]="textAlign === 'center'" (click)="setTextAlign('center')" title="Align Center">
+          <i class="uil uil-align-center font-12"></i>
+        </button>
+        <button type="button" class="btn btn-outline-secondary py-0 px-1 font-11"
+          [class.active]="textAlign === 'right'" (click)="setTextAlign('right')" title="Align Right">
+          <i class="uil uil-align-right font-12"></i>
+        </button>
+      </div>
+    </div>
 
     <span class="formula-symbol fw-bold fst-italic text-muted me-2">fx</span>
 
@@ -275,8 +306,8 @@
 
   </div>
 
-  <!-- SPREADSHEET CANVAS WORKSPACE (WITH DRAGGABLE COLUMN RESIZING) -->
-  <main class="spreadsheet-workspace" #gridContainer (paste)="onGridPaste($event)">
+  <!-- SPREADSHEET CANVAS WORKSPACE (WITH DRAGGABLE COLUMN RESIZING & ZOOM SCALE) -->
+  <main class="spreadsheet-workspace" #gridContainer (paste)="onGridPaste($event)" [style.zoom]="zoomLevel">
     <table class="table spreadsheet-table mb-0">
       
       <!-- COLUMN HEADERS (A, B, C... + Draggable Resizer) -->
@@ -352,6 +383,8 @@
               class="studio-cell"
               [style.width.px]="columnWidths[col.key] || 160"
               [style.min-width.px]="columnWidths[col.key] || 160"
+              [style.font-weight]="isTextBold ? 'bold' : 'normal'"
+              [style.text-align]="textAlign"
               [class.cell-active]="activeRowIndex === rIdx && activeColKey === col.key"
               [class.cell-bad]="mode === 'intelligent' && rowHasData(r) && r.cells[col.key] && !r.cells[col.key].isValid"
               [class.cell-warning]="mode === 'intelligent' && rowHasData(r) && r.cells[col.key] && r.cells[col.key].isWarning"
@@ -417,48 +450,96 @@
     </table>
   </main>
 
-  <!-- BOTTOM STATUS BAR & SHEET TABS -->
-  <footer class="studio-footer px-3 py-1 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
-    <div class="d-flex align-items-center gap-1">
-      <div class="sheet-tab active-tab px-3 py-1 font-12 fw-semibold">
-        <i class="uil uil-file-alt me-1 text-success"></i>Sheet 1
+  <!-- REAL EXCEL-STYLE BOTTOM MULTI-SHEET TABS & STATUS BAR -->
+  <footer class="studio-footer border-top d-flex flex-column p-0">
+    <!-- SUB-ROW A: EXCEL SHEET TABS STRIP -->
+    <div class="sheet-tabs-container d-flex align-items-center border-bottom px-2 py-1">
+      <!-- Scroll Left Button -->
+      <button type="button" class="btn btn-sm btn-icon scroll-tab-btn me-1 p-0 px-1 border-0" (click)="scrollSheetTabs('left')" title="Scroll Tabs Left">
+        <i class="uil uil-angle-left font-14"></i>
+      </button>
+
+      <!-- Horizontal Scrollable Tabs Strip -->
+      <div id="sheetTabsStrip" class="sheet-tabs-strip d-flex align-items-center gap-1 overflow-auto flex-grow-1">
+        <div *ngFor="let tab of sheetTabs"
+             class="excel-tab-pill d-flex align-items-center px-3 py-1 font-12 fw-semibold cursor-pointer"
+             [class.active-sheet-tab]="activeSheetId === tab.id"
+             (click)="switchSheet(tab)"
+             [title]="tab.title_hin || tab.title">
+          <i [class]="'uil ' + tab.icon + ' me-1 font-13'" [class.text-success]="activeSheetId === tab.id"></i>
+          <span>{{ tab.title }}</span>
+          <span *ngIf="tab.isLoaded && tab.recordCount !== undefined && tab.recordCount > 0" 
+                class="badge bg-soft-success text-success font-10 ms-1 px-1 rounded-pill">
+            {{ tab.recordCount }}
+          </span>
+        </div>
+
+        <!-- Add Blank Sheet Button (+) -->
+        <button type="button" class="btn btn-sm add-sheet-btn ms-1 p-1 rounded-circle" (click)="addNewBlankSheet()" title="Add New Blank Sheet">
+          <i class="uil uil-plus font-13 text-primary"></i>
+        </button>
       </div>
-      <span *ngIf="currentFormat" class="badge bg-soft-primary text-primary font-11 ms-2 px-2 py-1">
-        <i class="uil uil-file-bookmark-alt me-1"></i>{{ currentFormat.title_hin }}
-      </span>
-      <span class="text-muted font-11 ms-3">
-        मोड: <strong>{{ mode === 'intelligent' ? 'स्मार्ट ऑडिट' : 'नॉर्मल' }}</strong>
-      </span>
-      <span class="text-muted font-11 ms-2">
-        डेटा प्रविष्टियां: <strong>{{ auditSummary.total }}</strong>
-      </span>
-      <span *ngIf="mode === 'intelligent'" class="text-success font-11 ms-2">
-        वैध: <strong>{{ auditSummary.valid }}</strong>
-      </span>
+
+      <!-- Scroll Right Button -->
+      <button type="button" class="btn btn-sm btn-icon scroll-tab-btn ms-1 p-0 px-1 border-0" (click)="scrollSheetTabs('right')" title="Scroll Tabs Right">
+        <i class="uil uil-angle-right font-14"></i>
+      </button>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
-      <!-- Freedom Navigation Guidance -->
-      <div class="text-muted font-11 d-none d-lg-flex align-items-center gap-2">
-        <span><kbd>Enter</kbd> अगली रो</span>
-        <span><kbd>Tab</kbd> अगला कॉलम</span>
-        <span>कॉलम बॉर्डर <strong>ड्रैग</strong> करके चौड़ाई बदलें</span>
-        <span>रो/सेल पर <strong>राइट-क्लिक</strong> करें मेनू के लिए</span>
+    <!-- SUB-ROW B: STATUS BAR WITH SCALE/ZOOM CONTROLS -->
+    <div class="sheet-status-bar px-3 py-1 d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <!-- Left: Cell coordinate & audit info -->
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-soft-primary text-primary font-11 px-2 py-05">
+          <i class="uil uil-crosshair me-1"></i>{{ activeCellCoordinate }}
+        </span>
+        <span *ngIf="currentFormat" class="text-muted font-11">
+          फॉर्मेट: <strong>{{ currentFormat.title }}</strong>
+        </span>
+        <span class="text-muted font-11">
+          रो: <strong>{{ rows.length }}</strong>
+        </span>
+        <span *ngIf="mode === 'intelligent'" class="font-11 ms-1" [class.text-success]="auditSummary.badCells === 0" [class.text-danger]="auditSummary.badCells > 0">
+          {{ auditSummary.badCells === 0 ? '100% वैध' : auditSummary.badCells + ' बैड सेल्स' }}
+        </span>
       </div>
 
-      <!-- Proceed to Software Import Button -->
-      <button type="button"
-        class="btn btn-success btn-sm py-1 px-3 fw-bold font-12 shadow-sm d-flex align-items-center proceed-import-btn"
-        (click)="proceedToSoftwareImport()"
-        title="सॉफ्टवेयर के सुरक्षित इम्पोर्ट विज़ार्ड में भेजें">
-        <i class="uil uil-shield-check me-1 fs-6"></i>
-        <span>Proceed to Import</span>
-        <span *ngIf="(mode === 'intelligent' ? auditSummary.valid : auditSummary.total) > 0"
-          class="badge bg-white text-success font-10 ms-1 rounded-pill fw-bold">
-          {{ mode === 'intelligent' ? auditSummary.valid : auditSummary.total }}
-        </span>
-        <i class="uil uil-arrow-right ms-1 font-13"></i>
-      </button>
+      <!-- Center: Quick Writing Shortcuts hint -->
+      <div class="text-muted font-11 d-none d-xl-flex align-items-center gap-2">
+        <span><kbd>Enter</kbd> अगली रो</span>
+        <span><kbd>Tab</kbd> अगला सेल</span>
+        <span>राइट-क्लिक: <strong>रो ऑपरेशन्स</strong></span>
+      </div>
+
+      <!-- Right: SCALE / ZOOM CONTROLS & IMPORT -->
+      <div class="d-flex align-items-center gap-2">
+        <!-- Scale / Zoom Controls (User explicitly requested) -->
+        <div class="zoom-pill-controls d-flex align-items-center rounded px-1 py-05 border">
+          <button type="button" class="btn btn-sm btn-icon p-0 px-1 border-0" (click)="zoomOut()" title="Zoom Out (-10%)">
+            <i class="uil uil-minus font-11"></i>
+          </button>
+          <button type="button" class="btn btn-sm p-0 px-2 font-11 fw-bold border-0 zoom-display-btn" (click)="resetZoom()" title="Reset to 100%">
+            {{ Math.round(zoomLevel * 100) }}%
+          </button>
+          <button type="button" class="btn btn-sm btn-icon p-0 px-1 border-0" (click)="zoomIn()" title="Zoom In (+10%)">
+            <i class="uil uil-plus font-11"></i>
+          </button>
+        </div>
+
+        <!-- Proceed to Software Import Button -->
+        <button type="button"
+          class="btn btn-success btn-sm py-1 px-3 fw-bold font-12 shadow-sm d-flex align-items-center proceed-import-btn"
+          (click)="proceedToSoftwareImport()"
+          title="सॉफ्टवेयर के सुरक्षित इम्पोर्ट विज़ार्ड में भेजें">
+          <i class="uil uil-shield-check me-1 fs-6"></i>
+          <span>Proceed to Import</span>
+          <span *ngIf="(mode === 'intelligent' ? auditSummary.valid : auditSummary.total) > 0"
+            class="badge bg-white text-success font-10 ms-1 rounded-pill fw-bold">
+            {{ mode === 'intelligent' ? auditSummary.valid : auditSummary.total }}
+          </span>
+          <i class="uil uil-arrow-right ms-1 font-13"></i>
+        </button>
+      </div>
     </div>
   </footer>
 
@@ -534,6 +615,55 @@
           </app-excel-import>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SEARCHABLE MM SELECTION FOR STOCK LOADING -->
+  <div *ngIf="showMmSelectModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.55); z-index: 1060;" (click)="showMmSelectModal = false">
+    <div class="modal-dialog" style="max-width: 480px; margin-top: 10vh;" (click)="$event.stopPropagation()">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header border-bottom py-2 px-3">
+          <h5 class="modal-title font-14 fw-bold d-flex align-items-center m-0">
+            <i class="uil uil-building text-primary me-2 fs-5"></i>
+            <span>मिनी मधुबन (MM) चुनें</span>
+          </h5>
+          <button type="button" class="btn-close font-10" (click)="showMmSelectModal = false"></button>
+        </div>
+        <div class="modal-body py-3 px-3">
+          <label class="form-label font-12 fw-semibold mb-2">
+            किस मिनी मधुबन का स्टॉक लोड करना चाहते हैं?
+          </label>
+          <ng-select
+            class="custom"
+            style="width: 100%;"
+            placeholder="-- मिनी मधुबन खोजें या चुनें (Search MM) --"
+            [clearable]="false"
+            [virtualScroll]="true"
+            [searchable]="true"
+            [autofocus]="true"
+            [(ngModel)]="selectedMmIdForLoad"
+            (keydown.enter)="confirmMmAndLoadBachat()">
+            <ng-option value="ALL">
+              <span class="fw-bold text-primary">★ सभी मिनी मधुबन (All Mini Madhubans)</span>
+            </ng-option>
+            <ng-option *ngFor="let item of (mms.length ? mms : (gs.Lists?.mm || []))" [value]="item._id">
+              {{ item.mm_hin }} : {{ item.mm_eng }}{{ item.mm_code ? ' : ' + item.mm_code : '' }}
+            </ng-option>
+          </ng-select>
+          <div class="text-muted font-11 mt-2 d-flex align-items-center">
+            <i class="uil uil-search-alt me-1 text-primary"></i>
+            <span>सर्च करने के लिए हिंदी, अंग्रेजी या मि.म. कोड टाइप करें।</span>
+          </div>
+        </div>
+        <div class="modal-footer border-top py-2 px-3 d-flex justify-content-end">
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3" (click)="showMmSelectModal = false">
+            रद्द करें
+          </button>
+          <button type="button" class="btn btn-primary btn-sm px-3 ms-2" (click)="confirmMmAndLoadBachat()">
+            <i class="uil uil-download-alt me-1"></i>स्टॉक लोड करें
+          </button>
+        </div>
       </div>
     </div>
   </div>

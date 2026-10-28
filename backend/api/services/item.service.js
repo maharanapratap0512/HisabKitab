@@ -3,11 +3,12 @@ const BaseTable = require('../database/base.table');
 const Fn = require('../database/functions');
 const { sutramDB } = require('../database/db.model');
 
-const item = new BaseTable('item');
-const subitem = new BaseTable('subitem');
-const rel_item_cat = new BaseTable('rel_item_category');
-const rel_subitem_cat = new BaseTable('rel_subitem_category');
-const item_aliases = new BaseTable('item_aliases');
+const item = sutramDB.table('item');
+const subitem = sutramDB.table('subitem');
+const rel_item_cat = sutramDB.table('rel_item_category');
+const rel_subitem_cat = sutramDB.table('rel_subitem_category');
+const item_aliases = sutramDB.table('item_aliases');
+const subitem_aliases = sutramDB.table('subitem_aliases');
 const deptService = require('./department.service');
 const HmpService = require('./hmp.service');
 const PrastavService = require('./prastav.service');
@@ -51,42 +52,74 @@ async function getItems(deptId, options = {}) {
         row.document = (row.document && row.document != "[null]" ? JSON.parse(row.document) : []);
         row.categories = (row.categories && row.categories != "[null]" ? JSON.parse(row.categories) : []);
         row.item_aliases = (row.item_aliases && row.item_aliases != "[null]" ? JSON.parse(row.item_aliases) : []);
-        subitem_count += row.subitems.length;
-        for (let j = 0; j < row.subitems.length; j++) {
-            row.subitems[j].categories = parseSubitemCategories(row.subitems[j]);
+        if (Array.isArray(row.item_aliases)) {
+            row.item_aliases = row.item_aliases.filter(a => a && a._id);
         }
+        subitem_count += row.subitems.length;
+        cleanSubitems(row.subitems);
     }
     return { data: resolve.data, total_count: resolve.total_count, subitem_count };
+}
+
+function cleanSubitems(subitems) {
+    if (!Array.isArray(subitems)) return [];
+    for (let j = 0; j < subitems.length; j++) {
+        subitems[j].categories = parseSubitemCategories(subitems[j]);
+        if (typeof subitems[j].aliases === 'string') {
+            try {
+                subitems[j].aliases = JSON.parse(subitems[j].aliases);
+            } catch (e) {
+                subitems[j].aliases = [];
+            }
+        }
+        if (!Array.isArray(subitems[j].aliases)) {
+            subitems[j].aliases = [];
+        } else {
+            subitems[j].aliases = subitems[j].aliases.filter(a => a && a._id);
+        }
+    }
+    return subitems;
 }
 
 /**
  * Filters itemmix with specific conditions.
  */
 async function filterItems(deptId, body) {
-    let itemCondition = ``;
-    let sitemCondition = ``;
+    const itemConditions = [];
+    const sitemConditions = [];
     let orderBy = null, limit = null, offset = null;
 
     if (body._id) {
-        itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item._id = ${body._id}`;
+        itemConditions.push(`item._id = ${body._id}`);
     }
     if (body.active) {
-        itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item.active = ${body.active}`;
+        itemConditions.push(`item.active = ${body.active}`);
     }
     if (body.categories) {
-        itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` (item._id IN (SELECT item_id FROM rel_item_category WHERE category_id = ${body.categories}) OR item._id IN (SELECT item_id FROM subitem WHERE _id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id = ${body.categories})))`;
-        sitemCondition += (sitemCondition.trim() != `` ? ` AND` : ``) + ` subitem._id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id = ${body.categories})`;
+        itemConditions.push(`(item._id IN (SELECT item_id FROM rel_item_category WHERE category_id = ${body.categories}) OR item._id IN (SELECT item_id FROM subitem WHERE _id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id = ${body.categories})))`);
+        sitemConditions.push(`subitem._id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id = ${body.categories})`);
     }
     if (body.subitem_list_id) {
-        sitemCondition += (sitemCondition.trim() != `` ? ` AND` : ``) + ` subitem.subitem_list_id = ${body.subitem_list_id}`;
-        itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item._id IN (SELECT item_id FROM subitem WHERE subitem.subitem_list_id = ${body.subitem_list_id})`;
+        sitemConditions.push(`subitem.subitem_list_id = ${body.subitem_list_id}`);
+        itemConditions.push(`item._id IN (SELECT item_id FROM subitem WHERE subitem.subitem_list_id = ${body.subitem_list_id})`);
     }
-    if (itemCondition.trim() == `` && sitemCondition.trim() == ``) {
+    if (body.aliasSearch && typeof body.aliasSearch === 'string' && body.aliasSearch.trim()) {
+        const cleanAlias = body.aliasSearch.trim().replace(/'/g, "''");
+        itemConditions.push(`(item._id IN (SELECT item_id FROM item_aliases WHERE alias LIKE '%${cleanAlias}%') OR item._id IN (SELECT item_id FROM subitem WHERE _id IN (SELECT subitem_id FROM subitem_aliases WHERE alias LIKE '%${cleanAlias}%')))`);
+    }
+    if (body.search && typeof body.search === 'string' && body.search.trim()) {
+        const cleanTerm = body.search.trim().replace(/'/g, "''");
+        itemConditions.push(`(item.item_hin LIKE '%${cleanTerm}%' OR item.item_eng LIKE '%${cleanTerm}%' OR item.item_roman LIKE '%${cleanTerm}%' OR item.item_code LIKE '%${cleanTerm}%' OR item._id IN (SELECT item_id FROM item_aliases WHERE alias LIKE '%${cleanTerm}%') OR item._id IN (SELECT item_id FROM subitem WHERE _id IN (SELECT subitem_id FROM subitem_aliases WHERE alias LIKE '%${cleanTerm}%')))`);
+    }
+    if (itemConditions.length === 0 && sitemConditions.length === 0) {
         orderBy = "item._id";
     }
     if (body.pageNo && body.pageNo > 0) {
         offset = (body.pageNo - 1) * limit;
     }
+
+    const itemCondition = itemConditions.length > 0 ? itemConditions.join(' AND ') : null;
+    const sitemCondition = sitemConditions.length > 0 ? sitemConditions.join(' AND ') : null;
 
     const resolve = await Fn.getList('itemmix', {
         full: true,
@@ -105,11 +138,11 @@ async function filterItems(deptId, body) {
         row.document = (row.document && row.document != "[null]" ? JSON.parse(row.document) : []);
         row.categories = (row.categories && row.categories != "[null]" ? JSON.parse(row.categories) : []);
         row.item_aliases = (row.item_aliases && row.item_aliases != "[null]" ? JSON.parse(row.item_aliases) : []);
-        subitem_count += row.subitems.length;
-
-        for (let j = 0; j < row.subitems.length; j++) {
-            row.subitems[j].categories = parseSubitemCategories(row.subitems[j]);
+        if (Array.isArray(row.item_aliases)) {
+            row.item_aliases = row.item_aliases.filter(a => a && a._id);
         }
+        subitem_count += row.subitems.length;
+        cleanSubitems(row.subitems);
     }
 
     return { data: resolve.data, total_count: resolve.data.length, subitem_count };
@@ -149,15 +182,23 @@ async function createItem(data, dept_id = null) {
             }
 
             for (const alias_str of aliases) {
-                if (alias_str && typeof alias_str === 'string') {
-                    Fn.db.prepare(`INSERT OR IGNORE INTO item_aliases (item_id, alias) VALUES (?, ?)`).run(item_id, alias_str.trim());
+                const trimmed = typeof alias_str === 'object' && alias_str !== null ? alias_str.alias : alias_str;
+                if (trimmed && typeof trimmed === 'string' && trimmed.trim()) {
+                    Fn.db.prepare(`INSERT OR IGNORE INTO item_aliases (item_id, alias) VALUES (?, ?)`).run(item_id, trimmed.trim());
                 }
             }
 
             if (dept_id) deptService.pushToConfig(dept_id, 'item', item_id);
         }
 
-        return item.getById(item_id, { full: true });
+        const created = await item.getById(item_id, { full: true });
+        if (created) {
+            created.item_aliases = (created.item_aliases && created.item_aliases != "[null]" ? (typeof created.item_aliases === 'string' ? JSON.parse(created.item_aliases) : created.item_aliases) : []);
+            if (Array.isArray(created.item_aliases)) {
+                created.item_aliases = created.item_aliases.filter(a => a && a._id);
+            }
+        }
+        return created;
     } catch (err) {
         throw err;
     }
@@ -371,8 +412,11 @@ function checkItemConflict(data, currentId = null) {
  */
 function checkAliasConflict(aliases, currentId = null) {
     const aliasList = Array.isArray(aliases) ? aliases : (typeof aliases === 'string' ? JSON.parse(aliases || '[]') : []);
-    for (const alias of aliasList) {
-        checkSingleNameConflict(alias, currentId, 'alias');
+    for (const aliasItem of aliasList) {
+        const aliasStr = typeof aliasItem === 'object' && aliasItem !== null ? aliasItem.alias : aliasItem;
+        if (aliasStr && typeof aliasStr === 'string' && aliasStr.trim()) {
+            checkSingleNameConflict(aliasStr.trim(), currentId, 'alias');
+        }
     }
 }
 
@@ -399,7 +443,7 @@ async function updateItem(id, setData) {
     }
 
     let aliases = null;
-    if (setData.aliases) {
+    if (setData.aliases !== undefined) {
         if (Array.isArray(setData.aliases)) aliases = setData.aliases;
         else if (typeof setData.aliases === 'string') {
             try { aliases = JSON.parse(setData.aliases); } catch (e) { }
@@ -409,8 +453,9 @@ async function updateItem(id, setData) {
     if (aliases && Array.isArray(aliases)) {
         Fn.db.prepare(`DELETE FROM item_aliases WHERE item_id = ?`).run([id]);
         for (const alias_str of aliases) {
-            if (alias_str && typeof alias_str === 'string') {
-                try { Fn.db.prepare(`INSERT OR IGNORE INTO item_aliases (item_id, alias) VALUES (?, ?)`).run(id, alias_str.trim()); } catch (e) { }
+            const trimmed = typeof alias_str === 'object' && alias_str !== null ? alias_str.alias : alias_str;
+            if (trimmed && typeof trimmed === 'string' && trimmed.trim()) {
+                try { Fn.db.prepare(`INSERT OR IGNORE INTO item_aliases (item_id, alias) VALUES (?, ?)`).run(id, trimmed.trim()); } catch (e) { }
             }
         }
     }
@@ -423,6 +468,10 @@ async function updateItem(id, setData) {
         result.categories = (result.categories && result.categories != "[null]" ? (typeof result.categories === 'string' ? JSON.parse(result.categories) : result.categories) : []);
         result.categories_hin = (result.categories_hin && result.categories_hin != "[null]" ? (typeof result.categories_hin === 'string' ? JSON.parse(result.categories_hin) : result.categories_hin) : []);
         result.subitems = (result.subitems && result.subitems != "[null]" ? (typeof result.subitems === 'string' ? JSON.parse(result.subitems) : result.subitems) : []);
+        result.item_aliases = (result.item_aliases && result.item_aliases != "[null]" ? (typeof result.item_aliases === 'string' ? JSON.parse(result.item_aliases) : result.item_aliases) : []);
+        if (Array.isArray(result.item_aliases)) {
+            result.item_aliases = result.item_aliases.filter(a => a && a._id);
+        }
     }
     return result;
 }

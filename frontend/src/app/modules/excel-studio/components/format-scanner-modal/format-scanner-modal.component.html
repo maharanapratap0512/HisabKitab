@@ -18,7 +18,7 @@
             <ng-select class="custom" [virtualScroll]="true" [clearable]="false"
               [(ngModel)]="selectedFormatId" (change)="onFormatChange()">
               <ng-option *ngFor="let fmt of formats" [value]="fmt.id">
-                <i [class]="'uil ' + fmt.icon + ' me-1'"></i>{{ fmt.title_hin }} ({{ fmt.title }})
+                <i [class]="'uil ' + fmt.icon + ' me-1'"></i>{{ fmt.title }}
               </ng-option>
             </ng-select>
           </div>

@@ -254,6 +254,7 @@ export class AuthService {
       { colName: 'item_eng', title: 'Name (Eng)' },
       { colName: 'item_roman', title: 'Name (Roman)' },
       { colName: 'item_code', title: 'Item Code' },
+      { colName: 'aliases', title: 'Aliases' },
       { colName: 'price_range', title: 'Price Range' },
       { colName: 'sku', title: 'SKU' },
       { colName: 'extra_note', title: 'Extra Note' },

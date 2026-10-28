@@ -1,0 +1,136 @@
+/**
+ * sutram-grid.component.scss
+ * ─────────────────────────────────────────────────────────────
+ * Scoped styles for the PrimeNG spreadsheet grid component.
+ * Big Header Row (38px) + Compact Small Data Cells (23px).
+ * Adheres to AGENTS.md Rule 1 (Dynamic Theme Native Inheritance).
+ * ─────────────────────────────────────────────────────────────
+ */
+
+.sutram-grid-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  /* Big Header Row */
+  ::ng-deep .p-datatable-thead > tr > th {
+    height: 38px !important;
+    padding: 6px 10px !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    border-bottom: 2px solid rgba(125, 125, 125, 0.25) !important;
+  }
+
+  /* Compact Small Data Cells */
+  ::ng-deep .p-datatable-tbody > tr > td {
+    height: 23px !important;
+    padding: 1px 6px !important;
+    font-size: 11.5px !important;
+    white-space: nowrap !important;
+    line-height: 21px !important;
+    border-color: rgba(125, 125, 125, 0.15) !important;
+    transition: background-color 0.15s ease;
+  }
+
+  /* Eye-Protect Mode: Edited cell warm yellow tint */
+  ::ng-deep .cell-edited {
+    background-color: var(--cell-edited-bg, #fff9db) !important;
+    color: var(--cell-edited-text, #854d0e) !important;
+    box-shadow: inset 0 0 0 1px #facc15 !important;
+    font-weight: 600;
+  }
+
+  /* New Row: Soft green shade */
+  ::ng-deep .row-new > td {
+    background-color: var(--row-new-bg, #edfbf0) !important;
+    border-bottom-color: rgba(34, 197, 94, 0.3) !important;
+  }
+
+  /* Invalid / Error Cell: Soft red */
+  ::ng-deep .cell-error {
+    background-color: var(--cell-error-bg, rgba(239, 68, 68, 0.12)) !important;
+    color: #ef4444 !important;
+    box-shadow: inset 0 0 0 1.5px #ef4444 !important;
+    font-weight: 600;
+  }
+
+  .error-indicator-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  .in-cell-input {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    height: 23px !important;
+    padding: 1px 4px !important;
+    background: transparent !important;
+    font-size: 11.5px !important;
+    width: 100%;
+    color: inherit !important;
+  }
+
+  /* PrimeNG In-Cell Autocomplete Dropdown styling */
+  ::ng-deep .sutram-cell-autocomplete {
+    width: 100%;
+    height: 23px;
+
+    .p-autocomplete-input {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      height: 23px !important;
+      padding: 1px 4px !important;
+      background: transparent !important;
+      font-size: 11.5px !important;
+      width: 100% !important;
+      color: inherit !important;
+    }
+
+    .p-autocomplete-dropdown {
+      width: 20px !important;
+      height: 23px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      color: #64748b !important;
+
+      &:hover {
+        color: #4f46e5 !important;
+      }
+    }
+
+    .p-autocomplete-panel {
+      font-size: 12px !important;
+      border-radius: 6px !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+      max-height: 280px !important;
+
+      .p-autocomplete-item {
+        padding: 4px 8px !important;
+        font-size: 11.5px !important;
+      }
+    }
+  }
+
+  .inline-correction-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1050;
+    background: var(--surface-card, #ffffff);
+    border: 1px solid rgba(125, 125, 125, 0.3);
+    border-radius: 6px;
+    padding: 10px;
+    width: 280px;
+    color: var(--text-color, #1e293b);
+    margin-top: 2px;
+  }
+}

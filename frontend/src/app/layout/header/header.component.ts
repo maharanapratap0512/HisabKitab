@@ -77,7 +77,8 @@ export class HeaderComponent implements AfterViewInit {
     'unit': 'unit',
     'subitem_list': 'subitem_list',
     'integrity-checkup': 'integrity_checkup',
-    'excel-studio': 'excel_studio'
+    'excel-studio': 'excel_studio',
+    'sutram-studio': 'sutram_studio'
   };
 
   constructor(
@@ -299,11 +300,12 @@ export class HeaderComponent implements AfterViewInit {
           { title: 'NetDrop', link: 'netdrop', visible: true, target: '_blank' },
           { title: 'FeedBack', link: 'feedback', visible: true },
           { title: 'Integrity Checkup', link: 'integrity-checkup', visible: this.auth.webUser.settings?.integrity_checkup?.visible ?? true },
+          { title: 'MySQL', link: 'mysql', visible: true },
+          { title: 'Sutram Studio', link: 'sutram-studio', visible: true },
         ]
       },
-      { title: 'Excel Studio', icon: 'uil-table', link: 'excel-studio', visible: true },
+      { title: 'Excel', icon: 'uil-table', link: 'excel-studio', visible: true },
       { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible ?? true },
-      { title: 'MySQL', icon: 'uil-layer-group', link: 'mysql', visible: true },
     ];
   }
 

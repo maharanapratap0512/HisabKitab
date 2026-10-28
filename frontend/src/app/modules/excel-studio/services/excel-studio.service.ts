@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { StudioColumn, StudioFormat, StudioRow, StudioCell, ScanReport, ScanMatchItem } from '../models/excel-studio.model';
 import { MasterIndexerService } from './master-indexer.service';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +14,8 @@ export class ExcelStudioService {
     {
       id: 'bachat',
       name: 'bachat',
-      title: 'Bachat (बचत / Actual Counting)',
-      title_hin: 'बचत (स्टॉक भौतिक गणना)',
+      title: 'Bachat (Closing)',
+      title_hin: 'Bachat (Closing)',
       icon: 'uil-shopping-bag',
       badgeColor: 'primary',
       desc: 'Physical stock counting sheet with items, subitems, units, condition, and quantities.',
@@ -26,9 +27,10 @@ export class ExcelStudioService {
         { key: 'mm', name: 'मि.म. (MM)*', col_name: 'mm', not_null: true, ref_table: 'mm', alt_names: ['mm', 'mm_name', 'मि.म.', 'मि म', 'मिनी मधुबन'] },
         { key: 'item', name: 'आइटम (Item)*', col_name: 'item', not_null: true, ref_table: 'item', alt_names: ['item', 'item_name', 'आइटम', 'आइटम का नाम'] },
         { key: 'subitem', name: 'सबआइटम (Subitem)', col_name: 'subitem', not_null: false, ref_table: 'subitem', alt_names: ['subitem', 'subitem_name', 'सबआइटम', 'सब आइटम'] },
-        { key: 'qty', name: 'संख्या (Qty)*', col_name: 'qty', not_null: true, type: 'number', alt_names: ['qty', 'quantity', 'संख्या', 'मात्रा'] },
         { key: 'unit', name: 'यूनिट (Unit)*', col_name: 'unit', not_null: true, ref_table: 'unit', alt_names: ['unit', 'यूनिट', 'इकाई'] },
         { key: 'condition', name: 'कंडीशन (Condition)', col_name: 'condition', not_null: false, ref_table: 'condition', alt_names: ['condition', 'कन्डिशन', 'हालत'] },
+        { key: 'sw_qty', name: 'सॉफ्टवेयर स्टॉक (SW Qty)', col_name: 'sw_qty', not_null: false, type: 'number', alt_names: ['sw_qty', 'sw qty', 'software qty', 'सॉफ्टवेयर स्टॉक', 'स्टॉक', 'software stock', 'sw stock', 'सॉफ्टवेयर मात्रा'] },
+        { key: 'qty', name: 'भौतिक मात्रा (Physical Qty)*', col_name: 'qty', not_null: true, type: 'number', alt_names: ['qty', 'quantity', 'संख्या', 'मात्रा', 'भौतिक मात्रा', 'physical qty', 'भौतिक मात्रा (physical qty)*', 'भौतिक मात्रा (physical qty)'] },
         { key: 'company_name', name: 'कंपनी (Company)', col_name: 'company', not_null: false, alt_names: ['company', 'company_name', 'कंपनी'] },
         { key: 'actual_amt', name: 'राशि (Amount)', col_name: 'amount', not_null: false, type: 'number', alt_names: ['amount', 'actual_amt', 'अमाउन्ट', 'राशि'] },
         { key: 'item_detail', name: 'विवरण (Detail)', col_name: 'item_detail', not_null: false, alt_names: ['item_detail', 'detail', 'डेटाइल'] },
@@ -36,15 +38,15 @@ export class ExcelStudioService {
         { key: 'nimmit', name: 'निमित्त (Nimitt)', col_name: 'nimmit', not_null: false, ref_table: 'nimitt', alt_names: ['nimitt', 'nimmit', 'निमित्त'] },
       ],
       sampleRows: [
-        { date: '25-10-2026', mm: 'मुम्बई', item: 'गेंहू', subitem: 'शरबती', qty: 50, unit: 'किग्रा', condition: 'अच्छा', actual_amt: 2500 },
-        { date: '25-10-2026', mm: 'दिल्ली', item: 'चावल', subitem: 'बासमती', qty: 100, unit: 'किग्रा', condition: 'अच्छा', actual_amt: 6000 }
+        { date: '25-10-2026', mm: 'मुम्बई', item: 'गेंहू', subitem: 'शरबती', unit: 'किग्रा', condition: 'अच्छा', sw_qty: 50, qty: '', actual_amt: 2500 },
+        { date: '25-10-2026', mm: 'दिल्ली', item: 'चावल', subitem: 'बासमती', unit: 'किग्रा', condition: 'अच्छा', sw_qty: 100, qty: '', actual_amt: 6000 }
       ]
     },
     {
       id: 'vehicle',
       name: 'vehicle',
-      title: 'Vehicle Fleet & Documents',
-      title_hin: 'वाहन एवं दस्तावेज़ (RC, Insurance, PUC)',
+      title: 'Vehicle',
+      title_hin: 'Vehicle',
       icon: 'uil-car-sideview',
       badgeColor: 'info',
       desc: 'Vehicle register with standard RC, Insurance, and PUC expiry dates & amounts.',
@@ -77,8 +79,8 @@ export class ExcelStudioService {
     {
       id: 'item',
       name: 'item',
-      title: 'Item Master (आइटम मास्टर)',
-      title_hin: 'आइटम मास्टर (नाम, कोड, यूनिट, रेट)',
+      title: 'Item',
+      title_hin: 'Item',
       icon: 'uil-box',
       badgeColor: 'success',
       desc: 'Master items with Hindi, English, Roman names, unit, aliases, and yearly rates.',
@@ -103,8 +105,8 @@ export class ExcelStudioService {
     {
       id: 'subitem',
       name: 'subitem',
-      title: 'Subitem Master (सबआइटम)',
-      title_hin: 'सबआइटम मास्टर (आइटम अनुसार)',
+      title: 'Subitem',
+      title_hin: 'Subitem',
       icon: 'uil-layer-group',
       badgeColor: 'warning',
       desc: 'Subitems linked to parent items with unit and custom rates.',
@@ -124,8 +126,8 @@ export class ExcelStudioService {
     {
       id: 'jawak',
       name: 'jawak',
-      title: 'Jawak Entries (जावक प्रविष्टियां)',
-      title_hin: 'जावक (सेवाधारी या अन्य मि.म. को निकासी)',
+      title: 'Jawak',
+      title_hin: 'Jawak',
       icon: 'uil-arrow-circle-right',
       badgeColor: 'secondary',
       desc: 'Outward distribution records for PBKs or destination MMs.',
@@ -149,8 +151,8 @@ export class ExcelStudioService {
     {
       id: 'pbk',
       name: 'pbk',
-      title: 'PBK (सेवाधारी सूची)',
-      title_hin: 'सेवाधारी विवरण (रोल नं, नाम, राज्य, जिला)',
+      title: 'PBK',
+      title_hin: 'PBK',
       icon: 'uil-users-alt',
       badgeColor: 'danger',
       desc: 'PBK sewadhari directory with contact details and class MM.',
@@ -172,8 +174,8 @@ export class ExcelStudioService {
     {
       id: 'product',
       name: 'product',
-      title: 'Product & Assets (उपकरण एवं संपत्ति रजिस्टर)',
-      title_hin: 'उत्पाद / उपकरण रजिस्टर (मशीनरी, फ़र्नीचर, संपत्ति)',
+      title: 'Product',
+      title_hin: 'Product',
       icon: 'uil-desktop',
       badgeColor: 'primary',
       desc: 'Asset, machinery, and equipment register with warranty and purchase details.',
@@ -206,8 +208,8 @@ export class ExcelStudioService {
     {
       id: 'nimitt',
       name: 'nimitt',
-      title: 'Nimitt (निमित्त भाई-बहन)',
-      title_hin: 'निमित्त सूची (जिम्मेवार सेवाधारी विवरण)',
+      title: 'Nimitt',
+      title_hin: 'Nimitt',
       icon: 'uil-user-check',
       badgeColor: 'success',
       desc: 'Nimitt sewadhari directory with gender, state, and contact details.',
@@ -228,8 +230,8 @@ export class ExcelStudioService {
     {
       id: 'category',
       name: 'category',
-      title: 'Category Master (श्रेणी मास्टर)',
-      title_hin: 'सामग्री श्रेणी मास्टर (मुख्य एवं उप-श्रेणी)',
+      title: 'Category',
+      title_hin: 'Category',
       icon: 'uil-folder-open',
       badgeColor: 'warning',
       desc: 'Category hierarchy with Hindi, English, and Roman titles.',
@@ -246,10 +248,67 @@ export class ExcelStudioService {
       ]
     },
     {
+      id: 'unit',
+      name: 'unit',
+      title: 'Unit',
+      title_hin: 'Unit (इकाई)',
+      icon: 'uil-balance-scale',
+      badgeColor: 'success',
+      desc: 'Measurement units with short and full names.',
+      desc_hin: 'माप की इकाइयों के संक्षिप्त एवं पूर्ण नामों की सूची।',
+      columns: [
+        { key: 'unit_short', name: 'संक्षिप्त नाम (Unit)*', col_name: 'unit_short', not_null: true, alt_names: ['unit_short', 'unit', 'इकाई', 'शॉर्ट'] },
+        { key: 'unit_full', name: 'पूर्ण नाम (Full Name)', col_name: 'unit_full', not_null: false, alt_names: ['unit_full', 'full name', 'पूरा नाम'] }
+      ],
+      sampleRows: [
+        { unit_short: 'किग्रा', unit_full: 'किलोग्राम' },
+        { unit_short: 'लीटर', unit_full: 'लीटर' },
+        { unit_short: 'मीटर', unit_full: 'मीटर' }
+      ]
+    },
+    {
+      id: 'state',
+      name: 'state',
+      title: 'State',
+      title_hin: 'State (राज्य)',
+      icon: 'uil-map',
+      badgeColor: 'info',
+      desc: 'State directory with Hindi and English names.',
+      desc_hin: 'राज्यों के हिंदी और अंग्रेजी नामों की सूची।',
+      columns: [
+        { key: 'state_hin', name: 'राज्य नाम (हिंदी)*', col_name: 'state_hin', not_null: true, alt_names: ['state_hin', 'state', 'राज्य'] },
+        { key: 'state_eng', name: 'राज्य नाम (English)*', col_name: 'state_eng', not_null: true, alt_names: ['state_eng', 'nameeng'] }
+      ],
+      sampleRows: [
+        { state_hin: 'राजस्थान', state_eng: 'Rajasthan' },
+        { state_hin: 'गुजरात', state_eng: 'Gujarat' },
+        { state_hin: 'महाराष्ट्र', state_eng: 'Maharashtra' }
+      ]
+    },
+    {
+      id: 'city',
+      name: 'city',
+      title: 'City',
+      title_hin: 'City (शहर)',
+      icon: 'uil-building',
+      badgeColor: 'primary',
+      desc: 'City directory linked to corresponding state.',
+      desc_hin: 'शहरों के हिंदी, अंग्रेजी नामों एवं सम्बद्ध राज्य की सूची।',
+      columns: [
+        { key: 'city_hin', name: 'शहर (हिंदी)*', col_name: 'city_hin', not_null: true, alt_names: ['city_hin', 'city', 'शहर'] },
+        { key: 'city_eng', name: 'शहर (English)*', col_name: 'city_eng', not_null: true, alt_names: ['city_eng', 'nameeng'] },
+        { key: 'state', name: 'राज्य (State)*', col_name: 'state', not_null: true, ref_table: 'state', alt_names: ['state', 'राज्य'] }
+      ],
+      sampleRows: [
+        { city_hin: 'आबू रोड', city_eng: 'Abu Road', state: 'राजस्थान' },
+        { city_hin: 'अहमदाबाद', city_eng: 'Ahmedabad', state: 'गुजरात' }
+      ]
+    },
+    {
       id: 'district',
       name: 'district',
-      title: 'District Master (ज़िला मास्टर)',
-      title_hin: 'ज़िला सूची (राज्य अनुसार)',
+      title: 'District',
+      title_hin: 'District',
       icon: 'uil-map-marker',
       badgeColor: 'info',
       desc: 'District directory linked to corresponding state.',
@@ -267,8 +326,8 @@ export class ExcelStudioService {
     {
       id: 'support_list',
       name: 'support_list',
-      title: 'Support Lists (सहायक सूचियां)',
-      title_hin: 'सिस्टम ड्रॉपडाउन मान (आवक प्रकार, जेंडर, स्थिति आदि)',
+      title: 'Support List',
+      title_hin: 'Support List',
       icon: 'uil-list-ul',
       badgeColor: 'secondary',
       desc: 'System lookup values: aawak_type, jawak_type, gender, relation, condition.',
@@ -287,8 +346,8 @@ export class ExcelStudioService {
     {
       id: 'attribute',
       name: 'attribute',
-      title: 'Attributes Master (विशेषता मास्टर)',
-      title_hin: 'सामग्री विशेषता मास्टर (रंग, साइज़, माप आदि)',
+      title: 'Attribute',
+      title_hin: 'Attribute',
       icon: 'uil-tag-alt',
       badgeColor: 'primary',
       desc: 'Product attribute definitions such as Color, Size, Weight, Brand.',
@@ -306,8 +365,8 @@ export class ExcelStudioService {
     {
       id: 'attributes_value',
       name: 'attributes_value',
-      title: 'Attribute Values (विशेषता मान)',
-      title_hin: 'विशेषता मान सूची (लाल, नीला, 500gm, XL आदि)',
+      title: 'Attribute Value',
+      title_hin: 'Attribute Value',
       icon: 'uil-brackets-curly',
       badgeColor: 'info',
       desc: 'Values assigned to attributes, e.g., Red, Blue for Color, 500gm for Weight.',
@@ -326,8 +385,8 @@ export class ExcelStudioService {
     {
       id: 'variant',
       name: 'variant',
-      title: 'Variant Master (वेरिएंट मास्टर)',
-      title_hin: 'उत्पाद वेरिएंट (विशेषता संयोजन, SKU, दरें)',
+      title: 'Variant',
+      title_hin: 'Variant',
       icon: 'uil-apps',
       badgeColor: 'warning',
       desc: 'Product variants with comma-separated attributes, SKU, and price ranges.',
@@ -350,8 +409,8 @@ export class ExcelStudioService {
     {
       id: 'rel_item_category',
       name: 'rel_item_category',
-      title: 'Item-Category Link (आइटम-श्रेणी संबंध)',
-      title_hin: 'आइटम और श्रेणी मैपिंग (संबंध सूची)',
+      title: 'Item Category',
+      title_hin: 'Item Category',
       icon: 'uil-link',
       badgeColor: 'info',
       desc: 'Map existing items to multiple categories.',
@@ -367,8 +426,8 @@ export class ExcelStudioService {
     {
       id: 'rel_subitem_category',
       name: 'rel_subitem_category',
-      title: 'Subitem-Category Link (सबआइटम-श्रेणी संबंध)',
-      title_hin: 'सबआइटम और श्रेणी मैपिंग (संबंध सूची)',
+      title: 'Subitem Category',
+      title_hin: 'Subitem Category',
       icon: 'uil-link-alt',
       badgeColor: 'secondary',
       desc: 'Map specific subitems under items to categories.',
@@ -385,8 +444,8 @@ export class ExcelStudioService {
     {
       id: 'subitem_list',
       name: 'subitem_list',
-      title: 'Subitem Directory (मानक सबआइटम मास्टर)',
-      title_hin: 'मानक सबआइटम डायरेक्टरी (सामान्य शब्दकोश)',
+      title: 'Subitem List',
+      title_hin: 'Subitem List',
       icon: 'uil-list-ol',
       badgeColor: 'success',
       desc: 'Standard global dictionary of subitem names in Hindi, English, and Roman.',
@@ -400,10 +459,35 @@ export class ExcelStudioService {
       sampleRows: [
         { subitem_hin: 'बासमती', subitem_eng: 'Basmati', subitem_roman: 'Basmati' }
       ]
+    },
+    {
+      id: 'mm',
+      name: 'mm',
+      title: 'MM',
+      title_hin: 'MM',
+      icon: 'uil-building',
+      badgeColor: 'secondary',
+      desc: 'Mini Madhuban master list with state, code, and opening details.',
+      desc_hin: 'मिनी मधुबन (मि.म.) मास्टर सूची - राज्य, कोड एवं विवरण।',
+      columns: [
+        { key: 'mm_hin', name: 'मि.म. नाम (हिन्दी)*', col_name: 'mm_hin', not_null: true, alt_names: ['mm_hin', 'mm hin', 'मि.म.', 'मिनी मधुबन', 'नाम'] },
+        { key: 'mm_eng', name: 'मि.म. नाम (अंग्रेजी)', col_name: 'mm_eng', not_null: false, alt_names: ['mm_eng', 'mm eng', 'name eng'] },
+        { key: 'mm_roman', name: 'रोमन नाम (Roman)', col_name: 'mm_roman', not_null: false, alt_names: ['mm_roman', 'mm roman', 'roman'] },
+        { key: 'mm_code', name: 'कोड (Code)', col_name: 'mm_code', not_null: false, alt_names: ['mm_code', 'mm code', 'code', 'कोड'] },
+        { key: 'state', name: 'राज्य (State)*', col_name: 'state', not_null: true, ref_table: 'state', alt_names: ['state', 'राज्य', 'स्टेट'] },
+        { key: 'opening_date', name: 'खुलने की तारीख (Opening Date)', col_name: 'opening_date', not_null: false, type: 'date', alt_names: ['opening_date', 'opening date', 'तारीख'] },
+        { key: 'nimitt', name: 'निमित्त (Nimitt)', col_name: 'nimitt', not_null: false, ref_table: 'nimitt', alt_names: ['nimitt', 'निमित्त'] },
+      ],
+      sampleRows: [
+        { mm_hin: 'मुम्बई', mm_eng: 'Mumbai', mm_roman: 'Mumbai', mm_code: 'BOM', state: 'महाराष्ट्र', opening_date: '01-01-2010' }
+      ]
     }
   ];
 
-  constructor(private masterIndexer: MasterIndexerService) {}
+  constructor(
+    private masterIndexer: MasterIndexerService,
+    private excelExportService: ExcelExportService
+  ) {}
 
   public getFormat(id: string): StudioFormat | undefined {
     return this.formats.find(f => f.id === id);
@@ -702,11 +786,14 @@ export class ExcelStudioService {
   }
 
   /**
-   * Export Studio rows to styled Excel
+   * Export Studio rows to styled Excel (Following universal project rule #6)
    */
   public exportExcel(columns: StudioColumn[], rows: StudioRow[], fileName: string = 'HK_Excel_Data'): void {
+    const dataRows = rows.filter(r => this.rowHasData(r, columns));
+    const targetRows = dataRows.length > 0 ? dataRows : rows;
+
     const dataForSheet: any[] = [];
-    for (const r of rows) {
+    for (const r of targetRows) {
       const rowObj: any = {};
       for (const col of columns) {
         rowObj[col.name] = r.cells[col.key] ? r.cells[col.key].value : '';
@@ -714,13 +801,69 @@ export class ExcelStudioService {
       dataForSheet.push(rowObj);
     }
 
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataForSheet);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    if (dataForSheet.length > 0) {
+      this.excelExportService.exportStyledExcel(dataForSheet, fileName, '');
+    }
+  }
 
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    FileSaver.saveAs(blob, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  /**
+   * Builds StudioRow[] from an array of raw database / model objects
+   */
+  public buildRowsFromRawObjects(format: StudioFormat, rawObjects: any[]): StudioRow[] {
+    const resultRows: StudioRow[] = [];
+    if (!rawObjects || !Array.isArray(rawObjects)) return resultRows;
+
+    for (let i = 0; i < rawObjects.length; i++) {
+      const raw = rawObjects[i];
+      const row: StudioRow = {
+        rowNum: resultRows.length + 1,
+        cells: {},
+        hasError: false,
+        errorCount: 0
+      };
+
+      for (const col of format.columns) {
+        let val: any = '';
+        if (col.key === 'sn') {
+          val = i + 1;
+        } else if (raw[col.key] !== undefined && raw[col.key] !== null) {
+          val = raw[col.key];
+        } else if (col.col_name && raw[col.col_name] !== undefined && raw[col.col_name] !== null) {
+          val = raw[col.col_name];
+        }
+
+        // For bachat format: ensure sw_qty is preserved and qty is blank for physical counting
+        if (format.id === 'bachat') {
+          if (col.key === 'qty' && (val === undefined || val === null || val === '')) {
+            val = '';
+          }
+        }
+
+        row.cells[col.key] = {
+          value: val !== null && val !== undefined ? String(val) : '',
+          isValid: true
+        };
+      }
+
+      this.validateRow(row, format.columns);
+      resultRows.push(row);
+    }
+
+    // Append 5 empty padding rows so user can enter more data easily
+    for (let p = 0; p < 5; p++) {
+      const emptyCells: { [k: string]: StudioCell } = {};
+      for (const col of format.columns) {
+        emptyCells[col.key] = { value: '', isValid: true };
+      }
+      resultRows.push({
+        rowNum: resultRows.length + 1,
+        cells: emptyCells,
+        hasError: false,
+        errorCount: 0
+      });
+    }
+
+    return resultRows;
   }
 
   /**

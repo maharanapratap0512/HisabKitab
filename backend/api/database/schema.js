@@ -41,6 +41,7 @@ module.exports = {
         updated_at: col.string(),
     }, {
         categories: { manyToMany: true, on: 'subitem_id', table: 'category', junction: 'rel_subitem_category', target: 'category_id', as: 'categories', select: ['_id', 'category_hin', 'category_eng'] },
+        aliases: { hasMany: true, on: 'subitem_id', table: 'subitem_aliases', target: '_id', as: 'aliases', select: ['_id', 'alias'] },
     }),
 
     ...defineView('vsi', 'subitem'),
@@ -69,6 +70,7 @@ module.exports = {
     }, {
         subitems: { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: '*' },
         categories: { manyToMany: true, on: 'item_id', table: 'category', junction: 'rel_item_category', target: 'category_id', as: 'categories', select: ['_id', 'category_hin', 'category_eng'] },
+        aliases: { hasMany: true, on: 'item_id', table: 'item_aliases', target: '_id', as: 'aliases', select: ['_id', 'alias'] },
     }),
 
     ...defineView('vi', 'item'),
@@ -555,6 +557,13 @@ module.exports = {
     ...defineTable('variant_aliases', {
         _id: col.id(),
         variant_id: col.ref('variant._id', { as: 'variant' }),
+        alias: col.string().required(),
+        created_at: col.string(),
+    }),
+
+    ...defineTable('subitem_aliases', {
+        _id: col.id(),
+        subitem_id: col.ref('subitem._id', { as: 'subitem' }),
         alias: col.string().required(),
         created_at: col.string(),
     }),

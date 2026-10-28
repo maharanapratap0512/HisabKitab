@@ -1,0 +1,83 @@
+<!-- sutram-import-progress.component.html -->
+<p-dialog [(visible)]="visible"
+          [modal]="true"
+          [style]="{ width: '520px', maxWidth: '95vw' }"
+          [closable]="!progress.isActive"
+          header="इम्पोर्ट प्रगति (Import Progress)">
+
+  <div class="py-3 text-center">
+
+    <!-- Progress Bar -->
+    <div class="mb-3 px-2">
+      <div class="d-flex justify-content-between mb-1">
+        <span class="small fw-bold">{{ progress.current }} / {{ progress.total }} पंक्तियाँ प्रसंस्कृत</span>
+        <span class="small fw-bold text-primary">{{ progress.percentage }}%</span>
+      </div>
+      <p-progressBar [value]="progress.percentage" [showValue]="false" styleClass="sutram-progress"></p-progressBar>
+    </div>
+
+    <!-- Live Status Counters Grid -->
+    <div class="row g-2 mb-3">
+      <div class="col-3">
+        <div class="card p-2 bg-soft-success border border-success">
+          <small class="text-muted d-block" style="font-size: 11px;">Inserted</small>
+          <strong class="fs-5 text-success">{{ progress.inserted }}</strong>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card p-2 bg-soft-primary border border-primary">
+          <small class="text-muted d-block" style="font-size: 11px;">Updated</small>
+          <strong class="fs-5 text-primary">{{ progress.updated }}</strong>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card p-2 bg-soft-warning border border-warning">
+          <small class="text-muted d-block" style="font-size: 11px;">Duplicate</small>
+          <strong class="fs-5 text-warning">{{ progress.duplicate }}</strong>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card p-2 bg-soft-danger border border-danger">
+          <small class="text-muted d-block" style="font-size: 11px;">Rejected</small>
+          <strong class="fs-5 text-danger">{{ progress.rejected }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Report Download Action if rejected rows exist -->
+    <div *ngIf="progress.rejected > 0 && !progress.isActive" class="alert alert-danger p-2 text-start mb-2">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <strong>{{ progress.rejected }} पंक्तियाँ रिजेक्ट हुईं!</strong>
+          <small class="d-block text-muted">त्रुटि विवरण के साथ Excel डाउनलोड करें</small>
+        </div>
+        <button pButton
+                label="Error Report (.xlsx)"
+                icon="pi pi-download"
+                class="p-button-sm p-button-danger"
+                [loading]="isDownloadingReport"
+                (click)="downloadErrorReport()">
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="d-flex justify-content-end gap-2">
+      <button *ngIf="progress.isActive"
+              pButton
+              label="रोकें (Cancel)"
+              class="p-button-outlined p-button-danger"
+              (click)="cancelRequested.emit()">
+      </button>
+      <button *ngIf="!progress.isActive"
+              pButton
+              label="समाप्त (Done)"
+              class="p-button-primary"
+              (click)="close()">
+      </button>
+    </div>
+  </ng-template>
+
+</p-dialog>

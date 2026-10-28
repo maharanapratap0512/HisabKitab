@@ -9,16 +9,16 @@
 // ADD THIS BLOCK inside variant.routes.js (before existing routes, after checkAuth)
 const router = require('express').Router();
 const vs = require('../services/variant.service');
-const BaseTable = require('../database/base.table');
-const db = require('../database/db.model').dbmodal.db;
+const { dbmodal, sutramDB } = require('../database/db.model');
+const db = dbmodal.db;
 
-const itemTable = new BaseTable('item');
-const variantTable = new BaseTable('variant');
-const variantAttrMap = new BaseTable('variant_attribute_map');
-const variantAliasTable = new BaseTable('variant_aliases');
-const variantCatMap = new BaseTable('variant_category_map');
-const subitemTable = new BaseTable('subitem');
-const itemAliasTable = new BaseTable('item_aliases');
+const itemTable = sutramDB.table('item');
+const variantTable = sutramDB.table('variant');
+const variantAttrMap = sutramDB.table('variant_attribute_map');
+const subitemAliasTable = sutramDB.table('subitem_aliases');
+const variantCatMap = sutramDB.table('variant_category_map');
+const subitemTable = sutramDB.table('subitem');
+const itemAliasTable = sutramDB.table('item_aliases');
 
 // ─── GET /api/variants/items/:dept_id  (initial full load) ──────────────────
 // Returns: all items with variants, item_aliases embedded.
@@ -55,7 +55,7 @@ router.get('/items/:dept_id', async (req, res, next) => {
                        JOIN attributes a ON a._id = vam.attribute_id
                        JOIN attributes_value av ON av._id = vam.attribute_value_id
                        WHERE vam.variant_id = v._id),
-                    'aliases', (SELECT json_group_array(json_object('alias', va.alias)) FROM variant_aliases va WHERE va.variant_id = v._id)
+                    'aliases', (SELECT json_group_array(json_object('alias', sa.alias)) FROM subitem_aliases sa JOIN subitem s ON s._id = sa.subitem_id WHERE s.variant_id = v._id)
                 )) FROM variant v WHERE v.item_id = i._id AND v.active = 1) as variants_json,
                 -- unlinked subitems
                 (SELECT json_group_array(json_object(
@@ -64,7 +64,8 @@ router.get('/items/:dept_id', async (req, res, next) => {
                     'subitem_eng', s.subitem_eng,
                     'subitem_roman', s.subitem_roman,
                     'min_rate', s.min_rate,
-                    'max_rate', s.max_rate
+                    'max_rate', s.max_rate,
+                    'aliases', (SELECT json_group_array(json_object('alias', sa.alias)) FROM subitem_aliases sa WHERE sa.subitem_id = s._id)
                 )) FROM subitem s WHERE s.item_id = i._id AND s.variant_id IS NULL AND s.active = 1) as unlinked_subitems_json,
                 -- item aliases
                 (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias))
@@ -183,7 +184,7 @@ router.put('/items/:dept_id', async (req, res, next) => {
                        JOIN attributes a ON a._id = vam.attribute_id
                        JOIN attributes_value av ON av._id = vam.attribute_value_id
                        WHERE vam.variant_id = v._id),
-                    'aliases', (SELECT json_group_array(json_object('alias', va.alias)) FROM variant_aliases va WHERE va.variant_id = v._id)
+                    'aliases', (SELECT json_group_array(json_object('alias', sa.alias)) FROM subitem_aliases sa JOIN subitem s ON s._id = sa.subitem_id WHERE s.variant_id = v._id)
                 )) FROM variant v WHERE v.item_id = i._id AND v.active = 1) as variants_json,
                 -- unlinked subitems (subitems for this item with no variant_id)
                 (SELECT json_group_array(json_object(
@@ -192,7 +193,8 @@ router.put('/items/:dept_id', async (req, res, next) => {
                     'subitem_eng', s.subitem_eng,
                     'subitem_roman', s.subitem_roman,
                     'min_rate', s.min_rate,
-                    'max_rate', s.max_rate
+                    'max_rate', s.max_rate,
+                    'aliases', (SELECT json_group_array(json_object('alias', sa.alias)) FROM subitem_aliases sa WHERE sa.subitem_id = s._id)
                 )) FROM subitem s WHERE s.item_id = i._id AND s.variant_id IS NULL AND s.active = 1) as unlinked_subitems_json,
                 -- item aliases
                 (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias))
@@ -485,6 +487,32 @@ router.post('/aliases', async (req, res, next) => {
 router.delete('/aliases/:id', async (req, res, next) => {
     try {
         vs.deleteVariantAlias(req.params.id);
+        res.json({ success: true });
+    } catch (e) { next(e); }
+});
+
+// GET /api/variants/subitem-aliases/:subitem_id
+router.get('/subitem-aliases/:subitem_id', async (req, res, next) => {
+    try {
+        const result = vs.getSubitemAliases(req.params.subitem_id);
+        res.json({ success: true, result, total_count: result.length });
+    } catch (e) { next(e); }
+});
+
+// POST /api/variants/subitem-aliases
+router.post('/subitem-aliases', async (req, res, next) => {
+    try {
+        const { subitem_id, alias } = req.body;
+        if (!subitem_id || !alias) return next(new Error('subitem_id and alias required'));
+        const result = vs.insertSubitemAlias({ subitem_id, alias });
+        res.json({ success: true, result });
+    } catch (e) { next(e); }
+});
+
+// DELETE /api/variants/subitem-aliases/:id
+router.delete('/subitem-aliases/:id', async (req, res, next) => {
+    try {
+        vs.deleteSubitemAlias(req.params.id);
         res.json({ success: true });
     } catch (e) { next(e); }
 });

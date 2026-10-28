@@ -1,0 +1,78 @@
+<!-- sutram-header-scanner.component.html -->
+<p-dialog [(visible)]="visible"
+          [modal]="true"
+          [style]="{ width: '750px', maxWidth: '95vw' }"
+          [closable]="true"
+          (onHide)="close()"
+          header="Excel शीट हेडर स्कैनर (Smart Header Matcher)">
+
+  <div *ngIf="report" class="p-2">
+
+    <!-- Missing Mandatory Columns Warning Banner -->
+    <div *ngIf="report.missingMandatory.length > 0" class="alert alert-warning d-flex align-items-center mb-3 p-2">
+      <i class="pi pi-exclamation-triangle text-warning fs-4 me-2"></i>
+      <div>
+        <strong>अनिवार्य कॉलम अनुपस्थित हैं (Missing Required):</strong>
+        <div class="d-flex flex-wrap gap-1 mt-1">
+          <span *ngFor="let col of report.missingMandatory" class="badge bg-danger">
+            {{ col.name }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Match Summary Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+      <small class="text-muted">
+        कुल <strong>{{ report.totalSheetCols }}</strong> में से <strong>{{ matchedCount }}</strong> कॉलम मैप हो चुके हैं
+      </small>
+    </div>
+
+    <!-- Matches Table -->
+    <div class="border rounded overflow-hidden" style="max-height: 340px; overflow-y: auto;">
+      <table class="table table-sm table-hover align-middle mb-0" style="font-size: 13px;">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 45%;">Excel फ़ाइल का हेडर</th>
+            <th style="width: 10%; text-align: center;">→</th>
+            <th style="width: 45%;">टारगेट डेटाबेस कॉलम</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let match of report.matches">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary" style="font-size: 10px;">Col {{ match.sheetColIndex + 1 }}</span>
+                <strong>{{ match.sheetHeader }}</strong>
+              </div>
+            </td>
+            <td class="text-center text-muted">
+              <i *ngIf="match.status === 'matched'" class="pi pi-check text-success" title="ऑटो-मैच"></i>
+              <i *ngIf="match.status === 'manual'" class="pi pi-user-edit text-primary" title="मैन्युअल चयन"></i>
+              <i *ngIf="match.status === 'unmatched'" class="pi pi-times text-danger" title="अनमैप्ड"></i>
+            </td>
+            <td>
+              <select class="form-select form-select-sm"
+                      [value]="match.targetColKey || ''"
+                      (change)="onTargetColumnChange(match, $any($event.target).value)">
+                <option value="">-- कॉलम चुनें (छोड़ें) --</option>
+                <option *ngFor="let target of availableHeaders" [value]="target.name">
+                  {{ target.name }} {{ target.not_null ? '*' : '' }}
+                </option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="d-flex justify-content-end gap-2">
+      <button pButton label="रद्द करें" class="p-button-text p-button-secondary" (click)="close()"></button>
+      <button pButton label="पुष्टि करें और ग्रिड में खोलें" icon="pi pi-check" class="p-button-primary" (click)="confirm()"></button>
+    </div>
+  </ng-template>
+
+</p-dialog>

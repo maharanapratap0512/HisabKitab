@@ -36,6 +36,22 @@ class ExcelImporter {
     // ─────────────────────────────────────────────────────────
 
     async importRow(row, tableConfig, req = {}) {
+        // If row has _id, it is an existing record — route to updateRow
+        if (row._id) {
+            return this.updateRow(row, tableConfig, req);
+        }
+
+        // 0. auto-resolve FK references
+        row = await this._resolveReferences(row, tableConfig);
+
+        if (row._unresolvedRef && row._unresolvedRef.length) {
+            return {
+                status: 'rejected',
+                data: row,
+                error: `Invalid foreign key: ${row._unresolvedRef.join(', ')}`
+            };
+        }
+
         // 1. apply date conversions
         row = this._parseDates(row, tableConfig);
 
@@ -90,10 +106,31 @@ class ExcelImporter {
     // ─────────────────────────────────────────────────────────
 
     async updateRow(row, tableConfig, req = {}) {
+        // 0. auto-resolve FK references
+        row = await this._resolveReferences(row, tableConfig);
+
+        if (row._unresolvedRef && row._unresolvedRef.length) {
+            return {
+                status: 'rejected',
+                data: row,
+                error: `Invalid foreign key: ${row._unresolvedRef.join(', ')}`
+            };
+        }
+
         row = this._parseDates(row, tableConfig);
         row = this._parseBooleans(row, tableConfig);
         row = this._parseJson(row, tableConfig);
         row = this._applyAutoSet(row, tableConfig, req);
+
+        // 5. validate required fields
+        const missing = this._validateRequired(row, tableConfig);
+        if (missing.length) {
+            return {
+                status: 'rejected',
+                data:   row,
+                error:  `Missing required: ${missing.join(', ')}`,
+            };
+        }
 
         try {
             if (!row._id && tableConfig.duplicateOn?.length) {
@@ -106,6 +143,56 @@ class ExcelImporter {
         } catch (err) {
             return { status: 'rejected', data: row, error: err.message };
         }
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // AUTO-RESOLVE FK REFERENCES
+    // ─────────────────────────────────────────────────────────
+
+    async _resolveReferences(row, tableConfig) {
+        if (!this.matcher) {
+            this.matcher = new RefMatcher(this.engine, this.dictionary);
+        }
+        await this.matcher._preloadRefs(tableConfig);
+
+        for (const h of (tableConfig.headers || [])) {
+            if (h.type === 'mix') {
+                await this.matcher._resolveMix(row, h, [], {}, 0);
+                continue;
+            }
+
+            if (h.ref_table || h.type === 'ref') {
+                const refField = h.ref_field || h.col_name;
+                const currentVal = row[refField];
+                const displayVal = row[h.name] ?? row[h.ref_as] ?? row[h.col_name];
+
+                // If currentVal is already a numeric ID, keep it
+                const isNumericId = currentVal !== undefined && currentVal !== null && currentVal !== '' && !isNaN(currentVal) && Number(currentVal) > 0;
+
+                if (isNumericId) {
+                    row[refField] = Number(currentVal);
+                    continue;
+                }
+
+                // If display string or raw text value exists, resolve it
+                const valToResolve = (displayVal !== undefined && displayVal !== null && displayVal !== '') ? displayVal : currentVal;
+                if (valToResolve !== undefined && valToResolve !== null && valToResolve !== '') {
+                    if (!isNaN(valToResolve) && Number(valToResolve) > 0) {
+                        row[refField] = Number(valToResolve);
+                    } else {
+                        const resolvedId = await this.matcher._resolveRef(valToResolve, h, [], {}, 0);
+                        if (resolvedId !== null && resolvedId !== undefined) {
+                            row[refField] = resolvedId;
+                            if (h.col_name) row[h.col_name] = resolvedId;
+                        } else {
+                            row._unresolvedRef = row._unresolvedRef || [];
+                            row._unresolvedRef.push(`${h.name} ("${valToResolve}") not found in ${h.ref_table}`);
+                        }
+                    }
+                }
+            }
+        }
+        return row;
     }
 
     // ─────────────────────────────────────────────────────────

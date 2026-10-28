@@ -207,6 +207,11 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnInit, OnCh
           const subitemCode = sub.subitem_code ? String(sub.subitem_code).trim() : '';
           const subitemRoman = sub.subitem_roman ? String(sub.subitem_roman).trim() : '';
 
+          let subAliasTags = '';
+          if (sub.aliases && Array.isArray(sub.aliases)) {
+            subAliasTags = sub.aliases.map((a: any) => (typeof a === 'object' ? a.alias : a) || '').join(' ');
+          }
+
           flat.push({
             id: `${it._id}:${sub._id}`,
             item_id: it._id,
@@ -218,9 +223,10 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnInit, OnCh
             subitem_code: subitemCode,
             subitem_roman: subitemRoman,
             item_aliases: it.item_aliases,
+            subitem_aliases: sub.aliases,
             isSubitem: true,
             item: it,
-            searchTags: `${subitemHin} ${itemHin} ${subitemEng} ${itemEng} ${subitemCode} ${subitemRoman} ${itemCode} ${aliasTags}`.toLowerCase()
+            searchTags: `${subitemHin} ${itemHin} ${subitemEng} ${itemEng} ${subitemCode} ${subitemRoman} ${itemCode} ${aliasTags} ${subAliasTags}`.toLowerCase()
           });
         });
       }

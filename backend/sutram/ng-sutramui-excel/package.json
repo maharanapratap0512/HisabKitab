@@ -1,0 +1,29 @@
+{
+  "name": "ng-sutramui-excel",
+  "version": "1.0.0-beta.1",
+  "description": "Enterprise PrimeNG-powered Excel Studio UI component library for Sutram Eco-System. Schema-driven, FK matching, live in-cell correction, fuzzy header scanning, and dictionary memory.",
+  "main": "src/index.ts",
+  "keywords": [
+    "sutram",
+    "sutramcore",
+    "sutramengine",
+    "sutramexcel",
+    "excel",
+    "angular",
+    "primeng",
+    "spreadsheet",
+    "xlsx",
+    "import-export"
+  ],
+  "author": "Antigravity & Sutram Development Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": ">=16.0.0",
+    "@angular/core": ">=16.0.0",
+    "@angular/forms": ">=16.0.0",
+    "primeng": ">=16.0.0",
+    "primeicons": ">=6.0.0",
+    "rxjs": ">=7.0.0",
+    "xlsx": ">=0.18.0"
+  }
+}

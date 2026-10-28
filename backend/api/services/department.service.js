@@ -33,6 +33,7 @@ const DB_GEN_CONFIG = {
     variant_category_map: { label: 'Variant Category Map', handle_type: 'auto', depends_on: 'variant', parent_col: 'variant_id' },
     variant_aliases: { label: 'Variant Aliases', handle_type: 'auto', depends_on: 'variant', parent_col: 'variant_id' },
     item_aliases: { label: 'Item Aliases', handle_type: 'auto', depends_on: 'item', parent_col: 'item_id' },
+    subitem_aliases: { label: 'Subitem Aliases', handle_type: 'auto', depends_on: 'subitem', parent_col: 'subitem_id' },
     item_source_map: { label: 'Item Source Map', handle_type: 'auto', depends_on: 'item', parent_col: 'item_id' },
     rel_item_category: { label: 'Item Category Map', handle_type: 'auto', depends_on: 'item', parent_col: 'item_id' },
     rel_subitem_category: { label: 'Subitem Category Map', handle_type: 'auto', depends_on: 'subitem', parent_col: 'subitem_id' },
