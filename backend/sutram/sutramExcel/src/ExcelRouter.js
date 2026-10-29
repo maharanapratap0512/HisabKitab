@@ -25,6 +25,10 @@ function buildExcelRouter(sutramExcel) {
         const express = require('express');
         const path = require('path');
         router = express.Router();
+        router.get(['/legacy', '/studio-legacy', '/studio/legacy', '/studio/old'], (req, res) => {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            res.sendFile(path.join(__dirname, '../public/index.vanilla-studio-backup.html'));
+        });
         router.use('/studio', express.static(path.join(__dirname, '../public'), {
             etag: false,
             maxAge: 0,
@@ -201,20 +205,11 @@ function buildExcelRouter(sutramExcel) {
     });
 
     // ── GET /data/:table ──────────────────────────────────────
-    // Query: ?_limit=100&_offset=0&_search=...&_sort=...&_order=ASC|DESC&_full=1
-    // Supports: Direct SQLite search, lazy loading chunks, and full joins
+    // Query: ?_limit=100&_offset=0&_search=...&_sort=...&_order=ASC|DESC&_full=1&_filters=...
+    // Delegates search, filtering, sorting, and pagination completely to sutramEngine
     router.get('/data/:table', (req, res) => {
         try {
             const tblName = req.params.table;
-            let tbl = null;
-            try { tbl = sutramExcel.engine.table(tblName); } catch {}
-            if (!tbl && sutramExcel.engine._sutram) {
-                try { tbl = sutramExcel.engine._sutram.table(tblName); } catch {}
-            }
-            if (!tbl) {
-                return fail(res, new Error(`Table "${tblName}" not found`), 404);
-            }
-
             const limit = Math.min(1000, Math.max(1, parseInt(req.query._limit, 10) || 100));
             const offset = Math.max(0, parseInt(req.query._offset, 10) || 0);
             const search = req.query._search ? String(req.query._search).trim() : '';
@@ -229,74 +224,18 @@ function buildExcelRouter(sutramExcel) {
                 } catch {}
             }
 
-            let rows = [];
-            let total = 0;
+            const orderBy = sort ? `\`${sort}\` ${order}` : null;
 
-            const conditions = [];
-            const params = [];
+            // Pure delegation through sutramEngine -> sutramCore
+            const result = sutramExcel.engine.search(tblName, search, {
+                where: filterObj,
+                limit,
+                offset,
+                full,
+                orderBy
+            });
 
-            if (search) {
-                const searchCols = Object.entries(tbl.columns || {})
-                    .filter(([col, def]) => {
-                        const t = (def?.type || 'string').toLowerCase();
-                        return ['string', 'text', 'varchar'].includes(t) ||
-                            col.endsWith('_hin') || col.endsWith('_eng') ||
-                            col.includes('code') || col.includes('name');
-                    })
-                    .map(([col]) => col);
-
-                if (searchCols.length > 0) {
-                    const sConds = searchCols.map(col => `\`${col}\` LIKE ?`);
-                    conditions.push(`(${sConds.join(' OR ')})`);
-                    searchCols.forEach(() => params.push(`%${search}%`));
-                }
-            }
-
-            if (filterObj && typeof filterObj === 'object') {
-                for (const [col, val] of Object.entries(filterObj)) {
-                    if (!tbl.columns || !tbl.columns[col]) continue;
-                    if (Array.isArray(val) && val.length > 0) {
-                        const placeholders = val.map(() => '?').join(',');
-                        conditions.push(`\`${col}\` IN (${placeholders})`);
-                        val.forEach(v => params.push(v));
-                    } else if (val !== undefined && val !== null && val !== '') {
-                        conditions.push(`\`${col}\` = ?`);
-                        params.push(val);
-                    }
-                }
-            }
-
-            if (tbl.db && conditions.length > 0) {
-                const whereClause = `WHERE ${conditions.join(' AND ')}`;
-                const countSql = `SELECT COUNT(*) AS total FROM \`${tblName}\` ${whereClause}`;
-                const countRow = tbl.db.prepare(countSql).get(...params);
-                total = countRow ? countRow.total : 0;
-
-                let orderClause = '';
-                if (sort && tbl.columns[sort]) {
-                    orderClause = `ORDER BY \`${sort}\` ${order}`;
-                }
-                const dataSql = `SELECT * FROM \`${tblName}\` ${whereClause} ${orderClause} LIMIT ? OFFSET ?`;
-                const dataRows = tbl.db.prepare(dataSql).all(...params, limit, offset);
-
-                if (full && typeof tbl.getById === 'function') {
-                    const pkCol = tbl.pk || '_id';
-                    rows = dataRows.map(r => {
-                        try { return tbl.getById(r[pkCol]) || r; } catch { return r; }
-                    });
-                } else {
-                    rows = dataRows;
-                }
-            } else {
-                const opts = { limit, offset, full };
-                if (sort && tbl.columns && tbl.columns[sort]) {
-                    opts.orderBy = `${sort} ${order}`;
-                }
-                rows = tbl.getAll({}, opts);
-                total = tbl.count ? tbl.count() : rows.length;
-            }
-
-            ok(res, rows, { total, count: rows.length, offset, limit });
+            ok(res, result.rows, { total: result.total, count: result.rows.length, offset, limit });
         } catch (e) {
             fail(res, e, 500);
         }
@@ -343,6 +282,36 @@ function buildExcelRouter(sutramExcel) {
                 return fail(res, result.error || 'Update rejected', 400, { result });
             }
             ok(res, result);
+        } catch (e) { fail(res, e); }
+    });
+
+    // ── POST /delete/:table ───────────────────────────────────
+    // Body: { id: 123 } or { ids: [123, 124] } or { row: { _id: 123 } }
+    router.post('/delete/:table', async (req, res) => {
+        const tblName = req.params.table;
+        try {
+            const { id, ids, row } = req.body;
+            let targetIds = [];
+            if (id !== undefined && id !== null) {
+                targetIds = [id];
+            } else if (Array.isArray(ids)) {
+                targetIds = ids.filter(x => x !== undefined && x !== null);
+            } else if (row && (row._id !== undefined || row.id !== undefined)) {
+                targetIds = [row._id !== undefined ? row._id : row.id];
+            }
+
+            if (targetIds.length === 0) {
+                return fail(res, 'No id or row provided for deletion', 400);
+            }
+
+            let deletedCount = 0;
+            if (sutramExcel.engine) {
+                for (const targetId of targetIds) {
+                    const c = sutramExcel.engine.deleteById(tblName, targetId);
+                    deletedCount += (c || 0);
+                }
+            }
+            ok(res, { status: 'deleted', count: deletedCount, ids: targetIds });
         } catch (e) { fail(res, e); }
     });
 

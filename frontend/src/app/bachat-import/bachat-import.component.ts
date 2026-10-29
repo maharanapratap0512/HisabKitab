@@ -273,6 +273,8 @@ export class BachatImportComponent {
         "Item": this.combinedBachat[i].item_hin,
         "Subitem": this.combinedBachat[i].subitem_hin || '',
         "Condition": this.combinedBachat[i].condition_hin || '',
+        "Item Detail": this.combinedBachat[i].item_detail || '',
+        "Description": this.combinedBachat[i].description || '',
         "Unit": this.combinedBachat[i].unit_short,
         "Excel Qty": this.combinedBachat[i].qty,
         "SW Bachat": this.combinedBachat[i].bachat,

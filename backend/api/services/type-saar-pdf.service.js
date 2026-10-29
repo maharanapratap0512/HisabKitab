@@ -252,14 +252,41 @@ async function generatePdf(data) {
             const records = itemDetailsMap[itemKey] || [];
             const itemDisplayName = `${group.item_hin || ''}${group.subitem_hin ? ' : ' + group.subitem_hin : ''}`;
 
+            const showTotal = records.length > 1;
+            let totalBadgeHtml = '';
+
+            if (showTotal) {
+                const unitMap = {};
+                records.forEach(r => {
+                    const u = r.unit_short || group.unit_short || '';
+                    unitMap[u] = (unitMap[u] || 0) + (Number(r.qty) || 0);
+                });
+
+                const totalParts = Object.entries(unitMap).map(([u, q]) => {
+                    const formatted = Number(q).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+                    return u ? `${formatted} <small style="font-size: 8pt; color: #15803d;">${u}</small>` : formatted;
+                }).join(' <span style="color:#86efac; margin: 0 4px;">|</span> ');
+
+                totalBadgeHtml = `
+                    <span style="display: inline-block; background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 4px; padding: 2px 10px; font-size: 8.5pt; color: #166534; font-weight: bold;">
+                        <span style="color: #15803d;">कुल / Total:</span>
+                        <span style="font-size: 9.5pt; color: #14532d; margin-left: 4px;">${totalParts}</span>
+                        <span style="font-weight: normal; color: #15803d; font-size: 7.5pt; margin-left: 6px;">(${records.length} Entries)</span>
+                    </span>
+                `;
+            }
+
             parts.push(`
             <div id="item_detail_${itemKey}" class="detail-section-card">
                 <table style="width: 100%; margin-bottom: 6px; border-bottom: 1px solid #a9cce3;">
                     <tr>
-                        <td style="font-size: 10pt; font-weight: bold; color: #1b4f72;">
+                        <td style="font-size: 10pt; font-weight: bold; color: #1b4f72; vertical-align: middle;">
                             📦 ${itemDisplayName} <small style="color: #5d6d7e;">(${group.dept_hin || group.dept_code || ''})</small>
                         </td>
-                        <td class="text-end">
+                        <td class="text-center" style="vertical-align: middle;">
+                            ${totalBadgeHtml}
+                        </td>
+                        <td class="text-end" style="vertical-align: middle;">
                             <a href="#top-saar" class="back-top-link">↑ Back to Saar Summary (ऊपर सार पर जाएं)</a>
                         </td>
                     </tr>

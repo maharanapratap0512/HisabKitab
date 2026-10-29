@@ -1,0 +1,21 @@
+/* PrimeNG & PrimeIcons Themes */
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.min.css";
+@import "primeicons/primeicons.css";
+
+/* Unicons & Global Fonts */
+@import url('https://unicons.iconscout.com/release/v4.0.0/css/line.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}

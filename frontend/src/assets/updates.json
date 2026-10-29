@@ -1,34 +1,26 @@
 [
     {
-        "version": "38.6",
-        "date": "27-10-2026",
-        "summary": "Item Master Alias (Search Nicknames) System & Integrated Alias Manager",
-        "summary_hin": "आइटम मास्टर उपनाम (सर्च उपनाम) प्रणाली एवं एकीकृत उपनाम प्रबंधक",
+        "version": "39",
+        "date": "28-10-2026",
+        "summary": "Item & Subitem Alias System & AJ Type Saar PDF Updates",
+        "summary_hin": "आइटम एवं सब-आइटम उपनाम प्रणाली तथा प्रकार सार PDF सुधार",
         "isNew": true,
         "items": [
             {
                 "type": "feature",
                 "module": "Item & Subitem",
-                "title": "Interactive Alias Column with Dedicated Filter",
-                "title_hin": "आइटम सूची में उपनाम कॉलम एवं समर्पित फ़िल्टर",
-                "desc": "Easily view, add, and search alternative item names or local nicknames right from the Item table. Operators can now filter items by their alias with ease.",
-                "desc_hin": "मुख्य वस्तु सूची में अब सीधे उपनाम देख सकते हैं, नए उपनाम जोड़ सकते हैं और उपनाम खोज फ़िल्टर से मनचाही वस्तु तुरंत ढूंढ सकते हैं।"
+                "title": "Interactive Alias Management & Universal Search",
+                "title_hin": "एकीकृत उपनाम प्रबंधन एवं सर्वव्यापी त्वरित खोज",
+                "desc": "Easily register and manage search nicknames for items and subitems with dedicated in-row quick action buttons, a dedicated table filter, and automatic recognition across all dropdowns.",
+                "desc_hin": "आइटम और सब-आइटम के लिए सीधे तालिका से नए उपनाम जोड़ें व प्रबंधित करें। समर्पित उपनाम खोज फ़िल्टर और सभी ड्रॉपडाउन में उपनाम से तुरंत खोजने की पूर्ण सुविधा उपलब्ध है।"
             },
             {
                 "type": "feature",
-                "module": "Item Entry",
-                "title": "Direct Alias Entry & Quick Manage Modal",
-                "title_hin": "आइटम फॉर्म में उपनाम प्रविष्टि एवं त्वरित उपनाम प्रबंधक",
-                "desc": "Add multiple search aliases directly when creating or editing items using simple keyboard tags, or manage all registered nicknames with the convenient Manage button.",
-                "desc_hin": "नया आइटम बनाते समय या बदलते समय सीधे उपनाम टाइप करके Enter दबाएं, अथवा 'Manage' बटन दबाकर सभी उपनामों को आसानी से प्रबंधित करें।"
-            },
-            {
-                "type": "feature",
-                "module": "Item & Subitem",
-                "title": "Subitem Row Aliases & In-Row Quick Add",
-                "title_hin": "सब-आइटम पंक्ति में उपनाम एवं त्वरित जोड़ने की सुविधा",
-                "desc": "Subitems now display their registered aliases in the Aliases column with a one-click Add Alias button right in the subitem row.",
-                "desc_hin": "सब-आइटम पंक्तियों में भी अब उपनाम कॉलम दिखेगा और वहीं से सीधे नया उपनाम जोड़ने की आसान सुविधा उपलब्ध है।"
+                "module": "Reports",
+                "title": "Item Total Quantity in Detailed PDF",
+                "title_hin": "विस्तृत PDF में आइटम की कुल मात्रा",
+                "desc": "In the Detailed PDF report, items with more than one entry now show their total quantity directly in the item header row for easy reading.",
+                "desc_hin": "विस्तृत PDF रिपोर्ट में एक से अधिक प्रविष्टि वाले आइटम के शीर्षक पर ही उसकी कुल मात्रा दिखती है, जिससे अलग से जोड़ करने की ज़रूरत नहीं पड़ती।"
             }
         ]
     },

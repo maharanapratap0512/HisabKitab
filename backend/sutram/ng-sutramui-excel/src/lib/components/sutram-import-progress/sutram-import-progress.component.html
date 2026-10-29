@@ -18,25 +18,31 @@
 
     <!-- Live Status Counters Grid -->
     <div class="row g-2 mb-3">
-      <div class="col-3">
+      <div [class]="(progress.deleted || 0) > 0 ? 'col' : 'col-3'">
         <div class="card p-2 bg-soft-success border border-success">
           <small class="text-muted d-block" style="font-size: 11px;">Inserted</small>
           <strong class="fs-5 text-success">{{ progress.inserted }}</strong>
         </div>
       </div>
-      <div class="col-3">
+      <div [class]="(progress.deleted || 0) > 0 ? 'col' : 'col-3'">
         <div class="card p-2 bg-soft-primary border border-primary">
           <small class="text-muted d-block" style="font-size: 11px;">Updated</small>
           <strong class="fs-5 text-primary">{{ progress.updated }}</strong>
         </div>
       </div>
-      <div class="col-3">
+      <div *ngIf="(progress.deleted || 0) > 0" class="col">
+        <div class="card p-2 bg-soft-warning border border-warning">
+          <small class="text-muted d-block" style="font-size: 11px;">Deleted</small>
+          <strong class="fs-5 text-warning">{{ progress.deleted }}</strong>
+        </div>
+      </div>
+      <div [class]="(progress.deleted || 0) > 0 ? 'col' : 'col-3'">
         <div class="card p-2 bg-soft-warning border border-warning">
           <small class="text-muted d-block" style="font-size: 11px;">Duplicate</small>
           <strong class="fs-5 text-warning">{{ progress.duplicate }}</strong>
         </div>
       </div>
-      <div class="col-3">
+      <div [class]="(progress.deleted || 0) > 0 ? 'col' : 'col-3'">
         <div class="card p-2 bg-soft-danger border border-danger">
           <small class="text-muted d-block" style="font-size: 11px;">Rejected</small>
           <strong class="fs-5 text-danger">{{ progress.rejected }}</strong>

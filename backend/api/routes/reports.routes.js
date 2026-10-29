@@ -1379,22 +1379,31 @@ router.put('/type_saar_pdf/', async (req, res, next) => {
             for (let grp of req.body.groupedReportData) {
                 const groupKey = `${grp.item_id}_${grp.subitem_id || 0}`;
 
-                let condition = `1=1`;
+                const conditions = [];
                 if (req.body.filterBody?.year) {
-                    condition += ` AND strftime('%Y', ${table}.date) = '${req.body.filterBody.year}'`;
+                    conditions.push(`strftime('%Y', ${table}.date) = '${req.body.filterBody.year}'`);
                 }
                 if (monthsString.length > 0) {
-                    condition += ` AND strftime('%m', ${table}.date) IN (${Fn.join(monthsString)})`;
+                    conditions.push(`strftime('%m', ${table}.date) IN (${Fn.join(monthsString)})`);
                 }
                 if (grp.dept_id) {
-                    condition += ` AND ${table}.dept_id = ${Number(grp.dept_id)}`;
+                    conditions.push(`${table}.dept_id = ${Number(grp.dept_id)}`);
                 }
-                condition += ` AND ${table}.item_id = ${Number(grp.item_id)}`;
+                conditions.push(`${table}.item_id = ${Number(grp.item_id)}`);
                 if (grp.subitem_id) {
-                    condition += ` AND ${table}.subitem_id = ${Number(grp.subitem_id)}`;
+                    conditions.push(`${table}.subitem_id = ${Number(grp.subitem_id)}`);
                 } else {
-                    condition += ` AND (${table}.subitem_id IS NULL OR ${table}.subitem_id = 0)`;
+                    conditions.push(`(${table}.subitem_id IS NULL OR ${table}.subitem_id = 0)`);
                 }
+                if (req.body.filterBody?.aawak_type_id) {
+                    if (Array.isArray(req.body.filterBody.aawak_type_id) && req.body.filterBody.aawak_type_id.length > 0) {
+                        conditions.push(`${table}.${typeCol} IN (${req.body.filterBody.aawak_type_id.map(id => Number(id)).join(',')})`);
+                    } else if (!Array.isArray(req.body.filterBody.aawak_type_id)) {
+                        conditions.push(`${table}.${typeCol} = ${Number(req.body.filterBody.aawak_type_id)}`);
+                    }
+                }
+
+                const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
                 let sql = `SELECT ${table}.*, 
                     it.item_hin, it.item_eng, 
@@ -1410,7 +1419,7 @@ router.put('/type_saar_pdf/', async (req, res, next) => {
                     LEFT JOIN support_list sl ON sl._id = ${table}.${typeCol}
                     LEFT JOIN mm ON mm._id = ${table}.${mmCol}
                     LEFT JOIN pbk ON pbk._id = ${table}.pbk_id
-                    WHERE ${condition}
+                    ${whereClause}
                     ORDER BY ${table}.date ASC, ${table}._id ASC`;
 
                 let records = DB.db.prepare(sql).all();

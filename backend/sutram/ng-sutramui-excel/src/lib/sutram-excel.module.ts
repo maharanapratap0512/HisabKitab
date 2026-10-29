@@ -21,6 +21,8 @@ import { SidebarModule } from 'primeng/sidebar';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { AutoCompleteModule } from 'primeng/autocomplete';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { CheckboxModule } from 'primeng/checkbox';
 
 // Sutram Excel Components
 import { SutramExcelStudioComponent } from './components/sutram-excel-studio/sutram-excel-studio.component';
@@ -61,7 +63,9 @@ const COMPONENTS = [
     SidebarModule,
     ProgressBarModule,
     ContextMenuModule,
-    AutoCompleteModule
+    AutoCompleteModule,
+    OverlayPanelModule,
+    CheckboxModule
   ],
   providers: [
     SutramExcelApiService,

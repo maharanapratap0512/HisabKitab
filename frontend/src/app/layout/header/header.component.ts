@@ -283,7 +283,7 @@ export class HeaderComponent implements AfterViewInit {
           { title: 'Generate Reports', link: 'report-universal', visible: this.auth.webUser.settings?.report?.report_universal ?? true },
           { title: 'Ledger Report', link: 'report/report-item-ledger', visible: this.auth.webUser.settings?.report?.report_item_ledger ?? true },
           { title: 'Aawak Jawak Check', link: 'report/report-aj-check', visible: this.auth.webUser.settings?.report?.report_aj_check ?? true },
-          { title: 'AJ Type Saar (आवक जावक प्रकार सार)', link: 'report/report-at', visible: this.auth.webUser.settings?.report?.report_at ?? true },
+          { title: 'AJ Type Saar', link: 'report/report-at', visible: this.auth.webUser.settings?.report?.report_at ?? true },
           { title: 'Store Stock', link: 'report/report-str-stk', visible: this.auth.webUser.settings?.report?.report_str_stk ?? true },
           { title: 'Khet Saar', link: 'report/report-kh-saar', visible: this.auth.webUser.settings?.report?.report_kh ?? true },
           { title: 'Khet Saar (Item Wise)', link: 'report/report-kh-itemwise', visible: this.auth.webUser.settings?.report?.report_kh ?? true },

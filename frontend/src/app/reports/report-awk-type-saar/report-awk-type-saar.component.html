@@ -515,11 +515,11 @@
 </div>
 
 <!-- PDF Generation Progress Modal Overlay -->
-<div *ngIf="isPdfExporting" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.6); z-index: 1080;">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+<div *ngIf="isPdfExporting" class="modal fade show d-flex align-items-center justify-content-center" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.6); z-index: 1080;">
+    <div class="modal-dialog modal-dialog-centered m-auto" style="max-width: 440px; width: 90%;">
         <div class="modal-content shadow-lg border-0 rounded-3 text-center p-4">
             <div class="spinner-border text-danger mb-3" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
-            <h5 class="fw-bold mb-1 text-dark">Generating PDF Report</h5>
+            <h5 class="fw-bold mb-1">Generating PDF Report</h5>
             <p class="text-muted fs-7 mb-3">Constructing high-quality PDF document...</p>
             <div class="alert alert-soft-primary border border-primary-subtle py-2 px-3 mb-0 fs-7 fw-semibold text-primary">
                 <i class="uil uil-spin uil-spinner me-1"></i> {{pdfProgressStatus || 'Processing request...'}}

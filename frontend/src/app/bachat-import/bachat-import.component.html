@@ -111,7 +111,11 @@
                                                 <td>{{data.sn}}</td>
                                                 <td>{{data.date}}</td>
                                                 <td>{{data.mm}}</td>
-                                                <td>{{data.item_hin ? data.item_hin : data.item}}</td>
+                                                <td>
+                                                    {{data.item_hin ? data.item_hin : data.item}}
+                                                    <small class="text-muted d-block" *ngIf="data.item_detail">{{data.item_detail}}</small>
+                                                    <small class="text-muted d-block" *ngIf="data.description">{{data.description}}</small>
+                                                </td>
                                                 <td>{{data.subitem_hin ? data.subitem_hin : data.subitem}}</td>
                                                 <td>{{data.condition}}</td>
                                                 <td>{{data.qty}}</td>
@@ -268,7 +272,11 @@
                                                 <td>{{data.sn ? data.sn : ''}}</td>
                                                 <td>{{data.date}}</td>
                                                 <td>{{data.mm_hin}}</td>
-                                                <td>{{data.item_hin}}</td>
+                                                <td>
+                                                    {{data.item_hin}}
+                                                    <small class="text-muted d-block" *ngIf="data.item_detail">{{data.item_detail}}</small>
+                                                    <small class="text-muted d-block" *ngIf="data.description">{{data.description}}</small>
+                                                </td>
                                                 <td>{{data.subitem_id ? data.subitem_hin : ''}}</td>
                                                 <td>{{data.condition_id ? data.condition_hin : ''}}</td>
                                                 <td>{{data.unit_short}}</td>

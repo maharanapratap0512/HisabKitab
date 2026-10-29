@@ -1,0 +1,41 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": false,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "es2020",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "paths": {
+      "primeng/*": ["../node_modules/primeng/*"],
+      "primeicons/*": ["../node_modules/primeicons/*"],
+      "@angular/*": ["../node_modules/@angular/*"],
+      "rxjs": ["../node_modules/rxjs"],
+      "rxjs/*": ["../node_modules/rxjs/*"],
+      "xlsx": ["../node_modules/xlsx"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": false,
+    "strictInputAccessModifiers": false,
+    "strictTemplates": false
+  },
+  "files": [
+    "main.ts"
+  ],
+  "include": [
+    "../src/**/*.ts"
+  ]
+}

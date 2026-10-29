@@ -82,6 +82,40 @@ export class SutramExcelApiService {
   }
 
   /**
+   * GET /data/:table - Chunked lazy-loading with direct DB search, sort, and filters support
+   */
+  public getTableDataChunk(
+    tableName: string,
+    opts: {
+      limit?: number;
+      offset?: number;
+      search?: string;
+      sort?: string;
+      order?: 'ASC' | 'DESC';
+      filters?: any;
+    } = {}
+  ): Observable<{ rows: any[]; total: number; offset: number; limit: number }> {
+    const params: string[] = [];
+    params.push(`_limit=${opts.limit ?? 100}`);
+    params.push(`_offset=${opts.offset ?? 0}`);
+    params.push(`_full=1`);
+    if (opts.search) params.push(`_search=${encodeURIComponent(opts.search)}`);
+    if (opts.sort) params.push(`_sort=${encodeURIComponent(opts.sort)}&_order=${opts.order || 'ASC'}`);
+    if (opts.filters && Object.keys(opts.filters).length > 0) {
+      params.push(`_filters=${encodeURIComponent(JSON.stringify(opts.filters))}`);
+    }
+    const url = `${this.baseUri}/data/${tableName}?${params.join('&')}`;
+    return this.http.get<any>(url).pipe(
+      map(res => ({
+        rows: res.result || [],
+        total: res.total !== undefined ? res.total : (res.result?.length || 0),
+        offset: res.offset || 0,
+        limit: res.limit || (opts.limit ?? 100)
+      }))
+    );
+  }
+
+  /**
    * POST /verify/:table - Server-side FK matching, Unicode normalization, and dictionary check
    */
   public verifyRows(
@@ -177,6 +211,26 @@ export class SutramExcelApiService {
   public deleteDictionaryEntry(id: number): Observable<{ deleted: boolean }> {
     return this.http.delete<ApiResponse<{ deleted: boolean }>>(`${this.baseUri}/dictionary/${id}`).pipe(
       map(res => res.result || { deleted: true })
+    );
+  }
+
+  /**
+   * POST /delete/:table - Delete rows by id(s) via sutramEngine
+   */
+  public deleteRows(
+    tableName: string,
+    ids: any[]
+  ): Observable<{ status: string; count: number; ids: any[] }> {
+    return this.http.post<ApiResponse<{ status: string; count: number; ids: any[] }>>(
+      `${this.baseUri}/delete/${tableName}`,
+      { ids }
+    ).pipe(
+      map((res: ApiResponse<{ status: string; count: number; ids: any[] }>) => {
+        if (!res.success) {
+          throw new Error(res.error || 'Delete failed');
+        }
+        return res.result || { status: 'deleted', count: ids.length, ids };
+      })
     );
   }
 }

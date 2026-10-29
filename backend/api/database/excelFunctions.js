@@ -112,6 +112,7 @@ class ExcelFunctions {
       item_code: null,
       unit_id: null,
       categories: [],
+      aliases: [],
       extra_note: null,
       restrict_month: null,
       restrict_year: null,
@@ -125,6 +126,7 @@ class ExcelFunctions {
       subitem_roman: null,
       unit_id: null,
       item_id: null,
+      aliases: [],
       extra_note: null,
       document: null,
       restrict_month: null,
@@ -650,8 +652,15 @@ class ExcelFunctions {
 
       if (!this.checkedButNotFound(data, 'subitem')) {
          for (let i in this.subitem) {
-            if (this.subitem[i].item_id == item_id && [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].includes(data.subitem)) {
-               return this.subitem[i]._id;
+            if (this.subitem[i].item_id == item_id) {
+               const primaryNames = [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].filter(Boolean).map(n => n.trim().toLowerCase());
+               let aliasList = [];
+               if (Array.isArray(this.subitem[i].aliases)) {
+                  aliasList = this.subitem[i].aliases.map(a => typeof a === 'object' && a !== null ? (a.alias || '').trim().toLowerCase() : String(a || '').trim().toLowerCase()).filter(Boolean);
+               }
+               if ([...primaryNames, ...aliasList].includes(data.subitem)) {
+                  return this.subitem[i]._id;
+               }
             }
          }
          for (let i in this.dict.item) {
@@ -706,12 +715,19 @@ class ExcelFunctions {
          }
          if (row.item_id && row.subitem && !row.subitem_id) {
             for (let i in this.subitem) {
-               if (this.subitem[i].item_id == row.item_id && [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].includes(data.subitem)) {
-                  row.subitem_id = this.subitem[i]._id;
-                  if (row.log) {
-                     console.log("subitem found");
+               if (this.subitem[i].item_id == row.item_id) {
+                  const primaryNames = [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].filter(Boolean).map(n => n.trim().toLowerCase());
+                  let aliasList = [];
+                  if (Array.isArray(this.subitem[i].aliases)) {
+                     aliasList = this.subitem[i].aliases.map(a => typeof a === 'object' && a !== null ? (a.alias || '').trim().toLowerCase() : String(a || '').trim().toLowerCase()).filter(Boolean);
                   }
-                  break;
+                  if ([...primaryNames, ...aliasList].includes(data.subitem)) {
+                     row.subitem_id = this.subitem[i]._id;
+                     if (row.log) {
+                        console.log("subitem found");
+                     }
+                     break;
+                  }
                }
             }
          }
@@ -870,6 +886,20 @@ class ExcelFunctions {
                   }
                }
                // If excel cell is empty/blank, skip (do not consider as change)
+               continue;
+            }
+
+            if (headerList[j].type === 'array' || hName === 'aliases') {
+               const rawIncoming = data[hName] !== undefined ? data[hName] : (headerList[j].col_name ? data[headerList[j].col_name] : undefined);
+               if (rawIncoming !== undefined) {
+                  const existingList = (list[i].aliases || list[i].item_aliases || list[i][hName] || []);
+                  const existingArr = (Array.isArray(existingList) ? existingList : []).map(a => typeof a === 'object' && a !== null ? a.alias : a).filter(Boolean).map(a => String(a).trim().toLowerCase()).sort();
+                  const incomingArr = (Array.isArray(rawIncoming) ? rawIncoming : String(rawIncoming).split(',')).map(a => typeof a === 'object' && a !== null ? a.alias : a).filter(Boolean).map(a => String(a).trim().toLowerCase()).sort();
+                  if (existingArr.join(',') !== incomingArr.join(',')) {
+                     changes = true;
+                     break;
+                  }
+               }
                continue;
             }
 

@@ -336,6 +336,56 @@ class Engine {
     getAll(tableName, where, opts) { return this.table(tableName).getAll(where, opts); }
     count(tableName, where) { return this.table(tableName).count(where); }
 
+    /**
+     * Multi-column search with filtering, sorting, and pagination.
+     * Delegates pure database query generation and execution to sutramCore.
+     */
+    search(tableName, query = '', { where = {}, limit = 100, offset = 0, full = true, orderBy = null } = {}) {
+        const tbl = this.table(tableName);
+        const q = String(query || '').trim();
+        const conditions = [];
+
+        // 1. Process WHERE filter object or string
+        if (typeof where === 'string' && where.trim()) {
+            conditions.push(`(${where.trim()})`);
+        } else if (where && typeof where === 'object' && Object.keys(where).length > 0) {
+            for (const [col, val] of Object.entries(where)) {
+                if (!tbl.columns || !tbl.columns[col]) continue;
+                if (Array.isArray(val) && val.length > 0) {
+                    const formattedVals = val.map(v => typeof v === 'string' ? `'${v.replace(/'/g, "''")}'` : v);
+                    conditions.push(`\`${col}\` IN (${formattedVals.join(', ')})`);
+                } else if (val !== undefined && val !== null && val !== '') {
+                    const formattedVal = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
+                    conditions.push(`\`${col}\` = ${formattedVal}`);
+                }
+            }
+        }
+
+        // 2. Multi-column text search matching text/name/code columns
+        if (q) {
+            const searchCols = Object.entries(tbl.columns || {})
+                .filter(([col, def]) => {
+                    const t = (def?.type || 'string').toLowerCase();
+                    return ['string', 'text', 'varchar'].includes(t) ||
+                           col.endsWith('_hin') || col.endsWith('_eng') ||
+                           col.includes('code') || col.includes('name');
+                })
+                .map(([col]) => col);
+
+            if (searchCols.length > 0) {
+                const escapedQ = q.replace(/'/g, "''");
+                const sConds = searchCols.map(c => `\`${c}\` LIKE '%${escapedQ}%'`);
+                conditions.push(`(${sConds.join(' OR ')})`);
+            }
+        }
+
+        const combinedWhere = conditions.length > 0 ? conditions.join(' AND ') : {};
+        const rows = tbl.getAll(combinedWhere, { full, orderBy, limit, offset });
+        const total = tbl.count(combinedWhere);
+
+        return { rows, total, limit, offset };
+    }
+
     // ─────────────────────────────────────────────────────────
     // IMPORT / EXPORT
     // importAll / importSchema / importTriggers / importReports

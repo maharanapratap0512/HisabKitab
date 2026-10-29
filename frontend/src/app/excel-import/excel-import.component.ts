@@ -702,7 +702,7 @@ export class ExcelImportComponent implements OnInit, OnChanges {
 
   private applyItemCorrection(data: any): void {
     const itemId = data.item_id ?? data.id;
-    if (itemId == null) return;
+    if (itemId == null && !data.item_detail && !data.description) return;
 
     const src = typeof data.name === 'string'
       ? { item: data.name, subitem: data.extra_note }
@@ -717,22 +717,24 @@ export class ExcelImportComponent implements OnInit, OnChanges {
       const rowKey = `${this.norm(row.item || row.item_hin)}|${this.norm(row.subitem || row.subitem_hin)}`;
       if (rowKey !== key) continue;
 
-      row.item_id = itemId;
-      if (itemHin) row.item_hin = itemHin;
+      if (itemId != null) {
+        row.item_id = itemId;
+        if (itemHin) row.item_hin = itemHin;
 
-      if (hasSub) {
-        row.subitem_id = data.subitem_id;
-        if (subHin) row.subitem_hin = subHin;
-      } else {
-        // item-only is final: remove every trace of subitem
-        row.subitem = null;
-        row.subitem_id = null;
-        row.subitem_hin = '-';
-        // row.subitem_eng = null;  // agar aisi koi aur subitem field hai to yahan bhi
+        if (hasSub) {
+          row.subitem_id = data.subitem_id;
+          if (subHin) row.subitem_hin = subHin;
+        } else {
+          // item-only is final: remove every trace of subitem
+          row.subitem = null;
+          row.subitem_id = null;
+          row.subitem_hin = '-';
+          // row.subitem_eng = null;  // agar aisi koi aur subitem field hai to yahan bhi
+        }
+
+        delete row.subitem_corrected;
+        // delete row.subitem_unmatched;  // agar aisa koi flag use hota hai
       }
-
-      delete row.subitem_corrected;
-      // delete row.subitem_unmatched;  // agar aisa koi flag use hota hai
 
       row.item_detail = this.appendText(row.item_detail, data.item_detail);
       row.description = this.appendText(row.description, data.description);

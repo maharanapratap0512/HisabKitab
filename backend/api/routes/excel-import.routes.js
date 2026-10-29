@@ -2,7 +2,9 @@ const router = require('express').Router();
 const fs = require('fs');
 const DBContex = require('../database/DBContex');
 const ExcelFunctions = require('../database/excelFunctions');
-const { product, subitem } = require('../database/query');
+const { sutramDB } = require('../database/db.model');
+const subitemTable = sutramDB.table('subitem');
+const itemTable = sutramDB.table('item');
 const Fn = require('../database/functions');
 const itemRateService = require('../services/item-rate.service');
 const DB = new DBContex();
@@ -329,6 +331,24 @@ router.post('/final_insert/:dept_id', async (req, res, next) => {
                 }
             }
             result = { status: 'inserted', data: req.body.excelData, newData: result };
+        } else if (req.body.importType.name == 'subitem') {
+            const is = require('../services/item.service');
+            let fdata = await fn.setFormData(fn.subitem_form, req.body.excelData);
+            result = await is.createSubitem(fdata, req.params.dept_id);
+            const newSubitemId = result ? (result.insertId || result._id || result.id) : null;
+            const parentItemId = result ? (result.item_id || fdata.item_id) : fdata.item_id;
+            const yearlyRates = extractYearlyRates(req.body.excelData);
+            if (newSubitemId && parentItemId && yearlyRates.length > 0) {
+                for (const yr of yearlyRates) {
+                    await itemRateService.saveItemRate(req.params.dept_id, {
+                        item_id: parentItemId,
+                        subitem_id: newSubitemId,
+                        year: yr.year,
+                        rate: yr.rate
+                    });
+                }
+            }
+            result = { status: 'inserted', data: req.body.excelData, newData: result };
         } else if (req.body.importType.name == 'attribute') {
             const vs = require('../services/variant.service');
             const dataArr = Array.isArray(req.body.excelData) ? req.body.excelData : [req.body.excelData];
@@ -472,14 +492,15 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                     } else if (type === 'item') {
                         const conflict = service.getItemConflict(row);
                         if (conflict) {
-                            let fullDuplicate = await fn.checkFullDuplication([conflict.conflict], row, headerList, req.params.dept_id);
+                            const fullItem = itemTable.getById(conflict.conflict._id, { full: true }) || conflict.conflict;
+                            let fullDuplicate = await fn.checkFullDuplication([fullItem], row, headerList, req.params.dept_id);
                             if (fullDuplicate.found) {
-                                row.duplicateItem = conflict.conflict;
+                                row.duplicateItem = fullItem;
                                 result = { status: 'duplicate', data: row };
                             } else {
                                 row.duplicate = fullDuplicate.list;
-                                row._id = conflict.conflict._id || conflict.conflict.item_id;
-                                row.item_id = conflict.conflict.item_id || conflict.conflict._id;
+                                row._id = fullItem._id || conflict.conflict.item_id;
+                                row.item_id = fullItem._id || conflict.conflict.item_id;
                                 result = { status: 'update', data: row };
                             }
                         } else {
@@ -531,14 +552,15 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                         let fdata = await fn.setFormData(form, row);
                         const conflict = service.getSubitemConflict(fdata);
                         if (conflict) {
-                            let fullDuplicate = await fn.checkFullDuplication([conflict.conflict], row, headerList, req.params.dept_id);
+                            const fullSubitem = subitemTable.getById(conflict.conflict._id, { full: true }) || conflict.conflict;
+                            let fullDuplicate = await fn.checkFullDuplication([fullSubitem], row, headerList, req.params.dept_id);
                             if (fullDuplicate.found) {
                                 result = { status: 'duplicate', data: row };
                             } else {
                                 row.duplicate = fullDuplicate.list;
-                                row._id = conflict.conflict._id;
-                                row.subitem_id = conflict.conflict.subitem_id || conflict.conflict._id;
-                                row.item_id = conflict.conflict.item_id;
+                                row._id = fullSubitem._id;
+                                row.subitem_id = fullSubitem.subitem_id || fullSubitem._id;
+                                row.item_id = fullSubitem.item_id;
                                 result = { status: 'update', data: row };
                             }
                         } else {
@@ -595,15 +617,28 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
 router.put('/update/:dept_id', async (req, res, next) => {
     try {
         let fn = new ExcelFunctions([], req.params.dept_id);
-        let result = await fn.updateExcelData(req.body.importType, req.body.excelData);
         let yearlyRateChanges = false;
+        let result;
         const typeName = req.body.importType && (req.body.importType.name || req.body.importType);
+        if (typeName === 'item') {
+            const is = require('../services/item.service');
+            const itemId = req.body.excelData.item_id || req.body.excelData._id;
+            const updated = await is.updateItem(itemId, req.body.excelData);
+            result = { changes: updated ? 1 : 0 };
+        } else if (typeName === 'subitem') {
+            const is = require('../services/item.service');
+            const subitemId = req.body.excelData.subitem_id || req.body.excelData._id;
+            const updated = await is.updateSubitem(subitemId, req.body.excelData);
+            result = { changes: updated ? 1 : 0 };
+        } else {
+            result = await fn.updateExcelData(req.body.importType, req.body.excelData);
+        }
         if (typeName === 'item' || typeName === 'subitem') {
             const yearlyRates = extractYearlyRates(req.body.excelData);
             let itemId = req.body.excelData.item_id || req.body.excelData._id;
             const subitemId = typeName === 'subitem' ? (req.body.excelData.subitem_id || req.body.excelData._id) : null;
             if (typeName === 'subitem' && !itemId && subitemId) {
-                const subRec = subitem.getById(subitemId, { full: false });
+                const subRec = subitemTable.getById(subitemId, { full: false });
                 if (subRec && subRec.item_id) itemId = subRec.item_id;
             }
             if (itemId && yearlyRates.length > 0) {
@@ -705,7 +740,20 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
             const insertStmt = DB.db.prepare(`insert into bachat_import(date, sn, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, qty, company_name, actual_amt, item_detail, description, nimitt_id) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(dept_id, mm_id, item_id, subitem_id, condition_id, unit_id) 
-                DO UPDATE SET qty = ROUND(qty + excluded.qty, 3)`);
+                DO UPDATE SET 
+                    qty = ROUND(qty + excluded.qty, 3),
+                    item_detail = CASE 
+                        WHEN (bachat_import.item_detail IS NULL OR bachat_import.item_detail = '') THEN excluded.item_detail 
+                        WHEN (excluded.item_detail IS NULL OR excluded.item_detail = '') THEN bachat_import.item_detail 
+                        WHEN INSTR(bachat_import.item_detail, excluded.item_detail) > 0 THEN bachat_import.item_detail
+                        ELSE bachat_import.item_detail || ' ' || excluded.item_detail 
+                    END,
+                    description = CASE 
+                        WHEN (bachat_import.description IS NULL OR bachat_import.description = '') THEN excluded.description 
+                        WHEN (excluded.description IS NULL OR excluded.description = '') THEN bachat_import.description 
+                        WHEN INSTR(bachat_import.description, excluded.description) > 0 THEN bachat_import.description
+                        ELSE bachat_import.description || ' ' || excluded.description 
+                    END`);
 
             const insertMany = DB.db.transaction((rows) => {
                 for (const data of rows) {
@@ -769,6 +817,7 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
                        ROUND(IFNULL(bcht.bachat, 0), 3) as bachat, 
                        'DB' AS status, 
                        ROUND(0 - IFNULL(bcht.bachat, 0), 3) as difference, 
+                       null as item_detail, null as description,
                        mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
                        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
                        sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
@@ -809,6 +858,15 @@ router.put('/final_bachat/:dept_id', async (req, res, next) => {
             let obj, op, result = [];
             const deptId = parseInt(req.params.dept_id);
 
+            const appendText = (oldVal, add) => {
+                if (!add || !String(add).trim()) return oldVal || null;
+                const addClean = String(add).trim();
+                if (!oldVal || !String(oldVal).trim()) return addClean;
+                const oldClean = String(oldVal).trim();
+                if (oldClean.includes(addClean)) return oldClean;
+                return `${oldClean} ${addClean}`;
+            };
+
             if (req.body.difference > 0) {
                 // Incoming Excel stock is greater than software stock -> Create Aawak entry to add the difference
                 op = 'aawak';
@@ -817,6 +875,8 @@ router.put('/final_bachat/:dept_id', async (req, res, next) => {
                 obj.dept_id = deptId;
                 if (!obj.date) obj.date = new Date().toISOString().split('T')[0];
                 obj.qty = Math.round(Number(obj.qty) * 1000) / 1000;
+                obj.item_detail = appendText(obj.item_detail, req.body.item_detail);
+                obj.description = appendText(obj.description, req.body.description);
 
                 const rs = await Fn.insertAJ(obj, 'aawak');
                 const data = await DB.getList('aawak', { full: true, conditionString: `aawak._id = ${rs}` });
@@ -852,6 +912,8 @@ router.put('/final_bachat/:dept_id', async (req, res, next) => {
                         const jwkEntry = {
                             ...baseObj,
                             qty: take,
+                            item_detail: appendText(awk.item_detail || baseObj.item_detail, req.body.item_detail),
+                            description: appendText(awk.description || baseObj.description, req.body.description),
                             aawak_id: awk._id,
                             aawak_splits: [{ aawak_id: awk._id, split_qty: take, qty: take }]
                         };
@@ -866,6 +928,8 @@ router.put('/final_bachat/:dept_id', async (req, res, next) => {
                     const jwkEntry = {
                         ...baseObj,
                         qty: remainingToDeduct,
+                        item_detail: appendText(baseObj.item_detail, req.body.item_detail),
+                        description: appendText(baseObj.description, req.body.description),
                         aawak_id: null,
                         aawak_splits: []
                     };

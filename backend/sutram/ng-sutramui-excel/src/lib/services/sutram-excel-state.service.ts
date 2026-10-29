@@ -23,6 +23,7 @@ export interface ImportProgressState {
   percentage: number;
   inserted: number;
   updated: number;
+  deleted?: number;
   duplicate: number;
   rejected: number;
   isActive: boolean;
@@ -36,6 +37,8 @@ export class SutramExcelStateService {
   public readonly activeTable: WritableSignal<string | null> = signal(null);
   public readonly config: WritableSignal<SutramTableConfig | null> = signal(null);
   public readonly rows: WritableSignal<SutramRow[]> = signal([]);
+  public readonly deletedRowIds: WritableSignal<any[]> = signal([]);
+  public readonly deletedRowsQueue: WritableSignal<Array<{ row: SutramRow; id: any; index: number }>> = signal([]);
   public readonly corrections: WritableSignal<SutramCorrectionItem[]> = signal([]);
   public readonly selectedCell: WritableSignal<{ rowIdx: number; colKey: string } | null> = signal(null);
   public readonly isAuditMode: WritableSignal<boolean> = signal(true);
@@ -43,12 +46,31 @@ export class SutramExcelStateService {
   public readonly isImporting: WritableSignal<boolean> = signal(false);
   public readonly filterOnlyErrors: WritableSignal<boolean> = signal(false);
 
+  // Lazy Loading & Live DB Search State
+  public readonly totalDbRecords: WritableSignal<number> = signal(0);
+  public readonly dbSearchQuery: WritableSignal<string> = signal('');
+  public readonly isLoadingDb: WritableSignal<boolean> = signal(false);
+
+  // Control Bar Feature Settings
+  public readonly filtersEnabled: WritableSignal<boolean> = signal(true);
+  public readonly sortingEnabled: WritableSignal<boolean> = signal(true);
+
+  // Active Column Filters & Sorting
+  public readonly columnFilters: WritableSignal<{ [colKey: string]: Set<any> }> = signal({});
+  public readonly activeSort: WritableSignal<{ colKey: string; order: 'ASC' | 'DESC' } | null> = signal(null);
+
+  // Computed Active Filter Count
+  public readonly activeFilterCount: Signal<number> = computed(() => {
+    return Object.keys(this.columnFilters()).length;
+  });
+
   public readonly importProgress: WritableSignal<ImportProgressState> = signal({
     current: 0,
     total: 0,
     percentage: 0,
     inserted: 0,
     updated: 0,
+    deleted: 0,
     duplicate: 0,
     rejected: 0,
     isActive: false
@@ -159,6 +181,10 @@ export class SutramExcelStateService {
     return this.rows().filter(r => r.isNew || r.isModified).length;
   });
 
+  public readonly pendingChangesCount: Signal<number> = computed(() => {
+    return this.modifiedRowsCount() + this.deletedRowIds().length;
+  });
+
   /**
    * Updates an individual cell value in the grid and marks row modified
    */
@@ -238,6 +264,21 @@ export class SutramExcelStateService {
         return r;
       });
     });
+
+    // Clear isSynced pulse styling after 3.8 seconds while keeping rows clean and synced
+    setTimeout(() => {
+      this.rows.update(list => {
+        return list.map(r => {
+          if (set.has(r.rowNum) && r.isSynced) {
+            return {
+              ...r,
+              isSynced: false
+            };
+          }
+          return r;
+        });
+      });
+    }, 3800);
   }
 
   /**
@@ -316,11 +357,93 @@ export class SutramExcelStateService {
   }
 
   /**
+   * Appends newly loaded lazy chunks to existing rows
+   */
+  public appendRows(newRows: SutramRow[]): void {
+    this.rows.update((current: SutramRow[]) => [...current, ...newRows]);
+  }
+
+  /**
+   * Tracks a deleted row ID and records its state for rollback if deletion fails.
+   */
+  public trackDeletedRow(row: SutramRow, index: number = -1): void {
+    if (!row) return;
+    const targetId = (row as any)._id || row._rawOriginal?._id || row._rawOriginal?.id;
+    if (targetId !== undefined && targetId !== null && targetId !== '') {
+      this.deletedRowIds.update((ids: any[]) => {
+        if (!ids.includes(targetId)) {
+          return [...ids, targetId];
+        }
+        return ids;
+      });
+      this.deletedRowsQueue.update((q: Array<{ row: SutramRow; id: any; index: number }>) => [
+        ...q,
+        { row, id: targetId, index }
+      ]);
+    }
+  }
+
+  /**
+   * Clears tracked deleted row IDs and restore queue
+   */
+  public clearDeletedRowIds(): void {
+    this.deletedRowIds.set([]);
+    this.deletedRowsQueue.set([]);
+  }
+
+  /**
    * Clears all rows and resets state
    */
   public clearGrid(): void {
     this.rows.set([]);
     this.corrections.set([]);
     this.selectedCell.set(null);
+    this.deletedRowIds.set([]);
+    this.deletedRowsQueue.set([]);
+  }
+
+  // ── Filter & Sorting Control Methods ─────────────────────────
+  public toggleFiltersEnabled(): void {
+    this.filtersEnabled.update((v: boolean) => !v);
+  }
+
+  public toggleSortingEnabled(): void {
+    this.sortingEnabled.update((v: boolean) => {
+      const next = !v;
+      if (!next) this.activeSort.set(null);
+      return next;
+    });
+  }
+
+  public setColumnFilter(colKey: string, values: Set<any>): void {
+    this.columnFilters.update((filters: any) => {
+      const next = { ...filters };
+      if (!values || values.size === 0) {
+        delete next[colKey];
+      } else {
+        next[colKey] = values;
+      }
+      return next;
+    });
+  }
+
+  public clearColumnFilter(colKey: string): void {
+    this.columnFilters.update((filters: any) => {
+      const next = { ...filters };
+      delete next[colKey];
+      return next;
+    });
+  }
+
+  public clearAllColumnFilters(): void {
+    this.columnFilters.set({});
+  }
+
+  public setSort(colKey: string, order: 'ASC' | 'DESC'): void {
+    this.activeSort.set({ colKey, order });
+  }
+
+  public clearSort(): void {
+    this.activeSort.set(null);
   }
 }

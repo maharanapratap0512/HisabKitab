@@ -1,142 +1,175 @@
 <!-- sutram-excel-studio.component.html -->
-<div class="sutram-excel-container card m-0 border-0 shadow-none">
+<div class="sutram-excel-container" [class.dark-mode]="isDarkMode">
 
-  <!-- 1. Top Action Toolbar -->
-  <div class="sutram-toolbar">
-    <!-- Left: Table Selection & Upload -->
-    <div class="toolbar-left">
-      <!-- Table Selector Dropdown -->
-      <p-dropdown [options]="tablesList"
-                  optionLabel="display_name"
-                  optionValue="table"
-                  [(ngModel)]="selectedTableName"
-                  (onChange)="onTableSelect($event.value)"
-                  [style]="{ width: '220px' }"
-                  styleClass="p-inputtext-sm"
-                  placeholder="टेबल चुनें (Select Table)">
-      </p-dropdown>
-
-      <!-- Excel File Upload Button -->
-      <button pButton
-              label="Excel अपलोड"
-              icon="pi pi-upload"
-              class="p-button-sm p-button-outlined"
-              (click)="fileInput.click()">
-      </button>
-      <input #fileInput type="file" accept=".xlsx, .xls, .csv" (change)="onFileUpload($event)" hidden>
-
-      <!-- Audit Mode Switch -->
-      <button pButton
-              [label]="state.isAuditMode() ? 'ऑडिट मोड: ON' : 'ऑडिट मोड: OFF'"
-              [icon]="state.isAuditMode() ? 'pi pi-eye' : 'pi pi-eye-slash'"
-              class="p-button-sm"
-              [class.p-button-secondary]="!state.isAuditMode()"
-              [class.p-button-info]="state.isAuditMode()"
-              (click)="state.toggleAuditMode()">
-      </button>
-
-      <!-- Add New Row Button -->
-      <button pButton
-              label="+ पंक्ति जोड़ें"
-              icon="pi pi-plus"
-              class="p-button-sm p-button-outlined p-button-success"
-              [disabled]="!selectedTableName"
-              (click)="addNewRow()"
-              title="शीट में नई पंक्ति जोड़ें">
-      </button>
-    </div>
-
-    <!-- Right: Verification, Corrections, & Import -->
-    <div class="toolbar-right">
-      <!-- Correction Sidebar Toggle Button -->
-      <button pButton
-              [label]="'गलतियाँ (' + state.unresolvedCorrectionsCount() + ')'"
-              icon="pi pi-bolt"
-              class="p-button-sm p-button-outlined"
-              [class.p-button-warning]="state.unresolvedCorrectionsCount() > 0"
-              [class.p-button-secondary]="state.unresolvedCorrectionsCount() === 0"
-              (click)="showSidebar = !showSidebar">
-      </button>
-
-      <!-- Load Data from Database Button -->
-      <button pButton
-              label="डेटा लोड करें (Load Data)"
-              icon="pi pi-database"
-              class="p-button-sm p-button-success"
-              [disabled]="!selectedTableName"
-              (click)="loadTableDataFromDb()">
-      </button>
-
-      <!-- Server Verify Button -->
-      <button pButton
-              label="सत्यापित करें (Verify)"
-              icon="pi pi-check-circle"
-              class="p-button-sm p-button-outlined p-button-primary"
-              [loading]="state.isVerifying()"
-              [disabled]="state.rows().length === 0"
-              (click)="verifyData()">
-      </button>
-
-      <!-- Import / Sync to DB Button -->
-      <button pButton
-              [label]="state.modifiedRowsCount() > 0 ? 'डेटाबेस में सिंक (' + state.modifiedRowsCount() + ')' : 'डेटाबेस में सिंक'"
-              icon="pi pi-cloud-upload"
-              class="p-button-sm p-button-primary"
-              [disabled]="state.rows().length === 0 || state.hasErrors()"
-              (click)="startImport()">
-      </button>
-    </div>
-  </div>
-
-  <!-- 2. Stats Bar -->
-  <div class="sutram-stats-bar">
-    <span class="stat-pill bg-light text-dark">
-      कुल पंक्तियाँ: <strong>{{ state.stats().totalRows }}</strong>
-    </span>
-    <span class="stat-pill bg-soft-success text-success">
-      वैध: <strong>{{ state.stats().validRows }}</strong>
-    </span>
-    <span *ngIf="state.modifiedRowsCount() > 0" class="stat-pill" style="background-color: var(--cell-edited-bg, #fff9db); color: var(--cell-edited-text, #854d0e);">
-      संशोधित/नई: <strong>{{ state.modifiedRowsCount() }}</strong>
-    </span>
-    <span *ngIf="state.stats().errorRows > 0" class="stat-pill bg-soft-danger text-danger">
-      त्रुटियाँ: <strong>{{ state.stats().errorRows }}</strong>
-    </span>
-
-    <div class="ms-auto d-flex align-items-center gap-2">
-      <div *ngIf="state.stats().errorRows > 0" class="form-check form-switch m-0">
-        <input class="form-check-input" type="checkbox" id="errFilter"
-               [checked]="state.filterOnlyErrors()"
-               (change)="state.toggleFilterErrors()">
-        <label class="form-check-label small" for="errFilter">केवल गलतियाँ दिखाएं</label>
+  <!-- 1. TOP COMMAND BAR -->
+  <header class="command-bar">
+    <div class="brand">
+      <div class="brand-icon"><i class="pi pi-table"></i></div>
+      <div class="brand-title">
+        <span>Sutram Excel Studio</span>
+        <span style="font-size: 9px; padding: 1px 4px; background: rgba(16, 185, 129, 0.2); color: #059669; border-radius: 4px;">v2.0</span>
       </div>
+    </div>
 
-      <button *ngIf="state.rows().length > 0"
-              pButton
-              icon="pi pi-trash"
-              class="p-button-text p-button-danger p-button-sm p-0 px-2"
-              label="शीट साफ़ करें"
-              (click)="state.clearGrid()">
+    <!-- Center Mode Switcher -->
+    <div class="mode-pill-toggle">
+      <button class="mode-pill-btn" [class.active-normal]="mode === 'normal'" (click)="setStudioMode('normal')">
+        <i class="pi pi-pencil"></i> Normal
+      </button>
+      <button class="mode-pill-btn" [class.active-smart]="mode === 'intelligent'" (click)="setStudioMode('intelligent')">
+        <i class="pi pi-bolt"></i> Smart (Intelligent)
+      </button>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="btn-group-cmd">
+      <button class="cmd-btn cmd-btn-success" (click)="loadTableDataFromDb()" title="डेटाबेस से इस टेबल का लाइव डेटा लोड करें">
+        <i class="pi pi-database"></i> Load Data
+      </button>
+
+      <button class="cmd-btn" (click)="fileInput.click()" title="बाहरी Excel (.xlsx) खोलें">
+        <i class="pi pi-folder-open"></i> Open File
+      </button>
+      <input #fileInput type="file" accept=".xlsx, .xls, .csv" style="display:none;" (change)="onFileUpload($event)">
+
+      <button class="cmd-btn" (click)="exportExcel()" title="Excel डाउनलोड करें">
+        <i class="pi pi-download"></i> Export
+      </button>
+
+      <button class="cmd-btn" (click)="state.clearGrid()" title="शीट खाली करें">
+        <i class="pi pi-trash"></i> Clear
+      </button>
+
+      <button class="cmd-btn cmd-btn-primary" [disabled]="state.pendingChangesCount() === 0 || state.hasErrors()" (click)="startImport()" title="डेटाबेस में सेव/इम्पोर्ट करें">
+        <i class="pi pi-cloud-upload"></i> Sync to DB
+        <span *ngIf="state.pendingChangesCount() > 0" class="sync-badge-count">{{ state.pendingChangesCount() }}</span>
+      </button>
+
+      <button class="cmd-btn" style="padding: 4px 6px;" (click)="toggleTheme()" title="लाइट / डार्क मोड">
+        <i class="pi" [ngClass]="isDarkMode ? 'pi-sun' : 'pi-moon'"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. FORMULA BAR ROW -->
+  <div class="formula-bar-row">
+    <div class="coord-box">{{ activeCoord }}</div>
+    <span class="active-col-chip">{{ activeColChip }}</span>
+
+    <!-- Quick Writing Tools -->
+    <div style="display: flex; gap: 2px;">
+      <button class="cmd-btn" [class.active]="isBoldActive" style="padding: 2px 7px; font-weight: 700;" (click)="isBoldActive = !isBoldActive" title="Bold (Ctrl+B)">B</button>
+      <button class="cmd-btn" style="padding: 2px 6px;" (click)="textAlign = 'left'" title="Align Left"><i class="pi pi-align-left"></i></button>
+      <button class="cmd-btn" style="padding: 2px 6px;" (click)="textAlign = 'center'" title="Align Center"><i class="pi pi-align-center"></i></button>
+      <button class="cmd-btn" style="padding: 2px 6px;" (click)="textAlign = 'right'" title="Align Right"><i class="pi pi-align-right"></i></button>
+    </div>
+
+    <!-- Column Config Button -->
+    <button class="cmd-btn" (click)="colConfigOp.toggle($event)" title="Choose Visible Columns (कॉलम चुनें)" style="gap: 5px;">
+      <i class="pi pi-sliders-h" style="color: var(--primary);"></i>
+      <span>Columns</span>
+      <span style="font-size: 10px; padding: 1px 5px; background: var(--primary-soft); color: var(--primary); border-radius: 999px; font-weight: 700;">{{ visibleHeadersCount }}</span>
+    </button>
+
+    <span style="font-weight: 700; font-style: italic; color: var(--text-muted); margin: 0 4px;">fx</span>
+    <input type="text"
+           class="formula-input"
+           [ngModel]="formulaValue"
+           (ngModelChange)="onFormulaChange($event)"
+           placeholder="Select a cell or type value here...">
+  </div>
+
+  <!-- Column Config Popover -->
+  <p-overlayPanel #colConfigOp [dismissable]="true" styleClass="p-2 shadow-lg">
+    <ng-template pTemplate="content">
+      <div style="min-width: 200px; max-height: 260px; overflow-y: auto;">
+        <div class="fw-bold small mb-2 text-muted">Visible Columns</div>
+        <div *ngFor="let h of state.headers()" class="d-flex align-items-center gap-2 py-1">
+          <input type="checkbox"
+                 [id]="'col_vis_' + h.name"
+                 [checked]="!hiddenColumnKeys.has(h.name)"
+                 (change)="toggleColumnVisibility(h.name)" />
+          <label [for]="'col_vis_' + h.name" class="small mb-0 cursor-pointer">{{ h.name }}</label>
+        </div>
+      </div>
+    </ng-template>
+  </p-overlayPanel>
+
+  <!-- 3. CONTROL SETTINGS BAR (Filters, Sorting, Live DB Search, Record Counter) -->
+  <div class="control-settings-bar">
+    <div class="ctrl-bar-left">
+      <button class="ctrl-btn" [class.active]="state.filtersEnabled()" (click)="state.toggleFiltersEnabled()" title="कॉलम फ़िल्टर ऑन / ऑफ़ करें">
+        <i class="pi pi-filter"></i>
+        <span>Filters</span>
+        <span class="ctrl-dot"></span>
+      </button>
+
+      <button class="ctrl-btn" [class.active]="state.sortingEnabled()" (click)="state.toggleSortingEnabled()" title="सॉर्टिंग ऑन / ऑफ़ करें">
+        <i class="pi pi-sort-alt"></i>
+        <span>Sorting</span>
+        <span class="ctrl-dot"></span>
+      </button>
+
+      <button *ngIf="state.filtersEnabled() && state.activeFilterCount() > 0" class="ctrl-btn ctrl-btn-danger" (click)="clearAllFilters()" title="सभी फ़िल्टर साफ़ करें">
+        <i class="pi pi-filter-slash"></i>
+        <span>Clear Filters ({{ state.activeFilterCount() }})</span>
+      </button>
+    </div>
+
+    <!-- Center: Direct Database Live Search Box -->
+    <div class="ctrl-search-wrap">
+      <i class="pi pi-search ctrl-search-icon"></i>
+      <input type="text"
+             class="ctrl-search-input"
+             placeholder="डेटाबेस में सीधा खोजें (Direct DB Search)..."
+             [ngModel]="state.dbSearchQuery()"
+             (ngModelChange)="onDbSearchInput($event)"
+             autocomplete="off">
+      <button *ngIf="state.dbSearchQuery()" class="ctrl-search-clear" style="display: block;" (click)="clearDbSearch()" title="खोज साफ़ करें">✕</button>
+      <span *ngIf="state.isLoadingDb()" class="ctrl-search-spinner"><i class="pi pi-spin pi-spinner"></i></span>
+    </div>
+
+    <div class="ctrl-bar-right">
+      <div class="ctrl-record-badge" title="कुल डेटाबेस रिकॉर्ड्स एवं लोड स्थिति">
+        <i class="pi pi-database"></i>
+        <span>{{ state.rows().length }} / {{ state.totalDbRecords() }} Records</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. STATUS & BATCH FIX SUGGESTION STRIP -->
+  <div class="status-strip" [ngClass]="statusStripClass">
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <i class="pi" [ngClass]="statusStripIcon"></i>
+      <span>{{ statusStripMessage }}</span>
+    </div>
+    <div *ngIf="state.unresolvedCorrectionsCount() > 0">
+      <button class="cmd-btn cmd-btn-warning" style="padding: 2px 8px;" (click)="showSidebar = true">
+        <i class="pi pi-bolt"></i> गलतियाँ ({{ state.unresolvedCorrectionsCount() }})
       </button>
     </div>
   </div>
 
-  <!-- 3. PrimeNG Virtual Grid wrapped in Scalable Canvas -->
-  <div class="sutram-grid-container flex-grow-1 overflow-auto" [style.zoom]="zoomLevel">
-    <sutram-grid [headers]="state.headers()"
+  <!-- 5. SPREADSHEET CANVAS -->
+  <main class="spreadsheet-canvas flex-grow-1 overflow-auto" [style.zoom]="zoomLevel">
+    <sutram-grid [headers]="visibleHeaders"
                  [rows]="state.rows()"
                  [filterOnlyErrors]="state.filterOnlyErrors()"
+                 [enableDelete]="enableDelete"
+                 (loadMore)="onLoadMore()"
+                 (filterChanged)="onGridFilterChanged()"
+                 (sortChanged)="onGridSortChanged()"
                  (solveAllTriggered)="onGridSolveAll($event)">
     </sutram-grid>
-  </div>
+  </main>
 
-  <!-- 4. Bottom Multi-Sheet Tab Bar & Zoom Controls -->
-  <footer class="sutram-footer">
+  <!-- 6. BOTTOM MULTI-SHEET TAB BAR & STATUS BAR -->
+  <footer class="studio-footer">
     <!-- Sub-row A: Sheet Tabs Strip -->
-    <div class="sutram-sheet-tabs-bar">
+    <div class="sheet-tabs-bar">
       <div *ngFor="let tab of sheetTabs"
-           class="sheet-tab-pill"
-           [class.active-sheet]="activeSheetId === tab.id"
+           class="tab-pill"
+           [class.active-tab]="activeSheetId === tab.id"
            (click)="switchSheet(tab.id)">
         <i class="pi" [ngClass]="tab.icon" style="font-size: 11px;"></i>
         <span>{{ tab.title }}</span>
@@ -145,50 +178,79 @@
         </span>
       </div>
 
-      <button class="add-sheet-btn" (click)="addNewBlankSheet()" title="Add Blank Sheet">
+      <button class="add-tab-btn" (click)="addNewBlankSheet()" title="Add Blank Sheet">
         <i class="pi pi-plus" style="font-size: 10px;"></i>
       </button>
     </div>
 
-    <!-- Sub-row B: Status & Scale Controls -->
-    <div class="sutram-status-subrow">
-      <div class="d-flex align-items-center gap-3">
-        <span class="sheet-info-text">शीट: <strong>{{ activeSheetId }}</strong></span>
-        <span class="sheet-info-text">पंक्तियाँ: <strong>{{ state.rows().length }}</strong></span>
-        <span class="text-success small fw-semibold" *ngIf="state.stats().errorRows === 0">✓ स्वच्छ (100% Valid)</span>
-        <span class="text-danger small fw-semibold" *ngIf="state.stats().errorRows > 0">{{ state.stats().errorRows }} त्रुटियाँ</span>
+    <!-- Sub-row B: Status Bar with Scale / Zoom Controls -->
+    <div class="bottom-status-subrow">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>Sheet: {{ activeSheetId }}</span>
+        <span>Rows: {{ state.rows().length }}</span>
+        <span *ngIf="state.deletedRowIds().length > 0" class="badge bg-soft-warning text-warning small fw-semibold">
+          <i class="pi pi-trash me-1"></i>{{ state.deletedRowIds().length }} Deleted
+        </span>
+        <span *ngIf="state.stats().errorRows === 0" style="color: #10b981; font-weight: 600;">✓ 100% In Sync</span>
+        <span *ngIf="state.stats().errorRows > 0" style="color: #ef4444; font-weight: 600;">{{ state.stats().errorRows }} त्रुटियाँ</span>
       </div>
 
-      <div class="d-flex align-items-center gap-2">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 10.5px; opacity: 0.8;">Enter next row | Tab next col | Right-click row for actions</span>
+
         <!-- Scale / Zoom Controls -->
         <div class="zoom-controls">
-          <button class="zoom-btn" (click)="zoomOut()" title="Zoom Out (-10%)">
-            <i class="pi pi-minus"></i>
-          </button>
-          <span class="zoom-display" (click)="resetZoom()" title="Reset to 100%">
-            {{ (zoomLevel * 100).toFixed(0) }}%
-          </span>
-          <button class="zoom-btn" (click)="zoomIn()" title="Zoom In (+10%)">
-            <i class="pi pi-plus"></i>
-          </button>
+          <button class="zoom-btn" (click)="zoomOut()" title="Zoom Out (-10%)"><i class="pi pi-minus"></i></button>
+          <span class="zoom-display" (click)="resetZoom()" title="Reset to 100%">{{ (zoomLevel * 100).toFixed(0) }}%</span>
+          <button class="zoom-btn" (click)="zoomIn()" title="Zoom In (+10%)"><i class="pi pi-plus"></i></button>
         </div>
       </div>
     </div>
   </footer>
 
-  <!-- 5. Smart Header Scanner Modal -->
+  <!-- 7. Floating Sync Toast HUD -->
+  <div *ngIf="syncToast.visible" class="sync-toast-hud">
+    <div class="sync-toast-header">
+      <div class="sync-toast-title">
+        <i class="pi" [ngClass]="syncToast.hasError ? 'pi-exclamation-circle text-warning' : 'pi-check-circle text-success'"></i>
+        <span>{{ syncToast.title }}</span>
+      </div>
+      <button class="sync-toast-close" (click)="syncToast.visible = false">✕</button>
+    </div>
+    <div class="sync-toast-body">
+      <div class="sync-toast-stats">
+        <span *ngIf="syncToast.inserted > 0" class="sync-badge-chip chip-success">
+          <i class="pi pi-plus"></i> {{ syncToast.inserted }} Inserted
+        </span>
+        <span *ngIf="syncToast.updated > 0" class="sync-badge-chip chip-info">
+          <i class="pi pi-refresh"></i> {{ syncToast.updated }} Updated
+        </span>
+        <span *ngIf="syncToast.deleted > 0" class="sync-badge-chip chip-warning">
+          <i class="pi pi-trash"></i> {{ syncToast.deleted }} Deleted
+        </span>
+        <span *ngIf="syncToast.failed > 0" class="sync-badge-chip chip-danger">
+          <i class="pi pi-times"></i> {{ syncToast.failed }} Failed
+        </span>
+      </div>
+      <div *ngIf="syncToast.errors.length > 0" class="sync-toast-errors">
+        <div *ngFor="let err of syncToast.errors">• {{ err }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Header Scanner Modal -->
   <sutram-header-scanner [(visible)]="showScannerModal"
                          [report]="scanReport"
                          [availableHeaders]="state.headers()"
                          (confirmed)="onScannerConfirmed($event)">
   </sutram-header-scanner>
 
-  <!-- 6. Batch Correction Sidebar -->
+  <!-- Batch Correction Sidebar -->
   <sutram-correction-sidebar [(visible)]="showSidebar"
                              [groups]="state.correctionGroups()">
   </sutram-correction-sidebar>
 
-  <!-- 7. Streaming Import Progress Modal -->
+  <!-- Streaming Import Progress Modal -->
   <sutram-import-progress [(visible)]="showProgressModal"
                           [progress]="state.importProgress()"
                           [tableName]="selectedTableName"

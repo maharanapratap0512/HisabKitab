@@ -1,0 +1,232 @@
+@import "../node_modules/primeng/resources/themes/lara-light-blue/theme.css";
+@import "../node_modules/primeng/resources/primeng.min.css";
+@import "../node_modules/primeicons/primeicons.css";
+@import url('https://unicons.iconscout.com/release/v4.0.0/css/line.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-soft: #e0e7ff;
+  --success: #10b981;
+  --success-soft: #d1fae5;
+  --warning: #f59e0b;
+  --warning-soft: #fef3c7;
+  --danger: #ef4444;
+  --danger-soft: #fee2e2;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-border: #e2e8f0;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --radius: 6px;
+  --header-bg: #f1f5f9;
+  --header-text: #1e293b;
+  --cell-border: rgba(125, 125, 125, 0.18);
+  --cell-height: 23px;
+  --header-height: 38px;
+  --cell-edited-bg: #fef9c3;
+  --cell-edited-border: #eab308;
+  --row-edited-bg: #fffbeb;
+  --row-new-bg: #dcfce7;
+  --row-new-border: #22c55e;
+}
+
+body.dark-mode {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-border: #334155;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --header-bg: #1e293b;
+  --header-text: #cbd5e1;
+  --cell-border: rgba(255, 255, 255, 0.1);
+  --cell-edited-bg: rgba(234, 179, 8, 0.22);
+  --cell-edited-border: #facc15;
+  --row-edited-bg: rgba(234, 179, 8, 0.12);
+  --row-new-bg: rgba(34, 197, 94, 0.18);
+  --row-new-border: #4ade80;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Bootstrap Utility Fallbacks for Sutram Studio */
+.d-flex { display: flex !important; }
+.flex-column { flex-direction: column !important; }
+.flex-row { flex-direction: row !important; }
+.flex-grow-1 { flex-grow: 1 !important; }
+.align-items-center { align-items: center !important; }
+.justify-content-between { justify-content: space-between !important; }
+.gap-1 { gap: 4px !important; }
+.gap-2 { gap: 8px !important; }
+.gap-3 { gap: 16px !important; }
+.m-0 { margin: 0 !important; }
+.p-0 { padding: 0 !important; }
+.me-1 { margin-right: 4px !important; }
+.me-2 { margin-right: 8px !important; }
+.ms-auto { margin-left: auto !important; }
+.text-danger { color: #dc3545 !important; }
+.text-success { color: #198754 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-primary { color: #0d6efd !important; }
+.text-dark { color: #212529 !important; }
+.bg-light { background-color: #f8f9fa !important; }
+.bg-soft-danger { background-color: #fce8e6 !important; }
+.bg-soft-success { background-color: #e6f4ea !important; }
+.bg-soft-warning { background-color: #fef7e0 !important; }
+.badge {
+  display: inline-block;
+  padding: 0.25em 0.5em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  border: 1px solid transparent;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease-in-out;
+}
+.btn-outline-warning {
+  color: #d97706;
+  border-color: #d97706;
+  background-color: transparent;
+}
+.btn-outline-warning:hover {
+  background-color: #fef3c7;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Sutram Studio Strict 23px Excel Cell & 38px Header Overrides
+ * ───────────────────────────────────────────────────────────── */
+.p-datatable.sutram-grid-table,
+.sutram-grid-table {
+  font-size: 11.5px !important;
+}
+
+.p-datatable.sutram-grid-table .p-datatable-table,
+.sutram-grid-table .p-datatable-table,
+.sutram-grid-table table {
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.p-datatable.sutram-grid-table .p-datatable-thead > tr > th,
+.sutram-grid-table .p-datatable-thead > tr > th,
+.p-datatable.p-datatable-sm .p-datatable-thead > tr > th {
+  height: 38px !important;
+  max-height: 38px !important;
+  min-height: 38px !important;
+  padding: 4px 8px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+}
+
+.p-datatable.sutram-grid-table .p-datatable-tbody > tr,
+.sutram-grid-table .p-datatable-tbody > tr,
+.p-datatable.p-datatable-sm .p-datatable-tbody > tr {
+  height: 23px !important;
+  max-height: 23px !important;
+  min-height: 23px !important;
+  line-height: 21px !important;
+  box-sizing: border-box !important;
+}
+
+.p-datatable.sutram-grid-table .p-datatable-tbody > tr > td,
+.sutram-grid-table .p-datatable-tbody > tr > td,
+.p-datatable.p-datatable-sm .p-datatable-tbody > tr > td,
+.p-datatable .p-datatable-tbody > tr > td.p-editable-column,
+.p-datatable .p-datatable-tbody > tr > td.p-frozen-column {
+  height: 23px !important;
+  max-height: 23px !important;
+  min-height: 23px !important;
+  padding: 0 !important;
+  line-height: 21px !important;
+  font-size: 11.5px !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+}
+
+.p-datatable.sutram-grid-table .p-datatable-tbody > tr > td.row-num-td,
+.sutram-grid-table .p-datatable-tbody > tr > td.row-num-td {
+  height: 23px !important;
+  max-height: 23px !important;
+  min-height: 23px !important;
+  padding: 0 !important;
+  line-height: 21px !important;
+  text-align: center !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  box-sizing: border-box !important;
+}
+
+.p-datatable.sutram-grid-table .cell-box,
+.sutram-grid-table .cell-box {
+  height: 23px !important;
+  max-height: 23px !important;
+  min-height: 23px !important;
+  line-height: 21px !important;
+  padding: 0 6px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.p-datatable.sutram-grid-table p-celleditor,
+.p-datatable.sutram-grid-table .p-cell-editor,
+.p-datatable.sutram-grid-table .p-cell-editor-output {
+  display: flex !important;
+  align-items: center !important;
+  height: 23px !important;
+  max-height: 23px !important;
+  min-height: 23px !important;
+  line-height: 21px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.p-datatable.sutram-grid-table .cell-value-text {
+  line-height: 21px !important;
+  font-size: 11.5px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: inline-block !important;
+  width: 100% !important;
+}
+

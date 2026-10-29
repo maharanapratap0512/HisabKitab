@@ -1,9 +1,10 @@
 /**
  * sutram-grid.component.scss
  * ─────────────────────────────────────────────────────────────
- * Scoped styles for the PrimeNG spreadsheet grid component.
- * Big Header Row (38px) + Compact Small Data Cells (23px).
- * Adheres to AGENTS.md Rule 1 (Dynamic Theme Native Inheritance).
+ * Pixel-Perfect Enterprise PrimeNG Virtual Table Styles.
+ * Exact replication of Sutram Excel Studio v2.0 Grid:
+ * Big Header Row (38px) + Compact Data Cells (23px).
+ * Active cell blue box-shadow highlight, row status borders.
  * ─────────────────────────────────────────────────────────────
  */
 
@@ -11,126 +12,254 @@
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 
-  /* Big Header Row */
+  ::ng-deep .p-datatable-wrapper {
+    height: 100% !important;
+  }
+
+  /* Big Header Row (38px) */
   ::ng-deep .p-datatable-thead > tr > th {
-    height: 38px !important;
-    padding: 6px 10px !important;
-    font-size: 12.5px !important;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--header-bg, #f1f5f9) !important;
+    color: var(--header-text, #1e293b) !important;
     font-weight: 700 !important;
+    font-size: 13px !important;
+    height: var(--header-height, 38px) !important;
+    padding: 6px 10px !important;
+    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;
+    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;
     white-space: nowrap !important;
-    border-bottom: 2px solid rgba(125, 125, 125, 0.25) !important;
-  }
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
-  /* Compact Small Data Cells */
-  ::ng-deep .p-datatable-tbody > tr > td {
-    height: 23px !important;
-    padding: 1px 6px !important;
-    font-size: 11.5px !important;
-    white-space: nowrap !important;
-    line-height: 21px !important;
-    border-color: rgba(125, 125, 125, 0.15) !important;
-    transition: background-color 0.15s ease;
-  }
-
-  /* Eye-Protect Mode: Edited cell warm yellow tint */
-  ::ng-deep .cell-edited {
-    background-color: var(--cell-edited-bg, #fff9db) !important;
-    color: var(--cell-edited-text, #854d0e) !important;
-    box-shadow: inset 0 0 0 1px #facc15 !important;
-    font-weight: 600;
-  }
-
-  /* New Row: Soft green shade */
-  ::ng-deep .row-new > td {
-    background-color: var(--row-new-bg, #edfbf0) !important;
-    border-bottom-color: rgba(34, 197, 94, 0.3) !important;
-  }
-
-  /* Invalid / Error Cell: Soft red */
-  ::ng-deep .cell-error {
-    background-color: var(--cell-error-bg, rgba(239, 68, 68, 0.12)) !important;
-    color: #ef4444 !important;
-    box-shadow: inset 0 0 0 1.5px #ef4444 !important;
-    font-weight: 600;
-  }
-
-  .error-indicator-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background-color: #ef4444;
-    border-radius: 50%;
-    margin-left: 4px;
-    vertical-align: middle;
-  }
-
-  .in-cell-input {
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    height: 23px !important;
-    padding: 1px 4px !important;
-    background: transparent !important;
-    font-size: 11.5px !important;
-    width: 100%;
-    color: inherit !important;
-  }
-
-  /* PrimeNG In-Cell Autocomplete Dropdown styling */
-  ::ng-deep .sutram-cell-autocomplete {
-    width: 100%;
-    height: 23px;
-
-    .p-autocomplete-input {
-      border: none !important;
-      outline: none !important;
-      box-shadow: none !important;
-      height: 23px !important;
-      padding: 1px 4px !important;
-      background: transparent !important;
-      font-size: 11.5px !important;
-      width: 100% !important;
-      color: inherit !important;
-    }
-
-    .p-autocomplete-dropdown {
-      width: 20px !important;
-      height: 23px !important;
-      padding: 0 !important;
-      background: transparent !important;
-      border: none !important;
-      color: #64748b !important;
+    &.sortable-th {
+      cursor: pointer !important;
+      transition: background-color 0.15s ease;
 
       &:hover {
-        color: #4f46e5 !important;
-      }
-    }
-
-    .p-autocomplete-panel {
-      font-size: 12px !important;
-      border-radius: 6px !important;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-      max-height: 280px !important;
-
-      .p-autocomplete-item {
-        padding: 4px 8px !important;
-        font-size: 11.5px !important;
+        background-color: rgba(125, 125, 125, 0.1) !important;
       }
     }
   }
 
-  .inline-correction-popup {
-    position: absolute;
-    top: 100%;
+  /* Corner Config ⚙️ Trigger */
+  ::ng-deep th.corner-th {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
     left: 0;
-    z-index: 1050;
-    background: var(--surface-card, #ffffff);
-    border: 1px solid rgba(125, 125, 125, 0.3);
-    border-radius: 6px;
-    padding: 10px;
-    width: 280px;
-    color: var(--text-color, #1e293b);
-    margin-top: 2px;
+    z-index: 25 !important;
+    text-align: center !important;
+    border-right: 2px solid rgba(125, 125, 125, 0.35) !important;
+    cursor: pointer;
+
+    &:hover .corner-cog-icon {
+      color: var(--primary, #4f46e5) !important;
+      transform: rotate(45deg);
+      transition: all 0.2s ease;
+    }
+  }
+
+  /* Column Header Controls */
+  .col-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 4px;
+    flex-shrink: 0;
+  }
+  .col-sort-trigger, .col-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: var(--text-muted, #64748b);
+    opacity: 0.65;
+    transition: all 0.12s ease;
+    font-size: 11px;
+
+    &:hover {
+      background: rgba(125, 125, 125, 0.18);
+      opacity: 1;
+      color: var(--text, #0f172a);
+    }
+    &.is-sorted, &.is-filtered {
+      color: var(--primary, #4f46e5) !important;
+      opacity: 1 !important;
+      font-weight: 700;
+      background: var(--primary-soft, #e0e7ff);
+    }
+  }
+
+  /* Compact Small Data Cells (23px height) */
+  ::ng-deep .p-datatable-tbody > tr > td {
+    height: var(--cell-height, 23px) !important;
+    padding: 0 !important;
+    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;
+    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;
+    vertical-align: middle;
+    font-size: 11.5px;
+  }
+
+  /* Sticky Row Number TD (48px) */
+  ::ng-deep td.row-num-td {
+    position: sticky;
+    left: 0;
+    z-index: 15;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    text-align: center;
+    background: var(--header-bg, #f1f5f9) !important;
+    border-right: 2px solid rgba(125, 125, 125, 0.35) !important;
+    color: var(--text-muted, #64748b);
+    font-size: 10.5px;
+    font-weight: 600;
+    user-select: none;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.15) !important;
+    }
+  }
+
+  /* Cell Box & Excel Active Cell Blue Outline */
+  .cell-box {
+    height: var(--cell-height, 23px);
+    padding: 1px 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    cursor: cell;
+    width: 100%;
+
+    &.cell-active {
+      box-shadow: inset 0 0 0 2px #3b82f6 !important;
+      z-index: 10;
+    }
+    &.cell-bad {
+      background-color: rgba(244, 63, 94, 0.18) !important;
+      color: #f43f5e !important;
+      font-weight: 600;
+      box-shadow: inset 0 0 0 1px #f43f5e;
+    }
+    &.cell-edited {
+      background-color: var(--cell-edited-bg, #fef9c3) !important;
+      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);
+    }
+    &.cell-new {
+      background-color: var(--row-new-bg, #dcfce7) !important;
+    }
+  }
+
+  /* Eye Protect Warm Yellow for Edited Rows */
+  ::ng-deep tr.row-edited td {
+    background-color: var(--row-edited-bg, #fffbeb);
+
+    &.row-num-td {
+      background-color: rgba(234, 179, 8, 0.2) !important;
+      color: #b45309 !important;
+      font-weight: 700;
+      border-left: 3px solid var(--cell-edited-border, #eab308) !important;
+    }
+  }
+
+  /* Soft Light Green Shade for New Added Rows */
+  ::ng-deep tr.row-new td {
+    background-color: var(--row-new-bg, #dcfce7);
+
+    &.row-num-td {
+      background-color: rgba(34, 197, 94, 0.2) !important;
+      color: #15803d !important;
+      font-weight: 700;
+      border-left: 3px solid var(--row-new-border, #22c55e) !important;
+    }
+  }
+
+  .raw-cell-editor {
+    width: 100%;
+    height: var(--cell-height, 23px);
+    border: none;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: 11.5px;
+    padding: 1px 6px;
+  }
+}
+
+/* Inline Batch Mistake Prompt Modal */
+.inline-solve-prompt {
+  position: fixed;
+  bottom: 70px;
+  right: 25px;
+  z-index: 2100;
+  width: 440px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  animation: promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes promptSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Column Header Filter Popover */
+::ng-deep .sutram-col-filter-popover {
+  width: 270px;
+  font-size: 12px;
+
+  .p-overlaypanel-content {
+    padding: 0 !important;
+  }
+}
+.filter-popover-content {
+  display: flex;
+  flex-direction: column;
+
+  .popover-header {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--surface-border, #e2e8f0);
+    background: rgba(125, 125, 125, 0.04);
+  }
+  .popover-search-box {
+    position: relative;
+    padding: 6px 8px;
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 13px;
+      font-size: 11px;
+      color: var(--text-muted, #64748b);
+    }
+    .popover-search-input {
+      padding-left: 24px;
+      font-size: 11.5px;
+      height: 26px;
+      border-radius: 4px;
+    }
+  }
+  .popover-checklist-items {
+    max-height: 180px;
+    overflow-y: auto;
+  }
+  .checklist-item:hover {
+    background: rgba(125, 125, 125, 0.08);
+  }
+  .popover-footer {
+    padding: 8px 10px;
+    border-top: 1px solid var(--surface-border, #e2e8f0);
   }
 }

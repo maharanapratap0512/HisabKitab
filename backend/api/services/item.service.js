@@ -170,7 +170,11 @@ async function createItem(data, dept_id = null) {
         if (Array.isArray(data.aliases)) {
             aliases = [...data.aliases];
         } else if (typeof data.aliases === 'string') {
-            aliases = JSON.parse(data.aliases);
+            try {
+                aliases = JSON.parse(data.aliases);
+            } catch (e) {
+                aliases = data.aliases.split(',').map(s => s.trim()).filter(Boolean);
+            }
         }
 
         // BaseTable handles JSON fields (document, categories) automatically for INSERT/UPDATE
@@ -205,18 +209,49 @@ async function createItem(data, dept_id = null) {
 }
 
 /**
- * Checks if a subitem exists by subitem_hin under the same item_id.
+ * Checks if a subitem exists by primary names or aliases under the same item_id.
  */
 function getSubitemConflict(data, currentId = null) {
-    if (!data.subitem_hin || !data.item_id) return null;
+    let itemId = data.item_id;
     const cid = currentId || -1;
-    const conflict = Fn.db.prepare(`
-        SELECT *
+    if (!itemId && currentId) {
+        const existing = subitem.getById(currentId, { full: false });
+        if (existing && existing.item_id) itemId = existing.item_id;
+    }
+    if (!itemId) return null;
+    const names = [data.subitem_hin, data.subitem_eng, data.subitem_roman];
+    let aliases = [];
+    if (Array.isArray(data.aliases)) aliases = data.aliases;
+    else if (typeof data.aliases === 'string') {
+        try {
+            aliases = JSON.parse(data.aliases || '[]');
+        } catch (e) {
+            aliases = data.aliases.split(',').map(s => s.trim()).filter(Boolean);
+        }
+    }
+    const aliasStrings = aliases.map(a => typeof a === 'object' && a !== null ? a.alias : a).filter(a => typeof a === 'string' && a.trim());
+    const allNames = [...new Set([...names.filter(n => typeof n === 'string' && n.trim()), ...aliasStrings])];
+    if (allNames.length === 0) return null;
+
+    const namesJson = JSON.stringify(allNames);
+    const sql = `
+        WITH input_names(name) AS (
+            SELECT value FROM json_each(?)
+        )
+        SELECT _id, subitem_hin, 'primary' as source, n.name as matched_name
         FROM subitem
-        WHERE item_id = ? AND subitem_hin = ? AND _id != ?
+        JOIN input_names n ON (subitem_hin = n.name OR subitem_eng = n.name OR subitem_roman = n.name)
+        WHERE item_id = ? AND _id != ?
+        UNION ALL
+        SELECT s._id, s.subitem_hin, 'alias' as source, n.name as matched_name
+        FROM subitem_aliases sa
+        JOIN subitem s ON s._id = sa.subitem_id
+        JOIN input_names n ON sa.alias = n.name
+        WHERE s.item_id = ? AND s._id != ?
         LIMIT 1
-    `).get(data.item_id, data.subitem_hin, cid);
-    return conflict ? { type: 'primary', name: conflict.subitem_hin, conflict } : null;
+    `;
+    const conflict = Fn.db.prepare(sql).get(namesJson, itemId, cid, itemId, cid);
+    return conflict ? { type: conflict.source, name: conflict.matched_name, conflict } : null;
 }
 
 function checkSubitemConflict(data, currentId = null) {
@@ -244,11 +279,28 @@ async function createSubitem(data, dept_id = null) {
             }
         }
 
+        let aliases = [];
+        if (Array.isArray(data.aliases)) {
+            aliases = [...data.aliases];
+        } else if (typeof data.aliases === 'string') {
+            try {
+                aliases = JSON.parse(data.aliases);
+            } catch (e) {
+                aliases = data.aliases.split(',').map(s => s.trim()).filter(Boolean);
+            }
+        }
+
         const subitem_id = subitem.insert(data, false);
 
         if (subitem_id) {
             for (const cat_id of catIds) {
                 rel_subitem_cat.insert({ subitem_id, category_id: Number(cat_id) }, false);
+            }
+            for (const alias_str of aliases) {
+                const trimmed = typeof alias_str === 'object' && alias_str !== null ? alias_str.alias : alias_str;
+                if (trimmed && typeof trimmed === 'string' && trimmed.trim()) {
+                    Fn.db.prepare(`INSERT OR IGNORE INTO subitem_aliases (subitem_id, alias) VALUES (?, ?)`).run(subitem_id, trimmed.trim());
+                }
             }
             if (dept_id) deptService.pushToConfig(dept_id, 'subitem', subitem_id);
         }
@@ -257,6 +309,10 @@ async function createSubitem(data, dept_id = null) {
         if (res) {
             res.document = (res.document && res.document != "[null]" ? (typeof res.document === 'string' ? JSON.parse(res.document) : res.document) : []);
             res.categories = (res.categories && res.categories != "[null]" ? (typeof res.categories === 'string' ? JSON.parse(res.categories) : res.categories) : []);
+            res.aliases = (res.aliases && res.aliases != "[null]" ? (typeof res.aliases === 'string' ? JSON.parse(res.aliases) : res.aliases) : []);
+            if (Array.isArray(res.aliases)) {
+                res.aliases = res.aliases.filter(a => a && a._id);
+            }
         }
         return res;
     } catch (err) {
@@ -265,7 +321,7 @@ async function createSubitem(data, dept_id = null) {
 }
 
 /**
- * Updates a subitem and syncs its category mappings in rel_subitem_category.
+ * Updates a subitem and syncs its category mappings in rel_subitem_category and subitem_aliases.
  */
 async function updateSubitem(id, setData) {
     try {
@@ -286,11 +342,37 @@ async function updateSubitem(id, setData) {
             }
         }
 
+        let aliases = null;
+        if (setData.aliases !== undefined) {
+            if (Array.isArray(setData.aliases)) aliases = setData.aliases;
+            else if (typeof setData.aliases === 'string') {
+                try {
+                    aliases = JSON.parse(setData.aliases);
+                } catch (e) {
+                    aliases = setData.aliases.split(',').map(s => s.trim()).filter(Boolean);
+                }
+            }
+        }
+
+        if (aliases && Array.isArray(aliases)) {
+            Fn.db.prepare(`DELETE FROM subitem_aliases WHERE subitem_id = ?`).run([id]);
+            for (const alias_str of aliases) {
+                const trimmed = typeof alias_str === 'object' && alias_str !== null ? alias_str.alias : alias_str;
+                if (trimmed && typeof trimmed === 'string' && trimmed.trim()) {
+                    try { Fn.db.prepare(`INSERT OR IGNORE INTO subitem_aliases (subitem_id, alias) VALUES (?, ?)`).run(id, trimmed.trim()); } catch (e) { }
+                }
+            }
+        }
+
         subitem.updateById(setData, id);
         const res = subitem.getById(id, { full: true });
         if (res) {
             res.document = (res.document && res.document != "[null]" ? (typeof res.document === 'string' ? JSON.parse(res.document) : res.document) : []);
             res.categories = (res.categories && res.categories != "[null]" ? (typeof res.categories === 'string' ? JSON.parse(res.categories) : res.categories) : []);
+            res.aliases = (res.aliases && res.aliases != "[null]" ? (typeof res.aliases === 'string' ? JSON.parse(res.aliases) : res.aliases) : []);
+            if (Array.isArray(res.aliases)) {
+                res.aliases = res.aliases.filter(a => a && a._id);
+            }
         }
         return res;
     } catch (err) {
@@ -346,9 +428,16 @@ function getItemConflict(data, currentId = null) {
     const names = [data.item_hin, data.item_eng, data.item_roman];
     let aliases = [];
     if (Array.isArray(data.aliases)) aliases = data.aliases;
-    else if (typeof data.aliases === 'string') try { aliases = JSON.parse(data.aliases || '[]'); } catch (e) { }
+    else if (typeof data.aliases === 'string') {
+        try {
+            aliases = JSON.parse(data.aliases || '[]');
+        } catch (e) {
+            aliases = data.aliases.split(',').map(s => s.trim()).filter(Boolean);
+        }
+    }
 
-    const allNames = [...new Set([...names, ...aliases])].filter(n => n && n.trim());
+    const aliasStrings = aliases.map(a => typeof a === 'object' && a !== null ? a.alias : a).filter(a => typeof a === 'string' && a.trim());
+    const allNames = [...new Set([...names.filter(n => typeof n === 'string' && n.trim()), ...aliasStrings])];
     if (allNames.length === 0) return null;
 
     const cid = currentId || 0;
@@ -411,7 +500,15 @@ function checkItemConflict(data, currentId = null) {
  * Validates an array of aliases against database.
  */
 function checkAliasConflict(aliases, currentId = null) {
-    const aliasList = Array.isArray(aliases) ? aliases : (typeof aliases === 'string' ? JSON.parse(aliases || '[]') : []);
+    let aliasList = [];
+    if (Array.isArray(aliases)) aliasList = aliases;
+    else if (typeof aliases === 'string') {
+        try {
+            aliasList = JSON.parse(aliases || '[]');
+        } catch (e) {
+            aliasList = aliases.split(',').map(s => s.trim()).filter(Boolean);
+        }
+    }
     for (const aliasItem of aliasList) {
         const aliasStr = typeof aliasItem === 'object' && aliasItem !== null ? aliasItem.alias : aliasItem;
         if (aliasStr && typeof aliasStr === 'string' && aliasStr.trim()) {
@@ -446,7 +543,11 @@ async function updateItem(id, setData) {
     if (setData.aliases !== undefined) {
         if (Array.isArray(setData.aliases)) aliases = setData.aliases;
         else if (typeof setData.aliases === 'string') {
-            try { aliases = JSON.parse(setData.aliases); } catch (e) { }
+            try {
+                aliases = JSON.parse(setData.aliases);
+            } catch (e) {
+                aliases = setData.aliases.split(',').map(s => s.trim()).filter(Boolean);
+            }
         }
     }
 
