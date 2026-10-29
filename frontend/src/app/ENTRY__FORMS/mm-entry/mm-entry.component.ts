@@ -46,7 +46,7 @@ export class MmEntryComponent implements OnInit {
       mm_code: [null],
       mm_type: [null, Validators.required],
       parent_mm_id: [null],
-      dept_id: [2, Validators.required],
+      dept_id: [auth.webUser.dept_id, Validators.required],
       state_id: [null, Validators.required],
       opening_date: [null],
       mm_closed: [null],
