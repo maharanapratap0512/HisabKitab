@@ -380,7 +380,23 @@ class Engine {
         }
 
         const combinedWhere = conditions.length > 0 ? conditions.join(' AND ') : {};
-        const rows = tbl.getAll(combinedWhere, { full, orderBy, limit, offset });
+
+        let safeOrderBy = orderBy;
+        if (safeOrderBy && tbl.columns) {
+            const match = String(safeOrderBy).match(/[`"']?([a-zA-Z0-9_]+)[`"']?\s*(ASC|DESC)?/i);
+            if (match) {
+                const colName = match[1];
+                if (!tbl.columns[colName]) {
+                    if (tbl.columns[`${colName}_id`]) {
+                        safeOrderBy = `\`${colName}_id\` ${match[2] || 'ASC'}`;
+                    } else {
+                        safeOrderBy = null;
+                    }
+                }
+            }
+        }
+
+        const rows = tbl.getAll(combinedWhere, { full, orderBy: safeOrderBy, limit, offset });
         const total = tbl.count(combinedWhere);
 
         return { rows, total, limit, offset };

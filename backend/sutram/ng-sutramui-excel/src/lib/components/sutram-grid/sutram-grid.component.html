@@ -1,10 +1,96 @@
 <!-- sutram-grid.component.html -->
-<div class="sutram-grid-wrapper">
+<div class="sutram-grid-wrapper" (contextmenu)="$event.preventDefault()">
 
-  <!-- Right Click Context Menu -->
-  <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
+  <!-- 1. Sleek Pixel-Perfect Custom Context Menu (Replaces p-contextMenu) -->
+  <div *ngIf="contextMenuState.visible"
+       class="custom-context-menu shadow-lg"
+       [style.top.px]="contextMenuState.y"
+       [style.left.px]="contextMenuState.x"
+       (click)="$event.stopPropagation()">
 
-  <!-- Excel-like Column Header Filter & Sort Popover -->
+    <!-- Cell Actions (Copy, Cut, Paste) -->
+    <ng-container *ngIf="contextMenuState.type === 'cell'">
+      <div class="context-menu-item" (click)="copyActiveCell()">
+        <i class="pi pi-copy"></i>
+        <span>कॉपी करें (Copy)</span>
+        <kbd class="ms-auto">Ctrl+C</kbd>
+      </div>
+      <div class="context-menu-item" (click)="cutActiveCell()">
+        <i class="pi pi-file-edit"></i>
+        <span>कट करें (Cut)</span>
+        <kbd class="ms-auto">Ctrl+X</kbd>
+      </div>
+      <div class="context-menu-item" (click)="pasteToActiveCell()">
+        <i class="pi pi-clipboard"></i>
+        <span>पेस्ट करें (Paste)</span>
+        <kbd class="ms-auto">Ctrl+V</kbd>
+      </div>
+      <div class="context-menu-divider"></div>
+    </ng-container>
+
+    <!-- Copy Row (Row Header Action) -->
+    <ng-container *ngIf="contextMenuState.type === 'row'">
+      <div class="context-menu-item" (click)="copySelectedRow()">
+        <i class="pi pi-copy"></i>
+        <span>कॉपी करें (Copy)</span>
+      </div>
+      <div class="context-menu-divider"></div>
+    </ng-container>
+
+    <!-- Row Operations (Insert Above, Insert Below, Duplicate Row) -->
+    <div class="context-menu-item" (click)="insertRowAbove()">
+      <i class="pi pi-arrow-up"></i>
+      <span>ऊपर पंक्ति जोड़ें (Insert Row Above)</span>
+    </div>
+    <div class="context-menu-item" (click)="insertRowBelow()">
+      <i class="pi pi-arrow-down"></i>
+      <span>नीचे पंक्ति जोड़ें (Insert Row Below)</span>
+    </div>
+    <div class="context-menu-item" (click)="duplicateRow()">
+      <i class="pi pi-clone"></i>
+      <span>पंक्ति डुप्लिकेट करें (Duplicate Row)</span>
+    </div>
+
+    <!-- Delete Row (Soft Red) -->
+    <ng-container *ngIf="enableDelete">
+      <div class="context-menu-divider"></div>
+      <div class="context-menu-item text-danger" (click)="deleteRow()">
+        <i class="pi pi-trash" style="color: #ef4444;"></i>
+        <span style="color: #ef4444; font-weight: 600;">पंक्ति हटाएं (Delete Row)</span>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- 2. Floating Smart FK Reference Dropdown Menu (Smart Mode live lookup) -->
+  <div *ngIf="dropdownOpen && isFkColumn(editingColDef)"
+       class="ref-dropdown-menu shadow-lg"
+       [style.top.px]="dropdownPos.top"
+       [style.left.px]="dropdownPos.left"
+       [style.min-width.px]="dropdownPos.minWidth"
+       (mousedown)="$event.preventDefault()">
+
+    <div class="ref-dropdown-header">
+      <span>Select {{ editingColDef?.ref_table || editingColDef?.name }} ({{ dropdownOptions.length }})</span>
+      <small style="opacity: 0.8; font-weight: 400;">↑↓ to navigate, Enter to select</small>
+    </div>
+
+    <div class="ref-dropdown-items-wrap" style="max-height: 185px; overflow-y: auto;">
+      <div *ngFor="let opt of dropdownOptions; let i = index"
+           class="ref-dropdown-item"
+           [class.highlighted]="i === highlightedIdx"
+           (mousedown)="selectDropdownOption(opt, $event, true)">
+        <span class="ref-item-label text-truncate">{{ opt.display }}</span>
+        <span *ngIf="opt.code" class="ref-item-badge">{{ opt.code }}</span>
+      </div>
+
+      <div *ngIf="dropdownOptions.length === 0" class="ref-dropdown-empty">
+        <i class="pi pi-search me-1"></i>
+        No matching {{ editingColDef?.ref_table || editingColDef?.name }} found
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Excel-like Column Header Filter & Sort Popover -->
   <p-overlayPanel #colFilterOp
                   [showCloseIcon]="false"
                   [dismissable]="true"
@@ -12,22 +98,25 @@
     <ng-template pTemplate="content">
       <div *ngIf="activeFilterCol" class="filter-popover-content">
         <!-- Popover Header -->
-        <div class="popover-header d-flex align-items-center justify-content-between">
-          <span class="fw-bold fs-7 text-truncate">
-            <i class="pi pi-filter me-1 text-primary"></i>
-            {{ activeFilterCol.name }} Filter
-          </span>
-          <button type="button" class="btn-close-popover" (click)="colFilterOp.hide()">
+        <div class="popover-header">
+          <div class="popover-title text-truncate">
+            <i class="pi pi-filter-fill text-primary"></i>
+            <span class="col-name text-truncate" [title]="activeFilterCol.name">{{ activeFilterCol.name }}</span>
+            <span *ngIf="activeFilterCol.ref_table || activeFilterCol.type === 'ref'" class="badge-type">
+              {{ activeFilterCol.ref_table || 'ref' }}
+            </span>
+          </div>
+          <button type="button" class="btn-popover-close" (click)="colFilterOp.hide()" title="Close">
             <i class="pi pi-times"></i>
           </button>
         </div>
 
-        <!-- Popover Search Box -->
-        <div class="popover-search-box">
+        <!-- Search Bar -->
+        <div class="popover-search-wrap">
           <i class="pi pi-search search-icon"></i>
           <input type="text"
-                 class="form-control form-control-sm popover-search-input"
-                 placeholder="Search values..."
+                 class="popover-search-input"
+                 placeholder="Search in list..."
                  [(ngModel)]="filterChecklistSearch" />
           <button *ngIf="filterChecklistSearch"
                   type="button"
@@ -37,19 +126,21 @@
           </button>
         </div>
 
-        <!-- Select All / Clear All Row -->
-        <div class="popover-select-all-row d-flex align-items-center justify-content-between px-2 py-1">
-          <div class="form-check m-0">
+        <!-- Action Strip: Select All & Quick Links -->
+        <div class="popover-action-strip">
+          <label class="select-all-label">
             <input type="checkbox"
-                   class="form-check-input cursor-pointer"
-                   id="selectAllFilterVals"
+                   class="custom-check"
                    [checked]="isAllChecklistSelected()"
                    (change)="toggleSelectAllChecklist($event)" />
-            <label class="form-check-label small fw-semibold cursor-pointer" for="selectAllFilterVals">
-              (Select All)
-            </label>
+            <span>(Select All)</span>
+          </label>
+          <div class="quick-links">
+            <button type="button" class="btn-link-action" (click)="selectAllFilteredItems()">All</button>
+            <span class="divider">·</span>
+            <button type="button" class="btn-link-action" (click)="clearAllFilteredItems()">Clear</button>
           </div>
-          <span class="small text-muted">
+          <span class="count-pill">
             {{ selectedChecklistValues.size }} / {{ currentChecklistItems.length }}
           </span>
         </div>
@@ -57,11 +148,11 @@
         <!-- Checklist Values Container -->
         <div class="popover-checklist-items">
           <div *ngFor="let item of filteredChecklistItems"
-               class="checklist-item d-flex align-items-center justify-content-between px-2 py-1 cursor-pointer"
+               class="checklist-item"
                (click)="toggleChecklistItem(item.value)">
-            <div class="d-flex align-items-center gap-2 text-truncate">
+            <div class="item-left text-truncate">
               <input type="checkbox"
-                     class="form-check-input cursor-pointer m-0"
+                     class="custom-check"
                      [checked]="selectedChecklistValues.has(item.value)"
                      (click)="$event.stopPropagation()"
                      (change)="toggleChecklistItem(item.value)" />
@@ -69,34 +160,34 @@
                 {{ item.display }}
               </span>
             </div>
-            <span *ngIf="item.code" class="badge bg-light text-muted small ms-1">{{ item.code }}</span>
-            <span *ngIf="item.count !== undefined && item.count > 0" class="item-count-badge">{{ item.count }}</span>
+            <div class="item-right">
+              <span *ngIf="item.code" class="item-code-chip">{{ item.code }}</span>
+              <span *ngIf="item.count !== undefined && item.count > 0" class="item-count-badge">{{ item.count }}</span>
+            </div>
           </div>
 
-          <div *ngIf="filteredChecklistItems.length === 0" class="text-center py-3 text-muted small">
-            No values found
+          <div *ngIf="filteredChecklistItems.length === 0" class="empty-list-state">
+            <i class="pi pi-search me-1"></i> No matching values
           </div>
         </div>
 
-        <div class="popover-divider"></div>
-
         <!-- Footer Actions -->
-        <div class="popover-footer d-flex align-items-center justify-content-between pt-2">
+        <div class="popover-footer">
           <button type="button"
-                  class="btn btn-sm btn-outline-danger btn-xs"
+                  class="btn-filter-clear"
                   (click)="clearCurrentColFilter(colFilterOp)">
-            Clear
+            <i class="pi pi-trash me-1"></i>Reset
           </button>
-          <div class="d-flex gap-2">
+          <div class="footer-actions-right">
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary btn-xs"
+                    class="btn-filter-cancel"
                     (click)="colFilterOp.hide()">
               Cancel
             </button>
             <button type="button"
-                    class="btn btn-sm btn-primary btn-xs"
+                    class="btn-filter-apply"
                     (click)="applyCurrentColFilter(colFilterOp)">
-              Apply
+              <i class="pi pi-check"></i> Apply
             </button>
           </div>
         </div>
@@ -105,27 +196,29 @@
     </ng-template>
   </p-overlayPanel>
 
-  <!-- PrimeNG Virtual Table -->
-  <p-table [value]="visibleRows"
+  <!-- 4. PrimeNG Virtual Table -->
+  <p-table #pTable
+           [value]="visibleRows"
            [columns]="headers"
            [virtualScroll]="true"
            [virtualScrollItemSize]="23"
+           [virtualScrollOptions]="{ autoSize: false, numToleratedItems: 30 }"
+           [rowTrackBy]="trackByRowNum"
            [scrollable]="true"
            scrollHeight="flex"
            [resizableColumns]="true"
            columnResizeMode="expand"
            [reorderableColumns]="true"
-           [contextMenu]="cm"
-           [(contextMenuSelection)]="contextSelectedRow"
            styleClass="p-datatable-gridlines p-datatable-sm sutram-grid-table">
 
     <!-- Table Header Row -->
     <ng-template pTemplate="header" let-columns>
       <tr>
-        <!-- Interactive Corner Config Trigger (#) -->
-        <th class="corner-th corner-config-th" pFrozenColumn style="width: 48px; min-width: 48px; text-align: center;">
+        <!-- Corner Cog Config Trigger -->
+        <th class="corner-th corner-config-th" pFrozenColumn style="width: 34px; min-width: 34px; max-width: 34px; text-align: center;"
+            (click)="openConfig.emit($event)" title="Configure Columns (कॉलम चुनें)">
           <div style="display: flex; align-items: center; justify-content: center;">
-            <i class="pi pi-cog corner-cog-icon" style="font-size: 13px; color: var(--text-muted, #64748b);"></i>
+            <i class="pi pi-cog corner-cog-icon" style="font-size: 12px; color: var(--text-muted, #64748b);"></i>
           </div>
         </th>
 
@@ -140,37 +233,49 @@
             [class.sortable-th]="state.sortingEnabled()"
             (click)="onHeaderClick(col)">
           <div style="display: flex; justify-content: space-between; align-items: center; position: relative; width: 100%;">
-            <span class="col-header-title text-truncate d-flex align-items-center" [title]="col.description || col.name">
+            <span class="col-header-title text-truncate d-flex align-items-center" [title]="col.description || col.short_name || col.name">
               <strong style="color: var(--text-muted, #64748b); font-size: 11px; margin-right: 5px;">{{ getColLetter(idx) }}</strong>
-              <span class="text-truncate">{{ col.name }}</span>
+              <span class="text-truncate">{{ col.short_name || col.name }}</span>
               <span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
             </span>
 
-            <!-- Header Action Controls: Sort Trigger, Filter Trigger & FK Pill -->
+            <!-- Header Action Controls: FK Pill, Sort & Filter Trigger -->
             <div class="col-header-controls d-flex align-items-center" (click)="$event.stopPropagation()">
-              <span *ngIf="col.type === 'ref' || col.ref_table"
+              <span *ngIf="col.is_fk_subcol"
+                    style="font-size: 9px; padding: 1px 4px; background: rgba(16, 185, 129, 0.15); color: #059669; border-radius: 3px; font-weight: 600; margin-right: 4px;"
+                    [title]="'Reference: ' + (col.ref_table || col.group)">
+                {{ col.ref_table || col.group }}
+              </span>
+
+              <span *ngIf="!col.is_fk_subcol && (col.type === 'ref' || col.ref_table || col.is_fk_main)"
                     style="font-size: 9px; padding: 1px 4px; background: rgba(59, 130, 246, 0.15); color: #2563eb; border-radius: 3px; font-weight: 600; margin-right: 4px;"
-                    [title]="col.ref_table || col.name">
+                    [title]="'FK: ' + (col.ref_table || col.name)">
                 {{ col.ref_table || col.name }}
+              </span>
+
+              <span *ngIf="col.is_fk_raw"
+                    style="font-size: 9px; padding: 1px 4px; background: rgba(245, 158, 11, 0.15); color: #d97706; border-radius: 3px; font-weight: 600; margin-right: 4px;"
+                    title="Raw ID">
+                id
               </span>
 
               <span *ngIf="state.sortingEnabled()"
                     class="col-sort-trigger"
-                    [class.is-sorted]="state.activeSort()?.colKey === col.name"
+                    [class.is-sorted]="state.activeSort()?.colKey === (col.key || col.name)"
                     (click)="onHeaderClick(col)"
-                    [title]="state.activeSort()?.colKey === col.name ? (state.activeSort()?.order === 'ASC' ? 'Sorted: ASC' : 'Sorted: DESC') : 'Sort'">
+                    [title]="state.activeSort()?.colKey === (col.key || col.name) ? (state.activeSort()?.order === 'ASC' ? 'Sorted: ASC' : 'Sorted: DESC') : 'Sort'">
                 <i class="pi"
-                   [ngClass]="state.activeSort()?.colKey === col.name
+                   [ngClass]="state.activeSort()?.colKey === (col.key || col.name)
                      ? (state.activeSort()?.order === 'ASC' ? 'pi-sort-amount-up-alt text-primary' : 'pi-sort-amount-down text-primary')
                      : 'pi-sort-alt text-muted'"></i>
               </span>
 
               <span *ngIf="state.filtersEnabled()"
                     class="col-filter-trigger"
-                    [class.is-filtered]="isColumnFiltered(col.name)"
+                    [class.is-filtered]="isColumnFiltered(col.key || col.name)"
                     (click)="openColumnFilter($event, col, colFilterOp)"
-                    [title]="isColumnFiltered(col.name) ? 'Filter Active' : 'Filter'">
-                <i class="pi" [ngClass]="isColumnFiltered(col.name) ? 'pi-filter-fill text-primary' : 'pi-filter'"></i>
+                    [title]="isColumnFiltered(col.key || col.name) ? 'Filter Active' : 'Filter'">
+                <i class="pi" [ngClass]="isColumnFiltered(col.key || col.name) ? 'pi-filter-fill text-primary' : 'pi-filter'"></i>
               </span>
             </div>
           </div>
@@ -180,75 +285,55 @@
 
     <!-- Table Body Rows -->
     <ng-template pTemplate="body" let-row let-rowIndex="rowIndex" let-columns="columns">
-      <tr [pContextMenuRow]="row"
-          [class.row-new]="row.isNew"
+      <tr [class.row-new]="row.isNew && isRowPopulated(row)"
           [class.row-edited]="!row.isNew && row.isModified"
           [class.row-has-error]="row.hasError"
-          [class.row-synced]="row.isSynced">
+          [class.row-synced]="row.isSynced"
+          [class.row-selected]="selectedRowIdx === rowIndex">
 
-        <!-- Sticky Row Number TD (48px) -->
+        <!-- Sticky Row Number TD (34px, Authentic Excel Look) -->
         <td class="row-num-td"
             pFrozenColumn
-            style="width: 48px; min-width: 48px; max-width: 48px; text-align: center;"
-            (contextmenu)="openRowContextMenu($event, row, cm)">
-          <span *ngIf="row.isNew" style="font-size: 10px; margin-right: 3px; font-weight: 700; color: #15803d;">+</span>
-          <span *ngIf="!row.isNew && row.isModified" style="font-size: 10px; margin-right: 3px; font-weight: 700; color: #b45309;">•</span>
+            style="width: 34px; min-width: 34px; max-width: 34px; text-align: center;"
+            (click)="onRowHeaderClick(rowIndex, row, $event)"
+            (contextmenu)="openRowContextMenu($event, row, rowIndex)">
+          <span *ngIf="row.isNew && isRowPopulated(row)" class="row-state-dot dot-new">+</span>
+          <span *ngIf="!row.isNew && row.isModified" class="row-state-dot dot-edited">•</span>
           <span class="row-num-text">{{ row.rowNum }}</span>
         </td>
 
-        <!-- Compact Data Cells (23px height) -->
+        <!-- Compact Small Data Cells (23px height) -->
         <td *ngFor="let col of columns"
-            [pEditableColumn]="row.cells[col.name]?.value"
             [style.width.px]="getColumnWidth(col)"
             [style.min-width.px]="getColumnWidth(col)"
-            [style.max-width.px]="getColumnWidth(col)"
-            (click)="onCellClick(rowIndex, col.name)">
+            [style.max-width.px]="getColumnWidth(col)">
 
           <div class="cell-box"
-               [class.cell-active]="state.selectedCell()?.rowIdx === rowIndex && state.selectedCell()?.colKey === col.name"
-               [class.cell-bad]="!row.cells[col.name]?.isValid"
-               [class.cell-edited]="row.cells[col.name]?.isModified"
-               [class.cell-new]="row.isNew"
-               [title]="row.cells[col.name]?.errorMsg || ''">
+               [class.cell-active]="state.selectedCell()?.rowIdx === rowIndex && state.selectedCell()?.colKey === (col.key || col.name)"
+               [class.cell-editing]="isCellEditing(rowIndex, col.key || col.name)"
+               [class.cell-bad]="!row.cells[col.key || col.name]?.isValid"
+               [class.cell-edited]="row.cells[col.key || col.name]?.isModified"
+               [class.cell-new]="row.isNew && isRowPopulated(row)"
+               [title]="row.cells[col.key || col.name]?.errorMessage || ''"
+               (click)="onCellClick(rowIndex, col.key || col.name, $event)"
+               (dblclick)="startCellEdit(rowIndex, col.key || col.name, row, $event)"
+               (contextmenu)="openCellContextMenu($event, rowIndex, col.key || col.name, row)">
 
-            <p-cellEditor>
-              <!-- In-Cell Edit Mode -->
-              <ng-template pTemplate="input">
-                <p-autoComplete *ngIf="col.type === 'ref' || col.ref_table; else plainInput"
-                                [(ngModel)]="row.cells[col.name].value"
-                                [suggestions]="filteredSuggestions"
-                                (completeMethod)="searchRefOptions($event, col, row)"
-                                field="display"
-                                [dropdown]="true"
-                                [forceSelection]="false"
-                                appendTo="body"
-                                styleClass="sutram-cell-autocomplete"
-                                (onSelect)="onRefSuggestionSelect($event, rowIndex, col.name, row)"
-                                (onBlur)="onCellBlur(rowIndex, col.name, row)"
-                                (keydown)="onCellKeydown($event, rowIndex, col.name, row)">
-                  <ng-template let-item pTemplate="item">
-                    <div class="d-flex align-items-center justify-content-between w-100 py-1">
-                      <span class="fw-semibold">{{ item.display }}</span>
-                      <span *ngIf="item.code" class="badge bg-light text-muted ms-2">{{ item.code }}</span>
-                    </div>
-                  </ng-template>
-                </p-autoComplete>
+            <!-- In-Cell Edit Mode Input -->
+            <ng-container *ngIf="isCellEditing(rowIndex, col.key || col.name); else normalMode">
+              <input #cellEditorInput
+                     type="text"
+                     class="raw-cell-editor"
+                     [(ngModel)]="editingValue"
+                     (input)="onEditorInput(editingValue, col, row)"
+                     (keydown)="onCellEditorKeydown($event, rowIndex, col.key || col.name, row)"
+                     (blur)="onCellEditorBlur(rowIndex, col.key || col.name, row)" />
+            </ng-container>
 
-                <ng-template #plainInput>
-                  <input type="text"
-                         pInputText
-                         [(ngModel)]="row.cells[col.name].value"
-                         class="raw-cell-editor"
-                         (blur)="onCellBlur(rowIndex, col.name, row)"
-                         (keydown)="onCellKeydown($event, rowIndex, col.name, row)" />
-                </ng-template>
-              </ng-template>
-
-              <!-- In-Cell Normal Mode -->
-              <ng-template pTemplate="output">
-                <span class="cell-value-text text-truncate">{{ row.cells[col.name]?.value }}</span>
-              </ng-template>
-            </p-cellEditor>
+            <!-- Normal Output Mode -->
+            <ng-template #normalMode>
+              <span class="cell-value-text text-truncate">{{ row.cells[col.key || col.name]?.value }}</span>
+            </ng-template>
 
           </div>
         </td>
@@ -267,7 +352,7 @@
 
   </p-table>
 
-  <!-- Inline "Solve All" Batch Mistake Prompt Modal -->
+  <!-- 5. Inline "Solve All" Batch Mistake Prompt Modal -->
   <div *ngIf="promptState.visible" class="inline-solve-prompt card shadow-lg p-3">
     <div class="d-flex align-items-center justify-content-between pb-2 mb-2 border-bottom">
       <div class="d-flex align-items-center gap-2">

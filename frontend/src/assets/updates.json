@@ -1,10 +1,35 @@
 [
     {
+        "version": "39.5",
+        "date": "30-10-2026",
+        "summary": "Universal Excel Studio Support for Item, Aawak, Jawak, Bachat & Ultra-Smooth Scrolling",
+        "summary_hin": "आइटम, आवक, जावक, बचत हेतु एक्सेल स्टूडियो में पूर्ण सहयोग एवं तीव्र स्क्रॉलिंग सुविधा",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Excel Studio",
+                "title": "Full Support for All Core Modules",
+                "title_hin": "सभी मुख्य तालिकाओं के लिए स्प्रेडशीट सुविधा",
+                "desc": "Excel Studio now directly supports Item Master, Subitems, Aawak, Jawak, Bachat (Stock Balances), Proposals, and Fleet records with automatic duplicate prevention and smart Hindi-English auto-matching.",
+                "desc_hin": "एक्सेल स्टूडियो में अब आइटम, सब-आइटम, आवक, जावक, बचत (स्टॉक बैलेंस), प्रस्ताव एवं वाहन रिकॉर्ड्स को सीधे लोड, संपादित और एक्सेल से सुरक्षित इम्पोर्ट किया जा सकता है।"
+            },
+            {
+                "type": "improvement",
+                "module": "Excel Studio",
+                "title": "High-Speed Scrolling & Instant Sheet Tabs",
+                "title_hin": "अति-तीव्र स्क्रॉलिंग एवं पलक झपकते शीट बदलना",
+                "desc": "Enjoy frictionless, momentum-driven scrolling through thousands of records without jumping, along with an always-ready blank bottom row for rapid data entry and instant tab switching.",
+                "desc_hin": "हज़ारों रिकॉर्ड्स में भी बिना किसी रुकावट के मक्खन जैसी तेज़ स्क्रॉलिंग का आनंद लें। नई प्रविष्टि हेतु नीचे हमेशा एक खाली पंक्ति तैयार रहती है और अलग-अलग शीट में तुरंत स्विच किया जा सकता है।"
+            }
+        ]
+    },
+    {
         "version": "39",
         "date": "28-10-2026",
         "summary": "Item & Subitem Alias System & AJ Type Saar PDF Updates",
         "summary_hin": "आइटम एवं सब-आइटम उपनाम प्रणाली तथा प्रकार सार PDF सुधार",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

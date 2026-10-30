@@ -91,8 +91,10 @@ export class SutramExcelScannerService {
                         value = rawRow[match.sheetHeader] ?? rawRow[h.name] ?? '';
                     }
                 }
+                const valStr = value !== null && value !== undefined ? String(value) : '';
                 cells[h.name] = {
-                    value: value !== null && value !== undefined ? value : '',
+                    value: valStr,
+                    originalValue: valStr,
                     isValid: true,
                     isModified: false
                 };

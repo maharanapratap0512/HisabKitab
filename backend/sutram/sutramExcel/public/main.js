@@ -26312,6 +26312,28 @@ var EmptyError = createErrorClass(function(_super) {
   };
 });
 
+// backend/sutram/ng-sutramui-excel/node_modules/rxjs/dist/esm5/internal/firstValueFrom.js
+function firstValueFrom(source, config2) {
+  var hasConfig = typeof config2 === "object";
+  return new Promise(function(resolve, reject) {
+    var subscriber = new SafeSubscriber({
+      next: function(value) {
+        resolve(value);
+        subscriber.unsubscribe();
+      },
+      error: reject,
+      complete: function() {
+        if (hasConfig) {
+          resolve(config2.defaultValue);
+        } else {
+          reject(new EmptyError());
+        }
+      }
+    });
+    source.subscribe(subscriber);
+  });
+}
+
 // backend/sutram/ng-sutramui-excel/node_modules/rxjs/dist/esm5/internal/operators/map.js
 function map(project, thisArg) {
   return operate(function(source, subscriber) {
@@ -126668,13 +126690,28 @@ var SutramExcelStateService = class _SutramExcelStateService {
     this.filterOnlyErrors.update((v) => !v);
   }
   modifiedRowsCount = computed(() => {
-    return this.rows().filter((r) => r.isNew || r.isModified).length;
+    return this.rows().filter((r) => {
+      if (r.isModified)
+        return true;
+      if (r.isNew) {
+        if (!r.cells)
+          return false;
+        for (const k in r.cells) {
+          const val = r.cells[k]?.value;
+          if (val !== void 0 && val !== null && String(val).trim() !== "") {
+            return true;
+          }
+        }
+        return false;
+      }
+      return false;
+    }).length;
   });
   pendingChangesCount = computed(() => {
     return this.modifiedRowsCount() + this.deletedRowIds().length;
   });
   /**
-   * Updates an individual cell value in the grid and marks row modified
+   * Updates an individual cell value in the grid and marks row modified only if value actually changed
    */
   updateCellValue(rowIdx, colKey, newValue, refId) {
     this.rows.update((current) => {
@@ -126686,12 +126723,19 @@ var SutramExcelStateService = class _SutramExcelStateService {
       if (cell.originalValue === void 0) {
         cell.originalValue = cell.value;
       }
+      const strNew = String(newValue ?? "").trim();
+      const strOrig = String(cell.originalValue ?? "").trim();
+      const actuallyChanged = strNew !== strOrig;
       cell.value = newValue;
-      cell.isModified = true;
       if (refId !== void 0)
         cell.refId = refId;
+      if (actuallyChanged) {
+        cell.isModified = true;
+      } else if (!targetRow.isNew) {
+        cell.isModified = false;
+      }
       targetRow.cells = { ...targetRow.cells, [colKey]: cell };
-      targetRow.isModified = true;
+      targetRow.isModified = targetRow.isNew || Object.values(targetRow.cells).some((c) => c && c.isModified);
       copy[rowIdx] = targetRow;
       return copy;
     });
@@ -126731,7 +126775,9 @@ var SutramExcelStateService = class _SutramExcelStateService {
     const set = new Set(rowNums);
     this.rows.update((list) => {
       return list.map((r) => {
-        if (set.has(r.rowNum)) {
+        const rowId = r._id ?? r.id;
+        const matches = set.has(r.rowNum) || rowId !== void 0 && set.has(rowId);
+        if (matches) {
           const cleanCells = {};
           for (const k in r.cells) {
             cleanCells[k] = { ...r.cells[k], isModified: false, originalValue: r.cells[k].value };
@@ -126750,7 +126796,9 @@ var SutramExcelStateService = class _SutramExcelStateService {
     setTimeout(() => {
       this.rows.update((list) => {
         return list.map((r) => {
-          if (set.has(r.rowNum) && r.isSynced) {
+          const rowId = r._id ?? r.id;
+          const matches = set.has(r.rowNum) || rowId !== void 0 && set.has(rowId);
+          if (matches && r.isSynced) {
             return {
               ...r,
               isSynced: false
@@ -127151,8 +127199,10 @@ var SutramExcelScannerService = class _SutramExcelScannerService {
             value = rawRow[match2.sheetHeader] ?? rawRow[h.name] ?? "";
           }
         }
+        const valStr = value !== null && value !== void 0 ? String(value) : "";
         cells[h.name] = {
-          value: value !== null && value !== void 0 ? value : "",
+          value: valStr,
+          originalValue: valStr,
           isValid: true,
           isModified: false
         };
@@ -127245,57 +127295,95 @@ var SutramRefCacheService = class _SutramRefCacheService {
         hin = item.mm_hin || "";
         eng = item.mm_eng || "";
         code = item.mm_code || "";
-        id = item.mm_id ?? item.id;
+        id = item._id ?? item.mm_id ?? item.id;
         break;
       case "category":
         hin = item.category_hin || "";
         eng = item.category_eng || "";
-        id = item.category_id ?? item.id;
+        id = item._id ?? item.category_id ?? item.id;
         break;
       case "item":
         hin = item.item_hin || "";
         eng = item.item_eng || "";
         code = item.item_code || "";
-        id = item.item_id ?? item.id;
+        id = item._id ?? item.item_id ?? item.id;
         break;
       case "subitem":
         hin = item.subitem_hin || "";
         eng = item.subitem_eng || "";
         code = item.subitem_code || "";
-        id = item.subitem_id ?? item.id;
+        id = item._id ?? item.subitem_id ?? item.id;
+        break;
+      case "unit":
+        hin = item.unit_full || item.unit_short || "";
+        eng = item.unit_short || "";
+        id = item._id ?? item.unit_id ?? item.id;
+        break;
+      case "support_list":
+        hin = item.list_name_hin || "";
+        eng = item.list_name_eng || "";
+        id = item._id ?? item.support_list_id ?? item.id;
+        break;
+      case "pbk":
+        hin = item.pbk_hin || "";
+        eng = item.pbk_eng || "";
+        code = item.roll_no ? String(item.roll_no) : "";
+        id = item._id ?? item.pbk_id ?? item.id;
+        break;
+      case "nimitt":
+        hin = item.nimitt_hin || "";
+        eng = item.nimitt_eng || "";
+        code = item.roll_no ? String(item.roll_no) : "";
+        id = item._id ?? item.nimitt_id ?? item.id;
         break;
       case "state":
         hin = item.state_hin || "";
         eng = item.state_eng || "";
         code = item.state_code || "";
-        id = item.state_id ?? item.id;
+        id = item._id ?? item.state_id ?? item.id;
+        break;
+      case "district":
+        hin = item.district_hin || "";
+        eng = item.district_eng || "";
+        id = item._id ?? item.district_id ?? item.id;
         break;
       case "city":
         hin = item.city_hin || "";
         eng = item.city_eng || "";
-        id = item.city_id ?? item.id;
+        id = item._id ?? item.city_id ?? item.id;
+        break;
+      case "zone":
+        hin = item.zone_hin || "";
+        eng = item.zone_eng || "";
+        id = item._id ?? item.zone_id ?? item.id;
         break;
       case "country":
         hin = item.country_hin || "";
         eng = item.country_eng || "";
-        id = item.country_id ?? item.id;
+        id = item._id ?? item.country_id ?? item.id;
         break;
       case "department":
-        hin = item.department_hin || "";
-        eng = item.department_eng || "";
-        id = item.department_id ?? item.id;
+        hin = item.dept_hin || item.department_hin || "";
+        eng = item.dept_eng || item.department_eng || "";
+        code = item.dept_code || "";
+        id = item._id ?? item.dept_id ?? item.department_id ?? item.id;
         break;
       case "product":
-        hin = item.product_hin || "";
-        eng = item.product_eng || "";
-        code = item.product_code || "";
-        id = item.product_id ?? item.id;
+        hin = item.product_hin || item.product_detail || "";
+        eng = item.product_eng || item.company_name || "";
+        code = item.product_code || item.sr_num || "";
+        id = item._id ?? item.product_id ?? item.id;
+        break;
+      case "vehicle":
+        hin = item.gadi_name || item.vehicle_type || "";
+        eng = item.gadi_num || "";
+        id = item._id ?? item.vehicle_id ?? item.id;
         break;
       default:
         hin = item[`${tbl}_hin`] || item.name_hin || item.title_hin || item.label_hin || "";
         eng = item[`${tbl}_eng`] || item.name_eng || item.title_eng || item.name || item.title || "";
         code = item[`${tbl}_code`] || item.code || "";
-        id = item[`${tbl}_id`] ?? item.id ?? item._id;
+        id = item._id ?? item[`${tbl}_id`] ?? item.id;
         break;
     }
     let display = "";
@@ -127693,566 +127781,798 @@ var SutramClipboardService = class _SutramClipboardService {
 })();
 
 // backend/sutram/ng-sutramui-excel/playground/out-tsc/src/lib/components/sutram-grid/sutram-grid.component.js
-function SutramGridComponent_ng_template_5_div_0_button_10_Template(rf, ctx) {
+function SutramGridComponent_div_1_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
-    const _r12 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 36);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_button_10_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r12);
-      const ctx_r11 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r11.filterChecklistSearch = "");
+    const _r13 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 14);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_1_Template_div_click_1_listener() {
+      \u0275\u0275restoreView(_r13);
+      const ctx_r12 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r12.copyActiveCell());
     });
-    \u0275\u0275element(1, "i", 17);
+    \u0275\u0275element(2, "i", 18);
+    \u0275\u0275elementStart(3, "span");
+    \u0275\u0275text(4, "\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902 (Copy)");
     \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "kbd", 19);
+    \u0275\u0275text(6, "Ctrl+C");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(7, "div", 14);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_1_Template_div_click_7_listener() {
+      \u0275\u0275restoreView(_r13);
+      const ctx_r14 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r14.cutActiveCell());
+    });
+    \u0275\u0275element(8, "i", 20);
+    \u0275\u0275elementStart(9, "span");
+    \u0275\u0275text(10, "\u0915\u091F \u0915\u0930\u0947\u0902 (Cut)");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(11, "kbd", 19);
+    \u0275\u0275text(12, "Ctrl+X");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(13, "div", 14);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_1_Template_div_click_13_listener() {
+      \u0275\u0275restoreView(_r13);
+      const ctx_r15 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r15.pasteToActiveCell());
+    });
+    \u0275\u0275element(14, "i", 21);
+    \u0275\u0275elementStart(15, "span");
+    \u0275\u0275text(16, "\u092A\u0947\u0938\u094D\u091F \u0915\u0930\u0947\u0902 (Paste)");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(17, "kbd", 19);
+    \u0275\u0275text(18, "Ctrl+V");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275element(19, "div", 22);
+    \u0275\u0275elementContainerEnd();
   }
 }
-function SutramGridComponent_ng_template_5_div_0_div_19_span_5_Template(rf, ctx) {
+function SutramGridComponent_div_1_ng_container_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 43);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const item_r13 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(item_r13.code);
-  }
-}
-function SutramGridComponent_ng_template_5_div_0_div_19_span_6_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 44);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const item_r13 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(item_r13.count);
+    const _r17 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 14);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_2_Template_div_click_1_listener() {
+      \u0275\u0275restoreView(_r17);
+      const ctx_r16 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r16.copySelectedRow());
+    });
+    \u0275\u0275element(2, "i", 18);
+    \u0275\u0275elementStart(3, "span");
+    \u0275\u0275text(4, "\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902 (Copy)");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275element(5, "div", 22);
+    \u0275\u0275elementContainerEnd();
   }
 }
-function SutramGridComponent_ng_template_5_div_0_div_19_Template(rf, ctx) {
+function SutramGridComponent_div_1_ng_container_15_Template(rf, ctx) {
   if (rf & 1) {
     const _r19 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 37);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_div_19_Template_div_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r19);
-      const item_r13 = restoredCtx.$implicit;
-      const ctx_r18 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r18.toggleChecklistItem(item_r13.value));
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275element(1, "div", 22);
+    \u0275\u0275elementStart(2, "div", 23);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_15_Template_div_click_2_listener() {
+      \u0275\u0275restoreView(_r19);
+      const ctx_r18 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r18.deleteRow());
     });
-    \u0275\u0275elementStart(1, "div", 38)(2, "input", 39);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_div_19_Template_input_click_2_listener($event) {
-      return $event.stopPropagation();
-    })("change", function SutramGridComponent_ng_template_5_div_0_div_19_Template_input_change_2_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r19);
-      const item_r13 = restoredCtx.$implicit;
-      const ctx_r21 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r21.toggleChecklistItem(item_r13.value));
-    });
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "span", 40);
-    \u0275\u0275text(4);
+    \u0275\u0275element(3, "i", 24);
+    \u0275\u0275elementStart(4, "span", 25);
+    \u0275\u0275text(5, "\u092A\u0902\u0915\u094D\u0924\u093F \u0939\u091F\u093E\u090F\u0902 (Delete Row)");
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(5, SutramGridComponent_ng_template_5_div_0_div_19_span_5_Template, 2, 1, "span", 41);
-    \u0275\u0275template(6, SutramGridComponent_ng_template_5_div_0_div_19_span_6_Template, 2, 1, "span", 42);
+    \u0275\u0275elementContainerEnd();
+  }
+}
+function SutramGridComponent_div_1_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r22 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 12);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_0_listener($event) {
+      return $event.stopPropagation();
+    });
+    \u0275\u0275template(1, SutramGridComponent_div_1_ng_container_1_Template, 20, 0, "ng-container", 13);
+    \u0275\u0275template(2, SutramGridComponent_div_1_ng_container_2_Template, 6, 0, "ng-container", 13);
+    \u0275\u0275elementStart(3, "div", 14);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_3_listener() {
+      \u0275\u0275restoreView(_r22);
+      const ctx_r21 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r21.insertRowAbove());
+    });
+    \u0275\u0275element(4, "i", 15);
+    \u0275\u0275elementStart(5, "span");
+    \u0275\u0275text(6, "\u090A\u092A\u0930 \u092A\u0902\u0915\u094D\u0924\u093F \u091C\u094B\u0921\u093C\u0947\u0902 (Insert Row Above)");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(7, "div", 14);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_7_listener() {
+      \u0275\u0275restoreView(_r22);
+      const ctx_r23 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r23.insertRowBelow());
+    });
+    \u0275\u0275element(8, "i", 16);
+    \u0275\u0275elementStart(9, "span");
+    \u0275\u0275text(10, "\u0928\u0940\u091A\u0947 \u092A\u0902\u0915\u094D\u0924\u093F \u091C\u094B\u0921\u093C\u0947\u0902 (Insert Row Below)");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(11, "div", 14);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_11_listener() {
+      \u0275\u0275restoreView(_r22);
+      const ctx_r24 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r24.duplicateRow());
+    });
+    \u0275\u0275element(12, "i", 17);
+    \u0275\u0275elementStart(13, "span");
+    \u0275\u0275text(14, "\u092A\u0902\u0915\u094D\u0924\u093F \u0921\u0941\u092A\u094D\u0932\u093F\u0915\u0947\u091F \u0915\u0930\u0947\u0902 (Duplicate Row)");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(15, SutramGridComponent_div_1_ng_container_15_Template, 6, 0, "ng-container", 13);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const item_r13 = ctx.$implicit;
-    const ctx_r9 = \u0275\u0275nextContext(3);
-    \u0275\u0275advance(2);
-    \u0275\u0275property("checked", ctx_r9.selectedChecklistValues.has(item_r13.value));
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275styleProp("top", ctx_r0.contextMenuState.y, "px")("left", ctx_r0.contextMenuState.x, "px");
     \u0275\u0275advance(1);
-    \u0275\u0275property("title", item_r13.display);
+    \u0275\u0275property("ngIf", ctx_r0.contextMenuState.type === "cell");
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", item_r13.display, " ");
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", item_r13.code);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", item_r13.count !== void 0 && item_r13.count > 0);
+    \u0275\u0275property("ngIf", ctx_r0.contextMenuState.type === "row");
+    \u0275\u0275advance(13);
+    \u0275\u0275property("ngIf", ctx_r0.enableDelete);
   }
 }
-function SutramGridComponent_ng_template_5_div_0_div_20_Template(rf, ctx) {
+function SutramGridComponent_div_2_div_7_span_3_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 45);
-    \u0275\u0275text(1, " No values found ");
+    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const opt_r27 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(opt_r27.code);
+  }
+}
+function SutramGridComponent_div_2_div_7_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r32 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 32);
+    \u0275\u0275listener("mousedown", function SutramGridComponent_div_2_div_7_Template_div_mousedown_0_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r32);
+      const opt_r27 = restoredCtx.$implicit;
+      const ctx_r31 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r31.selectDropdownOption(opt_r27, $event, true));
+    });
+    \u0275\u0275elementStart(1, "span", 33);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(3, SutramGridComponent_div_2_div_7_span_3_Template, 2, 1, "span", 34);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const opt_r27 = ctx.$implicit;
+    const i_r28 = ctx.index;
+    const ctx_r25 = \u0275\u0275nextContext(2);
+    \u0275\u0275classProp("highlighted", i_r28 === ctx_r25.highlightedIdx);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(opt_r27.display);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", opt_r27.code);
+  }
+}
+function SutramGridComponent_div_2_div_8_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 36);
+    \u0275\u0275element(1, "i", 37);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r26 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" No matching ", (ctx_r26.editingColDef == null ? null : ctx_r26.editingColDef.ref_table) || (ctx_r26.editingColDef == null ? null : ctx_r26.editingColDef.name), " found ");
+  }
+}
+function SutramGridComponent_div_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 26);
+    \u0275\u0275listener("mousedown", function SutramGridComponent_div_2_Template_div_mousedown_0_listener($event) {
+      return $event.preventDefault();
+    });
+    \u0275\u0275elementStart(1, "div", 27)(2, "span");
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "small", 28);
+    \u0275\u0275text(5, "\u2191\u2193 to navigate, Enter to select");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "div", 29);
+    \u0275\u0275template(7, SutramGridComponent_div_2_div_7_Template, 4, 4, "div", 30);
+    \u0275\u0275template(8, SutramGridComponent_div_2_div_8_Template, 3, 1, "div", 31);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275styleProp("top", ctx_r1.dropdownPos.top, "px")("left", ctx_r1.dropdownPos.left, "px")("min-width", ctx_r1.dropdownPos.minWidth, "px");
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate2("Select ", (ctx_r1.editingColDef == null ? null : ctx_r1.editingColDef.ref_table) || (ctx_r1.editingColDef == null ? null : ctx_r1.editingColDef.name), " (", ctx_r1.dropdownOptions.length, ")");
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngForOf", ctx_r1.dropdownOptions);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r1.dropdownOptions.length === 0);
+  }
+}
+function SutramGridComponent_ng_template_5_div_0_span_6_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 68);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r35 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", ctx_r35.activeFilterCol.ref_table || "ref", " ");
+  }
+}
+function SutramGridComponent_ng_template_5_div_0_button_12_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r40 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 69);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_button_12_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r40);
+      const ctx_r39 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r39.filterChecklistSearch = "");
+    });
+    \u0275\u0275element(1, "i", 46);
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramGridComponent_ng_template_5_div_0_div_28_span_6_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 77);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const item_r41 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(item_r41.code);
+  }
+}
+function SutramGridComponent_ng_template_5_div_0_div_28_span_7_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 78);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const item_r41 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(item_r41.count);
+  }
+}
+function SutramGridComponent_ng_template_5_div_0_div_28_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r47 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 70);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_div_28_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r47);
+      const item_r41 = restoredCtx.$implicit;
+      const ctx_r46 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r46.toggleChecklistItem(item_r41.value));
+    });
+    \u0275\u0275elementStart(1, "div", 71)(2, "input", 72);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_div_28_Template_input_click_2_listener($event) {
+      return $event.stopPropagation();
+    })("change", function SutramGridComponent_ng_template_5_div_0_div_28_Template_input_change_2_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r47);
+      const item_r41 = restoredCtx.$implicit;
+      const ctx_r49 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r49.toggleChecklistItem(item_r41.value));
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "span", 73);
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(5, "div", 74);
+    \u0275\u0275template(6, SutramGridComponent_ng_template_5_div_0_div_28_span_6_Template, 2, 1, "span", 75);
+    \u0275\u0275template(7, SutramGridComponent_ng_template_5_div_0_div_28_span_7_Template, 2, 1, "span", 76);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const item_r41 = ctx.$implicit;
+    const ctx_r37 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("checked", ctx_r37.selectedChecklistValues.has(item_r41.value));
+    \u0275\u0275advance(1);
+    \u0275\u0275property("title", item_r41.display);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", item_r41.display, " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", item_r41.code);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", item_r41.count !== void 0 && item_r41.count > 0);
+  }
+}
+function SutramGridComponent_ng_template_5_div_0_div_29_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 79);
+    \u0275\u0275element(1, "i", 37);
+    \u0275\u0275text(2, " No matching values ");
     \u0275\u0275elementEnd();
   }
 }
 function SutramGridComponent_ng_template_5_div_0_Template(rf, ctx) {
   if (rf & 1) {
-    const _r23 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 12)(1, "div", 13)(2, "span", 14);
-    \u0275\u0275element(3, "i", 15);
-    \u0275\u0275text(4);
+    const _r51 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 39)(1, "div", 40)(2, "div", 41);
+    \u0275\u0275element(3, "i", 42);
+    \u0275\u0275elementStart(4, "span", 43);
+    \u0275\u0275text(5);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "button", 16);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_5_listener() {
-      \u0275\u0275restoreView(_r23);
+    \u0275\u0275template(6, SutramGridComponent_ng_template_5_div_0_span_6_Template, 2, 1, "span", 44);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(7, "button", 45);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_7_listener() {
+      \u0275\u0275restoreView(_r51);
       \u0275\u0275nextContext(2);
-      const _r1 = \u0275\u0275reference(4);
-      return \u0275\u0275resetView(_r1.hide());
+      const _r2 = \u0275\u0275reference(4);
+      return \u0275\u0275resetView(_r2.hide());
     });
-    \u0275\u0275element(6, "i", 17);
+    \u0275\u0275element(8, "i", 46);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(7, "div", 18);
-    \u0275\u0275element(8, "i", 19);
-    \u0275\u0275elementStart(9, "input", 20);
-    \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_5_div_0_Template_input_ngModelChange_9_listener($event) {
-      \u0275\u0275restoreView(_r23);
-      const ctx_r24 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r24.filterChecklistSearch = $event);
-    });
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(10, SutramGridComponent_ng_template_5_div_0_button_10_Template, 2, 0, "button", 21);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "div", 22)(12, "div", 23)(13, "input", 24);
-    \u0275\u0275listener("change", function SutramGridComponent_ng_template_5_div_0_Template_input_change_13_listener($event) {
-      \u0275\u0275restoreView(_r23);
-      const ctx_r25 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r25.toggleSelectAllChecklist($event));
+    \u0275\u0275elementStart(9, "div", 47);
+    \u0275\u0275element(10, "i", 48);
+    \u0275\u0275elementStart(11, "input", 49);
+    \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_5_div_0_Template_input_ngModelChange_11_listener($event) {
+      \u0275\u0275restoreView(_r51);
+      const ctx_r52 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r52.filterChecklistSearch = $event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "label", 25);
-    \u0275\u0275text(15, " (Select All) ");
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(16, "span", 26);
-    \u0275\u0275text(17);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(18, "div", 27);
-    \u0275\u0275template(19, SutramGridComponent_ng_template_5_div_0_div_19_Template, 7, 5, "div", 28);
-    \u0275\u0275template(20, SutramGridComponent_ng_template_5_div_0_div_20_Template, 2, 0, "div", 29);
+    \u0275\u0275template(12, SutramGridComponent_ng_template_5_div_0_button_12_Template, 2, 0, "button", 50);
     \u0275\u0275elementEnd();
-    \u0275\u0275element(21, "div", 30);
-    \u0275\u0275elementStart(22, "div", 31)(23, "button", 32);
+    \u0275\u0275elementStart(13, "div", 51)(14, "label", 52)(15, "input", 53);
+    \u0275\u0275listener("change", function SutramGridComponent_ng_template_5_div_0_Template_input_change_15_listener($event) {
+      \u0275\u0275restoreView(_r51);
+      const ctx_r53 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r53.toggleSelectAllChecklist($event));
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(16, "span");
+    \u0275\u0275text(17, "(Select All)");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(18, "div", 54)(19, "button", 55);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_19_listener() {
+      \u0275\u0275restoreView(_r51);
+      const ctx_r54 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r54.selectAllFilteredItems());
+    });
+    \u0275\u0275text(20, "All");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(21, "span", 56);
+    \u0275\u0275text(22, "\xB7");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(23, "button", 55);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_23_listener() {
-      \u0275\u0275restoreView(_r23);
-      const ctx_r26 = \u0275\u0275nextContext(2);
-      const _r1 = \u0275\u0275reference(4);
-      return \u0275\u0275resetView(ctx_r26.clearCurrentColFilter(_r1));
+      \u0275\u0275restoreView(_r51);
+      const ctx_r55 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r55.clearAllFilteredItems());
     });
-    \u0275\u0275text(24, " Clear ");
+    \u0275\u0275text(24, "Clear");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(25, "span", 57);
+    \u0275\u0275text(26);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(27, "div", 58);
+    \u0275\u0275template(28, SutramGridComponent_ng_template_5_div_0_div_28_Template, 8, 5, "div", 59);
+    \u0275\u0275template(29, SutramGridComponent_ng_template_5_div_0_div_29_Template, 3, 0, "div", 60);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(25, "div", 33)(26, "button", 34);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_26_listener() {
-      \u0275\u0275restoreView(_r23);
+    \u0275\u0275elementStart(30, "div", 61)(31, "button", 62);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_31_listener() {
+      \u0275\u0275restoreView(_r51);
+      const ctx_r56 = \u0275\u0275nextContext(2);
+      const _r2 = \u0275\u0275reference(4);
+      return \u0275\u0275resetView(ctx_r56.clearCurrentColFilter(_r2));
+    });
+    \u0275\u0275element(32, "i", 63);
+    \u0275\u0275text(33, "Reset ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(34, "div", 64)(35, "button", 65);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_35_listener() {
+      \u0275\u0275restoreView(_r51);
       \u0275\u0275nextContext(2);
-      const _r1 = \u0275\u0275reference(4);
-      return \u0275\u0275resetView(_r1.hide());
+      const _r2 = \u0275\u0275reference(4);
+      return \u0275\u0275resetView(_r2.hide());
     });
-    \u0275\u0275text(27, " Cancel ");
+    \u0275\u0275text(36, " Cancel ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(28, "button", 35);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_28_listener() {
-      \u0275\u0275restoreView(_r23);
-      const ctx_r28 = \u0275\u0275nextContext(2);
-      const _r1 = \u0275\u0275reference(4);
-      return \u0275\u0275resetView(ctx_r28.applyCurrentColFilter(_r1));
+    \u0275\u0275elementStart(37, "button", 66);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_37_listener() {
+      \u0275\u0275restoreView(_r51);
+      const ctx_r58 = \u0275\u0275nextContext(2);
+      const _r2 = \u0275\u0275reference(4);
+      return \u0275\u0275resetView(ctx_r58.applyCurrentColFilter(_r2));
     });
-    \u0275\u0275text(29, " Apply ");
+    \u0275\u0275element(38, "i", 67);
+    \u0275\u0275text(39, " Apply ");
     \u0275\u0275elementEnd()()()();
   }
   if (rf & 2) {
-    const ctx_r7 = \u0275\u0275nextContext(2);
+    const ctx_r34 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(4);
-    \u0275\u0275textInterpolate1(" ", ctx_r7.activeFilterCol.name, " Filter ");
+    \u0275\u0275property("title", ctx_r34.activeFilterCol.name);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(ctx_r34.activeFilterCol.name);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r34.activeFilterCol.ref_table || ctx_r34.activeFilterCol.type === "ref");
     \u0275\u0275advance(5);
-    \u0275\u0275property("ngModel", ctx_r7.filterChecklistSearch);
+    \u0275\u0275property("ngModel", ctx_r34.filterChecklistSearch);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r7.filterChecklistSearch);
+    \u0275\u0275property("ngIf", ctx_r34.filterChecklistSearch);
     \u0275\u0275advance(3);
-    \u0275\u0275property("checked", ctx_r7.isAllChecklistSelected());
-    \u0275\u0275advance(4);
-    \u0275\u0275textInterpolate2(" ", ctx_r7.selectedChecklistValues.size, " / ", ctx_r7.currentChecklistItems.length, " ");
+    \u0275\u0275property("checked", ctx_r34.isAllChecklistSelected());
+    \u0275\u0275advance(11);
+    \u0275\u0275textInterpolate2(" ", ctx_r34.selectedChecklistValues.size, " / ", ctx_r34.currentChecklistItems.length, " ");
     \u0275\u0275advance(2);
-    \u0275\u0275property("ngForOf", ctx_r7.filteredChecklistItems);
+    \u0275\u0275property("ngForOf", ctx_r34.filteredChecklistItems);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r7.filteredChecklistItems.length === 0);
+    \u0275\u0275property("ngIf", ctx_r34.filteredChecklistItems.length === 0);
   }
 }
 function SutramGridComponent_ng_template_5_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275template(0, SutramGridComponent_ng_template_5_div_0_Template, 30, 8, "div", 11);
+    \u0275\u0275template(0, SutramGridComponent_ng_template_5_div_0_Template, 40, 10, "div", 38);
   }
   if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext();
-    \u0275\u0275property("ngIf", ctx_r2.activeFilterCol);
+    const ctx_r3 = \u0275\u0275nextContext();
+    \u0275\u0275property("ngIf", ctx_r3.activeFilterCol);
   }
 }
-function SutramGridComponent_ng_template_7_th_4_span_7_Template(rf, ctx) {
+function SutramGridComponent_ng_template_8_th_4_span_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 60);
+    \u0275\u0275elementStart(0, "span", 96);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
-function SutramGridComponent_ng_template_7_th_4_span_9_Template(rf, ctx) {
+function SutramGridComponent_ng_template_8_th_4_span_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 61);
+    \u0275\u0275elementStart(0, "span", 97);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const col_r31 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275property("title", col_r31.ref_table || col_r31.name);
+    const col_r61 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("title", "Reference: " + (col_r61.ref_table || col_r61.group));
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", col_r31.ref_table || col_r31.name, " ");
+    \u0275\u0275textInterpolate1(" ", col_r61.ref_table || col_r61.group, " ");
   }
 }
-function SutramGridComponent_ng_template_7_th_4_span_10_Template(rf, ctx) {
+function SutramGridComponent_ng_template_8_th_4_span_10_Template(rf, ctx) {
   if (rf & 1) {
-    const _r40 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "span", 62);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_7_th_4_span_10_Template_span_click_0_listener() {
-      \u0275\u0275restoreView(_r40);
-      const col_r31 = \u0275\u0275nextContext().$implicit;
-      const ctx_r38 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r38.onHeaderClick(col_r31));
-    });
-    \u0275\u0275element(1, "i", 63);
+    \u0275\u0275elementStart(0, "span", 98);
+    \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const col_r31 = \u0275\u0275nextContext().$implicit;
-    const ctx_r35 = \u0275\u0275nextContext(2);
+    const col_r61 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("title", "FK: " + (col_r61.ref_table || col_r61.name));
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", col_r61.ref_table || col_r61.name, " ");
+  }
+}
+function SutramGridComponent_ng_template_8_th_4_span_11_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 99);
+    \u0275\u0275text(1, " id ");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramGridComponent_ng_template_8_th_4_span_12_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r73 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 100);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_span_12_Template_span_click_0_listener() {
+      \u0275\u0275restoreView(_r73);
+      const col_r61 = \u0275\u0275nextContext().$implicit;
+      const ctx_r71 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r71.onHeaderClick(col_r61));
+    });
+    \u0275\u0275element(1, "i", 101);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const col_r61 = \u0275\u0275nextContext().$implicit;
+    const ctx_r67 = \u0275\u0275nextContext(2);
     let tmp_0_0;
     let tmp_1_0;
     let tmp_2_0;
-    \u0275\u0275classProp("is-sorted", ((tmp_0_0 = ctx_r35.state.activeSort()) == null ? null : tmp_0_0.colKey) === col_r31.name);
-    \u0275\u0275property("title", ((tmp_1_0 = ctx_r35.state.activeSort()) == null ? null : tmp_1_0.colKey) === col_r31.name ? ((tmp_1_0 = ctx_r35.state.activeSort()) == null ? null : tmp_1_0.order) === "ASC" ? "Sorted: ASC" : "Sorted: DESC" : "Sort");
+    \u0275\u0275classProp("is-sorted", ((tmp_0_0 = ctx_r67.state.activeSort()) == null ? null : tmp_0_0.colKey) === (col_r61.key || col_r61.name));
+    \u0275\u0275property("title", ((tmp_1_0 = ctx_r67.state.activeSort()) == null ? null : tmp_1_0.colKey) === (col_r61.key || col_r61.name) ? ((tmp_1_0 = ctx_r67.state.activeSort()) == null ? null : tmp_1_0.order) === "ASC" ? "Sorted: ASC" : "Sorted: DESC" : "Sort");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", ((tmp_2_0 = ctx_r35.state.activeSort()) == null ? null : tmp_2_0.colKey) === col_r31.name ? ((tmp_2_0 = ctx_r35.state.activeSort()) == null ? null : tmp_2_0.order) === "ASC" ? "pi-sort-amount-up-alt text-primary" : "pi-sort-amount-down text-primary" : "pi-sort-alt text-muted");
+    \u0275\u0275property("ngClass", ((tmp_2_0 = ctx_r67.state.activeSort()) == null ? null : tmp_2_0.colKey) === (col_r61.key || col_r61.name) ? ((tmp_2_0 = ctx_r67.state.activeSort()) == null ? null : tmp_2_0.order) === "ASC" ? "pi-sort-amount-up-alt text-primary" : "pi-sort-amount-down text-primary" : "pi-sort-alt text-muted");
   }
 }
-function SutramGridComponent_ng_template_7_th_4_span_11_Template(rf, ctx) {
+function SutramGridComponent_ng_template_8_th_4_span_13_Template(rf, ctx) {
   if (rf & 1) {
-    const _r44 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "span", 64);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_7_th_4_span_11_Template_span_click_0_listener($event) {
-      \u0275\u0275restoreView(_r44);
-      const col_r31 = \u0275\u0275nextContext().$implicit;
-      const ctx_r42 = \u0275\u0275nextContext(2);
-      const _r1 = \u0275\u0275reference(4);
-      return \u0275\u0275resetView(ctx_r42.openColumnFilter($event, col_r31, _r1));
+    const _r77 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 102);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_span_13_Template_span_click_0_listener($event) {
+      \u0275\u0275restoreView(_r77);
+      const col_r61 = \u0275\u0275nextContext().$implicit;
+      const ctx_r75 = \u0275\u0275nextContext(2);
+      const _r2 = \u0275\u0275reference(4);
+      return \u0275\u0275resetView(ctx_r75.openColumnFilter($event, col_r61, _r2));
     });
-    \u0275\u0275element(1, "i", 63);
+    \u0275\u0275element(1, "i", 101);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const col_r31 = \u0275\u0275nextContext().$implicit;
-    const ctx_r36 = \u0275\u0275nextContext(2);
-    \u0275\u0275classProp("is-filtered", ctx_r36.isColumnFiltered(col_r31.name));
-    \u0275\u0275property("title", ctx_r36.isColumnFiltered(col_r31.name) ? "Filter Active" : "Filter");
+    const col_r61 = \u0275\u0275nextContext().$implicit;
+    const ctx_r68 = \u0275\u0275nextContext(2);
+    \u0275\u0275classProp("is-filtered", ctx_r68.isColumnFiltered(col_r61.key || col_r61.name));
+    \u0275\u0275property("title", ctx_r68.isColumnFiltered(col_r61.key || col_r61.name) ? "Filter Active" : "Filter");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", ctx_r36.isColumnFiltered(col_r31.name) ? "pi-filter-fill text-primary" : "pi-filter");
+    \u0275\u0275property("ngClass", ctx_r68.isColumnFiltered(col_r61.key || col_r61.name) ? "pi-filter-fill text-primary" : "pi-filter");
   }
 }
-function SutramGridComponent_ng_template_7_th_4_Template(rf, ctx) {
+function SutramGridComponent_ng_template_8_th_4_Template(rf, ctx) {
   if (rf & 1) {
-    const _r47 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "th", 50);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_7_th_4_Template_th_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r47);
-      const col_r31 = restoredCtx.$implicit;
-      const ctx_r46 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r46.onHeaderClick(col_r31));
+    const _r80 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "th", 84);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_Template_th_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r80);
+      const col_r61 = restoredCtx.$implicit;
+      const ctx_r79 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r79.onHeaderClick(col_r61));
     });
-    \u0275\u0275elementStart(1, "div", 51)(2, "span", 52)(3, "strong", 53);
+    \u0275\u0275elementStart(1, "div", 85)(2, "span", 86)(3, "strong", 87);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "span", 54);
+    \u0275\u0275elementStart(5, "span", 88);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(7, SutramGridComponent_ng_template_7_th_4_span_7_Template, 2, 0, "span", 55);
+    \u0275\u0275template(7, SutramGridComponent_ng_template_8_th_4_span_7_Template, 2, 0, "span", 89);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "div", 56);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_7_th_4_Template_div_click_8_listener($event) {
+    \u0275\u0275elementStart(8, "div", 90);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_Template_div_click_8_listener($event) {
       return $event.stopPropagation();
     });
-    \u0275\u0275template(9, SutramGridComponent_ng_template_7_th_4_span_9_Template, 2, 2, "span", 57);
-    \u0275\u0275template(10, SutramGridComponent_ng_template_7_th_4_span_10_Template, 2, 4, "span", 58);
-    \u0275\u0275template(11, SutramGridComponent_ng_template_7_th_4_span_11_Template, 2, 4, "span", 59);
+    \u0275\u0275template(9, SutramGridComponent_ng_template_8_th_4_span_9_Template, 2, 2, "span", 91);
+    \u0275\u0275template(10, SutramGridComponent_ng_template_8_th_4_span_10_Template, 2, 2, "span", 92);
+    \u0275\u0275template(11, SutramGridComponent_ng_template_8_th_4_span_11_Template, 2, 0, "span", 93);
+    \u0275\u0275template(12, SutramGridComponent_ng_template_8_th_4_span_12_Template, 2, 4, "span", 94);
+    \u0275\u0275template(13, SutramGridComponent_ng_template_8_th_4_span_13_Template, 2, 4, "span", 95);
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
-    const col_r31 = ctx.$implicit;
-    const idx_r32 = ctx.index;
-    const ctx_r30 = \u0275\u0275nextContext(2);
-    \u0275\u0275styleProp("width", ctx_r30.getColumnWidth(col_r31), "px")("min-width", ctx_r30.getColumnWidth(col_r31), "px")("max-width", ctx_r30.getColumnWidth(col_r31), "px");
-    \u0275\u0275classProp("sortable-th", ctx_r30.state.sortingEnabled());
+    const col_r61 = ctx.$implicit;
+    const idx_r62 = ctx.index;
+    const ctx_r60 = \u0275\u0275nextContext(2);
+    \u0275\u0275styleProp("width", ctx_r60.getColumnWidth(col_r61), "px")("min-width", ctx_r60.getColumnWidth(col_r61), "px")("max-width", ctx_r60.getColumnWidth(col_r61), "px");
+    \u0275\u0275classProp("sortable-th", ctx_r60.state.sortingEnabled());
     \u0275\u0275advance(2);
-    \u0275\u0275property("title", col_r31.description || col_r31.name);
+    \u0275\u0275property("title", col_r61.description || col_r61.short_name || col_r61.name);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r30.getColLetter(idx_r32));
+    \u0275\u0275textInterpolate(ctx_r60.getColLetter(idx_r62));
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(col_r31.name);
+    \u0275\u0275textInterpolate(col_r61.short_name || col_r61.name);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", col_r31.not_null);
+    \u0275\u0275property("ngIf", col_r61.not_null);
     \u0275\u0275advance(2);
-    \u0275\u0275property("ngIf", col_r31.type === "ref" || col_r31.ref_table);
+    \u0275\u0275property("ngIf", col_r61.is_fk_subcol);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r30.state.sortingEnabled());
+    \u0275\u0275property("ngIf", !col_r61.is_fk_subcol && (col_r61.type === "ref" || col_r61.ref_table || col_r61.is_fk_main));
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r30.state.filtersEnabled());
-  }
-}
-function SutramGridComponent_ng_template_7_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "th", 46)(2, "div", 47);
-    \u0275\u0275element(3, "i", 48);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275template(4, SutramGridComponent_ng_template_7_th_4_Template, 12, 15, "th", 49);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const columns_r29 = ctx.$implicit;
-    \u0275\u0275advance(4);
-    \u0275\u0275property("ngForOf", columns_r29);
-  }
-}
-function SutramGridComponent_ng_template_8_span_2_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 71);
-    \u0275\u0275text(1, "+");
-    \u0275\u0275elementEnd();
-  }
-}
-function SutramGridComponent_ng_template_8_span_3_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 72);
-    \u0275\u0275text(1, "\u2022");
-    \u0275\u0275elementEnd();
-  }
-}
-function SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_ng_template_1_span_3_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 84);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const item_r62 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("ngIf", col_r61.is_fk_raw);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(item_r62.code);
-  }
-}
-function SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_ng_template_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 81)(1, "span", 82);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(3, SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_ng_template_1_span_3_Template, 2, 1, "span", 83);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const item_r62 = ctx.$implicit;
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(item_r62.display);
+    \u0275\u0275property("ngIf", ctx_r60.state.sortingEnabled());
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", item_r62.code);
-  }
-}
-function SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r67 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "p-autoComplete", 79);
-    \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_Template_p_autoComplete_ngModelChange_0_listener($event) {
-      \u0275\u0275restoreView(_r67);
-      const col_r55 = \u0275\u0275nextContext(2).$implicit;
-      const row_r49 = \u0275\u0275nextContext().$implicit;
-      return \u0275\u0275resetView(row_r49.cells[col_r55.name].value = $event);
-    })("completeMethod", function SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_Template_p_autoComplete_completeMethod_0_listener($event) {
-      \u0275\u0275restoreView(_r67);
-      const col_r55 = \u0275\u0275nextContext(2).$implicit;
-      const row_r49 = \u0275\u0275nextContext().$implicit;
-      const ctx_r69 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r69.searchRefOptions($event, col_r55, row_r49));
-    })("onSelect", function SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_Template_p_autoComplete_onSelect_0_listener($event) {
-      \u0275\u0275restoreView(_r67);
-      const col_r55 = \u0275\u0275nextContext(2).$implicit;
-      const ctx_r73 = \u0275\u0275nextContext();
-      const rowIndex_r50 = ctx_r73.rowIndex;
-      const row_r49 = ctx_r73.$implicit;
-      const ctx_r72 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r72.onRefSuggestionSelect($event, rowIndex_r50, col_r55.name, row_r49));
-    })("onBlur", function SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_Template_p_autoComplete_onBlur_0_listener() {
-      \u0275\u0275restoreView(_r67);
-      const col_r55 = \u0275\u0275nextContext(2).$implicit;
-      const ctx_r76 = \u0275\u0275nextContext();
-      const rowIndex_r50 = ctx_r76.rowIndex;
-      const row_r49 = ctx_r76.$implicit;
-      const ctx_r75 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r75.onCellBlur(rowIndex_r50, col_r55.name, row_r49));
-    })("keydown", function SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_Template_p_autoComplete_keydown_0_listener($event) {
-      \u0275\u0275restoreView(_r67);
-      const col_r55 = \u0275\u0275nextContext(2).$implicit;
-      const ctx_r79 = \u0275\u0275nextContext();
-      const rowIndex_r50 = ctx_r79.rowIndex;
-      const row_r49 = ctx_r79.$implicit;
-      const ctx_r78 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r78.onCellKeydown($event, rowIndex_r50, col_r55.name, row_r49));
-    });
-    \u0275\u0275template(1, SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_ng_template_1_Template, 4, 2, "ng-template", 80);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const col_r55 = \u0275\u0275nextContext(2).$implicit;
-    const row_r49 = \u0275\u0275nextContext().$implicit;
-    const ctx_r58 = \u0275\u0275nextContext();
-    \u0275\u0275property("ngModel", row_r49.cells[col_r55.name].value)("suggestions", ctx_r58.filteredSuggestions)("dropdown", true)("forceSelection", false);
-  }
-}
-function SutramGridComponent_ng_template_8_td_6_ng_template_3_ng_template_1_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r85 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "input", 85);
-    \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_8_td_6_ng_template_3_ng_template_1_Template_input_ngModelChange_0_listener($event) {
-      \u0275\u0275restoreView(_r85);
-      const col_r55 = \u0275\u0275nextContext(2).$implicit;
-      const row_r49 = \u0275\u0275nextContext().$implicit;
-      return \u0275\u0275resetView(row_r49.cells[col_r55.name].value = $event);
-    })("blur", function SutramGridComponent_ng_template_8_td_6_ng_template_3_ng_template_1_Template_input_blur_0_listener() {
-      \u0275\u0275restoreView(_r85);
-      const col_r55 = \u0275\u0275nextContext(2).$implicit;
-      const ctx_r88 = \u0275\u0275nextContext();
-      const rowIndex_r50 = ctx_r88.rowIndex;
-      const row_r49 = ctx_r88.$implicit;
-      const ctx_r87 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r87.onCellBlur(rowIndex_r50, col_r55.name, row_r49));
-    })("keydown", function SutramGridComponent_ng_template_8_td_6_ng_template_3_ng_template_1_Template_input_keydown_0_listener($event) {
-      \u0275\u0275restoreView(_r85);
-      const col_r55 = \u0275\u0275nextContext(2).$implicit;
-      const ctx_r91 = \u0275\u0275nextContext();
-      const rowIndex_r50 = ctx_r91.rowIndex;
-      const row_r49 = ctx_r91.$implicit;
-      const ctx_r90 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r90.onCellKeydown($event, rowIndex_r50, col_r55.name, row_r49));
-    });
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const col_r55 = \u0275\u0275nextContext(2).$implicit;
-    const row_r49 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275property("ngModel", row_r49.cells[col_r55.name].value);
-  }
-}
-function SutramGridComponent_ng_template_8_td_6_ng_template_3_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275template(0, SutramGridComponent_ng_template_8_td_6_ng_template_3_p_autoComplete_0_Template, 2, 4, "p-autoComplete", 77);
-    \u0275\u0275template(1, SutramGridComponent_ng_template_8_td_6_ng_template_3_ng_template_1_Template, 1, 1, "ng-template", null, 78, \u0275\u0275templateRefExtractor);
-  }
-  if (rf & 2) {
-    const _r59 = \u0275\u0275reference(2);
-    const col_r55 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275property("ngIf", col_r55.type === "ref" || col_r55.ref_table)("ngIfElse", _r59);
-  }
-}
-function SutramGridComponent_ng_template_8_td_6_ng_template_4_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 86);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const col_r55 = \u0275\u0275nextContext().$implicit;
-    const row_r49 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(row_r49.cells[col_r55.name] == null ? null : row_r49.cells[col_r55.name].value);
-  }
-}
-function SutramGridComponent_ng_template_8_td_6_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r100 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "td", 73);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_td_6_Template_td_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r100);
-      const col_r55 = restoredCtx.$implicit;
-      const rowIndex_r50 = \u0275\u0275nextContext().rowIndex;
-      const ctx_r98 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r98.onCellClick(rowIndex_r50, col_r55.name));
-    });
-    \u0275\u0275elementStart(1, "div", 74)(2, "p-cellEditor");
-    \u0275\u0275template(3, SutramGridComponent_ng_template_8_td_6_ng_template_3_Template, 3, 2, "ng-template", 75);
-    \u0275\u0275template(4, SutramGridComponent_ng_template_8_td_6_ng_template_4_Template, 2, 1, "ng-template", 76);
-    \u0275\u0275elementEnd()()();
-  }
-  if (rf & 2) {
-    const col_r55 = ctx.$implicit;
-    const ctx_r101 = \u0275\u0275nextContext();
-    const row_r49 = ctx_r101.$implicit;
-    const rowIndex_r50 = ctx_r101.rowIndex;
-    const ctx_r54 = \u0275\u0275nextContext();
-    let tmp_4_0;
-    \u0275\u0275styleProp("width", ctx_r54.getColumnWidth(col_r55), "px")("min-width", ctx_r54.getColumnWidth(col_r55), "px")("max-width", ctx_r54.getColumnWidth(col_r55), "px");
-    \u0275\u0275property("pEditableColumn", row_r49.cells[col_r55.name] == null ? null : row_r49.cells[col_r55.name].value);
-    \u0275\u0275advance(1);
-    \u0275\u0275classProp("cell-active", ((tmp_4_0 = ctx_r54.state.selectedCell()) == null ? null : tmp_4_0.rowIdx) === rowIndex_r50 && ((tmp_4_0 = ctx_r54.state.selectedCell()) == null ? null : tmp_4_0.colKey) === col_r55.name)("cell-bad", !(row_r49.cells[col_r55.name] == null ? null : row_r49.cells[col_r55.name].isValid))("cell-edited", row_r49.cells[col_r55.name] == null ? null : row_r49.cells[col_r55.name].isModified)("cell-new", row_r49.isNew);
-    \u0275\u0275property("title", (row_r49.cells[col_r55.name] == null ? null : row_r49.cells[col_r55.name].errorMsg) || "");
+    \u0275\u0275property("ngIf", ctx_r60.state.filtersEnabled());
   }
 }
 function SutramGridComponent_ng_template_8_Template(rf, ctx) {
   if (rf & 1) {
-    const _r103 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "tr", 65)(1, "td", 66);
-    \u0275\u0275listener("contextmenu", function SutramGridComponent_ng_template_8_Template_td_contextmenu_1_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r103);
-      const row_r49 = restoredCtx.$implicit;
-      const ctx_r102 = \u0275\u0275nextContext();
-      const _r0 = \u0275\u0275reference(2);
-      return \u0275\u0275resetView(ctx_r102.openRowContextMenu($event, row_r49, _r0));
+    const _r83 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "tr")(1, "th", 80);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_Template_th_click_1_listener($event) {
+      \u0275\u0275restoreView(_r83);
+      const ctx_r82 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r82.openConfig.emit($event));
     });
-    \u0275\u0275template(2, SutramGridComponent_ng_template_8_span_2_Template, 2, 0, "span", 67);
-    \u0275\u0275template(3, SutramGridComponent_ng_template_8_span_3_Template, 2, 0, "span", 68);
-    \u0275\u0275elementStart(4, "span", 69);
-    \u0275\u0275text(5);
+    \u0275\u0275elementStart(2, "div", 81);
+    \u0275\u0275element(3, "i", 82);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(6, SutramGridComponent_ng_template_8_td_6_Template, 5, 16, "td", 70);
+    \u0275\u0275template(4, SutramGridComponent_ng_template_8_th_4_Template, 14, 17, "th", 83);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const row_r49 = ctx.$implicit;
-    const columns_r51 = ctx.columns;
-    \u0275\u0275classProp("row-new", row_r49.isNew)("row-edited", !row_r49.isNew && row_r49.isModified)("row-has-error", row_r49.hasError)("row-synced", row_r49.isSynced);
-    \u0275\u0275property("pContextMenuRow", row_r49);
-    \u0275\u0275advance(2);
-    \u0275\u0275property("ngIf", row_r49.isNew);
+    const columns_r59 = ctx.$implicit;
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngForOf", columns_r59);
+  }
+}
+function SutramGridComponent_ng_template_9_span_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 108);
+    \u0275\u0275text(1, "+");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramGridComponent_ng_template_9_span_3_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 109);
+    \u0275\u0275text(1, "\u2022");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r96 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "input", 113, 114);
+    \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template_input_ngModelChange_1_listener($event) {
+      \u0275\u0275restoreView(_r96);
+      const ctx_r95 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r95.editingValue = $event);
+    })("input", function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template_input_input_1_listener() {
+      \u0275\u0275restoreView(_r96);
+      const col_r90 = \u0275\u0275nextContext().$implicit;
+      const row_r84 = \u0275\u0275nextContext().$implicit;
+      const ctx_r97 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r97.onEditorInput(ctx_r97.editingValue, col_r90, row_r84));
+    })("keydown", function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template_input_keydown_1_listener($event) {
+      \u0275\u0275restoreView(_r96);
+      const col_r90 = \u0275\u0275nextContext().$implicit;
+      const ctx_r101 = \u0275\u0275nextContext();
+      const rowIndex_r85 = ctx_r101.rowIndex;
+      const row_r84 = ctx_r101.$implicit;
+      const ctx_r100 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r100.onCellEditorKeydown($event, rowIndex_r85, col_r90.key || col_r90.name, row_r84));
+    })("blur", function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template_input_blur_1_listener() {
+      \u0275\u0275restoreView(_r96);
+      const col_r90 = \u0275\u0275nextContext().$implicit;
+      const ctx_r104 = \u0275\u0275nextContext();
+      const rowIndex_r85 = ctx_r104.rowIndex;
+      const row_r84 = ctx_r104.$implicit;
+      const ctx_r103 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r103.onCellEditorBlur(rowIndex_r85, col_r90.key || col_r90.name, row_r84));
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r91 = \u0275\u0275nextContext(3);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", !row_r49.isNew && row_r49.isModified);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(row_r49.rowNum);
+    \u0275\u0275property("ngModel", ctx_r91.editingValue);
+  }
+}
+function SutramGridComponent_ng_template_9_td_6_ng_template_3_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 115);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const col_r90 = \u0275\u0275nextContext().$implicit;
+    const row_r84 = \u0275\u0275nextContext().$implicit;
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngForOf", columns_r51);
+    \u0275\u0275textInterpolate(row_r84.cells[col_r90.key || col_r90.name] == null ? null : row_r84.cells[col_r90.key || col_r90.name].value);
+  }
+}
+function SutramGridComponent_ng_template_9_td_6_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r110 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "td")(1, "div", 110);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_9_td_6_Template_div_click_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r110);
+      const col_r90 = restoredCtx.$implicit;
+      const rowIndex_r85 = \u0275\u0275nextContext().rowIndex;
+      const ctx_r108 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r108.onCellClick(rowIndex_r85, col_r90.key || col_r90.name, $event));
+    })("dblclick", function SutramGridComponent_ng_template_9_td_6_Template_div_dblclick_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r110);
+      const col_r90 = restoredCtx.$implicit;
+      const ctx_r112 = \u0275\u0275nextContext();
+      const rowIndex_r85 = ctx_r112.rowIndex;
+      const row_r84 = ctx_r112.$implicit;
+      const ctx_r111 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r111.startCellEdit(rowIndex_r85, col_r90.key || col_r90.name, row_r84, $event));
+    })("contextmenu", function SutramGridComponent_ng_template_9_td_6_Template_div_contextmenu_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r110);
+      const col_r90 = restoredCtx.$implicit;
+      const ctx_r114 = \u0275\u0275nextContext();
+      const rowIndex_r85 = ctx_r114.rowIndex;
+      const row_r84 = ctx_r114.$implicit;
+      const ctx_r113 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r113.openCellContextMenu($event, rowIndex_r85, col_r90.key || col_r90.name, row_r84));
+    });
+    \u0275\u0275template(2, SutramGridComponent_ng_template_9_td_6_ng_container_2_Template, 3, 1, "ng-container", 111);
+    \u0275\u0275template(3, SutramGridComponent_ng_template_9_td_6_ng_template_3_Template, 2, 1, "ng-template", null, 112, \u0275\u0275templateRefExtractor);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const col_r90 = ctx.$implicit;
+    const _r92 = \u0275\u0275reference(4);
+    const ctx_r115 = \u0275\u0275nextContext();
+    const rowIndex_r85 = ctx_r115.rowIndex;
+    const row_r84 = ctx_r115.$implicit;
+    const ctx_r89 = \u0275\u0275nextContext();
+    let tmp_3_0;
+    \u0275\u0275styleProp("width", ctx_r89.getColumnWidth(col_r90), "px")("min-width", ctx_r89.getColumnWidth(col_r90), "px")("max-width", ctx_r89.getColumnWidth(col_r90), "px");
+    \u0275\u0275advance(1);
+    \u0275\u0275classProp("cell-active", ((tmp_3_0 = ctx_r89.state.selectedCell()) == null ? null : tmp_3_0.rowIdx) === rowIndex_r85 && ((tmp_3_0 = ctx_r89.state.selectedCell()) == null ? null : tmp_3_0.colKey) === (col_r90.key || col_r90.name))("cell-editing", ctx_r89.isCellEditing(rowIndex_r85, col_r90.key || col_r90.name))("cell-bad", !(row_r84.cells[col_r90.key || col_r90.name] == null ? null : row_r84.cells[col_r90.key || col_r90.name].isValid))("cell-edited", row_r84.cells[col_r90.key || col_r90.name] == null ? null : row_r84.cells[col_r90.key || col_r90.name].isModified)("cell-new", row_r84.isNew && ctx_r89.isRowPopulated(row_r84));
+    \u0275\u0275property("title", (row_r84.cells[col_r90.key || col_r90.name] == null ? null : row_r84.cells[col_r90.key || col_r90.name].errorMessage) || "");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r89.isCellEditing(rowIndex_r85, col_r90.key || col_r90.name))("ngIfElse", _r92);
   }
 }
 function SutramGridComponent_ng_template_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 87);
-    \u0275\u0275element(2, "i", 88);
+    const _r117 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "tr")(1, "td", 103);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_9_Template_td_click_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r117);
+      const rowIndex_r85 = restoredCtx.rowIndex;
+      const row_r84 = restoredCtx.$implicit;
+      const ctx_r116 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r116.onRowHeaderClick(rowIndex_r85, row_r84, $event));
+    })("contextmenu", function SutramGridComponent_ng_template_9_Template_td_contextmenu_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r117);
+      const row_r84 = restoredCtx.$implicit;
+      const rowIndex_r85 = restoredCtx.rowIndex;
+      const ctx_r118 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r118.openRowContextMenu($event, row_r84, rowIndex_r85));
+    });
+    \u0275\u0275template(2, SutramGridComponent_ng_template_9_span_2_Template, 2, 0, "span", 104);
+    \u0275\u0275template(3, SutramGridComponent_ng_template_9_span_3_Template, 2, 0, "span", 105);
+    \u0275\u0275elementStart(4, "span", 106);
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(6, SutramGridComponent_ng_template_9_td_6_Template, 5, 19, "td", 107);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const row_r84 = ctx.$implicit;
+    const rowIndex_r85 = ctx.rowIndex;
+    const columns_r86 = ctx.columns;
+    const ctx_r6 = \u0275\u0275nextContext();
+    \u0275\u0275classProp("row-new", row_r84.isNew && ctx_r6.isRowPopulated(row_r84))("row-edited", !row_r84.isNew && row_r84.isModified)("row-has-error", row_r84.hasError)("row-synced", row_r84.isSynced)("row-selected", ctx_r6.selectedRowIdx === rowIndex_r85);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", row_r84.isNew && ctx_r6.isRowPopulated(row_r84));
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !row_r84.isNew && row_r84.isModified);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(row_r84.rowNum);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngForOf", columns_r86);
+  }
+}
+function SutramGridComponent_ng_template_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "tr")(1, "td", 116);
+    \u0275\u0275element(2, "i", 117);
     \u0275\u0275text(3, " \u0915\u094B\u0908 \u0921\u0947\u091F\u093E \u0909\u092A\u0932\u092C\u094D\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u090A\u092A\u0930 \u0938\u0947 Excel \u092B\u093C\u093E\u0907\u0932 \u0916\u094B\u0932\u0947\u0902 \u092F\u093E 'Load Data' \u092A\u0930 \u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0947\u0902\u0964 ");
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
-    const ctx_r5 = \u0275\u0275nextContext();
+    const ctx_r7 = \u0275\u0275nextContext();
     \u0275\u0275advance(1);
-    \u0275\u0275attribute("colspan", ctx_r5.headers.length + 1);
+    \u0275\u0275attribute("colspan", ctx_r7.headers.length + 1);
   }
 }
-function SutramGridComponent_div_10_Template(rf, ctx) {
+function SutramGridComponent_div_11_Template(rf, ctx) {
   if (rf & 1) {
-    const _r105 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 89)(1, "div", 90)(2, "div", 91);
-    \u0275\u0275element(3, "i", 92);
-    \u0275\u0275elementStart(4, "strong", 93);
+    const _r120 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 118)(1, "div", 119)(2, "div", 120);
+    \u0275\u0275element(3, "i", 121);
+    \u0275\u0275elementStart(4, "strong", 122);
     \u0275\u0275text(5, "\u0938\u094D\u092E\u093E\u0930\u094D\u091F \u092C\u0948\u091A \u0938\u0941\u0927\u093E\u0930 (Solve All Matches)");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "button", 94);
-    \u0275\u0275listener("click", function SutramGridComponent_div_10_Template_button_click_6_listener() {
-      \u0275\u0275restoreView(_r105);
-      const ctx_r104 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r104.dismissPrompt());
+    \u0275\u0275elementStart(6, "button", 123);
+    \u0275\u0275listener("click", function SutramGridComponent_div_11_Template_button_click_6_listener() {
+      \u0275\u0275restoreView(_r120);
+      const ctx_r119 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r119.dismissPrompt());
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(7, "div", 95)(8, "p", 96);
+    \u0275\u0275elementStart(7, "div", 124)(8, "p", 125);
     \u0275\u0275text(9, " \u0906\u092A\u0928\u0947 \u092A\u0902\u0915\u094D\u0924\u093F ");
     \u0275\u0275elementStart(10, "strong");
     \u0275\u0275text(11);
@@ -128267,8 +128587,8 @@ function SutramGridComponent_div_10_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275text(18, "' \u091A\u0941\u0928\u093E \u0939\u0948\u0964 ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(19, "div", 97);
-    \u0275\u0275element(20, "i", 98);
+    \u0275\u0275elementStart(19, "div", 126);
+    \u0275\u0275element(20, "i", 127);
     \u0275\u0275elementStart(21, "span");
     \u0275\u0275text(22, " \u0915\u0949\u0932\u092E ");
     \u0275\u0275elementStart(23, "strong");
@@ -128280,57 +128600,61 @@ function SutramGridComponent_div_10_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275text(28, " \u0905\u0928\u094D\u092F \u092A\u0902\u0915\u094D\u0924\u093F\u092F\u094B\u0902 \u092E\u0947\u0902 \u092D\u0940 \u092F\u0939\u0940 \u0905\u092E\u093E\u0928\u094D\u092F \u092E\u093E\u0928 \u0939\u0948\u0964 ");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(29, "div", 99)(30, "input", 100);
-    \u0275\u0275listener("ngModelChange", function SutramGridComponent_div_10_Template_input_ngModelChange_30_listener($event) {
-      \u0275\u0275restoreView(_r105);
-      const ctx_r106 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r106.promptState.saveToDictionary = $event);
+    \u0275\u0275elementStart(29, "div", 128)(30, "input", 129);
+    \u0275\u0275listener("ngModelChange", function SutramGridComponent_div_11_Template_input_ngModelChange_30_listener($event) {
+      \u0275\u0275restoreView(_r120);
+      const ctx_r121 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r121.promptState.saveToDictionary = $event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(31, "label", 101);
+    \u0275\u0275elementStart(31, "label", 130);
     \u0275\u0275text(32, " \u092D\u0935\u093F\u0937\u094D\u092F \u0915\u0947 \u0932\u093F\u090F \u0921\u093F\u0915\u094D\u0936\u0928\u0930\u0940 \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902 (Save alias mapping to dictionary) ");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(33, "div", 102)(34, "button", 103);
-    \u0275\u0275listener("click", function SutramGridComponent_div_10_Template_button_click_34_listener() {
-      \u0275\u0275restoreView(_r105);
-      const ctx_r107 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r107.applySingleCellOnly());
+    \u0275\u0275elementStart(33, "div", 131)(34, "button", 132);
+    \u0275\u0275listener("click", function SutramGridComponent_div_11_Template_button_click_34_listener() {
+      \u0275\u0275restoreView(_r120);
+      const ctx_r122 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r122.applySingleCellOnly());
     });
     \u0275\u0275text(35, " \u0915\u0947\u0935\u0932 \u0907\u0938\u0940 \u092A\u0902\u0915\u094D\u0924\u093F \u092E\u0947\u0902 (Single Row Only) ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(36, "button", 104);
-    \u0275\u0275listener("click", function SutramGridComponent_div_10_Template_button_click_36_listener() {
-      \u0275\u0275restoreView(_r105);
-      const ctx_r108 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r108.confirmSolveAll());
+    \u0275\u0275elementStart(36, "button", 133);
+    \u0275\u0275listener("click", function SutramGridComponent_div_11_Template_button_click_36_listener() {
+      \u0275\u0275restoreView(_r120);
+      const ctx_r123 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r123.confirmSolveAll());
     });
     \u0275\u0275text(37);
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
-    const ctx_r6 = \u0275\u0275nextContext();
+    const ctx_r8 = \u0275\u0275nextContext();
     \u0275\u0275advance(11);
-    \u0275\u0275textInterpolate1("#", ctx_r6.promptState.rowIdx + 1, "");
+    \u0275\u0275textInterpolate1("#", ctx_r8.promptState.rowIdx + 1, "");
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(ctx_r6.promptState.originalBadValue);
+    \u0275\u0275textInterpolate(ctx_r8.promptState.originalBadValue);
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(ctx_r6.promptState.newSelectedDisplay);
+    \u0275\u0275textInterpolate(ctx_r8.promptState.newSelectedDisplay);
     \u0275\u0275advance(7);
-    \u0275\u0275textInterpolate(ctx_r6.promptState.colKey);
+    \u0275\u0275textInterpolate(ctx_r8.promptState.colKey);
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(ctx_r6.promptState.matchingCount);
+    \u0275\u0275textInterpolate(ctx_r8.promptState.matchingCount);
     \u0275\u0275advance(3);
-    \u0275\u0275property("ngModel", ctx_r6.promptState.saveToDictionary);
+    \u0275\u0275property("ngModel", ctx_r8.promptState.saveToDictionary);
     \u0275\u0275advance(7);
-    \u0275\u0275textInterpolate1(" \u0938\u092D\u0940 ", ctx_r6.promptState.matchingCount + 1, " \u0938\u0941\u0927\u093E\u0930\u0947\u0902 (Solve All) ");
+    \u0275\u0275textInterpolate1(" \u0938\u092D\u0940 ", ctx_r8.promptState.matchingCount + 1, " \u0938\u0941\u0927\u093E\u0930\u0947\u0902 (Solve All) ");
   }
 }
+var _c0 = function() {
+  return { autoSize: false, numToleratedItems: 30 };
+};
 var SutramGridComponent = class _SutramGridComponent {
   state;
   clipboard;
   audit;
   refCache;
   el;
+  cdr;
   headers = [];
   rows = [];
   filterOnlyErrors = false;
@@ -128340,9 +128664,35 @@ var SutramGridComponent = class _SutramGridComponent {
   loadMore = new EventEmitter();
   filterChanged = new EventEmitter();
   sortChanged = new EventEmitter();
-  // Autocomplete suggestions state
-  filteredSuggestions = [];
-  // Inline "Solve All" prompt state
+  openConfig = new EventEmitter();
+  // ── Inline Cell Editing State ────────────────────────────────
+  editingCell = null;
+  editingValue = "";
+  originalEditingValue = "";
+  editingColDef = null;
+  // ── Smart FK Autocomplete Dropdown State ─────────────────────
+  dropdownOpen = false;
+  dropdownOptions = [];
+  highlightedIdx = -1;
+  dropdownPos = { top: 0, left: 0, minWidth: 270 };
+  // ── Row Selection State ─────────────────────────────────────
+  selectedRowIdx = null;
+  // ── Sleek Custom Context Menu State ──────────────────────────
+  contextMenuState = {
+    visible: false,
+    type: "row",
+    x: 0,
+    y: 0,
+    rowIdx: -1,
+    colKey: null,
+    row: null
+  };
+  // ── Column Filter Popover State ──────────────────────────────
+  activeFilterCol = null;
+  filterChecklistSearch = "";
+  currentChecklistItems = [];
+  selectedChecklistValues = /* @__PURE__ */ new Set();
+  // ── Inline Batch Mistake Prompt State ────────────────────────
   promptState = {
     visible: false,
     rowIdx: -1,
@@ -128353,75 +128703,150 @@ var SutramGridComponent = class _SutramGridComponent {
     matchingCount: 0,
     saveToDictionary: true
   };
-  // Excel Column Header Filter Popover State
-  activeFilterCol = null;
-  filterChecklistSearch = "";
-  currentChecklistItems = [];
-  selectedChecklistValues = /* @__PURE__ */ new Set();
-  // Context menu items
-  contextMenuItems = [];
-  contextSelectedRow = null;
-  scrollCleanup;
-  constructor(state2, clipboard, audit, refCache, el) {
+  scrollCleanups = [];
+  lastLoadMoreEmitTime = 0;
+  lastKnownScrollTop = 0;
+  isRestoringScroll = false;
+  isResetting = false;
+  trackByRowNum = (index, row) => {
+    return row.rowNum ?? row._id ?? row.id ?? index;
+  };
+  isRowPopulated(row) {
+    if (!row || !row.cells)
+      return false;
+    for (const k in row.cells) {
+      const val = row.cells[k]?.value;
+      if (val !== void 0 && val !== null && String(val).trim() !== "") {
+        return true;
+      }
+    }
+    return false;
+  }
+  constructor(state2, clipboard, audit, refCache, el, cdr) {
     this.state = state2;
     this.clipboard = clipboard;
     this.audit = audit;
     this.refCache = refCache;
     this.el = el;
-    this.initContextMenu();
+    this.cdr = cdr;
   }
   ngOnChanges(changes) {
     if (changes["headers"] && this.headers) {
       const refTables = this.headers.filter((h) => h.ref_table || h.type === "ref").map((h) => h.ref_table).filter(Boolean);
       this.refCache.preloadTables(refTables);
     }
-    if (changes["enableDelete"]) {
-      this.initContextMenu();
+    if (changes["rows"]) {
+      const prev = changes["rows"].previousValue;
+      const curr = changes["rows"].currentValue;
+      if (prev && curr && curr.length > prev.length && this.lastKnownScrollTop > 40) {
+        const savedScroll = this.lastKnownScrollTop;
+        requestAnimationFrame(() => {
+          const scrollerEl = this.el.nativeElement.querySelector(".p-scroller");
+          if (scrollerEl && scrollerEl.scrollTop < savedScroll - 30) {
+            this.isRestoringScroll = true;
+            scrollerEl.scrollTop = savedScroll;
+            setTimeout(() => {
+              this.isRestoringScroll = false;
+            }, 60);
+          }
+        });
+      }
     }
+  }
+  resetScroll() {
+    this.isResetting = true;
+    this.lastKnownScrollTop = 0;
+    const scrollerEl = this.el.nativeElement.querySelector(".p-scroller");
+    if (scrollerEl) {
+      scrollerEl.scrollTop = 0;
+    }
+    setTimeout(() => {
+      this.isResetting = false;
+    }, 250);
   }
   ngAfterViewInit() {
-    const wrapper = this.el.nativeElement.querySelector(".p-datatable-wrapper");
-    if (wrapper) {
-      const scrollHandler = () => {
-        if (wrapper.scrollTop + wrapper.clientHeight >= wrapper.scrollHeight - 150) {
-          this.loadMore.emit();
-        }
-      };
-      wrapper.addEventListener("scroll", scrollHandler, { passive: true });
-      this.scrollCleanup = () => wrapper.removeEventListener("scroll", scrollHandler);
-    }
+    this.setupInfiniteScroll();
   }
   ngOnDestroy() {
-    if (this.scrollCleanup) {
-      this.scrollCleanup();
+    this.scrollCleanups.forEach((fn2) => fn2());
+    this.scrollCleanups = [];
+  }
+  /**
+   * Evaluates if any scrollable container is near the bottom and emits loadMore
+   */
+  checkAndEmitLoadMore(scrollEl) {
+    const el = scrollEl || this.el.nativeElement.querySelector(".p-scroller") || this.el.nativeElement.querySelector(".p-scroller-viewport") || this.el.nativeElement.querySelector(".p-datatable-wrapper");
+    if (!el)
+      return;
+    const scrollHeight = el.scrollHeight;
+    const scrollTop = el.scrollTop;
+    const clientHeight = el.clientHeight;
+    const threshold = 500;
+    const isNearBottom = scrollTop + clientHeight >= scrollHeight - threshold;
+    if (isNearBottom) {
+      const now = Date.now();
+      if (now - this.lastLoadMoreEmitTime > 300) {
+        this.lastLoadMoreEmitTime = now;
+        this.loadMore.emit();
+      }
     }
   }
-  initContextMenu() {
-    const items = [
-      {
-        label: "\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902 (Copy)",
-        icon: "pi pi-copy",
-        command: () => this.copySelectedRow()
-      },
-      {
-        label: "\u090A\u092A\u0930 \u092A\u0902\u0915\u094D\u0924\u093F \u091C\u094B\u0921\u093C\u0947\u0902 (Insert Row Above)",
-        icon: "pi pi-arrow-up",
-        command: () => this.insertRowAbove()
-      },
-      {
-        label: "\u0928\u0940\u091A\u0947 \u092A\u0902\u0915\u094D\u0924\u093F \u091C\u094B\u0921\u093C\u0947\u0902 (Insert Row Below)",
-        icon: "pi pi-arrow-down",
-        command: () => this.insertRowBelow()
+  /**
+   * Sets up multi-layer scroll detection for PrimeNG virtual scrolling and outer wrappers
+   */
+  setupInfiniteScroll() {
+    const root = this.el.nativeElement;
+    if (!root)
+      return;
+    const onScrollCapture = (e) => {
+      const target = e.target;
+      if (target && target.scrollHeight > target.clientHeight) {
+        if (this.isRestoringScroll)
+          return;
+        if (target.scrollTop === 0 && this.lastKnownScrollTop > 120 && !this.isResetting) {
+          const restoreVal = this.lastKnownScrollTop;
+          this.isRestoringScroll = true;
+          target.scrollTop = restoreVal;
+          requestAnimationFrame(() => {
+            if (target.scrollTop === 0) {
+              target.scrollTop = restoreVal;
+            }
+            setTimeout(() => {
+              this.isRestoringScroll = false;
+            }, 60);
+          });
+          return;
+        }
+        if (target.scrollTop > 0) {
+          this.lastKnownScrollTop = target.scrollTop;
+        }
+        this.checkAndEmitLoadMore(target);
+      } else {
+        this.checkAndEmitLoadMore();
       }
-    ];
-    if (this.enableDelete) {
-      items.push({ separator: true }, {
-        label: "\u092A\u0902\u0915\u094D\u0924\u093F \u0939\u091F\u093E\u090F\u0902 (Delete Row)",
-        icon: "pi pi-trash",
-        command: () => this.deleteSelectedRow()
-      });
+    };
+    root.addEventListener("scroll", onScrollCapture, { passive: true, capture: true });
+    this.scrollCleanups.push(() => root.removeEventListener("scroll", onScrollCapture, true));
+    const onWheel = (e) => {
+      if (e.deltaY > 0) {
+        this.checkAndEmitLoadMore();
+      }
+    };
+    root.addEventListener("wheel", onWheel, { passive: true });
+    this.scrollCleanups.push(() => root.removeEventListener("wheel", onWheel));
+    const onKeyDown = (e) => {
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === "End") {
+        setTimeout(() => this.checkAndEmitLoadMore(), 50);
+      }
+    };
+    root.addEventListener("keydown", onKeyDown, { passive: true });
+    this.scrollCleanups.push(() => root.removeEventListener("keydown", onKeyDown));
+    const canvas = root.closest(".spreadsheet-canvas");
+    if (canvas) {
+      const onCanvasScroll = () => this.checkAndEmitLoadMore(canvas);
+      canvas.addEventListener("scroll", onCanvasScroll, { passive: true });
+      this.scrollCleanups.push(() => canvas.removeEventListener("scroll", onCanvasScroll));
     }
-    this.contextMenuItems = items;
   }
   get visibleRows() {
     let result = this.rows;
@@ -128479,14 +128904,702 @@ var SutramGridComponent = class _SutramGridComponent {
     }
     return result;
   }
+  // ── Cell Selection & Inline Editing ──────────────────────────
+  isCellEditing(rowIdx, colKey) {
+    return this.editingCell?.rowIdx === rowIdx && this.editingCell?.colKey === colKey;
+  }
+  isFkColumn(col) {
+    return !!col && (col.type === "ref" || !!col.ref_table) && !!col.ref_table;
+  }
+  onCellClick(rowIdx, colKey, event2) {
+    if (this.contextMenuState.visible) {
+      this.closeContextMenu();
+    }
+    this.selectedRowIdx = null;
+    if (this.editingCell && (this.editingCell.rowIdx !== rowIdx || this.editingCell.colKey !== colKey)) {
+      this.commitCellEdit();
+    }
+    this.state.setSelectedCell({ rowIdx, colKey });
+    this.cdr.markForCheck();
+  }
+  onRowHeaderClick(rowIdx, row, event2) {
+    if (this.contextMenuState.visible) {
+      this.closeContextMenu();
+    }
+    if (this.editingCell) {
+      this.commitCellEdit();
+    }
+    this.selectedRowIdx = rowIdx;
+    const firstCol = this.headers[0]?.name || "";
+    this.state.setSelectedCell({ rowIdx, colKey: firstCol });
+    this.cdr.markForCheck();
+  }
+  startCellEdit(rowIdx, colKey, row, event2, initialChar) {
+    this.closeContextMenu();
+    if (this.editingCell && (this.editingCell.rowIdx !== rowIdx || this.editingCell.colKey !== colKey)) {
+      this.commitCellEdit();
+    }
+    this.state.setSelectedCell({ rowIdx, colKey });
+    const colDef = this.headers.find((h) => h.name === colKey) || null;
+    this.editingColDef = colDef;
+    const curVal = row.cells[colKey]?.value;
+    this.originalEditingValue = curVal !== void 0 && curVal !== null ? String(curVal) : "";
+    this.editingValue = initialChar !== void 0 ? initialChar : this.originalEditingValue;
+    this.editingCell = { rowIdx, colKey };
+    setTimeout(() => {
+      const inputEl = this.el.nativeElement.querySelector(".raw-cell-editor");
+      if (inputEl) {
+        inputEl.focus();
+        if (initialChar === void 0) {
+          inputEl.select();
+        }
+      }
+    }, 10);
+    if (this.isFkColumn(colDef)) {
+      let targetEl = null;
+      if (event2?.target) {
+        targetEl = event2.target.closest(".cell-box");
+      }
+      if (!targetEl) {
+        targetEl = this.el.nativeElement.querySelector(".cell-box.cell-active");
+      }
+      if (targetEl) {
+        this.positionFkDropdown(targetEl.getBoundingClientRect());
+      }
+      this.updateFkOptions(colDef, this.editingValue, row);
+    } else {
+      this.dropdownOpen = false;
+    }
+    this.cdr.markForCheck();
+  }
+  onEditorInput(val, col, row) {
+    this.editingValue = val;
+    if (this.isFkColumn(col)) {
+      const targetEl = this.el.nativeElement.querySelector(".cell-box.cell-editing");
+      if (targetEl) {
+        this.positionFkDropdown(targetEl.getBoundingClientRect());
+      }
+      this.updateFkOptions(col, val, row);
+    }
+  }
+  positionFkDropdown(rect) {
+    let top = rect.bottom + 2;
+    let left = rect.left;
+    const minWidth = Math.max(rect.width, 270);
+    if (top + 200 > window.innerHeight) {
+      top = Math.max(10, rect.top - 200);
+    }
+    if (left + minWidth > window.innerWidth) {
+      left = Math.max(10, window.innerWidth - minWidth - 12);
+    }
+    this.dropdownPos = { top, left, minWidth };
+    this.dropdownOpen = true;
+  }
+  updateFkOptions(col, query, row) {
+    if (!col.ref_table)
+      return;
+    let parentId = void 0;
+    if (col.ref_table.toLowerCase() === "subitem" && row) {
+      const itemHeader = this.headers.find((h) => h.ref_table === "item" || h.name.includes("item"));
+      if (itemHeader && row.cells[itemHeader.name]) {
+        parentId = row.cells[itemHeader.name].refId || row.cells[itemHeader.name].value;
+      }
+    }
+    this.dropdownOptions = this.refCache.searchOptions(col.ref_table, query, parentId, 50);
+    this.highlightedIdx = this.dropdownOptions.length > 0 ? 0 : -1;
+    this.dropdownOpen = true;
+    this.cdr.markForCheck();
+  }
+  selectDropdownOption(opt, event2, moveToNextRow = true) {
+    if (event2) {
+      event2.preventDefault();
+      event2.stopPropagation();
+    }
+    if (!this.editingCell)
+      return;
+    const { rowIdx, colKey } = this.editingCell;
+    const row = this.visibleRows[rowIdx];
+    const col = this.editingColDef;
+    this.editingValue = opt.display;
+    this.dropdownOpen = false;
+    this.editingCell = null;
+    if (row && col) {
+      const cell = row.cells[colKey];
+      if (cell) {
+        if (cell.originalValue === void 0) {
+          cell.originalValue = this.originalEditingValue;
+        }
+        const origStr = String(cell.originalValue ?? "").trim();
+        const currentEditStr = String(this.originalEditingValue ?? "").trim();
+        const changedFromCurrent = opt.display !== currentEditStr;
+        const changedFromOriginal = opt.display !== origStr;
+        if (!changedFromCurrent && !cell.isModified && !row.isNew) {
+          if (moveToNextRow) {
+            this.navigateCell(rowIdx + 1, colKey);
+          }
+          this.cdr.markForCheck();
+          return;
+        }
+        cell.value = opt.display;
+        cell.refId = opt.id;
+        cell.refDisplay = opt.display;
+        cell.isValid = true;
+        cell.errorMessage = void 0;
+        if (changedFromOriginal) {
+          cell.isModified = true;
+        } else if (!row.isNew) {
+          cell.isModified = false;
+        }
+        row.isModified = row.isNew || Object.values(row.cells).some((c) => c && c.isModified);
+      }
+      this.audit.validateCell(cell, col, row, this.headers);
+      this.audit.validateRow(row, this.headers);
+      this.cellChanged.emit({ rowIdx, colKey, value: opt.display });
+      this.state.updateCellValue(rowIdx, colKey, opt.display, opt.id);
+      if (rowIdx === this.visibleRows.length - 1 && this.isRowPopulated(row)) {
+        this.state.addNewBlankRow();
+      }
+    }
+    if (moveToNextRow) {
+      this.navigateCell(rowIdx + 1, colKey);
+    }
+    this.cdr.markForCheck();
+  }
+  onCellEditorKeydown(event2, rowIdx, colKey, row) {
+    if (this.dropdownOpen && this.dropdownOptions.length > 0) {
+      if (event2.key === "ArrowDown") {
+        event2.preventDefault();
+        this.highlightedIdx = Math.min(this.dropdownOptions.length - 1, this.highlightedIdx + 1);
+        this.scrollHighlightedDropdownItem();
+        this.cdr.markForCheck();
+        return;
+      }
+      if (event2.key === "ArrowUp") {
+        event2.preventDefault();
+        this.highlightedIdx = Math.max(0, this.highlightedIdx - 1);
+        this.scrollHighlightedDropdownItem();
+        this.cdr.markForCheck();
+        return;
+      }
+      if (event2.key === "Enter") {
+        event2.preventDefault();
+        if (this.highlightedIdx >= 0 && this.dropdownOptions[this.highlightedIdx]) {
+          this.selectDropdownOption(this.dropdownOptions[this.highlightedIdx], void 0, true);
+        } else {
+          this.commitCellEdit(true, false);
+        }
+        return;
+      }
+      if (event2.key === "Tab") {
+        event2.preventDefault();
+        if (this.highlightedIdx >= 0 && this.dropdownOptions[this.highlightedIdx]) {
+          this.selectDropdownOption(this.dropdownOptions[this.highlightedIdx], void 0, false);
+        } else {
+          this.commitCellEdit(false, true);
+        }
+        return;
+      }
+    }
+    if (event2.key === "Enter") {
+      event2.preventDefault();
+      this.commitCellEdit(true, false);
+      return;
+    }
+    if (event2.key === "Tab") {
+      event2.preventDefault();
+      if (event2.shiftKey) {
+        this.commitCellEdit(false, false);
+        this.navigateCell(rowIdx, this.getPrevColKey(colKey));
+      } else {
+        this.commitCellEdit(false, true);
+      }
+      return;
+    }
+    if (event2.key === "Escape") {
+      event2.preventDefault();
+      this.cancelCellEdit();
+      return;
+    }
+  }
+  onCellEditorBlur(rowIdx, colKey, row) {
+    setTimeout(() => {
+      if (this.isCellEditing(rowIdx, colKey)) {
+        this.commitCellEdit();
+      }
+    }, 150);
+  }
+  commitCellEdit(moveToNextRow = false, moveToNextCol = false) {
+    if (!this.editingCell)
+      return;
+    const { rowIdx, colKey } = this.editingCell;
+    const row = this.visibleRows[rowIdx];
+    const col = this.headers.find((h) => h.name === colKey);
+    const newVal = (this.editingValue ?? "").trim();
+    this.editingCell = null;
+    this.dropdownOpen = false;
+    if (row && col) {
+      const cell = row.cells[colKey];
+      if (cell) {
+        if (cell.originalValue === void 0) {
+          cell.originalValue = this.originalEditingValue;
+        }
+        const origStr = String(cell.originalValue ?? "").trim();
+        const currentEditStr = String(this.originalEditingValue ?? "").trim();
+        const changedFromCurrent = newVal !== currentEditStr;
+        const changedFromOriginal = newVal !== origStr;
+        if (!changedFromCurrent && !cell.isModified && !row.isNew) {
+          if (moveToNextRow) {
+            this.navigateCell(rowIdx + 1, colKey);
+          } else if (moveToNextCol) {
+            this.navigateCell(rowIdx, this.getNextColKey(colKey));
+          }
+          this.cdr.markForCheck();
+          return;
+        }
+        cell.value = newVal;
+        if (changedFromOriginal) {
+          cell.isModified = true;
+        } else if (!row.isNew) {
+          cell.isModified = false;
+        }
+        if (this.isFkColumn(col)) {
+          const match2 = this.refCache.findRefMatch(col.ref_table, newVal);
+          if (match2.found) {
+            cell.value = match2.display;
+            cell.refId = match2.id;
+            cell.refDisplay = match2.display;
+            cell.isValid = true;
+            cell.errorMessage = void 0;
+          } else if (newVal !== "") {
+            cell.isValid = false;
+            cell.errorMessage = `\u0905\u092E\u093E\u0928\u094D\u092F ${col.name}: '${col.ref_table}' \u092E\u0947\u0902 \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u093E`;
+            if (this.originalEditingValue && changedFromCurrent) {
+              const sameCount = this.state.findSameMistakeRowIndices(colKey, this.originalEditingValue).length;
+              if (sameCount > 1) {
+                this.promptState = {
+                  visible: true,
+                  rowIdx,
+                  colKey,
+                  originalBadValue: this.originalEditingValue,
+                  newSelectedValue: null,
+                  newSelectedDisplay: newVal,
+                  matchingCount: sameCount,
+                  saveToDictionary: true
+                };
+              }
+            }
+          }
+        }
+        row.isModified = row.isNew || Object.values(row.cells).some((c) => c && c.isModified);
+        this.audit.validateCell(cell, col, row, this.headers);
+        this.audit.validateRow(row, this.headers);
+        this.cellChanged.emit({ rowIdx, colKey, value: cell.value });
+        this.state.updateCellValue(rowIdx, colKey, cell.value, cell.refId);
+        if (rowIdx === this.visibleRows.length - 1 && this.isRowPopulated(row)) {
+          this.state.addNewBlankRow();
+        }
+      }
+    }
+    if (moveToNextRow) {
+      this.navigateCell(rowIdx + 1, colKey);
+    } else if (moveToNextCol) {
+      this.navigateCell(rowIdx, this.getNextColKey(colKey));
+    }
+    this.cdr.markForCheck();
+  }
+  cancelCellEdit() {
+    this.editingCell = null;
+    this.dropdownOpen = false;
+    this.cdr.markForCheck();
+  }
+  scrollHighlightedDropdownItem() {
+    setTimeout(() => {
+      const el = this.el.nativeElement.querySelector(".ref-dropdown-item.highlighted");
+      if (el) {
+        el.scrollIntoView({ block: "nearest" });
+      }
+    }, 10);
+  }
+  navigateCell(targetRowIdx, targetColKey) {
+    if (this.visibleRows.length === 0)
+      return;
+    const rowIdx = Math.max(0, Math.min(this.visibleRows.length - 1, targetRowIdx));
+    const colExists = this.headers.some((h) => h.name === targetColKey);
+    const colKey = colExists ? targetColKey : this.headers[0]?.name || "";
+    this.state.setSelectedCell({ rowIdx, colKey });
+    this.cdr.markForCheck();
+  }
+  getNextColKey(curColKey) {
+    const idx = this.headers.findIndex((h) => h.name === curColKey);
+    if (idx >= 0 && idx + 1 < this.headers.length) {
+      return this.headers[idx + 1].name;
+    }
+    return curColKey;
+  }
+  getPrevColKey(curColKey) {
+    const idx = this.headers.findIndex((h) => h.name === curColKey);
+    if (idx > 0) {
+      return this.headers[idx - 1].name;
+    }
+    return curColKey;
+  }
+  // ── Keyboard Navigation Across Canvas ────────────────────────
+  onDocumentKeydown(event2) {
+    if (this.contextMenuState.visible) {
+      if (event2.key === "Escape") {
+        this.closeContextMenu();
+        event2.preventDefault();
+      }
+      return;
+    }
+    if (this.editingCell) {
+      if (event2.key === "Escape") {
+        this.cancelCellEdit();
+        event2.preventDefault();
+      }
+      return;
+    }
+    const sel = this.state.selectedCell();
+    if (!sel)
+      return;
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA") && !activeEl.classList.contains("raw-cell-editor")) {
+      return;
+    }
+    if (this.selectedRowIdx !== null) {
+      const curRowIdx = this.selectedRowIdx;
+      const targetRow = this.visibleRows[curRowIdx];
+      if (event2.key === "ArrowDown") {
+        event2.preventDefault();
+        this.selectedRowIdx = Math.min(this.visibleRows.length - 1, curRowIdx + 1);
+        const firstCol = this.headers[0]?.name || "";
+        this.state.setSelectedCell({ rowIdx: this.selectedRowIdx, colKey: firstCol });
+        this.cdr.markForCheck();
+        return;
+      }
+      if (event2.key === "ArrowUp") {
+        event2.preventDefault();
+        this.selectedRowIdx = Math.max(0, curRowIdx - 1);
+        const firstCol = this.headers[0]?.name || "";
+        this.state.setSelectedCell({ rowIdx: this.selectedRowIdx, colKey: firstCol });
+        this.cdr.markForCheck();
+        return;
+      }
+      if (event2.key === "Escape") {
+        event2.preventDefault();
+        this.selectedRowIdx = null;
+        this.cdr.markForCheck();
+        return;
+      }
+      if ((event2.ctrlKey || event2.metaKey) && event2.key.toLowerCase() === "c") {
+        event2.preventDefault();
+        if (targetRow) {
+          this.clipboard.copyRowsToClipboard([targetRow], this.headers);
+        }
+        return;
+      }
+      if ((event2.ctrlKey || event2.metaKey) && event2.key.toLowerCase() === "v") {
+        event2.preventDefault();
+        this.pasteRowData(curRowIdx);
+        return;
+      }
+      if (event2.key === "Delete" || event2.key === "Backspace") {
+        event2.preventDefault();
+        this.clearSelectedRow(curRowIdx);
+        return;
+      }
+    }
+    const { rowIdx, colKey } = sel;
+    const row = this.visibleRows[rowIdx];
+    if (event2.key === "ArrowDown") {
+      event2.preventDefault();
+      this.navigateCell(rowIdx + 1, colKey);
+    } else if (event2.key === "ArrowUp") {
+      event2.preventDefault();
+      this.navigateCell(rowIdx - 1, colKey);
+    } else if (event2.key === "ArrowRight") {
+      event2.preventDefault();
+      this.navigateCell(rowIdx, this.getNextColKey(colKey));
+    } else if (event2.key === "ArrowLeft") {
+      event2.preventDefault();
+      this.navigateCell(rowIdx, this.getPrevColKey(colKey));
+    } else if (event2.key === "Enter" || event2.key === "F2") {
+      event2.preventDefault();
+      if (row)
+        this.startCellEdit(rowIdx, colKey, row);
+    } else if (event2.key === "Delete" || event2.key === "Backspace") {
+      event2.preventDefault();
+      this.state.updateCellValue(rowIdx, colKey, "");
+      this.cellChanged.emit({ rowIdx, colKey, value: "" });
+      this.cdr.markForCheck();
+    } else if ((event2.ctrlKey || event2.metaKey) && event2.key.toLowerCase() === "c") {
+      if (row) {
+        const val = row.cells[colKey]?.value ?? "";
+        navigator.clipboard.writeText(String(val));
+      }
+    } else if ((event2.ctrlKey || event2.metaKey) && event2.key.toLowerCase() === "v") {
+      navigator.clipboard.readText().then((text2) => {
+        if (text2 !== void 0 && text2 !== null) {
+          const val = text2.trim();
+          this.state.updateCellValue(rowIdx, colKey, val);
+          this.cellChanged.emit({ rowIdx, colKey, value: val });
+          this.cdr.markForCheck();
+        }
+      });
+    } else if (event2.key.length === 1 && !event2.ctrlKey && !event2.metaKey && !event2.altKey) {
+      if (row) {
+        this.startCellEdit(rowIdx, colKey, row, void 0, event2.key);
+      }
+    }
+  }
+  async pasteRowData(rowIdx) {
+    const matrix = await this.clipboard.readClipboardMatrix();
+    if (!matrix || matrix.length === 0)
+      return;
+    const targetRow = this.visibleRows[rowIdx];
+    if (!targetRow)
+      return;
+    const rowValues = matrix[0];
+    this.headers.forEach((h, colIndex) => {
+      if (colIndex < rowValues.length) {
+        const val = (rowValues[colIndex] ?? "").trim();
+        this.state.updateCellValue(rowIdx, h.name, val);
+        this.cellChanged.emit({ rowIdx, colKey: h.name, value: val });
+      }
+    });
+    this.cdr.markForCheck();
+  }
+  clearSelectedRow(rowIdx) {
+    const targetRow = this.visibleRows[rowIdx];
+    if (!targetRow)
+      return;
+    this.headers.forEach((h) => {
+      this.state.updateCellValue(rowIdx, h.name, "");
+      this.cellChanged.emit({ rowIdx, colKey: h.name, value: "" });
+    });
+    this.cdr.markForCheck();
+  }
+  onDocumentClick(event2) {
+    if (this.contextMenuState.visible) {
+      const target = event2.target;
+      if (!target.closest(".custom-context-menu")) {
+        this.closeContextMenu();
+      }
+    }
+    if (this.editingCell) {
+      const target = event2.target;
+      if (!target.closest(".raw-cell-editor") && !target.closest(".ref-dropdown-menu")) {
+        this.commitCellEdit();
+      }
+    }
+  }
+  onWindowChange() {
+    if (this.contextMenuState.visible) {
+      this.closeContextMenu();
+    }
+    if (this.dropdownOpen) {
+      const targetEl = this.el.nativeElement.querySelector(".cell-box.cell-editing");
+      if (targetEl) {
+        this.positionFkDropdown(targetEl.getBoundingClientRect());
+      } else {
+        this.dropdownOpen = false;
+      }
+      this.cdr.markForCheck();
+    }
+  }
+  // ── Context Menu Actions (Row & Cell) ────────────────────────
+  openRowContextMenu(event2, row, rowIdx) {
+    event2.preventDefault();
+    event2.stopPropagation();
+    this.selectedRowIdx = rowIdx;
+    const firstCol = this.headers[0]?.name || "";
+    this.state.setSelectedCell({ rowIdx, colKey: firstCol });
+    this.positionContextMenu(event2, "row", rowIdx, null, row);
+  }
+  openCellContextMenu(event2, rowIdx, colKey, row) {
+    event2.preventDefault();
+    event2.stopPropagation();
+    this.selectedRowIdx = null;
+    this.state.setSelectedCell({ rowIdx, colKey });
+    this.positionContextMenu(event2, "cell", rowIdx, colKey, row);
+  }
+  positionContextMenu(event2, type, rowIdx, colKey, row) {
+    const menuWidth = 220;
+    const menuHeight = type === "cell" ? 240 : 160;
+    let x = event2.clientX;
+    let y = event2.clientY;
+    if (x + menuWidth > window.innerWidth) {
+      x = Math.max(10, window.innerWidth - menuWidth - 10);
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = Math.max(10, window.innerHeight - menuHeight - 10);
+    }
+    this.contextMenuState = {
+      visible: true,
+      type,
+      x,
+      y,
+      rowIdx,
+      colKey,
+      row
+    };
+    this.cdr.markForCheck();
+  }
+  closeContextMenu() {
+    if (this.contextMenuState.visible) {
+      this.contextMenuState.visible = false;
+      this.cdr.markForCheck();
+    }
+  }
+  copyActiveCell() {
+    const { row, colKey } = this.contextMenuState;
+    this.closeContextMenu();
+    if (row && colKey) {
+      const val = row.cells[colKey]?.value ?? "";
+      navigator.clipboard.writeText(String(val));
+    }
+  }
+  cutActiveCell() {
+    const { rowIdx, colKey, row } = this.contextMenuState;
+    this.closeContextMenu();
+    if (row && colKey && rowIdx >= 0) {
+      const val = row.cells[colKey]?.value ?? "";
+      navigator.clipboard.writeText(String(val));
+      this.state.updateCellValue(rowIdx, colKey, "");
+      this.cellChanged.emit({ rowIdx, colKey, value: "" });
+      this.cdr.markForCheck();
+    }
+  }
+  pasteToActiveCell() {
+    const { rowIdx, colKey } = this.contextMenuState;
+    this.closeContextMenu();
+    if (colKey && rowIdx >= 0) {
+      navigator.clipboard.readText().then((text2) => {
+        if (text2 !== void 0 && text2 !== null) {
+          const val = text2.trim();
+          this.state.updateCellValue(rowIdx, colKey, val);
+          this.cellChanged.emit({ rowIdx, colKey, value: val });
+          this.cdr.markForCheck();
+        }
+      });
+    }
+  }
+  copySelectedRow() {
+    const row = this.contextMenuState.row || (this.contextMenuState.rowIdx >= 0 ? this.rows[this.contextMenuState.rowIdx] : null);
+    this.closeContextMenu();
+    if (row) {
+      this.clipboard.copyRowsToClipboard([row], this.headers);
+    }
+  }
+  insertRowAbove() {
+    const rowIdx = this.contextMenuState.rowIdx;
+    this.closeContextMenu();
+    if (rowIdx < 0)
+      return;
+    const newCells = {};
+    this.headers.forEach((h) => {
+      newCells[h.name] = {
+        value: "",
+        isValid: !h.not_null,
+        isModified: false,
+        isNew: true
+      };
+    });
+    const newRow = {
+      rowNum: rowIdx + 1,
+      cells: newCells,
+      hasError: false,
+      errorCount: 0,
+      isNew: true
+    };
+    const current = [...this.rows];
+    current.splice(rowIdx, 0, newRow);
+    current.forEach((r, idx) => r.rowNum = idx + 1);
+    this.state.setRows(current);
+    this.state.setSelectedCell({ rowIdx, colKey: this.headers[0]?.name || "" });
+    this.cdr.markForCheck();
+  }
+  insertRowBelow() {
+    const rowIdx = this.contextMenuState.rowIdx;
+    this.closeContextMenu();
+    if (rowIdx < 0)
+      return;
+    const newCells = {};
+    this.headers.forEach((h) => {
+      newCells[h.name] = {
+        value: "",
+        isValid: !h.not_null,
+        isModified: false,
+        isNew: true
+      };
+    });
+    const newRow = {
+      rowNum: rowIdx + 2,
+      cells: newCells,
+      hasError: false,
+      errorCount: 0,
+      isNew: true
+    };
+    const current = [...this.rows];
+    current.splice(rowIdx + 1, 0, newRow);
+    current.forEach((r, idx) => r.rowNum = idx + 1);
+    this.state.setRows(current);
+    this.state.setSelectedCell({ rowIdx: rowIdx + 1, colKey: this.headers[0]?.name || "" });
+    this.cdr.markForCheck();
+  }
+  duplicateRow() {
+    const rowIdx = this.contextMenuState.rowIdx;
+    const srcRow = this.contextMenuState.row || this.rows[rowIdx];
+    this.closeContextMenu();
+    if (!srcRow || rowIdx < 0)
+      return;
+    const clonedCells = {};
+    for (const h of this.headers) {
+      const srcCell = srcRow.cells[h.name];
+      clonedCells[h.name] = {
+        value: srcCell?.value ?? "",
+        isValid: true,
+        isModified: false,
+        isNew: true,
+        refId: srcCell?.refId,
+        refDisplay: srcCell?.refDisplay
+      };
+    }
+    const clonedRow = {
+      rowNum: rowIdx + 2,
+      cells: clonedCells,
+      hasError: false,
+      errorCount: 0,
+      isNew: true
+    };
+    const current = [...this.rows];
+    current.splice(rowIdx + 1, 0, clonedRow);
+    current.forEach((r, idx) => r.rowNum = idx + 1);
+    this.state.setRows(current);
+    this.state.setSelectedCell({ rowIdx: rowIdx + 1, colKey: this.headers[0]?.name || "" });
+    this.cdr.markForCheck();
+  }
+  deleteSelectedRow() {
+    this.deleteRow();
+  }
+  deleteRow() {
+    const rowIdx = this.contextMenuState.rowIdx;
+    const targetRow = this.contextMenuState.row || this.rows[rowIdx];
+    this.closeContextMenu();
+    if (!targetRow || rowIdx < 0 || this.rows.length <= 1)
+      return;
+    this.state.trackDeletedRow(targetRow, rowIdx);
+    const updated = this.rows.filter((_, idx) => idx !== rowIdx);
+    updated.forEach((r, idx) => r.rowNum = idx + 1);
+    this.state.setRows(updated);
+    const nextRowIdx = Math.min(rowIdx, updated.length - 1);
+    this.state.setSelectedCell({ rowIdx: nextRowIdx, colKey: this.headers[0]?.name || "" });
+    this.cdr.markForCheck();
+  }
   // ── Column Filter Popover Methods ────────────────────────────
   isColumnFiltered(colName) {
     const filters = this.state.columnFilters();
     return !!filters[colName] && filters[colName].size > 0;
-  }
-  isSortActive(colName, order) {
-    const s = this.state.activeSort();
-    return s?.colKey === colName && s?.order === order;
   }
   openColumnFilter(event2, col, op) {
     event2.stopPropagation();
@@ -128570,6 +129683,18 @@ var SutramGridComponent = class _SutramGridComponent {
       this.selectedChecklistValues.clear();
     }
   }
+  selectAllFilteredItems() {
+    for (const item of this.filteredChecklistItems) {
+      this.selectedChecklistValues.add(item.value);
+    }
+    this.cdr.markForCheck();
+  }
+  clearAllFilteredItems() {
+    for (const item of this.filteredChecklistItems) {
+      this.selectedChecklistValues.delete(item.value);
+    }
+    this.cdr.markForCheck();
+  }
   toggleChecklistItem(value) {
     if (this.selectedChecklistValues.has(value)) {
       this.selectedChecklistValues.delete(value);
@@ -128597,9 +129722,6 @@ var SutramGridComponent = class _SutramGridComponent {
     this.filterChanged.emit(this.state.columnFilters());
     op.hide();
   }
-  /**
-   * Directly cycle column sort on clicking table header: None -> ASC -> DESC -> None
-   */
   onHeaderClick(col) {
     if (!this.state.sortingEnabled() || !col?.name)
       return;
@@ -128615,103 +129737,7 @@ var SutramGridComponent = class _SutramGridComponent {
     }
     this.sortChanged.emit(this.state.activeSort());
   }
-  applySort(colKey, order, op) {
-    this.state.setSort(colKey, order);
-    this.sortChanged.emit(this.state.activeSort());
-    if (op)
-      op.hide();
-  }
-  clearSort(op) {
-    this.state.clearSort();
-    this.sortChanged.emit(null);
-    if (op)
-      op.hide();
-  }
-  /**
-   * Cell clicked / focused
-   */
-  onCellClick(rowIdx, colKey) {
-    this.state.setSelectedCell({ rowIdx, colKey });
-  }
-  /**
-   * Search suggestions for Foreign Key reference autocomplete
-   */
-  searchRefOptions(event2, header, row) {
-    const query = event2?.query || "";
-    const refTable = header.ref_table || header.name;
-    let parentId = void 0;
-    if (refTable.toLowerCase() === "subitem" && row) {
-      const itemHeader = this.headers.find((h) => h.ref_table === "item" || h.name.includes("item"));
-      if (itemHeader && row.cells[itemHeader.name]) {
-        parentId = row.cells[itemHeader.name].refId || row.cells[itemHeader.name].value;
-      }
-    }
-    this.filteredSuggestions = this.refCache.searchOptions(refTable, query, parentId, 30);
-  }
-  /**
-   * Selection from reference autocomplete dropdown
-   */
-  onRefSuggestionSelect(option, rowIdx, colKey, cell, header, row) {
-    if (!option)
-      return;
-    const originalValue = cell.value ? String(cell.value) : "";
-    const resolvedDisplay = option.display || option.hin || option.eng || "";
-    const resolvedId = option.id !== void 0 ? option.id : resolvedDisplay;
-    if (cell.originalValue === void 0) {
-      cell.originalValue = originalValue;
-    }
-    if (originalValue !== resolvedDisplay) {
-      cell.isModified = true;
-      if (row)
-        row.isModified = true;
-    }
-    cell.value = resolvedDisplay;
-    cell.refId = resolvedId;
-    cell.refDisplay = resolvedDisplay;
-    this.audit.validateCell(cell, header, row, this.headers);
-    if (row) {
-      this.audit.validateRow(row, this.headers);
-    }
-    if (originalValue && originalValue !== resolvedDisplay) {
-      const sameCount = this.state.findSameMistakeRowIndices(colKey, originalValue).length;
-      if (sameCount > 1) {
-        this.promptState = {
-          visible: true,
-          rowIdx,
-          colKey,
-          originalBadValue: originalValue,
-          newSelectedValue: resolvedId,
-          newSelectedDisplay: resolvedDisplay,
-          matchingCount: sameCount,
-          saveToDictionary: true
-        };
-      }
-    }
-    this.cellChanged.emit({ rowIdx, colKey, value: cell.value });
-  }
-  /**
-   * Value edited directly in cell
-   */
-  onCellValueCommit(rowIdx, colKey, cell, header, row) {
-    if (cell.originalValue === void 0) {
-      cell.originalValue = cell.value;
-    }
-    const valStr = cell.value === null || cell.value === void 0 ? "" : String(cell.value).trim();
-    const origStr = cell.originalValue === null || cell.originalValue === void 0 ? "" : String(cell.originalValue).trim();
-    if (valStr !== origStr) {
-      cell.isModified = true;
-      if (row)
-        row.isModified = true;
-    }
-    this.audit.validateCell(cell, header, row, this.headers);
-    if (row) {
-      this.audit.validateRow(row, this.headers);
-    }
-    this.cellChanged.emit({ rowIdx, colKey, value: cell.value });
-  }
-  /**
-   * User clicked "Apply to All" in prompt
-   */
+  // ── Batch Fix Prompt Methods ─────────────────────────────────
   confirmSolveAll() {
     this.solveAllTriggered.emit({
       colKey: this.promptState.colKey,
@@ -128722,9 +129748,6 @@ var SutramGridComponent = class _SutramGridComponent {
     });
     this.promptState.visible = false;
   }
-  /**
-   * User chose to update only this single cell
-   */
   applySingleCellOnly() {
     this.state.updateCellValue(this.promptState.rowIdx, this.promptState.colKey, this.promptState.newSelectedDisplay, this.promptState.newSelectedValue);
     this.promptState.visible = false;
@@ -128732,56 +129755,7 @@ var SutramGridComponent = class _SutramGridComponent {
   dismissPrompt() {
     this.promptState.visible = false;
   }
-  // ── Context Menu Handlers ────────────────────────────────────
-  copySelectedRow() {
-    if (this.contextSelectedRow) {
-      this.clipboard.copyRowsToClipboard([this.contextSelectedRow], this.headers);
-    }
-  }
-  insertRowAbove() {
-    if (!this.contextSelectedRow)
-      return;
-    const idx = this.rows.findIndex((r) => r.rowNum === this.contextSelectedRow.rowNum);
-    if (idx !== -1) {
-      const newRow = {
-        rowNum: this.rows.length + 1,
-        cells: {},
-        hasError: false,
-        errorCount: 0,
-        isNew: true
-      };
-      this.headers.forEach((h) => newRow.cells[h.name] = { value: "", isValid: true, isNew: true });
-      const updated = [...this.rows];
-      updated.splice(idx, 0, newRow);
-      this.state.setRows(updated);
-    }
-  }
-  insertRowBelow() {
-    if (!this.contextSelectedRow)
-      return;
-    const idx = this.rows.findIndex((r) => r.rowNum === this.contextSelectedRow.rowNum);
-    if (idx !== -1) {
-      const newRow = {
-        rowNum: this.rows.length + 1,
-        cells: {},
-        hasError: false,
-        errorCount: 0,
-        isNew: true
-      };
-      this.headers.forEach((h) => newRow.cells[h.name] = { value: "", isValid: true, isNew: true });
-      const updated = [...this.rows];
-      updated.splice(idx + 1, 0, newRow);
-      this.state.setRows(updated);
-    }
-  }
-  deleteSelectedRow() {
-    if (!this.contextSelectedRow)
-      return;
-    const idx = this.rows.findIndex((r) => r.rowNum === this.contextSelectedRow.rowNum);
-    this.state.trackDeletedRow(this.contextSelectedRow, idx);
-    const updated = this.rows.filter((r) => r.rowNum !== this.contextSelectedRow.rowNum);
-    this.state.setRows(updated);
-  }
+  // ── Column Geometry & Headers ────────────────────────────────
   getColLetter(idx) {
     let letter = "";
     let temp = idx;
@@ -128794,69 +129768,167 @@ var SutramGridComponent = class _SutramGridComponent {
   getColumnWidth(col) {
     if (col.width)
       return col.width;
-    const name = (col.name || "").toLowerCase();
-    if (name === "_id" || name === "id")
-      return 60;
+    const name = (col.short_name || col.name || col.col_name || "").toLowerCase();
+    const key = (col.key || "").toLowerCase();
+    if (name === "_id" || name === "id" || col.is_fk_raw || key.endsWith("_id"))
+      return 75;
     if (name === "active")
       return 80;
     if (name === "sort_order" || name === "order" || name === "roll_no")
       return 90;
     if (name === "gender" || name.includes("code"))
       return 95;
-    if (name === "parent" || name === "alias")
+    if (name.includes("date") || name.includes("time"))
       return 120;
-    return Math.max(130, Math.min(220, (col.name || "").length * 10 + 35));
-  }
-  openRowContextMenu(event2, row, cm) {
-    event2.preventDefault();
-    this.contextSelectedRow = row;
-    if (cm)
-      cm.show(event2);
+    if (col.is_fk_main || col.ref_table || col.type === "ref") {
+      return Math.max(160, Math.min(260, (col.short_name || col.name || "").length * 11 + 55));
+    }
+    return Math.max(130, Math.min(220, (col.short_name || col.name || "").length * 10 + 35));
   }
   static \u0275fac = function SutramGridComponent_Factory(t) {
-    return new (t || _SutramGridComponent)(\u0275\u0275directiveInject(SutramExcelStateService), \u0275\u0275directiveInject(SutramClipboardService), \u0275\u0275directiveInject(SutramAuditService), \u0275\u0275directiveInject(SutramRefCacheService), \u0275\u0275directiveInject(ElementRef));
+    return new (t || _SutramGridComponent)(\u0275\u0275directiveInject(SutramExcelStateService), \u0275\u0275directiveInject(SutramClipboardService), \u0275\u0275directiveInject(SutramAuditService), \u0275\u0275directiveInject(SutramRefCacheService), \u0275\u0275directiveInject(ElementRef), \u0275\u0275directiveInject(ChangeDetectorRef));
   };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _SutramGridComponent, selectors: [["sutram-grid"]], inputs: { headers: "headers", rows: "rows", filterOnlyErrors: "filterOnlyErrors", enableDelete: "enableDelete" }, outputs: { cellChanged: "cellChanged", solveAllTriggered: "solveAllTriggered", loadMore: "loadMore", filterChanged: "filterChanged", sortChanged: "sortChanged" }, features: [\u0275\u0275NgOnChangesFeature], decls: 11, vars: 13, consts: [[1, "sutram-grid-wrapper"], [3, "model"], ["cm", ""], ["styleClass", "sutram-col-filter-popover shadow-lg", 3, "showCloseIcon", "dismissable"], ["colFilterOp", ""], ["pTemplate", "content"], ["scrollHeight", "flex", "columnResizeMode", "expand", "styleClass", "p-datatable-gridlines p-datatable-sm sutram-grid-table", 3, "value", "columns", "virtualScroll", "virtualScrollItemSize", "scrollable", "resizableColumns", "reorderableColumns", "contextMenu", "contextMenuSelection", "contextMenuSelectionChange"], ["pTemplate", "header"], ["pTemplate", "body"], ["pTemplate", "emptymessage"], ["class", "inline-solve-prompt card shadow-lg p-3", 4, "ngIf"], ["class", "filter-popover-content", 4, "ngIf"], [1, "filter-popover-content"], [1, "popover-header", "d-flex", "align-items-center", "justify-content-between"], [1, "fw-bold", "fs-7", "text-truncate"], [1, "pi", "pi-filter", "me-1", "text-primary"], ["type", "button", 1, "btn-close-popover", 3, "click"], [1, "pi", "pi-times"], [1, "popover-search-box"], [1, "pi", "pi-search", "search-icon"], ["type", "text", "placeholder", "Search values...", 1, "form-control", "form-control-sm", "popover-search-input", 3, "ngModel", "ngModelChange"], ["type", "button", "class", "btn-clear-search-inline", 3, "click", 4, "ngIf"], [1, "popover-select-all-row", "d-flex", "align-items-center", "justify-content-between", "px-2", "py-1"], [1, "form-check", "m-0"], ["type", "checkbox", "id", "selectAllFilterVals", 1, "form-check-input", "cursor-pointer", 3, "checked", "change"], ["for", "selectAllFilterVals", 1, "form-check-label", "small", "fw-semibold", "cursor-pointer"], [1, "small", "text-muted"], [1, "popover-checklist-items"], ["class", "checklist-item d-flex align-items-center justify-content-between px-2 py-1 cursor-pointer", 3, "click", 4, "ngFor", "ngForOf"], ["class", "text-center py-3 text-muted small", 4, "ngIf"], [1, "popover-divider"], [1, "popover-footer", "d-flex", "align-items-center", "justify-content-between", "pt-2"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-danger", "btn-xs", 3, "click"], [1, "d-flex", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-secondary", "btn-xs", 3, "click"], ["type", "button", 1, "btn", "btn-sm", "btn-primary", "btn-xs", 3, "click"], ["type", "button", 1, "btn-clear-search-inline", 3, "click"], [1, "checklist-item", "d-flex", "align-items-center", "justify-content-between", "px-2", "py-1", "cursor-pointer", 3, "click"], [1, "d-flex", "align-items-center", "gap-2", "text-truncate"], ["type", "checkbox", 1, "form-check-input", "cursor-pointer", "m-0", 3, "checked", "click", "change"], [1, "item-label", "text-truncate", 3, "title"], ["class", "badge bg-light text-muted small ms-1", 4, "ngIf"], ["class", "item-count-badge", 4, "ngIf"], [1, "badge", "bg-light", "text-muted", "small", "ms-1"], [1, "item-count-badge"], [1, "text-center", "py-3", "text-muted", "small"], ["pFrozenColumn", "", 1, "corner-th", "corner-config-th", 2, "width", "48px", "min-width", "48px", "text-align", "center"], [2, "display", "flex", "align-items", "center", "justify-content", "center"], [1, "pi", "pi-cog", "corner-cog-icon", 2, "font-size", "13px", "color", "var(--text-muted, #64748b)"], ["pResizableColumn", "", "pReorderableColumn", "", "class", "sutram-th", 3, "width", "min-width", "max-width", "sortable-th", "click", 4, "ngFor", "ngForOf"], ["pResizableColumn", "", "pReorderableColumn", "", 1, "sutram-th", 3, "click"], [2, "display", "flex", "justify-content", "space-between", "align-items", "center", "position", "relative", "width", "100%"], [1, "col-header-title", "text-truncate", "d-flex", "align-items-center", 3, "title"], [2, "color", "var(--text-muted, #64748b)", "font-size", "11px", "margin-right", "5px"], [1, "text-truncate"], ["style", "color: #ef4444; margin-left: 2px;", 4, "ngIf"], [1, "col-header-controls", "d-flex", "align-items-center", 3, "click"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(59, 130, 246, 0.15); color: #2563eb; border-radius: 3px; font-weight: 600; margin-right: 4px;", 3, "title", 4, "ngIf"], ["class", "col-sort-trigger", 3, "is-sorted", "title", "click", 4, "ngIf"], ["class", "col-filter-trigger", 3, "is-filtered", "title", "click", 4, "ngIf"], [2, "color", "#ef4444", "margin-left", "2px"], [2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(59, 130, 246, 0.15)", "color", "#2563eb", "border-radius", "3px", "font-weight", "600", "margin-right", "4px", 3, "title"], [1, "col-sort-trigger", 3, "title", "click"], [1, "pi", 3, "ngClass"], [1, "col-filter-trigger", 3, "title", "click"], [3, "pContextMenuRow"], ["pFrozenColumn", "", 1, "row-num-td", 2, "width", "48px", "min-width", "48px", "max-width", "48px", "text-align", "center", 3, "contextmenu"], ["style", "font-size: 10px; margin-right: 3px; font-weight: 700; color: #15803d;", 4, "ngIf"], ["style", "font-size: 10px; margin-right: 3px; font-weight: 700; color: #b45309;", 4, "ngIf"], [1, "row-num-text"], [3, "pEditableColumn", "width", "min-width", "max-width", "click", 4, "ngFor", "ngForOf"], [2, "font-size", "10px", "margin-right", "3px", "font-weight", "700", "color", "#15803d"], [2, "font-size", "10px", "margin-right", "3px", "font-weight", "700", "color", "#b45309"], [3, "pEditableColumn", "click"], [1, "cell-box", 3, "title"], ["pTemplate", "input"], ["pTemplate", "output"], ["field", "display", "appendTo", "body", "styleClass", "sutram-cell-autocomplete", 3, "ngModel", "suggestions", "dropdown", "forceSelection", "ngModelChange", "completeMethod", "onSelect", "onBlur", "keydown", 4, "ngIf", "ngIfElse"], ["plainInput", ""], ["field", "display", "appendTo", "body", "styleClass", "sutram-cell-autocomplete", 3, "ngModel", "suggestions", "dropdown", "forceSelection", "ngModelChange", "completeMethod", "onSelect", "onBlur", "keydown"], ["pTemplate", "item"], [1, "d-flex", "align-items-center", "justify-content-between", "w-100", "py-1"], [1, "fw-semibold"], ["class", "badge bg-light text-muted ms-2", 4, "ngIf"], [1, "badge", "bg-light", "text-muted", "ms-2"], ["type", "text", "pInputText", "", 1, "raw-cell-editor", 3, "ngModel", "ngModelChange", "blur", "keydown"], [1, "cell-value-text", "text-truncate"], [1, "text-center", "py-4", "text-muted"], [1, "pi", "pi-file-excel", "me-2", 2, "font-size", "16px"], [1, "inline-solve-prompt", "card", "shadow-lg", "p-3"], [1, "d-flex", "align-items-center", "justify-content-between", "pb-2", "mb-2", "border-bottom"], [1, "d-flex", "align-items-center", "gap-2"], [1, "pi", "pi-bolt", "text-warning", 2, "font-size", "16px"], [1, "fs-7"], ["type", "button", 1, "btn-close", 3, "click"], [1, "prompt-body", "text-start", "mb-3"], [1, "small", "text-muted", "mb-2"], [1, "alert", "alert-warning", "py-2", "px-3", "small", "d-flex", "align-items-center", "gap-2", "m-0"], [1, "pi", "pi-info-circle"], [1, "form-check", "mt-2"], ["type", "checkbox", "id", "chkDict", 1, "form-check-input", 3, "ngModel", "ngModelChange"], ["for", "chkDict", 1, "form-check-label", "small", "cursor-pointer"], [1, "prompt-actions", "d-flex", "justify-content-end", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-secondary", 3, "click"], ["type", "button", 1, "btn", "btn-sm", "btn-success", 3, "click"]], template: function SutramGridComponent_Template(rf, ctx) {
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _SutramGridComponent, selectors: [["sutram-grid"]], hostBindings: function SutramGridComponent_HostBindings(rf, ctx) {
+    if (rf & 1) {
+      \u0275\u0275listener("keydown", function SutramGridComponent_keydown_HostBindingHandler($event) {
+        return ctx.onDocumentKeydown($event);
+      }, false, \u0275\u0275resolveDocument)("click", function SutramGridComponent_click_HostBindingHandler($event) {
+        return ctx.onDocumentClick($event);
+      }, false, \u0275\u0275resolveDocument)("scroll", function SutramGridComponent_scroll_HostBindingHandler() {
+        return ctx.onWindowChange();
+      }, false, \u0275\u0275resolveWindow)("resize", function SutramGridComponent_resize_HostBindingHandler() {
+        return ctx.onWindowChange();
+      }, false, \u0275\u0275resolveWindow);
+    }
+  }, inputs: { headers: "headers", rows: "rows", filterOnlyErrors: "filterOnlyErrors", enableDelete: "enableDelete" }, outputs: { cellChanged: "cellChanged", solveAllTriggered: "solveAllTriggered", loadMore: "loadMore", filterChanged: "filterChanged", sortChanged: "sortChanged", openConfig: "openConfig" }, features: [\u0275\u0275NgOnChangesFeature], decls: 12, vars: 15, consts: [[1, "sutram-grid-wrapper", 3, "contextmenu"], ["class", "custom-context-menu shadow-lg", 3, "top", "left", "click", 4, "ngIf"], ["class", "ref-dropdown-menu shadow-lg", 3, "top", "left", "min-width", "mousedown", 4, "ngIf"], ["styleClass", "sutram-col-filter-popover shadow-lg", 3, "showCloseIcon", "dismissable"], ["colFilterOp", ""], ["pTemplate", "content"], ["scrollHeight", "flex", "columnResizeMode", "expand", "styleClass", "p-datatable-gridlines p-datatable-sm sutram-grid-table", 3, "value", "columns", "virtualScroll", "virtualScrollItemSize", "virtualScrollOptions", "rowTrackBy", "scrollable", "resizableColumns", "reorderableColumns"], ["pTable", ""], ["pTemplate", "header"], ["pTemplate", "body"], ["pTemplate", "emptymessage"], ["class", "inline-solve-prompt card shadow-lg p-3", 4, "ngIf"], [1, "custom-context-menu", "shadow-lg", 3, "click"], [4, "ngIf"], [1, "context-menu-item", 3, "click"], [1, "pi", "pi-arrow-up"], [1, "pi", "pi-arrow-down"], [1, "pi", "pi-clone"], [1, "pi", "pi-copy"], [1, "ms-auto"], [1, "pi", "pi-file-edit"], [1, "pi", "pi-clipboard"], [1, "context-menu-divider"], [1, "context-menu-item", "text-danger", 3, "click"], [1, "pi", "pi-trash", 2, "color", "#ef4444"], [2, "color", "#ef4444", "font-weight", "600"], [1, "ref-dropdown-menu", "shadow-lg", 3, "mousedown"], [1, "ref-dropdown-header"], [2, "opacity", "0.8", "font-weight", "400"], [1, "ref-dropdown-items-wrap", 2, "max-height", "185px", "overflow-y", "auto"], ["class", "ref-dropdown-item", 3, "highlighted", "mousedown", 4, "ngFor", "ngForOf"], ["class", "ref-dropdown-empty", 4, "ngIf"], [1, "ref-dropdown-item", 3, "mousedown"], [1, "ref-item-label", "text-truncate"], ["class", "ref-item-badge", 4, "ngIf"], [1, "ref-item-badge"], [1, "ref-dropdown-empty"], [1, "pi", "pi-search", "me-1"], ["class", "filter-popover-content", 4, "ngIf"], [1, "filter-popover-content"], [1, "popover-header"], [1, "popover-title", "text-truncate"], [1, "pi", "pi-filter-fill", "text-primary"], [1, "col-name", "text-truncate", 3, "title"], ["class", "badge-type", 4, "ngIf"], ["type", "button", "title", "Close", 1, "btn-popover-close", 3, "click"], [1, "pi", "pi-times"], [1, "popover-search-wrap"], [1, "pi", "pi-search", "search-icon"], ["type", "text", "placeholder", "Search in list...", 1, "popover-search-input", 3, "ngModel", "ngModelChange"], ["type", "button", "class", "btn-clear-search-inline", 3, "click", 4, "ngIf"], [1, "popover-action-strip"], [1, "select-all-label"], ["type", "checkbox", 1, "custom-check", 3, "checked", "change"], [1, "quick-links"], ["type", "button", 1, "btn-link-action", 3, "click"], [1, "divider"], [1, "count-pill"], [1, "popover-checklist-items"], ["class", "checklist-item", 3, "click", 4, "ngFor", "ngForOf"], ["class", "empty-list-state", 4, "ngIf"], [1, "popover-footer"], ["type", "button", 1, "btn-filter-clear", 3, "click"], [1, "pi", "pi-trash", "me-1"], [1, "footer-actions-right"], ["type", "button", 1, "btn-filter-cancel", 3, "click"], ["type", "button", 1, "btn-filter-apply", 3, "click"], [1, "pi", "pi-check"], [1, "badge-type"], ["type", "button", 1, "btn-clear-search-inline", 3, "click"], [1, "checklist-item", 3, "click"], [1, "item-left", "text-truncate"], ["type", "checkbox", 1, "custom-check", 3, "checked", "click", "change"], [1, "item-label", "text-truncate", 3, "title"], [1, "item-right"], ["class", "item-code-chip", 4, "ngIf"], ["class", "item-count-badge", 4, "ngIf"], [1, "item-code-chip"], [1, "item-count-badge"], [1, "empty-list-state"], ["pFrozenColumn", "", "title", "Configure Columns (\u0915\u0949\u0932\u092E \u091A\u0941\u0928\u0947\u0902)", 1, "corner-th", "corner-config-th", 2, "width", "34px", "min-width", "34px", "max-width", "34px", "text-align", "center", 3, "click"], [2, "display", "flex", "align-items", "center", "justify-content", "center"], [1, "pi", "pi-cog", "corner-cog-icon", 2, "font-size", "12px", "color", "var(--text-muted, #64748b)"], ["pResizableColumn", "", "pReorderableColumn", "", "class", "sutram-th", 3, "width", "min-width", "max-width", "sortable-th", "click", 4, "ngFor", "ngForOf"], ["pResizableColumn", "", "pReorderableColumn", "", 1, "sutram-th", 3, "click"], [2, "display", "flex", "justify-content", "space-between", "align-items", "center", "position", "relative", "width", "100%"], [1, "col-header-title", "text-truncate", "d-flex", "align-items-center", 3, "title"], [2, "color", "var(--text-muted, #64748b)", "font-size", "11px", "margin-right", "5px"], [1, "text-truncate"], ["style", "color: #ef4444; margin-left: 2px;", 4, "ngIf"], [1, "col-header-controls", "d-flex", "align-items-center", 3, "click"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(16, 185, 129, 0.15); color: #059669; border-radius: 3px; font-weight: 600; margin-right: 4px;", 3, "title", 4, "ngIf"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(59, 130, 246, 0.15); color: #2563eb; border-radius: 3px; font-weight: 600; margin-right: 4px;", 3, "title", 4, "ngIf"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(245, 158, 11, 0.15); color: #d97706; border-radius: 3px; font-weight: 600; margin-right: 4px;", "title", "Raw ID", 4, "ngIf"], ["class", "col-sort-trigger", 3, "is-sorted", "title", "click", 4, "ngIf"], ["class", "col-filter-trigger", 3, "is-filtered", "title", "click", 4, "ngIf"], [2, "color", "#ef4444", "margin-left", "2px"], [2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(16, 185, 129, 0.15)", "color", "#059669", "border-radius", "3px", "font-weight", "600", "margin-right", "4px", 3, "title"], [2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(59, 130, 246, 0.15)", "color", "#2563eb", "border-radius", "3px", "font-weight", "600", "margin-right", "4px", 3, "title"], ["title", "Raw ID", 2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(245, 158, 11, 0.15)", "color", "#d97706", "border-radius", "3px", "font-weight", "600", "margin-right", "4px"], [1, "col-sort-trigger", 3, "title", "click"], [1, "pi", 3, "ngClass"], [1, "col-filter-trigger", 3, "title", "click"], ["pFrozenColumn", "", 1, "row-num-td", 2, "width", "34px", "min-width", "34px", "max-width", "34px", "text-align", "center", 3, "click", "contextmenu"], ["class", "row-state-dot dot-new", 4, "ngIf"], ["class", "row-state-dot dot-edited", 4, "ngIf"], [1, "row-num-text"], [3, "width", "min-width", "max-width", 4, "ngFor", "ngForOf"], [1, "row-state-dot", "dot-new"], [1, "row-state-dot", "dot-edited"], [1, "cell-box", 3, "title", "click", "dblclick", "contextmenu"], [4, "ngIf", "ngIfElse"], ["normalMode", ""], ["type", "text", 1, "raw-cell-editor", 3, "ngModel", "ngModelChange", "input", "keydown", "blur"], ["cellEditorInput", ""], [1, "cell-value-text", "text-truncate"], [1, "text-center", "py-4", "text-muted"], [1, "pi", "pi-file-excel", "me-2", 2, "font-size", "16px"], [1, "inline-solve-prompt", "card", "shadow-lg", "p-3"], [1, "d-flex", "align-items-center", "justify-content-between", "pb-2", "mb-2", "border-bottom"], [1, "d-flex", "align-items-center", "gap-2"], [1, "pi", "pi-bolt", "text-warning", 2, "font-size", "16px"], [1, "fs-7"], ["type", "button", 1, "btn-close", 3, "click"], [1, "prompt-body", "text-start", "mb-3"], [1, "small", "text-muted", "mb-2"], [1, "alert", "alert-warning", "py-2", "px-3", "small", "d-flex", "align-items-center", "gap-2", "m-0"], [1, "pi", "pi-info-circle"], [1, "form-check", "mt-2"], ["type", "checkbox", "id", "chkDict", 1, "form-check-input", 3, "ngModel", "ngModelChange"], ["for", "chkDict", 1, "form-check-label", "small", "cursor-pointer"], [1, "prompt-actions", "d-flex", "justify-content-end", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-secondary", 3, "click"], ["type", "button", 1, "btn", "btn-sm", "btn-success", 3, "click"]], template: function SutramGridComponent_Template(rf, ctx) {
     if (rf & 1) {
       \u0275\u0275elementStart(0, "div", 0);
-      \u0275\u0275element(1, "p-contextMenu", 1, 2);
+      \u0275\u0275listener("contextmenu", function SutramGridComponent_Template_div_contextmenu_0_listener($event) {
+        return $event.preventDefault();
+      });
+      \u0275\u0275template(1, SutramGridComponent_div_1_Template, 16, 7, "div", 1);
+      \u0275\u0275template(2, SutramGridComponent_div_2_Template, 9, 10, "div", 2);
       \u0275\u0275elementStart(3, "p-overlayPanel", 3, 4);
       \u0275\u0275template(5, SutramGridComponent_ng_template_5_Template, 1, 1, "ng-template", 5);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(6, "p-table", 6);
-      \u0275\u0275listener("contextMenuSelectionChange", function SutramGridComponent_Template_p_table_contextMenuSelectionChange_6_listener($event) {
-        return ctx.contextSelectedRow = $event;
-      });
-      \u0275\u0275template(7, SutramGridComponent_ng_template_7_Template, 5, 1, "ng-template", 7);
-      \u0275\u0275template(8, SutramGridComponent_ng_template_8_Template, 7, 13, "ng-template", 8);
-      \u0275\u0275template(9, SutramGridComponent_ng_template_9_Template, 4, 1, "ng-template", 9);
+      \u0275\u0275elementStart(6, "p-table", 6, 7);
+      \u0275\u0275template(8, SutramGridComponent_ng_template_8_Template, 5, 1, "ng-template", 8);
+      \u0275\u0275template(9, SutramGridComponent_ng_template_9_Template, 7, 14, "ng-template", 9);
+      \u0275\u0275template(10, SutramGridComponent_ng_template_10_Template, 4, 1, "ng-template", 10);
       \u0275\u0275elementEnd();
-      \u0275\u0275template(10, SutramGridComponent_div_10_Template, 38, 7, "div", 10);
+      \u0275\u0275template(11, SutramGridComponent_div_11_Template, 38, 7, "div", 11);
       \u0275\u0275elementEnd();
     }
     if (rf & 2) {
-      const _r0 = \u0275\u0275reference(2);
       \u0275\u0275advance(1);
-      \u0275\u0275property("model", ctx.contextMenuItems);
-      \u0275\u0275advance(2);
+      \u0275\u0275property("ngIf", ctx.contextMenuState.visible);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.dropdownOpen && ctx.isFkColumn(ctx.editingColDef));
+      \u0275\u0275advance(1);
       \u0275\u0275property("showCloseIcon", false)("dismissable", true);
       \u0275\u0275advance(3);
-      \u0275\u0275property("value", ctx.visibleRows)("columns", ctx.headers)("virtualScroll", true)("virtualScrollItemSize", 23)("scrollable", true)("resizableColumns", true)("reorderableColumns", true)("contextMenu", _r0)("contextMenuSelection", ctx.contextSelectedRow);
-      \u0275\u0275advance(4);
+      \u0275\u0275property("value", ctx.visibleRows)("columns", ctx.headers)("virtualScroll", true)("virtualScrollItemSize", 23)("virtualScrollOptions", \u0275\u0275pureFunction0(14, _c0))("rowTrackBy", ctx.trackByRowNum)("scrollable", true)("resizableColumns", true)("reorderableColumns", true);
+      \u0275\u0275advance(5);
       \u0275\u0275property("ngIf", ctx.promptState.visible);
     }
-  }, dependencies: [NgClass, NgForOf, NgIf, DefaultValueAccessor, CheckboxControlValueAccessor, NgControlStatus, NgModel, Table, PrimeTemplate, FrozenColumn, ContextMenuRow, ResizableColumn, ReorderableColumn, EditableColumn, CellEditor, InputText, ContextMenu, AutoComplete, OverlayPanel], styles: ["\n\n\n\n\n\n\n\n\n\n\n.sutram-grid-wrapper[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n\n  ::ng-deep .p-datatable-wrapper {\n    height: 100% !important;\n  }\n\n  \n\n  ::ng-deep .p-datatable-thead > tr > th {\n    position: sticky;\n    top: 0;\n    z-index: 20;\n    background: var(--header-bg, #f1f5f9) !important;\n    color: var(--header-text, #1e293b) !important;\n    font-weight: 700 !important;\n    font-size: 13px !important;\n    height: var(--header-height, 38px) !important;\n    padding: 6px 10px !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;\n    white-space: nowrap !important;\n    user-select: none;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);\n\n    &.sortable-th {\n      cursor: pointer !important;\n      transition: background-color 0.15s ease;\n\n      &:hover {\n        background-color: rgba(125, 125, 125, 0.1) !important;\n      }\n    }\n  }\n\n  \n\n  ::ng-deep th.corner-th {\n    width: 48px !important;\n    min-width: 48px !important;\n    max-width: 48px !important;\n    left: 0;\n    z-index: 25 !important;\n    text-align: center !important;\n    border-right: 2px solid rgba(125, 125, 125, 0.35) !important;\n    cursor: pointer;\n\n    &:hover .corner-cog-icon {\n      color: var(--primary, #4f46e5) !important;\n      transform: rotate(45deg);\n      transition: all 0.2s ease;\n    }\n  }\n\n  \n\n  .col-header-controls {\n    display: flex;\n    align-items: center;\n    gap: 3px;\n    margin-left: 4px;\n    flex-shrink: 0;\n  }\n  .col-sort-trigger, .col-filter-trigger {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 18px;\n    height: 18px;\n    border-radius: 3px;\n    cursor: pointer;\n    color: var(--text-muted, #64748b);\n    opacity: 0.65;\n    transition: all 0.12s ease;\n    font-size: 11px;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.18);\n      opacity: 1;\n      color: var(--text, #0f172a);\n    }\n    &.is-sorted, &.is-filtered {\n      color: var(--primary, #4f46e5) !important;\n      opacity: 1 !important;\n      font-weight: 700;\n      background: var(--primary-soft, #e0e7ff);\n    }\n  }\n\n  \n\n  ::ng-deep .p-datatable-tbody > tr > td {\n    height: var(--cell-height, 23px) !important;\n    padding: 0 !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    vertical-align: middle;\n    font-size: 11.5px;\n  }\n\n  \n\n  ::ng-deep td.row-num-td {\n    position: sticky;\n    left: 0;\n    z-index: 15;\n    width: 48px !important;\n    min-width: 48px !important;\n    max-width: 48px !important;\n    text-align: center;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 2px solid rgba(125, 125, 125, 0.35) !important;\n    color: var(--text-muted, #64748b);\n    font-size: 10.5px;\n    font-weight: 600;\n    user-select: none;\n    cursor: pointer;\n\n    &:hover {\n      background: rgba(59, 130, 246, 0.15) !important;\n    }\n  }\n\n  \n\n  .cell-box {\n    height: var(--cell-height, 23px);\n    padding: 1px 6px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    display: flex;\n    align-items: center;\n    cursor: cell;\n    width: 100%;\n\n    &.cell-active {\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      z-index: 10;\n    }\n    &.cell-bad {\n      background-color: rgba(244, 63, 94, 0.18) !important;\n      color: #f43f5e !important;\n      font-weight: 600;\n      box-shadow: inset 0 0 0 1px #f43f5e;\n    }\n    &.cell-edited {\n      background-color: var(--cell-edited-bg, #fef9c3) !important;\n      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);\n    }\n    &.cell-new {\n      background-color: var(--row-new-bg, #dcfce7) !important;\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-edited td {\n    background-color: var(--row-edited-bg, #fffbeb);\n\n    &.row-num-td {\n      background-color: rgba(234, 179, 8, 0.2) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid var(--cell-edited-border, #eab308) !important;\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-new td {\n    background-color: var(--row-new-bg, #dcfce7);\n\n    &.row-num-td {\n      background-color: rgba(34, 197, 94, 0.2) !important;\n      color: #15803d !important;\n      font-weight: 700;\n      border-left: 3px solid var(--row-new-border, #22c55e) !important;\n    }\n  }\n\n  .raw-cell-editor {\n    width: 100%;\n    height: var(--cell-height, 23px);\n    border: none;\n    outline: none;\n    background: transparent;\n    color: inherit;\n    font-family: inherit;\n    font-size: 11.5px;\n    padding: 1px 6px;\n  }\n}\n\n\n\n.inline-solve-prompt[_ngcontent-%COMP%] {\n  position: fixed;\n  bottom: 70px;\n  right: 25px;\n  z-index: 2100;\n  width: 440px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 8px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);\n  animation: _ngcontent-%COMP%_promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);\n}\n@keyframes _ngcontent-%COMP%_promptSlideUp {\n  from { opacity: 0; transform: translateY(16px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n\n\n  .sutram-col-filter-popover {\n  width: 270px;\n  font-size: 12px;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n  }\n}\n.filter-popover-content[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n\n  .popover-header {\n    padding: 8px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.04);\n  }\n  .popover-search-box {\n    position: relative;\n    padding: 6px 8px;\n\n    .search-icon {\n      position: absolute;\n      left: 14px;\n      top: 13px;\n      font-size: 11px;\n      color: var(--text-muted, #64748b);\n    }\n    .popover-search-input {\n      padding-left: 24px;\n      font-size: 11.5px;\n      height: 26px;\n      border-radius: 4px;\n    }\n  }\n  .popover-checklist-items {\n    max-height: 180px;\n    overflow-y: auto;\n  }\n  .checklist-item:hover {\n    background: rgba(125, 125, 125, 0.08);\n  }\n  .popover-footer {\n    padding: 8px 10px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n  }\n}"], changeDetection: 0 });
+  }, dependencies: [NgClass, NgForOf, NgIf, DefaultValueAccessor, CheckboxControlValueAccessor, NgControlStatus, NgModel, Table, PrimeTemplate, FrozenColumn, ResizableColumn, ReorderableColumn, OverlayPanel], styles: ['\n\n\n\n\n\n\n\n\n\n\n\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.sutram-grid-wrapper[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n\n  ::ng-deep .p-datatable-wrapper {\n    height: 100% !important;\n  }\n\n  \n\n  ::ng-deep .p-datatable-thead > tr > th {\n    position: sticky;\n    top: 0;\n    z-index: 20;\n    background: var(--header-bg, #f1f5f9) !important;\n    color: var(--header-text, #1e293b) !important;\n    font-weight: 700 !important;\n    font-size: 13px !important;\n    height: var(--header-height, 38px) !important;\n    padding: 6px 10px !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;\n    white-space: nowrap !important;\n    user-select: none;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);\n\n    &.sortable-th {\n      cursor: pointer !important;\n      transition: background-color 0.15s ease;\n\n      &:hover {\n        background-color: rgba(125, 125, 125, 0.1) !important;\n      }\n    }\n  }\n\n  \n\n  \n\n  ::ng-deep th.corner-th {\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    left: 0;\n    z-index: 25 !important;\n    text-align: center !important;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    cursor: pointer;\n\n    .corner-cog-icon {\n      font-size: 10px !important;\n      color: var(--text-muted, #64748b);\n      transition: all 0.2s ease;\n    }\n\n    &:hover .corner-cog-icon {\n      color: var(--primary, #4f46e5) !important;\n      transform: rotate(45deg);\n    }\n  }\n\n  \n\n  .col-header-controls {\n    display: flex;\n    align-items: center;\n    gap: 1.5px;\n    margin-left: 2px;\n    flex-shrink: 0;\n  }\n  .col-sort-trigger, .col-filter-trigger {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 13px;\n    height: 13px;\n    border-radius: 2px;\n    cursor: pointer;\n    color: var(--text-muted, #64748b);\n    opacity: 0.65;\n    transition: all 0.12s ease;\n    font-size: 8px;\n    line-height: 1;\n\n    i.pi {\n      font-size: 8px !important;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.18);\n      opacity: 1;\n      color: var(--text, #0f172a);\n    }\n    &.is-sorted, &.is-filtered {\n      color: var(--primary, #4f46e5) !important;\n      opacity: 1 !important;\n      font-weight: 700;\n      background: var(--primary-soft, #e0e7ff);\n    }\n  }\n\n  \n\n  ::ng-deep .p-datatable-tbody > tr {\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n  }\n  ::ng-deep .p-datatable-tbody > tr > td {\n    height: var(--cell-height, 23px) !important;\n    padding: 0 !important;\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    vertical-align: middle;\n    font-size: 11.5px;\n  }\n\n  \n\n  ::ng-deep td.row-num-td {\n    position: sticky;\n    left: 0;\n    z-index: 15;\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    text-align: center;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    color: var(--text-muted, #64748b);\n    font-size: 11px;\n    font-weight: 500;\n    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n    user-select: none;\n    cursor: pointer;\n    letter-spacing: -0.2px;\n    padding: 0 !important;\n    transition: background-color 0.12s ease;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.16) !important;\n      color: var(--text, #1e293b);\n    }\n\n    .row-state-dot {\n      font-size: 10px;\n      font-weight: 700;\n      margin-right: 2px;\n      &.dot-new { color: #15803d; }\n      &.dot-edited { color: #b45309; }\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-selected {\n    background-color: rgba(59, 130, 246, 0.12) !important;\n\n    > td {\n      background-color: rgba(59, 130, 246, 0.12) !important;\n      border-top: 1px solid rgba(59, 130, 246, 0.4) !important;\n      border-bottom: 1px solid rgba(59, 130, 246, 0.4) !important;\n    }\n\n    > td.row-num-td {\n      background-color: #2563eb !important;\n      color: #ffffff !important;\n      font-weight: 700 !important;\n      border-top: 1px solid #2563eb !important;\n      border-bottom: 1px solid #2563eb !important;\n      border-right: 1px solid #1d4ed8 !important;\n\n      .row-state-dot {\n        color: #ffffff !important;\n      }\n    }\n\n    .cell-box {\n      background-color: transparent !important;\n    }\n  }\n\n  \n\n  .cell-box {\n    height: var(--cell-height, 23px);\n    padding: 0 6px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    display: flex;\n    align-items: center;\n    cursor: cell;\n    width: 100%;\n    position: relative;\n\n    &.cell-active {\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      z-index: 10;\n    }\n    &.cell-editing {\n      padding: 0 !important;\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      background: var(--surface, #ffffff) !important;\n      z-index: 20;\n    }\n    &.cell-bad {\n      background-color: rgba(244, 63, 94, 0.18) !important;\n      color: #f43f5e !important;\n      font-weight: 600;\n      box-shadow: inset 0 0 0 1px #f43f5e;\n    }\n    &.cell-edited {\n      background-color: var(--cell-edited-bg, #fef9c3) !important;\n      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);\n    }\n    &.cell-new {\n      background-color: var(--row-new-bg, #dcfce7) !important;\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-edited td {\n    background-color: var(--row-edited-bg, #fffbeb);\n\n    &.row-num-td {\n      background-color: rgba(234, 179, 8, 0.2) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid var(--cell-edited-border, #eab308) !important;\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-new td {\n    background-color: var(--row-new-bg, #dcfce7);\n\n    &.row-num-td {\n      background-color: rgba(34, 197, 94, 0.2) !important;\n      color: #15803d !important;\n      font-weight: 700;\n      border-left: 3px solid var(--row-new-border, #22c55e) !important;\n    }\n  }\n\n  .raw-cell-editor {\n    width: 100%;\n    height: 100%;\n    border: none;\n    outline: none;\n    background: transparent;\n    color: var(--text, inherit);\n    font-family: inherit;\n    font-size: 11.5px;\n    padding: 0 6px;\n    margin: 0;\n    box-sizing: border-box;\n  }\n}\n\n\n\n\n\n.custom-context-menu[_ngcontent-%COMP%] {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);\n  min-width: 220px;\n  max-width: 280px;\n  z-index: 100000;\n  padding: 4px 0;\n  white-space: nowrap;\n  animation: _ngcontent-%COMP%_contextMenuPop 0.12s ease-out;\n  user-select: none;\n\n  .context-menu-item {\n    padding: 6px 14px;\n    font-size: 11.5px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    color: var(--text, #0f172a);\n    transition: background 0.12s ease;\n    white-space: nowrap;\n\n    i {\n      font-size: 12px;\n      color: var(--text-muted, #64748b);\n      width: 14px;\n      text-align: center;\n      flex-shrink: 0;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.1);\n      color: var(--text, #0f172a);\n\n      i {\n        color: var(--primary, #4f46e5);\n      }\n    }\n\n    &.text-danger {\n      color: #ef4444 !important;\n      &:hover {\n        background: rgba(239, 68, 68, 0.1) !important;\n      }\n    }\n\n    kbd {\n      font-size: 10px;\n      padding: 1px 4px;\n      background: rgba(125, 125, 125, 0.12);\n      border-radius: 3px;\n      font-family: inherit;\n      color: var(--text-muted, #64748b);\n    }\n  }\n\n  .context-menu-divider {\n    height: 1px;\n    background: var(--surface-border, #e2e8f0);\n    margin: 4px 0;\n  }\n}\n\n@keyframes _ngcontent-%COMP%_contextMenuPop {\n  from {\n    opacity: 0;\n    transform: scale(0.96);\n  }\n  to {\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n\n\n\n\n.ref-dropdown-menu[_ngcontent-%COMP%] {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.2);\n  max-height: 220px;\n  overflow-y: auto;\n  z-index: 100001;\n  font-size: 11.5px;\n  font-family: inherit;\n  animation: _ngcontent-%COMP%_fadeInDropdown 0.12s ease-out;\n  box-sizing: border-box;\n\n  .ref-dropdown-header {\n    padding: 5px 9px;\n    font-size: 10px;\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    background: var(--header-bg, #f1f5f9);\n    color: var(--text-muted, #64748b);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    position: sticky;\n    top: 0;\n    z-index: 2;\n  }\n\n  .ref-dropdown-item {\n    padding: 6px 10px;\n    cursor: pointer;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    color: var(--text, #0f172a);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    transition: background 0.12s ease;\n    line-height: 1.3;\n\n    &:last-child {\n      border-bottom: none;\n    }\n\n    &:hover,\n    &.highlighted {\n      background: var(--primary-soft, #e0e7ff) !important;\n      color: var(--primary, #4f46e5) !important;\n      font-weight: 600;\n    }\n\n    .ref-item-badge {\n      font-size: 9.5px;\n      font-weight: 600;\n      padding: 1px 6px;\n      border-radius: 3px;\n      background: rgba(100, 116, 139, 0.15);\n      color: var(--text-muted, #64748b);\n      margin-left: 8px;\n      flex-shrink: 0;\n    }\n  }\n\n  .ref-dropdown-empty {\n    padding: 10px;\n    color: var(--text-muted, #64748b);\n    font-style: italic;\n    text-align: center;\n  }\n}\n\n@keyframes _ngcontent-%COMP%_fadeInDropdown {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n\n\n\n\n.inline-solve-prompt[_ngcontent-%COMP%] {\n  position: fixed;\n  bottom: 70px;\n  right: 25px;\n  z-index: 2100;\n  width: 440px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 8px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);\n  animation: _ngcontent-%COMP%_promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);\n}\n@keyframes _ngcontent-%COMP%_promptSlideUp {\n  from {\n    opacity: 0;\n    transform: translateY(16px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n\n\n\n\n  .sutram-col-filter-popover {\n  width: 290px !important;\n  font-size: 12px;\n  border-radius: 8px !important;\n  overflow: hidden;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n  }\n}\n\n.filter-popover-content[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  overflow: hidden;\n\n  .popover-header {\n    padding: 9px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.05);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n\n    .popover-title {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      font-weight: 700;\n      font-size: 12px;\n      color: var(--text, #0f172a);\n\n      .col-name {\n        max-width: 170px;\n      }\n      .badge-type {\n        font-size: 9px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(59, 130, 246, 0.15);\n        color: #2563eb;\n        font-weight: 600;\n      }\n    }\n\n    .btn-popover-close {\n      background: transparent;\n      border: none;\n      width: 22px;\n      height: 22px;\n      border-radius: 4px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      cursor: pointer;\n      color: var(--text-muted, #64748b);\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.15);\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-search-wrap {\n    position: relative;\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n\n    .search-icon {\n      position: absolute;\n      left: 18px;\n      top: 17px;\n      font-size: 11px;\n      color: var(--text-muted, #64748b);\n      pointer-events: none;\n    }\n    .popover-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      font-size: 11.5px;\n      border-radius: 5px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.15s, box-shadow 0.15s;\n\n      &:focus {\n        border-color: #3b82f6;\n        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);\n      }\n    }\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 18px;\n      top: 15px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      padding: 0;\n      font-size: 11px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-action-strip {\n    padding: 6px 12px;\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.02);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    font-size: 11px;\n\n    .select-all-label {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      cursor: pointer;\n      font-weight: 600;\n      color: var(--text, #0f172a);\n      user-select: none;\n      margin: 0;\n    }\n\n    .quick-links {\n      display: flex;\n      align-items: center;\n      gap: 4px;\n\n      .btn-link-action {\n        background: transparent;\n        border: none;\n        color: #3b82f6;\n        cursor: pointer;\n        padding: 0 3px;\n        font-size: 11px;\n        font-weight: 600;\n        text-decoration: none;\n\n        &:hover {\n          text-decoration: underline;\n        }\n      }\n      .divider {\n        color: var(--text-muted, #64748b);\n        opacity: 0.5;\n      }\n    }\n\n    .count-pill {\n      font-size: 10px;\n      color: var(--text-muted, #64748b);\n      font-weight: 500;\n    }\n  }\n\n  .popover-checklist-items {\n    max-height: 180px;\n    overflow-y: auto;\n    padding: 3px 0;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 4px;\n    }\n\n    .checklist-item {\n      padding: 5px 12px;\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      cursor: pointer;\n      user-select: none;\n      transition: background-color 0.1s ease;\n      color: var(--text, #0f172a);\n\n      &:hover {\n        background: rgba(59, 130, 246, 0.08);\n      }\n\n      .item-left {\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        flex-grow: 1;\n        min-width: 0;\n      }\n\n      .item-label {\n        font-size: 11.5px;\n        color: var(--text, #0f172a);\n      }\n\n      .item-right {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        flex-shrink: 0;\n      }\n\n      .item-code-chip {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n\n      .item-count-badge {\n        font-size: 10px;\n        padding: 1px 6px;\n        border-radius: 999px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n    }\n\n    .empty-list-state {\n      padding: 16px;\n      text-align: center;\n      color: var(--text-muted, #64748b);\n      font-size: 11.5px;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    accent-color: #3b82f6;\n    cursor: pointer;\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .popover-footer {\n    padding: 8px 12px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.04);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    gap: 8px;\n\n    .btn-filter-clear {\n      background: transparent;\n      border: 1px solid transparent;\n      color: #ef4444;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 8px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(239, 68, 68, 0.1);\n      }\n    }\n\n    .footer-actions-right {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n    }\n\n    .btn-filter-cancel {\n      background: transparent;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 10px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .btn-filter-apply {\n      background: #3b82f6;\n      border: 1px solid #3b82f6;\n      color: #ffffff;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 12px;\n      border-radius: 4px;\n      cursor: pointer;\n      display: inline-flex;\n      align-items: center;\n      gap: 4px;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: #2563eb;\n      }\n    }\n  }\n}'], changeDetection: 0 });
 };
 (function() {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SutramGridComponent, [{
     type: Component,
     args: [{ selector: "sutram-grid", changeDetection: ChangeDetectionStrategy2.OnPush, template: `<!-- sutram-grid.component.html -->
-<div class="sutram-grid-wrapper">
+<div class="sutram-grid-wrapper" (contextmenu)="$event.preventDefault()">
 
-  <!-- Right Click Context Menu -->
-  <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
+  <!-- 1. Sleek Pixel-Perfect Custom Context Menu (Replaces p-contextMenu) -->
+  <div *ngIf="contextMenuState.visible"
+       class="custom-context-menu shadow-lg"
+       [style.top.px]="contextMenuState.y"
+       [style.left.px]="contextMenuState.x"
+       (click)="$event.stopPropagation()">
 
-  <!-- Excel-like Column Header Filter & Sort Popover -->
+    <!-- Cell Actions (Copy, Cut, Paste) -->
+    <ng-container *ngIf="contextMenuState.type === 'cell'">
+      <div class="context-menu-item" (click)="copyActiveCell()">
+        <i class="pi pi-copy"></i>
+        <span>\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902 (Copy)</span>
+        <kbd class="ms-auto">Ctrl+C</kbd>
+      </div>
+      <div class="context-menu-item" (click)="cutActiveCell()">
+        <i class="pi pi-file-edit"></i>
+        <span>\u0915\u091F \u0915\u0930\u0947\u0902 (Cut)</span>
+        <kbd class="ms-auto">Ctrl+X</kbd>
+      </div>
+      <div class="context-menu-item" (click)="pasteToActiveCell()">
+        <i class="pi pi-clipboard"></i>
+        <span>\u092A\u0947\u0938\u094D\u091F \u0915\u0930\u0947\u0902 (Paste)</span>
+        <kbd class="ms-auto">Ctrl+V</kbd>
+      </div>
+      <div class="context-menu-divider"></div>
+    </ng-container>
+
+    <!-- Copy Row (Row Header Action) -->
+    <ng-container *ngIf="contextMenuState.type === 'row'">
+      <div class="context-menu-item" (click)="copySelectedRow()">
+        <i class="pi pi-copy"></i>
+        <span>\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902 (Copy)</span>
+      </div>
+      <div class="context-menu-divider"></div>
+    </ng-container>
+
+    <!-- Row Operations (Insert Above, Insert Below, Duplicate Row) -->
+    <div class="context-menu-item" (click)="insertRowAbove()">
+      <i class="pi pi-arrow-up"></i>
+      <span>\u090A\u092A\u0930 \u092A\u0902\u0915\u094D\u0924\u093F \u091C\u094B\u0921\u093C\u0947\u0902 (Insert Row Above)</span>
+    </div>
+    <div class="context-menu-item" (click)="insertRowBelow()">
+      <i class="pi pi-arrow-down"></i>
+      <span>\u0928\u0940\u091A\u0947 \u092A\u0902\u0915\u094D\u0924\u093F \u091C\u094B\u0921\u093C\u0947\u0902 (Insert Row Below)</span>
+    </div>
+    <div class="context-menu-item" (click)="duplicateRow()">
+      <i class="pi pi-clone"></i>
+      <span>\u092A\u0902\u0915\u094D\u0924\u093F \u0921\u0941\u092A\u094D\u0932\u093F\u0915\u0947\u091F \u0915\u0930\u0947\u0902 (Duplicate Row)</span>
+    </div>
+
+    <!-- Delete Row (Soft Red) -->
+    <ng-container *ngIf="enableDelete">
+      <div class="context-menu-divider"></div>
+      <div class="context-menu-item text-danger" (click)="deleteRow()">
+        <i class="pi pi-trash" style="color: #ef4444;"></i>
+        <span style="color: #ef4444; font-weight: 600;">\u092A\u0902\u0915\u094D\u0924\u093F \u0939\u091F\u093E\u090F\u0902 (Delete Row)</span>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- 2. Floating Smart FK Reference Dropdown Menu (Smart Mode live lookup) -->
+  <div *ngIf="dropdownOpen && isFkColumn(editingColDef)"
+       class="ref-dropdown-menu shadow-lg"
+       [style.top.px]="dropdownPos.top"
+       [style.left.px]="dropdownPos.left"
+       [style.min-width.px]="dropdownPos.minWidth"
+       (mousedown)="$event.preventDefault()">
+
+    <div class="ref-dropdown-header">
+      <span>Select {{ editingColDef?.ref_table || editingColDef?.name }} ({{ dropdownOptions.length }})</span>
+      <small style="opacity: 0.8; font-weight: 400;">\u2191\u2193 to navigate, Enter to select</small>
+    </div>
+
+    <div class="ref-dropdown-items-wrap" style="max-height: 185px; overflow-y: auto;">
+      <div *ngFor="let opt of dropdownOptions; let i = index"
+           class="ref-dropdown-item"
+           [class.highlighted]="i === highlightedIdx"
+           (mousedown)="selectDropdownOption(opt, $event, true)">
+        <span class="ref-item-label text-truncate">{{ opt.display }}</span>
+        <span *ngIf="opt.code" class="ref-item-badge">{{ opt.code }}</span>
+      </div>
+
+      <div *ngIf="dropdownOptions.length === 0" class="ref-dropdown-empty">
+        <i class="pi pi-search me-1"></i>
+        No matching {{ editingColDef?.ref_table || editingColDef?.name }} found
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Excel-like Column Header Filter & Sort Popover -->
   <p-overlayPanel #colFilterOp
                   [showCloseIcon]="false"
                   [dismissable]="true"
@@ -128864,22 +129936,25 @@ var SutramGridComponent = class _SutramGridComponent {
     <ng-template pTemplate="content">
       <div *ngIf="activeFilterCol" class="filter-popover-content">
         <!-- Popover Header -->
-        <div class="popover-header d-flex align-items-center justify-content-between">
-          <span class="fw-bold fs-7 text-truncate">
-            <i class="pi pi-filter me-1 text-primary"></i>
-            {{ activeFilterCol.name }} Filter
-          </span>
-          <button type="button" class="btn-close-popover" (click)="colFilterOp.hide()">
+        <div class="popover-header">
+          <div class="popover-title text-truncate">
+            <i class="pi pi-filter-fill text-primary"></i>
+            <span class="col-name text-truncate" [title]="activeFilterCol.name">{{ activeFilterCol.name }}</span>
+            <span *ngIf="activeFilterCol.ref_table || activeFilterCol.type === 'ref'" class="badge-type">
+              {{ activeFilterCol.ref_table || 'ref' }}
+            </span>
+          </div>
+          <button type="button" class="btn-popover-close" (click)="colFilterOp.hide()" title="Close">
             <i class="pi pi-times"></i>
           </button>
         </div>
 
-        <!-- Popover Search Box -->
-        <div class="popover-search-box">
+        <!-- Search Bar -->
+        <div class="popover-search-wrap">
           <i class="pi pi-search search-icon"></i>
           <input type="text"
-                 class="form-control form-control-sm popover-search-input"
-                 placeholder="Search values..."
+                 class="popover-search-input"
+                 placeholder="Search in list..."
                  [(ngModel)]="filterChecklistSearch" />
           <button *ngIf="filterChecklistSearch"
                   type="button"
@@ -128889,19 +129964,21 @@ var SutramGridComponent = class _SutramGridComponent {
           </button>
         </div>
 
-        <!-- Select All / Clear All Row -->
-        <div class="popover-select-all-row d-flex align-items-center justify-content-between px-2 py-1">
-          <div class="form-check m-0">
+        <!-- Action Strip: Select All & Quick Links -->
+        <div class="popover-action-strip">
+          <label class="select-all-label">
             <input type="checkbox"
-                   class="form-check-input cursor-pointer"
-                   id="selectAllFilterVals"
+                   class="custom-check"
                    [checked]="isAllChecklistSelected()"
                    (change)="toggleSelectAllChecklist($event)" />
-            <label class="form-check-label small fw-semibold cursor-pointer" for="selectAllFilterVals">
-              (Select All)
-            </label>
+            <span>(Select All)</span>
+          </label>
+          <div class="quick-links">
+            <button type="button" class="btn-link-action" (click)="selectAllFilteredItems()">All</button>
+            <span class="divider">\xB7</span>
+            <button type="button" class="btn-link-action" (click)="clearAllFilteredItems()">Clear</button>
           </div>
-          <span class="small text-muted">
+          <span class="count-pill">
             {{ selectedChecklistValues.size }} / {{ currentChecklistItems.length }}
           </span>
         </div>
@@ -128909,11 +129986,11 @@ var SutramGridComponent = class _SutramGridComponent {
         <!-- Checklist Values Container -->
         <div class="popover-checklist-items">
           <div *ngFor="let item of filteredChecklistItems"
-               class="checklist-item d-flex align-items-center justify-content-between px-2 py-1 cursor-pointer"
+               class="checklist-item"
                (click)="toggleChecklistItem(item.value)">
-            <div class="d-flex align-items-center gap-2 text-truncate">
+            <div class="item-left text-truncate">
               <input type="checkbox"
-                     class="form-check-input cursor-pointer m-0"
+                     class="custom-check"
                      [checked]="selectedChecklistValues.has(item.value)"
                      (click)="$event.stopPropagation()"
                      (change)="toggleChecklistItem(item.value)" />
@@ -128921,34 +129998,34 @@ var SutramGridComponent = class _SutramGridComponent {
                 {{ item.display }}
               </span>
             </div>
-            <span *ngIf="item.code" class="badge bg-light text-muted small ms-1">{{ item.code }}</span>
-            <span *ngIf="item.count !== undefined && item.count > 0" class="item-count-badge">{{ item.count }}</span>
+            <div class="item-right">
+              <span *ngIf="item.code" class="item-code-chip">{{ item.code }}</span>
+              <span *ngIf="item.count !== undefined && item.count > 0" class="item-count-badge">{{ item.count }}</span>
+            </div>
           </div>
 
-          <div *ngIf="filteredChecklistItems.length === 0" class="text-center py-3 text-muted small">
-            No values found
+          <div *ngIf="filteredChecklistItems.length === 0" class="empty-list-state">
+            <i class="pi pi-search me-1"></i> No matching values
           </div>
         </div>
 
-        <div class="popover-divider"></div>
-
         <!-- Footer Actions -->
-        <div class="popover-footer d-flex align-items-center justify-content-between pt-2">
+        <div class="popover-footer">
           <button type="button"
-                  class="btn btn-sm btn-outline-danger btn-xs"
+                  class="btn-filter-clear"
                   (click)="clearCurrentColFilter(colFilterOp)">
-            Clear
+            <i class="pi pi-trash me-1"></i>Reset
           </button>
-          <div class="d-flex gap-2">
+          <div class="footer-actions-right">
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary btn-xs"
+                    class="btn-filter-cancel"
                     (click)="colFilterOp.hide()">
               Cancel
             </button>
             <button type="button"
-                    class="btn btn-sm btn-primary btn-xs"
+                    class="btn-filter-apply"
                     (click)="applyCurrentColFilter(colFilterOp)">
-              Apply
+              <i class="pi pi-check"></i> Apply
             </button>
           </div>
         </div>
@@ -128957,27 +130034,29 @@ var SutramGridComponent = class _SutramGridComponent {
     </ng-template>
   </p-overlayPanel>
 
-  <!-- PrimeNG Virtual Table -->
-  <p-table [value]="visibleRows"
+  <!-- 4. PrimeNG Virtual Table -->
+  <p-table #pTable
+           [value]="visibleRows"
            [columns]="headers"
            [virtualScroll]="true"
            [virtualScrollItemSize]="23"
+           [virtualScrollOptions]="{ autoSize: false, numToleratedItems: 30 }"
+           [rowTrackBy]="trackByRowNum"
            [scrollable]="true"
            scrollHeight="flex"
            [resizableColumns]="true"
            columnResizeMode="expand"
            [reorderableColumns]="true"
-           [contextMenu]="cm"
-           [(contextMenuSelection)]="contextSelectedRow"
            styleClass="p-datatable-gridlines p-datatable-sm sutram-grid-table">
 
     <!-- Table Header Row -->
     <ng-template pTemplate="header" let-columns>
       <tr>
-        <!-- Interactive Corner Config Trigger (#) -->
-        <th class="corner-th corner-config-th" pFrozenColumn style="width: 48px; min-width: 48px; text-align: center;">
+        <!-- Corner Cog Config Trigger -->
+        <th class="corner-th corner-config-th" pFrozenColumn style="width: 34px; min-width: 34px; max-width: 34px; text-align: center;"
+            (click)="openConfig.emit($event)" title="Configure Columns (\u0915\u0949\u0932\u092E \u091A\u0941\u0928\u0947\u0902)">
           <div style="display: flex; align-items: center; justify-content: center;">
-            <i class="pi pi-cog corner-cog-icon" style="font-size: 13px; color: var(--text-muted, #64748b);"></i>
+            <i class="pi pi-cog corner-cog-icon" style="font-size: 12px; color: var(--text-muted, #64748b);"></i>
           </div>
         </th>
 
@@ -128992,37 +130071,49 @@ var SutramGridComponent = class _SutramGridComponent {
             [class.sortable-th]="state.sortingEnabled()"
             (click)="onHeaderClick(col)">
           <div style="display: flex; justify-content: space-between; align-items: center; position: relative; width: 100%;">
-            <span class="col-header-title text-truncate d-flex align-items-center" [title]="col.description || col.name">
+            <span class="col-header-title text-truncate d-flex align-items-center" [title]="col.description || col.short_name || col.name">
               <strong style="color: var(--text-muted, #64748b); font-size: 11px; margin-right: 5px;">{{ getColLetter(idx) }}</strong>
-              <span class="text-truncate">{{ col.name }}</span>
+              <span class="text-truncate">{{ col.short_name || col.name }}</span>
               <span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
             </span>
 
-            <!-- Header Action Controls: Sort Trigger, Filter Trigger & FK Pill -->
+            <!-- Header Action Controls: FK Pill, Sort & Filter Trigger -->
             <div class="col-header-controls d-flex align-items-center" (click)="$event.stopPropagation()">
-              <span *ngIf="col.type === 'ref' || col.ref_table"
+              <span *ngIf="col.is_fk_subcol"
+                    style="font-size: 9px; padding: 1px 4px; background: rgba(16, 185, 129, 0.15); color: #059669; border-radius: 3px; font-weight: 600; margin-right: 4px;"
+                    [title]="'Reference: ' + (col.ref_table || col.group)">
+                {{ col.ref_table || col.group }}
+              </span>
+
+              <span *ngIf="!col.is_fk_subcol && (col.type === 'ref' || col.ref_table || col.is_fk_main)"
                     style="font-size: 9px; padding: 1px 4px; background: rgba(59, 130, 246, 0.15); color: #2563eb; border-radius: 3px; font-weight: 600; margin-right: 4px;"
-                    [title]="col.ref_table || col.name">
+                    [title]="'FK: ' + (col.ref_table || col.name)">
                 {{ col.ref_table || col.name }}
+              </span>
+
+              <span *ngIf="col.is_fk_raw"
+                    style="font-size: 9px; padding: 1px 4px; background: rgba(245, 158, 11, 0.15); color: #d97706; border-radius: 3px; font-weight: 600; margin-right: 4px;"
+                    title="Raw ID">
+                id
               </span>
 
               <span *ngIf="state.sortingEnabled()"
                     class="col-sort-trigger"
-                    [class.is-sorted]="state.activeSort()?.colKey === col.name"
+                    [class.is-sorted]="state.activeSort()?.colKey === (col.key || col.name)"
                     (click)="onHeaderClick(col)"
-                    [title]="state.activeSort()?.colKey === col.name ? (state.activeSort()?.order === 'ASC' ? 'Sorted: ASC' : 'Sorted: DESC') : 'Sort'">
+                    [title]="state.activeSort()?.colKey === (col.key || col.name) ? (state.activeSort()?.order === 'ASC' ? 'Sorted: ASC' : 'Sorted: DESC') : 'Sort'">
                 <i class="pi"
-                   [ngClass]="state.activeSort()?.colKey === col.name
+                   [ngClass]="state.activeSort()?.colKey === (col.key || col.name)
                      ? (state.activeSort()?.order === 'ASC' ? 'pi-sort-amount-up-alt text-primary' : 'pi-sort-amount-down text-primary')
                      : 'pi-sort-alt text-muted'"></i>
               </span>
 
               <span *ngIf="state.filtersEnabled()"
                     class="col-filter-trigger"
-                    [class.is-filtered]="isColumnFiltered(col.name)"
+                    [class.is-filtered]="isColumnFiltered(col.key || col.name)"
                     (click)="openColumnFilter($event, col, colFilterOp)"
-                    [title]="isColumnFiltered(col.name) ? 'Filter Active' : 'Filter'">
-                <i class="pi" [ngClass]="isColumnFiltered(col.name) ? 'pi-filter-fill text-primary' : 'pi-filter'"></i>
+                    [title]="isColumnFiltered(col.key || col.name) ? 'Filter Active' : 'Filter'">
+                <i class="pi" [ngClass]="isColumnFiltered(col.key || col.name) ? 'pi-filter-fill text-primary' : 'pi-filter'"></i>
               </span>
             </div>
           </div>
@@ -129032,75 +130123,55 @@ var SutramGridComponent = class _SutramGridComponent {
 
     <!-- Table Body Rows -->
     <ng-template pTemplate="body" let-row let-rowIndex="rowIndex" let-columns="columns">
-      <tr [pContextMenuRow]="row"
-          [class.row-new]="row.isNew"
+      <tr [class.row-new]="row.isNew && isRowPopulated(row)"
           [class.row-edited]="!row.isNew && row.isModified"
           [class.row-has-error]="row.hasError"
-          [class.row-synced]="row.isSynced">
+          [class.row-synced]="row.isSynced"
+          [class.row-selected]="selectedRowIdx === rowIndex">
 
-        <!-- Sticky Row Number TD (48px) -->
+        <!-- Sticky Row Number TD (34px, Authentic Excel Look) -->
         <td class="row-num-td"
             pFrozenColumn
-            style="width: 48px; min-width: 48px; max-width: 48px; text-align: center;"
-            (contextmenu)="openRowContextMenu($event, row, cm)">
-          <span *ngIf="row.isNew" style="font-size: 10px; margin-right: 3px; font-weight: 700; color: #15803d;">+</span>
-          <span *ngIf="!row.isNew && row.isModified" style="font-size: 10px; margin-right: 3px; font-weight: 700; color: #b45309;">\u2022</span>
+            style="width: 34px; min-width: 34px; max-width: 34px; text-align: center;"
+            (click)="onRowHeaderClick(rowIndex, row, $event)"
+            (contextmenu)="openRowContextMenu($event, row, rowIndex)">
+          <span *ngIf="row.isNew && isRowPopulated(row)" class="row-state-dot dot-new">+</span>
+          <span *ngIf="!row.isNew && row.isModified" class="row-state-dot dot-edited">\u2022</span>
           <span class="row-num-text">{{ row.rowNum }}</span>
         </td>
 
-        <!-- Compact Data Cells (23px height) -->
+        <!-- Compact Small Data Cells (23px height) -->
         <td *ngFor="let col of columns"
-            [pEditableColumn]="row.cells[col.name]?.value"
             [style.width.px]="getColumnWidth(col)"
             [style.min-width.px]="getColumnWidth(col)"
-            [style.max-width.px]="getColumnWidth(col)"
-            (click)="onCellClick(rowIndex, col.name)">
+            [style.max-width.px]="getColumnWidth(col)">
 
           <div class="cell-box"
-               [class.cell-active]="state.selectedCell()?.rowIdx === rowIndex && state.selectedCell()?.colKey === col.name"
-               [class.cell-bad]="!row.cells[col.name]?.isValid"
-               [class.cell-edited]="row.cells[col.name]?.isModified"
-               [class.cell-new]="row.isNew"
-               [title]="row.cells[col.name]?.errorMsg || ''">
+               [class.cell-active]="state.selectedCell()?.rowIdx === rowIndex && state.selectedCell()?.colKey === (col.key || col.name)"
+               [class.cell-editing]="isCellEditing(rowIndex, col.key || col.name)"
+               [class.cell-bad]="!row.cells[col.key || col.name]?.isValid"
+               [class.cell-edited]="row.cells[col.key || col.name]?.isModified"
+               [class.cell-new]="row.isNew && isRowPopulated(row)"
+               [title]="row.cells[col.key || col.name]?.errorMessage || ''"
+               (click)="onCellClick(rowIndex, col.key || col.name, $event)"
+               (dblclick)="startCellEdit(rowIndex, col.key || col.name, row, $event)"
+               (contextmenu)="openCellContextMenu($event, rowIndex, col.key || col.name, row)">
 
-            <p-cellEditor>
-              <!-- In-Cell Edit Mode -->
-              <ng-template pTemplate="input">
-                <p-autoComplete *ngIf="col.type === 'ref' || col.ref_table; else plainInput"
-                                [(ngModel)]="row.cells[col.name].value"
-                                [suggestions]="filteredSuggestions"
-                                (completeMethod)="searchRefOptions($event, col, row)"
-                                field="display"
-                                [dropdown]="true"
-                                [forceSelection]="false"
-                                appendTo="body"
-                                styleClass="sutram-cell-autocomplete"
-                                (onSelect)="onRefSuggestionSelect($event, rowIndex, col.name, row)"
-                                (onBlur)="onCellBlur(rowIndex, col.name, row)"
-                                (keydown)="onCellKeydown($event, rowIndex, col.name, row)">
-                  <ng-template let-item pTemplate="item">
-                    <div class="d-flex align-items-center justify-content-between w-100 py-1">
-                      <span class="fw-semibold">{{ item.display }}</span>
-                      <span *ngIf="item.code" class="badge bg-light text-muted ms-2">{{ item.code }}</span>
-                    </div>
-                  </ng-template>
-                </p-autoComplete>
+            <!-- In-Cell Edit Mode Input -->
+            <ng-container *ngIf="isCellEditing(rowIndex, col.key || col.name); else normalMode">
+              <input #cellEditorInput
+                     type="text"
+                     class="raw-cell-editor"
+                     [(ngModel)]="editingValue"
+                     (input)="onEditorInput(editingValue, col, row)"
+                     (keydown)="onCellEditorKeydown($event, rowIndex, col.key || col.name, row)"
+                     (blur)="onCellEditorBlur(rowIndex, col.key || col.name, row)" />
+            </ng-container>
 
-                <ng-template #plainInput>
-                  <input type="text"
-                         pInputText
-                         [(ngModel)]="row.cells[col.name].value"
-                         class="raw-cell-editor"
-                         (blur)="onCellBlur(rowIndex, col.name, row)"
-                         (keydown)="onCellKeydown($event, rowIndex, col.name, row)" />
-                </ng-template>
-              </ng-template>
-
-              <!-- In-Cell Normal Mode -->
-              <ng-template pTemplate="output">
-                <span class="cell-value-text text-truncate">{{ row.cells[col.name]?.value }}</span>
-              </ng-template>
-            </p-cellEditor>
+            <!-- Normal Output Mode -->
+            <ng-template #normalMode>
+              <span class="cell-value-text text-truncate">{{ row.cells[col.key || col.name]?.value }}</span>
+            </ng-template>
 
           </div>
         </td>
@@ -129119,7 +130190,7 @@ var SutramGridComponent = class _SutramGridComponent {
 
   </p-table>
 
-  <!-- Inline "Solve All" Batch Mistake Prompt Modal -->
+  <!-- 5. Inline "Solve All" Batch Mistake Prompt Modal -->
   <div *ngIf="promptState.visible" class="inline-solve-prompt card shadow-lg p-3">
     <div class="d-flex align-items-center justify-content-between pb-2 mb-2 border-bottom">
       <div class="d-flex align-items-center gap-2">
@@ -129159,9 +130230,9 @@ var SutramGridComponent = class _SutramGridComponent {
   </div>
 
 </div>
-`, styles: ["/**\n * sutram-grid.component.scss\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Pixel-Perfect Enterprise PrimeNG Virtual Table Styles.\n * Exact replication of Sutram Excel Studio v2.0 Grid:\n * Big Header Row (38px) + Compact Data Cells (23px).\n * Active cell blue box-shadow highlight, row status borders.\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n */\n\n.sutram-grid-wrapper {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n\n  ::ng-deep .p-datatable-wrapper {\n    height: 100% !important;\n  }\n\n  /* Big Header Row (38px) */\n  ::ng-deep .p-datatable-thead > tr > th {\n    position: sticky;\n    top: 0;\n    z-index: 20;\n    background: var(--header-bg, #f1f5f9) !important;\n    color: var(--header-text, #1e293b) !important;\n    font-weight: 700 !important;\n    font-size: 13px !important;\n    height: var(--header-height, 38px) !important;\n    padding: 6px 10px !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;\n    white-space: nowrap !important;\n    user-select: none;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);\n\n    &.sortable-th {\n      cursor: pointer !important;\n      transition: background-color 0.15s ease;\n\n      &:hover {\n        background-color: rgba(125, 125, 125, 0.1) !important;\n      }\n    }\n  }\n\n  /* Corner Config \u2699\uFE0F Trigger */\n  ::ng-deep th.corner-th {\n    width: 48px !important;\n    min-width: 48px !important;\n    max-width: 48px !important;\n    left: 0;\n    z-index: 25 !important;\n    text-align: center !important;\n    border-right: 2px solid rgba(125, 125, 125, 0.35) !important;\n    cursor: pointer;\n\n    &:hover .corner-cog-icon {\n      color: var(--primary, #4f46e5) !important;\n      transform: rotate(45deg);\n      transition: all 0.2s ease;\n    }\n  }\n\n  /* Column Header Controls */\n  .col-header-controls {\n    display: flex;\n    align-items: center;\n    gap: 3px;\n    margin-left: 4px;\n    flex-shrink: 0;\n  }\n  .col-sort-trigger, .col-filter-trigger {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 18px;\n    height: 18px;\n    border-radius: 3px;\n    cursor: pointer;\n    color: var(--text-muted, #64748b);\n    opacity: 0.65;\n    transition: all 0.12s ease;\n    font-size: 11px;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.18);\n      opacity: 1;\n      color: var(--text, #0f172a);\n    }\n    &.is-sorted, &.is-filtered {\n      color: var(--primary, #4f46e5) !important;\n      opacity: 1 !important;\n      font-weight: 700;\n      background: var(--primary-soft, #e0e7ff);\n    }\n  }\n\n  /* Compact Small Data Cells (23px height) */\n  ::ng-deep .p-datatable-tbody > tr > td {\n    height: var(--cell-height, 23px) !important;\n    padding: 0 !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    vertical-align: middle;\n    font-size: 11.5px;\n  }\n\n  /* Sticky Row Number TD (48px) */\n  ::ng-deep td.row-num-td {\n    position: sticky;\n    left: 0;\n    z-index: 15;\n    width: 48px !important;\n    min-width: 48px !important;\n    max-width: 48px !important;\n    text-align: center;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 2px solid rgba(125, 125, 125, 0.35) !important;\n    color: var(--text-muted, #64748b);\n    font-size: 10.5px;\n    font-weight: 600;\n    user-select: none;\n    cursor: pointer;\n\n    &:hover {\n      background: rgba(59, 130, 246, 0.15) !important;\n    }\n  }\n\n  /* Cell Box & Excel Active Cell Blue Outline */\n  .cell-box {\n    height: var(--cell-height, 23px);\n    padding: 1px 6px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    display: flex;\n    align-items: center;\n    cursor: cell;\n    width: 100%;\n\n    &.cell-active {\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      z-index: 10;\n    }\n    &.cell-bad {\n      background-color: rgba(244, 63, 94, 0.18) !important;\n      color: #f43f5e !important;\n      font-weight: 600;\n      box-shadow: inset 0 0 0 1px #f43f5e;\n    }\n    &.cell-edited {\n      background-color: var(--cell-edited-bg, #fef9c3) !important;\n      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);\n    }\n    &.cell-new {\n      background-color: var(--row-new-bg, #dcfce7) !important;\n    }\n  }\n\n  /* Eye Protect Warm Yellow for Edited Rows */\n  ::ng-deep tr.row-edited td {\n    background-color: var(--row-edited-bg, #fffbeb);\n\n    &.row-num-td {\n      background-color: rgba(234, 179, 8, 0.2) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid var(--cell-edited-border, #eab308) !important;\n    }\n  }\n\n  /* Soft Light Green Shade for New Added Rows */\n  ::ng-deep tr.row-new td {\n    background-color: var(--row-new-bg, #dcfce7);\n\n    &.row-num-td {\n      background-color: rgba(34, 197, 94, 0.2) !important;\n      color: #15803d !important;\n      font-weight: 700;\n      border-left: 3px solid var(--row-new-border, #22c55e) !important;\n    }\n  }\n\n  .raw-cell-editor {\n    width: 100%;\n    height: var(--cell-height, 23px);\n    border: none;\n    outline: none;\n    background: transparent;\n    color: inherit;\n    font-family: inherit;\n    font-size: 11.5px;\n    padding: 1px 6px;\n  }\n}\n\n/* Inline Batch Mistake Prompt Modal */\n.inline-solve-prompt {\n  position: fixed;\n  bottom: 70px;\n  right: 25px;\n  z-index: 2100;\n  width: 440px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 8px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);\n  animation: promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);\n}\n@keyframes promptSlideUp {\n  from { opacity: 0; transform: translateY(16px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n/* Column Header Filter Popover */\n::ng-deep .sutram-col-filter-popover {\n  width: 270px;\n  font-size: 12px;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n  }\n}\n.filter-popover-content {\n  display: flex;\n  flex-direction: column;\n\n  .popover-header {\n    padding: 8px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.04);\n  }\n  .popover-search-box {\n    position: relative;\n    padding: 6px 8px;\n\n    .search-icon {\n      position: absolute;\n      left: 14px;\n      top: 13px;\n      font-size: 11px;\n      color: var(--text-muted, #64748b);\n    }\n    .popover-search-input {\n      padding-left: 24px;\n      font-size: 11.5px;\n      height: 26px;\n      border-radius: 4px;\n    }\n  }\n  .popover-checklist-items {\n    max-height: 180px;\n    overflow-y: auto;\n  }\n  .checklist-item:hover {\n    background: rgba(125, 125, 125, 0.08);\n  }\n  .popover-footer {\n    padding: 8px 10px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n  }\n}\n"] }]
+`, styles: ['/**\n * sutram-grid.component.scss\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Pixel-Perfect Enterprise PrimeNG Virtual Table Styles.\n * Exact replication of Sutram Excel Studio v2.0 Grid:\n * Big Header Row (38px) + Compact Data Cells (23px).\n * In-cell inline editor, active cell blue outline, eye-protect\n * dirty state, custom context menu, and smart FK autocomplete dropdown.\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n */\n\n:host {\n  display: block;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.sutram-grid-wrapper {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n\n  ::ng-deep .p-datatable-wrapper {\n    height: 100% !important;\n  }\n\n  /* Big Header Row (38px) */\n  ::ng-deep .p-datatable-thead > tr > th {\n    position: sticky;\n    top: 0;\n    z-index: 20;\n    background: var(--header-bg, #f1f5f9) !important;\n    color: var(--header-text, #1e293b) !important;\n    font-weight: 700 !important;\n    font-size: 13px !important;\n    height: var(--header-height, 38px) !important;\n    padding: 6px 10px !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;\n    white-space: nowrap !important;\n    user-select: none;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);\n\n    &.sortable-th {\n      cursor: pointer !important;\n      transition: background-color 0.15s ease;\n\n      &:hover {\n        background-color: rgba(125, 125, 125, 0.1) !important;\n      }\n    }\n  }\n\n  /* Corner Config \u2699\uFE0F Trigger */\n  /* Corner Config \u2699\uFE0F Trigger (34px, Authentic Excel Look) */\n  ::ng-deep th.corner-th {\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    left: 0;\n    z-index: 25 !important;\n    text-align: center !important;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    cursor: pointer;\n\n    .corner-cog-icon {\n      font-size: 10px !important;\n      color: var(--text-muted, #64748b);\n      transition: all 0.2s ease;\n    }\n\n    &:hover .corner-cog-icon {\n      color: var(--primary, #4f46e5) !important;\n      transform: rotate(45deg);\n    }\n  }\n\n  /* Column Header Controls */\n  .col-header-controls {\n    display: flex;\n    align-items: center;\n    gap: 1.5px;\n    margin-left: 2px;\n    flex-shrink: 0;\n  }\n  .col-sort-trigger, .col-filter-trigger {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 13px;\n    height: 13px;\n    border-radius: 2px;\n    cursor: pointer;\n    color: var(--text-muted, #64748b);\n    opacity: 0.65;\n    transition: all 0.12s ease;\n    font-size: 8px;\n    line-height: 1;\n\n    i.pi {\n      font-size: 8px !important;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.18);\n      opacity: 1;\n      color: var(--text, #0f172a);\n    }\n    &.is-sorted, &.is-filtered {\n      color: var(--primary, #4f46e5) !important;\n      opacity: 1 !important;\n      font-weight: 700;\n      background: var(--primary-soft, #e0e7ff);\n    }\n  }\n\n  /* Compact Small Data Cells (23px height) */\n  ::ng-deep .p-datatable-tbody > tr {\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n  }\n  ::ng-deep .p-datatable-tbody > tr > td {\n    height: var(--cell-height, 23px) !important;\n    padding: 0 !important;\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    vertical-align: middle;\n    font-size: 11.5px;\n  }\n\n  /* Sticky Row Number TD (34px, Authentic Excel Look) */\n  ::ng-deep td.row-num-td {\n    position: sticky;\n    left: 0;\n    z-index: 15;\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    text-align: center;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    color: var(--text-muted, #64748b);\n    font-size: 11px;\n    font-weight: 500;\n    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n    user-select: none;\n    cursor: pointer;\n    letter-spacing: -0.2px;\n    padding: 0 !important;\n    transition: background-color 0.12s ease;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.16) !important;\n      color: var(--text, #1e293b);\n    }\n\n    .row-state-dot {\n      font-size: 10px;\n      font-weight: 700;\n      margin-right: 2px;\n      &.dot-new { color: #15803d; }\n      &.dot-edited { color: #b45309; }\n    }\n  }\n\n  /* Full Row Selected State (Authentic Excel Selection) */\n  ::ng-deep tr.row-selected {\n    background-color: rgba(59, 130, 246, 0.12) !important;\n\n    > td {\n      background-color: rgba(59, 130, 246, 0.12) !important;\n      border-top: 1px solid rgba(59, 130, 246, 0.4) !important;\n      border-bottom: 1px solid rgba(59, 130, 246, 0.4) !important;\n    }\n\n    > td.row-num-td {\n      background-color: #2563eb !important;\n      color: #ffffff !important;\n      font-weight: 700 !important;\n      border-top: 1px solid #2563eb !important;\n      border-bottom: 1px solid #2563eb !important;\n      border-right: 1px solid #1d4ed8 !important;\n\n      .row-state-dot {\n        color: #ffffff !important;\n      }\n    }\n\n    .cell-box {\n      background-color: transparent !important;\n    }\n  }\n\n  /* Cell Box & Excel Active Cell Blue Outline */\n  .cell-box {\n    height: var(--cell-height, 23px);\n    padding: 0 6px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    display: flex;\n    align-items: center;\n    cursor: cell;\n    width: 100%;\n    position: relative;\n\n    &.cell-active {\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      z-index: 10;\n    }\n    &.cell-editing {\n      padding: 0 !important;\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      background: var(--surface, #ffffff) !important;\n      z-index: 20;\n    }\n    &.cell-bad {\n      background-color: rgba(244, 63, 94, 0.18) !important;\n      color: #f43f5e !important;\n      font-weight: 600;\n      box-shadow: inset 0 0 0 1px #f43f5e;\n    }\n    &.cell-edited {\n      background-color: var(--cell-edited-bg, #fef9c3) !important;\n      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);\n    }\n    &.cell-new {\n      background-color: var(--row-new-bg, #dcfce7) !important;\n    }\n  }\n\n  /* Eye Protect Warm Yellow for Edited Rows */\n  ::ng-deep tr.row-edited td {\n    background-color: var(--row-edited-bg, #fffbeb);\n\n    &.row-num-td {\n      background-color: rgba(234, 179, 8, 0.2) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid var(--cell-edited-border, #eab308) !important;\n    }\n  }\n\n  /* Soft Light Green Shade for New Added Rows */\n  ::ng-deep tr.row-new td {\n    background-color: var(--row-new-bg, #dcfce7);\n\n    &.row-num-td {\n      background-color: rgba(34, 197, 94, 0.2) !important;\n      color: #15803d !important;\n      font-weight: 700;\n      border-left: 3px solid var(--row-new-border, #22c55e) !important;\n    }\n  }\n\n  .raw-cell-editor {\n    width: 100%;\n    height: 100%;\n    border: none;\n    outline: none;\n    background: transparent;\n    color: var(--text, inherit);\n    font-family: inherit;\n    font-size: 11.5px;\n    padding: 0 6px;\n    margin: 0;\n    box-sizing: border-box;\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Right Click Custom Context Menu (Clean, Sleek & Non-wrapping)\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.custom-context-menu {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);\n  min-width: 220px;\n  max-width: 280px;\n  z-index: 100000;\n  padding: 4px 0;\n  white-space: nowrap;\n  animation: contextMenuPop 0.12s ease-out;\n  user-select: none;\n\n  .context-menu-item {\n    padding: 6px 14px;\n    font-size: 11.5px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    color: var(--text, #0f172a);\n    transition: background 0.12s ease;\n    white-space: nowrap;\n\n    i {\n      font-size: 12px;\n      color: var(--text-muted, #64748b);\n      width: 14px;\n      text-align: center;\n      flex-shrink: 0;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.1);\n      color: var(--text, #0f172a);\n\n      i {\n        color: var(--primary, #4f46e5);\n      }\n    }\n\n    &.text-danger {\n      color: #ef4444 !important;\n      &:hover {\n        background: rgba(239, 68, 68, 0.1) !important;\n      }\n    }\n\n    kbd {\n      font-size: 10px;\n      padding: 1px 4px;\n      background: rgba(125, 125, 125, 0.12);\n      border-radius: 3px;\n      font-family: inherit;\n      color: var(--text-muted, #64748b);\n    }\n  }\n\n  .context-menu-divider {\n    height: 1px;\n    background: var(--surface-border, #e2e8f0);\n    margin: 4px 0;\n  }\n}\n\n@keyframes contextMenuPop {\n  from {\n    opacity: 0;\n    transform: scale(0.96);\n  }\n  to {\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Smart Mode Foreign Key Autocomplete Dropdown Menu\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.ref-dropdown-menu {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.2);\n  max-height: 220px;\n  overflow-y: auto;\n  z-index: 100001;\n  font-size: 11.5px;\n  font-family: inherit;\n  animation: fadeInDropdown 0.12s ease-out;\n  box-sizing: border-box;\n\n  .ref-dropdown-header {\n    padding: 5px 9px;\n    font-size: 10px;\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    background: var(--header-bg, #f1f5f9);\n    color: var(--text-muted, #64748b);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    position: sticky;\n    top: 0;\n    z-index: 2;\n  }\n\n  .ref-dropdown-item {\n    padding: 6px 10px;\n    cursor: pointer;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    color: var(--text, #0f172a);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    transition: background 0.12s ease;\n    line-height: 1.3;\n\n    &:last-child {\n      border-bottom: none;\n    }\n\n    &:hover,\n    &.highlighted {\n      background: var(--primary-soft, #e0e7ff) !important;\n      color: var(--primary, #4f46e5) !important;\n      font-weight: 600;\n    }\n\n    .ref-item-badge {\n      font-size: 9.5px;\n      font-weight: 600;\n      padding: 1px 6px;\n      border-radius: 3px;\n      background: rgba(100, 116, 139, 0.15);\n      color: var(--text-muted, #64748b);\n      margin-left: 8px;\n      flex-shrink: 0;\n    }\n  }\n\n  .ref-dropdown-empty {\n    padding: 10px;\n    color: var(--text-muted, #64748b);\n    font-style: italic;\n    text-align: center;\n  }\n}\n\n@keyframes fadeInDropdown {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Inline Batch Mistake Prompt Modal\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.inline-solve-prompt {\n  position: fixed;\n  bottom: 70px;\n  right: 25px;\n  z-index: 2100;\n  width: 440px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 8px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);\n  animation: promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);\n}\n@keyframes promptSlideUp {\n  from {\n    opacity: 0;\n    transform: translateY(16px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Column Header Filter Popover (Modern Enterprise UI)\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n::ng-deep .sutram-col-filter-popover {\n  width: 290px !important;\n  font-size: 12px;\n  border-radius: 8px !important;\n  overflow: hidden;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n  }\n}\n\n.filter-popover-content {\n  display: flex;\n  flex-direction: column;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  overflow: hidden;\n\n  .popover-header {\n    padding: 9px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.05);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n\n    .popover-title {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      font-weight: 700;\n      font-size: 12px;\n      color: var(--text, #0f172a);\n\n      .col-name {\n        max-width: 170px;\n      }\n      .badge-type {\n        font-size: 9px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(59, 130, 246, 0.15);\n        color: #2563eb;\n        font-weight: 600;\n      }\n    }\n\n    .btn-popover-close {\n      background: transparent;\n      border: none;\n      width: 22px;\n      height: 22px;\n      border-radius: 4px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      cursor: pointer;\n      color: var(--text-muted, #64748b);\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.15);\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-search-wrap {\n    position: relative;\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n\n    .search-icon {\n      position: absolute;\n      left: 18px;\n      top: 17px;\n      font-size: 11px;\n      color: var(--text-muted, #64748b);\n      pointer-events: none;\n    }\n    .popover-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      font-size: 11.5px;\n      border-radius: 5px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.15s, box-shadow 0.15s;\n\n      &:focus {\n        border-color: #3b82f6;\n        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);\n      }\n    }\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 18px;\n      top: 15px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      padding: 0;\n      font-size: 11px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-action-strip {\n    padding: 6px 12px;\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.02);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    font-size: 11px;\n\n    .select-all-label {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      cursor: pointer;\n      font-weight: 600;\n      color: var(--text, #0f172a);\n      user-select: none;\n      margin: 0;\n    }\n\n    .quick-links {\n      display: flex;\n      align-items: center;\n      gap: 4px;\n\n      .btn-link-action {\n        background: transparent;\n        border: none;\n        color: #3b82f6;\n        cursor: pointer;\n        padding: 0 3px;\n        font-size: 11px;\n        font-weight: 600;\n        text-decoration: none;\n\n        &:hover {\n          text-decoration: underline;\n        }\n      }\n      .divider {\n        color: var(--text-muted, #64748b);\n        opacity: 0.5;\n      }\n    }\n\n    .count-pill {\n      font-size: 10px;\n      color: var(--text-muted, #64748b);\n      font-weight: 500;\n    }\n  }\n\n  .popover-checklist-items {\n    max-height: 180px;\n    overflow-y: auto;\n    padding: 3px 0;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 4px;\n    }\n\n    .checklist-item {\n      padding: 5px 12px;\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      cursor: pointer;\n      user-select: none;\n      transition: background-color 0.1s ease;\n      color: var(--text, #0f172a);\n\n      &:hover {\n        background: rgba(59, 130, 246, 0.08);\n      }\n\n      .item-left {\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        flex-grow: 1;\n        min-width: 0;\n      }\n\n      .item-label {\n        font-size: 11.5px;\n        color: var(--text, #0f172a);\n      }\n\n      .item-right {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        flex-shrink: 0;\n      }\n\n      .item-code-chip {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n\n      .item-count-badge {\n        font-size: 10px;\n        padding: 1px 6px;\n        border-radius: 999px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n    }\n\n    .empty-list-state {\n      padding: 16px;\n      text-align: center;\n      color: var(--text-muted, #64748b);\n      font-size: 11.5px;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    accent-color: #3b82f6;\n    cursor: pointer;\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .popover-footer {\n    padding: 8px 12px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.04);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    gap: 8px;\n\n    .btn-filter-clear {\n      background: transparent;\n      border: 1px solid transparent;\n      color: #ef4444;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 8px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(239, 68, 68, 0.1);\n      }\n    }\n\n    .footer-actions-right {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n    }\n\n    .btn-filter-cancel {\n      background: transparent;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 10px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .btn-filter-apply {\n      background: #3b82f6;\n      border: 1px solid #3b82f6;\n      color: #ffffff;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 12px;\n      border-radius: 4px;\n      cursor: pointer;\n      display: inline-flex;\n      align-items: center;\n      gap: 4px;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: #2563eb;\n      }\n    }\n  }\n}\n'] }]
   }], function() {
-    return [{ type: SutramExcelStateService }, { type: SutramClipboardService }, { type: SutramAuditService }, { type: SutramRefCacheService }, { type: ElementRef }];
+    return [{ type: SutramExcelStateService }, { type: SutramClipboardService }, { type: SutramAuditService }, { type: SutramRefCacheService }, { type: ElementRef }, { type: ChangeDetectorRef }];
   }, { headers: [{
     type: Input
   }], rows: [{
@@ -129180,6 +130251,20 @@ var SutramGridComponent = class _SutramGridComponent {
     type: Output
   }], sortChanged: [{
     type: Output
+  }], openConfig: [{
+    type: Output
+  }], onDocumentKeydown: [{
+    type: HostListener,
+    args: ["document:keydown", ["$event"]]
+  }], onDocumentClick: [{
+    type: HostListener,
+    args: ["document:click", ["$event"]]
+  }], onWindowChange: [{
+    type: HostListener,
+    args: ["window:scroll"]
+  }, {
+    type: HostListener,
+    args: ["window:resize"]
   }] });
 })();
 
@@ -129346,7 +130431,7 @@ function SutramHeaderScannerComponent_ng_template_2_Template(rf, ctx) {
     \u0275\u0275elementEnd()();
   }
 }
-var _c0 = function() {
+var _c02 = function() {
   return { width: "750px", maxWidth: "95vw" };
 };
 var SutramHeaderScannerComponent = class _SutramHeaderScannerComponent {
@@ -129400,7 +130485,7 @@ var SutramHeaderScannerComponent = class _SutramHeaderScannerComponent {
       \u0275\u0275elementEnd();
     }
     if (rf & 2) {
-      \u0275\u0275styleMap(\u0275\u0275pureFunction0(6, _c0));
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(6, _c02));
       \u0275\u0275property("visible", ctx.visible)("modal", true)("closable", true);
       \u0275\u0275advance(1);
       \u0275\u0275property("ngIf", ctx.report);
@@ -129594,7 +130679,7 @@ function SutramCorrectionSidebarComponent_div_6_Template(rf, ctx) {
     \u0275\u0275property("disabled", !grp_r3.resolvedDisplay);
   }
 }
-var _c02 = function() {
+var _c03 = function() {
   return { width: "420px", maxWidth: "90vw" };
 };
 var SutramCorrectionSidebarComponent = class _SutramCorrectionSidebarComponent {
@@ -129649,7 +130734,7 @@ var SutramCorrectionSidebarComponent = class _SutramCorrectionSidebarComponent {
       \u0275\u0275elementEnd()();
     }
     if (rf & 2) {
-      \u0275\u0275styleMap(\u0275\u0275pureFunction0(5, _c02));
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(5, _c03));
       \u0275\u0275property("visible", ctx.visible);
       \u0275\u0275advance(5);
       \u0275\u0275property("ngIf", ctx.groups.length === 0);
@@ -129743,6 +130828,3405 @@ var SutramCorrectionSidebarComponent = class _SutramCorrectionSidebarComponent {
   }] });
 })();
 
+// backend/sutram/ng-sutramui-excel/playground/out-tsc/src/lib/components/sutram-excel-studio/sutram-excel-studio.component.js
+var _c04 = ["grid"];
+function SutramExcelStudioComponent_div_40_button_24_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r21 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 99);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_button_24_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r21);
+      const ctx_r20 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r20.loadTableDataFromDb());
+    });
+    \u0275\u0275element(1, "i", 100);
+    \u0275\u0275elementStart(2, "span", 66);
+    \u0275\u0275text(3, "Load Data");
+    \u0275\u0275elementEnd()();
+  }
+}
+function SutramExcelStudioComponent_div_40_button_55_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r23 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 101);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_button_55_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r23);
+      const ctx_r22 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r22.clearDbSearch());
+    });
+    \u0275\u0275text(1, "\u2715");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_40_span_56_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 102);
+    \u0275\u0275element(1, "i", 103);
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_40_button_62_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r25 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 104);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_button_62_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r25);
+      const ctx_r24 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r24.saveRoughSheetLocally());
+    });
+    \u0275\u0275element(1, "i", 105);
+    \u0275\u0275elementStart(2, "span", 66);
+    \u0275\u0275text(3, "\u0938\u094D\u0925\u093E\u0928\u0940\u092F \u0938\u0939\u0947\u091C\u0947\u0902");
+    \u0275\u0275elementEnd()();
+  }
+}
+function SutramExcelStudioComponent_div_40_button_63_span_4_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 109);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r26 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(ctx_r26.state.pendingChangesCount());
+  }
+}
+function SutramExcelStudioComponent_div_40_button_63_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r28 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 106);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_button_63_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r28);
+      const ctx_r27 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r27.startImport());
+    });
+    \u0275\u0275element(1, "i", 107);
+    \u0275\u0275elementStart(2, "span", 66);
+    \u0275\u0275text(3, "Sync to DB");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, SutramExcelStudioComponent_div_40_button_63_span_4_Template, 2, 1, "span", 108);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r19 = \u0275\u0275nextContext(2);
+    \u0275\u0275property("disabled", ctx_r19.state.pendingChangesCount() === 0 || ctx_r19.state.hasErrors());
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngIf", ctx_r19.state.pendingChangesCount() > 0);
+  }
+}
+function SutramExcelStudioComponent_div_40_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r30 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 61)(1, "div", 62)(2, "div", 63)(3, "button", 64);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_3_listener() {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r29 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r29.isBoldActive = !ctx_r29.isBoldActive);
+    });
+    \u0275\u0275elementStart(4, "span", 65);
+    \u0275\u0275text(5, "B");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "span", 66);
+    \u0275\u0275text(7, "Bold");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(8, "div", 67)(9, "button", 68);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_9_listener() {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r31 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r31.textAlign = "left");
+    });
+    \u0275\u0275element(10, "i", 69);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(11, "button", 70);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_11_listener() {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r32 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r32.textAlign = "center");
+    });
+    \u0275\u0275element(12, "i", 71);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(13, "button", 72);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_13_listener() {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r33 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r33.textAlign = "right");
+    });
+    \u0275\u0275element(14, "i", 73);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(15, "button", 74);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_15_listener($event) {
+      \u0275\u0275restoreView(_r30);
+      \u0275\u0275nextContext();
+      const _r3 = \u0275\u0275reference(52);
+      return \u0275\u0275resetView(_r3.toggle($event));
+    });
+    \u0275\u0275element(16, "i", 75);
+    \u0275\u0275elementStart(17, "span", 66);
+    \u0275\u0275text(18);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(19, "span", 76);
+    \u0275\u0275text(20, "\u092A\u094D\u0930\u093E\u0930\u0942\u092A (Format)");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275element(21, "div", 77);
+    \u0275\u0275elementStart(22, "div", 62)(23, "div", 63);
+    \u0275\u0275template(24, SutramExcelStudioComponent_div_40_button_24_Template, 4, 0, "button", 78);
+    \u0275\u0275elementStart(25, "button", 79);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_25_listener() {
+      \u0275\u0275restoreView(_r30);
+      const _r15 = \u0275\u0275reference(30);
+      return \u0275\u0275resetView(_r15.click());
+    });
+    \u0275\u0275element(26, "i", 80);
+    \u0275\u0275elementStart(27, "span", 66);
+    \u0275\u0275text(28, "Open File");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(29, "input", 81, 82);
+    \u0275\u0275listener("change", function SutramExcelStudioComponent_div_40_Template_input_change_29_listener($event) {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r36 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r36.onFileUpload($event));
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(31, "button", 83);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_31_listener() {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r37 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r37.exportExcel());
+    });
+    \u0275\u0275element(32, "i", 84);
+    \u0275\u0275elementStart(33, "span", 66);
+    \u0275\u0275text(34, "Export");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(35, "button", 85);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_35_listener() {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r38 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r38.state.clearGrid());
+    });
+    \u0275\u0275element(36, "i", 86);
+    \u0275\u0275elementStart(37, "span", 66);
+    \u0275\u0275text(38, "Clear");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(39, "span", 76);
+    \u0275\u0275text(40, "\u0921\u0947\u091F\u093E (Data)");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275element(41, "div", 77);
+    \u0275\u0275elementStart(42, "div", 62)(43, "div", 63)(44, "button", 87);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_44_listener() {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r39 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r39.state.toggleFiltersEnabled());
+    });
+    \u0275\u0275element(45, "i", 88);
+    \u0275\u0275elementStart(46, "span", 66);
+    \u0275\u0275text(47, "Filters");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(48, "button", 89);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_48_listener() {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r40 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r40.state.toggleSortingEnabled());
+    });
+    \u0275\u0275element(49, "i", 90);
+    \u0275\u0275elementStart(50, "span", 66);
+    \u0275\u0275text(51, "Sorting");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(52, "div", 91);
+    \u0275\u0275element(53, "i", 92);
+    \u0275\u0275elementStart(54, "input", 93);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_40_Template_input_ngModelChange_54_listener($event) {
+      \u0275\u0275restoreView(_r30);
+      const ctx_r41 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r41.onDbSearchInput($event));
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(55, SutramExcelStudioComponent_div_40_button_55_Template, 2, 0, "button", 94);
+    \u0275\u0275template(56, SutramExcelStudioComponent_div_40_span_56_Template, 2, 0, "span", 95);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(57, "span", 76);
+    \u0275\u0275text(58, "\u0916\u094B\u091C \u0935 \u092B\u093C\u093F\u0932\u094D\u091F\u0930 (Search)");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275element(59, "div", 77);
+    \u0275\u0275elementStart(60, "div", 62)(61, "div", 63);
+    \u0275\u0275template(62, SutramExcelStudioComponent_div_40_button_62_Template, 4, 0, "button", 96);
+    \u0275\u0275template(63, SutramExcelStudioComponent_div_40_button_63_Template, 5, 2, "button", 97);
+    \u0275\u0275elementStart(64, "div", 98);
+    \u0275\u0275element(65, "i", 12);
+    \u0275\u0275elementStart(66, "span");
+    \u0275\u0275text(67);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(68, "span", 76);
+    \u0275\u0275text(69, "\u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u0915\u0930\u0947\u0902 (Save / Sync)");
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance(3);
+    \u0275\u0275classProp("active", ctx_r0.isBoldActive);
+    \u0275\u0275advance(15);
+    \u0275\u0275textInterpolate1("Columns (", ctx_r0.visibleHeadersCount, ")");
+    \u0275\u0275advance(6);
+    \u0275\u0275property("ngIf", !ctx_r0.isCurrentSheetRough);
+    \u0275\u0275advance(20);
+    \u0275\u0275classProp("active", ctx_r0.state.filtersEnabled());
+    \u0275\u0275advance(4);
+    \u0275\u0275classProp("active", ctx_r0.state.sortingEnabled());
+    \u0275\u0275advance(6);
+    \u0275\u0275property("ngModel", ctx_r0.state.dbSearchQuery());
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r0.state.dbSearchQuery());
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r0.state.isLoadingDb());
+    \u0275\u0275advance(6);
+    \u0275\u0275property("ngIf", ctx_r0.isCurrentSheetRough);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !ctx_r0.isCurrentSheetRough);
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate2("", ctx_r0.state.rows().length, " / ", ctx_r0.state.totalDbRecords(), "");
+  }
+}
+function SutramExcelStudioComponent_div_41_button_4_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r45 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 101);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_41_button_4_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r45);
+      const ctx_r44 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r44.tableSearchQuery = "");
+    });
+    \u0275\u0275text(1, "\u2715");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_41_div_6_span_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "span", 122);
+  }
+}
+function SutramExcelStudioComponent_div_41_div_6_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r49 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 115);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_41_div_6_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r49);
+      const tbl_r46 = restoredCtx.$implicit;
+      const ctx_r48 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r48.openTableInSheet(tbl_r46.table));
+    });
+    \u0275\u0275elementStart(1, "button", 116);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_41_div_6_Template_button_click_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r49);
+      const tbl_r46 = restoredCtx.$implicit;
+      const ctx_r50 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r50.toggleFavoriteTable(tbl_r46.table, $event));
+    });
+    \u0275\u0275element(2, "i", 21);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 117);
+    \u0275\u0275element(4, "i", 6);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "div", 118)(6, "span", 119);
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "span", 120);
+    \u0275\u0275text(9);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(10, SutramExcelStudioComponent_div_41_div_6_span_10_Template, 1, 0, "span", 121);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const tbl_r46 = ctx.$implicit;
+    const ctx_r43 = \u0275\u0275nextContext(2);
+    \u0275\u0275classProp("active-box", ctx_r43.isTableOpen(tbl_r46.table));
+    \u0275\u0275property("title", (tbl_r46.display_name || tbl_r46.table) + " (" + tbl_r46.table + ")");
+    \u0275\u0275advance(1);
+    \u0275\u0275classProp("starred", ctx_r43.favoriteTables.has(tbl_r46.table));
+    \u0275\u0275property("title", ctx_r43.favoriteTables.has(tbl_r46.table) ? "\u092A\u0938\u0902\u0926\u0940\u0926\u093E \u0938\u0947 \u0939\u091F\u093E\u090F\u0902" : "\u0938\u094D\u091F\u093E\u0930\u094D\u091F\u0905\u092A \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u092E\u0947\u0902 \u091C\u094B\u0921\u093C\u0947\u0902");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngClass", ctx_r43.favoriteTables.has(tbl_r46.table) ? "pi-star-fill" : "pi-star");
+    \u0275\u0275advance(5);
+    \u0275\u0275textInterpolate(tbl_r46.display_name || tbl_r46.table);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(tbl_r46.table);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r43.isTableOpen(tbl_r46.table));
+  }
+}
+function SutramExcelStudioComponent_div_41_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r52 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 110)(1, "div", 111);
+    \u0275\u0275element(2, "i", 92);
+    \u0275\u0275elementStart(3, "input", 112);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_41_Template_input_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r51 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r51.tableSearchQuery = $event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, SutramExcelStudioComponent_div_41_button_4_Template, 2, 0, "button", 94);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "div", 113);
+    \u0275\u0275template(6, SutramExcelStudioComponent_div_41_div_6_Template, 11, 10, "div", 114);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngModel", ctx_r1.tableSearchQuery);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r1.tableSearchQuery);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngForOf", ctx_r1.filteredTables);
+  }
+}
+function SutramExcelStudioComponent_div_42_button_4_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r56 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 101);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_42_button_4_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r56);
+      const ctx_r55 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r55.reportSearchQuery = "");
+    });
+    \u0275\u0275text(1, "\u2715");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_42_div_6_span_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "span", 122);
+  }
+}
+function SutramExcelStudioComponent_div_42_div_6_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r60 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 125);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_42_div_6_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r60);
+      const rep_r57 = restoredCtx.$implicit;
+      const ctx_r59 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r59.openReportInSheet(rep_r57));
+    });
+    \u0275\u0275elementStart(1, "button", 116);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_42_div_6_Template_button_click_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r60);
+      const rep_r57 = restoredCtx.$implicit;
+      const ctx_r61 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r61.toggleFavoriteReport(rep_r57.id, $event));
+    });
+    \u0275\u0275element(2, "i", 21);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 126);
+    \u0275\u0275element(4, "i", 21);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "div", 118)(6, "span", 119);
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "span", 120);
+    \u0275\u0275text(9);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(10, SutramExcelStudioComponent_div_42_div_6_span_10_Template, 1, 0, "span", 121);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const rep_r57 = ctx.$implicit;
+    const ctx_r54 = \u0275\u0275nextContext(2);
+    \u0275\u0275classProp("active-box", ctx_r54.isReportOpen(rep_r57.id));
+    \u0275\u0275property("title", rep_r57.title + " \u2014 " + (rep_r57.desc || ""));
+    \u0275\u0275advance(1);
+    \u0275\u0275classProp("starred", ctx_r54.favoriteReports.has(rep_r57.id));
+    \u0275\u0275property("title", ctx_r54.favoriteReports.has(rep_r57.id) ? "\u092A\u0938\u0902\u0926\u0940\u0926\u093E \u0938\u0947 \u0939\u091F\u093E\u090F\u0902" : "\u0938\u094D\u091F\u093E\u0930\u094D\u091F\u0905\u092A \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u092E\u0947\u0902 \u091C\u094B\u0921\u093C\u0947\u0902");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngClass", ctx_r54.favoriteReports.has(rep_r57.id) ? "pi-star-fill" : "pi-star");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngClass", rep_r57.icon);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(rep_r57.title);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(rep_r57.category);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r54.isReportOpen(rep_r57.id));
+  }
+}
+function SutramExcelStudioComponent_div_42_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r63 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 110)(1, "div", 111);
+    \u0275\u0275element(2, "i", 92);
+    \u0275\u0275elementStart(3, "input", 123);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_42_Template_input_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r63);
+      const ctx_r62 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r62.reportSearchQuery = $event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, SutramExcelStudioComponent_div_42_button_4_Template, 2, 0, "button", 94);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "div", 113);
+    \u0275\u0275template(6, SutramExcelStudioComponent_div_42_div_6_Template, 11, 11, "div", 124);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngModel", ctx_r2.reportSearchQuery);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r2.reportSearchQuery);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngForOf", ctx_r2.filteredReports);
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_button_5_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r69 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 142);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_button_5_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r69);
+      const ctx_r68 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r68.colSearchQuery = "");
+    });
+    \u0275\u0275element(1, "i", 143);
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_ng_container_17_div_3_span_5_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 152);
+    \u0275\u0275text(1, "*");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_ng_container_17_div_3_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r74 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 146);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_ng_container_17_div_3_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r74);
+      const col_r71 = restoredCtx.$implicit;
+      const ctx_r73 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r73.toggleColumnCheckbox(col_r71.key));
+    });
+    \u0275\u0275elementStart(1, "div", 147);
+    \u0275\u0275element(2, "input", 148);
+    \u0275\u0275elementStart(3, "span", 149);
+    \u0275\u0275text(4);
+    \u0275\u0275template(5, SutramExcelStudioComponent_ng_template_53_ng_container_17_div_3_span_5_Template, 2, 0, "span", 150);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "span", 151);
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const col_r71 = ctx.$implicit;
+    const ctx_r70 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("checked", ctx_r70.isColumnSelected(col_r71.key));
+    \u0275\u0275advance(1);
+    \u0275\u0275property("title", col_r71.name);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", col_r71.name, "");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", col_r71.not_null);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(col_r71.type || "string");
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_ng_container_17_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 144);
+    \u0275\u0275text(2, "Standard Columns");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(3, SutramExcelStudioComponent_ng_template_53_ng_container_17_div_3_Template, 8, 5, "div", 145);
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r65 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngForOf", ctx_r65.filteredDirectCols)("ngForTrackBy", ctx_r65.trackByColKey);
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_div_14_div_1_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r81 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 146);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_div_14_div_1_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r81);
+      const col_r79 = restoredCtx.$implicit;
+      const ctx_r80 = \u0275\u0275nextContext(5);
+      return \u0275\u0275resetView(ctx_r80.toggleColumnCheckbox(col_r79.key));
+    });
+    \u0275\u0275elementStart(1, "div", 147);
+    \u0275\u0275element(2, "input", 148);
+    \u0275\u0275elementStart(3, "span", 149);
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(5, "span", 151);
+    \u0275\u0275text(6);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const col_r79 = ctx.$implicit;
+    const ctx_r78 = \u0275\u0275nextContext(5);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("checked", ctx_r78.isColumnSelected(col_r79.key));
+    \u0275\u0275advance(1);
+    \u0275\u0275styleProp("font-weight", col_r79.is_fk_main ? "600" : "normal");
+    \u0275\u0275property("title", col_r79.name);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", col_r79.short_name || col_r79.name, " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(col_r79.is_fk_main ? "display" : col_r79.is_fk_raw ? "id" : col_r79.type || "string");
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_div_14_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 166);
+    \u0275\u0275template(1, SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_div_14_div_1_Template, 7, 6, "div", 145);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const grp_r76 = \u0275\u0275nextContext().$implicit;
+    const ctx_r77 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngForOf", grp_r76.columns)("ngForTrackBy", ctx_r77.trackByColKey);
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r84 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 155)(1, "div", 156)(2, "div", 157);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_Template_div_click_2_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r84);
+      const grp_r76 = restoredCtx.$implicit;
+      const ctx_r83 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r83.toggleFkGroupExpand(grp_r76.name));
+    });
+    \u0275\u0275element(3, "i", 158);
+    \u0275\u0275elementStart(4, "span", 159);
+    \u0275\u0275element(5, "i", 160);
+    \u0275\u0275elementStart(6, "strong", 161);
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "span", 162);
+    \u0275\u0275text(9);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(10, "div", 163);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_Template_div_click_10_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r84);
+      const grp_r76 = restoredCtx.$implicit;
+      const ctx_r85 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r85.toggleFkGroupAll(grp_r76.name));
+    });
+    \u0275\u0275element(11, "input", 148);
+    \u0275\u0275elementStart(12, "span", 164);
+    \u0275\u0275text(13);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275template(14, SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_div_14_Template, 2, 2, "div", 165);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const grp_r76 = ctx.$implicit;
+    const ctx_r75 = \u0275\u0275nextContext(3);
+    \u0275\u0275classProp("fk-active-group", grp_r76.selectedCount > 0);
+    \u0275\u0275advance(3);
+    \u0275\u0275classProp("rotated", ctx_r75.isFkGroupExpanded(grp_r76.name));
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate(grp_r76.name);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("(", grp_r76.refTable, ")");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("checked", grp_r76.isAllChecked);
+    \u0275\u0275advance(1);
+    \u0275\u0275styleProp("background", grp_r76.selectedCount > 0 ? "rgba(16, 185, 129, 0.12)" : "rgba(125, 125, 125, 0.1)")("color", grp_r76.selectedCount > 0 ? "#059669" : "var(--text-muted)");
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate2(" ", grp_r76.selectedCount, "/", grp_r76.totalCount, " ");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r75.isFkGroupExpanded(grp_r76.name));
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_ng_container_18_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 153);
+    \u0275\u0275text(2, "FK Reference Groups");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(3, SutramExcelStudioComponent_ng_template_53_ng_container_18_div_3_Template, 15, 14, "div", 154);
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r66 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngForOf", ctx_r66.filteredFkGroups)("ngForTrackBy", ctx_r66.trackByGroupName);
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_div_19_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 167);
+    \u0275\u0275element(1, "i", 168);
+    \u0275\u0275text(2, " No matching columns found ");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_ng_template_53_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r87 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 127)(1, "div", 128)(2, "div", 129);
+    \u0275\u0275element(3, "i", 130);
+    \u0275\u0275elementStart(4, "input", 131);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_ng_template_53_Template_input_ngModelChange_4_listener($event) {
+      \u0275\u0275restoreView(_r87);
+      const ctx_r86 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r86.colSearchQuery = $event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(5, SutramExcelStudioComponent_ng_template_53_button_5_Template, 2, 0, "button", 132);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "div", 133)(7, "div", 134)(8, "button", 135);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_Template_button_click_8_listener() {
+      \u0275\u0275restoreView(_r87);
+      const ctx_r88 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r88.selectAllColumns(true));
+    });
+    \u0275\u0275text(9, "All");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(10, "button", 135);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_Template_button_click_10_listener() {
+      \u0275\u0275restoreView(_r87);
+      const ctx_r89 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r89.selectAllColumns(false));
+    });
+    \u0275\u0275text(11, "None");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "button", 135);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_Template_button_click_12_listener() {
+      \u0275\u0275restoreView(_r87);
+      const ctx_r90 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r90.resetDefaultColumns());
+    });
+    \u0275\u0275text(13, "Reset");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(14, "span", 136);
+    \u0275\u0275text(15);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(16, "div", 137);
+    \u0275\u0275template(17, SutramExcelStudioComponent_ng_template_53_ng_container_17_Template, 4, 2, "ng-container", 35);
+    \u0275\u0275template(18, SutramExcelStudioComponent_ng_template_53_ng_container_18_Template, 4, 2, "ng-container", 35);
+    \u0275\u0275template(19, SutramExcelStudioComponent_ng_template_53_div_19_Template, 3, 0, "div", 138);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(20, "div", 139)(21, "span", 140);
+    \u0275\u0275text(22, "Click outside or press Esc");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(23, "button", 141);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_53_Template_button_click_23_listener() {
+      \u0275\u0275restoreView(_r87);
+      \u0275\u0275nextContext();
+      const _r3 = \u0275\u0275reference(52);
+      return \u0275\u0275resetView(_r3.hide());
+    });
+    \u0275\u0275text(24, "Done");
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r4 = \u0275\u0275nextContext();
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngModel", ctx_r4.colSearchQuery);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r4.colSearchQuery);
+    \u0275\u0275advance(10);
+    \u0275\u0275textInterpolate2("", ctx_r4.selectedColumnKeys.size, " of ", ctx_r4.allConfigColumns.length, " visible");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", ctx_r4.filteredDirectCols.length > 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r4.filteredFkGroups.length > 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r4.filteredDirectCols.length === 0 && ctx_r4.filteredFkGroups.length === 0);
+  }
+}
+function SutramExcelStudioComponent_div_59_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r93 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div")(1, "button", 169);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_59_Template_button_click_1_listener() {
+      \u0275\u0275restoreView(_r93);
+      const ctx_r92 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r92.showSidebar = true);
+    });
+    \u0275\u0275element(2, "i", 19);
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r5 = \u0275\u0275nextContext();
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1(" \u0917\u0932\u0924\u093F\u092F\u093E\u0901 (", ctx_r5.state.unresolvedCorrectionsCount(), ") ");
+  }
+}
+function SutramExcelStudioComponent_div_65_span_4_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 175);
+    \u0275\u0275text(1, "\u0930\u092B");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_65_span_5_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 176);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const tab_r94 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", tab_r94.recordCount, " ");
+  }
+}
+function SutramExcelStudioComponent_div_65_button_6_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r101 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 177);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_65_button_6_Template_button_click_0_listener($event) {
+      \u0275\u0275restoreView(_r101);
+      const tab_r94 = \u0275\u0275nextContext().$implicit;
+      const ctx_r99 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r99.closeSheet(tab_r94.id, $event));
+    });
+    \u0275\u0275text(1, "\u2715");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_65_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r103 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 170);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_65_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r103);
+      const tab_r94 = restoredCtx.$implicit;
+      const ctx_r102 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r102.switchSheet(tab_r94.id));
+    });
+    \u0275\u0275element(1, "i", 171);
+    \u0275\u0275elementStart(2, "span");
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, SutramExcelStudioComponent_div_65_span_4_Template, 2, 0, "span", 172);
+    \u0275\u0275template(5, SutramExcelStudioComponent_div_65_span_5_Template, 2, 1, "span", 173);
+    \u0275\u0275template(6, SutramExcelStudioComponent_div_65_button_6_Template, 2, 0, "button", 174);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const tab_r94 = ctx.$implicit;
+    const ctx_r7 = \u0275\u0275nextContext();
+    \u0275\u0275classProp("active-tab", ctx_r7.activeSheetId === tab_r94.id);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngClass", tab_r94.icon);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(tab_r94.title);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", tab_r94.type === "rough");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", tab_r94.isLoaded && (tab_r94.recordCount || 0) > 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r7.sheetTabs.length > 1);
+  }
+}
+function SutramExcelStudioComponent_span_74_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 178);
+    \u0275\u0275element(1, "i", 179);
+    \u0275\u0275text(2, "Loading more... ");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_span_75_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 180);
+    \u0275\u0275element(1, "i", 181);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r9 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("", ctx_r9.state.deletedRowIds().length, " Deleted ");
+  }
+}
+function SutramExcelStudioComponent_span_76_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 182);
+    \u0275\u0275text(1, "\u2713 100% In Sync");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_span_77_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 183);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r11 = \u0275\u0275nextContext();
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1("", ctx_r11.state.stats().errorRows, " \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u093E\u0901");
+  }
+}
+function SutramExcelStudioComponent_span_78_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 184);
+    \u0275\u0275element(1, "i", 185);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r12 = \u0275\u0275nextContext();
+    \u0275\u0275classProp("sync-error", ctx_r12.lastSyncPerSheet[ctx_r12.activeSheetId].hasError);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate2("\u0905\u0902\u0924\u093F\u092E \u0938\u093F\u0902\u0915 (", ctx_r12.lastSyncPerSheet[ctx_r12.activeSheetId].time, "): ", ctx_r12.lastSyncPerSheet[ctx_r12.activeSheetId].summary, " ");
+  }
+}
+function SutramExcelStudioComponent_div_89_div_8_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 198)(1, "div", 199)(2, "span");
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "span");
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "div", 200);
+    \u0275\u0275element(7, "div", 201);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r104 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1("", ctx_r104.syncToast.percentage, "% \u092A\u0942\u0930\u094D\u0923");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate2("", ctx_r104.state.importProgress().current, " / ", ctx_r104.state.importProgress().total, "");
+    \u0275\u0275advance(2);
+    \u0275\u0275styleProp("width", ctx_r104.syncToast.percentage, "%");
+  }
+}
+function SutramExcelStudioComponent_div_89_span_11_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 202);
+    \u0275\u0275element(1, "i", 57);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r105 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", ctx_r105.syncToast.inserted, " Inserted ");
+  }
+}
+function SutramExcelStudioComponent_div_89_span_12_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 203);
+    \u0275\u0275element(1, "i", 204);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r106 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", ctx_r106.syncToast.updated, " Updated ");
+  }
+}
+function SutramExcelStudioComponent_div_89_span_13_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 205);
+    \u0275\u0275element(1, "i", 206);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r107 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", ctx_r107.syncToast.deleted, " Deleted ");
+  }
+}
+function SutramExcelStudioComponent_div_89_span_14_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 207);
+    \u0275\u0275element(1, "i", 143);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r108 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", ctx_r108.syncToast.failed, " Failed ");
+  }
+}
+function SutramExcelStudioComponent_div_89_div_15_div_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div");
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r111 = ctx.$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1("\u2022 ", err_r111, "");
+  }
+}
+function SutramExcelStudioComponent_div_89_div_15_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 208);
+    \u0275\u0275template(1, SutramExcelStudioComponent_div_89_div_15_div_1_Template, 2, 1, "div", 209);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r109 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngForOf", ctx_r109.syncToast.errors);
+  }
+}
+function SutramExcelStudioComponent_div_89_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r113 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 186)(1, "div", 187)(2, "div", 188);
+    \u0275\u0275element(3, "i", 21);
+    \u0275\u0275elementStart(4, "span");
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "button", 189);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_89_Template_button_click_6_listener() {
+      \u0275\u0275restoreView(_r113);
+      const ctx_r112 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r112.dismissSyncToast());
+    });
+    \u0275\u0275text(7, "\u2715");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(8, SutramExcelStudioComponent_div_89_div_8_Template, 8, 5, "div", 190);
+    \u0275\u0275elementStart(9, "div", 191)(10, "div", 192);
+    \u0275\u0275template(11, SutramExcelStudioComponent_div_89_span_11_Template, 3, 1, "span", 193);
+    \u0275\u0275template(12, SutramExcelStudioComponent_div_89_span_12_Template, 3, 1, "span", 194);
+    \u0275\u0275template(13, SutramExcelStudioComponent_div_89_span_13_Template, 3, 1, "span", 195);
+    \u0275\u0275template(14, SutramExcelStudioComponent_div_89_span_14_Template, 3, 1, "span", 196);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(15, SutramExcelStudioComponent_div_89_div_15_Template, 2, 1, "div", 197);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r13 = \u0275\u0275nextContext();
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngClass", ctx_r13.syncToast.inProgress ? "pi-spin pi-sync text-primary" : ctx_r13.syncToast.hasError ? "pi-exclamation-circle text-warning" : "pi-check-circle text-success");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(ctx_r13.syncToast.title);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngIf", ctx_r13.syncToast.inProgress);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngIf", ctx_r13.syncToast.inserted > 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r13.syncToast.updated > 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r13.syncToast.deleted > 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r13.syncToast.failed > 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r13.syncToast.errors.length > 0);
+  }
+}
+var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
+  state;
+  api;
+  scanner;
+  audit;
+  refCache;
+  cdr;
+  set table(tableName) {
+    if (tableName) {
+      this.onTableSelect(tableName);
+    }
+  }
+  mode = "intelligent";
+  apiBase = "/_sutram/excel";
+  // ── Declarative Feature Flags (Batteries-Included: All ON by default, toggleable by user flags) ──
+  enableFilters = true;
+  enableSorting = true;
+  enableSearch = true;
+  enableControlBar = true;
+  enableStatsBar = true;
+  enableUpload = true;
+  enableAudit = true;
+  enableAddRow = true;
+  enableCorrections = true;
+  enableLoadData = true;
+  enableVerify = true;
+  enableSync = true;
+  enableDelete = true;
+  enableTabs = true;
+  enableZoom = true;
+  gridComponent;
+  // ── Top Ribbon Navigation & Catalogs State ───────────────────
+  activeTopTab = "home";
+  tableSearchQuery = "";
+  reportSearchQuery = "";
+  favoriteTables = /* @__PURE__ */ new Set();
+  favoriteReports = /* @__PURE__ */ new Set();
+  // ── Pre-configured Reports Catalog (CTE & SQL Views) ─────────
+  reportsList = [
+    {
+      id: "mn_awk_type_wise",
+      title: "\u0906\u0935\u0915 \u092A\u094D\u0930\u0915\u093E\u0930 \u0938\u093E\u0930 (Monthly Aawak Type Saar)",
+      desc: "\u092E\u093E\u0939 \u090F\u0935\u0902 \u092A\u094D\u0930\u0915\u093E\u0930 \u0905\u0928\u0941\u0938\u093E\u0930 \u0906\u0935\u0915 \u0915\u0940 \u0915\u0941\u0932 \u092E\u093E\u0924\u094D\u0930\u093E, \u0926\u0930 \u090F\u0935\u0902 \u0905\u0935\u0936\u0947\u0937 \u0930\u093F\u092A\u094B\u0930\u094D\u091F",
+      icon: "pi-chart-line",
+      table: "mn_awk_type_wise",
+      category: "Aawak / Inventory"
+    },
+    {
+      id: "mn_jwk_aj_type",
+      title: "\u091C\u093E\u0935\u0915 \u092A\u094D\u0930\u0915\u093E\u0930 \u0938\u093E\u0930 (Monthly Jawak Type Saar)",
+      desc: "\u092E\u093E\u0939 \u0905\u0928\u0941\u0938\u093E\u0930 \u092A\u094D\u0930\u092F\u0941\u0915\u094D\u0924 \u090F\u0935\u0902 \u0905\u0928\u094D\u092F \u091C\u093E\u0935\u0915 \u0915\u093E \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923 \u0935\u093F\u0935\u0930\u0923",
+      icon: "pi-chart-bar",
+      table: "mn_jwk_aj_type",
+      category: "Jawak / Inventory"
+    },
+    {
+      id: "bachat_summary",
+      title: "\u092C\u091A\u0924 \u0938\u094D\u091F\u0949\u0915 \u0938\u093E\u0930\u093E\u0902\u0936 (Bachat Stock Summary)",
+      desc: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0936\u0947\u0937, \u091A\u093E\u0932\u0942, \u0928\u092F\u093E, \u092A\u0941\u0930\u093E\u0928\u093E, \u0930\u093F\u092A\u0947\u092F\u0930\u093F\u0902\u0917 \u090F\u0935\u0902 \u0915\u092C\u093E\u0921\u093C \u0938\u094D\u091F\u0949\u0915 \u0915\u093E \u0938\u092E\u0917\u094D\u0930 \u0935\u093F\u0935\u0930\u0923",
+      icon: "pi-percentage",
+      table: "bachat",
+      category: "Stock Balance"
+    },
+    {
+      id: "pbk_closing",
+      title: "\u092A\u0940\u092C\u0940\u0915\u0947 \u0915\u094D\u0932\u094B\u091C\u093F\u0902\u0917 \u0930\u093F\u092A\u094B\u0930\u094D\u091F (PBK Closing Statement)",
+      desc: "\u0935\u093F\u0924\u094D\u0924\u0940\u092F \u0935\u0930\u094D\u0937\u093E\u0928\u0941\u0938\u093E\u0930 \u092A\u0940\u092C\u0940\u0915\u0947 \u0915\u0940 \u0935\u093E\u0930\u094D\u0937\u093F\u0915 \u0915\u094D\u0932\u094B\u091C\u093F\u0902\u0917 \u090F\u0935\u0902 \u092C\u0948\u0932\u0947\u0902\u0938 \u0936\u0940\u091F",
+      icon: "pi-book",
+      table: "pbk_closing",
+      category: "Closing"
+    }
+  ];
+  tablesList = [];
+  selectedTableName = "";
+  isLoadingConfig = false;
+  // Active Session Sheet Tabs (Rough & Favorites only)
+  sheetTabs = [];
+  activeSheetId = "rough_1";
+  sheetWorkbooks = {};
+  loadedDbRecordCount = 0;
+  // Zoom / Scale state
+  zoomLevel = 1;
+  // Dark Mode State
+  isDarkMode = false;
+  // Text Formatting State
+  isBoldActive = false;
+  textAlign = "left";
+  // Hidden Columns Set (legacy support)
+  hiddenColumnKeys = /* @__PURE__ */ new Set();
+  // Rich Column Configuration Dropdown State (Matching Legacy Studio)
+  allConfigColumns = [];
+  selectedColumnKeys = /* @__PURE__ */ new Set();
+  expandedFkGroups = /* @__PURE__ */ new Set();
+  colSearchQuery = "";
+  // Floating Sync Toast HUD State (Live toastr & result notification)
+  syncToast = {
+    visible: false,
+    inProgress: false,
+    percentage: 0,
+    title: "",
+    hasError: false,
+    inserted: 0,
+    updated: 0,
+    deleted: 0,
+    failed: 0,
+    errors: []
+  };
+  // Last database sync status per sheet (rendered in bottom status bar)
+  lastSyncPerSheet = {};
+  // Scanner modal state
+  showScannerModal = false;
+  scanReport = null;
+  pendingRawRows = [];
+  // Correction sidebar state
+  showSidebar = false;
+  // Import progress modal state
+  showProgressModal = false;
+  rejectedRowsDuringImport = [];
+  isCancelRequested = false;
+  // DB Search Subject & Subscription
+  searchSubject = new Subject();
+  searchSub;
+  // Computed Active Cell Coordinate, Column Chip, and Formula Value
+  get activeCoord() {
+    const sel = this.state.selectedCell();
+    if (!sel)
+      return "A1";
+    const cols = this.visibleHeaders;
+    const colIdx = cols.findIndex((c) => (c.key || c.name) === sel.colKey);
+    const letter = this.getColLetter(colIdx >= 0 ? colIdx : 0);
+    return `${letter}${sel.rowIdx + 1}`;
+  }
+  get activeColChip() {
+    const sel = this.state.selectedCell();
+    return sel ? sel.colKey : "--";
+  }
+  get formulaValue() {
+    const sel = this.state.selectedCell();
+    if (!sel)
+      return "";
+    const rows = this.state.rows();
+    return rows[sel.rowIdx]?.cells[sel.colKey]?.value ?? "";
+  }
+  get visibleHeaders() {
+    if (this.allConfigColumns.length > 0) {
+      return this.allConfigColumns.filter((c) => this.selectedColumnKeys.has(c.key));
+    }
+    const headers = this.state.headers();
+    return headers.filter((h) => !this.hiddenColumnKeys.has(h.name));
+  }
+  get visibleHeadersCount() {
+    return this.visibleHeaders.length;
+  }
+  getColLetter(idx) {
+    let letter = "";
+    let temp = idx;
+    while (temp >= 0) {
+      letter = String.fromCharCode(temp % 26 + 65) + letter;
+      temp = Math.floor(temp / 26) - 1;
+    }
+    return letter;
+  }
+  isTechnicalCol(name) {
+    const n = (name || "").toLowerCase();
+    return n === "_id" || n.includes("_by_dept_id") || n === "verify";
+  }
+  buildConfigColumns(cfg) {
+    this.allConfigColumns = [];
+    this.selectedColumnKeys.clear();
+    this.expandedFkGroups.clear();
+    const rawHeaders = cfg.headers || [];
+    const allSchemaCols = cfg.all_schema_columns || [];
+    const headerList = Array.isArray(rawHeaders) ? rawHeaders : Object.values(rawHeaders);
+    const processedCols = /* @__PURE__ */ new Set();
+    for (const h of headerList) {
+      const colName = h.col_name || h.name;
+      if (this.isTechnicalCol(colName))
+        continue;
+      processedCols.add(colName);
+      if (h.ref_table || h.type === "ref") {
+        const refTbl = h.ref_table;
+        const refAs = h.ref_as || refTbl;
+        const refCols = h.ref_columns || [];
+        const mainCol = {
+          key: refAs,
+          name: h.name || refAs,
+          short_name: `${refAs} (display)`,
+          col_name: colName,
+          group: refTbl,
+          is_fk_main: true,
+          ref_table: refTbl,
+          ref_as: refAs,
+          type: "ref",
+          not_null: !!h.not_null,
+          default_selected: true
+        };
+        this.allConfigColumns.push(mainCol);
+        this.selectedColumnKeys.add(refAs);
+        this.expandedFkGroups.add(refTbl);
+        if (Array.isArray(refCols)) {
+          refCols.forEach((rc) => {
+            const subColName = rc.col_name || rc.name;
+            if (this.isTechnicalCol(subColName))
+              return;
+            this.allConfigColumns.push({
+              key: `${refAs}.${subColName}`,
+              name: `${refAs}.${subColName}`,
+              short_name: rc.name || subColName,
+              col_name: subColName,
+              group: refTbl,
+              is_fk_subcol: true,
+              ref_table: refTbl,
+              ref_as: refAs,
+              sub_col_name: subColName,
+              type: rc.type || "string",
+              not_null: false,
+              default_selected: false
+            });
+          });
+        }
+        this.allConfigColumns.push({
+          key: colName,
+          name: colName,
+          short_name: `${colName} (id)`,
+          col_name: colName,
+          group: refTbl,
+          is_fk_raw: true,
+          ref_table: refTbl,
+          ref_as: refAs,
+          type: "id",
+          not_null: !!h.not_null,
+          default_selected: false
+        });
+      } else {
+        this.allConfigColumns.push({
+          key: colName,
+          name: h.name || colName,
+          short_name: h.name || colName,
+          col_name: colName,
+          group: null,
+          is_fk_subcol: false,
+          is_fk_main: false,
+          is_fk_raw: false,
+          type: h.type || "string",
+          not_null: !!h.not_null,
+          default_selected: true
+        });
+        this.selectedColumnKeys.add(colName);
+      }
+    }
+    if (Array.isArray(allSchemaCols)) {
+      for (const sc of allSchemaCols) {
+        const colName = sc.col_name || sc.name;
+        if (this.isTechnicalCol(colName) || processedCols.has(colName))
+          continue;
+        processedCols.add(colName);
+        this.allConfigColumns.push({
+          key: colName,
+          name: sc.name || colName,
+          short_name: sc.name || colName,
+          col_name: colName,
+          group: null,
+          type: sc.type || "string",
+          not_null: !!sc.not_null,
+          default_selected: false
+        });
+      }
+    }
+    if (this.selectedColumnKeys.size === 0 && this.allConfigColumns.length > 0) {
+      this.selectedColumnKeys.add(this.allConfigColumns[0].key);
+    }
+  }
+  get filteredDirectCols() {
+    const q = (this.colSearchQuery || "").trim().toLowerCase();
+    return this.allConfigColumns.filter((c) => {
+      if (c.group)
+        return false;
+      if (!q)
+        return true;
+      return c.name && c.name.toLowerCase().includes(q) || c.key && c.key.toLowerCase().includes(q);
+    });
+  }
+  get filteredFkGroups() {
+    const q = (this.colSearchQuery || "").trim().toLowerCase();
+    const groupsMap = /* @__PURE__ */ new Map();
+    this.allConfigColumns.forEach((c) => {
+      if (c.group) {
+        if (!groupsMap.has(c.group))
+          groupsMap.set(c.group, []);
+        groupsMap.get(c.group).push(c);
+      }
+    });
+    const result = [];
+    for (const [groupName, cols] of groupsMap.entries()) {
+      const matchingCols = cols.filter((c) => {
+        if (!q)
+          return true;
+        return groupName.toLowerCase().includes(q) || c.name && c.name.toLowerCase().includes(q) || c.short_name && c.short_name.toLowerCase().includes(q);
+      });
+      if (q && matchingCols.length === 0)
+        continue;
+      const selectedInGroup = cols.filter((c) => this.selectedColumnKeys.has(c.key)).length;
+      const totalInGroup = cols.length;
+      result.push({
+        name: groupName,
+        refTable: cols[0]?.ref_table || groupName,
+        columns: q ? matchingCols : cols,
+        totalCount: totalInGroup,
+        selectedCount: selectedInGroup,
+        isAllChecked: selectedInGroup === totalInGroup && totalInGroup > 0,
+        isIndeterminate: selectedInGroup > 0 && selectedInGroup < totalInGroup
+      });
+    }
+    return result;
+  }
+  isColumnSelected(key) {
+    return this.selectedColumnKeys.has(key);
+  }
+  trackByGroupName(index, grp) {
+    return grp.name;
+  }
+  trackByColKey(index, col) {
+    return col.key;
+  }
+  isFkGroupExpanded(groupName) {
+    if (this.colSearchQuery && this.colSearchQuery.trim())
+      return true;
+    return this.expandedFkGroups.has(groupName);
+  }
+  toggleFkGroupExpand(groupName) {
+    if (this.expandedFkGroups.has(groupName)) {
+      this.expandedFkGroups.delete(groupName);
+    } else {
+      this.expandedFkGroups.add(groupName);
+    }
+    this.expandedFkGroups = new Set(this.expandedFkGroups);
+    this.cdr.markForCheck();
+  }
+  toggleColumnCheckbox(key) {
+    if (this.selectedColumnKeys.has(key)) {
+      if (this.selectedColumnKeys.size <= 1) {
+        return;
+      }
+      this.selectedColumnKeys.delete(key);
+    } else {
+      this.selectedColumnKeys.add(key);
+      this.ensureRowCellsForColumn(key);
+    }
+    this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.cdr.markForCheck();
+  }
+  toggleFkGroupAll(groupName) {
+    const groupCols = this.allConfigColumns.filter((c) => c.group === groupName);
+    const selectedCount = groupCols.filter((c) => this.selectedColumnKeys.has(c.key)).length;
+    const shouldSelectAll = selectedCount < groupCols.length;
+    if (shouldSelectAll) {
+      groupCols.forEach((c) => {
+        this.selectedColumnKeys.add(c.key);
+        this.ensureRowCellsForColumn(c.key);
+      });
+    } else {
+      groupCols.forEach((c) => this.selectedColumnKeys.delete(c.key));
+      if (this.selectedColumnKeys.size === 0) {
+        const fallback = this.allConfigColumns.find((c) => !c.group) || this.allConfigColumns[0];
+        if (fallback) {
+          this.selectedColumnKeys.add(fallback.key);
+          this.ensureRowCellsForColumn(fallback.key);
+        }
+      }
+    }
+    this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.cdr.markForCheck();
+  }
+  selectAllColumns(selectAll = true) {
+    if (selectAll) {
+      this.allConfigColumns.forEach((c) => {
+        this.selectedColumnKeys.add(c.key);
+        this.ensureRowCellsForColumn(c.key);
+      });
+    } else {
+      this.selectedColumnKeys.clear();
+      if (this.allConfigColumns.length > 0) {
+        const fallback = this.allConfigColumns.find((c) => !c.group) || this.allConfigColumns[0];
+        if (fallback) {
+          this.selectedColumnKeys.add(fallback.key);
+          this.ensureRowCellsForColumn(fallback.key);
+        }
+      }
+    }
+    this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.cdr.markForCheck();
+  }
+  resetDefaultColumns() {
+    this.selectedColumnKeys.clear();
+    this.allConfigColumns.forEach((c) => {
+      if (c.default_selected) {
+        this.selectedColumnKeys.add(c.key);
+        this.ensureRowCellsForColumn(c.key);
+      }
+    });
+    if (this.selectedColumnKeys.size === 0 && this.allConfigColumns.length > 0) {
+      this.selectedColumnKeys.add(this.allConfigColumns[0].key);
+      this.ensureRowCellsForColumn(this.allConfigColumns[0].key);
+    }
+    this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.cdr.markForCheck();
+  }
+  ensureRowCellsForColumn(key) {
+    const colDef = this.allConfigColumns.find((c) => c.key === key);
+    if (!colDef)
+      return;
+    const rows = this.state.rows();
+    let updated = false;
+    rows.forEach((r) => {
+      if (r.cells && !r.cells[key] && r._rawOriginal) {
+        const dr = r._rawOriginal;
+        let rawVal;
+        if (colDef.is_fk_subcol) {
+          const refObj = dr[colDef.ref_as || colDef.ref_table];
+          if (refObj && typeof refObj === "object") {
+            rawVal = refObj[colDef.sub_col_name];
+          }
+        } else if (colDef.is_fk_main || colDef.type === "ref") {
+          const joined = dr[colDef.ref_as || colDef.name || colDef.ref_table];
+          if (joined && typeof joined === "object") {
+            const formatted = this.refCache.formatOption(colDef.ref_table, joined);
+            rawVal = formatted?.display;
+          }
+        } else if (colDef.is_fk_raw) {
+          rawVal = dr[colDef.col_name] ?? dr[colDef.key];
+        } else {
+          rawVal = dr[colDef.col_name] ?? dr[colDef.name] ?? dr[colDef.key];
+        }
+        r.cells[key] = {
+          value: String(rawVal ?? ""),
+          isValid: true,
+          refId: dr[colDef.col_name] !== void 0 ? dr[colDef.col_name] : rawVal
+        };
+        updated = true;
+      }
+    });
+    if (updated) {
+      this.state.setRows([...rows]);
+    }
+  }
+  get statusStripClass() {
+    if (this.state.stats().errorRows > 0)
+      return "strip-error";
+    if (this.mode === "intelligent")
+      return "strip-suggestion";
+    return "strip-clean";
+  }
+  get statusStripIcon() {
+    if (this.state.stats().errorRows > 0)
+      return "pi-exclamation-triangle text-danger";
+    if (this.mode === "intelligent")
+      return "pi-bolt text-primary";
+    return "pi-info-circle text-primary";
+  }
+  get statusStripMessage() {
+    if (this.state.stats().errorRows > 0) {
+      return `\u0936\u0940\u091F \u092E\u0947\u0902 ${this.state.stats().errorRows} \u092A\u0902\u0915\u094D\u0924\u093F\u092F\u094B\u0902 \u092E\u0947\u0902 \u0905\u092E\u093E\u0928\u094D\u092F \u092E\u093E\u0928 \u092E\u093F\u0932\u0947 \u0939\u0948\u0902\u0964 \u0915\u0943\u092A\u092F\u093E \u0938\u0941\u0927\u093E\u0930\u0947\u0902 \u092F\u093E '\u0917\u0932\u0924\u093F\u092F\u093E\u0901' \u0938\u093E\u0907\u0921\u092C\u093E\u0930 \u0926\u0947\u0916\u0947\u0902\u0964`;
+    }
+    if (this.mode === "intelligent") {
+      return "Smart Mode ON. Live foreign key validation and dictionary learning active.";
+    }
+    return "Normal mode ready. Type or paste data. Turn on Smart Mode for live FK validation.";
+  }
+  constructor(state2, api, scanner, audit, refCache, cdr) {
+    this.state = state2;
+    this.api = api;
+    this.scanner = scanner;
+    this.audit = audit;
+    this.refCache = refCache;
+    this.cdr = cdr;
+  }
+  ngOnInit() {
+    if (this.apiBase) {
+      this.api.setBaseUri(this.apiBase);
+    }
+    const savedTheme = localStorage.getItem("sutram_dark_mode");
+    if (savedTheme === "true" || document.body.classList.contains("dark-mode")) {
+      this.isDarkMode = true;
+      document.body.classList.add("dark-mode");
+    }
+    this.state.isAuditMode.set(this.mode === "intelligent");
+    this.state.filtersEnabled.set(this.enableFilters);
+    this.state.sortingEnabled.set(this.enableSorting);
+    this.searchSub = this.searchSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
+      this.state.dbSearchQuery.set(query);
+      if (this.selectedTableName) {
+        this.loadDataChunk(this.selectedTableName, 0, 100, true);
+      }
+    });
+    this.loadTablesList();
+  }
+  ngOnDestroy() {
+    this.searchSub?.unsubscribe();
+  }
+  setStudioMode(newMode) {
+    this.mode = newMode;
+    this.state.isAuditMode.set(newMode === "intelligent");
+    this.cdr.markForCheck();
+  }
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    if (this.isDarkMode) {
+      document.body.classList.add("dark-mode");
+      localStorage.setItem("sutram_dark_mode", "true");
+    } else {
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("sutram_dark_mode", "false");
+    }
+    this.cdr.markForCheck();
+  }
+  onFormulaChange(val) {
+    const sel = this.state.selectedCell();
+    if (!sel)
+      return;
+    this.state.updateCellValue(sel.rowIdx, sel.colKey, val);
+    this.cdr.markForCheck();
+  }
+  toggleColumnVisibility(colName) {
+    if (this.hiddenColumnKeys.has(colName)) {
+      this.hiddenColumnKeys.delete(colName);
+    } else {
+      this.hiddenColumnKeys.add(colName);
+    }
+    this.cdr.markForCheck();
+  }
+  exportExcel() {
+    const rows = this.state.rows();
+    if (!rows || rows.length === 0) {
+      alert("\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0936\u0940\u091F \u092E\u0947\u0902 \u0915\u094B\u0908 \u0921\u0947\u091F\u093E \u0928\u0939\u0940\u0902 \u0939\u0948 (No data to export)");
+      return;
+    }
+    const headers = this.visibleHeaders;
+    const exportData = rows.map((r) => {
+      const obj = {};
+      headers.forEach((h) => {
+        obj[h.name] = r.cells[h.name]?.value ?? "";
+      });
+      return obj;
+    });
+    const ws = utils.json_to_sheet(exportData);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, this.selectedTableName || "Sheet1");
+    writeFileSync(wb, `${this.selectedTableName || "data"}_${Date.now()}.xlsx`);
+  }
+  setTopTab(tab) {
+    this.activeTopTab = tab;
+    this.cdr.markForCheck();
+  }
+  get isCurrentSheetRough() {
+    const cur = this.sheetTabs.find((t) => t.id === this.activeSheetId);
+    return !cur || cur.type === "rough" || this.activeSheetId === "blank" || this.activeSheetId.startsWith("rough_") || this.activeSheetId.startsWith("sheet_");
+  }
+  get filteredTables() {
+    const q = (this.tableSearchQuery || "").toLowerCase().trim();
+    if (!q)
+      return this.tablesList;
+    return this.tablesList.filter((t) => t.table.toLowerCase().includes(q) || t.display_name && t.display_name.toLowerCase().includes(q));
+  }
+  get filteredReports() {
+    const q = (this.reportSearchQuery || "").toLowerCase().trim();
+    if (!q)
+      return this.reportsList;
+    return this.reportsList.filter((r) => r.title.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q) || r.category.toLowerCase().includes(q));
+  }
+  toggleFavoriteTable(tableName, event2) {
+    if (event2) {
+      event2.stopPropagation();
+      event2.preventDefault();
+    }
+    if (this.favoriteTables.has(tableName)) {
+      this.favoriteTables.delete(tableName);
+    } else {
+      this.favoriteTables.add(tableName);
+    }
+    localStorage.setItem("sutram_studio_favorites", JSON.stringify(Array.from(this.favoriteTables)));
+    this.cdr.markForCheck();
+  }
+  toggleFavoriteReport(reportId, event2) {
+    if (event2) {
+      event2.stopPropagation();
+      event2.preventDefault();
+    }
+    if (this.favoriteReports.has(reportId)) {
+      this.favoriteReports.delete(reportId);
+    } else {
+      this.favoriteReports.add(reportId);
+    }
+    localStorage.setItem("sutram_favorite_reports", JSON.stringify(Array.from(this.favoriteReports)));
+    this.cdr.markForCheck();
+  }
+  isTableOpen(tableName) {
+    return this.sheetTabs.some((t) => t.id === tableName || t.tableName === tableName);
+  }
+  isReportOpen(reportId) {
+    return this.sheetTabs.some((t) => t.id === "rep_" + reportId || t.reportId === reportId);
+  }
+  openTableInSheet(tableName) {
+    const foundTab = this.sheetTabs.find((t) => t.id === tableName || t.tableName === tableName);
+    if (foundTab) {
+      this.switchSheet(foundTab.id);
+    } else {
+      const tableInfo = this.tablesList.find((t) => t.table === tableName);
+      const newTab = {
+        id: tableName,
+        title: tableInfo?.display_name || tableName,
+        icon: "pi-table",
+        type: "table",
+        tableName,
+        isLoaded: false,
+        recordCount: 0
+      };
+      this.sheetTabs.push(newTab);
+      this.switchSheet(newTab.id);
+    }
+    this.cdr.markForCheck();
+  }
+  openReportInSheet(report) {
+    const tabId = "rep_" + report.id;
+    const foundTab = this.sheetTabs.find((t) => t.id === tabId);
+    if (foundTab) {
+      this.switchSheet(foundTab.id);
+    } else {
+      const newTab = {
+        id: tabId,
+        title: report.title,
+        icon: report.icon || "pi-chart-bar",
+        type: "report",
+        tableName: report.table,
+        reportId: report.id,
+        isLoaded: false,
+        recordCount: 0
+      };
+      this.sheetTabs.push(newTab);
+      this.switchSheet(newTab.id);
+    }
+    this.cdr.markForCheck();
+  }
+  closeSheet(tabId, event2) {
+    if (event2) {
+      event2.stopPropagation();
+      event2.preventDefault();
+    }
+    if (this.sheetTabs.length <= 1)
+      return;
+    const idx = this.sheetTabs.findIndex((t) => t.id === tabId);
+    if (idx < 0)
+      return;
+    const wasActive = this.activeSheetId === tabId;
+    this.sheetTabs.splice(idx, 1);
+    if (wasActive) {
+      const nextTab = this.sheetTabs[Math.max(0, idx - 1)] || this.sheetTabs[0];
+      if (nextTab) {
+        this.switchSheet(nextTab.id);
+      }
+    }
+    this.cdr.markForCheck();
+  }
+  initBlankRoughSheet() {
+    this.state.clearGrid();
+    const defaultCols = ["A", "B", "C", "D", "E", "F", "G", "H"].map((c) => ({
+      key: c,
+      name: c,
+      short_name: c,
+      col_name: c,
+      type: "string",
+      default_selected: true
+    }));
+    this.allConfigColumns = defaultCols;
+    this.selectedColumnKeys = new Set(defaultCols.map((c) => c.key));
+    const roughHeaders = defaultCols.map((c) => ({
+      name: c.name,
+      col_name: c.col_name,
+      type: "string"
+    }));
+    const mockCfg = {
+      table: "rough",
+      display_name: "Sheet (\u0930\u092B)",
+      headers: roughHeaders,
+      duplicateOn: []
+    };
+    this.state.setConfig(mockCfg);
+    const blankRow = this.createBlankRow(1, mockCfg);
+    this.state.setRows([blankRow]);
+  }
+  saveRoughSheetLocally() {
+    const currentRows = this.state.rows();
+    const cleanRows = currentRows.map((r) => ({
+      rowNum: r.rowNum,
+      cells: r.cells,
+      hasError: r.hasError,
+      isNew: r.isNew,
+      isModified: r.isModified
+    }));
+    const dataToSave = {
+      sheetId: this.activeSheetId,
+      savedAt: (/* @__PURE__ */ new Date()).toLocaleTimeString(),
+      rows: cleanRows,
+      allConfigColumns: this.allConfigColumns,
+      selectedColumnKeys: Array.from(this.selectedColumnKeys)
+    };
+    try {
+      localStorage.setItem(`sutram_rough_${this.activeSheetId}`, JSON.stringify(dataToSave));
+      const curTab = this.sheetTabs.find((t) => t.id === this.activeSheetId);
+      if (curTab) {
+        curTab.lastSaved = (/* @__PURE__ */ new Date()).toLocaleTimeString();
+        curTab.recordCount = currentRows.length;
+      }
+      this.lastSyncPerSheet[this.activeSheetId] = {
+        time: (/* @__PURE__ */ new Date()).toLocaleTimeString(),
+        summary: `${currentRows.length} \u092A\u0902\u0915\u094D\u0924\u093F\u092F\u093E\u0901 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 (Saved locally)`,
+        hasError: false
+      };
+      this.syncToast = {
+        visible: true,
+        inProgress: false,
+        percentage: 100,
+        title: "\u0930\u092B \u0936\u0940\u091F \u0938\u094D\u0925\u093E\u0928\u0940\u092F \u0930\u0942\u092A \u0938\u0947 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 (Saved Locally)",
+        hasError: false,
+        inserted: currentRows.length,
+        updated: 0,
+        deleted: 0,
+        failed: 0,
+        errors: []
+      };
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        if (this.syncToast.visible && !this.syncToast.inProgress && !this.syncToast.hasError) {
+          this.syncToast = { ...this.syncToast, visible: false };
+          this.cdr.detectChanges();
+        }
+      }, 2500);
+    } catch (e) {
+      console.error("[SutramStudio] Local save failed:", e);
+    }
+  }
+  loadTablesList() {
+    const savedFavs = localStorage.getItem("sutram_studio_favorites");
+    if (savedFavs) {
+      try {
+        this.favoriteTables = new Set(JSON.parse(savedFavs));
+      } catch {
+      }
+    } else {
+      this.favoriteTables = /* @__PURE__ */ new Set(["item", "aawak", "bachat"]);
+    }
+    const savedFavReps = localStorage.getItem("sutram_favorite_reports");
+    if (savedFavReps) {
+      try {
+        this.favoriteReports = new Set(JSON.parse(savedFavReps));
+      } catch {
+      }
+    }
+    this.api.getRegisteredTables().subscribe({
+      next: (tables) => {
+        this.tablesList = tables;
+        const activeTabs = [
+          { id: "rough_1", title: "Sheet 1 (\u0930\u092B)", icon: "pi-file", type: "rough", isLoaded: true }
+        ];
+        tables.forEach((t) => {
+          if (this.favoriteTables.has(t.table)) {
+            activeTabs.push({
+              id: t.table,
+              title: t.display_name || t.table,
+              icon: "pi-table",
+              type: "table",
+              tableName: t.table,
+              isLoaded: false,
+              recordCount: 0
+            });
+          }
+        });
+        this.sheetTabs = activeTabs;
+        const firstTable = activeTabs.find((t) => t.type === "table");
+        if (firstTable) {
+          this.activeSheetId = firstTable.id;
+          this.selectedTableName = firstTable.id;
+          this.onTableSelect(firstTable.id, true);
+        } else {
+          this.activeSheetId = "rough_1";
+          this.selectedTableName = "";
+          this.switchSheet("rough_1");
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error("[SutramStudio] Load tables failed:", err)
+    });
+  }
+  onTableSelect(tableName, autoLoadData = true) {
+    if (!tableName)
+      return;
+    this.selectedTableName = tableName;
+    this.activeSheetId = tableName;
+    this.state.setActiveTable(tableName);
+    if (autoLoadData) {
+      this.state.clearGrid();
+      this.loadedDbRecordCount = 0;
+    }
+    this.isLoadingConfig = true;
+    this.api.getTableConfig(tableName).subscribe({
+      next: (cfg) => {
+        this.state.setConfig(cfg);
+        this.isLoadingConfig = false;
+        if (autoLoadData || this.allConfigColumns.length === 0) {
+          this.buildConfigColumns(cfg);
+        }
+        if (cfg && cfg.headers) {
+          const refTables = cfg.headers.filter((h) => h.ref_table || h.type === "ref").map((h) => h.ref_table).filter(Boolean);
+          this.refCache.preloadTables(refTables);
+        }
+        if (autoLoadData) {
+          this.loadDataChunk(tableName, 0, 100, true);
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isLoadingConfig = false;
+        console.error("[SutramStudio] Load config failed:", err);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+  switchSheet(tabId) {
+    if (this.activeSheetId === tabId)
+      return;
+    if (this.activeSheetId) {
+      this.sheetWorkbooks[this.activeSheetId] = {
+        rows: this.state.rows(),
+        config: this.state.config() || void 0,
+        totalDbRecords: this.state.totalDbRecords(),
+        loadedDbRecordCount: this.loadedDbRecordCount,
+        deletedRowIds: this.state.deletedRowIds(),
+        deletedRowsQueue: this.state.deletedRowsQueue(),
+        allConfigColumns: [...this.allConfigColumns],
+        selectedColumnKeys: new Set(this.selectedColumnKeys)
+      };
+    }
+    this.activeSheetId = tabId;
+    if (tabId === "blank" || tabId.startsWith("rough_") || tabId.startsWith("sheet_")) {
+      this.selectedTableName = "";
+      this.state.setActiveTable(null);
+      const saved = this.sheetWorkbooks[tabId];
+      if (saved && saved.rows && saved.rows.length > 0) {
+        this.state.setRows(saved.rows);
+        this.state.deletedRowIds.set(saved.deletedRowIds || []);
+        this.state.deletedRowsQueue.set(saved.deletedRowsQueue || []);
+        if (saved.allConfigColumns)
+          this.allConfigColumns = [...saved.allConfigColumns];
+        if (saved.selectedColumnKeys)
+          this.selectedColumnKeys = new Set(saved.selectedColumnKeys);
+      } else {
+        const localSaved = localStorage.getItem(`sutram_rough_${tabId}`);
+        if (localSaved) {
+          try {
+            const parsed = JSON.parse(localSaved);
+            if (parsed.rows && parsed.rows.length > 0) {
+              this.state.setRows(parsed.rows);
+              if (parsed.allConfigColumns)
+                this.allConfigColumns = parsed.allConfigColumns;
+              if (parsed.selectedColumnKeys)
+                this.selectedColumnKeys = new Set(parsed.selectedColumnKeys);
+            } else {
+              this.initBlankRoughSheet();
+            }
+          } catch {
+            this.initBlankRoughSheet();
+          }
+        } else {
+          this.initBlankRoughSheet();
+        }
+      }
+      this.state.totalDbRecords.set(0);
+      this.loadedDbRecordCount = 0;
+      this.gridComponent?.resetScroll();
+      this.cdr.markForCheck();
+    } else {
+      const saved = this.sheetWorkbooks[tabId];
+      if (saved && saved.rows && saved.rows.length > 0) {
+        this.selectedTableName = tabId;
+        this.state.setActiveTable(tabId);
+        if (saved.config) {
+          this.state.setConfig(saved.config);
+        }
+        if (saved.allConfigColumns && saved.selectedColumnKeys) {
+          this.allConfigColumns = [...saved.allConfigColumns];
+          this.selectedColumnKeys = new Set(saved.selectedColumnKeys);
+        }
+        this.state.setRows(saved.rows);
+        this.state.deletedRowIds.set(saved.deletedRowIds || []);
+        this.state.deletedRowsQueue.set(saved.deletedRowsQueue || []);
+        if (saved.totalDbRecords !== void 0) {
+          this.state.totalDbRecords.set(saved.totalDbRecords);
+        }
+        if (saved.loadedDbRecordCount !== void 0) {
+          this.loadedDbRecordCount = saved.loadedDbRecordCount;
+        }
+        this.gridComponent?.resetScroll();
+      } else {
+        this.gridComponent?.resetScroll();
+        this.onTableSelect(tabId, true);
+      }
+    }
+    this.cdr.markForCheck();
+  }
+  addNewBlankSheet() {
+    const roughCount = this.sheetTabs.filter((t) => t.type === "rough").length + 1;
+    const newId = `rough_${Date.now()}`;
+    const newTab = {
+      id: newId,
+      title: `Sheet ${roughCount} (\u0930\u092B)`,
+      icon: "pi-file",
+      type: "rough",
+      isLoaded: true
+    };
+    this.sheetTabs.push(newTab);
+    this.switchSheet(newId);
+  }
+  /**
+   * Converts a database row object into a verified SutramRow.
+   * Utilizes SutramRefCacheService for Rule 8 bilingual formatting.
+   */
+  convertDbRecordToSutramRow(dr, rowNum, cfg) {
+    const cells = {};
+    const colsToPopulate = this.allConfigColumns.length > 0 ? this.allConfigColumns : (cfg.headers || []).map((h) => ({
+      key: h.col_name || h.name,
+      name: h.name,
+      short_name: h.name,
+      col_name: h.col_name,
+      type: h.type || "string",
+      ref_table: h.ref_table,
+      ref_as: h.ref_as || h.ref_table,
+      is_fk_main: !!h.ref_table,
+      is_fk_subcol: false,
+      is_fk_raw: false
+    }));
+    colsToPopulate.forEach((col) => {
+      let rawVal;
+      if (col.is_fk_subcol) {
+        const refObj = dr[col.ref_as || col.ref_table];
+        if (refObj && typeof refObj === "object") {
+          rawVal = refObj[col.sub_col_name];
+        }
+      } else if (col.is_fk_main || col.type === "ref") {
+        const joined = dr[col.ref_as || col.name || col.ref_table];
+        if (joined && typeof joined === "object") {
+          const formatted = this.refCache.formatOption(col.ref_table, joined);
+          if (formatted && formatted.display) {
+            rawVal = formatted.display;
+          }
+        }
+      } else if (col.is_fk_raw) {
+        rawVal = dr[col.col_name] ?? dr[col.key];
+      } else {
+        rawVal = dr[col.col_name];
+        if (rawVal === void 0)
+          rawVal = dr[col.name];
+        if (rawVal === void 0 && col.key)
+          rawVal = dr[col.key];
+      }
+      if (rawVal === void 0) {
+        const matchKey = Object.keys(dr).find((k) => k.toLowerCase() === (col.col_name || col.name || "").toLowerCase());
+        if (matchKey)
+          rawVal = dr[matchKey];
+      }
+      const cellKey = col.key || col.name;
+      const strVal = String(rawVal ?? "");
+      cells[cellKey] = {
+        value: strVal,
+        originalValue: strVal,
+        isValid: true,
+        isModified: false,
+        refId: dr[col.col_name] !== void 0 ? dr[col.col_name] : rawVal
+      };
+      if (col.name && col.name !== cellKey) {
+        cells[col.name] = cells[cellKey];
+      }
+    });
+    return {
+      rowNum,
+      cells,
+      hasError: false,
+      errorCount: 0,
+      _rawOriginal: dr
+    };
+  }
+  /**
+   * Helper to check if a row contains any non-empty cell values
+   */
+  isRowPopulated(row) {
+    if (!row || !row.cells)
+      return false;
+    for (const k in row.cells) {
+      const val = row.cells[k]?.value;
+      if (val !== void 0 && val !== null && String(val).trim() !== "") {
+        return true;
+      }
+    }
+    return false;
+  }
+  /**
+   * Creates an empty blank SutramRow initialized with column structure
+   */
+  createBlankRow(rowNum, cfg) {
+    const cells = {};
+    const colsToPopulate = this.allConfigColumns.length > 0 ? this.allConfigColumns : (cfg.headers || []).map((h) => ({
+      key: h.col_name || h.name,
+      name: h.name
+    }));
+    colsToPopulate.forEach((col) => {
+      const cellKey = col.key || col.name;
+      cells[cellKey] = {
+        value: "",
+        originalValue: "",
+        isValid: true,
+        isModified: false,
+        isNew: true
+      };
+      if (col.name && col.name !== cellKey) {
+        cells[col.name] = cells[cellKey];
+      }
+    });
+    return {
+      rowNum,
+      cells,
+      hasError: false,
+      errorCount: 0,
+      isNew: true
+    };
+  }
+  /**
+   * Guarantees there is always one trailing blank row at the very end of the sheet
+   */
+  ensureTrailingBlankRow(rows, cfg) {
+    if (!rows || rows.length === 0) {
+      return [this.createBlankRow(1, cfg)];
+    }
+    const lastRow = rows[rows.length - 1];
+    if (this.isRowPopulated(lastRow)) {
+      return [...rows, this.createBlankRow(rows.length + 1, cfg)];
+    }
+    return rows;
+  }
+  /**
+   * Chunked lazy loading with direct database search, sort, and filters.
+   */
+  loadDataChunk(tableName, offset = 0, limit = 100, isReset = true) {
+    const cfg = this.state.config();
+    if (!cfg || !tableName)
+      return;
+    if (this.state.isLoadingDb())
+      return;
+    this.state.isLoadingDb.set(true);
+    const activeSort = this.state.activeSort();
+    const columnFilters = this.state.columnFilters();
+    const searchQuery = this.state.dbSearchQuery().trim();
+    let sortColKey = activeSort?.colKey;
+    if (sortColKey && cfg) {
+      const foundCol = this.allConfigColumns.find((c) => c.key === sortColKey || c.name === sortColKey);
+      if (foundCol && foundCol.col_name) {
+        sortColKey = foundCol.col_name;
+      } else {
+        const foundHeader = (cfg.headers || []).find((h) => h.name === sortColKey || h.col_name === sortColKey);
+        if (foundHeader && foundHeader.col_name) {
+          sortColKey = foundHeader.col_name;
+        }
+      }
+    }
+    const apiFilters = {};
+    for (const [colKey, valSet] of Object.entries(columnFilters)) {
+      if (valSet && valSet.size > 0) {
+        let dbKey = colKey;
+        const foundCol = this.allConfigColumns.find((c) => c.key === colKey || c.name === colKey);
+        if (foundCol && foundCol.col_name) {
+          dbKey = foundCol.col_name;
+        }
+        apiFilters[dbKey] = Array.from(valSet);
+      }
+    }
+    this.api.getTableDataChunk(tableName, {
+      limit,
+      offset,
+      search: searchQuery || void 0,
+      sort: sortColKey,
+      order: activeSort?.order,
+      filters: Object.keys(apiFilters).length > 0 ? apiFilters : void 0
+    }).subscribe({
+      next: (res) => {
+        this.state.isLoadingDb.set(false);
+        this.state.totalDbRecords.set(res.total);
+        if (isReset) {
+          this.loadedDbRecordCount = res.rows ? res.rows.length : 0;
+          this.gridComponent?.resetScroll();
+        } else {
+          this.loadedDbRecordCount += res.rows ? res.rows.length : 0;
+        }
+        const existingRows = isReset ? [] : this.state.rows();
+        const cleanExisting = !isReset && existingRows.length > 0 && !this.isRowPopulated(existingRows[existingRows.length - 1]) ? existingRows.slice(0, -1) : existingRows;
+        const startIndex = cleanExisting.length;
+        const builtRows = (res.rows || []).map((dr, idx) => {
+          return this.convertDbRecordToSutramRow(dr, startIndex + idx + 1, cfg);
+        });
+        this.audit.auditAll(builtRows, cfg.headers);
+        let combined = isReset ? builtRows : [...cleanExisting, ...builtRows];
+        combined = this.ensureTrailingBlankRow(combined, cfg);
+        this.state.setRows(combined);
+        const tab = this.sheetTabs.find((t) => t.id === tableName);
+        if (tab) {
+          tab.isLoaded = true;
+          tab.recordCount = res.total !== void 0 ? res.total : this.loadedDbRecordCount;
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.state.isLoadingDb.set(false);
+        console.error("[SutramStudio] Load DB data chunk failed:", err);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+  /**
+   * Infinite scroll trigger emitted from grid when scrolling near bottom
+   */
+  onLoadMore() {
+    if (this.state.isLoadingDb())
+      return;
+    const loadedCount = this.loadedDbRecordCount;
+    const totalCount = this.state.totalDbRecords();
+    if (totalCount > 0 && loadedCount < totalCount && this.selectedTableName) {
+      this.loadDataChunk(this.selectedTableName, loadedCount, 100, false);
+    }
+  }
+  /**
+   * Direct Database Searchbox Handlers
+   */
+  onDbSearchInput(query) {
+    this.searchSubject.next(query);
+  }
+  clearDbSearch() {
+    this.state.dbSearchQuery.set("");
+    this.searchSubject.next("");
+  }
+  /**
+   * Clear All Active Column Filters
+   */
+  clearAllFilters() {
+    this.state.clearAllColumnFilters();
+    if (this.selectedTableName) {
+      this.loadDataChunk(this.selectedTableName, 0, 100, true);
+    }
+  }
+  onGridFilterChanged() {
+    if (this.selectedTableName) {
+      this.loadDataChunk(this.selectedTableName, 0, 100, true);
+    }
+  }
+  onGridSortChanged() {
+    if (this.selectedTableName) {
+      this.loadDataChunk(this.selectedTableName, 0, 100, true);
+    }
+  }
+  loadTableDataFromDb() {
+    if (this.selectedTableName) {
+      this.loadDataChunk(this.selectedTableName, 0, 100, true);
+    }
+  }
+  zoomIn() {
+    if (this.zoomLevel < 1.6) {
+      this.zoomLevel = Math.min(1.6, Math.round((this.zoomLevel + 0.1) * 10) / 10);
+      this.cdr.markForCheck();
+    }
+  }
+  zoomOut() {
+    if (this.zoomLevel > 0.6) {
+      this.zoomLevel = Math.max(0.6, Math.round((this.zoomLevel - 0.1) * 10) / 10);
+      this.cdr.markForCheck();
+    }
+  }
+  resetZoom() {
+    this.zoomLevel = 1;
+    this.cdr.markForCheck();
+  }
+  // ── File Parsing & Header Scanning ───────────────────────────
+  onFileUpload(event2) {
+    const file = event2?.target?.files?.[0] || event2?.files?.[0];
+    if (!file)
+      return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = readSync(data, { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const rawJson = utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+      if (!rawJson || rawJson.length === 0)
+        return;
+      const headers = (rawJson[0] || []).map((h) => String(h || "").trim());
+      this.pendingRawRows = rawJson.slice(1);
+      const cfg = this.state.config();
+      if (!cfg)
+        return;
+      this.scanReport = this.scanner.scan(headers, cfg, this.pendingRawRows);
+      this.showScannerModal = true;
+      this.cdr.markForCheck();
+    };
+    reader.readAsArrayBuffer(file);
+    if (event2.target)
+      event2.target.value = "";
+  }
+  onScannerConfirmed(matches) {
+    const cfg = this.state.config();
+    if (!cfg)
+      return;
+    const builtRows = this.scanner.buildSutramRows(this.pendingRawRows, matches, cfg.headers);
+    this.audit.auditAll(builtRows, cfg.headers);
+    const withBlank = this.ensureTrailingBlankRow(builtRows, cfg);
+    this.state.setRows(withBlank);
+    this.showScannerModal = false;
+    this.pendingRawRows = [];
+    this.cdr.markForCheck();
+  }
+  // ── Server-Side Verification ─────────────────────────────────
+  verifyData() {
+    const cfg = this.state.config();
+    if (!cfg || !this.selectedTableName)
+      return;
+    const rows = this.state.rows();
+    if (rows.length === 0)
+      return;
+    this.state.isVerifying.set(true);
+    const rawObjects = rows.map((r) => {
+      const obj = {};
+      cfg.headers.forEach((h) => obj[h.name] = r.cells[h.name]?.value);
+      return obj;
+    });
+    this.api.verifyRows(this.selectedTableName, rawObjects).subscribe({
+      next: (res) => {
+        this.state.isVerifying.set(false);
+        this.state.setCorrections(res.correctionList || []);
+        if (res.correctionList && res.correctionList.length > 0) {
+          this.showSidebar = true;
+        }
+        if (res.rows && res.rows.length === rows.length) {
+          const updatedRows = [...rows];
+          res.rows.forEach((resolvedObj, idx) => {
+            cfg.headers.forEach((h) => {
+              if (resolvedObj[h.col_name] !== void 0) {
+                updatedRows[idx].cells[h.name].refId = resolvedObj[h.col_name];
+              }
+            });
+          });
+          this.state.setRows(updatedRows);
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.state.isVerifying.set(false);
+        console.error("[SutramStudio] Verify failed:", err);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+  addNewRow() {
+    const row = this.state.addNewBlankRow();
+    this.cdr.markForCheck();
+  }
+  // ── Streaming Import Pipeline ────────────────────────────────
+  async startImport() {
+    if (this.gridComponent && this.gridComponent.editingCell) {
+      this.gridComponent.commitCellEdit();
+    }
+    const cfg = this.state.config();
+    if (!cfg || !this.selectedTableName)
+      return;
+    const rows = this.state.rows();
+    const deletedIds = [...this.state.deletedRowIds()];
+    if (rows.length === 0 && deletedIds.length === 0)
+      return;
+    const rowsToSync = rows.filter((r) => (r.isNew || r.isModified) && this.audit.rowHasData(r, cfg.headers));
+    if (rowsToSync.length === 0 && deletedIds.length === 0) {
+      alert("\u0938\u093F\u0902\u0915 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0915\u094B\u0908 \u0928\u092F\u093E, \u0938\u0902\u0936\u094B\u0927\u093F\u0924 \u092F\u093E \u0939\u091F\u093E\u092F\u093E \u0917\u092F\u093E \u0921\u0947\u091F\u093E \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u093E (No modified, new, or deleted rows found to sync)\u0964");
+      return;
+    }
+    if (rowsToSync.length > 0) {
+      const preSyncAudit = this.audit.auditRowsBeforeSync(rows, cfg.headers);
+      if (!preSyncAudit.canSync) {
+        const firstErr = preSyncAudit.errorDetails[0];
+        const errMsg = `\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0938\u093F\u0902\u0915 \u0930\u094B\u0915\u093E \u0917\u092F\u093E! \u0915\u0941\u0932 ${preSyncAudit.totalErrors} \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u093E\u0902 \u092A\u093E\u0908 \u0917\u0908\u0902 (\u092A\u0902\u0915\u094D\u0924\u093F ${firstErr.rowNum}: ${firstErr.message})\u0964 \u0915\u0947\u0935\u0932 \u0936\u0941\u0926\u094D\u0927 \u0921\u0947\u091F\u093E \u0939\u0940 \u0938\u093F\u0902\u0915 \u0915\u093F\u092F\u093E \u091C\u093E \u0938\u0915\u0924\u093E \u0939\u0948\u0964`;
+        console.warn("[SutramStudio] DB Sync Blocked:", errMsg);
+        alert(errMsg);
+        this.cdr.detectChanges();
+        return;
+      }
+    }
+    this.isCancelRequested = false;
+    this.rejectedRowsDuringImport = [];
+    this.showProgressModal = false;
+    this.state.isImporting.set(true);
+    const totalOps = rowsToSync.length + (deletedIds.length > 0 ? deletedIds.length : 0);
+    const progress = {
+      current: 0,
+      total: totalOps,
+      percentage: 0,
+      inserted: 0,
+      updated: 0,
+      deleted: 0,
+      duplicate: 0,
+      rejected: 0,
+      isActive: true
+    };
+    this.state.importProgress.set({ ...progress });
+    this.syncToast = {
+      visible: true,
+      inProgress: true,
+      percentage: 0,
+      title: "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u093F\u0902\u0915 \u0939\u094B \u0930\u0939\u093E \u0939\u0948 (Syncing to Database)...",
+      hasError: false,
+      inserted: 0,
+      updated: 0,
+      deleted: 0,
+      failed: 0,
+      errors: []
+    };
+    this.cdr.detectChanges();
+    const syncedRowNums = [];
+    try {
+      if (deletedIds.length > 0) {
+        try {
+          const delRes = await firstValueFrom(this.api.deleteRows(this.selectedTableName, deletedIds));
+          const delCount = delRes?.count || deletedIds.length;
+          progress.deleted = delCount;
+          this.syncToast = { ...this.syncToast, deleted: delCount };
+          this.state.totalDbRecords.update((n) => Math.max(0, n - delCount));
+          this.state.clearDeletedRowIds();
+        } catch (delErr) {
+          progress.rejected += deletedIds.length;
+          this.syncToast = { ...this.syncToast, failed: this.syncToast.failed + deletedIds.length };
+          this.rejectedRowsDuringImport.push({ _id: deletedIds.join(", "), _error: delErr?.message || "Delete failed" });
+          const queue = this.state.deletedRowsQueue();
+          if (queue.length > 0) {
+            const currentRows = [...this.state.rows()];
+            queue.forEach((item) => {
+              const cleanRow = {
+                ...item.row,
+                isNew: false,
+                isModified: false,
+                hasError: false,
+                errorCount: 0
+              };
+              const insertIdx = item.index >= 0 ? Math.min(item.index, currentRows.length) : currentRows.length;
+              currentRows.splice(insertIdx, 0, cleanRow);
+            });
+            this.state.setRows(currentRows);
+          }
+          this.state.clearDeletedRowIds();
+        }
+        progress.current += deletedIds.length;
+        progress.percentage = Math.round(progress.current / progress.total * 100);
+        this.syncToast = { ...this.syncToast, percentage: progress.percentage };
+        this.state.importProgress.set({ ...progress });
+        this.cdr.detectChanges();
+      }
+      for (let i = 0; i < rowsToSync.length; i++) {
+        if (this.isCancelRequested)
+          break;
+        const r = rowsToSync[i];
+        const payload = {};
+        cfg.headers.forEach((h) => {
+          const cell = r.cells[h.name];
+          const val = cell?.refId !== void 0 ? cell.refId : cell?.value;
+          payload[h.col_name] = val;
+        });
+        const rowId = r._id || r._rawOriginal?._id || r._rawOriginal?.id;
+        const isUpdate = !r.isNew && !!rowId;
+        if (isUpdate) {
+          payload._id = rowId;
+        }
+        try {
+          const res = isUpdate ? await firstValueFrom(this.api.updateRow(this.selectedTableName, payload)) : await firstValueFrom(this.api.importRow(this.selectedTableName, payload));
+          if (res?.status === "inserted") {
+            progress.inserted++;
+            syncedRowNums.push(r.rowNum);
+            if (rowId)
+              syncedRowNums.push(rowId);
+            this.state.totalDbRecords.update((n) => n + 1);
+          } else if (res?.status === "updated") {
+            progress.updated++;
+            syncedRowNums.push(r.rowNum);
+            if (rowId)
+              syncedRowNums.push(rowId);
+          } else if (res?.status === "duplicate") {
+            progress.duplicate++;
+            syncedRowNums.push(r.rowNum);
+            if (rowId)
+              syncedRowNums.push(rowId);
+          } else {
+            progress.rejected++;
+            this.rejectedRowsDuringImport.push({ ...payload, _error: res?.error || "Rejected" });
+          }
+        } catch (err) {
+          progress.rejected++;
+          this.rejectedRowsDuringImport.push({ ...payload, _error: err?.message || "Network error" });
+        }
+        progress.current = deletedIds.length + i + 1;
+        progress.percentage = Math.round(progress.current / progress.total * 100);
+        this.syncToast = {
+          ...this.syncToast,
+          percentage: progress.percentage,
+          title: `\u0938\u093F\u0902\u0915 \u091C\u093E\u0930\u0940 \u0939\u0948 (${progress.current}/${progress.total})...`,
+          inserted: progress.inserted,
+          updated: progress.updated,
+          deleted: progress.deleted || 0,
+          failed: progress.rejected
+        };
+        this.state.importProgress.set({ ...progress });
+        this.cdr.detectChanges();
+      }
+      if (syncedRowNums.length > 0) {
+        this.state.markRowsSynced(syncedRowNums);
+      }
+      progress.isActive = false;
+      this.state.importProgress.set({ ...progress });
+      const hasErr = progress.rejected > 0;
+      this.syncToast = {
+        visible: true,
+        inProgress: false,
+        percentage: 100,
+        title: hasErr ? "\u0938\u093F\u0902\u0915 \u091A\u0947\u0924\u093E\u0935\u0928\u0940 \u0915\u0947 \u0938\u093E\u0925 \u0938\u0902\u092A\u0928\u094D\u0928 (Sync Finished with Warnings)" : "\u0938\u093F\u0902\u0915 \u0938\u092B\u0932\u0924\u093E\u092A\u0942\u0930\u094D\u0935\u0915 \u0938\u0902\u092A\u0928\u094D\u0928 (Sync Completed Successfully)",
+        hasError: hasErr,
+        inserted: progress.inserted,
+        updated: progress.updated,
+        deleted: progress.deleted || 0,
+        failed: progress.rejected,
+        errors: this.rejectedRowsDuringImport.map((x) => x._error || "Row operation failed")
+      };
+      this.recordSheetLastSync(progress, hasErr);
+      this.cdr.detectChanges();
+      if (!hasErr) {
+        setTimeout(() => {
+          if (this.syncToast.visible && !this.syncToast.inProgress && !this.syncToast.hasError) {
+            this.syncToast = { ...this.syncToast, visible: false };
+            this.cdr.detectChanges();
+          }
+        }, 3500);
+      }
+    } catch (globalErr) {
+      console.error("[SutramStudio] DB Sync Error:", globalErr);
+      this.syncToast = {
+        visible: true,
+        inProgress: false,
+        percentage: 100,
+        title: "\u0938\u093F\u0902\u0915 \u092E\u0947\u0902 \u0924\u094D\u0930\u0941\u091F\u093F (Sync Failed)",
+        hasError: true,
+        inserted: progress.inserted,
+        updated: progress.updated,
+        deleted: progress.deleted || 0,
+        failed: progress.rejected + 1,
+        errors: [globalErr?.message || "Database sync encountered an unexpected error."]
+      };
+      this.recordSheetLastSync(progress, true);
+      this.cdr.detectChanges();
+    } finally {
+      this.state.isImporting.set(false);
+      this.cdr.detectChanges();
+    }
+  }
+  recordSheetLastSync(progress, hasErr) {
+    const now = /* @__PURE__ */ new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const parts = [];
+    if (progress.updated > 0)
+      parts.push(`${progress.updated} Updated`);
+    if (progress.inserted > 0)
+      parts.push(`${progress.inserted} Inserted`);
+    if ((progress.deleted || 0) > 0)
+      parts.push(`${progress.deleted} Deleted`);
+    if (progress.rejected > 0)
+      parts.push(`${progress.rejected} Failed`);
+    const summary = parts.length > 0 ? parts.join(", ") : "All in sync";
+    this.lastSyncPerSheet[this.activeSheetId] = {
+      time: timeStr,
+      summary,
+      hasError: hasErr
+    };
+  }
+  dismissSyncToast() {
+    this.syncToast = { ...this.syncToast, visible: false, inProgress: false };
+    this.cdr.detectChanges();
+  }
+  onStudioGlobalKeydown(event2) {
+    if ((event2.ctrlKey || event2.metaKey) && event2.key.toLowerCase() === "s") {
+      event2.preventDefault();
+      event2.stopPropagation();
+      if (this.isCurrentSheetRough) {
+        this.saveRoughSheetLocally();
+        return;
+      }
+      if (this.state.isImporting())
+        return;
+      if (this.state.hasErrors()) {
+        this.syncToast = {
+          visible: true,
+          inProgress: false,
+          percentage: 0,
+          title: "\u0915\u0943\u092A\u092F\u093E \u092A\u0939\u0932\u0947 \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u094B\u0902 \u0915\u094B \u0920\u0940\u0915 \u0915\u0930\u0947\u0902 (Fix errors before syncing)",
+          hasError: true,
+          inserted: 0,
+          updated: 0,
+          deleted: 0,
+          failed: this.state.stats().errorRows,
+          errors: ["\u0936\u0940\u091F \u092E\u0947\u0902 \u0905\u092E\u093E\u0928\u094D\u092F \u0921\u0947\u091F\u093E \u092F\u093E \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u093E\u0901 \u092E\u094C\u091C\u0942\u0926 \u0939\u0948\u0902\u0964"]
+        };
+        this.cdr.detectChanges();
+        return;
+      }
+      if (this.state.pendingChangesCount() > 0) {
+        this.startImport();
+      } else {
+        this.syncToast = {
+          visible: true,
+          inProgress: false,
+          percentage: 100,
+          title: "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092A\u0939\u0932\u0947 \u0938\u0947 \u0938\u093F\u0902\u0915 \u0939\u0948 (Already in sync)",
+          hasError: false,
+          inserted: 0,
+          updated: 0,
+          deleted: 0,
+          failed: 0,
+          errors: []
+        };
+        this.cdr.detectChanges();
+        setTimeout(() => {
+          if (this.syncToast.visible && !this.syncToast.inProgress && !this.syncToast.hasError) {
+            this.syncToast = { ...this.syncToast, visible: false };
+            this.cdr.detectChanges();
+          }
+        }, 2500);
+      }
+    }
+  }
+  cancelImport() {
+    this.isCancelRequested = true;
+  }
+  // ── "Solve All" Handler from Grid ────────────────────────────
+  onGridSolveAll(event2) {
+    this.state.applyBatchCorrection(event2.colKey, event2.badValue, event2.resolvedDisplay, event2.resolvedId);
+    if (event2.saveToDict) {
+      const header = this.state.headers().find((h) => h.name === event2.colKey);
+      const refType = header?.ref_table || event2.colKey;
+      this.api.addDictionaryEntry({
+        type: refType,
+        name: event2.badValue,
+        ref_id: event2.resolvedId !== void 0 ? event2.resolvedId : event2.resolvedDisplay
+      }).subscribe();
+    }
+  }
+  static \u0275fac = function SutramExcelStudioComponent_Factory(t) {
+    return new (t || _SutramExcelStudioComponent)(\u0275\u0275directiveInject(SutramExcelStateService), \u0275\u0275directiveInject(SutramExcelApiService), \u0275\u0275directiveInject(SutramExcelScannerService), \u0275\u0275directiveInject(SutramAuditService), \u0275\u0275directiveInject(SutramRefCacheService), \u0275\u0275directiveInject(ChangeDetectorRef));
+  };
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _SutramExcelStudioComponent, selectors: [["sutram-excel-studio"]], viewQuery: function SutramExcelStudioComponent_Query(rf, ctx) {
+    if (rf & 1) {
+      \u0275\u0275viewQuery(_c04, 5);
+    }
+    if (rf & 2) {
+      let _t;
+      \u0275\u0275queryRefresh(_t = \u0275\u0275loadQuery()) && (ctx.gridComponent = _t.first);
+    }
+  }, hostBindings: function SutramExcelStudioComponent_HostBindings(rf, ctx) {
+    if (rf & 1) {
+      \u0275\u0275listener("keydown", function SutramExcelStudioComponent_keydown_HostBindingHandler($event) {
+        return ctx.onStudioGlobalKeydown($event);
+      }, false, \u0275\u0275resolveDocument);
+    }
+  }, inputs: { table: "table", mode: "mode", apiBase: "apiBase", enableFilters: "enableFilters", enableSorting: "enableSorting", enableSearch: "enableSearch", enableControlBar: "enableControlBar", enableStatsBar: "enableStatsBar", enableUpload: "enableUpload", enableAudit: "enableAudit", enableAddRow: "enableAddRow", enableCorrections: "enableCorrections", enableLoadData: "enableLoadData", enableVerify: "enableVerify", enableSync: "enableSync", enableDelete: "enableDelete", enableTabs: "enableTabs", enableZoom: "enableZoom" }, decls: 92, vars: 48, consts: [[1, "sutram-excel-container"], [1, "studio-header"], [1, "ribbon-menu-bar"], [1, "menu-bar-left"], [1, "brand"], [1, "brand-icon"], [1, "pi", "pi-table"], [1, "brand-title"], [1, "version-tag"], [1, "ribbon-tabs-nav"], ["type", "button", 1, "ribbon-tab-btn", 3, "click"], [1, "pi", "pi-home"], [1, "pi", "pi-database"], [1, "ribbon-badge"], [1, "pi", "pi-chart-bar"], [1, "menu-bar-right"], [1, "mode-pill-toggle"], [1, "mode-pill-btn", 3, "click"], [1, "pi", "pi-pencil"], [1, "pi", "pi-bolt"], ["title", "\u0932\u093E\u0907\u091F / \u0921\u093E\u0930\u094D\u0915 \u092E\u094B\u0921", 1, "cmd-btn", 2, "padding", "3px 6px", 3, "click"], [1, "pi", 3, "ngClass"], [1, "ribbon-strip"], ["class", "ribbon-content-row", 4, "ngIf"], ["class", "ribbon-scroll-row", 4, "ngIf"], [1, "formula-bar-row"], [1, "coord-box"], [1, "active-col-chip"], [2, "font-weight", "700", "font-style", "italic", "color", "var(--text-muted)", "margin", "0 4px"], ["type", "text", "placeholder", "Select a cell or type value here...", 1, "formula-input", 3, "ngModel", "ngModelChange"], ["styleClass", "sutram-col-config-popover shadow-lg", 3, "dismissable"], ["colConfigOp", ""], ["pTemplate", "content"], [1, "status-strip", 3, "ngClass"], [2, "display", "flex", "align-items", "center", "gap", "6px"], [4, "ngIf"], [1, "spreadsheet-canvas", "flex-grow-1"], [3, "headers", "rows", "filterOnlyErrors", "enableDelete", "loadMore", "filterChanged", "sortChanged", "solveAllTriggered", "openConfig"], ["grid", ""], [1, "studio-footer"], [1, "sheet-tabs-bar"], ["class", "tab-pill", 3, "active-tab", "click", 4, "ngFor", "ngForOf"], ["title", "Add Blank Sheet", 1, "add-tab-btn", 3, "click"], [1, "pi", "pi-plus", 2, "font-size", "10px"], [1, "bottom-status-subrow"], [2, "display", "flex", "align-items", "center", "gap", "10px"], ["class", "text-primary small fw-semibold", 4, "ngIf"], ["class", "badge bg-soft-warning text-warning small fw-semibold", 4, "ngIf"], ["style", "color: #10b981; font-weight: 600;", 4, "ngIf"], ["style", "color: #ef4444; font-weight: 600;", 4, "ngIf"], ["class", "last-sync-badge", 3, "sync-error", 4, "ngIf"], [2, "font-size", "10.5px", "opacity", "0.8"], [1, "zoom-controls"], ["title", "Zoom Out (-10%)", 1, "zoom-btn", 3, "click"], [1, "pi", "pi-minus"], ["title", "Reset to 100%", 1, "zoom-display", 3, "click"], ["title", "Zoom In (+10%)", 1, "zoom-btn", 3, "click"], [1, "pi", "pi-plus"], ["class", "sync-toast-hud shadow-lg", 4, "ngIf"], [3, "visible", "report", "availableHeaders", "visibleChange", "confirmed"], [3, "visible", "groups", "visibleChange"], [1, "ribbon-content-row"], [1, "ribbon-group"], [1, "ribbon-group-items"], ["title", "Bold (Ctrl+B)", 1, "ribbon-tool-btn", 3, "click"], [2, "font-weight", "800", "font-size", "13px"], [1, "ribbon-tool-lbl"], [1, "ribbon-mini-col"], ["title", "Align Left", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-left"], ["title", "Align Center", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-center"], ["title", "Align Right", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-right"], ["title", "Choose Visible Columns", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-sliders-h", 2, "color", "var(--primary)"], [1, "ribbon-group-name"], [1, "ribbon-v-sep"], ["class", "ribbon-tool-btn", "title", "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0938\u0947 \u0907\u0938 \u091F\u0947\u092C\u0932 \u0915\u093E \u0932\u093E\u0907\u0935 \u0921\u0947\u091F\u093E \u0932\u094B\u0921 \u0915\u0930\u0947\u0902", 3, "click", 4, "ngIf"], ["title", "\u092C\u093E\u0939\u0930\u0940 Excel (.xlsx) \u0916\u094B\u0932\u0947\u0902", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-folder-open"], ["type", "file", "accept", ".xlsx, .xls, .csv", 2, "display", "none", 3, "change"], ["fileInput", ""], ["title", "Excel \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0947\u0902", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-download"], ["title", "\u0936\u0940\u091F \u0916\u093E\u0932\u0940 \u0915\u0930\u0947\u0902", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-trash", "text-danger"], ["title", "\u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u091A\u093E\u0932\u0942/\u092C\u0902\u0926", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-filter"], ["title", "\u0938\u0949\u0930\u094D\u091F\u093F\u0902\u0917 \u091A\u093E\u0932\u0942/\u092C\u0902\u0926", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-sort-alt"], [1, "ribbon-search-field"], [1, "pi", "pi-search", "search-ico"], ["type", "text", "placeholder", "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0940\u0927\u093E \u0916\u094B\u091C\u0947\u0902...", 1, "ribbon-search-inp", 3, "ngModel", "ngModelChange"], ["class", "clear-btn-inline", 3, "click", 4, "ngIf"], ["class", "spin-inline", 4, "ngIf"], ["class", "ribbon-tool-btn ribbon-btn-action", "title", "\u0930\u092B \u0936\u0940\u091F \u0915\u094B \u0932\u094B\u0915\u0932 \u0938\u094D\u091F\u094B\u0930\u0947\u091C \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902 (Ctrl+S)", 3, "click", 4, "ngIf"], ["class", "ribbon-tool-btn ribbon-btn-action", "title", "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0947\u0935/\u0907\u092E\u094D\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0947\u0902 (Ctrl+S)", 3, "disabled", "click", 4, "ngIf"], ["title", "\u0915\u0941\u0932 \u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0930\u093F\u0915\u0949\u0930\u094D\u0921\u094D\u0938 \u090F\u0935\u0902 \u0932\u094B\u0921 \u0938\u094D\u0925\u093F\u0924\u093F", 1, "ribbon-record-pill"], ["title", "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0938\u0947 \u0907\u0938 \u091F\u0947\u092C\u0932 \u0915\u093E \u0932\u093E\u0907\u0935 \u0921\u0947\u091F\u093E \u0932\u094B\u0921 \u0915\u0930\u0947\u0902", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-database", "text-success"], [1, "clear-btn-inline", 3, "click"], [1, "spin-inline"], [1, "pi", "pi-spin", "pi-spinner"], ["title", "\u0930\u092B \u0936\u0940\u091F \u0915\u094B \u0932\u094B\u0915\u0932 \u0938\u094D\u091F\u094B\u0930\u0947\u091C \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902 (Ctrl+S)", 1, "ribbon-tool-btn", "ribbon-btn-action", 3, "click"], [1, "pi", "pi-save"], ["title", "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0947\u0935/\u0907\u092E\u094D\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0947\u0902 (Ctrl+S)", 1, "ribbon-tool-btn", "ribbon-btn-action", 3, "disabled", "click"], [1, "pi", "pi-cloud-upload"], ["class", "sync-count-tag", 4, "ngIf"], [1, "sync-count-tag"], [1, "ribbon-scroll-row"], [1, "ribbon-search-field", 2, "width", "140px", "min-width", "140px", "margin-right", "6px"], ["type", "text", "placeholder", "\u0924\u093E\u0932\u093F\u0915\u093E \u0916\u094B\u091C\u0947\u0902...", 1, "ribbon-search-inp", 3, "ngModel", "ngModelChange"], [1, "ribbon-boxes-track"], ["class", "ribbon-small-box", 3, "active-box", "title", "click", 4, "ngFor", "ngForOf"], [1, "ribbon-small-box", 3, "title", "click"], ["type", "button", 1, "box-star-btn", 3, "title", "click"], [1, "box-icon-wrap"], [1, "box-info"], [1, "box-name-hin"], [1, "box-name-eng"], ["class", "box-dot", "title", "\u0936\u0940\u091F \u0916\u0941\u0932\u0940 \u0939\u0948", 4, "ngIf"], ["title", "\u0936\u0940\u091F \u0916\u0941\u0932\u0940 \u0939\u0948", 1, "box-dot"], ["type", "text", "placeholder", "\u0930\u093F\u092A\u094B\u0930\u094D\u091F \u0916\u094B\u091C\u0947\u0902...", 1, "ribbon-search-inp", 3, "ngModel", "ngModelChange"], ["class", "ribbon-small-box report-box", 3, "active-box", "title", "click", 4, "ngFor", "ngForOf"], [1, "ribbon-small-box", "report-box", 3, "title", "click"], [1, "box-icon-wrap", "report-icon-bg"], [1, "col-dropdown-menu"], [1, "col-dd-header"], [1, "col-dd-search-wrap"], [1, "pi", "pi-search", "col-dd-search-icon"], ["type", "text", "placeholder", "Search columns / FK...", 1, "col-dd-search-input", 3, "ngModel", "ngModelChange"], ["type", "button", "class", "btn-clear-search-inline", 3, "click", 4, "ngIf"], [1, "col-dd-actions"], [1, "col-dd-actions-left"], ["type", "button", 1, "col-dd-act-btn", 3, "click"], [1, "col-dd-count"], [1, "col-dd-body"], ["class", "col-dd-empty", 4, "ngIf"], [1, "col-dd-footer"], [1, "small", "text-muted", 2, "font-size", "10.5px"], ["type", "button", 1, "btn", "btn-sm", "btn-primary", "py-1", "px-3", 2, "font-size", "11.5px", "font-weight", "600", 3, "click"], ["type", "button", 1, "btn-clear-search-inline", 3, "click"], [1, "pi", "pi-times"], [1, "col-dd-section-title"], ["class", "col-dd-item", 3, "click", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "col-dd-item", 3, "click"], [1, "col-dd-item-left"], ["type", "checkbox", 1, "custom-check", 2, "pointer-events", "none", 3, "checked"], [1, "col-dd-item-name", 3, "title"], ["style", "color: #ef4444; margin-left: 2px;", 4, "ngIf"], [1, "type-badge"], [2, "color", "#ef4444", "margin-left", "2px"], [1, "col-dd-section-title", 2, "margin-top", "8px"], ["class", "col-dd-group", 3, "fk-active-group", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "col-dd-group"], [1, "col-dd-group-header"], [1, "col-dd-group-left", 2, "cursor", "pointer", "flex-grow", "1", 3, "click"], [1, "pi", "pi-chevron-right", "fk-expand-toggle"], [1, "col-dd-item-name"], [1, "pi", "pi-link", 2, "color", "var(--primary, #4f46e5)", "font-size", "10px", "margin-right", "3px"], [2, "text-transform", "capitalize"], [2, "font-size", "10px", "color", "var(--text-muted)", "font-weight", "400", "margin-left", "3px"], [1, "col-dd-group-right", 2, "cursor", "pointer", "display", "flex", "align-items", "center", "gap", "6px", 3, "click"], [1, "fk-group-pill"], ["class", "col-dd-group-items", 4, "ngIf"], [1, "col-dd-group-items"], [1, "col-dd-empty"], [1, "pi", "pi-search", "me-1"], [1, "cmd-btn", "cmd-btn-warning", 2, "padding", "2px 8px", 3, "click"], [1, "tab-pill", 3, "click"], [1, "pi", 2, "font-size", "11px", 3, "ngClass"], ["class", "sheet-tab-rough-badge", 4, "ngIf"], ["class", "sheet-tab-badge", 4, "ngIf"], ["type", "button", "class", "tab-close-btn", "title", "\u0936\u0940\u091F \u092C\u0902\u0926 \u0915\u0930\u0947\u0902", 3, "click", 4, "ngIf"], [1, "sheet-tab-rough-badge"], [1, "sheet-tab-badge"], ["type", "button", "title", "\u0936\u0940\u091F \u092C\u0902\u0926 \u0915\u0930\u0947\u0902", 1, "tab-close-btn", 3, "click"], [1, "text-primary", "small", "fw-semibold"], [1, "pi", "pi-spin", "pi-spinner", "me-1"], [1, "badge", "bg-soft-warning", "text-warning", "small", "fw-semibold"], [1, "pi", "pi-trash", "me-1"], [2, "color", "#10b981", "font-weight", "600"], [2, "color", "#ef4444", "font-weight", "600"], [1, "last-sync-badge"], [1, "pi", "pi-history", "me-1"], [1, "sync-toast-hud", "shadow-lg"], [1, "sync-toast-header"], [1, "sync-toast-title"], [1, "sync-toast-close", 3, "click"], ["class", "sync-progress-wrap px-3 pt-2", 4, "ngIf"], [1, "sync-toast-body"], [1, "sync-toast-stats"], ["class", "sync-badge-chip chip-success", 4, "ngIf"], ["class", "sync-badge-chip chip-info", 4, "ngIf"], ["class", "sync-badge-chip chip-warning", 4, "ngIf"], ["class", "sync-badge-chip chip-danger", 4, "ngIf"], ["class", "sync-toast-errors", 4, "ngIf"], [1, "sync-progress-wrap", "px-3", "pt-2"], [1, "d-flex", "justify-content-between", "align-items-center", "mb-1", 2, "font-size", "11px", "color", "var(--text-muted, #64748b)"], [1, "sync-progress-track"], [1, "sync-progress-bar"], [1, "sync-badge-chip", "chip-success"], [1, "sync-badge-chip", "chip-info"], [1, "pi", "pi-refresh"], [1, "sync-badge-chip", "chip-warning"], [1, "pi", "pi-trash"], [1, "sync-badge-chip", "chip-danger"], [1, "sync-toast-errors"], [4, "ngFor", "ngForOf"]], template: function SutramExcelStudioComponent_Template(rf, ctx) {
+    if (rf & 1) {
+      const _r114 = \u0275\u0275getCurrentView();
+      \u0275\u0275elementStart(0, "div", 0)(1, "header", 1)(2, "div", 2)(3, "div", 3)(4, "div", 4)(5, "div", 5);
+      \u0275\u0275element(6, "i", 6);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(7, "div", 7)(8, "span");
+      \u0275\u0275text(9, "Sutram Studio");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(10, "span", 8);
+      \u0275\u0275text(11, "v2.0");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(12, "nav", 9)(13, "button", 10);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_13_listener() {
+        return ctx.setTopTab("home");
+      });
+      \u0275\u0275element(14, "i", 11);
+      \u0275\u0275elementStart(15, "span");
+      \u0275\u0275text(16, "\u0939\u094B\u092E (Home)");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(17, "button", 10);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_17_listener() {
+        return ctx.setTopTab("tables");
+      });
+      \u0275\u0275element(18, "i", 12);
+      \u0275\u0275elementStart(19, "span");
+      \u0275\u0275text(20, "\u0924\u093E\u0932\u093F\u0915\u093E\u090F\u0902 (Tables)");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(21, "span", 13);
+      \u0275\u0275text(22);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(23, "button", 10);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_23_listener() {
+        return ctx.setTopTab("reports");
+      });
+      \u0275\u0275element(24, "i", 14);
+      \u0275\u0275elementStart(25, "span");
+      \u0275\u0275text(26, "\u0930\u093F\u092A\u094B\u0930\u094D\u091F\u094D\u0938 (Reports)");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(27, "span", 13);
+      \u0275\u0275text(28);
+      \u0275\u0275elementEnd()()()();
+      \u0275\u0275elementStart(29, "div", 15)(30, "div", 16)(31, "button", 17);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_31_listener() {
+        return ctx.setStudioMode("normal");
+      });
+      \u0275\u0275element(32, "i", 18);
+      \u0275\u0275text(33, " Normal ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(34, "button", 17);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_34_listener() {
+        return ctx.setStudioMode("intelligent");
+      });
+      \u0275\u0275element(35, "i", 19);
+      \u0275\u0275text(36, " Smart ");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(37, "button", 20);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_37_listener() {
+        return ctx.toggleTheme();
+      });
+      \u0275\u0275element(38, "i", 21);
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(39, "div", 22);
+      \u0275\u0275template(40, SutramExcelStudioComponent_div_40_Template, 70, 15, "div", 23);
+      \u0275\u0275template(41, SutramExcelStudioComponent_div_41_Template, 7, 3, "div", 24);
+      \u0275\u0275template(42, SutramExcelStudioComponent_div_42_Template, 7, 3, "div", 24);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(43, "div", 25)(44, "div", 26);
+      \u0275\u0275text(45);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(46, "span", 27);
+      \u0275\u0275text(47);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(48, "span", 28);
+      \u0275\u0275text(49, "fx");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(50, "input", 29);
+      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_50_listener($event) {
+        return ctx.onFormulaChange($event);
+      });
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(51, "p-overlayPanel", 30, 31);
+      \u0275\u0275template(53, SutramExcelStudioComponent_ng_template_53_Template, 25, 7, "ng-template", 32);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(54, "div", 33)(55, "div", 34);
+      \u0275\u0275element(56, "i", 21);
+      \u0275\u0275elementStart(57, "span");
+      \u0275\u0275text(58);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275template(59, SutramExcelStudioComponent_div_59_Template, 4, 1, "div", 35);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(60, "main", 36)(61, "sutram-grid", 37, 38);
+      \u0275\u0275listener("loadMore", function SutramExcelStudioComponent_Template_sutram_grid_loadMore_61_listener() {
+        return ctx.onLoadMore();
+      })("filterChanged", function SutramExcelStudioComponent_Template_sutram_grid_filterChanged_61_listener() {
+        return ctx.onGridFilterChanged();
+      })("sortChanged", function SutramExcelStudioComponent_Template_sutram_grid_sortChanged_61_listener() {
+        return ctx.onGridSortChanged();
+      })("solveAllTriggered", function SutramExcelStudioComponent_Template_sutram_grid_solveAllTriggered_61_listener($event) {
+        return ctx.onGridSolveAll($event);
+      })("openConfig", function SutramExcelStudioComponent_Template_sutram_grid_openConfig_61_listener($event) {
+        \u0275\u0275restoreView(_r114);
+        const _r3 = \u0275\u0275reference(52);
+        return \u0275\u0275resetView(_r3.toggle($event));
+      });
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(63, "footer", 39)(64, "div", 40);
+      \u0275\u0275template(65, SutramExcelStudioComponent_div_65_Template, 7, 7, "div", 41);
+      \u0275\u0275elementStart(66, "button", 42);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_66_listener() {
+        return ctx.addNewBlankSheet();
+      });
+      \u0275\u0275element(67, "i", 43);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(68, "div", 44)(69, "div", 45)(70, "span");
+      \u0275\u0275text(71);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(72, "span");
+      \u0275\u0275text(73);
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(74, SutramExcelStudioComponent_span_74_Template, 3, 0, "span", 46);
+      \u0275\u0275template(75, SutramExcelStudioComponent_span_75_Template, 3, 1, "span", 47);
+      \u0275\u0275template(76, SutramExcelStudioComponent_span_76_Template, 2, 0, "span", 48);
+      \u0275\u0275template(77, SutramExcelStudioComponent_span_77_Template, 2, 1, "span", 49);
+      \u0275\u0275template(78, SutramExcelStudioComponent_span_78_Template, 3, 4, "span", 50);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(79, "div", 45)(80, "span", 51);
+      \u0275\u0275text(81, "Ctrl+S to Sync | Enter next row | Tab next col | Click # to select row");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(82, "div", 52)(83, "button", 53);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_83_listener() {
+        return ctx.zoomOut();
+      });
+      \u0275\u0275element(84, "i", 54);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(85, "span", 55);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_span_click_85_listener() {
+        return ctx.resetZoom();
+      });
+      \u0275\u0275text(86);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(87, "button", 56);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_87_listener() {
+        return ctx.zoomIn();
+      });
+      \u0275\u0275element(88, "i", 57);
+      \u0275\u0275elementEnd()()()()();
+      \u0275\u0275template(89, SutramExcelStudioComponent_div_89_Template, 16, 8, "div", 58);
+      \u0275\u0275elementStart(90, "sutram-header-scanner", 59);
+      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_header_scanner_visibleChange_90_listener($event) {
+        return ctx.showScannerModal = $event;
+      })("confirmed", function SutramExcelStudioComponent_Template_sutram_header_scanner_confirmed_90_listener($event) {
+        return ctx.onScannerConfirmed($event);
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(91, "sutram-correction-sidebar", 60);
+      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_correction_sidebar_visibleChange_91_listener($event) {
+        return ctx.showSidebar = $event;
+      });
+      \u0275\u0275elementEnd()();
+    }
+    if (rf & 2) {
+      \u0275\u0275classProp("dark-mode", ctx.isDarkMode);
+      \u0275\u0275advance(13);
+      \u0275\u0275classProp("active", ctx.activeTopTab === "home");
+      \u0275\u0275advance(4);
+      \u0275\u0275classProp("active", ctx.activeTopTab === "tables");
+      \u0275\u0275advance(5);
+      \u0275\u0275textInterpolate(ctx.tablesList.length || 21);
+      \u0275\u0275advance(1);
+      \u0275\u0275classProp("active", ctx.activeTopTab === "reports");
+      \u0275\u0275advance(5);
+      \u0275\u0275textInterpolate(ctx.reportsList.length);
+      \u0275\u0275advance(3);
+      \u0275\u0275classProp("active-normal", ctx.mode === "normal");
+      \u0275\u0275advance(3);
+      \u0275\u0275classProp("active-smart", ctx.mode === "intelligent");
+      \u0275\u0275advance(4);
+      \u0275\u0275property("ngClass", ctx.isDarkMode ? "pi-sun" : "pi-moon");
+      \u0275\u0275advance(2);
+      \u0275\u0275property("ngIf", ctx.activeTopTab === "home");
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.activeTopTab === "tables");
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.activeTopTab === "reports");
+      \u0275\u0275advance(3);
+      \u0275\u0275textInterpolate(ctx.activeCoord);
+      \u0275\u0275advance(2);
+      \u0275\u0275textInterpolate(ctx.activeColChip);
+      \u0275\u0275advance(3);
+      \u0275\u0275property("ngModel", ctx.formulaValue);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("dismissable", true);
+      \u0275\u0275advance(3);
+      \u0275\u0275property("ngClass", ctx.statusStripClass);
+      \u0275\u0275advance(2);
+      \u0275\u0275property("ngClass", ctx.statusStripIcon);
+      \u0275\u0275advance(2);
+      \u0275\u0275textInterpolate(ctx.statusStripMessage);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.state.unresolvedCorrectionsCount() > 0);
+      \u0275\u0275advance(1);
+      \u0275\u0275styleProp("zoom", ctx.zoomLevel);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("headers", ctx.visibleHeaders)("rows", ctx.state.rows())("filterOnlyErrors", ctx.state.filterOnlyErrors())("enableDelete", ctx.enableDelete);
+      \u0275\u0275advance(4);
+      \u0275\u0275property("ngForOf", ctx.sheetTabs);
+      \u0275\u0275advance(6);
+      \u0275\u0275textInterpolate1("Sheet: ", ctx.activeSheetId, "");
+      \u0275\u0275advance(2);
+      \u0275\u0275textInterpolate2("Rows: ", ctx.state.rows().length, "", ctx.state.totalDbRecords() > ctx.state.rows().length ? " / " + ctx.state.totalDbRecords() : "", "");
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.state.isLoadingDb());
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.state.deletedRowIds().length > 0);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.state.stats().errorRows === 0);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.state.stats().errorRows > 0);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.lastSyncPerSheet[ctx.activeSheetId]);
+      \u0275\u0275advance(8);
+      \u0275\u0275textInterpolate1("", (ctx.zoomLevel * 100).toFixed(0), "%");
+      \u0275\u0275advance(3);
+      \u0275\u0275property("ngIf", ctx.syncToast.visible);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("visible", ctx.showScannerModal)("report", ctx.scanReport)("availableHeaders", ctx.state.headers());
+      \u0275\u0275advance(1);
+      \u0275\u0275property("visible", ctx.showSidebar)("groups", ctx.state.correctionGroups());
+    }
+  }, dependencies: [NgClass, NgForOf, NgIf, DefaultValueAccessor, NgControlStatus, NgModel, PrimeTemplate, OverlayPanel, SutramGridComponent, SutramHeaderScannerComponent, SutramCorrectionSidebarComponent], styles: ["\n\n\n\n\n\n\n\n\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 100%;\n}\n\n.sutram-excel-container[_ngcontent-%COMP%] {\n  --primary: #4f46e5;\n  --primary-hover: #4338ca;\n  --primary-soft: #e0e7ff;\n  --success: #10b981;\n  --success-soft: #d1fae5;\n  --warning: #f59e0b;\n  --warning-soft: #fef3c7;\n  --danger: #ef4444;\n  --danger-soft: #fee2e2;\n  --bg: #f8fafc;\n  --surface: #ffffff;\n  --surface-border: #e2e8f0;\n  --text: #0f172a;\n  --text-muted: #64748b;\n  --radius: 6px;\n  --header-bg: #f1f5f9;\n  --header-text: #1e293b;\n  --cell-border: rgba(125, 125, 125, 0.18);\n  --cell-height: 23px;\n  --header-height: 38px;\n  --cell-edited-bg: #fef9c3;\n  --cell-edited-border: #eab308;\n  --row-edited-bg: #fffbeb;\n  --row-new-bg: #dcfce7;\n  --row-new-border: #22c55e;\n\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\n  background-color: var(--bg);\n  color: var(--text);\n  height: 100%;\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  user-select: none;\n\n  &.dark-mode {\n    --bg: #0f172a;\n    --surface: #1e293b;\n    --surface-border: #334155;\n    --text: #f8fafc;\n    --text-muted: #94a3b8;\n    --header-bg: #1e293b;\n    --header-text: #cbd5e1;\n    --cell-border: rgba(255, 255, 255, 0.1);\n    --cell-edited-bg: rgba(234, 179, 8, 0.22);\n    --cell-edited-border: #facc15;\n    --row-edited-bg: rgba(234, 179, 8, 0.12);\n    --row-new-bg: rgba(34, 197, 94, 0.18);\n    --row-new-border: #4ade80;\n  }\n}\n\n\n\n\n\n.studio-header[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n  flex-shrink: 0;\n  user-select: none;\n}\n\n\n\n.ribbon-menu-bar[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 2px 10px;\n  height: 32px;\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n}\n\n.menu-bar-left[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.brand[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.brand-icon[_ngcontent-%COMP%] {\n  width: 22px;\n  height: 22px;\n  background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 11px;\n}\n.brand-title[_ngcontent-%COMP%] {\n  font-size: 11.5px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  color: var(--text);\n\n  .version-tag {\n    font-size: 9px;\n    padding: 1px 4px;\n    background: rgba(16, 185, 129, 0.18);\n    color: #059669;\n    border-radius: 3px;\n    font-weight: 700;\n  }\n}\n\n\n\n.ribbon-tabs-nav[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n}\n.ribbon-tab-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 3px 11px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.12s ease;\n\n  i {\n    font-size: 10.5px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.08);\n    color: var(--text);\n  }\n\n  &.active {\n    background: var(--surface);\n    color: var(--primary);\n    border-color: var(--surface-border) var(--surface-border) transparent var(--surface-border);\n    border-bottom: 2px solid var(--primary);\n    font-weight: 700;\n  }\n}\n.ribbon-badge[_ngcontent-%COMP%] {\n  font-size: 9px;\n  padding: 1px 4px;\n  border-radius: 999px;\n  background: rgba(79, 70, 229, 0.12);\n  color: var(--primary);\n  font-weight: 700;\n}\n\n.menu-bar-right[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.mode-pill-toggle[_ngcontent-%COMP%] {\n  background: rgba(125, 125, 125, 0.12);\n  border-radius: 999px;\n  padding: 2px;\n  display: flex;\n  gap: 2px;\n}\n.mode-pill-btn[_ngcontent-%COMP%] {\n  padding: 2px 9px;\n  border-radius: 999px;\n  font-size: 10px;\n  font-weight: 600;\n  border: none;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.15s ease;\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n\n  i { font-size: 9.5px; }\n}\n.mode-pill-btn.active-normal[_ngcontent-%COMP%] {\n  background: #3b82f6;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.35);\n}\n.mode-pill-btn.active-smart[_ngcontent-%COMP%] {\n  background: #10b981;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.35);\n}\n\n\n\n.ribbon-strip[_ngcontent-%COMP%] {\n  background: var(--surface);\n  padding: 4px 10px;\n  height: 60px;\n  display: flex;\n  align-items: center;\n  overflow: hidden;\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);\n}\n\n\n\n.ribbon-content-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n}\n\n.ribbon-group[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  height: 52px;\n  padding: 0 4px;\n}\n\n.ribbon-group-items[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  flex-grow: 1;\n}\n\n.ribbon-group-name[_ngcontent-%COMP%] {\n  font-size: 8.5px;\n  color: var(--text-muted);\n  font-weight: 600;\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n  margin-top: 1px;\n}\n\n.ribbon-v-sep[_ngcontent-%COMP%] {\n  width: 1px;\n  height: 40px;\n  background: var(--surface-border);\n  opacity: 0.75;\n  margin: 0 4px;\n}\n\n.ribbon-tool-btn[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  gap: 2px;\n  padding: 2px 7px;\n  height: 42px;\n  border-radius: 4px;\n  border: 1px solid transparent;\n  background: transparent;\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.12s;\n  font-size: 10.5px;\n\n  i {\n    font-size: 13px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.09);\n    border-color: var(--surface-border);\n  }\n\n  &.active {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.3);\n    font-weight: 700;\n  }\n\n  .ribbon-tool-lbl {\n    font-size: 9px;\n    white-space: nowrap;\n    font-weight: 500;\n  }\n}\n\n.ribbon-mini-col[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: row;\n  gap: 2px;\n}\n\n.ribbon-mini-btn[_ngcontent-%COMP%] {\n  width: 22px;\n  height: 22px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 3px;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  font-size: 9.5px;\n\n  &:hover { background: rgba(125, 125, 125, 0.1); }\n}\n\n.ribbon-search-field[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 165px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .ribbon-search-inp {\n    width: 100%;\n    height: 24px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.ribbon-btn-action[_ngcontent-%COMP%] {\n  background: var(--primary) !important;\n  color: #ffffff !important;\n  border-color: var(--primary) !important;\n  font-weight: 700 !important;\n\n  &:hover {\n    filter: brightness(1.1);\n  }\n\n  .sync-count-tag {\n    font-size: 8.5px;\n    padding: 0 4px;\n    background: #ffffff;\n    color: var(--primary);\n    border-radius: 999px;\n    font-weight: 800;\n    margin-left: 2px;\n  }\n}\n\n.ribbon-record-pill[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 24px;\n}\n\n\n\n.ribbon-scroll-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.ribbon-boxes-track[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  overflow-x: auto;\n  scrollbar-width: thin;\n  height: 100%;\n  flex-grow: 1;\n  padding: 2px 2px;\n\n  &::-webkit-scrollbar {\n    height: 4px;\n  }\n  &::-webkit-scrollbar-thumb {\n    background: rgba(125, 125, 125, 0.25);\n    border-radius: 2px;\n  }\n}\n\n.ribbon-small-box[_ngcontent-%COMP%] {\n  position: relative;\n  flex-shrink: 0;\n  min-width: 115px;\n  max-width: 140px;\n  height: 46px;\n  background: var(--surface);\n  border: 1px solid var(--surface-border);\n  border-radius: 5px;\n  padding: 3px 8px 3px 6px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  cursor: pointer;\n  transition: all 0.12s ease;\n  user-select: none;\n\n  &:hover {\n    border-color: var(--primary);\n    background: var(--primary-soft);\n    transform: translateY(-1px);\n    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);\n  }\n\n  &.active-box {\n    border-color: rgba(16, 185, 129, 0.6);\n    background: rgba(16, 185, 129, 0.08);\n  }\n\n  .box-star-btn {\n    position: absolute;\n    top: 2px;\n    right: 2px;\n    width: 15px;\n    height: 15px;\n    border: none;\n    background: transparent;\n    cursor: pointer;\n    color: var(--text-muted);\n    font-size: 9px;\n    padding: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 2;\n    transition: all 0.12s;\n\n    &:hover {\n      color: #f59e0b;\n      transform: scale(1.2);\n    }\n\n    &.starred {\n      color: #f59e0b;\n    }\n  }\n\n  .box-icon-wrap {\n    width: 25px;\n    height: 25px;\n    border-radius: 4px;\n    background: var(--primary-soft);\n    color: var(--primary);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 11px;\n    flex-shrink: 0;\n\n    &.report-icon-bg {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n    }\n  }\n\n  .box-info {\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    padding-right: 10px;\n\n    .box-name-hin {\n      font-size: 10.5px;\n      font-weight: 700;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-eng {\n      font-size: 9px;\n      color: var(--text-muted);\n      font-family: monospace;\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n  }\n\n  .box-dot {\n    position: absolute;\n    bottom: 3px;\n    right: 3px;\n    width: 5px;\n    height: 5px;\n    border-radius: 50%;\n    background: #10b981;\n  }\n}\n\n.btn-group-cmd[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.cmd-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  cursor: pointer;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  transition: all 0.15s;\n  user-select: none;\n\n  i {\n    font-size: 10.5px;\n  }\n}\n.cmd-btn[_ngcontent-%COMP%]:hover { background: rgba(125, 125, 125, 0.1); }\n.cmd-btn.active[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.cmd-btn-primary[_ngcontent-%COMP%] { background: var(--primary); color: white; border-color: var(--primary); }\n.cmd-btn-primary[_ngcontent-%COMP%]:hover { background: var(--primary-hover); }\n.cmd-btn-success[_ngcontent-%COMP%] { background: var(--success); color: white; border-color: var(--success); }\n.cmd-btn-success[_ngcontent-%COMP%]:hover { background: #059669; }\n.cmd-btn-warning[_ngcontent-%COMP%] { background: var(--warning-soft); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }\n\n.sync-badge-count[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  background: #f59e0b;\n  color: #ffffff;\n  font-size: 9.5px;\n  font-weight: 700;\n  padding: 1px 5px;\n  border-radius: 999px;\n  margin-left: 4px;\n  line-height: 1.1;\n}\n\n\n\n.formula-bar-row[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n.coord-box[_ngcontent-%COMP%] {\n  width: 48px;\n  height: 22px;\n  line-height: 18px;\n  text-align: center;\n  font-weight: 700;\n  font-size: 11px;\n  padding: 1px 3px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  background: rgba(125, 125, 125, 0.05);\n}\n.active-col-chip[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n  padding: 1px 6px;\n  height: 20px;\n  line-height: 17px;\n  border-radius: 4px;\n  font-size: 10.5px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 170px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n.formula-input[_ngcontent-%COMP%] {\n  flex-grow: 1;\n  height: 22px;\n  padding: 2px 7px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 11.5px;\n  font-family: inherit;\n  outline: none;\n  background: var(--surface);\n  color: var(--text);\n}\n.formula-input[_ngcontent-%COMP%]:focus { border-color: var(--primary); }\n\n\n\n.control-settings-bar[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  flex-shrink: 0;\n  font-size: 11px;\n}\n.ctrl-bar-left[_ngcontent-%COMP%], .ctrl-bar-right[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.ctrl-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 8px;\n  height: 23px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  user-select: none;\n\n  i {\n    font-size: 10px;\n  }\n}\n.ctrl-btn[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text);\n}\n.ctrl-btn.active[_ngcontent-%COMP%] {\n  color: var(--primary);\n  background: var(--primary-soft);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.ctrl-btn-danger[_ngcontent-%COMP%] {\n  color: var(--danger);\n  background: var(--danger-soft);\n  border-color: rgba(239, 68, 68, 0.3);\n}\n.ctrl-btn-danger[_ngcontent-%COMP%]:hover {\n  background: rgba(239, 68, 68, 0.2);\n}\n.ctrl-dot[_ngcontent-%COMP%] {\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  background: #10b981;\n  display: inline-block;\n}\n.ctrl-search-wrap[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  flex-grow: 1;\n  max-width: 420px;\n}\n.ctrl-search-icon[_ngcontent-%COMP%] {\n  position: absolute;\n  left: 8px;\n  color: var(--text-muted);\n  font-size: 10px;\n  pointer-events: none;\n}\n.ctrl-search-input[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 23px;\n  padding: 2px 24px 2px 24px;\n  border: 1px solid var(--surface-border);\n  border-radius: 999px;\n  font-size: 11px;\n  background: rgba(125, 125, 125, 0.05);\n  color: var(--text);\n  outline: none;\n  transition: all 0.15s;\n}\n.ctrl-search-input[_ngcontent-%COMP%]:focus {\n  border-color: var(--primary);\n  background: var(--surface);\n  box-shadow: 0 0 0 2px var(--primary-soft);\n}\n.ctrl-search-clear[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 6px;\n  background: none;\n  border: none;\n  font-size: 10px;\n  color: var(--text-muted);\n  cursor: pointer;\n  padding: 1px 4px;\n  border-radius: 50%;\n}\n.ctrl-search-clear[_ngcontent-%COMP%]:hover {\n  color: var(--danger);\n  background: rgba(125, 125, 125, 0.15);\n}\n.ctrl-search-spinner[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 24px;\n  color: var(--primary);\n  font-size: 10px;\n}\n.ctrl-record-badge[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  height: 21px;\n  border-radius: 999px;\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text-muted);\n  font-size: 10px;\n  font-weight: 600;\n  white-space: nowrap;\n\n  i {\n    font-size: 10px;\n  }\n}\n\n\n\n.status-strip[_ngcontent-%COMP%] {\n  padding: 3px 14px;\n  font-size: 11.5px;\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  background: rgba(125, 125, 125, 0.04);\n}\n.status-strip.strip-error[_ngcontent-%COMP%] { background: #fef2f2; color: #991b1b; }\n.status-strip.strip-clean[_ngcontent-%COMP%] { background: #f0fdf4; color: #166534; }\n.status-strip.strip-suggestion[_ngcontent-%COMP%] { background: #fffbeb; color: #92400e; }\n\n\n\n.spreadsheet-canvas[_ngcontent-%COMP%] {\n  flex-grow: 1;\n  overflow: hidden;\n  background: var(--surface);\n  position: relative;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n\n  sutram-grid {\n    display: block;\n    width: 100%;\n    height: 100%;\n    flex: 1;\n    min-height: 0;\n  }\n}\n\n\n\n.studio-footer[_ngcontent-%COMP%] {\n  flex-shrink: 0;\n  background: var(--surface);\n  border-top: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n}\n.sheet-tabs-bar[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  background: rgba(125, 125, 125, 0.05);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 2px 6px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.sheet-tabs-bar[_ngcontent-%COMP%]::-webkit-scrollbar { display: none; }\n\n.tab-pill[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 12px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11.5px;\n  font-weight: 600;\n  cursor: pointer;\n  color: var(--text-muted);\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  transition: all 0.15s;\n}\n.tab-pill[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.1);\n  color: var(--text);\n}\n.tab-pill.active-tab[_ngcontent-%COMP%] {\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-color: rgba(16, 185, 129, 0.25);\n  border-bottom: 2px solid #10b981;\n  font-weight: 700;\n}\n\n.sheet-tab-badge[_ngcontent-%COMP%] {\n  font-size: 9.5px;\n  padding: 1px 5px;\n  background: rgba(16, 185, 129, 0.2);\n  color: #059669;\n  border-radius: 999px;\n  font-weight: 700;\n}\n\n.add-tab-btn[_ngcontent-%COMP%] {\n  padding: 2px 8px;\n  border: 1px dashed rgba(125, 125, 125, 0.4);\n  border-radius: 4px;\n  background: transparent;\n  cursor: pointer;\n  color: var(--primary);\n  margin-left: 4px;\n}\n.add-tab-btn[_ngcontent-%COMP%]:hover { background: rgba(79, 70, 229, 0.1); }\n\n.sheet-tab-rough-badge[_ngcontent-%COMP%] {\n  font-size: 9px;\n  padding: 1px 4px;\n  background: rgba(245, 158, 11, 0.2);\n  color: #d97706;\n  border-radius: 3px;\n  font-weight: 700;\n  text-transform: uppercase;\n}\n\n.tab-close-btn[_ngcontent-%COMP%] {\n  margin-left: 3px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  font-size: 9.5px;\n  line-height: 1;\n  padding: 0;\n  transition: all 0.12s;\n\n  &:hover {\n    background: rgba(239, 68, 68, 0.18);\n    color: #ef4444;\n  }\n}\n\n.bottom-status-subrow[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 3px 14px;\n  font-size: 11px;\n  color: var(--text-muted);\n}\n.zoom-controls[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  padding: 1px 4px;\n}\n.zoom-btn[_ngcontent-%COMP%] {\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  color: var(--text);\n  padding: 1px 5px;\n  font-size: 11px;\n}\n.zoom-display[_ngcontent-%COMP%] {\n  font-weight: 700;\n  cursor: pointer;\n  padding: 0 4px;\n}\n\n\n\n.sync-toast-hud[_ngcontent-%COMP%] {\n  position: fixed;\n  top: 50px;\n  right: 20px;\n  z-index: 2500;\n  min-width: 320px;\n  max-width: 440px;\n  background: var(--surface);\n  color: var(--text);\n  border: 1px solid var(--surface-border);\n  border-radius: 8px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);\n  overflow: hidden;\n  animation: _ngcontent-%COMP%_toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);\n  font-size: 11.5px;\n}\n@keyframes _ngcontent-%COMP%_toastSlideIn {\n  from { opacity: 0; transform: translateY(-12px) scale(0.97); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n.sync-toast-header[_ngcontent-%COMP%] {\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--surface-border);\n  background: rgba(125, 125, 125, 0.04);\n}\n.sync-toast-title[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 7px;\n  font-weight: 700;\n  font-size: 12px;\n}\n.sync-toast-close[_ngcontent-%COMP%] {\n  background: none;\n  border: none;\n  color: var(--text-muted);\n  cursor: pointer;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 3px;\n}\n.sync-toast-close[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.12);\n  color: var(--text);\n}\n.sync-toast-body[_ngcontent-%COMP%] {\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n.sync-toast-stats[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-wrap: wrap;\n}\n.sync-badge-chip[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n}\n.chip-success[_ngcontent-%COMP%] {\n  background: var(--success-soft);\n  color: var(--success);\n}\n.chip-info[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n}\n.chip-warning[_ngcontent-%COMP%] {\n  background: var(--warning-soft);\n  color: #b45309;\n}\n.chip-danger[_ngcontent-%COMP%] {\n  background: var(--danger-soft);\n  color: var(--danger);\n}\n.sync-toast-errors[_ngcontent-%COMP%] {\n  margin-top: 4px;\n  padding: 6px 8px;\n  background: rgba(239, 68, 68, 0.08);\n  border: 1px solid rgba(239, 68, 68, 0.2);\n  border-radius: 4px;\n  font-size: 10.5px;\n  color: #ef4444;\n  max-height: 140px;\n  overflow-y: auto;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}\n\n\n\n.last-sync-badge[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  padding: 1px 7px;\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-radius: 4px;\n  font-weight: 600;\n  font-size: 10.5px;\n  border: 1px solid rgba(16, 185, 129, 0.25);\n\n  &.sync-error {\n    background: rgba(239, 68, 68, 0.12);\n    color: #ef4444;\n    border-color: rgba(239, 68, 68, 0.25);\n  }\n}\n\n\n\n.sync-progress-wrap[_ngcontent-%COMP%] {\n  width: 100%;\n}\n.sync-progress-track[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 6px;\n  background: rgba(125, 125, 125, 0.2);\n  border-radius: 999px;\n  overflow: hidden;\n}\n.sync-progress-bar[_ngcontent-%COMP%] {\n  height: 100%;\n  background: linear-gradient(90deg, #3b82f6, #10b981);\n  border-radius: 999px;\n  transition: width 0.2s ease-in-out;\n}\n\n\n\n\n\n  .sutram-col-config-popover {\n  width: 340px !important;\n  height: 500px !important;\n  max-height: calc(100vh - 120px) !important;\n  font-size: 11.5px;\n  border-radius: 8px !important;\n  overflow: hidden !important;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n  display: flex !important;\n  flex-direction: column !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n    width: 100% !important;\n    height: 100% !important;\n    display: flex !important;\n    flex-direction: column !important;\n    flex: 1 1 auto !important;\n    min-height: 0 !important;\n    overflow: hidden !important;\n  }\n}\n\n.col-dropdown-menu[_ngcontent-%COMP%] {\n  width: 100% !important;\n  height: 100% !important;\n  max-height: none !important;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n  flex: 1 1 auto;\n  min-height: 0;\n  user-select: none;\n\n  .col-dd-header {\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    flex-direction: column;\n    gap: 6px;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-search-wrap {\n    position: relative;\n    display: flex;\n    align-items: center;\n\n    .col-dd-search-icon {\n      position: absolute;\n      left: 8px;\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      pointer-events: none;\n    }\n\n    .col-dd-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      border-radius: 4px;\n      font-size: 11.5px;\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.12s;\n\n      &:focus {\n        border-color: var(--primary, #4f46e5);\n      }\n    }\n\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 8px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      font-size: 11px;\n      padding: 0;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .col-dd-actions {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 0 2px;\n\n    .col-dd-actions-left {\n      display: flex;\n      gap: 4px;\n    }\n\n    .col-dd-act-btn {\n      padding: 2px 7px;\n      font-size: 10.5px;\n      font-weight: 600;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--surface, #ffffff);\n      color: var(--text-muted, #64748b);\n      border-radius: 3px;\n      cursor: pointer;\n      transition: all 0.12s;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .col-dd-count {\n      font-size: 10.5px;\n      color: var(--text-muted, #64748b);\n      font-weight: 600;\n    }\n  }\n\n  .col-dd-body {\n    padding: 6px 8px;\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    flex: 1 1 0 !important;\n    min-height: 0 !important;\n    max-height: none !important;\n    display: flex;\n    flex-direction: column;\n    gap: 3px;\n    overscroll-behavior: contain;\n    scrollbar-width: thin;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-track {\n      background: rgba(125, 125, 125, 0.05);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb:hover {\n      background: var(--primary, #4f46e5);\n    }\n  }\n\n  .col-dd-section-title {\n    font-size: 10px;\n    font-weight: 700;\n    color: var(--text-muted, #64748b);\n    margin: 3px 0 2px 4px;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-item {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 4px 6px;\n    border-radius: 4px;\n    cursor: pointer;\n    user-select: none;\n    transition: background 0.1s;\n    font-size: 11.5px;\n    color: var(--text, #0f172a);\n    flex-shrink: 0 !important;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.08);\n    }\n\n    .col-dd-item-left {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n\n    .col-dd-item-name {\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    cursor: pointer;\n    accent-color: var(--primary, #4f46e5);\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .type-badge {\n    font-size: 9.5px;\n    padding: 1px 5px;\n    border-radius: 3px;\n    background: rgba(125, 125, 125, 0.12);\n    color: var(--text-muted, #64748b);\n    font-family: 'JetBrains Mono', monospace;\n    flex-shrink: 0;\n  }\n\n  \n\n  .col-dd-group {\n    border: 1px solid var(--surface-border, #e2e8f0);\n    border-radius: 5px;\n    margin: 3px 0;\n    overflow: hidden;\n    background: rgba(125, 125, 125, 0.02);\n    flex-shrink: 0 !important;\n\n    &.fk-active-group {\n      border-color: rgba(79, 70, 229, 0.35);\n    }\n\n    .col-dd-group-header {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding: 5px 8px;\n      background: rgba(125, 125, 125, 0.06);\n      cursor: pointer;\n      user-select: none;\n      font-size: 11.5px;\n      font-weight: 600;\n      flex-shrink: 0 !important;\n      min-height: 28px !important;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n      }\n\n      .col-dd-group-left {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        overflow: hidden;\n      }\n\n      .fk-expand-toggle {\n        font-size: 10px;\n        color: var(--text-muted, #64748b);\n        width: 12px;\n        text-align: center;\n        transition: transform 0.18s ease;\n\n        &.rotated {\n          transform: rotate(90deg);\n        }\n      }\n\n      .fk-group-pill {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 999px;\n        font-weight: 600;\n      }\n    }\n\n    .col-dd-group-items {\n      padding: 3px 4px 4px 18px;\n      background: var(--surface, #ffffff);\n      border-top: 1px solid var(--surface-border, #e2e8f0);\n      display: flex;\n      flex-direction: column;\n      gap: 2px;\n      max-height: none !important;\n      overflow: visible !important;\n    }\n  }\n\n  .col-dd-empty {\n    padding: 16px;\n    text-align: center;\n    color: var(--text-muted, #64748b);\n    font-size: 11.5px;\n  }\n\n  .col-dd-footer {\n    padding: 6px 10px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n}"], changeDetection: 0 });
+};
+(function() {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SutramExcelStudioComponent, [{
+    type: Component,
+    args: [{ selector: "sutram-excel-studio", changeDetection: ChangeDetectionStrategy2.OnPush, template: `<!-- sutram-excel-studio.component.html -->
+<div class="sutram-excel-container" [class.dark-mode]="isDarkMode">
+
+  <!-- 1. TOP EXCEL-STYLE RIBBON HEADER (Few cm area) -->
+  <header class="studio-header">
+    <!-- Top Menu Bar: Brand, Ribbon Tabs, Mode Switch & Theme -->
+    <div class="ribbon-menu-bar">
+      <div class="menu-bar-left">
+        <div class="brand">
+          <div class="brand-icon"><i class="pi pi-table"></i></div>
+          <div class="brand-title">
+            <span>Sutram Studio</span>
+            <span class="version-tag">v2.0</span>
+          </div>
+        </div>
+
+        <!-- Excel Ribbon Tabs: Home, Tables, Reports -->
+        <nav class="ribbon-tabs-nav">
+          <button type="button"
+                  class="ribbon-tab-btn"
+                  [class.active]="activeTopTab === 'home'"
+                  (click)="setTopTab('home')">
+            <i class="pi pi-home"></i>
+            <span>\u0939\u094B\u092E (Home)</span>
+          </button>
+          <button type="button"
+                  class="ribbon-tab-btn"
+                  [class.active]="activeTopTab === 'tables'"
+                  (click)="setTopTab('tables')">
+            <i class="pi pi-database"></i>
+            <span>\u0924\u093E\u0932\u093F\u0915\u093E\u090F\u0902 (Tables)</span>
+            <span class="ribbon-badge">{{ tablesList.length || 21 }}</span>
+          </button>
+          <button type="button"
+                  class="ribbon-tab-btn"
+                  [class.active]="activeTopTab === 'reports'"
+                  (click)="setTopTab('reports')">
+            <i class="pi pi-chart-bar"></i>
+            <span>\u0930\u093F\u092A\u094B\u0930\u094D\u091F\u094D\u0938 (Reports)</span>
+            <span class="ribbon-badge">{{ reportsList.length }}</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Menu Bar Right: Mode Switcher & Dark Mode Toggle -->
+      <div class="menu-bar-right">
+        <div class="mode-pill-toggle">
+          <button class="mode-pill-btn" [class.active-normal]="mode === 'normal'" (click)="setStudioMode('normal')">
+            <i class="pi pi-pencil"></i> Normal
+          </button>
+          <button class="mode-pill-btn" [class.active-smart]="mode === 'intelligent'" (click)="setStudioMode('intelligent')">
+            <i class="pi pi-bolt"></i> Smart
+          </button>
+        </div>
+
+        <button class="cmd-btn" style="padding: 3px 6px;" (click)="toggleTheme()" title="\u0932\u093E\u0907\u091F / \u0921\u093E\u0930\u094D\u0915 \u092E\u094B\u0921">
+          <i class="pi" [ngClass]="isDarkMode ? 'pi-sun' : 'pi-moon'"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Ribbon Content Strip (Few cm area, switches with tabs, horizontally scrollable) -->
+    <div class="ribbon-strip">
+
+      <!-- RIBBON TAB 1: HOME TOOLS -->
+      <div *ngIf="activeTopTab === 'home'" class="ribbon-content-row">
+        <!-- Section: Style & Format -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn" [class.active]="isBoldActive" (click)="isBoldActive = !isBoldActive" title="Bold (Ctrl+B)">
+              <span style="font-weight: 800; font-size: 13px;">B</span>
+              <span class="ribbon-tool-lbl">Bold</span>
+            </button>
+            <div class="ribbon-mini-col">
+              <button class="ribbon-mini-btn" (click)="textAlign = 'left'" title="Align Left"><i class="pi pi-align-left"></i></button>
+              <button class="ribbon-mini-btn" (click)="textAlign = 'center'" title="Align Center"><i class="pi pi-align-center"></i></button>
+              <button class="ribbon-mini-btn" (click)="textAlign = 'right'" title="Align Right"><i class="pi pi-align-right"></i></button>
+            </div>
+            <button class="ribbon-tool-btn" (click)="colConfigOp.toggle($event)" title="Choose Visible Columns">
+              <i class="pi pi-sliders-h" style="color: var(--primary);"></i>
+              <span class="ribbon-tool-lbl">Columns ({{ visibleHeadersCount }})</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">\u092A\u094D\u0930\u093E\u0930\u0942\u092A (Format)</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Data Actions -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button *ngIf="!isCurrentSheetRough" class="ribbon-tool-btn" (click)="loadTableDataFromDb()" title="\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0938\u0947 \u0907\u0938 \u091F\u0947\u092C\u0932 \u0915\u093E \u0932\u093E\u0907\u0935 \u0921\u0947\u091F\u093E \u0932\u094B\u0921 \u0915\u0930\u0947\u0902">
+              <i class="pi pi-database text-success"></i>
+              <span class="ribbon-tool-lbl">Load Data</span>
+            </button>
+            <button class="ribbon-tool-btn" (click)="fileInput.click()" title="\u092C\u093E\u0939\u0930\u0940 Excel (.xlsx) \u0916\u094B\u0932\u0947\u0902">
+              <i class="pi pi-folder-open"></i>
+              <span class="ribbon-tool-lbl">Open File</span>
+            </button>
+            <input #fileInput type="file" accept=".xlsx, .xls, .csv" style="display:none;" (change)="onFileUpload($event)">
+            <button class="ribbon-tool-btn" (click)="exportExcel()" title="Excel \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0947\u0902">
+              <i class="pi pi-download"></i>
+              <span class="ribbon-tool-lbl">Export</span>
+            </button>
+            <button class="ribbon-tool-btn" (click)="state.clearGrid()" title="\u0936\u0940\u091F \u0916\u093E\u0932\u0940 \u0915\u0930\u0947\u0902">
+              <i class="pi pi-trash text-danger"></i>
+              <span class="ribbon-tool-lbl">Clear</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">\u0921\u0947\u091F\u093E (Data)</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Search & Filters -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn" [class.active]="state.filtersEnabled()" (click)="state.toggleFiltersEnabled()" title="\u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u091A\u093E\u0932\u0942/\u092C\u0902\u0926">
+              <i class="pi pi-filter"></i>
+              <span class="ribbon-tool-lbl">Filters</span>
+            </button>
+            <button class="ribbon-tool-btn" [class.active]="state.sortingEnabled()" (click)="state.toggleSortingEnabled()" title="\u0938\u0949\u0930\u094D\u091F\u093F\u0902\u0917 \u091A\u093E\u0932\u0942/\u092C\u0902\u0926">
+              <i class="pi pi-sort-alt"></i>
+              <span class="ribbon-tool-lbl">Sorting</span>
+            </button>
+            <div class="ribbon-search-field">
+              <i class="pi pi-search search-ico"></i>
+              <input type="text"
+                     class="ribbon-search-inp"
+                     placeholder="\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0940\u0927\u093E \u0916\u094B\u091C\u0947\u0902..."
+                     [ngModel]="state.dbSearchQuery()"
+                     (ngModelChange)="onDbSearchInput($event)">
+              <button *ngIf="state.dbSearchQuery()" class="clear-btn-inline" (click)="clearDbSearch()">\u2715</button>
+              <span *ngIf="state.isLoadingDb()" class="spin-inline"><i class="pi pi-spin pi-spinner"></i></span>
+            </div>
+          </div>
+          <span class="ribbon-group-name">\u0916\u094B\u091C \u0935 \u092B\u093C\u093F\u0932\u094D\u091F\u0930 (Search)</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Save / Sync -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <!-- Case A: Rough Sheet -> Save Locally -->
+            <button *ngIf="isCurrentSheetRough"
+                    class="ribbon-tool-btn ribbon-btn-action"
+                    (click)="saveRoughSheetLocally()"
+                    title="\u0930\u092B \u0936\u0940\u091F \u0915\u094B \u0932\u094B\u0915\u0932 \u0938\u094D\u091F\u094B\u0930\u0947\u091C \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902 (Ctrl+S)">
+              <i class="pi pi-save"></i>
+              <span class="ribbon-tool-lbl">\u0938\u094D\u0925\u093E\u0928\u0940\u092F \u0938\u0939\u0947\u091C\u0947\u0902</span>
+            </button>
+
+            <!-- Case B: Database Table Sheet -> Sync to DB -->
+            <button *ngIf="!isCurrentSheetRough"
+                    class="ribbon-tool-btn ribbon-btn-action"
+                    [disabled]="state.pendingChangesCount() === 0 || state.hasErrors()"
+                    (click)="startImport()"
+                    title="\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0947\u0935/\u0907\u092E\u094D\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0947\u0902 (Ctrl+S)">
+              <i class="pi pi-cloud-upload"></i>
+              <span class="ribbon-tool-lbl">Sync to DB</span>
+              <span *ngIf="state.pendingChangesCount() > 0" class="sync-count-tag">{{ state.pendingChangesCount() }}</span>
+            </button>
+
+            <div class="ribbon-record-pill" title="\u0915\u0941\u0932 \u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0930\u093F\u0915\u0949\u0930\u094D\u0921\u094D\u0938 \u090F\u0935\u0902 \u0932\u094B\u0921 \u0938\u094D\u0925\u093F\u0924\u093F">
+              <i class="pi pi-database"></i>
+              <span>{{ state.rows().length }} / {{ state.totalDbRecords() }}</span>
+            </div>
+          </div>
+          <span class="ribbon-group-name">\u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u0915\u0930\u0947\u0902 (Save / Sync)</span>
+        </div>
+      </div>
+
+      <!-- RIBBON TAB 2: TABLES (Horizontal Scrolling Strip with Small Simple Boxes) -->
+      <div *ngIf="activeTopTab === 'tables'" class="ribbon-scroll-row">
+        <!-- Quick search input inside tables strip -->
+        <div class="ribbon-search-field" style="width: 140px; min-width: 140px; margin-right: 6px;">
+          <i class="pi pi-search search-ico"></i>
+          <input type="text"
+                 class="ribbon-search-inp"
+                 placeholder="\u0924\u093E\u0932\u093F\u0915\u093E \u0916\u094B\u091C\u0947\u0902..."
+                 [(ngModel)]="tableSearchQuery">
+          <button *ngIf="tableSearchQuery" class="clear-btn-inline" (click)="tableSearchQuery = ''">\u2715</button>
+        </div>
+
+        <!-- Small simple boxes for each table -->
+        <div class="ribbon-boxes-track">
+          <div *ngFor="let tbl of filteredTables"
+               class="ribbon-small-box"
+               [class.active-box]="isTableOpen(tbl.table)"
+               (click)="openTableInSheet(tbl.table)"
+               [title]="(tbl.display_name || tbl.table) + ' (' + tbl.table + ')'">
+
+            <!-- Corner Star Favorite Button -->
+            <button type="button"
+                    class="box-star-btn"
+                    [class.starred]="favoriteTables.has(tbl.table)"
+                    (click)="toggleFavoriteTable(tbl.table, $event)"
+                    [title]="favoriteTables.has(tbl.table) ? '\u092A\u0938\u0902\u0926\u0940\u0926\u093E \u0938\u0947 \u0939\u091F\u093E\u090F\u0902' : '\u0938\u094D\u091F\u093E\u0930\u094D\u091F\u0905\u092A \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u092E\u0947\u0902 \u091C\u094B\u0921\u093C\u0947\u0902'">
+              <i class="pi" [ngClass]="favoriteTables.has(tbl.table) ? 'pi-star-fill' : 'pi-star'"></i>
+            </button>
+
+            <div class="box-icon-wrap">
+              <i class="pi pi-table"></i>
+            </div>
+            <div class="box-info">
+              <span class="box-name-hin">{{ tbl.display_name || tbl.table }}</span>
+              <span class="box-name-eng">{{ tbl.table }}</span>
+            </div>
+            <span *ngIf="isTableOpen(tbl.table)" class="box-dot" title="\u0936\u0940\u091F \u0916\u0941\u0932\u0940 \u0939\u0948"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIBBON TAB 3: REPORTS (Horizontal Scrolling Strip with Small Simple Boxes) -->
+      <div *ngIf="activeTopTab === 'reports'" class="ribbon-scroll-row">
+        <!-- Quick search input inside reports strip -->
+        <div class="ribbon-search-field" style="width: 140px; min-width: 140px; margin-right: 6px;">
+          <i class="pi pi-search search-ico"></i>
+          <input type="text"
+                 class="ribbon-search-inp"
+                 placeholder="\u0930\u093F\u092A\u094B\u0930\u094D\u091F \u0916\u094B\u091C\u0947\u0902..."
+                 [(ngModel)]="reportSearchQuery">
+          <button *ngIf="reportSearchQuery" class="clear-btn-inline" (click)="reportSearchQuery = ''">\u2715</button>
+        </div>
+
+        <!-- Small simple boxes for each report -->
+        <div class="ribbon-boxes-track">
+          <div *ngFor="let rep of filteredReports"
+               class="ribbon-small-box report-box"
+               [class.active-box]="isReportOpen(rep.id)"
+               (click)="openReportInSheet(rep)"
+               [title]="rep.title + ' \u2014 ' + (rep.desc || '')">
+
+            <!-- Corner Star Favorite Button -->
+            <button type="button"
+                    class="box-star-btn"
+                    [class.starred]="favoriteReports.has(rep.id)"
+                    (click)="toggleFavoriteReport(rep.id, $event)"
+                    [title]="favoriteReports.has(rep.id) ? '\u092A\u0938\u0902\u0926\u0940\u0926\u093E \u0938\u0947 \u0939\u091F\u093E\u090F\u0902' : '\u0938\u094D\u091F\u093E\u0930\u094D\u091F\u0905\u092A \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u092E\u0947\u0902 \u091C\u094B\u0921\u093C\u0947\u0902'">
+              <i class="pi" [ngClass]="favoriteReports.has(rep.id) ? 'pi-star-fill' : 'pi-star'"></i>
+            </button>
+
+            <div class="box-icon-wrap report-icon-bg">
+              <i class="pi" [ngClass]="rep.icon"></i>
+            </div>
+            <div class="box-info">
+              <span class="box-name-hin">{{ rep.title }}</span>
+              <span class="box-name-eng">{{ rep.category }}</span>
+            </div>
+            <span *ngIf="isReportOpen(rep.id)" class="box-dot" title="\u0936\u0940\u091F \u0916\u0941\u0932\u0940 \u0939\u0948"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- 2. FORMULA BAR ROW (ALWAYS VISIBLE) -->
+  <div class="formula-bar-row">
+    <div class="coord-box">{{ activeCoord }}</div>
+    <span class="active-col-chip">{{ activeColChip }}</span>
+
+    <span style="font-weight: 700; font-style: italic; color: var(--text-muted); margin: 0 4px;">fx</span>
+    <input type="text"
+           class="formula-input"
+           [ngModel]="formulaValue"
+           (ngModelChange)="onFormulaChange($event)"
+           placeholder="Select a cell or type value here...">
+  </div>
+
+  <!-- Column Config Popover (Replicating Legacy Studio) -->
+  <p-overlayPanel #colConfigOp [dismissable]="true" styleClass="sutram-col-config-popover shadow-lg">
+    <ng-template pTemplate="content">
+      <div class="col-dropdown-menu">
+        <!-- Header: Search Bar & Action Strip -->
+        <div class="col-dd-header">
+          <div class="col-dd-search-wrap">
+            <i class="pi pi-search col-dd-search-icon"></i>
+            <input type="text"
+                   class="col-dd-search-input"
+                   placeholder="Search columns / FK..."
+                   [(ngModel)]="colSearchQuery" />
+            <button *ngIf="colSearchQuery"
+                    type="button"
+                    class="btn-clear-search-inline"
+                    (click)="colSearchQuery = ''">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+
+          <div class="col-dd-actions">
+            <div class="col-dd-actions-left">
+              <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(true)">All</button>
+              <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(false)">None</button>
+              <button type="button" class="col-dd-act-btn" (click)="resetDefaultColumns()">Reset</button>
+            </div>
+            <span class="col-dd-count">{{ selectedColumnKeys.size }} of {{ allConfigColumns.length }} visible</span>
+          </div>
+        </div>
+
+        <!-- Body: Standard Columns & FK Groups -->
+        <div class="col-dd-body">
+          <!-- 1. Standard Columns -->
+          <ng-container *ngIf="filteredDirectCols.length > 0">
+            <div class="col-dd-section-title">Standard Columns</div>
+            <div *ngFor="let col of filteredDirectCols; trackBy: trackByColKey"
+                 class="col-dd-item"
+                 (click)="toggleColumnCheckbox(col.key)">
+              <div class="col-dd-item-left">
+                <input type="checkbox"
+                       class="custom-check"
+                       [checked]="isColumnSelected(col.key)"
+                       style="pointer-events: none;" />
+                <span class="col-dd-item-name" [title]="col.name">
+                  {{ col.name }}<span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
+                </span>
+              </div>
+              <span class="type-badge">{{ col.type || 'string' }}</span>
+            </div>
+          </ng-container>
+
+          <!-- 2. Foreign Key Reference Groups -->
+          <ng-container *ngIf="filteredFkGroups.length > 0">
+            <div class="col-dd-section-title" style="margin-top: 8px;">FK Reference Groups</div>
+            <div *ngFor="let grp of filteredFkGroups; trackBy: trackByGroupName"
+                 class="col-dd-group"
+                 [class.fk-active-group]="grp.selectedCount > 0">
+              <!-- Group Accordion Header -->
+              <div class="col-dd-group-header">
+                <div class="col-dd-group-left"
+                     (click)="toggleFkGroupExpand(grp.name)"
+                     style="cursor: pointer; flex-grow: 1;">
+                  <i class="pi pi-chevron-right fk-expand-toggle"
+                     [class.rotated]="isFkGroupExpanded(grp.name)"></i>
+                  <span class="col-dd-item-name">
+                    <i class="pi pi-link" style="color: var(--primary, #4f46e5); font-size: 10px; margin-right: 3px;"></i>
+                    <strong style="text-transform: capitalize;">{{ grp.name }}</strong>
+                    <span style="font-size: 10px; color: var(--text-muted); font-weight: 400; margin-left: 3px;">({{ grp.refTable }})</span>
+                  </span>
+                </div>
+                <div class="col-dd-group-right"
+                     (click)="toggleFkGroupAll(grp.name)"
+                     style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox"
+                         class="custom-check"
+                         [checked]="grp.isAllChecked"
+                         style="pointer-events: none;" />
+                  <span class="fk-group-pill"
+                        [style.background]="grp.selectedCount > 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(125, 125, 125, 0.1)'"
+                        [style.color]="grp.selectedCount > 0 ? '#059669' : 'var(--text-muted)'">
+                    {{ grp.selectedCount }}/{{ grp.totalCount }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Group Sub-items (when expanded) -->
+              <div *ngIf="isFkGroupExpanded(grp.name)" class="col-dd-group-items">
+                <div *ngFor="let col of grp.columns; trackBy: trackByColKey"
+                     class="col-dd-item"
+                     (click)="toggleColumnCheckbox(col.key)">
+                  <div class="col-dd-item-left">
+                    <input type="checkbox"
+                           class="custom-check"
+                           [checked]="isColumnSelected(col.key)"
+                           style="pointer-events: none;" />
+                    <span class="col-dd-item-name"
+                          [style.font-weight]="col.is_fk_main ? '600' : 'normal'"
+                          [title]="col.name">
+                      {{ col.short_name || col.name }}
+                    </span>
+                  </div>
+                  <span class="type-badge">{{ col.is_fk_main ? 'display' : (col.is_fk_raw ? 'id' : (col.type || 'string')) }}</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Empty State -->
+          <div *ngIf="filteredDirectCols.length === 0 && filteredFkGroups.length === 0" class="col-dd-empty">
+            <i class="pi pi-search me-1"></i> No matching columns found
+          </div>
+        </div>
+
+        <!-- Footer: Click outside hint + Done button -->
+        <div class="col-dd-footer">
+          <span class="small text-muted" style="font-size: 10.5px;">Click outside or press Esc</span>
+          <button type="button" class="btn btn-sm btn-primary py-1 px-3" style="font-size: 11.5px; font-weight: 600;" (click)="colConfigOp.hide()">Done</button>
+        </div>
+      </div>
+    </ng-template>
+  </p-overlayPanel>
+
+  <!-- 3. STATUS & BATCH FIX SUGGESTION STRIP (ALWAYS VISIBLE) -->
+  <div class="status-strip" [ngClass]="statusStripClass">
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <i class="pi" [ngClass]="statusStripIcon"></i>
+      <span>{{ statusStripMessage }}</span>
+    </div>
+    <div *ngIf="state.unresolvedCorrectionsCount() > 0">
+      <button class="cmd-btn cmd-btn-warning" style="padding: 2px 8px;" (click)="showSidebar = true">
+        <i class="pi pi-bolt"></i> \u0917\u0932\u0924\u093F\u092F\u093E\u0901 ({{ state.unresolvedCorrectionsCount() }})
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. SPREADSHEET CANVAS (ALWAYS VISIBLE! 100% REMAINING HEIGHT) -->
+  <main class="spreadsheet-canvas flex-grow-1" [style.zoom]="zoomLevel">
+    <sutram-grid #grid
+                 [headers]="visibleHeaders"
+                 [rows]="state.rows()"
+                 [filterOnlyErrors]="state.filterOnlyErrors()"
+                 [enableDelete]="enableDelete"
+                 (loadMore)="onLoadMore()"
+                 (filterChanged)="onGridFilterChanged()"
+                 (sortChanged)="onGridSortChanged()"
+                 (solveAllTriggered)="onGridSolveAll($event)"
+                 (openConfig)="colConfigOp.toggle($event)">
+    </sutram-grid>
+  </main>
+
+  <!-- 5. BOTTOM MULTI-SHEET TAB BAR & STATUS BAR -->
+  <footer class="studio-footer">
+    <!-- Sub-row A: Sheet Tabs Strip -->
+    <div class="sheet-tabs-bar">
+      <div *ngFor="let tab of sheetTabs"
+           class="tab-pill"
+           [class.active-tab]="activeSheetId === tab.id"
+           (click)="switchSheet(tab.id)">
+        <i class="pi" [ngClass]="tab.icon" style="font-size: 11px;"></i>
+        <span>{{ tab.title }}</span>
+        <span *ngIf="tab.type === 'rough'" class="sheet-tab-rough-badge">\u0930\u092B</span>
+        <span *ngIf="tab.isLoaded && (tab.recordCount || 0) > 0" class="sheet-tab-badge">
+          {{ tab.recordCount }}
+        </span>
+        <button *ngIf="sheetTabs.length > 1"
+                type="button"
+                class="tab-close-btn"
+                (click)="closeSheet(tab.id, $event)"
+                title="\u0936\u0940\u091F \u092C\u0902\u0926 \u0915\u0930\u0947\u0902">\u2715</button>
+      </div>
+
+      <button class="add-tab-btn" (click)="addNewBlankSheet()" title="Add Blank Sheet">
+        <i class="pi pi-plus" style="font-size: 10px;"></i>
+      </button>
+    </div>
+
+    <!-- Sub-row B: Status Bar with Scale / Zoom Controls -->
+    <div class="bottom-status-subrow">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>Sheet: {{ activeSheetId }}</span>
+        <span>Rows: {{ state.rows().length }}{{ state.totalDbRecords() > state.rows().length ? ' / ' + state.totalDbRecords() : '' }}</span>
+        <span *ngIf="state.isLoadingDb()" class="text-primary small fw-semibold">
+          <i class="pi pi-spin pi-spinner me-1"></i>Loading more...
+        </span>
+        <span *ngIf="state.deletedRowIds().length > 0" class="badge bg-soft-warning text-warning small fw-semibold">
+          <i class="pi pi-trash me-1"></i>{{ state.deletedRowIds().length }} Deleted
+        </span>
+        <span *ngIf="state.stats().errorRows === 0" style="color: #10b981; font-weight: 600;">\u2713 100% In Sync</span>
+        <span *ngIf="state.stats().errorRows > 0" style="color: #ef4444; font-weight: 600;">{{ state.stats().errorRows }} \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u093E\u0901</span>
+
+        <!-- Last Sync Status of the active sheet -->
+        <span *ngIf="lastSyncPerSheet[activeSheetId]"
+              class="last-sync-badge"
+              [class.sync-error]="lastSyncPerSheet[activeSheetId].hasError">
+          <i class="pi pi-history me-1"></i>\u0905\u0902\u0924\u093F\u092E \u0938\u093F\u0902\u0915 ({{ lastSyncPerSheet[activeSheetId].time }}): {{ lastSyncPerSheet[activeSheetId].summary }}
+        </span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 10.5px; opacity: 0.8;">Ctrl+S to Sync | Enter next row | Tab next col | Click # to select row</span>
+
+        <!-- Scale / Zoom Controls -->
+        <div class="zoom-controls">
+          <button class="zoom-btn" (click)="zoomOut()" title="Zoom Out (-10%)"><i class="pi pi-minus"></i></button>
+          <span class="zoom-display" (click)="resetZoom()" title="Reset to 100%">{{ (zoomLevel * 100).toFixed(0) }}%</span>
+          <button class="zoom-btn" (click)="zoomIn()" title="Zoom In (+10%)"><i class="pi pi-plus"></i></button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 6. Floating Sync Toast HUD (Live Progress & Completion) -->
+  <div *ngIf="syncToast.visible" class="sync-toast-hud shadow-lg">
+    <div class="sync-toast-header">
+      <div class="sync-toast-title">
+        <i class="pi"
+           [ngClass]="syncToast.inProgress ? 'pi-spin pi-sync text-primary' : (syncToast.hasError ? 'pi-exclamation-circle text-warning' : 'pi-check-circle text-success')"></i>
+        <span>{{ syncToast.title }}</span>
+      </div>
+      <button class="sync-toast-close" (click)="dismissSyncToast()">\u2715</button>
+    </div>
+
+    <!-- Live Progress Bar when Sync is running -->
+    <div *ngIf="syncToast.inProgress" class="sync-progress-wrap px-3 pt-2">
+      <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 11px; color: var(--text-muted, #64748b);">
+        <span>{{ syncToast.percentage }}% \u092A\u0942\u0930\u094D\u0923</span>
+        <span>{{ state.importProgress().current }} / {{ state.importProgress().total }}</span>
+      </div>
+      <div class="sync-progress-track">
+        <div class="sync-progress-bar" [style.width.%]="syncToast.percentage"></div>
+      </div>
+    </div>
+
+    <div class="sync-toast-body">
+      <div class="sync-toast-stats">
+        <span *ngIf="syncToast.inserted > 0" class="sync-badge-chip chip-success">
+          <i class="pi pi-plus"></i> {{ syncToast.inserted }} Inserted
+        </span>
+        <span *ngIf="syncToast.updated > 0" class="sync-badge-chip chip-info">
+          <i class="pi pi-refresh"></i> {{ syncToast.updated }} Updated
+        </span>
+        <span *ngIf="syncToast.deleted > 0" class="sync-badge-chip chip-warning">
+          <i class="pi pi-trash"></i> {{ syncToast.deleted }} Deleted
+        </span>
+        <span *ngIf="syncToast.failed > 0" class="sync-badge-chip chip-danger">
+          <i class="pi pi-times"></i> {{ syncToast.failed }} Failed
+        </span>
+      </div>
+      <div *ngIf="syncToast.errors.length > 0" class="sync-toast-errors">
+        <div *ngFor="let err of syncToast.errors">\u2022 {{ err }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Header Scanner Modal -->
+  <sutram-header-scanner [(visible)]="showScannerModal"
+                         [report]="scanReport"
+                         [availableHeaders]="state.headers()"
+                         (confirmed)="onScannerConfirmed($event)">
+  </sutram-header-scanner>
+
+  <!-- Batch Correction Sidebar -->
+  <sutram-correction-sidebar [(visible)]="showSidebar"
+                             [groups]="state.correctionGroups()">
+  </sutram-correction-sidebar>
+
+</div>
+`, styles: ["/**\n * sutram-excel-studio.component.scss\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Pixel-Perfect Enterprise Excel Studio Styling.\n * Exact replication of Sutram Excel Studio v2.0 UI.\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n */\n\n:host {\n  display: block;\n  width: 100%;\n  height: 100%;\n}\n\n.sutram-excel-container {\n  --primary: #4f46e5;\n  --primary-hover: #4338ca;\n  --primary-soft: #e0e7ff;\n  --success: #10b981;\n  --success-soft: #d1fae5;\n  --warning: #f59e0b;\n  --warning-soft: #fef3c7;\n  --danger: #ef4444;\n  --danger-soft: #fee2e2;\n  --bg: #f8fafc;\n  --surface: #ffffff;\n  --surface-border: #e2e8f0;\n  --text: #0f172a;\n  --text-muted: #64748b;\n  --radius: 6px;\n  --header-bg: #f1f5f9;\n  --header-text: #1e293b;\n  --cell-border: rgba(125, 125, 125, 0.18);\n  --cell-height: 23px;\n  --header-height: 38px;\n  --cell-edited-bg: #fef9c3;\n  --cell-edited-border: #eab308;\n  --row-edited-bg: #fffbeb;\n  --row-new-bg: #dcfce7;\n  --row-new-border: #22c55e;\n\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\n  background-color: var(--bg);\n  color: var(--text);\n  height: 100%;\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  user-select: none;\n\n  &.dark-mode {\n    --bg: #0f172a;\n    --surface: #1e293b;\n    --surface-border: #334155;\n    --text: #f8fafc;\n    --text-muted: #94a3b8;\n    --header-bg: #1e293b;\n    --header-text: #cbd5e1;\n    --cell-border: rgba(255, 255, 255, 0.1);\n    --cell-edited-bg: rgba(234, 179, 8, 0.22);\n    --cell-edited-border: #facc15;\n    --row-edited-bg: rgba(234, 179, 8, 0.12);\n    --row-new-bg: rgba(34, 197, 94, 0.18);\n    --row-new-border: #4ade80;\n  }\n}\n\n/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n * 1. TOP EXCEL-STYLE RIBBON HEADER\n * \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */\n.studio-header {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n  flex-shrink: 0;\n  user-select: none;\n}\n\n/* 1A. Ribbon Top Menu Bar (Brand + Tabs + Mode Switcher) */\n.ribbon-menu-bar {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 2px 10px;\n  height: 32px;\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n}\n\n.menu-bar-left {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.brand-icon {\n  width: 22px;\n  height: 22px;\n  background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 11px;\n}\n.brand-title {\n  font-size: 11.5px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  color: var(--text);\n\n  .version-tag {\n    font-size: 9px;\n    padding: 1px 4px;\n    background: rgba(16, 185, 129, 0.18);\n    color: #059669;\n    border-radius: 3px;\n    font-weight: 700;\n  }\n}\n\n/* Ribbon Tabs Navigation */\n.ribbon-tabs-nav {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n}\n.ribbon-tab-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 3px 11px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.12s ease;\n\n  i {\n    font-size: 10.5px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.08);\n    color: var(--text);\n  }\n\n  &.active {\n    background: var(--surface);\n    color: var(--primary);\n    border-color: var(--surface-border) var(--surface-border) transparent var(--surface-border);\n    border-bottom: 2px solid var(--primary);\n    font-weight: 700;\n  }\n}\n.ribbon-badge {\n  font-size: 9px;\n  padding: 1px 4px;\n  border-radius: 999px;\n  background: rgba(79, 70, 229, 0.12);\n  color: var(--primary);\n  font-weight: 700;\n}\n\n.menu-bar-right {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.mode-pill-toggle {\n  background: rgba(125, 125, 125, 0.12);\n  border-radius: 999px;\n  padding: 2px;\n  display: flex;\n  gap: 2px;\n}\n.mode-pill-btn {\n  padding: 2px 9px;\n  border-radius: 999px;\n  font-size: 10px;\n  font-weight: 600;\n  border: none;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.15s ease;\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n\n  i { font-size: 9.5px; }\n}\n.mode-pill-btn.active-normal {\n  background: #3b82f6;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.35);\n}\n.mode-pill-btn.active-smart {\n  background: #10b981;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.35);\n}\n\n/* 1B. Ribbon Content Strip (Few cm area) */\n.ribbon-strip {\n  background: var(--surface);\n  padding: 4px 10px;\n  height: 60px;\n  display: flex;\n  align-items: center;\n  overflow: hidden;\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);\n}\n\n/* Home Panel Toolbar (Grouped items) */\n.ribbon-content-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n}\n\n.ribbon-group {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  height: 52px;\n  padding: 0 4px;\n}\n\n.ribbon-group-items {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  flex-grow: 1;\n}\n\n.ribbon-group-name {\n  font-size: 8.5px;\n  color: var(--text-muted);\n  font-weight: 600;\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n  margin-top: 1px;\n}\n\n.ribbon-v-sep {\n  width: 1px;\n  height: 40px;\n  background: var(--surface-border);\n  opacity: 0.75;\n  margin: 0 4px;\n}\n\n.ribbon-tool-btn {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  gap: 2px;\n  padding: 2px 7px;\n  height: 42px;\n  border-radius: 4px;\n  border: 1px solid transparent;\n  background: transparent;\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.12s;\n  font-size: 10.5px;\n\n  i {\n    font-size: 13px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.09);\n    border-color: var(--surface-border);\n  }\n\n  &.active {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.3);\n    font-weight: 700;\n  }\n\n  .ribbon-tool-lbl {\n    font-size: 9px;\n    white-space: nowrap;\n    font-weight: 500;\n  }\n}\n\n.ribbon-mini-col {\n  display: flex;\n  flex-direction: row;\n  gap: 2px;\n}\n\n.ribbon-mini-btn {\n  width: 22px;\n  height: 22px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 3px;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  font-size: 9.5px;\n\n  &:hover { background: rgba(125, 125, 125, 0.1); }\n}\n\n.ribbon-search-field {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 165px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .ribbon-search-inp {\n    width: 100%;\n    height: 24px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.ribbon-btn-action {\n  background: var(--primary) !important;\n  color: #ffffff !important;\n  border-color: var(--primary) !important;\n  font-weight: 700 !important;\n\n  &:hover {\n    filter: brightness(1.1);\n  }\n\n  .sync-count-tag {\n    font-size: 8.5px;\n    padding: 0 4px;\n    background: #ffffff;\n    color: var(--primary);\n    border-radius: 999px;\n    font-weight: 800;\n    margin-left: 2px;\n  }\n}\n\n.ribbon-record-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 24px;\n}\n\n/* 1C. Tables & Reports Strip (Horizontal Scrolling Track with Small Boxes) */\n.ribbon-scroll-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.ribbon-boxes-track {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  overflow-x: auto;\n  scrollbar-width: thin;\n  height: 100%;\n  flex-grow: 1;\n  padding: 2px 2px;\n\n  &::-webkit-scrollbar {\n    height: 4px;\n  }\n  &::-webkit-scrollbar-thumb {\n    background: rgba(125, 125, 125, 0.25);\n    border-radius: 2px;\n  }\n}\n\n.ribbon-small-box {\n  position: relative;\n  flex-shrink: 0;\n  min-width: 115px;\n  max-width: 140px;\n  height: 46px;\n  background: var(--surface);\n  border: 1px solid var(--surface-border);\n  border-radius: 5px;\n  padding: 3px 8px 3px 6px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  cursor: pointer;\n  transition: all 0.12s ease;\n  user-select: none;\n\n  &:hover {\n    border-color: var(--primary);\n    background: var(--primary-soft);\n    transform: translateY(-1px);\n    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);\n  }\n\n  &.active-box {\n    border-color: rgba(16, 185, 129, 0.6);\n    background: rgba(16, 185, 129, 0.08);\n  }\n\n  .box-star-btn {\n    position: absolute;\n    top: 2px;\n    right: 2px;\n    width: 15px;\n    height: 15px;\n    border: none;\n    background: transparent;\n    cursor: pointer;\n    color: var(--text-muted);\n    font-size: 9px;\n    padding: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 2;\n    transition: all 0.12s;\n\n    &:hover {\n      color: #f59e0b;\n      transform: scale(1.2);\n    }\n\n    &.starred {\n      color: #f59e0b;\n    }\n  }\n\n  .box-icon-wrap {\n    width: 25px;\n    height: 25px;\n    border-radius: 4px;\n    background: var(--primary-soft);\n    color: var(--primary);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 11px;\n    flex-shrink: 0;\n\n    &.report-icon-bg {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n    }\n  }\n\n  .box-info {\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    padding-right: 10px;\n\n    .box-name-hin {\n      font-size: 10.5px;\n      font-weight: 700;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-eng {\n      font-size: 9px;\n      color: var(--text-muted);\n      font-family: monospace;\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n  }\n\n  .box-dot {\n    position: absolute;\n    bottom: 3px;\n    right: 3px;\n    width: 5px;\n    height: 5px;\n    border-radius: 50%;\n    background: #10b981;\n  }\n}\n\n.btn-group-cmd {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.cmd-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  cursor: pointer;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  transition: all 0.15s;\n  user-select: none;\n\n  i {\n    font-size: 10.5px;\n  }\n}\n.cmd-btn:hover { background: rgba(125, 125, 125, 0.1); }\n.cmd-btn.active {\n  background: var(--primary-soft);\n  color: var(--primary);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.cmd-btn-primary { background: var(--primary); color: white; border-color: var(--primary); }\n.cmd-btn-primary:hover { background: var(--primary-hover); }\n.cmd-btn-success { background: var(--success); color: white; border-color: var(--success); }\n.cmd-btn-success:hover { background: #059669; }\n.cmd-btn-warning { background: var(--warning-soft); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }\n\n.sync-badge-count {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  background: #f59e0b;\n  color: #ffffff;\n  font-size: 9.5px;\n  font-weight: 700;\n  padding: 1px 5px;\n  border-radius: 999px;\n  margin-left: 4px;\n  line-height: 1.1;\n}\n\n/* 2. FORMULA BAR ROW */\n.formula-bar-row {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n.coord-box {\n  width: 48px;\n  height: 22px;\n  line-height: 18px;\n  text-align: center;\n  font-weight: 700;\n  font-size: 11px;\n  padding: 1px 3px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  background: rgba(125, 125, 125, 0.05);\n}\n.active-col-chip {\n  background: var(--primary-soft);\n  color: var(--primary);\n  padding: 1px 6px;\n  height: 20px;\n  line-height: 17px;\n  border-radius: 4px;\n  font-size: 10.5px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 170px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n.formula-input {\n  flex-grow: 1;\n  height: 22px;\n  padding: 2px 7px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 11.5px;\n  font-family: inherit;\n  outline: none;\n  background: var(--surface);\n  color: var(--text);\n}\n.formula-input:focus { border-color: var(--primary); }\n\n/* 3. CONTROL SETTINGS BAR & DIRECT DB SEARCH */\n.control-settings-bar {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  flex-shrink: 0;\n  font-size: 11px;\n}\n.ctrl-bar-left, .ctrl-bar-right {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.ctrl-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 8px;\n  height: 23px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  user-select: none;\n\n  i {\n    font-size: 10px;\n  }\n}\n.ctrl-btn:hover {\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text);\n}\n.ctrl-btn.active {\n  color: var(--primary);\n  background: var(--primary-soft);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.ctrl-btn-danger {\n  color: var(--danger);\n  background: var(--danger-soft);\n  border-color: rgba(239, 68, 68, 0.3);\n}\n.ctrl-btn-danger:hover {\n  background: rgba(239, 68, 68, 0.2);\n}\n.ctrl-dot {\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  background: #10b981;\n  display: inline-block;\n}\n.ctrl-search-wrap {\n  position: relative;\n  display: flex;\n  align-items: center;\n  flex-grow: 1;\n  max-width: 420px;\n}\n.ctrl-search-icon {\n  position: absolute;\n  left: 8px;\n  color: var(--text-muted);\n  font-size: 10px;\n  pointer-events: none;\n}\n.ctrl-search-input {\n  width: 100%;\n  height: 23px;\n  padding: 2px 24px 2px 24px;\n  border: 1px solid var(--surface-border);\n  border-radius: 999px;\n  font-size: 11px;\n  background: rgba(125, 125, 125, 0.05);\n  color: var(--text);\n  outline: none;\n  transition: all 0.15s;\n}\n.ctrl-search-input:focus {\n  border-color: var(--primary);\n  background: var(--surface);\n  box-shadow: 0 0 0 2px var(--primary-soft);\n}\n.ctrl-search-clear {\n  position: absolute;\n  right: 6px;\n  background: none;\n  border: none;\n  font-size: 10px;\n  color: var(--text-muted);\n  cursor: pointer;\n  padding: 1px 4px;\n  border-radius: 50%;\n}\n.ctrl-search-clear:hover {\n  color: var(--danger);\n  background: rgba(125, 125, 125, 0.15);\n}\n.ctrl-search-spinner {\n  position: absolute;\n  right: 24px;\n  color: var(--primary);\n  font-size: 10px;\n}\n.ctrl-record-badge {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  height: 21px;\n  border-radius: 999px;\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text-muted);\n  font-size: 10px;\n  font-weight: 600;\n  white-space: nowrap;\n\n  i {\n    font-size: 10px;\n  }\n}\n\n/* 4. STATUS & BATCH SUGGESTION STRIP */\n.status-strip {\n  padding: 3px 14px;\n  font-size: 11.5px;\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  background: rgba(125, 125, 125, 0.04);\n}\n.status-strip.strip-error { background: #fef2f2; color: #991b1b; }\n.status-strip.strip-clean { background: #f0fdf4; color: #166534; }\n.status-strip.strip-suggestion { background: #fffbeb; color: #92400e; }\n\n/* 5. SPREADSHEET CANVAS */\n.spreadsheet-canvas {\n  flex-grow: 1;\n  overflow: hidden;\n  background: var(--surface);\n  position: relative;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n\n  sutram-grid {\n    display: block;\n    width: 100%;\n    height: 100%;\n    flex: 1;\n    min-height: 0;\n  }\n}\n\n/* 6. BOTTOM MULTI-SHEET TAB BAR & STATUS BAR */\n.studio-footer {\n  flex-shrink: 0;\n  background: var(--surface);\n  border-top: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n}\n.sheet-tabs-bar {\n  display: flex;\n  align-items: center;\n  background: rgba(125, 125, 125, 0.05);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 2px 6px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.sheet-tabs-bar::-webkit-scrollbar { display: none; }\n\n.tab-pill {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 12px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11.5px;\n  font-weight: 600;\n  cursor: pointer;\n  color: var(--text-muted);\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  transition: all 0.15s;\n}\n.tab-pill:hover {\n  background: rgba(125, 125, 125, 0.1);\n  color: var(--text);\n}\n.tab-pill.active-tab {\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-color: rgba(16, 185, 129, 0.25);\n  border-bottom: 2px solid #10b981;\n  font-weight: 700;\n}\n\n.sheet-tab-badge {\n  font-size: 9.5px;\n  padding: 1px 5px;\n  background: rgba(16, 185, 129, 0.2);\n  color: #059669;\n  border-radius: 999px;\n  font-weight: 700;\n}\n\n.add-tab-btn {\n  padding: 2px 8px;\n  border: 1px dashed rgba(125, 125, 125, 0.4);\n  border-radius: 4px;\n  background: transparent;\n  cursor: pointer;\n  color: var(--primary);\n  margin-left: 4px;\n}\n.add-tab-btn:hover { background: rgba(79, 70, 229, 0.1); }\n\n.sheet-tab-rough-badge {\n  font-size: 9px;\n  padding: 1px 4px;\n  background: rgba(245, 158, 11, 0.2);\n  color: #d97706;\n  border-radius: 3px;\n  font-weight: 700;\n  text-transform: uppercase;\n}\n\n.tab-close-btn {\n  margin-left: 3px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  font-size: 9.5px;\n  line-height: 1;\n  padding: 0;\n  transition: all 0.12s;\n\n  &:hover {\n    background: rgba(239, 68, 68, 0.18);\n    color: #ef4444;\n  }\n}\n\n.bottom-status-subrow {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 3px 14px;\n  font-size: 11px;\n  color: var(--text-muted);\n}\n.zoom-controls {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  padding: 1px 4px;\n}\n.zoom-btn {\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  color: var(--text);\n  padding: 1px 5px;\n  font-size: 11px;\n}\n.zoom-display {\n  font-weight: 700;\n  cursor: pointer;\n  padding: 0 4px;\n}\n\n/* 7. FLOATING SYNC TOAST HUD */\n.sync-toast-hud {\n  position: fixed;\n  top: 50px;\n  right: 20px;\n  z-index: 2500;\n  min-width: 320px;\n  max-width: 440px;\n  background: var(--surface);\n  color: var(--text);\n  border: 1px solid var(--surface-border);\n  border-radius: 8px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);\n  overflow: hidden;\n  animation: toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);\n  font-size: 11.5px;\n}\n@keyframes toastSlideIn {\n  from { opacity: 0; transform: translateY(-12px) scale(0.97); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n.sync-toast-header {\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--surface-border);\n  background: rgba(125, 125, 125, 0.04);\n}\n.sync-toast-title {\n  display: flex;\n  align-items: center;\n  gap: 7px;\n  font-weight: 700;\n  font-size: 12px;\n}\n.sync-toast-close {\n  background: none;\n  border: none;\n  color: var(--text-muted);\n  cursor: pointer;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 3px;\n}\n.sync-toast-close:hover {\n  background: rgba(125, 125, 125, 0.12);\n  color: var(--text);\n}\n.sync-toast-body {\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n.sync-toast-stats {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-wrap: wrap;\n}\n.sync-badge-chip {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n}\n.chip-success {\n  background: var(--success-soft);\n  color: var(--success);\n}\n.chip-info {\n  background: var(--primary-soft);\n  color: var(--primary);\n}\n.chip-warning {\n  background: var(--warning-soft);\n  color: #b45309;\n}\n.chip-danger {\n  background: var(--danger-soft);\n  color: var(--danger);\n}\n.sync-toast-errors {\n  margin-top: 4px;\n  padding: 6px 8px;\n  background: rgba(239, 68, 68, 0.08);\n  border: 1px solid rgba(239, 68, 68, 0.2);\n  border-radius: 4px;\n  font-size: 10.5px;\n  color: #ef4444;\n  max-height: 140px;\n  overflow-y: auto;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}\n\n/* Last Sync Status in Bottom Bar */\n.last-sync-badge {\n  display: inline-flex;\n  align-items: center;\n  padding: 1px 7px;\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-radius: 4px;\n  font-weight: 600;\n  font-size: 10.5px;\n  border: 1px solid rgba(16, 185, 129, 0.25);\n\n  &.sync-error {\n    background: rgba(239, 68, 68, 0.12);\n    color: #ef4444;\n    border-color: rgba(239, 68, 68, 0.25);\n  }\n}\n\n/* Live Progress Bar inside Toast */\n.sync-progress-wrap {\n  width: 100%;\n}\n.sync-progress-track {\n  width: 100%;\n  height: 6px;\n  background: rgba(125, 125, 125, 0.2);\n  border-radius: 999px;\n  overflow: hidden;\n}\n.sync-progress-bar {\n  height: 100%;\n  background: linear-gradient(90deg, #3b82f6, #10b981);\n  border-radius: 999px;\n  transition: width 0.2s ease-in-out;\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Instant Column Configuration Dropdown Menu (Replicating Legacy Studio)\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n::ng-deep .sutram-col-config-popover {\n  width: 340px !important;\n  height: 500px !important;\n  max-height: calc(100vh - 120px) !important;\n  font-size: 11.5px;\n  border-radius: 8px !important;\n  overflow: hidden !important;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n  display: flex !important;\n  flex-direction: column !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n    width: 100% !important;\n    height: 100% !important;\n    display: flex !important;\n    flex-direction: column !important;\n    flex: 1 1 auto !important;\n    min-height: 0 !important;\n    overflow: hidden !important;\n  }\n}\n\n.col-dropdown-menu {\n  width: 100% !important;\n  height: 100% !important;\n  max-height: none !important;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n  flex: 1 1 auto;\n  min-height: 0;\n  user-select: none;\n\n  .col-dd-header {\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    flex-direction: column;\n    gap: 6px;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-search-wrap {\n    position: relative;\n    display: flex;\n    align-items: center;\n\n    .col-dd-search-icon {\n      position: absolute;\n      left: 8px;\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      pointer-events: none;\n    }\n\n    .col-dd-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      border-radius: 4px;\n      font-size: 11.5px;\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.12s;\n\n      &:focus {\n        border-color: var(--primary, #4f46e5);\n      }\n    }\n\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 8px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      font-size: 11px;\n      padding: 0;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .col-dd-actions {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 0 2px;\n\n    .col-dd-actions-left {\n      display: flex;\n      gap: 4px;\n    }\n\n    .col-dd-act-btn {\n      padding: 2px 7px;\n      font-size: 10.5px;\n      font-weight: 600;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--surface, #ffffff);\n      color: var(--text-muted, #64748b);\n      border-radius: 3px;\n      cursor: pointer;\n      transition: all 0.12s;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .col-dd-count {\n      font-size: 10.5px;\n      color: var(--text-muted, #64748b);\n      font-weight: 600;\n    }\n  }\n\n  .col-dd-body {\n    padding: 6px 8px;\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    flex: 1 1 0 !important;\n    min-height: 0 !important;\n    max-height: none !important;\n    display: flex;\n    flex-direction: column;\n    gap: 3px;\n    overscroll-behavior: contain;\n    scrollbar-width: thin;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-track {\n      background: rgba(125, 125, 125, 0.05);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb:hover {\n      background: var(--primary, #4f46e5);\n    }\n  }\n\n  .col-dd-section-title {\n    font-size: 10px;\n    font-weight: 700;\n    color: var(--text-muted, #64748b);\n    margin: 3px 0 2px 4px;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-item {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 4px 6px;\n    border-radius: 4px;\n    cursor: pointer;\n    user-select: none;\n    transition: background 0.1s;\n    font-size: 11.5px;\n    color: var(--text, #0f172a);\n    flex-shrink: 0 !important;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.08);\n    }\n\n    .col-dd-item-left {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n\n    .col-dd-item-name {\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    cursor: pointer;\n    accent-color: var(--primary, #4f46e5);\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .type-badge {\n    font-size: 9.5px;\n    padding: 1px 5px;\n    border-radius: 3px;\n    background: rgba(125, 125, 125, 0.12);\n    color: var(--text-muted, #64748b);\n    font-family: 'JetBrains Mono', monospace;\n    flex-shrink: 0;\n  }\n\n  /* FK Grouping */\n  .col-dd-group {\n    border: 1px solid var(--surface-border, #e2e8f0);\n    border-radius: 5px;\n    margin: 3px 0;\n    overflow: hidden;\n    background: rgba(125, 125, 125, 0.02);\n    flex-shrink: 0 !important;\n\n    &.fk-active-group {\n      border-color: rgba(79, 70, 229, 0.35);\n    }\n\n    .col-dd-group-header {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding: 5px 8px;\n      background: rgba(125, 125, 125, 0.06);\n      cursor: pointer;\n      user-select: none;\n      font-size: 11.5px;\n      font-weight: 600;\n      flex-shrink: 0 !important;\n      min-height: 28px !important;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n      }\n\n      .col-dd-group-left {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        overflow: hidden;\n      }\n\n      .fk-expand-toggle {\n        font-size: 10px;\n        color: var(--text-muted, #64748b);\n        width: 12px;\n        text-align: center;\n        transition: transform 0.18s ease;\n\n        &.rotated {\n          transform: rotate(90deg);\n        }\n      }\n\n      .fk-group-pill {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 999px;\n        font-weight: 600;\n      }\n    }\n\n    .col-dd-group-items {\n      padding: 3px 4px 4px 18px;\n      background: var(--surface, #ffffff);\n      border-top: 1px solid var(--surface-border, #e2e8f0);\n      display: flex;\n      flex-direction: column;\n      gap: 2px;\n      max-height: none !important;\n      overflow: visible !important;\n    }\n  }\n\n  .col-dd-empty {\n    padding: 16px;\n    text-align: center;\n    color: var(--text-muted, #64748b);\n    font-size: 11.5px;\n  }\n\n  .col-dd-footer {\n    padding: 6px 10px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n}\n\n\n\n"] }]
+  }], function() {
+    return [{ type: SutramExcelStateService }, { type: SutramExcelApiService }, { type: SutramExcelScannerService }, { type: SutramAuditService }, { type: SutramRefCacheService }, { type: ChangeDetectorRef }];
+  }, { table: [{
+    type: Input
+  }], mode: [{
+    type: Input
+  }], apiBase: [{
+    type: Input
+  }], enableFilters: [{
+    type: Input
+  }], enableSorting: [{
+    type: Input
+  }], enableSearch: [{
+    type: Input
+  }], enableControlBar: [{
+    type: Input
+  }], enableStatsBar: [{
+    type: Input
+  }], enableUpload: [{
+    type: Input
+  }], enableAudit: [{
+    type: Input
+  }], enableAddRow: [{
+    type: Input
+  }], enableCorrections: [{
+    type: Input
+  }], enableLoadData: [{
+    type: Input
+  }], enableVerify: [{
+    type: Input
+  }], enableSync: [{
+    type: Input
+  }], enableDelete: [{
+    type: Input
+  }], enableTabs: [{
+    type: Input
+  }], enableZoom: [{
+    type: Input
+  }], gridComponent: [{
+    type: ViewChild,
+    args: ["grid"]
+  }], onStudioGlobalKeydown: [{
+    type: HostListener,
+    args: ["document:keydown", ["$event"]]
+  }] });
+})();
+
 // backend/sutram/ng-sutramui-excel/playground/out-tsc/src/lib/components/sutram-import-progress/sutram-import-progress.component.js
 function SutramImportProgressComponent_div_22_Template(rf, ctx) {
   if (rf & 1) {
@@ -129823,7 +134307,7 @@ function SutramImportProgressComponent_ng_template_36_Template(rf, ctx) {
     \u0275\u0275property("ngIf", !ctx_r2.progress.isActive);
   }
 }
-var _c03 = function() {
+var _c05 = function() {
   return { width: "520px", maxWidth: "95vw" };
 };
 var SutramImportProgressComponent = class _SutramImportProgressComponent {
@@ -129921,7 +134405,7 @@ var SutramImportProgressComponent = class _SutramImportProgressComponent {
       \u0275\u0275elementEnd();
     }
     if (rf & 2) {
-      \u0275\u0275styleMap(\u0275\u0275pureFunction0(24, _c03));
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(24, _c05));
       \u0275\u0275property("visible", ctx.visible)("modal", true)("closable", !ctx.progress.isActive);
       \u0275\u0275advance(5);
       \u0275\u0275textInterpolate2("", ctx.progress.current, " / ", ctx.progress.total, " \u092A\u0902\u0915\u094D\u0924\u093F\u092F\u093E\u0901 \u092A\u094D\u0930\u0938\u0902\u0938\u094D\u0915\u0943\u0924");
@@ -130059,1637 +134543,6 @@ var SutramImportProgressComponent = class _SutramImportProgressComponent {
     type: Output
   }], cancelRequested: [{
     type: Output
-  }] });
-})();
-
-// backend/sutram/ng-sutramui-excel/playground/out-tsc/src/lib/components/sutram-excel-studio/sutram-excel-studio.component.js
-function SutramExcelStudioComponent_span_35_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 87);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(ctx_r1.state.pendingChangesCount());
-  }
-}
-function SutramExcelStudioComponent_ng_template_63_div_3_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r16 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "input", 92);
-    \u0275\u0275listener("change", function SutramExcelStudioComponent_ng_template_63_div_3_Template_input_change_1_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r16);
-      const h_r14 = restoredCtx.$implicit;
-      const ctx_r15 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r15.toggleColumnVisibility(h_r14.name));
-    });
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(2, "label", 93);
-    \u0275\u0275text(3);
-    \u0275\u0275elementEnd()();
-  }
-  if (rf & 2) {
-    const h_r14 = ctx.$implicit;
-    const ctx_r13 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("id", "col_vis_" + h_r14.name)("checked", !ctx_r13.hiddenColumnKeys.has(h_r14.name));
-    \u0275\u0275advance(1);
-    \u0275\u0275property("for", "col_vis_" + h_r14.name);
-    \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(h_r14.name);
-  }
-}
-function SutramExcelStudioComponent_ng_template_63_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 88)(1, "div", 89);
-    \u0275\u0275text(2, "Visible Columns");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(3, SutramExcelStudioComponent_ng_template_63_div_3_Template, 4, 4, "div", 90);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r3 = \u0275\u0275nextContext();
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngForOf", ctx_r3.state.headers());
-  }
-}
-function SutramExcelStudioComponent_button_76_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r18 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 94);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_button_76_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r18);
-      const ctx_r17 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r17.clearAllFilters());
-    });
-    \u0275\u0275element(1, "i", 95);
-    \u0275\u0275elementStart(2, "span");
-    \u0275\u0275text(3);
-    \u0275\u0275elementEnd()();
-  }
-  if (rf & 2) {
-    const ctx_r4 = \u0275\u0275nextContext();
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate1("Clear Filters (", ctx_r4.state.activeFilterCount(), ")");
-  }
-}
-function SutramExcelStudioComponent_button_80_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r20 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 96);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_button_80_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r20);
-      const ctx_r19 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r19.clearDbSearch());
-    });
-    \u0275\u0275text(1, "\u2715");
-    \u0275\u0275elementEnd();
-  }
-}
-function SutramExcelStudioComponent_span_81_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 97);
-    \u0275\u0275element(1, "i", 98);
-    \u0275\u0275elementEnd();
-  }
-}
-function SutramExcelStudioComponent_div_92_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r22 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div")(1, "button", 99);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_92_Template_button_click_1_listener() {
-      \u0275\u0275restoreView(_r22);
-      const ctx_r21 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r21.showSidebar = true);
-    });
-    \u0275\u0275element(2, "i", 10);
-    \u0275\u0275text(3);
-    \u0275\u0275elementEnd()();
-  }
-  if (rf & 2) {
-    const ctx_r7 = \u0275\u0275nextContext();
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate1(" \u0917\u0932\u0924\u093F\u092F\u093E\u0901 (", ctx_r7.state.unresolvedCorrectionsCount(), ") ");
-  }
-}
-function SutramExcelStudioComponent_div_97_span_4_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 103);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const tab_r23 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", tab_r23.recordCount, " ");
-  }
-}
-function SutramExcelStudioComponent_div_97_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r27 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 100);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_97_Template_div_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r27);
-      const tab_r23 = restoredCtx.$implicit;
-      const ctx_r26 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r26.switchSheet(tab_r23.id));
-    });
-    \u0275\u0275element(1, "i", 101);
-    \u0275\u0275elementStart(2, "span");
-    \u0275\u0275text(3);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(4, SutramExcelStudioComponent_div_97_span_4_Template, 2, 1, "span", 102);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const tab_r23 = ctx.$implicit;
-    const ctx_r8 = \u0275\u0275nextContext();
-    \u0275\u0275classProp("active-tab", ctx_r8.activeSheetId === tab_r23.id);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", tab_r23.icon);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(tab_r23.title);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", tab_r23.isLoaded && (tab_r23.recordCount || 0) > 0);
-  }
-}
-function SutramExcelStudioComponent_span_106_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 104);
-    \u0275\u0275element(1, "i", 105);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r9 = \u0275\u0275nextContext();
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1("", ctx_r9.state.deletedRowIds().length, " Deleted ");
-  }
-}
-function SutramExcelStudioComponent_span_107_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 106);
-    \u0275\u0275text(1, "\u2713 100% In Sync");
-    \u0275\u0275elementEnd();
-  }
-}
-function SutramExcelStudioComponent_span_108_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 107);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r11 = \u0275\u0275nextContext();
-    \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1("", ctx_r11.state.stats().errorRows, " \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u093E\u0901");
-  }
-}
-function SutramExcelStudioComponent_div_119_span_10_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 119);
-    \u0275\u0275element(1, "i", 82);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r28 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r28.syncToast.inserted, " Inserted ");
-  }
-}
-function SutramExcelStudioComponent_div_119_span_11_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 120);
-    \u0275\u0275element(1, "i", 121);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r29 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r29.syncToast.updated, " Updated ");
-  }
-}
-function SutramExcelStudioComponent_div_119_span_12_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 122);
-    \u0275\u0275element(1, "i", 21);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r30 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r30.syncToast.deleted, " Deleted ");
-  }
-}
-function SutramExcelStudioComponent_div_119_span_13_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 123);
-    \u0275\u0275element(1, "i", 124);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r31 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r31.syncToast.failed, " Failed ");
-  }
-}
-function SutramExcelStudioComponent_div_119_div_14_div_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div");
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r34 = ctx.$implicit;
-    \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1("\u2022 ", err_r34, "");
-  }
-}
-function SutramExcelStudioComponent_div_119_div_14_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 125);
-    \u0275\u0275template(1, SutramExcelStudioComponent_div_119_div_14_div_1_Template, 2, 1, "div", 126);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r32 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngForOf", ctx_r32.syncToast.errors);
-  }
-}
-function SutramExcelStudioComponent_div_119_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r36 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 108)(1, "div", 109)(2, "div", 110);
-    \u0275\u0275element(3, "i", 26);
-    \u0275\u0275elementStart(4, "span");
-    \u0275\u0275text(5);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "button", 111);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_119_Template_button_click_6_listener() {
-      \u0275\u0275restoreView(_r36);
-      const ctx_r35 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r35.syncToast.visible = false);
-    });
-    \u0275\u0275text(7, "\u2715");
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(8, "div", 112)(9, "div", 113);
-    \u0275\u0275template(10, SutramExcelStudioComponent_div_119_span_10_Template, 3, 1, "span", 114);
-    \u0275\u0275template(11, SutramExcelStudioComponent_div_119_span_11_Template, 3, 1, "span", 115);
-    \u0275\u0275template(12, SutramExcelStudioComponent_div_119_span_12_Template, 3, 1, "span", 116);
-    \u0275\u0275template(13, SutramExcelStudioComponent_div_119_span_13_Template, 3, 1, "span", 117);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(14, SutramExcelStudioComponent_div_119_div_14_Template, 2, 1, "div", 118);
-    \u0275\u0275elementEnd()();
-  }
-  if (rf & 2) {
-    const ctx_r12 = \u0275\u0275nextContext();
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngClass", ctx_r12.syncToast.hasError ? "pi-exclamation-circle text-warning" : "pi-check-circle text-success");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r12.syncToast.title);
-    \u0275\u0275advance(5);
-    \u0275\u0275property("ngIf", ctx_r12.syncToast.inserted > 0);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r12.syncToast.updated > 0);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r12.syncToast.deleted > 0);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r12.syncToast.failed > 0);
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r12.syncToast.errors.length > 0);
-  }
-}
-var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
-  state;
-  api;
-  scanner;
-  audit;
-  refCache;
-  cdr;
-  set table(tableName) {
-    if (tableName) {
-      this.onTableSelect(tableName);
-    }
-  }
-  mode = "intelligent";
-  apiBase = "/_sutram/excel";
-  // ── Declarative Feature Flags (Batteries-Included: All ON by default, toggleable by user flags) ──
-  enableFilters = true;
-  enableSorting = true;
-  enableSearch = true;
-  enableControlBar = true;
-  enableStatsBar = true;
-  enableUpload = true;
-  enableAudit = true;
-  enableAddRow = true;
-  enableCorrections = true;
-  enableLoadData = true;
-  enableVerify = true;
-  enableSync = true;
-  enableDelete = true;
-  enableTabs = true;
-  enableZoom = true;
-  tablesList = [];
-  selectedTableName = "";
-  isLoadingConfig = false;
-  // Sheet tabs state
-  sheetTabs = [];
-  activeSheetId = "blank";
-  sheetWorkbooks = {};
-  // Zoom / Scale state
-  zoomLevel = 1;
-  // Dark Mode State
-  isDarkMode = false;
-  // Text Formatting State
-  isBoldActive = false;
-  textAlign = "left";
-  // Hidden Columns Set
-  hiddenColumnKeys = /* @__PURE__ */ new Set();
-  // Floating Sync Toast HUD State
-  syncToast = {
-    visible: false,
-    title: "",
-    hasError: false,
-    inserted: 0,
-    updated: 0,
-    deleted: 0,
-    failed: 0,
-    errors: []
-  };
-  // Scanner modal state
-  showScannerModal = false;
-  scanReport = null;
-  pendingRawRows = [];
-  // Correction sidebar state
-  showSidebar = false;
-  // Import progress modal state
-  showProgressModal = false;
-  rejectedRowsDuringImport = [];
-  isCancelRequested = false;
-  // DB Search Subject & Subscription
-  searchSubject = new Subject();
-  searchSub;
-  // Computed Active Cell Coordinate, Column Chip, and Formula Value
-  get activeCoord() {
-    const sel = this.state.selectedCell();
-    if (!sel)
-      return "A1";
-    const cols = this.visibleHeaders;
-    const colIdx = cols.findIndex((c) => c.name === sel.colKey);
-    const letter = this.getColLetter(colIdx >= 0 ? colIdx : 0);
-    return `${letter}${sel.rowIdx + 1}`;
-  }
-  get activeColChip() {
-    const sel = this.state.selectedCell();
-    return sel ? sel.colKey : "--";
-  }
-  get formulaValue() {
-    const sel = this.state.selectedCell();
-    if (!sel)
-      return "";
-    const rows = this.state.rows();
-    return rows[sel.rowIdx]?.cells[sel.colKey]?.value ?? "";
-  }
-  get visibleHeaders() {
-    const headers = this.state.headers();
-    return headers.filter((h) => !this.hiddenColumnKeys.has(h.name));
-  }
-  get visibleHeadersCount() {
-    return this.visibleHeaders.length;
-  }
-  getColLetter(idx) {
-    let letter = "";
-    let temp = idx;
-    while (temp >= 0) {
-      letter = String.fromCharCode(temp % 26 + 65) + letter;
-      temp = Math.floor(temp / 26) - 1;
-    }
-    return letter;
-  }
-  get statusStripClass() {
-    if (this.state.stats().errorRows > 0)
-      return "strip-error";
-    if (this.mode === "intelligent")
-      return "strip-suggestion";
-    return "strip-clean";
-  }
-  get statusStripIcon() {
-    if (this.state.stats().errorRows > 0)
-      return "pi-exclamation-triangle text-danger";
-    if (this.mode === "intelligent")
-      return "pi-bolt text-primary";
-    return "pi-info-circle text-primary";
-  }
-  get statusStripMessage() {
-    if (this.state.stats().errorRows > 0) {
-      return `\u0936\u0940\u091F \u092E\u0947\u0902 ${this.state.stats().errorRows} \u092A\u0902\u0915\u094D\u0924\u093F\u092F\u094B\u0902 \u092E\u0947\u0902 \u0905\u092E\u093E\u0928\u094D\u092F \u092E\u093E\u0928 \u092E\u093F\u0932\u0947 \u0939\u0948\u0902\u0964 \u0915\u0943\u092A\u092F\u093E \u0938\u0941\u0927\u093E\u0930\u0947\u0902 \u092F\u093E '\u0917\u0932\u0924\u093F\u092F\u093E\u0901' \u0938\u093E\u0907\u0921\u092C\u093E\u0930 \u0926\u0947\u0916\u0947\u0902\u0964`;
-    }
-    if (this.mode === "intelligent") {
-      return "Smart Mode ON. Live foreign key validation and dictionary learning active.";
-    }
-    return "Normal mode ready. Type or paste data. Turn on Smart Mode for live FK validation.";
-  }
-  constructor(state2, api, scanner, audit, refCache, cdr) {
-    this.state = state2;
-    this.api = api;
-    this.scanner = scanner;
-    this.audit = audit;
-    this.refCache = refCache;
-    this.cdr = cdr;
-  }
-  ngOnInit() {
-    if (this.apiBase) {
-      this.api.setBaseUri(this.apiBase);
-    }
-    this.state.isAuditMode.set(this.mode === "intelligent");
-    this.state.filtersEnabled.set(this.enableFilters);
-    this.state.sortingEnabled.set(this.enableSorting);
-    this.searchSub = this.searchSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
-      this.state.dbSearchQuery.set(query);
-      if (this.selectedTableName) {
-        this.loadDataChunk(this.selectedTableName, 0, 100, true);
-      }
-    });
-    this.loadTablesList();
-  }
-  ngOnDestroy() {
-    this.searchSub?.unsubscribe();
-  }
-  setStudioMode(newMode) {
-    this.mode = newMode;
-    this.state.isAuditMode.set(newMode === "intelligent");
-    this.cdr.markForCheck();
-  }
-  toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
-    if (this.isDarkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-    this.cdr.markForCheck();
-  }
-  onFormulaChange(val) {
-    const sel = this.state.selectedCell();
-    if (!sel)
-      return;
-    this.state.updateCellValue(sel.rowIdx, sel.colKey, val);
-    this.cdr.markForCheck();
-  }
-  toggleColumnVisibility(colName) {
-    if (this.hiddenColumnKeys.has(colName)) {
-      this.hiddenColumnKeys.delete(colName);
-    } else {
-      this.hiddenColumnKeys.add(colName);
-    }
-    this.cdr.markForCheck();
-  }
-  exportExcel() {
-    const rows = this.state.rows();
-    if (!rows || rows.length === 0) {
-      alert("\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0936\u0940\u091F \u092E\u0947\u0902 \u0915\u094B\u0908 \u0921\u0947\u091F\u093E \u0928\u0939\u0940\u0902 \u0939\u0948 (No data to export)");
-      return;
-    }
-    const headers = this.visibleHeaders;
-    const exportData = rows.map((r) => {
-      const obj = {};
-      headers.forEach((h) => {
-        obj[h.name] = r.cells[h.name]?.value ?? "";
-      });
-      return obj;
-    });
-    const ws = utils.json_to_sheet(exportData);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, this.selectedTableName || "Sheet1");
-    writeFileSync(wb, `${this.selectedTableName || "data"}_${Date.now()}.xlsx`);
-  }
-  loadTablesList() {
-    this.api.getRegisteredTables().subscribe({
-      next: (tables) => {
-        this.tablesList = tables;
-        this.sheetTabs = [
-          { id: "blank", title: "Blank Sheet", icon: "pi-file", isLoaded: false },
-          ...tables.map((t) => ({
-            id: t.table,
-            title: t.display_name || t.table,
-            icon: "pi-table",
-            isLoaded: false,
-            recordCount: 0
-          }))
-        ];
-        if (!this.selectedTableName && tables.length > 0) {
-          this.activeSheetId = tables[0].table;
-          this.onTableSelect(tables[0].table, true);
-        }
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.error("[SutramStudio] Load tables failed:", err)
-    });
-  }
-  onTableSelect(tableName, autoLoadData = true) {
-    if (!tableName)
-      return;
-    this.selectedTableName = tableName;
-    this.activeSheetId = tableName;
-    this.state.setActiveTable(tableName);
-    this.isLoadingConfig = true;
-    this.api.getTableConfig(tableName).subscribe({
-      next: (cfg) => {
-        this.state.setConfig(cfg);
-        this.isLoadingConfig = false;
-        this.state.clearGrid();
-        this.hiddenColumnKeys.clear();
-        (cfg.headers || []).forEach((h) => {
-          const n = (h.name || h.col_name || "").toLowerCase();
-          if (n === "_id" || n.includes("_by_dept_id") || n === "verify") {
-            this.hiddenColumnKeys.add(h.name);
-          }
-        });
-        if (cfg && cfg.headers) {
-          const refTables = cfg.headers.filter((h) => h.ref_table || h.type === "ref").map((h) => h.ref_table).filter(Boolean);
-          this.refCache.preloadTables(refTables);
-        }
-        if (autoLoadData) {
-          this.loadDataChunk(tableName, 0, 100, true);
-        }
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        this.isLoadingConfig = false;
-        console.error("[SutramStudio] Load config failed:", err);
-        this.cdr.markForCheck();
-      }
-    });
-  }
-  switchSheet(tabId) {
-    if (this.activeSheetId === tabId)
-      return;
-    if (this.activeSheetId) {
-      this.sheetWorkbooks[this.activeSheetId] = {
-        rows: this.state.rows(),
-        deletedRowIds: this.state.deletedRowIds(),
-        deletedRowsQueue: this.state.deletedRowsQueue()
-      };
-    }
-    this.activeSheetId = tabId;
-    if (tabId === "blank" || tabId.startsWith("sheet_")) {
-      this.selectedTableName = "";
-      const saved = this.sheetWorkbooks[tabId];
-      if (saved && saved.rows) {
-        this.state.setRows(saved.rows);
-        this.state.deletedRowIds.set(saved.deletedRowIds || []);
-        this.state.deletedRowsQueue.set(saved.deletedRowsQueue || []);
-      } else {
-        this.state.clearGrid();
-      }
-      this.state.totalDbRecords.set(0);
-      this.cdr.markForCheck();
-    } else {
-      const saved = this.sheetWorkbooks[tabId];
-      if (saved && saved.rows && saved.rows.length > 0) {
-        this.selectedTableName = tabId;
-        this.state.setRows(saved.rows);
-        this.state.deletedRowIds.set(saved.deletedRowIds || []);
-        this.state.deletedRowsQueue.set(saved.deletedRowsQueue || []);
-        this.onTableSelect(tabId, false);
-      } else {
-        this.onTableSelect(tabId, true);
-      }
-    }
-    this.cdr.markForCheck();
-  }
-  addNewBlankSheet() {
-    const customCount = this.sheetTabs.filter((t) => t.id.startsWith("sheet_")).length + 2;
-    const newId = `sheet_${Date.now()}`;
-    this.sheetTabs.push({ id: newId, title: `Sheet ${customCount}`, icon: "pi-file", isLoaded: false });
-    this.switchSheet(newId);
-  }
-  /**
-   * Converts a database row object into a verified SutramRow.
-   * Utilizes SutramRefCacheService for Rule 8 bilingual formatting.
-   */
-  convertDbRecordToSutramRow(dr, rowNum, cfg) {
-    const cells = {};
-    cfg.headers.forEach((h) => {
-      let rawVal;
-      if (h.ref_table || h.type === "ref") {
-        const joined = dr[h.ref_as || h.name || h.ref_table];
-        if (joined && typeof joined === "object") {
-          const formatted = this.refCache.formatOption(h.ref_table, joined);
-          if (formatted && formatted.display) {
-            rawVal = formatted.display;
-          }
-        }
-      }
-      if (rawVal === void 0)
-        rawVal = dr[h.col_name];
-      if (rawVal === void 0)
-        rawVal = dr[h.name];
-      if (rawVal === void 0) {
-        const matchKey = Object.keys(dr).find((k) => k.toLowerCase() === (h.col_name || h.name || "").toLowerCase());
-        if (matchKey)
-          rawVal = dr[matchKey];
-      }
-      cells[h.name] = {
-        value: String(rawVal ?? ""),
-        isValid: true,
-        refId: dr[h.col_name] !== void 0 ? dr[h.col_name] : rawVal
-      };
-    });
-    return {
-      rowNum,
-      cells,
-      hasError: false,
-      errorCount: 0,
-      _rawOriginal: dr
-    };
-  }
-  /**
-   * Chunked lazy loading with direct database search, sort, and filters.
-   */
-  loadDataChunk(tableName, offset = 0, limit = 100, isReset = true) {
-    const cfg = this.state.config();
-    if (!cfg || !tableName)
-      return;
-    if (this.state.isLoadingDb())
-      return;
-    this.state.isLoadingDb.set(true);
-    const activeSort = this.state.activeSort();
-    const columnFilters = this.state.columnFilters();
-    const searchQuery = this.state.dbSearchQuery().trim();
-    const apiFilters = {};
-    for (const [colKey, valSet] of Object.entries(columnFilters)) {
-      if (valSet && valSet.size > 0) {
-        apiFilters[colKey] = Array.from(valSet);
-      }
-    }
-    this.api.getTableDataChunk(tableName, {
-      limit,
-      offset,
-      search: searchQuery || void 0,
-      sort: activeSort?.colKey,
-      order: activeSort?.order,
-      filters: Object.keys(apiFilters).length > 0 ? apiFilters : void 0
-    }).subscribe({
-      next: (res) => {
-        this.state.isLoadingDb.set(false);
-        this.state.totalDbRecords.set(res.total);
-        const startIndex = isReset ? 0 : this.state.rows().length;
-        const builtRows = (res.rows || []).map((dr, idx) => {
-          return this.convertDbRecordToSutramRow(dr, startIndex + idx + 1, cfg);
-        });
-        this.audit.auditAll(builtRows, cfg.headers);
-        if (isReset) {
-          this.state.setRows(builtRows);
-        } else {
-          this.state.appendRows(builtRows);
-        }
-        const tab = this.sheetTabs.find((t) => t.id === tableName);
-        if (tab) {
-          tab.isLoaded = true;
-          tab.recordCount = this.state.rows().length;
-        }
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        this.state.isLoadingDb.set(false);
-        console.error("[SutramStudio] Load DB data chunk failed:", err);
-        this.cdr.markForCheck();
-      }
-    });
-  }
-  /**
-   * Infinite scroll trigger emitted from grid when scrolling near bottom
-   */
-  onLoadMore() {
-    if (this.state.isLoadingDb())
-      return;
-    const currentCount = this.state.rows().length;
-    const totalCount = this.state.totalDbRecords();
-    if (totalCount > 0 && currentCount < totalCount && this.selectedTableName) {
-      this.loadDataChunk(this.selectedTableName, currentCount, 100, false);
-    }
-  }
-  /**
-   * Direct Database Searchbox Handlers
-   */
-  onDbSearchInput(query) {
-    this.searchSubject.next(query);
-  }
-  clearDbSearch() {
-    this.state.dbSearchQuery.set("");
-    this.searchSubject.next("");
-  }
-  /**
-   * Clear All Active Column Filters
-   */
-  clearAllFilters() {
-    this.state.clearAllColumnFilters();
-    if (this.selectedTableName) {
-      this.loadDataChunk(this.selectedTableName, 0, 100, true);
-    }
-  }
-  onGridFilterChanged() {
-    if (this.selectedTableName) {
-      this.loadDataChunk(this.selectedTableName, 0, 100, true);
-    }
-  }
-  onGridSortChanged() {
-    if (this.selectedTableName) {
-      this.loadDataChunk(this.selectedTableName, 0, 100, true);
-    }
-  }
-  loadTableDataFromDb() {
-    if (this.selectedTableName) {
-      this.loadDataChunk(this.selectedTableName, 0, 100, true);
-    }
-  }
-  zoomIn() {
-    if (this.zoomLevel < 1.6) {
-      this.zoomLevel = Math.min(1.6, Math.round((this.zoomLevel + 0.1) * 10) / 10);
-      this.cdr.markForCheck();
-    }
-  }
-  zoomOut() {
-    if (this.zoomLevel > 0.6) {
-      this.zoomLevel = Math.max(0.6, Math.round((this.zoomLevel - 0.1) * 10) / 10);
-      this.cdr.markForCheck();
-    }
-  }
-  resetZoom() {
-    this.zoomLevel = 1;
-    this.cdr.markForCheck();
-  }
-  // ── File Parsing & Header Scanning ───────────────────────────
-  onFileUpload(event2) {
-    const file = event2?.target?.files?.[0] || event2?.files?.[0];
-    if (!file)
-      return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = readSync(data, { type: "array" });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const rawJson = utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-      if (!rawJson || rawJson.length === 0)
-        return;
-      const headers = (rawJson[0] || []).map((h) => String(h || "").trim());
-      this.pendingRawRows = rawJson.slice(1);
-      const cfg = this.state.config();
-      if (!cfg)
-        return;
-      this.scanReport = this.scanner.scan(headers, cfg, this.pendingRawRows);
-      this.showScannerModal = true;
-      this.cdr.markForCheck();
-    };
-    reader.readAsArrayBuffer(file);
-    if (event2.target)
-      event2.target.value = "";
-  }
-  onScannerConfirmed(matches) {
-    const cfg = this.state.config();
-    if (!cfg)
-      return;
-    const builtRows = this.scanner.buildSutramRows(this.pendingRawRows, matches, cfg.headers);
-    this.audit.auditAll(builtRows, cfg.headers);
-    this.state.setRows(builtRows);
-    this.showScannerModal = false;
-    this.pendingRawRows = [];
-    this.cdr.markForCheck();
-  }
-  // ── Server-Side Verification ─────────────────────────────────
-  verifyData() {
-    const cfg = this.state.config();
-    if (!cfg || !this.selectedTableName)
-      return;
-    const rows = this.state.rows();
-    if (rows.length === 0)
-      return;
-    this.state.isVerifying.set(true);
-    const rawObjects = rows.map((r) => {
-      const obj = {};
-      cfg.headers.forEach((h) => obj[h.name] = r.cells[h.name]?.value);
-      return obj;
-    });
-    this.api.verifyRows(this.selectedTableName, rawObjects).subscribe({
-      next: (res) => {
-        this.state.isVerifying.set(false);
-        this.state.setCorrections(res.correctionList || []);
-        if (res.correctionList && res.correctionList.length > 0) {
-          this.showSidebar = true;
-        }
-        if (res.rows && res.rows.length === rows.length) {
-          const updatedRows = [...rows];
-          res.rows.forEach((resolvedObj, idx) => {
-            cfg.headers.forEach((h) => {
-              if (resolvedObj[h.col_name] !== void 0) {
-                updatedRows[idx].cells[h.name].refId = resolvedObj[h.col_name];
-              }
-            });
-          });
-          this.state.setRows(updatedRows);
-        }
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        this.state.isVerifying.set(false);
-        console.error("[SutramStudio] Verify failed:", err);
-        this.cdr.markForCheck();
-      }
-    });
-  }
-  addNewRow() {
-    const row = this.state.addNewBlankRow();
-    this.cdr.markForCheck();
-  }
-  // ── Streaming Import Pipeline ────────────────────────────────
-  async startImport() {
-    const cfg = this.state.config();
-    if (!cfg || !this.selectedTableName)
-      return;
-    const rows = this.state.rows();
-    const deletedIds = [...this.state.deletedRowIds()];
-    if (rows.length === 0 && deletedIds.length === 0)
-      return;
-    const rowsToSync = rows.filter((r) => (r.isNew || r.isModified) && this.audit.rowHasData(r, cfg.headers));
-    if (rowsToSync.length === 0 && deletedIds.length === 0) {
-      alert("\u0938\u093F\u0902\u0915 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0915\u094B\u0908 \u0928\u092F\u093E, \u0938\u0902\u0936\u094B\u0927\u093F\u0924 \u092F\u093E \u0939\u091F\u093E\u092F\u093E \u0917\u092F\u093E \u0921\u0947\u091F\u093E \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u093E (No modified, new, or deleted rows found to sync)\u0964");
-      return;
-    }
-    if (rowsToSync.length > 0) {
-      const preSyncAudit = this.audit.auditRowsBeforeSync(rows, cfg.headers);
-      if (!preSyncAudit.canSync) {
-        const firstErr = preSyncAudit.errorDetails[0];
-        const errMsg = `\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0938\u093F\u0902\u0915 \u0930\u094B\u0915\u093E \u0917\u092F\u093E! \u0915\u0941\u0932 ${preSyncAudit.totalErrors} \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u093E\u0902 \u092A\u093E\u0908 \u0917\u0908\u0902 (\u092A\u0902\u0915\u094D\u0924\u093F ${firstErr.rowNum}: ${firstErr.message})\u0964 \u0915\u0947\u0935\u0932 \u0936\u0941\u0926\u094D\u0927 \u0921\u0947\u091F\u093E \u0939\u0940 \u0938\u093F\u0902\u0915 \u0915\u093F\u092F\u093E \u091C\u093E \u0938\u0915\u0924\u093E \u0939\u0948\u0964`;
-        console.warn("[SutramStudio] DB Sync Blocked:", errMsg);
-        alert(errMsg);
-        this.cdr.markForCheck();
-        return;
-      }
-    }
-    this.isCancelRequested = false;
-    this.rejectedRowsDuringImport = [];
-    this.showProgressModal = true;
-    this.state.isImporting.set(true);
-    const totalOps = rowsToSync.length + (deletedIds.length > 0 ? deletedIds.length : 0);
-    const progress = {
-      current: 0,
-      total: totalOps,
-      percentage: 0,
-      inserted: 0,
-      updated: 0,
-      deleted: 0,
-      duplicate: 0,
-      rejected: 0,
-      isActive: true
-    };
-    this.state.importProgress.set({ ...progress });
-    if (deletedIds.length > 0) {
-      try {
-        const delRes = await this.api.deleteRows(this.selectedTableName, deletedIds).toPromise();
-        const delCount = delRes?.count || deletedIds.length;
-        progress.deleted = delCount;
-        this.state.totalDbRecords.update((n) => Math.max(0, n - delCount));
-        this.state.clearDeletedRowIds();
-      } catch (delErr) {
-        progress.rejected += deletedIds.length;
-        this.rejectedRowsDuringImport.push({ _id: deletedIds.join(", "), _error: delErr?.message || "Delete failed" });
-        const queue = this.state.deletedRowsQueue();
-        if (queue.length > 0) {
-          const currentRows = [...this.state.rows()];
-          queue.forEach((item) => {
-            const cleanRow = {
-              ...item.row,
-              isNew: false,
-              isModified: false,
-              hasError: false,
-              errorCount: 0
-            };
-            const insertIdx = item.index >= 0 ? Math.min(item.index, currentRows.length) : currentRows.length;
-            currentRows.splice(insertIdx, 0, cleanRow);
-          });
-          this.state.setRows(currentRows);
-        }
-        this.state.clearDeletedRowIds();
-      }
-      progress.current += deletedIds.length;
-      progress.percentage = Math.round(progress.current / progress.total * 100);
-      this.state.importProgress.set({ ...progress });
-      this.cdr.markForCheck();
-    }
-    if (rowsToSync.length === 0) {
-      progress.isActive = false;
-      this.state.importProgress.set({ ...progress });
-      this.state.isImporting.set(false);
-      this.cdr.markForCheck();
-      return;
-    }
-    const syncedRowNums = [];
-    for (let i = 0; i < rowsToSync.length; i++) {
-      if (this.isCancelRequested)
-        break;
-      const r = rowsToSync[i];
-      const payload = {};
-      cfg.headers.forEach((h) => {
-        const cell = r.cells[h.name];
-        const val = cell?.refId !== void 0 ? cell.refId : cell?.value;
-        payload[h.col_name] = val;
-      });
-      const rowId = r._id || r._rawOriginal?._id || r._rawOriginal?.id;
-      const isUpdate = !r.isNew && !!rowId;
-      if (isUpdate) {
-        payload._id = rowId;
-      }
-      try {
-        const res = isUpdate ? await this.api.updateRow(this.selectedTableName, payload).toPromise() : await this.api.importRow(this.selectedTableName, payload).toPromise();
-        if (res?.status === "inserted") {
-          progress.inserted++;
-          syncedRowNums.push(r.rowNum);
-          this.state.totalDbRecords.update((n) => n + 1);
-        } else if (res?.status === "updated") {
-          progress.updated++;
-          syncedRowNums.push(r.rowNum);
-        } else if (res?.status === "duplicate") {
-          progress.duplicate++;
-          syncedRowNums.push(r.rowNum);
-        } else {
-          progress.rejected++;
-          this.rejectedRowsDuringImport.push({ ...payload, _error: res?.error || "Rejected" });
-        }
-      } catch (err) {
-        progress.rejected++;
-        this.rejectedRowsDuringImport.push({ ...payload, _error: err?.message || "Network error" });
-      }
-      progress.current = deletedIds.length + i + 1;
-      progress.percentage = Math.round(progress.current / progress.total * 100);
-      this.state.importProgress.set({ ...progress });
-      this.cdr.markForCheck();
-    }
-    this.state.markRowsSynced(syncedRowNums);
-    progress.isActive = false;
-    this.state.importProgress.set({ ...progress });
-    this.state.isImporting.set(false);
-    this.syncToast = {
-      visible: true,
-      title: progress.rejected > 0 ? "Sync Finished with Warnings" : "Sync Completed Successfully",
-      hasError: progress.rejected > 0,
-      inserted: progress.inserted,
-      updated: progress.updated,
-      deleted: progress.deleted || 0,
-      failed: progress.rejected,
-      errors: this.rejectedRowsDuringImport.map((x) => x._error || "Row operation failed")
-    };
-    this.cdr.markForCheck();
-  }
-  cancelImport() {
-    this.isCancelRequested = true;
-  }
-  // ── "Solve All" Handler from Grid ────────────────────────────
-  onGridSolveAll(event2) {
-    this.state.applyBatchCorrection(event2.colKey, event2.badValue, event2.resolvedDisplay, event2.resolvedId);
-    if (event2.saveToDict) {
-      const header = this.state.headers().find((h) => h.name === event2.colKey);
-      const refType = header?.ref_table || event2.colKey;
-      this.api.addDictionaryEntry({
-        type: refType,
-        name: event2.badValue,
-        ref_id: event2.resolvedId !== void 0 ? event2.resolvedId : event2.resolvedDisplay
-      }).subscribe();
-    }
-  }
-  static \u0275fac = function SutramExcelStudioComponent_Factory(t) {
-    return new (t || _SutramExcelStudioComponent)(\u0275\u0275directiveInject(SutramExcelStateService), \u0275\u0275directiveInject(SutramExcelApiService), \u0275\u0275directiveInject(SutramExcelScannerService), \u0275\u0275directiveInject(SutramAuditService), \u0275\u0275directiveInject(SutramRefCacheService), \u0275\u0275directiveInject(ChangeDetectorRef));
-  };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _SutramExcelStudioComponent, selectors: [["sutram-excel-studio"]], inputs: { table: "table", mode: "mode", apiBase: "apiBase", enableFilters: "enableFilters", enableSorting: "enableSorting", enableSearch: "enableSearch", enableControlBar: "enableControlBar", enableStatsBar: "enableStatsBar", enableUpload: "enableUpload", enableAudit: "enableAudit", enableAddRow: "enableAddRow", enableCorrections: "enableCorrections", enableLoadData: "enableLoadData", enableVerify: "enableVerify", enableSync: "enableSync", enableDelete: "enableDelete", enableTabs: "enableTabs", enableZoom: "enableZoom" }, decls: 123, vars: 53, consts: [[1, "sutram-excel-container"], [1, "command-bar"], [1, "brand"], [1, "brand-icon"], [1, "pi", "pi-table"], [1, "brand-title"], [2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(16, 185, 129, 0.2)", "color", "#059669", "border-radius", "4px"], [1, "mode-pill-toggle"], [1, "mode-pill-btn", 3, "click"], [1, "pi", "pi-pencil"], [1, "pi", "pi-bolt"], [1, "btn-group-cmd"], ["title", "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0938\u0947 \u0907\u0938 \u091F\u0947\u092C\u0932 \u0915\u093E \u0932\u093E\u0907\u0935 \u0921\u0947\u091F\u093E \u0932\u094B\u0921 \u0915\u0930\u0947\u0902", 1, "cmd-btn", "cmd-btn-success", 3, "click"], [1, "pi", "pi-database"], ["title", "\u092C\u093E\u0939\u0930\u0940 Excel (.xlsx) \u0916\u094B\u0932\u0947\u0902", 1, "cmd-btn", 3, "click"], [1, "pi", "pi-folder-open"], ["type", "file", "accept", ".xlsx, .xls, .csv", 2, "display", "none", 3, "change"], ["fileInput", ""], ["title", "Excel \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0947\u0902", 1, "cmd-btn", 3, "click"], [1, "pi", "pi-download"], ["title", "\u0936\u0940\u091F \u0916\u093E\u0932\u0940 \u0915\u0930\u0947\u0902", 1, "cmd-btn", 3, "click"], [1, "pi", "pi-trash"], ["title", "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0947\u0935/\u0907\u092E\u094D\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0947\u0902", 1, "cmd-btn", "cmd-btn-primary", 3, "disabled", "click"], [1, "pi", "pi-cloud-upload"], ["class", "sync-badge-count", 4, "ngIf"], ["title", "\u0932\u093E\u0907\u091F / \u0921\u093E\u0930\u094D\u0915 \u092E\u094B\u0921", 1, "cmd-btn", 2, "padding", "4px 6px", 3, "click"], [1, "pi", 3, "ngClass"], [1, "formula-bar-row"], [1, "coord-box"], [1, "active-col-chip"], [2, "display", "flex", "gap", "2px"], ["title", "Bold (Ctrl+B)", 1, "cmd-btn", 2, "padding", "2px 7px", "font-weight", "700", 3, "click"], ["title", "Align Left", 1, "cmd-btn", 2, "padding", "2px 6px", 3, "click"], [1, "pi", "pi-align-left"], ["title", "Align Center", 1, "cmd-btn", 2, "padding", "2px 6px", 3, "click"], [1, "pi", "pi-align-center"], ["title", "Align Right", 1, "cmd-btn", 2, "padding", "2px 6px", 3, "click"], [1, "pi", "pi-align-right"], ["title", "Choose Visible Columns (\u0915\u0949\u0932\u092E \u091A\u0941\u0928\u0947\u0902)", 1, "cmd-btn", 2, "gap", "5px", 3, "click"], [1, "pi", "pi-sliders-h", 2, "color", "var(--primary)"], [2, "font-size", "10px", "padding", "1px 5px", "background", "var(--primary-soft)", "color", "var(--primary)", "border-radius", "999px", "font-weight", "700"], [2, "font-weight", "700", "font-style", "italic", "color", "var(--text-muted)", "margin", "0 4px"], ["type", "text", "placeholder", "Select a cell or type value here...", 1, "formula-input", 3, "ngModel", "ngModelChange"], ["styleClass", "p-2 shadow-lg", 3, "dismissable"], ["colConfigOp", ""], ["pTemplate", "content"], [1, "control-settings-bar"], [1, "ctrl-bar-left"], ["title", "\u0915\u0949\u0932\u092E \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0911\u0928 / \u0911\u092B\u093C \u0915\u0930\u0947\u0902", 1, "ctrl-btn", 3, "click"], [1, "pi", "pi-filter"], [1, "ctrl-dot"], ["title", "\u0938\u0949\u0930\u094D\u091F\u093F\u0902\u0917 \u0911\u0928 / \u0911\u092B\u093C \u0915\u0930\u0947\u0902", 1, "ctrl-btn", 3, "click"], [1, "pi", "pi-sort-alt"], ["class", "ctrl-btn ctrl-btn-danger", "title", "\u0938\u092D\u0940 \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0938\u093E\u092B\u093C \u0915\u0930\u0947\u0902", 3, "click", 4, "ngIf"], [1, "ctrl-search-wrap"], [1, "pi", "pi-search", "ctrl-search-icon"], ["type", "text", "placeholder", "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0940\u0927\u093E \u0916\u094B\u091C\u0947\u0902 (Direct DB Search)...", "autocomplete", "off", 1, "ctrl-search-input", 3, "ngModel", "ngModelChange"], ["class", "ctrl-search-clear", "style", "display: block;", "title", "\u0916\u094B\u091C \u0938\u093E\u092B\u093C \u0915\u0930\u0947\u0902", 3, "click", 4, "ngIf"], ["class", "ctrl-search-spinner", 4, "ngIf"], [1, "ctrl-bar-right"], ["title", "\u0915\u0941\u0932 \u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0930\u093F\u0915\u0949\u0930\u094D\u0921\u094D\u0938 \u090F\u0935\u0902 \u0932\u094B\u0921 \u0938\u094D\u0925\u093F\u0924\u093F", 1, "ctrl-record-badge"], [1, "status-strip", 3, "ngClass"], [2, "display", "flex", "align-items", "center", "gap", "6px"], [4, "ngIf"], [1, "spreadsheet-canvas", "flex-grow-1", "overflow-auto"], [3, "headers", "rows", "filterOnlyErrors", "enableDelete", "loadMore", "filterChanged", "sortChanged", "solveAllTriggered"], [1, "studio-footer"], [1, "sheet-tabs-bar"], ["class", "tab-pill", 3, "active-tab", "click", 4, "ngFor", "ngForOf"], ["title", "Add Blank Sheet", 1, "add-tab-btn", 3, "click"], [1, "pi", "pi-plus", 2, "font-size", "10px"], [1, "bottom-status-subrow"], [2, "display", "flex", "align-items", "center", "gap", "10px"], ["class", "badge bg-soft-warning text-warning small fw-semibold", 4, "ngIf"], ["style", "color: #10b981; font-weight: 600;", 4, "ngIf"], ["style", "color: #ef4444; font-weight: 600;", 4, "ngIf"], [2, "font-size", "10.5px", "opacity", "0.8"], [1, "zoom-controls"], ["title", "Zoom Out (-10%)", 1, "zoom-btn", 3, "click"], [1, "pi", "pi-minus"], ["title", "Reset to 100%", 1, "zoom-display", 3, "click"], ["title", "Zoom In (+10%)", 1, "zoom-btn", 3, "click"], [1, "pi", "pi-plus"], ["class", "sync-toast-hud", 4, "ngIf"], [3, "visible", "report", "availableHeaders", "visibleChange", "confirmed"], [3, "visible", "groups", "visibleChange"], [3, "visible", "progress", "tableName", "rejectedRows", "visibleChange", "cancelRequested"], [1, "sync-badge-count"], [2, "min-width", "200px", "max-height", "260px", "overflow-y", "auto"], [1, "fw-bold", "small", "mb-2", "text-muted"], ["class", "d-flex align-items-center gap-2 py-1", 4, "ngFor", "ngForOf"], [1, "d-flex", "align-items-center", "gap-2", "py-1"], ["type", "checkbox", 3, "id", "checked", "change"], [1, "small", "mb-0", "cursor-pointer", 3, "for"], ["title", "\u0938\u092D\u0940 \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0938\u093E\u092B\u093C \u0915\u0930\u0947\u0902", 1, "ctrl-btn", "ctrl-btn-danger", 3, "click"], [1, "pi", "pi-filter-slash"], ["title", "\u0916\u094B\u091C \u0938\u093E\u092B\u093C \u0915\u0930\u0947\u0902", 1, "ctrl-search-clear", 2, "display", "block", 3, "click"], [1, "ctrl-search-spinner"], [1, "pi", "pi-spin", "pi-spinner"], [1, "cmd-btn", "cmd-btn-warning", 2, "padding", "2px 8px", 3, "click"], [1, "tab-pill", 3, "click"], [1, "pi", 2, "font-size", "11px", 3, "ngClass"], ["class", "sheet-tab-badge", 4, "ngIf"], [1, "sheet-tab-badge"], [1, "badge", "bg-soft-warning", "text-warning", "small", "fw-semibold"], [1, "pi", "pi-trash", "me-1"], [2, "color", "#10b981", "font-weight", "600"], [2, "color", "#ef4444", "font-weight", "600"], [1, "sync-toast-hud"], [1, "sync-toast-header"], [1, "sync-toast-title"], [1, "sync-toast-close", 3, "click"], [1, "sync-toast-body"], [1, "sync-toast-stats"], ["class", "sync-badge-chip chip-success", 4, "ngIf"], ["class", "sync-badge-chip chip-info", 4, "ngIf"], ["class", "sync-badge-chip chip-warning", 4, "ngIf"], ["class", "sync-badge-chip chip-danger", 4, "ngIf"], ["class", "sync-toast-errors", 4, "ngIf"], [1, "sync-badge-chip", "chip-success"], [1, "sync-badge-chip", "chip-info"], [1, "pi", "pi-refresh"], [1, "sync-badge-chip", "chip-warning"], [1, "sync-badge-chip", "chip-danger"], [1, "pi", "pi-times"], [1, "sync-toast-errors"], [4, "ngFor", "ngForOf"]], template: function SutramExcelStudioComponent_Template(rf, ctx) {
-    if (rf & 1) {
-      const _r37 = \u0275\u0275getCurrentView();
-      \u0275\u0275elementStart(0, "div", 0)(1, "header", 1)(2, "div", 2)(3, "div", 3);
-      \u0275\u0275element(4, "i", 4);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(5, "div", 5)(6, "span");
-      \u0275\u0275text(7, "Sutram Excel Studio");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(8, "span", 6);
-      \u0275\u0275text(9, "v2.0");
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(10, "div", 7)(11, "button", 8);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_11_listener() {
-        return ctx.setStudioMode("normal");
-      });
-      \u0275\u0275element(12, "i", 9);
-      \u0275\u0275text(13, " Normal ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(14, "button", 8);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_14_listener() {
-        return ctx.setStudioMode("intelligent");
-      });
-      \u0275\u0275element(15, "i", 10);
-      \u0275\u0275text(16, " Smart (Intelligent) ");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(17, "div", 11)(18, "button", 12);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_18_listener() {
-        return ctx.loadTableDataFromDb();
-      });
-      \u0275\u0275element(19, "i", 13);
-      \u0275\u0275text(20, " Load Data ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(21, "button", 14);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_21_listener() {
-        \u0275\u0275restoreView(_r37);
-        const _r0 = \u0275\u0275reference(25);
-        return \u0275\u0275resetView(_r0.click());
-      });
-      \u0275\u0275element(22, "i", 15);
-      \u0275\u0275text(23, " Open File ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(24, "input", 16, 17);
-      \u0275\u0275listener("change", function SutramExcelStudioComponent_Template_input_change_24_listener($event) {
-        return ctx.onFileUpload($event);
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(26, "button", 18);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_26_listener() {
-        return ctx.exportExcel();
-      });
-      \u0275\u0275element(27, "i", 19);
-      \u0275\u0275text(28, " Export ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(29, "button", 20);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_29_listener() {
-        return ctx.state.clearGrid();
-      });
-      \u0275\u0275element(30, "i", 21);
-      \u0275\u0275text(31, " Clear ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(32, "button", 22);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_32_listener() {
-        return ctx.startImport();
-      });
-      \u0275\u0275element(33, "i", 23);
-      \u0275\u0275text(34, " Sync to DB ");
-      \u0275\u0275template(35, SutramExcelStudioComponent_span_35_Template, 2, 1, "span", 24);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(36, "button", 25);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_36_listener() {
-        return ctx.toggleTheme();
-      });
-      \u0275\u0275element(37, "i", 26);
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(38, "div", 27)(39, "div", 28);
-      \u0275\u0275text(40);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(41, "span", 29);
-      \u0275\u0275text(42);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(43, "div", 30)(44, "button", 31);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_44_listener() {
-        return ctx.isBoldActive = !ctx.isBoldActive;
-      });
-      \u0275\u0275text(45, "B");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(46, "button", 32);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_46_listener() {
-        return ctx.textAlign = "left";
-      });
-      \u0275\u0275element(47, "i", 33);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(48, "button", 34);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_48_listener() {
-        return ctx.textAlign = "center";
-      });
-      \u0275\u0275element(49, "i", 35);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(50, "button", 36);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_50_listener() {
-        return ctx.textAlign = "right";
-      });
-      \u0275\u0275element(51, "i", 37);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(52, "button", 38);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_52_listener($event) {
-        \u0275\u0275restoreView(_r37);
-        const _r2 = \u0275\u0275reference(62);
-        return \u0275\u0275resetView(_r2.toggle($event));
-      });
-      \u0275\u0275element(53, "i", 39);
-      \u0275\u0275elementStart(54, "span");
-      \u0275\u0275text(55, "Columns");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(56, "span", 40);
-      \u0275\u0275text(57);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(58, "span", 41);
-      \u0275\u0275text(59, "fx");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(60, "input", 42);
-      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_60_listener($event) {
-        return ctx.onFormulaChange($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(61, "p-overlayPanel", 43, 44);
-      \u0275\u0275template(63, SutramExcelStudioComponent_ng_template_63_Template, 4, 1, "ng-template", 45);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(64, "div", 46)(65, "div", 47)(66, "button", 48);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_66_listener() {
-        return ctx.state.toggleFiltersEnabled();
-      });
-      \u0275\u0275element(67, "i", 49);
-      \u0275\u0275elementStart(68, "span");
-      \u0275\u0275text(69, "Filters");
-      \u0275\u0275elementEnd();
-      \u0275\u0275element(70, "span", 50);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(71, "button", 51);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_71_listener() {
-        return ctx.state.toggleSortingEnabled();
-      });
-      \u0275\u0275element(72, "i", 52);
-      \u0275\u0275elementStart(73, "span");
-      \u0275\u0275text(74, "Sorting");
-      \u0275\u0275elementEnd();
-      \u0275\u0275element(75, "span", 50);
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(76, SutramExcelStudioComponent_button_76_Template, 4, 1, "button", 53);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(77, "div", 54);
-      \u0275\u0275element(78, "i", 55);
-      \u0275\u0275elementStart(79, "input", 56);
-      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_79_listener($event) {
-        return ctx.onDbSearchInput($event);
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(80, SutramExcelStudioComponent_button_80_Template, 2, 0, "button", 57);
-      \u0275\u0275template(81, SutramExcelStudioComponent_span_81_Template, 2, 0, "span", 58);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(82, "div", 59)(83, "div", 60);
-      \u0275\u0275element(84, "i", 13);
-      \u0275\u0275elementStart(85, "span");
-      \u0275\u0275text(86);
-      \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(87, "div", 61)(88, "div", 62);
-      \u0275\u0275element(89, "i", 26);
-      \u0275\u0275elementStart(90, "span");
-      \u0275\u0275text(91);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275template(92, SutramExcelStudioComponent_div_92_Template, 4, 1, "div", 63);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(93, "main", 64)(94, "sutram-grid", 65);
-      \u0275\u0275listener("loadMore", function SutramExcelStudioComponent_Template_sutram_grid_loadMore_94_listener() {
-        return ctx.onLoadMore();
-      })("filterChanged", function SutramExcelStudioComponent_Template_sutram_grid_filterChanged_94_listener() {
-        return ctx.onGridFilterChanged();
-      })("sortChanged", function SutramExcelStudioComponent_Template_sutram_grid_sortChanged_94_listener() {
-        return ctx.onGridSortChanged();
-      })("solveAllTriggered", function SutramExcelStudioComponent_Template_sutram_grid_solveAllTriggered_94_listener($event) {
-        return ctx.onGridSolveAll($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(95, "footer", 66)(96, "div", 67);
-      \u0275\u0275template(97, SutramExcelStudioComponent_div_97_Template, 5, 5, "div", 68);
-      \u0275\u0275elementStart(98, "button", 69);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_98_listener() {
-        return ctx.addNewBlankSheet();
-      });
-      \u0275\u0275element(99, "i", 70);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(100, "div", 71)(101, "div", 72)(102, "span");
-      \u0275\u0275text(103);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(104, "span");
-      \u0275\u0275text(105);
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(106, SutramExcelStudioComponent_span_106_Template, 3, 1, "span", 73);
-      \u0275\u0275template(107, SutramExcelStudioComponent_span_107_Template, 2, 0, "span", 74);
-      \u0275\u0275template(108, SutramExcelStudioComponent_span_108_Template, 2, 1, "span", 75);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(109, "div", 72)(110, "span", 76);
-      \u0275\u0275text(111, "Enter next row | Tab next col | Right-click row for actions");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(112, "div", 77)(113, "button", 78);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_113_listener() {
-        return ctx.zoomOut();
-      });
-      \u0275\u0275element(114, "i", 79);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(115, "span", 80);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_span_click_115_listener() {
-        return ctx.resetZoom();
-      });
-      \u0275\u0275text(116);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(117, "button", 81);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_117_listener() {
-        return ctx.zoomIn();
-      });
-      \u0275\u0275element(118, "i", 82);
-      \u0275\u0275elementEnd()()()()();
-      \u0275\u0275template(119, SutramExcelStudioComponent_div_119_Template, 15, 7, "div", 83);
-      \u0275\u0275elementStart(120, "sutram-header-scanner", 84);
-      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_header_scanner_visibleChange_120_listener($event) {
-        return ctx.showScannerModal = $event;
-      })("confirmed", function SutramExcelStudioComponent_Template_sutram_header_scanner_confirmed_120_listener($event) {
-        return ctx.onScannerConfirmed($event);
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(121, "sutram-correction-sidebar", 85);
-      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_correction_sidebar_visibleChange_121_listener($event) {
-        return ctx.showSidebar = $event;
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(122, "sutram-import-progress", 86);
-      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_import_progress_visibleChange_122_listener($event) {
-        return ctx.showProgressModal = $event;
-      })("cancelRequested", function SutramExcelStudioComponent_Template_sutram_import_progress_cancelRequested_122_listener() {
-        return ctx.cancelImport();
-      });
-      \u0275\u0275elementEnd()();
-    }
-    if (rf & 2) {
-      \u0275\u0275classProp("dark-mode", ctx.isDarkMode);
-      \u0275\u0275advance(11);
-      \u0275\u0275classProp("active-normal", ctx.mode === "normal");
-      \u0275\u0275advance(3);
-      \u0275\u0275classProp("active-smart", ctx.mode === "intelligent");
-      \u0275\u0275advance(18);
-      \u0275\u0275property("disabled", ctx.state.pendingChangesCount() === 0 || ctx.state.hasErrors());
-      \u0275\u0275advance(3);
-      \u0275\u0275property("ngIf", ctx.state.pendingChangesCount() > 0);
-      \u0275\u0275advance(2);
-      \u0275\u0275property("ngClass", ctx.isDarkMode ? "pi-sun" : "pi-moon");
-      \u0275\u0275advance(3);
-      \u0275\u0275textInterpolate(ctx.activeCoord);
-      \u0275\u0275advance(2);
-      \u0275\u0275textInterpolate(ctx.activeColChip);
-      \u0275\u0275advance(2);
-      \u0275\u0275classProp("active", ctx.isBoldActive);
-      \u0275\u0275advance(13);
-      \u0275\u0275textInterpolate(ctx.visibleHeadersCount);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("ngModel", ctx.formulaValue);
-      \u0275\u0275advance(1);
-      \u0275\u0275property("dismissable", true);
-      \u0275\u0275advance(5);
-      \u0275\u0275classProp("active", ctx.state.filtersEnabled());
-      \u0275\u0275advance(5);
-      \u0275\u0275classProp("active", ctx.state.sortingEnabled());
-      \u0275\u0275advance(5);
-      \u0275\u0275property("ngIf", ctx.state.filtersEnabled() && ctx.state.activeFilterCount() > 0);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("ngModel", ctx.state.dbSearchQuery());
-      \u0275\u0275advance(1);
-      \u0275\u0275property("ngIf", ctx.state.dbSearchQuery());
-      \u0275\u0275advance(1);
-      \u0275\u0275property("ngIf", ctx.state.isLoadingDb());
-      \u0275\u0275advance(5);
-      \u0275\u0275textInterpolate2("", ctx.state.rows().length, " / ", ctx.state.totalDbRecords(), " Records");
-      \u0275\u0275advance(1);
-      \u0275\u0275property("ngClass", ctx.statusStripClass);
-      \u0275\u0275advance(2);
-      \u0275\u0275property("ngClass", ctx.statusStripIcon);
-      \u0275\u0275advance(2);
-      \u0275\u0275textInterpolate(ctx.statusStripMessage);
-      \u0275\u0275advance(1);
-      \u0275\u0275property("ngIf", ctx.state.unresolvedCorrectionsCount() > 0);
-      \u0275\u0275advance(1);
-      \u0275\u0275styleProp("zoom", ctx.zoomLevel);
-      \u0275\u0275advance(1);
-      \u0275\u0275property("headers", ctx.visibleHeaders)("rows", ctx.state.rows())("filterOnlyErrors", ctx.state.filterOnlyErrors())("enableDelete", ctx.enableDelete);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("ngForOf", ctx.sheetTabs);
-      \u0275\u0275advance(6);
-      \u0275\u0275textInterpolate1("Sheet: ", ctx.activeSheetId, "");
-      \u0275\u0275advance(2);
-      \u0275\u0275textInterpolate1("Rows: ", ctx.state.rows().length, "");
-      \u0275\u0275advance(1);
-      \u0275\u0275property("ngIf", ctx.state.deletedRowIds().length > 0);
-      \u0275\u0275advance(1);
-      \u0275\u0275property("ngIf", ctx.state.stats().errorRows === 0);
-      \u0275\u0275advance(1);
-      \u0275\u0275property("ngIf", ctx.state.stats().errorRows > 0);
-      \u0275\u0275advance(8);
-      \u0275\u0275textInterpolate1("", (ctx.zoomLevel * 100).toFixed(0), "%");
-      \u0275\u0275advance(3);
-      \u0275\u0275property("ngIf", ctx.syncToast.visible);
-      \u0275\u0275advance(1);
-      \u0275\u0275property("visible", ctx.showScannerModal)("report", ctx.scanReport)("availableHeaders", ctx.state.headers());
-      \u0275\u0275advance(1);
-      \u0275\u0275property("visible", ctx.showSidebar)("groups", ctx.state.correctionGroups());
-      \u0275\u0275advance(1);
-      \u0275\u0275property("visible", ctx.showProgressModal)("progress", ctx.state.importProgress())("tableName", ctx.selectedTableName)("rejectedRows", ctx.rejectedRowsDuringImport);
-    }
-  }, dependencies: [NgClass, NgForOf, NgIf, DefaultValueAccessor, NgControlStatus, NgModel, PrimeTemplate, OverlayPanel, SutramGridComponent, SutramHeaderScannerComponent, SutramCorrectionSidebarComponent, SutramImportProgressComponent], styles: ["\n\n\n\n\n\n\n\n\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 100%;\n}\n\n.sutram-excel-container[_ngcontent-%COMP%] {\n  --primary: #4f46e5;\n  --primary-hover: #4338ca;\n  --primary-soft: #e0e7ff;\n  --success: #10b981;\n  --success-soft: #d1fae5;\n  --warning: #f59e0b;\n  --warning-soft: #fef3c7;\n  --danger: #ef4444;\n  --danger-soft: #fee2e2;\n  --bg: #f8fafc;\n  --surface: #ffffff;\n  --surface-border: #e2e8f0;\n  --text: #0f172a;\n  --text-muted: #64748b;\n  --radius: 6px;\n  --header-bg: #f1f5f9;\n  --header-text: #1e293b;\n  --cell-border: rgba(125, 125, 125, 0.18);\n  --cell-height: 23px;\n  --header-height: 38px;\n  --cell-edited-bg: #fef9c3;\n  --cell-edited-border: #eab308;\n  --row-edited-bg: #fffbeb;\n  --row-new-bg: #dcfce7;\n  --row-new-border: #22c55e;\n\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\n  background-color: var(--bg);\n  color: var(--text);\n  height: 100%;\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  user-select: none;\n\n  &.dark-mode {\n    --bg: #0f172a;\n    --surface: #1e293b;\n    --surface-border: #334155;\n    --text: #f8fafc;\n    --text-muted: #94a3b8;\n    --header-bg: #1e293b;\n    --header-text: #cbd5e1;\n    --cell-border: rgba(255, 255, 255, 0.1);\n    --cell-edited-bg: rgba(234, 179, 8, 0.22);\n    --cell-edited-border: #facc15;\n    --row-edited-bg: rgba(234, 179, 8, 0.12);\n    --row-new-bg: rgba(34, 197, 94, 0.18);\n    --row-new-border: #4ade80;\n  }\n}\n\n\n\n.command-bar[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 6px 14px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  gap: 10px;\n}\n.brand[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.brand-icon[_ngcontent-%COMP%] {\n  width: 28px;\n  height: 28px;\n  background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n  border-radius: 6px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 15px;\n}\n.brand-title[_ngcontent-%COMP%] {\n  font-size: 13px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.mode-pill-toggle[_ngcontent-%COMP%] {\n  background: rgba(125, 125, 125, 0.12);\n  border-radius: 999px;\n  padding: 2px;\n  display: flex;\n  gap: 2px;\n}\n.mode-pill-btn[_ngcontent-%COMP%] {\n  padding: 3px 12px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n  border: none;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.15s ease;\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n}\n.mode-pill-btn.active-normal[_ngcontent-%COMP%] {\n  background: #3b82f6;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.4);\n}\n.mode-pill-btn.active-smart[_ngcontent-%COMP%] {\n  background: #10b981;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.4);\n}\n\n.btn-group-cmd[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.cmd-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 10px;\n  border-radius: var(--radius);\n  font-size: 11px;\n  font-weight: 600;\n  cursor: pointer;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  transition: all 0.15s;\n}\n.cmd-btn[_ngcontent-%COMP%]:hover { background: rgba(125, 125, 125, 0.1); }\n.cmd-btn.active[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.cmd-btn-primary[_ngcontent-%COMP%] { background: var(--primary); color: white; border-color: var(--primary); }\n.cmd-btn-primary[_ngcontent-%COMP%]:hover { background: var(--primary-hover); }\n.cmd-btn-success[_ngcontent-%COMP%] { background: var(--success); color: white; border-color: var(--success); }\n.cmd-btn-success[_ngcontent-%COMP%]:hover { background: #059669; }\n.cmd-btn-warning[_ngcontent-%COMP%] { background: var(--warning-soft); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }\n\n.sync-badge-count[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  background: #f59e0b;\n  color: #ffffff;\n  font-size: 10px;\n  font-weight: 700;\n  padding: 1px 6px;\n  border-radius: 999px;\n  margin-left: 5px;\n  line-height: 1.2;\n}\n\n\n\n.formula-bar-row[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 4px 14px;\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  flex-shrink: 0;\n}\n.coord-box[_ngcontent-%COMP%] {\n  width: 55px;\n  text-align: center;\n  font-weight: 700;\n  font-size: 11.5px;\n  padding: 2px 4px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  background: rgba(125, 125, 125, 0.05);\n}\n.active-col-chip[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n  padding: 2px 8px;\n  border-radius: 4px;\n  font-size: 11px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 180px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n.formula-input[_ngcontent-%COMP%] {\n  flex-grow: 1;\n  padding: 3px 8px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 12px;\n  font-family: inherit;\n  outline: none;\n  background: var(--surface);\n  color: var(--text);\n}\n.formula-input[_ngcontent-%COMP%]:focus { border-color: var(--primary); }\n\n\n\n.control-settings-bar[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 4px 14px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 10px;\n  flex-shrink: 0;\n  font-size: 11.5px;\n}\n.ctrl-bar-left[_ngcontent-%COMP%], .ctrl-bar-right[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.ctrl-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 3px 10px;\n  border-radius: var(--radius);\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  user-select: none;\n}\n.ctrl-btn[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text);\n}\n.ctrl-btn.active[_ngcontent-%COMP%] {\n  color: var(--primary);\n  background: var(--primary-soft);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.ctrl-btn-danger[_ngcontent-%COMP%] {\n  color: var(--danger);\n  background: var(--danger-soft);\n  border-color: rgba(239, 68, 68, 0.3);\n}\n.ctrl-btn-danger[_ngcontent-%COMP%]:hover {\n  background: rgba(239, 68, 68, 0.2);\n}\n.ctrl-dot[_ngcontent-%COMP%] {\n  width: 5px;\n  height: 5px;\n  border-radius: 50%;\n  background: #10b981;\n  display: inline-block;\n}\n.ctrl-search-wrap[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  flex-grow: 1;\n  max-width: 460px;\n}\n.ctrl-search-icon[_ngcontent-%COMP%] {\n  position: absolute;\n  left: 10px;\n  color: var(--text-muted);\n  font-size: 11px;\n  pointer-events: none;\n}\n.ctrl-search-input[_ngcontent-%COMP%] {\n  width: 100%;\n  padding: 4px 28px 4px 28px;\n  border: 1px solid var(--surface-border);\n  border-radius: 999px;\n  font-size: 11.5px;\n  background: rgba(125, 125, 125, 0.05);\n  color: var(--text);\n  outline: none;\n  transition: all 0.15s;\n}\n.ctrl-search-input[_ngcontent-%COMP%]:focus {\n  border-color: var(--primary);\n  background: var(--surface);\n  box-shadow: 0 0 0 2px var(--primary-soft);\n}\n.ctrl-search-clear[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 8px;\n  background: none;\n  border: none;\n  font-size: 11px;\n  color: var(--text-muted);\n  cursor: pointer;\n  padding: 2px 5px;\n  border-radius: 50%;\n}\n.ctrl-search-clear[_ngcontent-%COMP%]:hover {\n  color: var(--danger);\n  background: rgba(125, 125, 125, 0.15);\n}\n.ctrl-search-spinner[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 28px;\n  color: var(--primary);\n  font-size: 11px;\n}\n.ctrl-record-badge[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 2px 9px;\n  border-radius: 999px;\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text-muted);\n  font-size: 10.5px;\n  font-weight: 600;\n  white-space: nowrap;\n}\n\n\n\n.status-strip[_ngcontent-%COMP%] {\n  padding: 3px 14px;\n  font-size: 11.5px;\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  background: rgba(125, 125, 125, 0.04);\n}\n.status-strip.strip-error[_ngcontent-%COMP%] { background: #fef2f2; color: #991b1b; }\n.status-strip.strip-clean[_ngcontent-%COMP%] { background: #f0fdf4; color: #166534; }\n.status-strip.strip-suggestion[_ngcontent-%COMP%] { background: #fffbeb; color: #92400e; }\n\n\n\n.spreadsheet-canvas[_ngcontent-%COMP%] {\n  flex-grow: 1;\n  overflow: auto;\n  background: var(--surface);\n  position: relative;\n  min-height: 0;\n}\n\n\n\n.studio-footer[_ngcontent-%COMP%] {\n  flex-shrink: 0;\n  background: var(--surface);\n  border-top: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n}\n.sheet-tabs-bar[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  background: rgba(125, 125, 125, 0.05);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 2px 6px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.sheet-tabs-bar[_ngcontent-%COMP%]::-webkit-scrollbar { display: none; }\n\n.tab-pill[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 12px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11.5px;\n  font-weight: 600;\n  cursor: pointer;\n  color: var(--text-muted);\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  transition: all 0.15s;\n}\n.tab-pill[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.1);\n  color: var(--text);\n}\n.tab-pill.active-tab[_ngcontent-%COMP%] {\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-color: rgba(16, 185, 129, 0.25);\n  border-bottom: 2px solid #10b981;\n  font-weight: 700;\n}\n\n.sheet-tab-badge[_ngcontent-%COMP%] {\n  font-size: 9.5px;\n  padding: 1px 5px;\n  background: rgba(16, 185, 129, 0.2);\n  color: #059669;\n  border-radius: 999px;\n  font-weight: 700;\n}\n\n.add-tab-btn[_ngcontent-%COMP%] {\n  padding: 2px 8px;\n  border: 1px dashed rgba(125, 125, 125, 0.4);\n  border-radius: 4px;\n  background: transparent;\n  cursor: pointer;\n  color: var(--primary);\n  margin-left: 4px;\n}\n.add-tab-btn[_ngcontent-%COMP%]:hover { background: rgba(79, 70, 229, 0.1); }\n\n.bottom-status-subrow[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 3px 14px;\n  font-size: 11px;\n  color: var(--text-muted);\n}\n.zoom-controls[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  padding: 1px 4px;\n}\n.zoom-btn[_ngcontent-%COMP%] {\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  color: var(--text);\n  padding: 1px 5px;\n  font-size: 11px;\n}\n.zoom-display[_ngcontent-%COMP%] {\n  font-weight: 700;\n  cursor: pointer;\n  padding: 0 4px;\n}\n\n\n\n.sync-toast-hud[_ngcontent-%COMP%] {\n  position: fixed;\n  top: 50px;\n  right: 20px;\n  z-index: 2500;\n  min-width: 320px;\n  max-width: 440px;\n  background: var(--surface);\n  color: var(--text);\n  border: 1px solid var(--surface-border);\n  border-radius: 8px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);\n  overflow: hidden;\n  animation: _ngcontent-%COMP%_toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);\n  font-size: 11.5px;\n}\n@keyframes _ngcontent-%COMP%_toastSlideIn {\n  from { opacity: 0; transform: translateY(-12px) scale(0.97); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n.sync-toast-header[_ngcontent-%COMP%] {\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--surface-border);\n  background: rgba(125, 125, 125, 0.04);\n}\n.sync-toast-title[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 7px;\n  font-weight: 700;\n  font-size: 12px;\n}\n.sync-toast-close[_ngcontent-%COMP%] {\n  background: none;\n  border: none;\n  color: var(--text-muted);\n  cursor: pointer;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 3px;\n}\n.sync-toast-close[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.12);\n  color: var(--text);\n}\n.sync-toast-body[_ngcontent-%COMP%] {\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n.sync-toast-stats[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-wrap: wrap;\n}\n.sync-badge-chip[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n}\n.chip-success[_ngcontent-%COMP%] {\n  background: var(--success-soft);\n  color: var(--success);\n}\n.chip-info[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n}\n.chip-warning[_ngcontent-%COMP%] {\n  background: var(--warning-soft);\n  color: #b45309;\n}\n.chip-danger[_ngcontent-%COMP%] {\n  background: var(--danger-soft);\n  color: var(--danger);\n}\n.sync-toast-errors[_ngcontent-%COMP%] {\n  margin-top: 4px;\n  padding: 6px 8px;\n  background: rgba(239, 68, 68, 0.08);\n  border: 1px solid rgba(239, 68, 68, 0.2);\n  border-radius: 4px;\n  font-size: 10.5px;\n  color: #ef4444;\n  max-height: 140px;\n  overflow-y: auto;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}"], changeDetection: 0 });
-};
-(function() {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SutramExcelStudioComponent, [{
-    type: Component,
-    args: [{ selector: "sutram-excel-studio", changeDetection: ChangeDetectionStrategy2.OnPush, template: `<!-- sutram-excel-studio.component.html -->
-<div class="sutram-excel-container" [class.dark-mode]="isDarkMode">
-
-  <!-- 1. TOP COMMAND BAR -->
-  <header class="command-bar">
-    <div class="brand">
-      <div class="brand-icon"><i class="pi pi-table"></i></div>
-      <div class="brand-title">
-        <span>Sutram Excel Studio</span>
-        <span style="font-size: 9px; padding: 1px 4px; background: rgba(16, 185, 129, 0.2); color: #059669; border-radius: 4px;">v2.0</span>
-      </div>
-    </div>
-
-    <!-- Center Mode Switcher -->
-    <div class="mode-pill-toggle">
-      <button class="mode-pill-btn" [class.active-normal]="mode === 'normal'" (click)="setStudioMode('normal')">
-        <i class="pi pi-pencil"></i> Normal
-      </button>
-      <button class="mode-pill-btn" [class.active-smart]="mode === 'intelligent'" (click)="setStudioMode('intelligent')">
-        <i class="pi pi-bolt"></i> Smart (Intelligent)
-      </button>
-    </div>
-
-    <!-- Right Actions -->
-    <div class="btn-group-cmd">
-      <button class="cmd-btn cmd-btn-success" (click)="loadTableDataFromDb()" title="\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0938\u0947 \u0907\u0938 \u091F\u0947\u092C\u0932 \u0915\u093E \u0932\u093E\u0907\u0935 \u0921\u0947\u091F\u093E \u0932\u094B\u0921 \u0915\u0930\u0947\u0902">
-        <i class="pi pi-database"></i> Load Data
-      </button>
-
-      <button class="cmd-btn" (click)="fileInput.click()" title="\u092C\u093E\u0939\u0930\u0940 Excel (.xlsx) \u0916\u094B\u0932\u0947\u0902">
-        <i class="pi pi-folder-open"></i> Open File
-      </button>
-      <input #fileInput type="file" accept=".xlsx, .xls, .csv" style="display:none;" (change)="onFileUpload($event)">
-
-      <button class="cmd-btn" (click)="exportExcel()" title="Excel \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0947\u0902">
-        <i class="pi pi-download"></i> Export
-      </button>
-
-      <button class="cmd-btn" (click)="state.clearGrid()" title="\u0936\u0940\u091F \u0916\u093E\u0932\u0940 \u0915\u0930\u0947\u0902">
-        <i class="pi pi-trash"></i> Clear
-      </button>
-
-      <button class="cmd-btn cmd-btn-primary" [disabled]="state.pendingChangesCount() === 0 || state.hasErrors()" (click)="startImport()" title="\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0947\u0935/\u0907\u092E\u094D\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0947\u0902">
-        <i class="pi pi-cloud-upload"></i> Sync to DB
-        <span *ngIf="state.pendingChangesCount() > 0" class="sync-badge-count">{{ state.pendingChangesCount() }}</span>
-      </button>
-
-      <button class="cmd-btn" style="padding: 4px 6px;" (click)="toggleTheme()" title="\u0932\u093E\u0907\u091F / \u0921\u093E\u0930\u094D\u0915 \u092E\u094B\u0921">
-        <i class="pi" [ngClass]="isDarkMode ? 'pi-sun' : 'pi-moon'"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- 2. FORMULA BAR ROW -->
-  <div class="formula-bar-row">
-    <div class="coord-box">{{ activeCoord }}</div>
-    <span class="active-col-chip">{{ activeColChip }}</span>
-
-    <!-- Quick Writing Tools -->
-    <div style="display: flex; gap: 2px;">
-      <button class="cmd-btn" [class.active]="isBoldActive" style="padding: 2px 7px; font-weight: 700;" (click)="isBoldActive = !isBoldActive" title="Bold (Ctrl+B)">B</button>
-      <button class="cmd-btn" style="padding: 2px 6px;" (click)="textAlign = 'left'" title="Align Left"><i class="pi pi-align-left"></i></button>
-      <button class="cmd-btn" style="padding: 2px 6px;" (click)="textAlign = 'center'" title="Align Center"><i class="pi pi-align-center"></i></button>
-      <button class="cmd-btn" style="padding: 2px 6px;" (click)="textAlign = 'right'" title="Align Right"><i class="pi pi-align-right"></i></button>
-    </div>
-
-    <!-- Column Config Button -->
-    <button class="cmd-btn" (click)="colConfigOp.toggle($event)" title="Choose Visible Columns (\u0915\u0949\u0932\u092E \u091A\u0941\u0928\u0947\u0902)" style="gap: 5px;">
-      <i class="pi pi-sliders-h" style="color: var(--primary);"></i>
-      <span>Columns</span>
-      <span style="font-size: 10px; padding: 1px 5px; background: var(--primary-soft); color: var(--primary); border-radius: 999px; font-weight: 700;">{{ visibleHeadersCount }}</span>
-    </button>
-
-    <span style="font-weight: 700; font-style: italic; color: var(--text-muted); margin: 0 4px;">fx</span>
-    <input type="text"
-           class="formula-input"
-           [ngModel]="formulaValue"
-           (ngModelChange)="onFormulaChange($event)"
-           placeholder="Select a cell or type value here...">
-  </div>
-
-  <!-- Column Config Popover -->
-  <p-overlayPanel #colConfigOp [dismissable]="true" styleClass="p-2 shadow-lg">
-    <ng-template pTemplate="content">
-      <div style="min-width: 200px; max-height: 260px; overflow-y: auto;">
-        <div class="fw-bold small mb-2 text-muted">Visible Columns</div>
-        <div *ngFor="let h of state.headers()" class="d-flex align-items-center gap-2 py-1">
-          <input type="checkbox"
-                 [id]="'col_vis_' + h.name"
-                 [checked]="!hiddenColumnKeys.has(h.name)"
-                 (change)="toggleColumnVisibility(h.name)" />
-          <label [for]="'col_vis_' + h.name" class="small mb-0 cursor-pointer">{{ h.name }}</label>
-        </div>
-      </div>
-    </ng-template>
-  </p-overlayPanel>
-
-  <!-- 3. CONTROL SETTINGS BAR (Filters, Sorting, Live DB Search, Record Counter) -->
-  <div class="control-settings-bar">
-    <div class="ctrl-bar-left">
-      <button class="ctrl-btn" [class.active]="state.filtersEnabled()" (click)="state.toggleFiltersEnabled()" title="\u0915\u0949\u0932\u092E \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0911\u0928 / \u0911\u092B\u093C \u0915\u0930\u0947\u0902">
-        <i class="pi pi-filter"></i>
-        <span>Filters</span>
-        <span class="ctrl-dot"></span>
-      </button>
-
-      <button class="ctrl-btn" [class.active]="state.sortingEnabled()" (click)="state.toggleSortingEnabled()" title="\u0938\u0949\u0930\u094D\u091F\u093F\u0902\u0917 \u0911\u0928 / \u0911\u092B\u093C \u0915\u0930\u0947\u0902">
-        <i class="pi pi-sort-alt"></i>
-        <span>Sorting</span>
-        <span class="ctrl-dot"></span>
-      </button>
-
-      <button *ngIf="state.filtersEnabled() && state.activeFilterCount() > 0" class="ctrl-btn ctrl-btn-danger" (click)="clearAllFilters()" title="\u0938\u092D\u0940 \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0938\u093E\u092B\u093C \u0915\u0930\u0947\u0902">
-        <i class="pi pi-filter-slash"></i>
-        <span>Clear Filters ({{ state.activeFilterCount() }})</span>
-      </button>
-    </div>
-
-    <!-- Center: Direct Database Live Search Box -->
-    <div class="ctrl-search-wrap">
-      <i class="pi pi-search ctrl-search-icon"></i>
-      <input type="text"
-             class="ctrl-search-input"
-             placeholder="\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0938\u0940\u0927\u093E \u0916\u094B\u091C\u0947\u0902 (Direct DB Search)..."
-             [ngModel]="state.dbSearchQuery()"
-             (ngModelChange)="onDbSearchInput($event)"
-             autocomplete="off">
-      <button *ngIf="state.dbSearchQuery()" class="ctrl-search-clear" style="display: block;" (click)="clearDbSearch()" title="\u0916\u094B\u091C \u0938\u093E\u092B\u093C \u0915\u0930\u0947\u0902">\u2715</button>
-      <span *ngIf="state.isLoadingDb()" class="ctrl-search-spinner"><i class="pi pi-spin pi-spinner"></i></span>
-    </div>
-
-    <div class="ctrl-bar-right">
-      <div class="ctrl-record-badge" title="\u0915\u0941\u0932 \u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u0930\u093F\u0915\u0949\u0930\u094D\u0921\u094D\u0938 \u090F\u0935\u0902 \u0932\u094B\u0921 \u0938\u094D\u0925\u093F\u0924\u093F">
-        <i class="pi pi-database"></i>
-        <span>{{ state.rows().length }} / {{ state.totalDbRecords() }} Records</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. STATUS & BATCH FIX SUGGESTION STRIP -->
-  <div class="status-strip" [ngClass]="statusStripClass">
-    <div style="display: flex; align-items: center; gap: 6px;">
-      <i class="pi" [ngClass]="statusStripIcon"></i>
-      <span>{{ statusStripMessage }}</span>
-    </div>
-    <div *ngIf="state.unresolvedCorrectionsCount() > 0">
-      <button class="cmd-btn cmd-btn-warning" style="padding: 2px 8px;" (click)="showSidebar = true">
-        <i class="pi pi-bolt"></i> \u0917\u0932\u0924\u093F\u092F\u093E\u0901 ({{ state.unresolvedCorrectionsCount() }})
-      </button>
-    </div>
-  </div>
-
-  <!-- 5. SPREADSHEET CANVAS -->
-  <main class="spreadsheet-canvas flex-grow-1 overflow-auto" [style.zoom]="zoomLevel">
-    <sutram-grid [headers]="visibleHeaders"
-                 [rows]="state.rows()"
-                 [filterOnlyErrors]="state.filterOnlyErrors()"
-                 [enableDelete]="enableDelete"
-                 (loadMore)="onLoadMore()"
-                 (filterChanged)="onGridFilterChanged()"
-                 (sortChanged)="onGridSortChanged()"
-                 (solveAllTriggered)="onGridSolveAll($event)">
-    </sutram-grid>
-  </main>
-
-  <!-- 6. BOTTOM MULTI-SHEET TAB BAR & STATUS BAR -->
-  <footer class="studio-footer">
-    <!-- Sub-row A: Sheet Tabs Strip -->
-    <div class="sheet-tabs-bar">
-      <div *ngFor="let tab of sheetTabs"
-           class="tab-pill"
-           [class.active-tab]="activeSheetId === tab.id"
-           (click)="switchSheet(tab.id)">
-        <i class="pi" [ngClass]="tab.icon" style="font-size: 11px;"></i>
-        <span>{{ tab.title }}</span>
-        <span *ngIf="tab.isLoaded && (tab.recordCount || 0) > 0" class="sheet-tab-badge">
-          {{ tab.recordCount }}
-        </span>
-      </div>
-
-      <button class="add-tab-btn" (click)="addNewBlankSheet()" title="Add Blank Sheet">
-        <i class="pi pi-plus" style="font-size: 10px;"></i>
-      </button>
-    </div>
-
-    <!-- Sub-row B: Status Bar with Scale / Zoom Controls -->
-    <div class="bottom-status-subrow">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span>Sheet: {{ activeSheetId }}</span>
-        <span>Rows: {{ state.rows().length }}</span>
-        <span *ngIf="state.deletedRowIds().length > 0" class="badge bg-soft-warning text-warning small fw-semibold">
-          <i class="pi pi-trash me-1"></i>{{ state.deletedRowIds().length }} Deleted
-        </span>
-        <span *ngIf="state.stats().errorRows === 0" style="color: #10b981; font-weight: 600;">\u2713 100% In Sync</span>
-        <span *ngIf="state.stats().errorRows > 0" style="color: #ef4444; font-weight: 600;">{{ state.stats().errorRows }} \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u093E\u0901</span>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 10.5px; opacity: 0.8;">Enter next row | Tab next col | Right-click row for actions</span>
-
-        <!-- Scale / Zoom Controls -->
-        <div class="zoom-controls">
-          <button class="zoom-btn" (click)="zoomOut()" title="Zoom Out (-10%)"><i class="pi pi-minus"></i></button>
-          <span class="zoom-display" (click)="resetZoom()" title="Reset to 100%">{{ (zoomLevel * 100).toFixed(0) }}%</span>
-          <button class="zoom-btn" (click)="zoomIn()" title="Zoom In (+10%)"><i class="pi pi-plus"></i></button>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- 7. Floating Sync Toast HUD -->
-  <div *ngIf="syncToast.visible" class="sync-toast-hud">
-    <div class="sync-toast-header">
-      <div class="sync-toast-title">
-        <i class="pi" [ngClass]="syncToast.hasError ? 'pi-exclamation-circle text-warning' : 'pi-check-circle text-success'"></i>
-        <span>{{ syncToast.title }}</span>
-      </div>
-      <button class="sync-toast-close" (click)="syncToast.visible = false">\u2715</button>
-    </div>
-    <div class="sync-toast-body">
-      <div class="sync-toast-stats">
-        <span *ngIf="syncToast.inserted > 0" class="sync-badge-chip chip-success">
-          <i class="pi pi-plus"></i> {{ syncToast.inserted }} Inserted
-        </span>
-        <span *ngIf="syncToast.updated > 0" class="sync-badge-chip chip-info">
-          <i class="pi pi-refresh"></i> {{ syncToast.updated }} Updated
-        </span>
-        <span *ngIf="syncToast.deleted > 0" class="sync-badge-chip chip-warning">
-          <i class="pi pi-trash"></i> {{ syncToast.deleted }} Deleted
-        </span>
-        <span *ngIf="syncToast.failed > 0" class="sync-badge-chip chip-danger">
-          <i class="pi pi-times"></i> {{ syncToast.failed }} Failed
-        </span>
-      </div>
-      <div *ngIf="syncToast.errors.length > 0" class="sync-toast-errors">
-        <div *ngFor="let err of syncToast.errors">\u2022 {{ err }}</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Smart Header Scanner Modal -->
-  <sutram-header-scanner [(visible)]="showScannerModal"
-                         [report]="scanReport"
-                         [availableHeaders]="state.headers()"
-                         (confirmed)="onScannerConfirmed($event)">
-  </sutram-header-scanner>
-
-  <!-- Batch Correction Sidebar -->
-  <sutram-correction-sidebar [(visible)]="showSidebar"
-                             [groups]="state.correctionGroups()">
-  </sutram-correction-sidebar>
-
-  <!-- Streaming Import Progress Modal -->
-  <sutram-import-progress [(visible)]="showProgressModal"
-                          [progress]="state.importProgress()"
-                          [tableName]="selectedTableName"
-                          [rejectedRows]="rejectedRowsDuringImport"
-                          (cancelRequested)="cancelImport()">
-  </sutram-import-progress>
-
-</div>
-`, styles: ["/**\n * sutram-excel-studio.component.scss\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Pixel-Perfect Enterprise Excel Studio Styling.\n * Exact replication of Sutram Excel Studio v2.0 UI.\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n */\n\n:host {\n  display: block;\n  width: 100%;\n  height: 100%;\n}\n\n.sutram-excel-container {\n  --primary: #4f46e5;\n  --primary-hover: #4338ca;\n  --primary-soft: #e0e7ff;\n  --success: #10b981;\n  --success-soft: #d1fae5;\n  --warning: #f59e0b;\n  --warning-soft: #fef3c7;\n  --danger: #ef4444;\n  --danger-soft: #fee2e2;\n  --bg: #f8fafc;\n  --surface: #ffffff;\n  --surface-border: #e2e8f0;\n  --text: #0f172a;\n  --text-muted: #64748b;\n  --radius: 6px;\n  --header-bg: #f1f5f9;\n  --header-text: #1e293b;\n  --cell-border: rgba(125, 125, 125, 0.18);\n  --cell-height: 23px;\n  --header-height: 38px;\n  --cell-edited-bg: #fef9c3;\n  --cell-edited-border: #eab308;\n  --row-edited-bg: #fffbeb;\n  --row-new-bg: #dcfce7;\n  --row-new-border: #22c55e;\n\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\n  background-color: var(--bg);\n  color: var(--text);\n  height: 100%;\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  user-select: none;\n\n  &.dark-mode {\n    --bg: #0f172a;\n    --surface: #1e293b;\n    --surface-border: #334155;\n    --text: #f8fafc;\n    --text-muted: #94a3b8;\n    --header-bg: #1e293b;\n    --header-text: #cbd5e1;\n    --cell-border: rgba(255, 255, 255, 0.1);\n    --cell-edited-bg: rgba(234, 179, 8, 0.22);\n    --cell-edited-border: #facc15;\n    --row-edited-bg: rgba(234, 179, 8, 0.12);\n    --row-new-bg: rgba(34, 197, 94, 0.18);\n    --row-new-border: #4ade80;\n  }\n}\n\n/* 1. TOP COMMAND BAR */\n.command-bar {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 6px 14px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  gap: 10px;\n}\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.brand-icon {\n  width: 28px;\n  height: 28px;\n  background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n  border-radius: 6px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 15px;\n}\n.brand-title {\n  font-size: 13px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.mode-pill-toggle {\n  background: rgba(125, 125, 125, 0.12);\n  border-radius: 999px;\n  padding: 2px;\n  display: flex;\n  gap: 2px;\n}\n.mode-pill-btn {\n  padding: 3px 12px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n  border: none;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.15s ease;\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n}\n.mode-pill-btn.active-normal {\n  background: #3b82f6;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.4);\n}\n.mode-pill-btn.active-smart {\n  background: #10b981;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.4);\n}\n\n.btn-group-cmd {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.cmd-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 10px;\n  border-radius: var(--radius);\n  font-size: 11px;\n  font-weight: 600;\n  cursor: pointer;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  transition: all 0.15s;\n}\n.cmd-btn:hover { background: rgba(125, 125, 125, 0.1); }\n.cmd-btn.active {\n  background: var(--primary-soft);\n  color: var(--primary);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.cmd-btn-primary { background: var(--primary); color: white; border-color: var(--primary); }\n.cmd-btn-primary:hover { background: var(--primary-hover); }\n.cmd-btn-success { background: var(--success); color: white; border-color: var(--success); }\n.cmd-btn-success:hover { background: #059669; }\n.cmd-btn-warning { background: var(--warning-soft); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }\n\n.sync-badge-count {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  background: #f59e0b;\n  color: #ffffff;\n  font-size: 10px;\n  font-weight: 700;\n  padding: 1px 6px;\n  border-radius: 999px;\n  margin-left: 5px;\n  line-height: 1.2;\n}\n\n/* 2. FORMULA BAR ROW */\n.formula-bar-row {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 4px 14px;\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  flex-shrink: 0;\n}\n.coord-box {\n  width: 55px;\n  text-align: center;\n  font-weight: 700;\n  font-size: 11.5px;\n  padding: 2px 4px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  background: rgba(125, 125, 125, 0.05);\n}\n.active-col-chip {\n  background: var(--primary-soft);\n  color: var(--primary);\n  padding: 2px 8px;\n  border-radius: 4px;\n  font-size: 11px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 180px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n.formula-input {\n  flex-grow: 1;\n  padding: 3px 8px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 12px;\n  font-family: inherit;\n  outline: none;\n  background: var(--surface);\n  color: var(--text);\n}\n.formula-input:focus { border-color: var(--primary); }\n\n/* 3. CONTROL SETTINGS BAR & DIRECT DB SEARCH */\n.control-settings-bar {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 4px 14px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 10px;\n  flex-shrink: 0;\n  font-size: 11.5px;\n}\n.ctrl-bar-left, .ctrl-bar-right {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.ctrl-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 3px 10px;\n  border-radius: var(--radius);\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  user-select: none;\n}\n.ctrl-btn:hover {\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text);\n}\n.ctrl-btn.active {\n  color: var(--primary);\n  background: var(--primary-soft);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.ctrl-btn-danger {\n  color: var(--danger);\n  background: var(--danger-soft);\n  border-color: rgba(239, 68, 68, 0.3);\n}\n.ctrl-btn-danger:hover {\n  background: rgba(239, 68, 68, 0.2);\n}\n.ctrl-dot {\n  width: 5px;\n  height: 5px;\n  border-radius: 50%;\n  background: #10b981;\n  display: inline-block;\n}\n.ctrl-search-wrap {\n  position: relative;\n  display: flex;\n  align-items: center;\n  flex-grow: 1;\n  max-width: 460px;\n}\n.ctrl-search-icon {\n  position: absolute;\n  left: 10px;\n  color: var(--text-muted);\n  font-size: 11px;\n  pointer-events: none;\n}\n.ctrl-search-input {\n  width: 100%;\n  padding: 4px 28px 4px 28px;\n  border: 1px solid var(--surface-border);\n  border-radius: 999px;\n  font-size: 11.5px;\n  background: rgba(125, 125, 125, 0.05);\n  color: var(--text);\n  outline: none;\n  transition: all 0.15s;\n}\n.ctrl-search-input:focus {\n  border-color: var(--primary);\n  background: var(--surface);\n  box-shadow: 0 0 0 2px var(--primary-soft);\n}\n.ctrl-search-clear {\n  position: absolute;\n  right: 8px;\n  background: none;\n  border: none;\n  font-size: 11px;\n  color: var(--text-muted);\n  cursor: pointer;\n  padding: 2px 5px;\n  border-radius: 50%;\n}\n.ctrl-search-clear:hover {\n  color: var(--danger);\n  background: rgba(125, 125, 125, 0.15);\n}\n.ctrl-search-spinner {\n  position: absolute;\n  right: 28px;\n  color: var(--primary);\n  font-size: 11px;\n}\n.ctrl-record-badge {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 2px 9px;\n  border-radius: 999px;\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text-muted);\n  font-size: 10.5px;\n  font-weight: 600;\n  white-space: nowrap;\n}\n\n/* 4. STATUS & BATCH SUGGESTION STRIP */\n.status-strip {\n  padding: 3px 14px;\n  font-size: 11.5px;\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  background: rgba(125, 125, 125, 0.04);\n}\n.status-strip.strip-error { background: #fef2f2; color: #991b1b; }\n.status-strip.strip-clean { background: #f0fdf4; color: #166534; }\n.status-strip.strip-suggestion { background: #fffbeb; color: #92400e; }\n\n/* 5. SPREADSHEET CANVAS */\n.spreadsheet-canvas {\n  flex-grow: 1;\n  overflow: auto;\n  background: var(--surface);\n  position: relative;\n  min-height: 0;\n}\n\n/* 6. BOTTOM MULTI-SHEET TAB BAR & STATUS BAR */\n.studio-footer {\n  flex-shrink: 0;\n  background: var(--surface);\n  border-top: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n}\n.sheet-tabs-bar {\n  display: flex;\n  align-items: center;\n  background: rgba(125, 125, 125, 0.05);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 2px 6px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.sheet-tabs-bar::-webkit-scrollbar { display: none; }\n\n.tab-pill {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 12px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11.5px;\n  font-weight: 600;\n  cursor: pointer;\n  color: var(--text-muted);\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  transition: all 0.15s;\n}\n.tab-pill:hover {\n  background: rgba(125, 125, 125, 0.1);\n  color: var(--text);\n}\n.tab-pill.active-tab {\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-color: rgba(16, 185, 129, 0.25);\n  border-bottom: 2px solid #10b981;\n  font-weight: 700;\n}\n\n.sheet-tab-badge {\n  font-size: 9.5px;\n  padding: 1px 5px;\n  background: rgba(16, 185, 129, 0.2);\n  color: #059669;\n  border-radius: 999px;\n  font-weight: 700;\n}\n\n.add-tab-btn {\n  padding: 2px 8px;\n  border: 1px dashed rgba(125, 125, 125, 0.4);\n  border-radius: 4px;\n  background: transparent;\n  cursor: pointer;\n  color: var(--primary);\n  margin-left: 4px;\n}\n.add-tab-btn:hover { background: rgba(79, 70, 229, 0.1); }\n\n.bottom-status-subrow {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 3px 14px;\n  font-size: 11px;\n  color: var(--text-muted);\n}\n.zoom-controls {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  padding: 1px 4px;\n}\n.zoom-btn {\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  color: var(--text);\n  padding: 1px 5px;\n  font-size: 11px;\n}\n.zoom-display {\n  font-weight: 700;\n  cursor: pointer;\n  padding: 0 4px;\n}\n\n/* 7. FLOATING SYNC TOAST HUD */\n.sync-toast-hud {\n  position: fixed;\n  top: 50px;\n  right: 20px;\n  z-index: 2500;\n  min-width: 320px;\n  max-width: 440px;\n  background: var(--surface);\n  color: var(--text);\n  border: 1px solid var(--surface-border);\n  border-radius: 8px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);\n  overflow: hidden;\n  animation: toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);\n  font-size: 11.5px;\n}\n@keyframes toastSlideIn {\n  from { opacity: 0; transform: translateY(-12px) scale(0.97); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n.sync-toast-header {\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--surface-border);\n  background: rgba(125, 125, 125, 0.04);\n}\n.sync-toast-title {\n  display: flex;\n  align-items: center;\n  gap: 7px;\n  font-weight: 700;\n  font-size: 12px;\n}\n.sync-toast-close {\n  background: none;\n  border: none;\n  color: var(--text-muted);\n  cursor: pointer;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 3px;\n}\n.sync-toast-close:hover {\n  background: rgba(125, 125, 125, 0.12);\n  color: var(--text);\n}\n.sync-toast-body {\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n.sync-toast-stats {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-wrap: wrap;\n}\n.sync-badge-chip {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n}\n.chip-success {\n  background: var(--success-soft);\n  color: var(--success);\n}\n.chip-info {\n  background: var(--primary-soft);\n  color: var(--primary);\n}\n.chip-warning {\n  background: var(--warning-soft);\n  color: #b45309;\n}\n.chip-danger {\n  background: var(--danger-soft);\n  color: var(--danger);\n}\n.sync-toast-errors {\n  margin-top: 4px;\n  padding: 6px 8px;\n  background: rgba(239, 68, 68, 0.08);\n  border: 1px solid rgba(239, 68, 68, 0.2);\n  border-radius: 4px;\n  font-size: 10.5px;\n  color: #ef4444;\n  max-height: 140px;\n  overflow-y: auto;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}\n"] }]
-  }], function() {
-    return [{ type: SutramExcelStateService }, { type: SutramExcelApiService }, { type: SutramExcelScannerService }, { type: SutramAuditService }, { type: SutramRefCacheService }, { type: ChangeDetectorRef }];
-  }, { table: [{
-    type: Input
-  }], mode: [{
-    type: Input
-  }], apiBase: [{
-    type: Input
-  }], enableFilters: [{
-    type: Input
-  }], enableSorting: [{
-    type: Input
-  }], enableSearch: [{
-    type: Input
-  }], enableControlBar: [{
-    type: Input
-  }], enableStatsBar: [{
-    type: Input
-  }], enableUpload: [{
-    type: Input
-  }], enableAudit: [{
-    type: Input
-  }], enableAddRow: [{
-    type: Input
-  }], enableCorrections: [{
-    type: Input
-  }], enableLoadData: [{
-    type: Input
-  }], enableVerify: [{
-    type: Input
-  }], enableSync: [{
-    type: Input
-  }], enableDelete: [{
-    type: Input
-  }], enableTabs: [{
-    type: Input
-  }], enableZoom: [{
-    type: Input
   }] });
 })();
 

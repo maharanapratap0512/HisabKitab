@@ -178,7 +178,20 @@ export class SutramExcelStateService {
   }
 
   public readonly modifiedRowsCount: Signal<number> = computed(() => {
-    return this.rows().filter(r => r.isNew || r.isModified).length;
+    return this.rows().filter(r => {
+      if (r.isModified) return true;
+      if (r.isNew) {
+        if (!r.cells) return false;
+        for (const k in r.cells) {
+          const val = r.cells[k]?.value;
+          if (val !== undefined && val !== null && String(val).trim() !== '') {
+            return true;
+          }
+        }
+        return false;
+      }
+      return false;
+    }).length;
   });
 
   public readonly pendingChangesCount: Signal<number> = computed(() => {
@@ -186,7 +199,7 @@ export class SutramExcelStateService {
   });
 
   /**
-   * Updates an individual cell value in the grid and marks row modified
+   * Updates an individual cell value in the grid and marks row modified only if value actually changed
    */
   public updateCellValue(rowIdx: number, colKey: string, newValue: any, refId?: any): void {
     this.rows.update(current => {
@@ -198,12 +211,22 @@ export class SutramExcelStateService {
       if (cell.originalValue === undefined) {
         cell.originalValue = cell.value;
       }
+
+      const strNew = String(newValue ?? '').trim();
+      const strOrig = String(cell.originalValue ?? '').trim();
+      const actuallyChanged = strNew !== strOrig;
+
       cell.value = newValue;
-      cell.isModified = true;
       if (refId !== undefined) cell.refId = refId;
 
+      if (actuallyChanged) {
+        cell.isModified = true;
+      } else if (!targetRow.isNew) {
+        cell.isModified = false;
+      }
+
       targetRow.cells = { ...targetRow.cells, [colKey]: cell };
-      targetRow.isModified = true;
+      targetRow.isModified = targetRow.isNew || Object.values(targetRow.cells).some((c: any) => c && c.isModified);
       copy[rowIdx] = targetRow;
       return copy;
     });
@@ -248,7 +271,9 @@ export class SutramExcelStateService {
 
     this.rows.update(list => {
       return list.map(r => {
-        if (set.has(r.rowNum)) {
+        const rowId = (r as any)._id ?? (r as any).id;
+        const matches = set.has(r.rowNum) || (rowId !== undefined && set.has(rowId));
+        if (matches) {
           const cleanCells: Record<string, SutramCell> = {};
           for (const k in r.cells) {
             cleanCells[k] = { ...r.cells[k], isModified: false, originalValue: r.cells[k].value };
@@ -269,7 +294,9 @@ export class SutramExcelStateService {
     setTimeout(() => {
       this.rows.update(list => {
         return list.map(r => {
-          if (set.has(r.rowNum) && r.isSynced) {
+          const rowId = (r as any)._id ?? (r as any).id;
+          const matches = set.has(r.rowNum) || (rowId !== undefined && set.has(rowId));
+          if (matches && r.isSynced) {
             return {
               ...r,
               isSynced: false

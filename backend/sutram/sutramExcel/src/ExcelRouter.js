@@ -224,7 +224,25 @@ function buildExcelRouter(sutramExcel) {
                 } catch {}
             }
 
-            const orderBy = sort ? `\`${sort}\` ${order}` : null;
+            const tbl = sutramExcel.engine.table(tblName);
+            let validSortCol = null;
+            if (sort && tbl && tbl.columns) {
+                if (tbl.columns[sort]) {
+                    validSortCol = sort;
+                } else if (tbl.columns[`${sort}_id`]) {
+                    validSortCol = `${sort}_id`;
+                } else {
+                    const cfg = sutramExcel.configs ? sutramExcel.configs[tblName] : null;
+                    if (cfg && cfg.headers) {
+                        const h = cfg.headers.find(x => x.name === sort || x.col_name === sort || x.ref_as === sort || x.ref_table === sort);
+                        if (h && tbl.columns[h.col_name]) {
+                            validSortCol = h.col_name;
+                        }
+                    }
+                }
+            }
+
+            const orderBy = validSortCol ? `\`${validSortCol}\` ${order}` : null;
 
             // Pure delegation through sutramEngine -> sutramCore
             const result = sutramExcel.engine.search(tblName, search, {

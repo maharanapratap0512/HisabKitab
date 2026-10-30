@@ -697,4 +697,32 @@ module.exports = {
         updated_at: col.string(),
     }),
 
+    // ── Vehicle Fleet ──────────────────────────────────────────
+    ...defineTable('vehicle', {
+        _id: col.id(),
+        mm_id: col.ref('mm._id', { as: 'mm', select: ['mm_hin', 'mm_eng', 'mm_code'], join: true }),
+        vehicle_type: col.string(),
+        gadi_name: col.string(),
+        gadi_num: col.string().required(),
+        fuel_type: col.string(),
+        seating_capacity: col.number(),
+        owner_name: col.string(),
+        nominee: col.string(),
+        aawak_type: col.string(),
+        rc_date: col.string(),
+        rc_exp_date: col.string(),
+        rc_amount: col.number(),
+        insurance_date: col.string(),
+        insurance_exp_date: col.string(),
+        insurance_type: col.string(),
+        insurance_company: col.string(),
+        insurance_amount: col.number(),
+        puc_date: col.string(),
+        puc_exp_date: col.string(),
+        puc_amount: col.number(),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
 };
+

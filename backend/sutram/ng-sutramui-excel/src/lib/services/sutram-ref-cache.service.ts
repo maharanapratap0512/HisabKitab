@@ -98,57 +98,95 @@ export class SutramRefCacheService {
         hin = item.mm_hin || '';
         eng = item.mm_eng || '';
         code = item.mm_code || '';
-        id = item.mm_id ?? item.id;
+        id = item._id ?? item.mm_id ?? item.id;
         break;
       case 'category':
         hin = item.category_hin || '';
         eng = item.category_eng || '';
-        id = item.category_id ?? item.id;
+        id = item._id ?? item.category_id ?? item.id;
         break;
       case 'item':
         hin = item.item_hin || '';
         eng = item.item_eng || '';
         code = item.item_code || '';
-        id = item.item_id ?? item.id;
+        id = item._id ?? item.item_id ?? item.id;
         break;
       case 'subitem':
         hin = item.subitem_hin || '';
         eng = item.subitem_eng || '';
         code = item.subitem_code || '';
-        id = item.subitem_id ?? item.id;
+        id = item._id ?? item.subitem_id ?? item.id;
+        break;
+      case 'unit':
+        hin = item.unit_full || item.unit_short || '';
+        eng = item.unit_short || '';
+        id = item._id ?? item.unit_id ?? item.id;
+        break;
+      case 'support_list':
+        hin = item.list_name_hin || '';
+        eng = item.list_name_eng || '';
+        id = item._id ?? item.support_list_id ?? item.id;
+        break;
+      case 'pbk':
+        hin = item.pbk_hin || '';
+        eng = item.pbk_eng || '';
+        code = item.roll_no ? String(item.roll_no) : '';
+        id = item._id ?? item.pbk_id ?? item.id;
+        break;
+      case 'nimitt':
+        hin = item.nimitt_hin || '';
+        eng = item.nimitt_eng || '';
+        code = item.roll_no ? String(item.roll_no) : '';
+        id = item._id ?? item.nimitt_id ?? item.id;
         break;
       case 'state':
         hin = item.state_hin || '';
         eng = item.state_eng || '';
         code = item.state_code || '';
-        id = item.state_id ?? item.id;
+        id = item._id ?? item.state_id ?? item.id;
+        break;
+      case 'district':
+        hin = item.district_hin || '';
+        eng = item.district_eng || '';
+        id = item._id ?? item.district_id ?? item.id;
         break;
       case 'city':
         hin = item.city_hin || '';
         eng = item.city_eng || '';
-        id = item.city_id ?? item.id;
+        id = item._id ?? item.city_id ?? item.id;
+        break;
+      case 'zone':
+        hin = item.zone_hin || '';
+        eng = item.zone_eng || '';
+        id = item._id ?? item.zone_id ?? item.id;
         break;
       case 'country':
         hin = item.country_hin || '';
         eng = item.country_eng || '';
-        id = item.country_id ?? item.id;
+        id = item._id ?? item.country_id ?? item.id;
         break;
       case 'department':
-        hin = item.department_hin || '';
-        eng = item.department_eng || '';
-        id = item.department_id ?? item.id;
+        hin = item.dept_hin || item.department_hin || '';
+        eng = item.dept_eng || item.department_eng || '';
+        code = item.dept_code || '';
+        id = item._id ?? item.dept_id ?? item.department_id ?? item.id;
         break;
       case 'product':
-        hin = item.product_hin || '';
-        eng = item.product_eng || '';
-        code = item.product_code || '';
-        id = item.product_id ?? item.id;
+        hin = item.product_hin || item.product_detail || '';
+        eng = item.product_eng || item.company_name || '';
+        code = item.product_code || item.sr_num || '';
+        id = item._id ?? item.product_id ?? item.id;
+        break;
+      case 'vehicle':
+        hin = item.gadi_name || item.vehicle_type || '';
+        eng = item.gadi_num || '';
+        id = item._id ?? item.vehicle_id ?? item.id;
         break;
       default:
         hin = item[`${tbl}_hin`] || item.name_hin || item.title_hin || item.label_hin || '';
         eng = item[`${tbl}_eng`] || item.name_eng || item.title_eng || item.name || item.title || '';
         code = item[`${tbl}_code`] || item.code || '';
-        id = item[`${tbl}_id`] ?? item.id ?? item._id;
+        id = item._id ?? item[`${tbl}_id`] ?? item.id;
         break;
     }
 
