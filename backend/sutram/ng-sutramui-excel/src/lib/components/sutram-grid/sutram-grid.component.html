@@ -1,4 +1,3 @@
-<!-- sutram-grid.component.html -->
 <div class="sutram-grid-wrapper" (contextmenu)="$event.preventDefault()">
 
   <!-- 1. Sleek Pixel-Perfect Custom Context Menu (Replaces p-contextMenu) -->
@@ -105,6 +104,7 @@
             <span *ngIf="activeFilterCol.ref_table || activeFilterCol.type === 'ref'" class="badge-type">
               {{ activeFilterCol.ref_table || 'ref' }}
             </span>
+            <i *ngIf="isFilterLoading" class="pi pi-spin pi-spinner text-primary ms-1" style="font-size: 11px;" title="Fetching from database..."></i>
           </div>
           <button type="button" class="btn-popover-close" (click)="colFilterOp.hide()" title="Close">
             <i class="pi pi-times"></i>
@@ -141,7 +141,7 @@
             <button type="button" class="btn-link-action" (click)="clearAllFilteredItems()">Clear</button>
           </div>
           <span class="count-pill">
-            {{ selectedChecklistValues.size }} / {{ currentChecklistItems.length }}
+            <i *ngIf="isFilterLoading" class="pi pi-spin pi-spinner me-1"></i>{{ selectedChecklistValues.size }} / {{ currentChecklistItems.length }}
           </span>
         </div>
 
@@ -166,7 +166,10 @@
             </div>
           </div>
 
-          <div *ngIf="filteredChecklistItems.length === 0" class="empty-list-state">
+          <div *ngIf="isFilterLoading && filteredChecklistItems.length === 0" class="empty-list-state">
+            <i class="pi pi-spin pi-spinner me-1"></i> Loading distinct values from database...
+          </div>
+          <div *ngIf="!isFilterLoading && filteredChecklistItems.length === 0" class="empty-list-state">
             <i class="pi pi-search me-1"></i> No matching values
           </div>
         </div>
@@ -287,7 +290,7 @@
     <ng-template pTemplate="body" let-row let-rowIndex="rowIndex" let-columns="columns">
       <tr [class.row-new]="row.isNew && isRowPopulated(row)"
           [class.row-edited]="!row.isNew && row.isModified"
-          [class.row-has-error]="row.hasError"
+          [class.row-has-error]="state.isAuditMode() && row.hasError"
           [class.row-synced]="row.isSynced"
           [class.row-selected]="selectedRowIdx === rowIndex">
 
@@ -311,9 +314,12 @@
           <div class="cell-box"
                [class.cell-active]="state.selectedCell()?.rowIdx === rowIndex && state.selectedCell()?.colKey === (col.key || col.name)"
                [class.cell-editing]="isCellEditing(rowIndex, col.key || col.name)"
-               [class.cell-bad]="!row.cells[col.key || col.name]?.isValid"
+               [class.cell-bad]="state.isAuditMode() && row.cells[col.key || col.name] && row.cells[col.key || col.name]?.isValid === false"
                [class.cell-edited]="row.cells[col.key || col.name]?.isModified"
                [class.cell-new]="row.isNew && isRowPopulated(row)"
+               [style.fontWeight]="isBold ? '700' : 'normal'"
+               [style.justifyContent]="textAlign === 'center' ? 'center' : (textAlign === 'right' ? 'flex-end' : 'flex-start')"
+               [style.textAlign]="textAlign"
                [title]="row.cells[col.key || col.name]?.errorMessage || ''"
                (click)="onCellClick(rowIndex, col.key || col.name, $event)"
                (dblclick)="startCellEdit(rowIndex, col.key || col.name, row, $event)"
@@ -325,6 +331,8 @@
                      type="text"
                      class="raw-cell-editor"
                      [(ngModel)]="editingValue"
+                     [style.fontWeight]="isBold ? '700' : 'normal'"
+                     [style.textAlign]="textAlign"
                      (input)="onEditorInput(editingValue, col, row)"
                      (keydown)="onCellEditorKeydown($event, rowIndex, col.key || col.name, row)"
                      (blur)="onCellEditorBlur(rowIndex, col.key || col.name, row)" />
@@ -332,7 +340,36 @@
 
             <!-- Normal Output Mode -->
             <ng-template #normalMode>
-              <span class="cell-value-text text-truncate">{{ row.cells[col.key || col.name]?.value }}</span>
+              <!-- 1. Special Boolean Column Rendering -->
+              <ng-container *ngIf="isBooleanColumn(col); else standardCellText">
+                <div class="bool-cell-container"
+                     (click)="toggleBooleanCell(rowIndex, col.key || col.name, row, $event)"
+                     [title]="isCellTrue(row.cells[col.key || col.name]?.value) ? 'Yes' : 'No'">
+
+                  <!-- Style A: Interactive Excel Checkbox -->
+                  <div *ngIf="booleanStyle === 'checkbox'"
+                       class="bool-checkbox-box"
+                       [class.checked]="isCellTrue(row.cells[col.key || col.name]?.value)">
+                    <i *ngIf="isCellTrue(row.cells[col.key || col.name]?.value)" class="pi pi-check"></i>
+                  </div>
+
+                  <!-- Style B: Micro Status Badge / Pill (Yes / No) -->
+                  <span *ngIf="booleanStyle === 'badge'"
+                        class="bool-badge-pill"
+                        [class.badge-true]="isCellTrue(row.cells[col.key || col.name]?.value)"
+                        [class.badge-false]="!isCellTrue(row.cells[col.key || col.name]?.value)">
+                    <i class="pi" [ngClass]="isCellTrue(row.cells[col.key || col.name]?.value) ? 'pi-check' : 'pi-times'"></i>
+                    <span class="bool-badge-text">{{ isCellTrue(row.cells[col.key || col.name]?.value) ? 'Yes' : 'No' }}</span>
+                  </span>
+
+                </div>
+              </ng-container>
+
+              <!-- 2. Standard Text Cell -->
+              <ng-template #standardCellText>
+                <span class="cell-value-text text-truncate"
+                      [style.textAlign]="textAlign">{{ row.cells[col.key || col.name]?.value }}</span>
+              </ng-template>
             </ng-template>
 
           </div>
@@ -345,7 +382,7 @@
       <tr>
         <td [attr.colspan]="headers.length + 1" class="text-center py-4 text-muted">
           <i class="pi pi-file-excel me-2" style="font-size: 16px;"></i>
-          कोई डेटा उपलब्ध नहीं है। ऊपर से Excel फ़ाइल खोलें या 'Load Data' पर क्लिक करें।
+          No data available. Open an Excel file or click 'Refresh' to load from database.
         </td>
       </tr>
     </ng-template>

@@ -275,4 +275,29 @@ export class GlobalService {
     }, 50);
   }
 
+  checkExcelImportSession(importType: string): Observable<any> {
+    const deptId = this.auth?.webUser?.dept_id;
+    const url = `${this.api.getUrl('EXCELIMPORT')}session/${deptId}?type=${importType}`;
+    return this.http.get(url);
+  }
+
+  checkAndTriggerImport(importType: string, fileInputRef: HTMLInputElement | null, onSessionFound: () => void) {
+    const deptId = this.auth?.webUser?.dept_id;
+    const url = `${this.api.getUrl('EXCELIMPORT')}session/${deptId}?type=${importType}`;
+    this.http.get(url).subscribe((res: any) => {
+      if (res && res.success && res.result && res.result.pendingRows && res.result.pendingRows.length > 0) {
+        onSessionFound();
+      } else {
+        if (fileInputRef) {
+          fileInputRef.value = '';
+          fileInputRef.click();
+        }
+      }
+    }, () => {
+      if (fileInputRef) {
+        fileInputRef.value = '';
+        fileInputRef.click();
+      }
+    });
+  }
 }

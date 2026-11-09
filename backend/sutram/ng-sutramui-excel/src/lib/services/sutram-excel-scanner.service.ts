@@ -23,6 +23,66 @@ import { cleanString, stringSimilarity } from '../utils/normalization.utils';
 export class SutramExcelScannerService {
 
   /**
+   * Intelligently detects the actual header row in a raw spreadsheet.
+   * Handles files where Row 0 is a merge & center title, blank row, or metadata.
+   */
+  public detectBestHeaderRow(
+    rawJson: any[][],
+    config?: SutramTableConfig | null
+  ): { headerRowIndex: number; headers: string[]; dataRows: any[][] } {
+    if (!rawJson || rawJson.length === 0) {
+      return { headerRowIndex: 0, headers: [], dataRows: [] };
+    }
+
+    let bestRowIdx = 0;
+    let bestScore = -1;
+    const maxLook = Math.min(10, rawJson.length);
+
+    for (let r = 0; r < maxLook; r++) {
+      const row = rawJson[r] || [];
+      const nonEmpties = row.filter((c: any) => c !== null && c !== undefined && String(c).trim() !== '');
+      if (nonEmpties.length === 0) continue;
+
+      let matchScore = 0;
+      if (config && config.headers && config.headers.length > 0) {
+        for (const cell of row) {
+          const str = cleanString(String(cell || ''));
+          if (!str) continue;
+          for (const h of config.headers) {
+            const candidates = [h.name, h.col_name, ...(h.alt_names || [])];
+            for (const cand of candidates) {
+              const sim = stringSimilarity(str, cleanString(cand));
+              if (sim >= 0.70) {
+                matchScore += 10 + sim;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      // Density score: merged headers or metadata typically have 1-2 cells,
+      // while real header rows have many distinct labels across columns.
+      const densityScore = nonEmpties.length;
+      const totalScore = matchScore > 0 ? (matchScore * 5 + densityScore) : densityScore;
+
+      if (totalScore > bestScore) {
+        bestScore = totalScore;
+        bestRowIdx = r;
+      }
+    }
+
+    const detectedHeaders = (rawJson[bestRowIdx] || []).map((h: any) => String(h || '').trim());
+    const dataRows = rawJson.slice(bestRowIdx + 1);
+
+    return {
+      headerRowIndex: bestRowIdx,
+      headers: detectedHeaders,
+      dataRows
+    };
+  }
+
+  /**
    * Scans sheet headers against derived table schema.
    */
   public scan(sheetHeaders: string[], config: SutramTableConfig, sampleRows: any[] = []): SutramScanReport {

@@ -1,10 +1,35 @@
 [
     {
+        "version": "40",
+        "date": "08-11-2026",
+        "summary": "Resumable Excel Import with Auto-Save and Session Recovery",
+        "summary_hin": "एक्सेल इम्पोर्ट में स्वचालित प्रगति संरक्षण एवं सत्र पुनः प्रारंभ सुविधा",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Excel Import",
+                "title": "Automatic Progress Saving & Crash Protection",
+                "title_hin": "स्वचालित प्रगति संरक्षण एवं सुरक्षित डेटा रिकवरी",
+                "desc": "Uploaded Excel files and your corrections are now saved automatically in the background. If the page is refreshed or the computer restarts, you can resume exactly where you left off.",
+                "desc_hin": "अपलोड की गई एक्सेल फाइल और किए गए सुधार अब बैकग्राउंड में अपने आप सुरक्षित रहते हैं। पेज रीफ्रेश होने या सिस्टम बंद होने पर भी आप वहीं से काम जारी रख सकते हैं।"
+            },
+            {
+                "type": "improved",
+                "module": "Excel Import",
+                "title": "Smart Resumption of Pending Records",
+                "title_hin": "शेष प्रविष्टियों को जारी रखने और नया शुरू करने की सुविधा",
+                "desc": "During imports, completed entries are safely finished while remaining records stay saved. A helpful alert banner lets you resume remaining entries or start a fresh import at any time.",
+                "desc_hin": "इम्पोर्ट के दौरान सफलतापूर्वक जोड़ी गई प्रविष्टियां सुरक्षित हो जाती हैं और बाकी बची प्रविष्टियां सुरक्षित रहती हैं। आप जब चाहें बचे हुए रिकॉर्ड्स को जारी रख सकते हैं या नया सत्र शुरू कर सकते हैं।"
+            }
+        ]
+    },
+    {
         "version": "39.5",
         "date": "30-10-2026",
         "summary": "Universal Excel Studio Support for Item, Aawak, Jawak, Bachat & Ultra-Smooth Scrolling",
         "summary_hin": "आइटम, आवक, जावक, बचत हेतु एक्सेल स्टूडियो में पूर्ण सहयोग एवं तीव्र स्क्रॉलिंग सुविधा",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",
@@ -15,7 +40,7 @@
                 "desc_hin": "एक्सेल स्टूडियो में अब आइटम, सब-आइटम, आवक, जावक, बचत (स्टॉक बैलेंस), प्रस्ताव एवं वाहन रिकॉर्ड्स को सीधे लोड, संपादित और एक्सेल से सुरक्षित इम्पोर्ट किया जा सकता है।"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "Excel Studio",
                 "title": "High-Speed Scrolling & Instant Sheet Tabs",
                 "title_hin": "अति-तीव्र स्क्रॉलिंग एवं पलक झपकते शीट बदलना",

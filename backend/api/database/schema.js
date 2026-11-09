@@ -724,5 +724,34 @@ module.exports = {
         updated_at: col.string(),
     }),
 
+    // ── Excel Import Session & Staging (Resumable Dynamic Imports) ──
+    ...defineTable('excel_import_session', {
+        _id: col.id(),
+        dept_id: col.number().default(0),
+        import_type: col.string().required(),
+        file_name: col.string(),
+        step_no: col.number().default(1),
+        header_config: col.json(),
+        header_list: col.json(),
+        unmatched_data: col.json(),
+        total_count: col.number().default(0),
+        processed_count: col.number().default(0),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
+    ...defineTable('excel_import_staging', {
+        _id: col.id(),
+        session_id: col.ref('excel_import_session._id', { as: 'session' }),
+        dept_id: col.number().default(0),
+        row_index: col.number().required(),
+        row_data: col.json().required(),
+        status: col.string().default('pending'),
+        error_message: col.string(),
+        is_imported: col.number().default(0),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
 };
 

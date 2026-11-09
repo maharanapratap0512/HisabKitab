@@ -9,6 +9,24 @@
          <div class="container-fluid">
             <div class="row">
                <div class="card card-body">
+                  <!-- Session Resume Alert Banner -->
+                  <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between p-2 mb-3" *ngIf="hasActiveSession && resumableSession">
+                     <div>
+                        <i class="uil uil-history fs-5 me-1 align-middle"></i>
+                        <strong>पिछला अधूरा सत्र मिला:</strong>
+                        <span class="ms-1">{{resumableSession.session?.file_name || resumableSession.session?.import_type}}</span>
+                        <span class="badge bg-primary ms-2">{{resumableSession.pendingRows?.length}} / {{resumableSession.session?.total_count || resumableSession.pendingRows?.length}} रिकॉर्ड्स बाकी</span>
+                     </div>
+                     <div class="mt-1 mt-sm-0">
+                        <button class="btn btn-sm btn-primary me-2" (click)="resumeSession()">
+                           <i class="uil uil-play me-1"></i> जारी रखें (Resume)
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" (click)="clearActiveSession()">
+                           <i class="uil uil-trash me-1"></i> नया शुरू करें (Clear)
+                        </button>
+                     </div>
+                  </div>
+
                   <div class="row">
                      <div class="col-md-2">
                         <!-- <div class="form-group"> -->
@@ -22,37 +40,35 @@
                         </ng-select>
                         <!-- </div> -->
                      </div>
-                     <div class="col-md-3" *ngIf="headerConfig && headerConfig.length && (!lockType || stepNo === 0)">
-                        <button *ngIf="importType" class="file btn btn-success" style="font-weight: 700 !important;">
+                     <div class="col-md-3" *ngIf="headerConfig && headerConfig.length && stepNo === 0">
+                        <button type="button" *ngIf="importType" class="btn btn-success" style="font-weight: 700 !important;" (click)="filePicker.click()">
                            <i class="uil uil-arrow-to-bottom"></i> Select Excel File
-                           <input type="file" class="inputtag"
-                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                              (change)="excelImport($event)" />
                         </button>
+                        <input #filePicker type="file" style="display: none;"
+                           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                           (change)="excelImport($event)" />
                      </div>
                      <div class="col-md-3" *ngIf="importType && (!headerConfig || !headerConfig.length)">
                         <span class="text-danger fs-4">Excel Import is not supported.</span>
                      </div>
-                     <div class="col-md-3">
-                        <!-- <div class="form-check form-switch">
-                           <input type="checkbox" id="isHeader2" [(ngModel)]="is2Header" [ngModelOptions]="{standalone: true}"
-                              class="form-check-input">
-                           <label class="form-check-label" for="isHeader2">has 2 header row</label>
-                        </div> -->
+                     <div class="col-md-2">
                      </div>
-                     <!-- <div class="col-md-2"></div> -->
-                     <div class="col-md-4">
-                        <button class="btn btn-primary" (click)="setExcelToObjectArray()" *ngIf="stepNo == 1">आगे
+                     <div class="col-md-5 d-flex align-items-center flex-wrap">
+                        <button type="button" class="btn btn-primary me-1" (click)="setExcelToObjectArray()" *ngIf="stepNo == 1">आगे
                            बढ़े</button>
-                        <button class="btn btn-primary mx-1" (click)="verifyExcelData()" *ngIf="stepNo == 2">आगे
+                        <button type="button" class="btn btn-primary me-1" (click)="verifyExcelData()" *ngIf="stepNo == 2">आगे
                            बढ़े</button>
-                        <button class="btn btn-primary mx-1" (click)="back()">Back</button>
-                        <button class="btn btn-outline-success btn-lg btn-rounded mx-1" *ngIf="stepNo == 3"
+                        <button type="button" class="btn btn-primary me-1" (click)="back()" *ngIf="stepNo > 2">Back</button>
+                        <button type="button" class="btn btn-outline-success btn-lg btn-rounded me-1" *ngIf="stepNo == 3"
                            (click)="finalImport()">इम्पोर्ट करे।</button>
-                        <button class="btn btn-outline-warning btn-lg btn-rounded mx-1" (click)="updateData()"
+                        <button type="button" class="btn btn-outline-warning btn-lg btn-rounded me-1" (click)="updateData()"
                            *ngIf="stepNo == 4 && willUpdateData.length">अपडेट करे।</button>
-                        <button class="btn btn-info mx-1" (click)="finish()" *ngIf="stepNo > 3">बंध करे। </button>
-                        <button class="btn btn-danger mx-1" *ngIf="stepNo < 5" (click)="finish()">skip</button>
+                        <button type="button" class="btn btn-info me-1" (click)="finish()" *ngIf="stepNo > 3">बंध करे। </button>
+                        <button type="button" class="btn btn-danger me-1" *ngIf="stepNo < 5" (click)="finish()">skip</button>
+                        <button type="button" class="btn btn-outline-danger me-1" *ngIf="stepNo > 0 || activeSessionId"
+                           (click)="clearActiveSession()" title="सत्र रीसेट करें">
+                           <i class="uil uil-trash me-1"></i>Clear
+                        </button>
                         <!-- <span class="text-warning" *ngIf="!nextButton">Dark वाले सारे कॉलम इक्सेल फाइल मे होने जरूरी है। </span> -->
                      </div>
 
@@ -129,7 +145,7 @@
             </div>
 
             <!-- step 2 : Verify final excel data -->
-            <div class="=row" *ngIf="stepNo == 2 && excelArrObj && excelArrObj.length > 0">
+            <div class="row" *ngIf="stepNo == 2 && excelArrObj && excelArrObj.length > 0">
                <div class="card-body" style="overflow: auto;">
                   <h4 class="card-title">इक्सेल डाटा वेरफाइ करे, और फिर आगे बढ़े। </h4>
                   <div class="row" style="overflow: auto;">
@@ -444,7 +460,7 @@
                                        </ng-select>
 
                                        <!-- aawak type dropdown -->
-                                       <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import"
+                                       <ng-select *ngIf="data.type == 'awk_type' || data.type == 'aawak_type'" class="custom custom-import"
                                           placeholder="Select Aawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}" (open)="onDropdownOpen()"
                                           (close)="onDropdownClose()"
@@ -457,8 +473,22 @@
                                              {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                                        </ng-select>
 
+                                       <!-- aawak source dropdown -->
+                                       <ng-select *ngIf="data.type == 'aawak_source'" class="custom custom-import"
+                                          placeholder="Select Aawak Source" [virtualScroll]="true" [(ngModel)]="data.id"
+                                          [ngModelOptions]="{standalone: true}" (open)="onDropdownOpen()"
+                                          (close)="onDropdownClose()"
+                                          (change)="handleAddOption($event, data, 'Add Aawak Source')" appendTo="body">
+                                          <ng-option selected="selected" disabled value="">-- Select Aawak Source
+                                             --</ng-option>
+                                          <ng-option value="+add" class="text-primary fw-bold">+ Add Aawak
+                                             Source</ng-option>
+                                          <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
+                                             {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                                       </ng-select>
+
                                        <!-- jawak type dropdown -->
-                                       <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import"
+                                       <ng-select *ngIf="data.type == 'jwk_type' || data.type == 'jawak_type'" class="custom custom-import"
                                           placeholder="Select Jawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}" (open)="onDropdownOpen()"
                                           (close)="onDropdownClose()"
@@ -468,6 +498,22 @@
                                           <ng-option value="+add" class="text-primary fw-bold">+ Add Jawak
                                              Type</ng-option>
                                           <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                             {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng :
+                                             ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman :
+                                             ''}}</ng-option>
+                                       </ng-select>
+
+                                       <!-- usage list dropdown -->
+                                       <ng-select *ngIf="data.type == 'usage_list'" class="custom custom-import"
+                                          placeholder="Select Usage List" [virtualScroll]="true" [(ngModel)]="data.id"
+                                          [ngModelOptions]="{standalone: true}" (open)="onDropdownOpen()"
+                                          (close)="onDropdownClose()"
+                                          (change)="handleAddOption($event, data, 'Add Usage List')" appendTo="body">
+                                          <ng-option selected="selected" disabled value="">-- Select Usage List
+                                             --</ng-option>
+                                          <ng-option value="+add" class="text-primary fw-bold">+ Add Usage
+                                             List</ng-option>
+                                          <ng-option *ngFor="let item of usage_lists" [value]="item._id">
                                              {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng :
                                              ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman :
                                              ''}}</ng-option>

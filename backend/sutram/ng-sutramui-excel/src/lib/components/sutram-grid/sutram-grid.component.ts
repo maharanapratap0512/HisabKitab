@@ -32,6 +32,7 @@ import { SutramHeaderConfig, SutramRow, SutramCell } from '../../models/sutram-e
 import { SutramClipboardService } from '../../services/sutram-clipboard.service';
 import { SutramAuditService } from '../../services/sutram-audit.service';
 import { SutramRefCacheService, SutramRefOption } from '../../services/sutram-ref-cache.service';
+import { SutramExcelApiService } from '../../services/sutram-excel-api.service';
 import { cleanString } from '../../utils/normalization.utils';
 
 interface InlinePromptState {
@@ -66,6 +67,9 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
   @Input() rows: SutramRow[] = [];
   @Input() filterOnlyErrors: boolean = false;
   @Input() enableDelete: boolean = true;
+  @Input() isBold: boolean = false;
+  @Input() textAlign: 'left' | 'center' | 'right' = 'left';
+  @Input() booleanStyle: 'checkbox' | 'badge' = 'checkbox';
 
   @Output() cellChanged = new EventEmitter<{ rowIdx: number; colKey: string; value: any }>();
   @Output() solveAllTriggered = new EventEmitter<{
@@ -111,6 +115,8 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
   public filterChecklistSearch: string = '';
   public currentChecklistItems: Array<{ display: string; value: any; code?: string; count?: number }> = [];
   public selectedChecklistValues: Set<any> = new Set<any>();
+  public isFilterLoading: boolean = false;
+  private filterValuesCache: Map<string, { values: Array<{ display: string; value: any; count?: number }>; blankCount: number }> = new Map();
 
   // ── Inline Batch Mistake Prompt State ────────────────────────
   public promptState: InlinePromptState = {
@@ -150,12 +156,14 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
     private clipboard: SutramClipboardService,
     private audit: SutramAuditService,
     public refCache: SutramRefCacheService,
+    private api: SutramExcelApiService,
     private el: ElementRef,
     public cdr: ChangeDetectorRef
   ) {}
 
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes['headers'] && this.headers) {
+      this.filterValuesCache.clear();
       const refTables = this.headers
         .filter(h => h.ref_table || h.type === 'ref')
         .map(h => h.ref_table!)
@@ -367,6 +375,63 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
 
   public isFkColumn(col: SutramHeaderConfig | null | undefined): boolean {
     return !!col && (col.type === 'ref' || !!col.ref_table) && !!col.ref_table;
+  }
+
+  public isBooleanColumn(col: any): boolean {
+    if (!col) return false;
+    const t = (col.type || '').toLowerCase();
+    if (t === 'boolean' || t === 'bool') return true;
+    const colName = (col.col_name || col.name || col.key || '').toLowerCase();
+    if (
+      colName === 'active' ||
+      colName === 'verify' ||
+      colName.startsWith('is_') ||
+      colName.startsWith('has_') ||
+      colName.endsWith('_status') ||
+      colName.endsWith('_flag')
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  public isCellTrue(val: any): boolean {
+    if (
+      val === true ||
+      val === 1 ||
+      val === '1' ||
+      val === 'true' ||
+      val === 'TRUE' ||
+      val === 'yes' ||
+      val === 'YES' ||
+      val === 'सक्रिय'
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  public toggleBooleanCell(rowIdx: number, colKey: string, row: SutramRow, event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    const cell = row?.cells ? row.cells[colKey] : null;
+    if (!cell) return;
+    const currentBool = this.isCellTrue(cell.value);
+    const newBool = !currentBool;
+    const newVal = newBool ? 1 : 0;
+    this.state.updateCellValue(rowIdx, colKey, newVal);
+    this.cellChanged.emit({ rowIdx, colKey, value: newVal });
+    this.cdr.markForCheck();
+  }
+
+  public getBooleanTrueLabel(): string {
+    return 'Yes';
+  }
+
+  public getBooleanFalseLabel(): string {
+    return 'No';
   }
 
   public onCellClick(rowIdx: number, colKey: string, event: MouseEvent): void {
@@ -666,7 +731,17 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
 
         // Foreign Key validation & auto-matching
         if (this.isFkColumn(col)) {
-          const match = this.refCache.findRefMatch(col.ref_table!, newVal);
+          let parentId: any = undefined;
+          if (col.ref_table?.toLowerCase() === 'subitem' && this.headers) {
+            const itemHeader = this.headers.find(h => (h.ref_table || '').toLowerCase() === 'item' || h.name.includes('item'));
+            if (itemHeader && row.cells) {
+              const itemCell = row.cells[itemHeader.name] || (itemHeader.col_name ? row.cells[itemHeader.col_name] : undefined);
+              if (itemCell) {
+                parentId = itemCell.refId || itemCell.value;
+              }
+            }
+          }
+          const match = this.refCache.findRefMatch(col.ref_table!, newVal, parentId);
           if (match.found) {
             cell.value = match.display;
             cell.refId = match.id;
@@ -849,7 +924,14 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       this.navigateCell(rowIdx, this.getNextColKey(colKey));
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
-      this.navigateCell(rowIdx, this.getPrevColKey(colKey));
+    } else if (event.key === ' ') {
+      // Spacebar toggles boolean cell!
+      const colDef = this.headers.find((c: any) => (c.key || c.name) === colKey);
+      if (colDef && this.isBooleanColumn(colDef) && row) {
+        event.preventDefault();
+        this.toggleBooleanCell(rowIdx, colKey, row);
+        return;
+      }
     } else if (event.key === 'Enter' || event.key === 'F2') {
       event.preventDefault();
       if (row) this.startCellEdit(rowIdx, colKey, row);
@@ -1175,8 +1257,42 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
     this.selectedChecklistValues.clear();
 
     const isFk = col.type === 'ref' || !!col.ref_table;
-    const itemsMap = new Map<any, { display: string; value: any; code?: string; count?: number }>();
+    const activeTable = this.state.activeTable();
+    const isDbTable = activeTable && activeTable !== 'rough' && !activeTable.startsWith('rough_') && activeTable !== 'blank';
+    const cacheKey = isDbTable ? `${activeTable}_${col.name}` : null;
 
+    const buildAndSetItems = (
+      values: Array<{ display: string; value: any; code?: string; count?: number }>,
+      blankCount: number
+    ) => {
+      const itemsList = [...values];
+      if (col.type === 'number') {
+        itemsList.sort((a, b) => (Number(a.value) || 0) - (Number(b.value) || 0));
+      } else {
+        itemsList.sort((a, b) => a.display.localeCompare(b.display, undefined, { numeric: true }));
+      }
+
+      if (blankCount > 0) {
+        itemsList.push({
+          display: '(रिक्त / Blanks)',
+          value: '__BLANK__',
+          count: blankCount
+        });
+      }
+
+      this.currentChecklistItems = itemsList;
+
+      const existing = this.state.columnFilters()[col.name];
+      if (existing && existing.size > 0) {
+        this.selectedChecklistValues = new Set(existing);
+      } else {
+        this.selectedChecklistValues = new Set(itemsList.map(i => i.value));
+      }
+      this.cdr.markForCheck();
+    };
+
+    // 1. Initial quick build from in-memory rows or FK refCache
+    const itemsMap = new Map<any, { display: string; value: any; code?: string; count?: number }>();
     if (isFk && col.ref_table) {
       const refOptions = this.refCache.getOptions(col.ref_table);
       for (const opt of refOptions) {
@@ -1189,13 +1305,13 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       }
     }
 
-    let blankCount = 0;
+    let localBlankCount = 0;
     for (const r of this.rows) {
       const cell = r.cells[col.name];
       const val = cell?.value !== undefined && cell?.value !== null ? String(cell.value).trim() : '';
 
       if (val === '') {
-        blankCount++;
+        localBlankCount++;
       } else {
         if (itemsMap.has(val)) {
           const item = itemsMap.get(val)!;
@@ -1210,32 +1326,52 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       }
     }
 
-    const itemsList = Array.from(itemsMap.values());
-
-    if (col.type === 'number') {
-      itemsList.sort((a, b) => (Number(a.value) || 0) - (Number(b.value) || 0));
-    } else {
-      itemsList.sort((a, b) => a.display.localeCompare(b.display, undefined, { numeric: true }));
-    }
-
-    if (blankCount > 0) {
-      itemsList.push({
-        display: '(रिक्त / Blanks)',
-        value: '__BLANK__',
-        count: blankCount
-      });
-    }
-
-    this.currentChecklistItems = itemsList;
-
-    const existing = this.state.columnFilters()[col.name];
-    if (existing && existing.size > 0) {
-      this.selectedChecklistValues = new Set(existing);
-    } else {
-      this.selectedChecklistValues = new Set(itemsList.map(i => i.value));
-    }
-
+    // Set initial list so the popover opens instantaneously without lag
+    buildAndSetItems(Array.from(itemsMap.values()), localBlankCount);
     op.toggle(event);
+
+    // 2. If it is a database table, check cache or fetch complete distinct values directly from database!
+    if (isDbTable && activeTable) {
+      if (cacheKey && this.filterValuesCache.has(cacheKey)) {
+        const cached = this.filterValuesCache.get(cacheKey)!;
+        buildAndSetItems(cached.values, cached.blankCount);
+      } else {
+        this.isFilterLoading = true;
+        this.api.getColumnFilterValues(activeTable, col.col_name || col.name).subscribe({
+          next: (res) => {
+            this.isFilterLoading = false;
+            if (res && Array.isArray(res.values)) {
+              let mappedValues = res.values;
+              if (isFk && col.ref_table) {
+                const refOptions = this.refCache.getOptions(col.ref_table);
+                const countMap = new Map<string, number>();
+                for (const rv of res.values) {
+                  countMap.set(String(rv.value), rv.count || 0);
+                }
+                mappedValues = refOptions.map(opt => ({
+                  display: opt.display,
+                  value: opt.display,
+                  code: opt.code,
+                  count: countMap.get(String(opt.id)) || 0
+                }));
+              }
+              const resultToCache = { values: mappedValues, blankCount: res.blankCount || 0 };
+              if (cacheKey) {
+                this.filterValuesCache.set(cacheKey, resultToCache);
+              }
+              // Only apply if this column is still open in filter
+              if (this.activeFilterCol?.name === col.name) {
+                buildAndSetItems(mappedValues, res.blankCount || 0);
+              }
+            }
+          },
+          error: (err) => {
+            this.isFilterLoading = false;
+            console.warn('[sutram-grid] Could not fetch distinct filter values from DB:', err);
+          }
+        });
+      }
+    }
   }
 
   public get filteredChecklistItems(): Array<{ display: string; value: any; code?: string; count?: number }> {

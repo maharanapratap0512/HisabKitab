@@ -352,11 +352,26 @@ class Engine {
             for (const [col, val] of Object.entries(where)) {
                 if (!tbl.columns || !tbl.columns[col]) continue;
                 if (Array.isArray(val) && val.length > 0) {
-                    const formattedVals = val.map(v => typeof v === 'string' ? `'${v.replace(/'/g, "''")}'` : v);
-                    conditions.push(`\`${col}\` IN (${formattedVals.join(', ')})`);
+                    const hasBlank = val.includes('__BLANK__') || val.includes('');
+                    const nonBlanks = val.filter(v => v !== '__BLANK__' && v !== '');
+                    const conds = [];
+                    if (nonBlanks.length > 0) {
+                        const formattedVals = nonBlanks.map(v => typeof v === 'string' ? `'${v.replace(/'/g, "''")}'` : v);
+                        conds.push(`\`${col}\` IN (${formattedVals.join(', ')})`);
+                    }
+                    if (hasBlank) {
+                        conds.push(`(\`${col}\` IS NULL OR \`${col}\` = '')`);
+                    }
+                    if (conds.length > 0) {
+                        conditions.push(`(${conds.join(' OR ')})`);
+                    }
                 } else if (val !== undefined && val !== null && val !== '') {
-                    const formattedVal = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
-                    conditions.push(`\`${col}\` = ${formattedVal}`);
+                    if (val === '__BLANK__') {
+                        conditions.push(`(\`${col}\` IS NULL OR \`${col}\` = '')`);
+                    } else {
+                        const formattedVal = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
+                        conditions.push(`\`${col}\` = ${formattedVal}`);
+                    }
                 }
             }
         }
@@ -367,8 +382,8 @@ class Engine {
                 .filter(([col, def]) => {
                     const t = (def?.type || 'string').toLowerCase();
                     return ['string', 'text', 'varchar'].includes(t) ||
-                           col.endsWith('_hin') || col.endsWith('_eng') ||
-                           col.includes('code') || col.includes('name');
+                        col.endsWith('_hin') || col.endsWith('_eng') ||
+                        col.includes('code') || col.includes('name');
                 })
                 .map(([col]) => col);
 
@@ -400,6 +415,15 @@ class Engine {
         const total = tbl.count(combinedWhere);
 
         return { rows, total, limit, offset };
+    }
+
+    /**
+     * Retrieves distinct values and frequency counts for a column.
+     * Delegates pure database query generation and execution to sutramCore.
+     */
+    distinct(tableName, column, { where = {}, limit = null, orderBy = null } = {}) {
+        const tbl = this.table(tableName);
+        return tbl.distinct(column, where, { limit, orderBy });
     }
 
     // ─────────────────────────────────────────────────────────

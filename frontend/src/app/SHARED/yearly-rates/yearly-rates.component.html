@@ -34,7 +34,7 @@
                         <i class="uil uil-save"></i> Save
                      </button>
                      <button class="btn btn-success btn-sm w-50" (click)="saveRate(true)"
-                        title="Save & apply to all Aawak & Jawak entries of this year">
+                        title="Save & apply to unpriced (0/null) Aawak & Jawak entries of this year">
                         <i class="uil uil-check-circle"></i> Save & Apply
                      </button>
                   </div>
@@ -189,7 +189,7 @@
                         <td>{{i + 1}}</td>
                         <td class="text-center">
                            <button class="btn btn-sm btn-outline-primary me-2 py-0 px-2" (click)="applyRateRow(item)"
-                              title="Apply Rate to Aawak/Jawak">
+                              title="Apply Rate to unpriced (0/null) Aawak/Jawak entries">
                               <i class="uil uil-check-circle me-1"></i> Apply
                            </button>
                            <i class="uil uil-trash i-outline-danger cursor-pointer" (click)="deleteRateRow(item._id)"

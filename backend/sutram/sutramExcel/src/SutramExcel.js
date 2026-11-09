@@ -24,10 +24,10 @@
 
 'use strict';
 
-const ExcelMigrator    = require('./ExcelMigrator');
+const ExcelMigrator = require('./ExcelMigrator');
 const DictionaryManager = require('./DictionaryManager');
-const ConfigDeriver    = require('./ConfigDeriver');
-const ExcelImporter    = require('./ExcelImporter');
+const ConfigDeriver = require('./ConfigDeriver');
+const ExcelImporter = require('./ExcelImporter');
 const buildExcelRouter = require('./ExcelRouter');
 
 class SutramExcel {
@@ -35,17 +35,17 @@ class SutramExcel {
     constructor(engine) {
         if (!engine) throw new Error('[sutramexcel] SutramExcel requires engine instance');
 
-        this.engine      = engine;
-        this._configs    = {};   // { tableName: derivedConfig }
-        this._deriver    = new ConfigDeriver();
+        this.engine = engine;
+        this._configs = {};   // { tableName: derivedConfig }
+        this._deriver = new ConfigDeriver();
 
         // run own migrations (xls_meta, xls_dictionary)
-        const migrator   = new ExcelMigrator(engine.db);
+        const migrator = new ExcelMigrator(engine.db);
         migrator.run();
 
         // init managers
         this._dictionary = new DictionaryManager(engine.db);
-        this._importer   = new ExcelImporter(engine, this._dictionary);
+        this._importer = new ExcelImporter(engine, this._dictionary);
 
         console.log('[sutramexcel] Ready');
     }

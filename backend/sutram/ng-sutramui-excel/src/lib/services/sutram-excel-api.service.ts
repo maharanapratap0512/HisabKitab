@@ -93,11 +93,17 @@ export class SutramExcelApiService {
       sort?: string;
       order?: 'ASC' | 'DESC';
       filters?: any;
+      export?: boolean;
     } = {}
   ): Observable<{ rows: any[]; total: number; offset: number; limit: number }> {
     const params: string[] = [];
-    params.push(`_limit=${opts.limit ?? 100}`);
-    params.push(`_offset=${opts.offset ?? 0}`);
+    if (opts.export) {
+      params.push(`_export=1`);
+      params.push(`_limit=-1`);
+    } else {
+      params.push(`_limit=${opts.limit ?? 100}`);
+      params.push(`_offset=${opts.offset ?? 0}`);
+    }
     params.push(`_full=1`);
     if (opts.search) params.push(`_search=${encodeURIComponent(opts.search)}`);
     if (opts.sort) params.push(`_sort=${encodeURIComponent(opts.sort)}&_order=${opts.order || 'ASC'}`);
@@ -112,6 +118,21 @@ export class SutramExcelApiService {
         offset: res.offset || 0,
         limit: res.limit || (opts.limit ?? 100)
       }))
+    );
+  }
+
+  /**
+   * GET /filter-values/:table/:column - Fetch distinct values and counts directly from database
+   */
+  public getColumnFilterValues(tableName: string, colName: string): Observable<{
+    values: Array<{ display: string; value: any; count?: number }>;
+    blankCount: number;
+  }> {
+    return this.http.get<ApiResponse<{
+      values: Array<{ display: string; value: any; count?: number }>;
+      blankCount: number;
+    }>>(`${this.baseUri}/filter-values/${encodeURIComponent(tableName)}/${encodeURIComponent(colName)}`).pipe(
+      map(res => res.result || { values: [], blankCount: 0 })
     );
   }
 

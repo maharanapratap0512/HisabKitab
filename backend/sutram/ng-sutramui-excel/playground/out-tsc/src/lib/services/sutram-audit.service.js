@@ -59,11 +59,16 @@ export class SutramAuditService {
             // Contextual parent lookup (e.g. subitem under item)
             if (header.ref_table.toLowerCase() === 'subitem' && row && headers) {
                 const itemHeader = headers.find(h => h.ref_table === 'item' || h.name.includes('item'));
-                if (itemHeader && row.cells[itemHeader.name]) {
-                    parentId = row.cells[itemHeader.name].refId || row.cells[itemHeader.name].value;
+                if (itemHeader) {
+                    const itemCell = row.cells[itemHeader.name] || (itemHeader.col_name ? row.cells[itemHeader.col_name] : undefined) || (itemHeader.ref_as ? row.cells[itemHeader.ref_as] : undefined);
+                    if (itemCell) {
+                        parentId = itemCell.refId || itemCell.value;
+                    }
                 }
             }
-            const match = this.refCache.findRefMatch(header.ref_table, strVal, parentId);
+            const isRefLoaded = this.refCache.isTableLoaded(header.ref_table);
+            const hintId = cell.refId !== undefined && cell.refId !== null && cell.refId !== '' ? cell.refId : undefined;
+            const match = this.refCache.findRefMatch(header.ref_table, strVal, parentId, hintId);
             if (match.found) {
                 cell.isValid = true;
                 cell.isWarning = false;
@@ -73,6 +78,16 @@ export class SutramAuditService {
                 return;
             }
             else {
+                // If reference cache is still downloading over HTTP from backend:
+                if (!isRefLoaded) {
+                    // If this is an existing database record and wasn't modified by user, keep valid while loading
+                    if (!row?.isNew && row?._rawOriginal && !cell.isModified) {
+                        cell.isValid = true;
+                        cell.isWarning = false;
+                        cell.errorMessage = undefined;
+                        return;
+                    }
+                }
                 cell.isValid = false;
                 cell.isWarning = false;
                 cell.refId = null;
@@ -114,7 +129,7 @@ export class SutramAuditService {
             return;
         if (!this.rowHasData(row, headers)) {
             for (const h of headers) {
-                const cell = row.cells[h.name];
+                const cell = row.cells[h.name] || (h.col_name ? row.cells[h.col_name] : undefined) || (h.ref_as ? row.cells[h.ref_as] : undefined);
                 if (cell) {
                     cell.isValid = true;
                     cell.isWarning = false;
@@ -127,7 +142,7 @@ export class SutramAuditService {
         }
         let errorCount = 0;
         for (const h of headers) {
-            const cell = row.cells[h.name];
+            const cell = row.cells[h.name] || (h.col_name ? row.cells[h.col_name] : undefined) || (h.ref_as ? row.cells[h.ref_as] : undefined);
             if (!cell)
                 continue;
             this.validateCell(cell, h, row, headers);

@@ -308,7 +308,7 @@ export class YearlyRatesComponent implements OnInit, OnDestroy {
           if (hasRates) {
             Swal.fire({
               title: 'Apply All Rates to Aawak & Jawak?',
-              text: `This will update the rates for all years available for ${row.item_hin}.`,
+              text: `This will apply the rates for all years available for ${row.item_hin} to Aawak & Jawak entries having no rate or 0 rate.`,
               icon: 'question',
               showCancelButton: true,
               confirmButtonText: 'Yes, Apply All',
@@ -501,7 +501,7 @@ export class YearlyRatesComponent implements OnInit, OnDestroy {
 
     Swal.fire({
       title: 'Apply Rate to Aawak & Jawak?',
-      text: `This will update the rate to ₹${row.rate} for all Aawak & Jawak entries of Year ${row.year} in this department.`,
+      text: `This will apply the rate of ₹${row.rate} to all Aawak & Jawak entries of Year ${row.year} having no price or 0 rate in this department.`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, Apply Rate',
@@ -635,7 +635,7 @@ export class YearlyRatesComponent implements OnInit, OnDestroy {
 
     Swal.fire({
       title: 'Bulk Apply Rates?',
-      text: `Are you sure you want to apply all yearly rates (${ratesToApply.length} records) for the selected items to all matching Aawak & Jawak entries?`,
+      text: `Are you sure you want to apply all yearly rates (${ratesToApply.length} records) for the selected items to all matching Aawak & Jawak entries having no rate or 0 rate?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, Apply All',

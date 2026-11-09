@@ -56,8 +56,14 @@ export class SutramExcelApiService {
      */
     getTableDataChunk(tableName, opts = {}) {
         const params = [];
-        params.push(`_limit=${opts.limit ?? 100}`);
-        params.push(`_offset=${opts.offset ?? 0}`);
+        if (opts.export) {
+            params.push(`_export=1`);
+            params.push(`_limit=-1`);
+        }
+        else {
+            params.push(`_limit=${opts.limit ?? 100}`);
+            params.push(`_offset=${opts.offset ?? 0}`);
+        }
         params.push(`_full=1`);
         if (opts.search)
             params.push(`_search=${encodeURIComponent(opts.search)}`);
@@ -73,6 +79,12 @@ export class SutramExcelApiService {
             offset: res.offset || 0,
             limit: res.limit || (opts.limit ?? 100)
         })));
+    }
+    /**
+     * GET /filter-values/:table/:column - Fetch distinct values and counts directly from database
+     */
+    getColumnFilterValues(tableName, colName) {
+        return this.http.get(`${this.baseUri}/filter-values/${encodeURIComponent(tableName)}/${encodeURIComponent(colName)}`).pipe(map(res => res.result || { values: [], blankCount: 0 }));
     }
     /**
      * POST /verify/:table - Server-side FK matching, Unicode normalization, and dictionary check

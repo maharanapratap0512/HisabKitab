@@ -210,8 +210,9 @@ function buildExcelRouter(sutramExcel) {
     router.get('/data/:table', (req, res) => {
         try {
             const tblName = req.params.table;
-            const limit = Math.min(1000, Math.max(1, parseInt(req.query._limit, 10) || 100));
-            const offset = Math.max(0, parseInt(req.query._offset, 10) || 0);
+            const isExport = req.query._export === '1' || req.query._limit === '-1' || req.query._limit === 'all';
+            const limit = isExport ? null : Math.min(1000, Math.max(1, parseInt(req.query._limit, 10) || 100));
+            const offset = isExport ? null : Math.max(0, parseInt(req.query._offset, 10) || 0);
             const search = req.query._search ? String(req.query._search).trim() : '';
             const full = req.query._full !== '0';
             const sort = req.query._sort ? String(req.query._sort).trim() : null;
@@ -232,7 +233,7 @@ function buildExcelRouter(sutramExcel) {
                 } else if (tbl.columns[`${sort}_id`]) {
                     validSortCol = `${sort}_id`;
                 } else {
-                    const cfg = sutramExcel.configs ? sutramExcel.configs[tblName] : null;
+                    const cfg = sutramExcel._configs ? sutramExcel._configs[tblName] : null;
                     if (cfg && cfg.headers) {
                         const h = cfg.headers.find(x => x.name === sort || x.col_name === sort || x.ref_as === sort || x.ref_table === sort);
                         if (h && tbl.columns[h.col_name]) {
@@ -254,6 +255,45 @@ function buildExcelRouter(sutramExcel) {
             });
 
             ok(res, result.rows, { total: result.total, count: result.rows.length, offset, limit });
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── GET /filter-values/:table/:column ─────────────────────
+    // Returns distinct values and counts for a column directly from the database table
+    router.get('/filter-values/:table/:column', async (req, res) => {
+        try {
+            const tblName = req.params.table;
+            const colName = req.params.column;
+            const tbl = sutramExcel.engine.table(tblName);
+            if (!tbl) {
+                return fail(res, `Table "${tblName}" not found`, 404);
+            }
+
+            let validCol = null;
+            if (tbl.columns) {
+                if (tbl.columns[colName]) {
+                    validCol = colName;
+                } else if (tbl.columns[`${colName}_id`]) {
+                    validCol = `${colName}_id`;
+                } else {
+                    const cfg = sutramExcel._configs ? sutramExcel._configs[tblName] : null;
+                    if (cfg && cfg.headers) {
+                        const h = cfg.headers.find(x => x.name === colName || x.col_name === colName || x.ref_as === colName);
+                        if (h && tbl.columns[h.col_name]) {
+                            validCol = h.col_name;
+                        }
+                    }
+                }
+            }
+
+            if (!validCol) {
+                return fail(res, `Column "${colName}" not found in table "${tblName}"`, 400);
+            }
+
+            const result = await Promise.resolve(sutramExcel.engine.distinct(tblName, validCol));
+            ok(res, result);
         } catch (e) {
             fail(res, e, 500);
         }

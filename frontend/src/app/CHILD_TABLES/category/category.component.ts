@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -154,9 +154,18 @@ export class CategoryComponent implements OnInit {
     });
   }
 
+  @ViewChild('excelFileInput') excelFileInput!: ElementRef<HTMLInputElement>;
+
+  onImportClick() {
+    this.gs.checkAndTriggerImport('category', this.excelFileInput?.nativeElement, () => {
+      this.excelFile = null;
+      this.openModal('ei_category');
+    });
+  }
+
   excelImport(ev: any) {
     this.excelFile = ev;
-    this.openModal('ei_category')
+    this.openModal('ei_category');
   }
 
   importResponse(type:any){

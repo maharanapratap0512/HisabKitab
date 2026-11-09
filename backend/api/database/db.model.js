@@ -2757,6 +2757,38 @@ class dbModal {
         FROM variant_aliases va
         JOIN subitem s ON s.variant_id = va.variant_id
         WHERE s._id IS NOT NULL;`
+    },
+    // Version 40
+    // Dynamic Excel Import Session & Staging tables for crash-resilient resumable imports
+    {
+      create_excel_import_session: `CREATE TABLE IF NOT EXISTS excel_import_session (
+        _id INTEGER PRIMARY KEY AUTOINCREMENT,
+        dept_id INTEGER DEFAULT 0,
+        import_type VARCHAR(100) NOT NULL,
+        file_name VARCHAR(255),
+        step_no INTEGER DEFAULT 1,
+        header_config TEXT,
+        header_list TEXT,
+        unmatched_data TEXT,
+        total_count INTEGER DEFAULT 0,
+        processed_count INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT (DATETIME('now', 'localtime')),
+        updated_at TIMESTAMP DEFAULT (DATETIME('now', 'localtime'))
+      );`,
+      create_excel_import_staging: `CREATE TABLE IF NOT EXISTS excel_import_staging (
+        _id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_id INTEGER NOT NULL REFERENCES excel_import_session(_id) ON DELETE CASCADE,
+        dept_id INTEGER DEFAULT 0,
+        row_index INTEGER NOT NULL,
+        row_data TEXT NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        error_message TEXT,
+        is_imported INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT (DATETIME('now', 'localtime')),
+        updated_at TIMESTAMP DEFAULT (DATETIME('now', 'localtime'))
+      );`,
+      create_idx_staging_session: `CREATE INDEX IF NOT EXISTS idx_staging_session ON excel_import_staging(session_id);`,
+      create_idx_staging_dept: `CREATE INDEX IF NOT EXISTS idx_staging_dept ON excel_import_staging(dept_id);`
     }
   ];
 

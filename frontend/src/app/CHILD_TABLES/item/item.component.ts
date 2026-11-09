@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -238,7 +238,7 @@ export class ItemComponent implements OnInit {
   applyRateToTransactions(rateObj: any) {
     if (!this.activeRateItem || rateObj.rate === null || rateObj.rate === undefined) return;
     const itemName = this.activeRateSubitem ? `${this.activeRateSubitem.subitem_hin} (${this.activeRateItem.item_hin})` : this.activeRateItem.item_hin;
-    const confirmMsg = `क्या आप वर्ष ${rateObj.year} के सभी आवक एवं जावक रिकॉर्ड्स में '${itemName}' की दर ₹${rateObj.rate} लागू करना चाहते हैं?`;
+    const confirmMsg = `क्या आप वर्ष ${rateObj.year} के बिना दर (शून्य/खाली) वाले आवक एवं जावक रिकॉर्ड्स में '${itemName}' की दर ₹${rateObj.rate} लागू करना चाहते हैं?`;
     if (!confirm(confirmMsg)) return;
 
     const payload = {
@@ -668,6 +668,15 @@ export class ItemComponent implements OnInit {
       $('#showModal').modal('hide');
       this.showModal = '';
     }
+  }
+
+  @ViewChild('excelFileInput') excelFileInput!: ElementRef<HTMLInputElement>;
+
+  onImportClick() {
+    this.gs.checkAndTriggerImport('item', this.excelFileInput?.nativeElement, () => {
+      this.excelFile = null;
+      this.importResponse(null);
+    });
   }
 
   excelImport(ev: any) {

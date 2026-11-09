@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -658,6 +658,15 @@ export class BachatNewComponent implements OnInit, OnDestroy {
   closeModal() {
     this.showModal = '';
     $('#showModal').modal('hide');
+  }
+
+  @ViewChild('excelFileInput') excelFileInput!: ElementRef<HTMLInputElement>;
+
+  onImportClick() {
+    this.gs.checkAndTriggerImport('bachat', this.excelFileInput?.nativeElement, () => {
+      this.excelFile = null;
+      this.openModal('import');
+    });
   }
 
   excelImport(ev: any) {

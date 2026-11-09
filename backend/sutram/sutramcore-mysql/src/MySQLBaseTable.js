@@ -104,6 +104,40 @@ class MySQLBaseTable {
         return row?.total ?? 0;
     }
 
+    // Return distinct values and frequency counts for a given column
+    async distinct(column, where = {}, { limit = null, orderBy = null } = {}) {
+        const colName = String(column).replace(/[`"']/g, '');
+        if (!this.columns[colName]) {
+            throw new Error(`[sutramcore-mysql] Column "${colName}" not found in table "${this.tableName}"`);
+        }
+        let sql = `SELECT \`${colName}\` AS val, COUNT(*) AS count FROM \`${this.tableName}\``;
+        const { clause, params } = this._buildWhere(where, false);
+        const whereClause = clause
+            ? `${clause} AND \`${colName}\` IS NOT NULL AND \`${colName}\` != ''`
+            : `WHERE \`${colName}\` IS NOT NULL AND \`${colName}\` != ''`;
+        sql += ` ${whereClause} GROUP BY \`${colName}\``;
+        if (orderBy) {
+            sql += ` ORDER BY ${orderBy}`;
+        } else {
+            sql += ` ORDER BY \`${colName}\` ASC`;
+        }
+        if (limit) sql += ` LIMIT ${parseInt(limit, 10)}`;
+        const rows = await this.adapter.all(sql, params);
+
+        const blankSql = `SELECT COUNT(*) AS count FROM \`${this.tableName}\` ${clause ? `${clause} AND` : 'WHERE'} (\`${colName}\` IS NULL OR \`${colName}\` = '')`;
+        const blankRow = await this.adapter.get(blankSql, params);
+        const blankCount = blankRow?.count || 0;
+
+        return {
+            values: (rows || []).map(r => ({
+                display: String(r.val),
+                value: String(r.val),
+                count: r.count
+            })),
+            blankCount
+        };
+    }
+
     // ─────────────────────────────────────────────────────────
     // SANITIZE / DESANITIZE — same as sutramCore
     // ─────────────────────────────────────────────────────────

@@ -463,7 +463,7 @@ export class VariantComponent implements OnInit {
     if (!this.activeRateItem || rateObj.rate === null || rateObj.rate === undefined) return;
     const label = this.activeRateVariant ? this.activeRateVariant.display_name : (this.activeRateSubitem ? this.activeRateSubitem.subitem_hin : this.activeRateItem.item_hin);
     const fullName = `${label} (${this.activeRateItem.item_hin})`;
-    const confirmMsg = `क्या आप वर्ष ${rateObj.year} के सभी आवक एवं जावक रिकॉर्ड्स में '${fullName}' की दर ₹${rateObj.rate} लागू करना चाहते हैं?`;
+    const confirmMsg = `क्या आप वर्ष ${rateObj.year} के बिना दर (शून्य/खाली) वाले आवक एवं जावक रिकॉर्ड्स में '${fullName}' की दर ₹${rateObj.rate} लागू करना चाहते हैं?`;
     if (!confirm(confirmMsg)) return;
 
     const payload = {

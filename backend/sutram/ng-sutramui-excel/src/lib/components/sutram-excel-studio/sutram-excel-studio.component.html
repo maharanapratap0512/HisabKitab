@@ -21,14 +21,14 @@
                   [class.active]="activeTopTab === 'home'"
                   (click)="setTopTab('home')">
             <i class="pi pi-home"></i>
-            <span>होम (Home)</span>
+            <span>Home</span>
           </button>
           <button type="button"
                   class="ribbon-tab-btn"
                   [class.active]="activeTopTab === 'tables'"
                   (click)="setTopTab('tables')">
             <i class="pi pi-database"></i>
-            <span>तालिकाएं (Tables)</span>
+            <span>Tables</span>
             <span class="ribbon-badge">{{ tablesList.length || 21 }}</span>
           </button>
           <button type="button"
@@ -36,15 +36,23 @@
                   [class.active]="activeTopTab === 'reports'"
                   (click)="setTopTab('reports')">
             <i class="pi pi-chart-bar"></i>
-            <span>रिपोर्ट्स (Reports)</span>
+            <span>Reports</span>
             <span class="ribbon-badge">{{ reportsList.length }}</span>
+          </button>
+          <button type="button"
+                  class="ribbon-tab-btn"
+                  [class.active]="activeTopTab === 'settings'"
+                  (click)="setTopTab('settings')">
+            <i class="pi pi-cog"></i>
+            <span>Settings</span>
           </button>
         </nav>
       </div>
 
-      <!-- Menu Bar Right: Mode Switcher & Dark Mode Toggle -->
+      <!-- Menu Bar Right: Mode Switcher, Save / Sync DB, & Dark Mode Toggle -->
       <div class="menu-bar-right">
-        <div class="mode-pill-toggle">
+        <!-- Mode Switcher: Only for database tables -->
+        <div *ngIf="!isCurrentSheetRough && !isCurrentSheetReport" class="mode-pill-toggle">
           <button class="mode-pill-btn" [class.active-normal]="mode === 'normal'" (click)="setStudioMode('normal')">
             <i class="pi pi-pencil"></i> Normal
           </button>
@@ -53,7 +61,31 @@
           </button>
         </div>
 
-        <button class="cmd-btn" style="padding: 3px 6px;" (click)="toggleTheme()" title="लाइट / डार्क मोड">
+        <!-- Shifted: Save / Sync DB shifted between Mode Switcher and Theme Toggle -->
+        <!-- Case A: Rough Sheet OR Report Sheet -> Save Locally -->
+        <button *ngIf="isCurrentSheetRough || isCurrentSheetReport"
+                type="button"
+                class="cmd-btn-save-top"
+                (click)="saveRoughSheetLocally()"
+                [title]="isCurrentSheetReport ? 'Save report locally (Ctrl+S)' : 'Save sheet locally (Ctrl+S)'">
+          <i class="pi pi-save"></i>
+          <span>Save</span>
+        </button>
+
+        <!-- Case B: Database Entry Table Sheet -> Sync to DB -->
+        <button *ngIf="!isCurrentSheetRough && !isCurrentSheetReport"
+                type="button"
+                class="cmd-btn-sync-top"
+                [class.has-pending]="state.pendingChangesCount() > 0"
+                [disabled]="state.pendingChangesCount() === 0 || state.hasErrors()"
+                (click)="startImport()"
+                title="Sync changes to Database (Ctrl+S)">
+          <i class="pi pi-cloud-upload"></i>
+          <span>Sync DB</span>
+          <span *ngIf="state.pendingChangesCount() > 0" class="sync-badge-count">{{ state.pendingChangesCount() }}</span>
+        </button>
+
+        <button class="cmd-btn" style="padding: 3px 6px;" (click)="toggleTheme()" title="Toggle Light / Dark Mode">
           <i class="pi" [ngClass]="isDarkMode ? 'pi-sun' : 'pi-moon'"></i>
         </button>
       </div>
@@ -67,107 +99,63 @@
         <!-- Section: Style & Format -->
         <div class="ribbon-group">
           <div class="ribbon-group-items">
-            <button class="ribbon-tool-btn" [class.active]="isBoldActive" (click)="isBoldActive = !isBoldActive" title="Bold (Ctrl+B)">
+            <button class="ribbon-tool-btn" [class.active]="isBoldActive" (click)="toggleBold()" title="Bold (Ctrl+B)">
               <span style="font-weight: 800; font-size: 13px;">B</span>
               <span class="ribbon-tool-lbl">Bold</span>
             </button>
             <div class="ribbon-mini-col">
-              <button class="ribbon-mini-btn" (click)="textAlign = 'left'" title="Align Left"><i class="pi pi-align-left"></i></button>
-              <button class="ribbon-mini-btn" (click)="textAlign = 'center'" title="Align Center"><i class="pi pi-align-center"></i></button>
-              <button class="ribbon-mini-btn" (click)="textAlign = 'right'" title="Align Right"><i class="pi pi-align-right"></i></button>
+              <button class="ribbon-mini-btn" [class.active-align]="textAlign === 'left'" (click)="setTextAlign('left')" title="Align Left"><i class="pi pi-align-left"></i></button>
+              <button class="ribbon-mini-btn" [class.active-align]="textAlign === 'center'" (click)="setTextAlign('center')" title="Align Center"><i class="pi pi-align-center"></i></button>
+              <button class="ribbon-mini-btn" [class.active-align]="textAlign === 'right'" (click)="setTextAlign('right')" title="Align Right"><i class="pi pi-align-right"></i></button>
             </div>
             <button class="ribbon-tool-btn" (click)="colConfigOp.toggle($event)" title="Choose Visible Columns">
               <i class="pi pi-sliders-h" style="color: var(--primary);"></i>
               <span class="ribbon-tool-lbl">Columns ({{ visibleHeadersCount }})</span>
             </button>
           </div>
-          <span class="ribbon-group-name">प्रारूप (Format)</span>
+          <span class="ribbon-group-name">Format</span>
         </div>
 
         <div class="ribbon-v-sep"></div>
 
-        <!-- Section: Data Actions -->
+        <!-- Section: Data Actions (Refresh, Open File, Export - Clear button removed) -->
         <div class="ribbon-group">
           <div class="ribbon-group-items">
-            <button *ngIf="!isCurrentSheetRough" class="ribbon-tool-btn" (click)="loadTableDataFromDb()" title="डेटाबेस से इस टेबल का लाइव डेटा लोड करें">
-              <i class="pi pi-database text-success"></i>
-              <span class="ribbon-tool-lbl">Load Data</span>
+            <button *ngIf="!isCurrentSheetRough" class="ribbon-tool-btn" (click)="onRefreshData()" title="Refresh data from database">
+              <i class="pi pi-refresh text-success"></i>
+              <span class="ribbon-tool-lbl">Refresh</span>
             </button>
-            <button class="ribbon-tool-btn" (click)="fileInput.click()" title="बाहरी Excel (.xlsx) खोलें">
+            <button class="ribbon-tool-btn" (click)="openFileManager()" title="Open Excel (.xlsx) file or saved sheets">
               <i class="pi pi-folder-open"></i>
               <span class="ribbon-tool-lbl">Open File</span>
             </button>
             <input #fileInput type="file" accept=".xlsx, .xls, .csv" style="display:none;" (change)="onFileUpload($event)">
-            <button class="ribbon-tool-btn" (click)="exportExcel()" title="Excel डाउनलोड करें">
-              <i class="pi pi-download"></i>
-              <span class="ribbon-tool-lbl">Export</span>
-            </button>
-            <button class="ribbon-tool-btn" (click)="state.clearGrid()" title="शीट खाली करें">
-              <i class="pi pi-trash text-danger"></i>
-              <span class="ribbon-tool-lbl">Clear</span>
+            <button class="ribbon-tool-btn"
+                    [disabled]="isExportingExcel"
+                    (click)="exportExcel()"
+                    title="Export sheet to Excel">
+              <i class="pi" [ngClass]="isExportingExcel ? 'pi-spin pi-spinner text-primary' : 'pi-download'"></i>
+              <span class="ribbon-tool-lbl">{{ isExportingExcel ? 'Exporting...' : 'Export' }}</span>
             </button>
           </div>
-          <span class="ribbon-group-name">डेटा (Data)</span>
+          <span class="ribbon-group-name">Data</span>
         </div>
 
         <div class="ribbon-v-sep"></div>
 
-        <!-- Section: Search & Filters -->
+        <!-- Section: Sort & Filter -->
         <div class="ribbon-group">
           <div class="ribbon-group-items">
-            <button class="ribbon-tool-btn" [class.active]="state.filtersEnabled()" (click)="state.toggleFiltersEnabled()" title="फ़िल्टर चालू/बंद">
+            <button class="ribbon-tool-btn" [class.active]="state.filtersEnabled()" (click)="state.toggleFiltersEnabled()" title="Toggle Filters">
               <i class="pi pi-filter"></i>
               <span class="ribbon-tool-lbl">Filters</span>
             </button>
-            <button class="ribbon-tool-btn" [class.active]="state.sortingEnabled()" (click)="state.toggleSortingEnabled()" title="सॉर्टिंग चालू/बंद">
+            <button class="ribbon-tool-btn" [class.active]="state.sortingEnabled()" (click)="state.toggleSortingEnabled()" title="Toggle Sorting">
               <i class="pi pi-sort-alt"></i>
               <span class="ribbon-tool-lbl">Sorting</span>
             </button>
-            <div class="ribbon-search-field">
-              <i class="pi pi-search search-ico"></i>
-              <input type="text"
-                     class="ribbon-search-inp"
-                     placeholder="डेटाबेस में सीधा खोजें..."
-                     [ngModel]="state.dbSearchQuery()"
-                     (ngModelChange)="onDbSearchInput($event)">
-              <button *ngIf="state.dbSearchQuery()" class="clear-btn-inline" (click)="clearDbSearch()">✕</button>
-              <span *ngIf="state.isLoadingDb()" class="spin-inline"><i class="pi pi-spin pi-spinner"></i></span>
-            </div>
           </div>
-          <span class="ribbon-group-name">खोज व फ़िल्टर (Search)</span>
-        </div>
-
-        <div class="ribbon-v-sep"></div>
-
-        <!-- Section: Save / Sync -->
-        <div class="ribbon-group">
-          <div class="ribbon-group-items">
-            <!-- Case A: Rough Sheet -> Save Locally -->
-            <button *ngIf="isCurrentSheetRough"
-                    class="ribbon-tool-btn ribbon-btn-action"
-                    (click)="saveRoughSheetLocally()"
-                    title="रफ शीट को लोकल स्टोरेज में सहेजें (Ctrl+S)">
-              <i class="pi pi-save"></i>
-              <span class="ribbon-tool-lbl">स्थानीय सहेजें</span>
-            </button>
-
-            <!-- Case B: Database Table Sheet -> Sync to DB -->
-            <button *ngIf="!isCurrentSheetRough"
-                    class="ribbon-tool-btn ribbon-btn-action"
-                    [disabled]="state.pendingChangesCount() === 0 || state.hasErrors()"
-                    (click)="startImport()"
-                    title="डेटाबेस में सेव/इम्पोर्ट करें (Ctrl+S)">
-              <i class="pi pi-cloud-upload"></i>
-              <span class="ribbon-tool-lbl">Sync to DB</span>
-              <span *ngIf="state.pendingChangesCount() > 0" class="sync-count-tag">{{ state.pendingChangesCount() }}</span>
-            </button>
-
-            <div class="ribbon-record-pill" title="कुल डेटाबेस रिकॉर्ड्स एवं लोड स्थिति">
-              <i class="pi pi-database"></i>
-              <span>{{ state.rows().length }} / {{ state.totalDbRecords() }}</span>
-            </div>
-          </div>
-          <span class="ribbon-group-name">सुरक्षित करें (Save / Sync)</span>
+          <span class="ribbon-group-name">Sort & Filter</span>
         </div>
       </div>
 
@@ -178,7 +166,7 @@
           <i class="pi pi-search search-ico"></i>
           <input type="text"
                  class="ribbon-search-inp"
-                 placeholder="तालिका खोजें..."
+                 placeholder="Search tables..."
                  [(ngModel)]="tableSearchQuery">
           <button *ngIf="tableSearchQuery" class="clear-btn-inline" (click)="tableSearchQuery = ''">✕</button>
         </div>
@@ -189,14 +177,14 @@
                class="ribbon-small-box"
                [class.active-box]="isTableOpen(tbl.table)"
                (click)="openTableInSheet(tbl.table)"
-               [title]="(tbl.display_name || tbl.table) + ' (' + tbl.table + ')'">
+               [title]="tbl.display_name ? (tbl.display_name + ' (' + tbl.table + ')') : tbl.table">
 
             <!-- Corner Star Favorite Button -->
             <button type="button"
                     class="box-star-btn"
                     [class.starred]="favoriteTables.has(tbl.table)"
                     (click)="toggleFavoriteTable(tbl.table, $event)"
-                    [title]="favoriteTables.has(tbl.table) ? 'पसंदीदा से हटाएं' : 'स्टार्टअप डिफ़ॉल्ट में जोड़ें'">
+                    [title]="favoriteTables.has(tbl.table) ? 'Remove favorite' : 'Add to startup sheets'">
               <i class="pi" [ngClass]="favoriteTables.has(tbl.table) ? 'pi-star-fill' : 'pi-star'"></i>
             </button>
 
@@ -204,10 +192,9 @@
               <i class="pi pi-table"></i>
             </div>
             <div class="box-info">
-              <span class="box-name-hin">{{ tbl.display_name || tbl.table }}</span>
-              <span class="box-name-eng">{{ tbl.table }}</span>
+              <span class="box-name-eng-main">{{ tbl.display_name || tbl.table }}</span>
             </div>
-            <span *ngIf="isTableOpen(tbl.table)" class="box-dot" title="शीट खुली है"></span>
+            <span *ngIf="isTableOpen(tbl.table)" class="box-dot" title="Sheet open"></span>
           </div>
         </div>
       </div>
@@ -219,7 +206,7 @@
           <i class="pi pi-search search-ico"></i>
           <input type="text"
                  class="ribbon-search-inp"
-                 placeholder="रिपोर्ट खोजें..."
+                 placeholder="Search reports..."
                  [(ngModel)]="reportSearchQuery">
           <button *ngIf="reportSearchQuery" class="clear-btn-inline" (click)="reportSearchQuery = ''">✕</button>
         </div>
@@ -230,14 +217,14 @@
                class="ribbon-small-box report-box"
                [class.active-box]="isReportOpen(rep.id)"
                (click)="openReportInSheet(rep)"
-               [title]="rep.title + ' — ' + (rep.desc || '')">
+               [title]="(rep.display_name || rep.title || rep.table || rep.id) + ' — ' + (rep.desc || '')">
 
             <!-- Corner Star Favorite Button -->
             <button type="button"
                     class="box-star-btn"
                     [class.starred]="favoriteReports.has(rep.id)"
                     (click)="toggleFavoriteReport(rep.id, $event)"
-                    [title]="favoriteReports.has(rep.id) ? 'पसंदीदा से हटाएं' : 'स्टार्टअप डिफ़ॉल्ट में जोड़ें'">
+                    [title]="favoriteReports.has(rep.id) ? 'Remove favorite' : 'Add to startup sheets'">
               <i class="pi" [ngClass]="favoriteReports.has(rep.id) ? 'pi-star-fill' : 'pi-star'"></i>
             </button>
 
@@ -245,11 +232,34 @@
               <i class="pi" [ngClass]="rep.icon"></i>
             </div>
             <div class="box-info">
-              <span class="box-name-hin">{{ rep.title }}</span>
-              <span class="box-name-eng">{{ rep.category }}</span>
+              <span class="box-name-eng-main">{{ rep.display_name || rep.title || rep.table || rep.id }}</span>
             </div>
-            <span *ngIf="isReportOpen(rep.id)" class="box-dot" title="शीट खुली है"></span>
+            <span *ngIf="isReportOpen(rep.id)" class="box-dot" title="Sheet open"></span>
           </div>
+        </div>
+      </div>
+
+      <!-- RIBBON TAB 4: SETTINGS (Concise & Minimal: Checkbox & Badge) -->
+      <div *ngIf="activeTopTab === 'settings'" class="ribbon-content-row">
+        <!-- Section: Boolean Display Style (Only Checkbox and Badge) -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    [class.active]="booleanDisplayStyle === 'checkbox'"
+                    (click)="setBooleanStyle('checkbox')"
+                    title="Excel style clickable checkbox">
+              <i class="pi pi-check-square" style="color: #10b981;"></i>
+              <span class="ribbon-tool-lbl">Checkbox</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    [class.active]="booleanDisplayStyle === 'badge'"
+                    (click)="setBooleanStyle('badge')"
+                    title="Status pill badge (Yes / No)">
+              <i class="pi pi-tag" style="color: #3b82f6;"></i>
+              <span class="ribbon-tool-lbl">Badge</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">Boolean</span>
         </div>
       </div>
 
@@ -267,6 +277,24 @@
            [ngModel]="formulaValue"
            (ngModelChange)="onFormulaChange($event)"
            placeholder="Select a cell or type value here...">
+
+    <!-- Direct DB Search & Record Counter (Shifted to Right Area of Formula Bar) -->
+    <div class="formula-bar-right-area">
+      <div class="formula-search-field">
+        <i class="pi pi-search search-ico"></i>
+        <input type="text"
+               class="formula-search-inp"
+               placeholder="Direct DB Search..."
+               [ngModel]="state.dbSearchQuery()"
+               (ngModelChange)="onDbSearchInput($event)">
+        <button *ngIf="state.dbSearchQuery()" class="clear-btn-inline" (click)="clearDbSearch()" title="Clear search">✕</button>
+        <span *ngIf="state.isLoadingDb()" class="spin-inline"><i class="pi pi-spin pi-spinner"></i></span>
+      </div>
+      <div *ngIf="!isCurrentSheetRough" class="formula-record-pill" title="Total database records">
+        <i class="pi pi-database"></i>
+        <span>{{ state.rows().length }} / {{ state.totalDbRecords() }}</span>
+      </div>
+    </div>
   </div>
 
   <!-- Column Config Popover (Replicating Legacy Studio) -->
@@ -397,7 +425,7 @@
       <i class="pi" [ngClass]="statusStripIcon"></i>
       <span>{{ statusStripMessage }}</span>
     </div>
-    <div *ngIf="state.unresolvedCorrectionsCount() > 0">
+    <div *ngIf="!isCurrentSheetReport && state.unresolvedCorrectionsCount() > 0">
       <button class="cmd-btn cmd-btn-warning" style="padding: 2px 8px;" (click)="showSidebar = true">
         <i class="pi pi-bolt"></i> गलतियाँ ({{ state.unresolvedCorrectionsCount() }})
       </button>
@@ -411,6 +439,9 @@
                  [rows]="state.rows()"
                  [filterOnlyErrors]="state.filterOnlyErrors()"
                  [enableDelete]="enableDelete"
+                 [isBold]="isBoldActive"
+                 [textAlign]="textAlign"
+                 [booleanStyle]="booleanDisplayStyle"
                  (loadMore)="onLoadMore()"
                  (filterChanged)="onGridFilterChanged()"
                  (sortChanged)="onGridSortChanged()"
@@ -426,23 +457,73 @@
       <div *ngFor="let tab of sheetTabs"
            class="tab-pill"
            [class.active-tab]="activeSheetId === tab.id"
-           (click)="switchSheet(tab.id)">
+           (click)="switchSheet(tab.id)"
+           (dblclick)="startRenameTab(tab, $event)"
+           (contextmenu)="openTabContextMenu($event, tab)">
         <i class="pi" [ngClass]="tab.icon" style="font-size: 11px;"></i>
-        <span>{{ tab.title }}</span>
-        <span *ngIf="tab.type === 'rough'" class="sheet-tab-rough-badge">रफ</span>
+
+        <!-- Regular Sheet Tab Title -->
+        <span *ngIf="renamingTabId !== tab.id"
+              class="tab-title-text"
+              title="डबल-क्लिक या राइट-क्लिक करके नाम बदलें (Double-click or right-click to rename)">
+          {{ tab.title }}
+        </span>
+
+        <!-- Inline Sheet Rename Input -->
+        <input *ngIf="renamingTabId === tab.id"
+               [id]="'tab-rename-input-' + tab.id"
+               type="text"
+               class="tab-inline-rename-input"
+               [(ngModel)]="renamingTabTitle"
+               (keyup.enter)="saveTabRename(tab)"
+               (keyup.escape)="cancelTabRename()"
+               (blur)="saveTabRename(tab)"
+               (click)="$event.stopPropagation()">
+
+        <!-- Record Count Badge -->
         <span *ngIf="tab.isLoaded && (tab.recordCount || 0) > 0" class="sheet-tab-badge">
           {{ tab.recordCount }}
         </span>
+
+        <!-- Inline Rename Button for Rough Sheets -->
+        <button *ngIf="renamingTabId !== tab.id && (tab.type === 'rough' || tab.id.startsWith('rough_') || tab.id.startsWith('sheet_'))"
+                type="button"
+                class="tab-edit-btn"
+                (click)="startRenameTab(tab, $event)"
+                title="शीट का नाम बदलें (Rename sheet)">
+          <i class="pi pi-pencil" style="font-size: 8.5px;"></i>
+        </button>
+
+        <!-- Close Sheet Button -->
         <button *ngIf="sheetTabs.length > 1"
                 type="button"
                 class="tab-close-btn"
                 (click)="closeSheet(tab.id, $event)"
-                title="शीट बंद करें">✕</button>
+                title="Close sheet">✕</button>
       </div>
 
       <button class="add-tab-btn" (click)="addNewBlankSheet()" title="Add Blank Sheet">
         <i class="pi pi-plus" style="font-size: 10px;"></i>
       </button>
+    </div>
+
+    <!-- Tab Context Menu (Right Click on Sheet Tab) -->
+    <div *ngIf="tabContextMenu.visible"
+         class="tab-context-menu"
+         [style.left.px]="tabContextMenu.x"
+         [style.top.px]="tabContextMenu.y"
+         (click)="$event.stopPropagation()">
+      <div class="tab-context-menu-item"
+           (click)="startRenameTab(tabContextMenu.tab!, $event)">
+        <i class="pi pi-pencil text-primary"></i>
+        <span>नाम बदलें (Rename Sheet)</span>
+      </div>
+      <div *ngIf="tabContextMenu.tab"
+           class="tab-context-menu-item text-danger"
+           (click)="deleteSheet(tabContextMenu.tab, $event)">
+        <i class="pi pi-trash"></i>
+        <span>शीट हटाएं / डिलीट करें (Delete Sheet)</span>
+      </div>
     </div>
 
     <!-- Sub-row B: Status Bar with Scale / Zoom Controls -->
@@ -523,11 +604,27 @@
     </div>
   </div>
 
-  <!-- Smart Header Scanner Modal -->
+  <!-- Smart Header Scanner & Dual-Mode Open File Modal -->
   <sutram-header-scanner [(visible)]="showScannerModal"
+                         [fileName]="uploadedFileName"
+                         [sheetNames]="uploadedSheetNames"
+                         [currentSheetName]="selectedUploadedSheet"
+                         [sheetHeaders]="uploadedSheetHeaders"
+                         [sampleRows]="uploadedSampleRows"
+                         [totalRows]="uploadedTotalRows"
+                         [tablesList]="tablesList"
+                         [selectedTable]="scannerTargetTable"
                          [report]="scanReport"
-                         [availableHeaders]="state.headers()"
-                         (confirmed)="onScannerConfirmed($event)">
+                         [availableHeaders]="scannerAvailableHeaders"
+                         [isTableConfigLoading]="isScannerConfigLoading"
+                         [savedSheets]="savedSheetsList"
+                         (sheetChange)="onUploadedSheetChange($event)"
+                         (targetTableChange)="onScannerTargetTableChange($event)"
+                         (openDirectNormal)="onDirectOpenAsNormalSheet($event)"
+                         (openMappedToTable)="onScannerConfirmedMapped($event)"
+                         (openSavedSheet)="onOpenSavedSheet($event)"
+                         (deleteSavedSheet)="onDeleteSavedSheet($event)"
+                         (triggerFileInput)="triggerBrowseFile()">
   </sutram-header-scanner>
 
   <!-- Batch Correction Sidebar -->

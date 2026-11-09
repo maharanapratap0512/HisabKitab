@@ -28,6 +28,15 @@ export class ExcelImportComponent implements OnInit, OnChanges {
   showAddModal: string = '';
   activeCorrectionRow: any = null;
 
+  activeSessionId: any = null;
+  resumableSession: any = null;
+  hasActiveSession: boolean = false;
+  selectedFileName: string = '';
+
+  get currentDeptId(): any {
+    return this.auth.webUser?.dept_id || this.auth.getWebUser()?.dept_id || 0;
+  }
+
   handleAddOption(val: any, data: any, modalTitle: string) {
     if (val === '+add') {
       this.activeCorrectionRow = data;
@@ -110,6 +119,8 @@ export class ExcelImportComponent implements OnInit, OnChanges {
   pbks: any = [];
   aawak_types: any = [];
   jawak_types: any = [];
+  aawak_sources: any = [];
+  usage_lists: any = [];
   nimitts: any = [];
   attributes: any = [];
   excelArr: any = [];
@@ -156,6 +167,8 @@ export class ExcelImportComponent implements OnInit, OnChanges {
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
+      this.aawak_sources = result.aawak_source ? result.aawak_source : [];
+      this.usage_lists = result.usage_list ? result.usage_list : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
       if (result.attribute) this.attributes = result.attribute;
     });
@@ -189,6 +202,165 @@ export class ExcelImportComponent implements OnInit, OnChanges {
     if (this.importedData && this.importedData.length) {
       this.loadImportedData(this.importedData);
     }
+
+    if (!this.importedData && !this.excelFile && !this.importType) {
+      this.checkActiveSession();
+    }
+  }
+
+  checkActiveSession(typeName?: string) {
+    const t = typeName || (this.importType?.name ? this.importType.name : (typeof this.importType === 'string' ? this.importType : ''));
+    const url = this.api.getUrl('EXCELIMPORT') + 'session/' + this.currentDeptId + (t ? '?type=' + t : '');
+    this.http.get(url).subscribe((res: any) => {
+      if (res && res.success && res.result && res.result.pendingRows && res.result.pendingRows.length > 0) {
+        this.resumableSession = res.result;
+        this.hasActiveSession = true;
+        // If opened without a fresh excelFile, automatically load and resume the session
+        if (!this.excelFile) {
+          this.resumeSession();
+        }
+      } else {
+        this.resumableSession = null;
+        this.hasActiveSession = false;
+      }
+    }, (err: any) => {
+      console.warn('Check active session failed:', err);
+    });
+  }
+
+  resumeSession() {
+    if (!this.resumableSession) return;
+    const s = this.resumableSession.session;
+    this.activeSessionId = s._id;
+    const foundType = this.EIService.importList.find((item: any) => item.name === s.import_type);
+    if (foundType) {
+      this.importType = foundType;
+    } else {
+      this.importType = { name: s.import_type };
+    }
+    this.headerConfig = Array.isArray(s.header_config) ? s.header_config : (typeof s.header_config === 'string' ? JSON.parse(s.header_config || '[]') : []);
+    this.headerList = Array.isArray(s.header_list) ? s.header_list : (typeof s.header_list === 'string' ? JSON.parse(s.header_list || '[]') : []);
+    this.unmatchedData = Array.isArray(s.unmatched_data) ? s.unmatched_data : (typeof s.unmatched_data === 'string' ? JSON.parse(s.unmatched_data || '[]') : []);
+    this.excelArrObj = this.resumableSession.pendingRows || [];
+
+    if (!this.headerList || !this.headerList.length) {
+      this.headerList = this.getHeaderList();
+    }
+
+    const activeHeaders = this.headerConfig.filter((h: any) => h.found);
+    const headerRow = activeHeaders.map((h: any) => h.name);
+    const dataRows = this.excelArrObj.map((r: any) => activeHeaders.map((h: any) => r[h.col_name] !== undefined ? r[h.col_name] : ''));
+    this.excelArr = [headerRow, ...dataRows];
+    this.header1 = 0;
+
+    this.stepNo = s.step_no || 2;
+    this.selectedFileName = s.file_name || '';
+    this.hasActiveSession = false;
+    this.toastr.success('पिछला अधूरा इम्पोर्ट सत्र रीस्टोर कर लिया गया है।');
+  }
+
+  clearActiveSession(showConfirm: boolean = true) {
+    const doClear = () => {
+      const t = this.importType?.name ? this.importType.name : '';
+      const url = this.api.getUrl('EXCELIMPORT') + 'session/' + this.currentDeptId + (t ? '?type=' + t : '');
+      this.http.delete(url).subscribe((res: any) => {
+        this.activeSessionId = null;
+        this.resumableSession = null;
+        this.hasActiveSession = false;
+        this.selectedFileName = '';
+        this.excelArr = [];
+        this.excelArrObj = [];
+        this.unmatchedData = [];
+        this.newInsertedData = [];
+        this.willUpdateData = [];
+        this.duplicateDate = [];
+        this.rejectedData = [];
+        this.updateFailData = [];
+        this.stepNo = 0;
+        this.toastr.success('सत्र साफ़ कर दिया गया है।');
+      }, (err: any) => {
+        this.toastr.error('सत्र साफ़ करने में त्रुटि: ' + (err?.error?.message || err?.message || 'Error'));
+      });
+    };
+
+    if (showConfirm) {
+      Swal.fire({
+        title: 'क्या आप निश्चित हैं?',
+        text: 'अधूरा इम्पोर्ट सत्र डेटा मिटा दिया जाएगा और आप नए सिरे से शुरू कर सकेंगे।',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'हाँ, मिटाएं (Clear)',
+        cancelButtonText: 'रद्द करें'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          doClear();
+        }
+      });
+    } else {
+      doClear();
+    }
+  }
+
+  saveSessionInit(stepNo?: number) {
+    if (!this.excelArrObj || !this.excelArrObj.length) return;
+    const typeName = typeof this.importType === 'object' ? this.importType?.name : this.importType;
+    if (!typeName) return;
+
+    const payload = {
+      sessionId: this.activeSessionId,
+      importType: typeName,
+      fileName: this.selectedFileName || (typeName + '_import.xlsx'),
+      stepNo: stepNo || this.stepNo || 2,
+      headerConfig: this.headerConfig,
+      headerList: this.headerList,
+      unmatchedData: this.unmatchedData,
+      excelData: this.excelArrObj
+    };
+
+    this.http.post(this.api.getUrl('EXCELIMPORT') + 'session/init/' + this.currentDeptId, payload).subscribe((res: any) => {
+      if (res && res.success && res.result) {
+        this.activeSessionId = res.result.sessionId;
+        this.toastr.success('इम्पोर्ट सत्र डेटाबेस में सुरक्षित कर लिया गया है।');
+      } else {
+        this.toastr.error(res?.message || 'इम्पोर्ट सत्र सुरक्षित नहीं हो सका।');
+      }
+    }, (err: any) => {
+      this.toastr.error('इम्पोर्ट सत्र सुरक्षित करने में त्रुटि: ' + (err?.error?.message || err?.message || 'Error'));
+    });
+  }
+
+  syncSessionStep(stepNo: number) {
+    if (!this.activeSessionId) return;
+    this.http.put(this.api.getUrl('EXCELIMPORT') + 'session/step/' + this.currentDeptId, {
+      sessionId: this.activeSessionId,
+      stepNo: stepNo,
+      unmatchedData: this.unmatchedData,
+      headerList: this.headerList
+    }).subscribe({
+      next: (res: any) => {
+        if (res && !res.success) {
+          this.toastr.error(res.message || 'सत्र स्टेप अपडेट विफल रहा।');
+        }
+      },
+      error: (err: any) => {
+        this.toastr.error('सत्र स्टेप अपडेट त्रुटि: ' + (err?.error?.message || err?.message || 'Error'));
+      }
+    });
+    this.http.put(this.api.getUrl('EXCELIMPORT') + 'session/sync_rows/' + this.currentDeptId, {
+      sessionId: this.activeSessionId,
+      rows: this.excelArrObj
+    }).subscribe({
+      next: (res: any) => {
+        if (res && !res.success) {
+          this.toastr.error(res.message || 'सत्र डेटा सिंक विफल रहा।');
+        }
+      },
+      error: (err: any) => {
+        this.toastr.error('सत्र डेटा सिंक त्रुटि: ' + (err?.error?.message || err?.message || 'Error'));
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -295,6 +467,8 @@ export class ExcelImportComponent implements OnInit, OnChanges {
 
   finish() {
     this.import$.complete();
+    this.activeSessionId = null;
+    this.hasActiveSession = false;
     if (this.importType?.name === 'item' || this.importType?.name === 'subitem') {
       this.response.emit([...this.newInsertedData, ...this.willUpdateData, ...this.duplicateDate]);
     } else {
@@ -305,13 +479,19 @@ export class ExcelImportComponent implements OnInit, OnChanges {
   importTypeChanged(ev: any) {
     this.headerConfig = JSON.parse(JSON.stringify(this.EIService.config[ev.name] || []));
     this.secondHeader = ev.secondHeader;
+    if (!this.excelFile && !this.importedData) {
+      this.checkActiveSession(ev.name);
+    }
   }
 
   excelImport(ev: any) {
     if (ev) {
       let workBooks: any = null;
       const reader = new FileReader();
-      const file = ev.target.files[0];
+      const file = ev.target?.files ? ev.target.files[0] : ev;
+      if (file && file.name) {
+        this.selectedFileName = file.name;
+      }
       reader.onload = (event) => {
         this.isLoader = true;
         // this.loadingStatus = "फाइल लोड की जा रही है ।";        
@@ -320,6 +500,9 @@ export class ExcelImportComponent implements OnInit, OnChanges {
         this.excelArr = XLSX.utils.sheet_to_json(workBooks.Sheets[workBooks.SheetNames[0]], { header: 1 });
         this.headerChanged(0)
         this.isLoader = false;
+        if (ev.target) {
+          ev.target.value = '';
+        }
         ev = null
       }
       reader.readAsBinaryString(file);
@@ -394,11 +577,16 @@ export class ExcelImportComponent implements OnInit, OnChanges {
 
     // verifying that all required header are found or not?
     this.stepNo = 1;
+    let allFound = true;
     for (let i in this.headerConfig) {
       if (this.headerConfig[i].not_null && !this.headerConfig[i].found) {
         this.stepNo = 0;
+        allFound = false;
         break;
       }
+    }
+    if (allFound) {
+      this.setExcelToObjectArray();
     }
   }
 
@@ -491,26 +679,31 @@ export class ExcelImportComponent implements OnInit, OnChanges {
   }
 
   back() {
-    this.stepNo = 2
+    this.stepNo = 2;
   }
 
   verifyExcelData() {
     this.isLoader = true;
-    this.http.put(this.api.getUrl('EXCELIMPORT') + 'verify/' + this.auth.webUser.dept_id, { importType: this.importType, excelData: this.excelArrObj, config: this.headerConfig, itemConfig: this.EIService.config.item }).subscribe((res: any) => {
+    this.http.put(this.api.getUrl('EXCELIMPORT') + 'verify/' + this.auth.webUser.dept_id, {
+      importType: this.importType,
+      excelData: this.excelArrObj,
+      config: this.headerConfig,
+      itemConfig: this.EIService.config.item
+    }).subscribe((res: any) => {
+      this.isLoader = false;
       if (res && res.excelData) {
         this.excelArrObj = res.excelData;
-        this.unmatchedData = res.correctionList;
+        this.unmatchedData = res.correctionList || [];
         this.stepNo = 3;
+        // Save all data into database when pressing next!
+        this.saveSessionInit(3);
       } else {
-        this.toastr.error(res['message']);
-        this.isLoader = false;
+        this.toastr.error(res['message'] || 'Verification failed');
       }
     }, (err: any) => {
-      this.toastr.error(err['error']);
       this.isLoader = false;
-
+      this.toastr.error(err['error'] || 'Verification error');
     });
-    this.isLoader = false;
   }
 
   isDropdownOpen: boolean = false;
@@ -676,6 +869,7 @@ export class ExcelImportComponent implements OnInit, OnChanges {
 
     this.unmatchedData[index].done = true;
     this.unmatchedData[index].ignore = false;
+    this.syncSessionStep(3);
     if (data.dictionary) {
       this.http.post(this.api.getUrl('DICT'), data).subscribe((res: any) => {
         if (res.success) {
@@ -834,7 +1028,8 @@ export class ExcelImportComponent implements OnInit, OnChanges {
     const body = {
       importType: this.importType,
       headerList: this.headerList,
-      excelData: validData
+      excelData: validData,
+      sessionId: this.activeSessionId
     };
 
     try {
@@ -890,6 +1085,8 @@ export class ExcelImportComponent implements OnInit, OnChanges {
               if (data.done) {
                 this.isLoader = false;
                 this.stepNo = 4;
+                this.activeSessionId = null;
+                this.hasActiveSession = false;
                 this.toastr.success("Import complete.");
                 return;
               }

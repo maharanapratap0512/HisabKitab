@@ -8,7 +8,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, of, tap, catchError } from 'rxjs';
+import { Observable, of, tap, catchError, Subject } from 'rxjs';
 import { SutramExcelApiService } from './sutram-excel-api.service';
 import { cleanString, stringSimilarity } from '../utils/normalization.utils';
 
@@ -30,7 +30,19 @@ export class SutramRefCacheService {
   private formattedCache = new Map<string, SutramRefOption[]>();
   private inFlight = new Map<string, Observable<any[]>>();
 
+  /** Emits the table name whenever a reference dataset finishes loading and caching */
+  public tableLoaded$ = new Subject<string>();
+
   constructor(private api: SutramExcelApiService) {}
+
+  /**
+   * Checks whether reference data for a given table is currently cached in memory.
+   */
+  public isTableLoaded(table: string): boolean {
+    if (!table) return false;
+    const cleanTable = table.toLowerCase().trim();
+    return this.cache.has(cleanTable);
+  }
 
   /**
    * Loads reference data for a given table, utilizing cache if already loaded.
@@ -52,6 +64,7 @@ export class SutramRefCacheService {
         this.cache.set(cleanTable, records || []);
         this.buildFormattedCache(cleanTable, records || []);
         this.inFlight.delete(cleanTable);
+        this.tableLoaded$.next(cleanTable);
       }),
       catchError((err: any) => {
         console.error(`[SutramRefCache] Failed to load ref data for ${cleanTable}:`, err);
@@ -265,49 +278,93 @@ export class SutramRefCacheService {
 
   /**
    * Finds a reference match for a given raw input string or numeric ID.
+   * Multi-tier matching strategy supporting hintId, code, bilingual split, prefix, and fuzzy similarity.
    */
   public findRefMatch(
     table: string,
     query: any,
-    parentId?: any
+    parentId?: any,
+    hintId?: any
   ): { found: boolean; item?: any; id?: any; display?: string } {
-    if (query === null || query === undefined || query === '') {
-      return { found: false };
-    }
-
     const cleanTable = (table || '').toLowerCase().trim();
     const options = this.getOptions(cleanTable, parentId);
     if (options.length === 0) {
       return { found: false };
     }
 
+    // Tier 0: Direct Foreign Key Hint ID match (from verified DB record)
+    if (hintId !== undefined && hintId !== null && hintId !== '') {
+      const byHint = options.find(o => String(o.id) === String(hintId));
+      if (byHint) {
+        return { found: true, item: byHint.raw, id: byHint.id, display: byHint.display };
+      }
+    }
+
+    if (query === null || query === undefined || query === '') {
+      return { found: false };
+    }
+
     const queryStr = String(query).trim();
     const cleanQ = cleanString(queryStr);
 
-    // 1. Exact numeric ID match
+    // Tier 1: Exact numeric ID match
     const byId = options.find(o => String(o.id) === queryStr);
     if (byId) {
       return { found: true, item: byId.raw, id: byId.id, display: byId.display };
     }
 
-    // 2. Exact code match
+    // Tier 2: Exact code match
     const byCode = options.find(o => o.code && cleanString(o.code) === cleanQ);
     if (byCode) {
       return { found: true, item: byCode.raw, id: byCode.id, display: byCode.display };
     }
 
-    // 3. Exact Hindi or English match
+    // Tier 3: Exact Hindi, English, or Formatted Display match
     const byExactName = options.find(o => {
       const h = o.hin ? cleanString(o.hin) : '';
       const e = o.eng ? cleanString(o.eng) : '';
       const d = cleanString(o.display);
-      return h === cleanQ || e === cleanQ || d === cleanQ;
+      return (h && h === cleanQ) || (e && e === cleanQ) || (d && d === cleanQ);
     });
     if (byExactName) {
       return { found: true, item: byExactName.raw, id: byExactName.id, display: byExactName.display };
     }
 
-    // 4. Fuzzy similarity match (>= 0.85 confidence)
+    // Tier 4: Bilingual token splitting (e.g. "खीरा : Cucumber" vs "खीरा : Cucumber : 01")
+    if (queryStr.includes(':')) {
+      const parts = queryStr.split(':').map(p => cleanString(p)).filter(Boolean);
+      if (parts.length >= 2) {
+        const byBilingual = options.find(o => {
+          const h = o.hin ? cleanString(o.hin) : '';
+          const e = o.eng ? cleanString(o.eng) : '';
+          if (h && e && (
+            (parts[0] === h && parts[1] === e) ||
+            (parts[0] === e && parts[1] === h)
+          )) {
+            return true;
+          }
+          if (o.code && parts.includes(cleanString(o.code))) {
+            if (h && parts.includes(h)) return true;
+            if (e && parts.includes(e)) return true;
+          }
+          return false;
+        });
+        if (byBilingual) {
+          return { found: true, item: byBilingual.raw, id: byBilingual.id, display: byBilingual.display };
+        }
+      }
+    }
+
+    // Tier 5: Prefix / Substring match on display string
+    const byPrefix = options.find(o => {
+      const d = cleanString(o.display);
+      return d && cleanQ && (d.startsWith(cleanQ) || cleanQ.startsWith(d));
+    });
+    if (byPrefix) {
+      return { found: true, item: byPrefix.raw, id: byPrefix.id, display: byPrefix.display };
+    }
+
+    // Tier 6: Fuzzy similarity match (>= 0.80 confidence threshold)
     let bestMatch: SutramRefOption | null = null;
     let bestScore = 0;
 
@@ -315,7 +372,7 @@ export class SutramRefCacheService {
       const candidates = [opt.hin, opt.eng, opt.display, opt.code].filter(Boolean) as string[];
       for (const cand of candidates) {
         const score = stringSimilarity(cleanQ, cleanString(cand));
-        if (score > bestScore && score >= 0.85) {
+        if (score > bestScore && score >= 0.80) {
           bestScore = score;
           bestMatch = opt;
         }

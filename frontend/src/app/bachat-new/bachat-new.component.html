@@ -26,12 +26,12 @@
                      </button>
                   </div>
                   <div class="col-2">
-                     <button class="file btn btn-success" style="font-weight: 700 !important;">
+                     <button type="button" class="btn btn-success" style="font-weight: 700 !important;" (click)="onImportClick()">
                         <i class="uil uil-arrow-to-bottom"></i> Import Bachat
-                        <input type="file" class="inputtag"
-                           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                           (change)="excelImport($event)" />
                      </button>
+                     <input #excelFileInput type="file" style="display: none;"
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                        (change)="excelImport($event)" />
                      <!-- <button *ngIf="gs.importPending" class="file btn btn-success" (click)="openModal('import')"
                            style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Import Aawak

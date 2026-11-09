@@ -59,24 +59,24 @@ function buildRouter(engine) {
     // Everything else → where object
 
     function parseQuery(query) {
-        const where   = {};
-        let limit     = null;
-        let offset    = null;
-        let orderBy   = null;
-        let full      = true;
+        const where = {};
+        let limit = null;
+        let offset = null;
+        let orderBy = null;
+        let full = true;
 
         const PAGE_DEFAULT = 50;
 
         for (const [key, val] of Object.entries(query)) {
-            if (key === '_limit')  { limit   = parseInt(val) || PAGE_DEFAULT; continue; }
-            if (key === '_page')   {
+            if (key === '_limit') { limit = parseInt(val) || PAGE_DEFAULT; continue; }
+            if (key === '_page') {
                 const page = parseInt(val) || 1;
                 limit = limit ?? PAGE_DEFAULT;
                 offset = (page - 1) * limit;
                 continue;
             }
-            if (key === '_order')  { orderBy = val; continue; }
-            if (key === '_full')   { full    = val !== 'false' && val !== '0'; continue; }
+            if (key === '_order') { orderBy = val; continue; }
+            if (key === '_full') { full = val !== 'false' && val !== '0'; continue; }
             // everything else is a where condition
             // try to coerce numbers
             where[key] = isNaN(val) || val === '' ? val : Number(val);
@@ -157,11 +157,11 @@ function buildRouter(engine) {
             const { where, limit, offset, orderBy, full } = parseQuery(req.query);
             const opts = { full };
             if (orderBy) opts.orderBy = orderBy;
-            if (limit)   opts.limit   = limit;
-            if (offset)  opts.offset  = offset;
+            if (limit) opts.limit = limit;
+            if (offset) opts.offset = offset;
 
             const result = tbl.getAll(where, opts);
-            const total  = Object.keys(where).length
+            const total = Object.keys(where).length
                 ? tbl.count(where)
                 : tbl.count();
 
@@ -205,13 +205,13 @@ function buildRouter(engine) {
         try {
             const { where = {}, limit = null, page = 1, orderBy = null, full = true } = req.body ?? {};
             const offset = limit ? (page - 1) * limit : null;
-            const opts   = { full };
+            const opts = { full };
             if (orderBy) opts.orderBy = orderBy;
-            if (limit)   opts.limit   = limit;
-            if (offset)  opts.offset  = offset;
+            if (limit) opts.limit = limit;
+            if (offset) opts.offset = offset;
 
             const result = tbl.getAll(where, opts);
-            const total  = tbl.count(where);
+            const total = tbl.count(where);
             ok(res, result, { total, count: result.length });
         } catch (e) {
             fail(res, e);

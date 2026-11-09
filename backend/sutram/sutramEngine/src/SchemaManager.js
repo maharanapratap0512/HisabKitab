@@ -16,7 +16,7 @@
 class SchemaManager {
 
     constructor(db, rebootstrap) {
-        this.db          = db;
+        this.db = db;
         this.rebootstrap = rebootstrap; // callback → Engine.rebootstrap()
     }
 
@@ -34,9 +34,9 @@ class SchemaManager {
     //   });
 
     importAll({ schema, triggers = [], reports = [] } = {}) {
-        if (schema)            this.importSchema(schema);
-        if (triggers?.length)  this._importTriggers(triggers);
-        if (reports?.length)   this._importReports(reports);
+        if (schema) this.importSchema(schema);
+        if (triggers?.length) this._importTriggers(triggers);
+        if (reports?.length) this._importReports(reports);
         // single rebootstrap at the very end
         this.rebootstrap();
         console.log('[sutramEngine] ✓ importAll complete');
@@ -61,7 +61,7 @@ class SchemaManager {
         }
 
         let imported = 0;
-        let skipped  = 0;
+        let skipped = 0;
 
         for (const [tableName, def] of Object.entries(tableMeta)) {
             if (tableName.startsWith('sys_')) continue; // never import sys_ tables
@@ -76,7 +76,7 @@ class SchemaManager {
             }
 
             const columns = this._parseColumns(def.columns ?? {});
-            const joins   = this._parseJoins(def.joins ?? {});
+            const joins = this._parseJoins(def.joins ?? {});
 
             // createTable handles sys_ insert + DDL — no rebootstrap here
             // (importAll / importSchema calls it once at the end)
@@ -138,9 +138,9 @@ class SchemaManager {
 
     exportAll() {
         return {
-            schema:   this.exportSchema(),
+            schema: this.exportSchema(),
             triggers: this.exportTriggers(),
-            reports:  this.exportReports(),
+            reports: this.exportReports(),
         };
     }
 
@@ -156,7 +156,7 @@ class SchemaManager {
     //   // { product: { columns: {...}, joins: {...} }, ... }
 
     exportSchema() {
-        const tables  = this.db.prepare(
+        const tables = this.db.prepare(
             `SELECT * FROM sys_table WHERE active = 1 AND is_system = 0 ORDER BY _id ASC`
         ).all();
 
@@ -173,7 +173,7 @@ class SchemaManager {
 
             result[table.table_name] = {
                 columns: this._exportColumns(cols),
-                joins:   this._exportJoins(joins),
+                joins: this._exportJoins(joins),
             };
         }
 
@@ -202,31 +202,31 @@ class SchemaManager {
 
             const def = {
                 trigger_name: t.trigger_name,
-                label:        t.label,
+                label: t.label,
                 source_table: t.source_table,
-                event:        t.event,
-                active:       t.active === 1,
+                event: t.event,
+                active: t.active === 1,
             };
 
             // only include condition fields if not 'always'
             if (t.condition_type !== 'always') {
-                def.condition_type  = t.condition_type;
-                if (t.condition_col)   def.condition_col   = t.condition_col;
+                def.condition_type = t.condition_type;
+                if (t.condition_col) def.condition_col = t.condition_col;
                 if (t.condition_value) def.condition_value = t.condition_value;
-                if (t.condition_sql)   def.condition_sql   = t.condition_sql;
+                if (t.condition_sql) def.condition_sql = t.condition_sql;
             }
 
             def.actions = actions.map(a => {
                 const action = {
                     action_type: a.action_type,
-                    sort_order:  a.sort_order,
+                    sort_order: a.sort_order,
                 };
                 if (a.target_table) action.target_table = a.target_table;
                 if (a.field_map && a.field_map !== '{}') {
                     action.field_map = JSON.parse(a.field_map);
                 }
                 if (a.condition) action.condition = a.condition;
-                if (a.raw_sql)   action.raw_sql   = a.raw_sql;
+                if (a.raw_sql) action.raw_sql = a.raw_sql;
                 return action;
             });
 
@@ -248,11 +248,11 @@ class SchemaManager {
             `SELECT * FROM sys_report ORDER BY _id ASC`
         ).all().map(r => ({
             report_name: r.report_name,
-            label:       r.label,
+            label: r.label,
             description: r.description,
-            cte_sql:     r.cte_sql,
-            params:      r.params ? JSON.parse(r.params) : [],
-            active:      r.active === 1,
+            cte_sql: r.cte_sql,
+            params: r.params ? JSON.parse(r.params) : [],
+            active: r.active === 1,
         }));
     }
 
@@ -311,11 +311,11 @@ class SchemaManager {
 
     dropColumn(tableName, columnName) {
         const tableRow = this._getTable(tableName);
-        const colRow   = this.db.prepare(
+        const colRow = this.db.prepare(
             `SELECT * FROM sys_column WHERE table_id = ? AND column_name = ?`
         ).get(tableRow._id, columnName);
 
-        if (!colRow)    throw new Error(`[sutramEngine] Column "${columnName}" not found in "${tableName}"`);
+        if (!colRow) throw new Error(`[sutramEngine] Column "${columnName}" not found in "${tableName}"`);
         if (colRow.is_pk) throw new Error(`[sutramEngine] Cannot drop primary key column`);
 
         this.db.transaction(() => {
@@ -344,7 +344,7 @@ class SchemaManager {
 
     removeJoin(tableName, joinKey) {
         const tableRow = this._getTable(tableName);
-        const joinRow  = this.db.prepare(
+        const joinRow = this.db.prepare(
             `SELECT * FROM sys_join WHERE table_id = ? AND join_key = ?`
         ).get(tableRow._id, joinKey);
 
@@ -382,10 +382,10 @@ class SchemaManager {
 
     getTableDetail(tableName) {
         const tableRow = this._getTable(tableName);
-        const columns  = this.db.prepare(
+        const columns = this.db.prepare(
             `SELECT * FROM sys_column WHERE table_id = ? AND active = 1 ORDER BY sort_order ASC`
         ).all(tableRow._id);
-        const joins    = this.db.prepare(
+        const joins = this.db.prepare(
             `SELECT * FROM sys_join WHERE table_id = ? AND active = 1`
         ).all(tableRow._id);
         return { ...tableRow, columns, joins };
@@ -397,7 +397,7 @@ class SchemaManager {
 
     _importTriggers(triggers) {
         let imported = 0;
-        let skipped  = 0;
+        let skipped = 0;
 
         for (const def of triggers) {
             if (!def.trigger_name) {
@@ -419,13 +419,13 @@ class SchemaManager {
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 `).run(
                     def.trigger_name,
-                    def.label          ?? def.trigger_name,
+                    def.label ?? def.trigger_name,
                     def.source_table,
                     def.event.toUpperCase(),
-                    def.condition_type  ?? 'always',
-                    def.condition_col   ?? null,
+                    def.condition_type ?? 'always',
+                    def.condition_col ?? null,
                     def.condition_value ?? null,
-                    def.condition_sql   ?? null,
+                    def.condition_sql ?? null,
                 );
 
                 const triggerId = res.lastInsertRowid;
@@ -444,7 +444,7 @@ class SchemaManager {
                         a.target_table ?? null,
                         a.field_map ? JSON.stringify(a.field_map) : '{}',
                         a.condition ?? null,
-                        a.raw_sql   ?? null,
+                        a.raw_sql ?? null,
                     );
                 }
             })();
@@ -457,7 +457,7 @@ class SchemaManager {
 
     _importReports(reports) {
         let imported = 0;
-        let skipped  = 0;
+        let skipped = 0;
 
         for (const def of reports) {
             if (!def.report_name) {
@@ -476,7 +476,7 @@ class SchemaManager {
                 VALUES (?, ?, ?, ?, ?)
             `).run(
                 def.report_name,
-                def.label       ?? def.report_name,
+                def.label ?? def.report_name,
                 def.description ?? null,
                 def.cte_sql,
                 JSON.stringify(def.params ?? []),
@@ -496,18 +496,18 @@ class SchemaManager {
     _parseColumns(columns) {
         return Object.entries(columns).map(([column_name, def], i) => ({
             column_name,
-            label:         def.label ?? column_name,
-            col_type:      def.type ?? 'string',
-            is_pk:         column_name === '_id' ? 1 : 0,
-            is_required:   def.required ? 1 : 0,
+            label: def.label ?? column_name,
+            col_type: def.type ?? 'string',
+            is_pk: column_name === '_id' ? 1 : 0,
+            is_required: def.required ? 1 : 0,
             default_value: def.default !== undefined ? String(def.default) : null,
-            ref_table:     def.ref ? def.ref.split('.')[0] : null,
-            ref_col:       def.ref ? def.ref.split('.')[1] : null,
-            ref_as:        def.as  ?? null,
-            ref_select:    def.select
-                               ? JSON.stringify(Array.isArray(def.select) ? def.select : [def.select])
-                               : null,
-            sort_order:    i,
+            ref_table: def.ref ? def.ref.split('.')[0] : null,
+            ref_col: def.ref ? def.ref.split('.')[1] : null,
+            ref_as: def.as ?? null,
+            ref_select: def.select
+                ? JSON.stringify(Array.isArray(def.select) ? def.select : [def.select])
+                : null,
+            sort_order: i,
         }));
     }
 
@@ -515,15 +515,15 @@ class SchemaManager {
     _parseJoins(joins) {
         return Object.entries(joins).map(([join_key, def]) => ({
             join_key,
-            join_type:      def.hasMany ? 'hasMany' : 'manyToMany',
-            child_table:    def.table,
-            fk_col:         def.on,
-            target_col:     def.target,
-            as_name:        def.as ?? join_key,
+            join_type: def.hasMany ? 'hasMany' : 'manyToMany',
+            child_table: def.table,
+            fk_col: def.on,
+            target_col: def.target,
+            as_name: def.as ?? join_key,
             junction_table: def.junction ?? null,
-            select_cols:    Array.isArray(def.select)
-                                ? JSON.stringify(def.select)
-                                : '["*"]',
+            select_cols: Array.isArray(def.select)
+                ? JSON.stringify(def.select)
+                : '["*"]',
         }));
     }
 
@@ -542,8 +542,8 @@ class SchemaManager {
             }
             if (col.is_required) def.required = true;
             if (col.ref_table && col.ref_col) {
-                def.ref    = `${col.ref_table}.${col.ref_col}`;
-                def.as     = col.ref_as ?? col.ref_table;
+                def.ref = `${col.ref_table}.${col.ref_col}`;
+                def.as = col.ref_as ?? col.ref_table;
                 def.select = col.ref_select ? JSON.parse(col.ref_select) : '*';
             }
 
@@ -562,21 +562,21 @@ class SchemaManager {
             if (join.join_type === 'hasMany') {
                 result[join.join_key] = {
                     hasMany: true,
-                    table:   join.child_table,
-                    on:      join.fk_col,
-                    target:  join.target_col,
-                    as:      join.as_name,
-                    select:  selectCols,
+                    table: join.child_table,
+                    on: join.fk_col,
+                    target: join.target_col,
+                    as: join.as_name,
+                    select: selectCols,
                 };
             } else if (join.join_type === 'manyToMany') {
                 result[join.join_key] = {
                     manyToMany: true,
-                    table:      join.child_table,
-                    junction:   join.junction_table,
-                    on:         join.fk_col,
-                    target:     join.target_col,
-                    as:         join.as_name,
-                    select:     selectCols,
+                    table: join.child_table,
+                    junction: join.junction_table,
+                    on: join.fk_col,
+                    target: join.target_col,
+                    as: join.as_name,
+                    select: selectCols,
                 };
             }
         }
@@ -620,15 +620,15 @@ class SchemaManager {
         `).run(
             tableId,
             col.column_name,
-            col.label         ?? col.column_name,
-            col.col_type      ?? 'string',
-            col.is_required   ? 1 : 0,
+            col.label ?? col.column_name,
+            col.col_type ?? 'string',
+            col.is_required ? 1 : 0,
             col.default_value !== undefined ? String(col.default_value) : null,
-            col.is_pk         ? 1 : 0,
-            col.ref_table     ?? null,
-            col.ref_col       ?? null,
-            col.ref_as        ?? null,
-            col.ref_select    ?? null,
+            col.is_pk ? 1 : 0,
+            col.ref_table ?? null,
+            col.ref_col ?? null,
+            col.ref_as ?? null,
+            col.ref_select ?? null,
             sortOrder,
         );
     }
@@ -671,10 +671,10 @@ class SchemaManager {
             let colDef = `"${col.column_name}"`;
 
             switch (col.col_type) {
-                case 'number':  colDef += ' DECIMAL(10,2)'; break;
-                case 'boolean': colDef += ' TINYINT';       break;
-                case 'json':    colDef += ' TEXT';          break;
-                default:        colDef += ' TEXT';
+                case 'number': colDef += ' DECIMAL(10,2)'; break;
+                case 'boolean': colDef += ' TINYINT'; break;
+                case 'json': colDef += ' TEXT'; break;
+                default: colDef += ' TEXT';
             }
 
             if (col.is_required) colDef += ' NOT NULL';
@@ -704,10 +704,10 @@ class SchemaManager {
         let def = `ALTER TABLE "${tableName}" ADD COLUMN "${col.column_name}"`;
 
         switch (col.col_type) {
-            case 'number':  def += ' DECIMAL(10,2)'; break;
-            case 'boolean': def += ' TINYINT';       break;
-            case 'json':    def += ' TEXT';          break;
-            default:        def += ' TEXT';
+            case 'number': def += ' DECIMAL(10,2)'; break;
+            case 'boolean': def += ' TINYINT'; break;
+            case 'json': def += ' TEXT'; break;
+            default: def += ' TEXT';
         }
 
         if (col.default_value !== undefined && col.default_value !== null) {
@@ -732,9 +732,9 @@ class SchemaManager {
 
     _parseDefault(type, raw) {
         if (raw === null || raw === undefined) return undefined;
-        if (type === 'number')  return Number(raw);
+        if (type === 'number') return Number(raw);
         if (type === 'boolean') return raw === 'true' || raw === '1' ? 1 : 0;
-        if (type === 'json')    { try { return JSON.parse(raw); } catch { return null; } }
+        if (type === 'json') { try { return JSON.parse(raw); } catch { return null; } }
         return raw;
     }
 }

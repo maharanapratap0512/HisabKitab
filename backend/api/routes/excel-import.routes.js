@@ -7,6 +7,7 @@ const subitemTable = sutramDB.table('subitem');
 const itemTable = sutramDB.table('item');
 const Fn = require('../database/functions');
 const itemRateService = require('../services/item-rate.service');
+const stagingService = require('../services/excel-import-staging.service');
 const DB = new DBContex();
 
 function extractYearlyRates(row) {
@@ -25,6 +26,64 @@ function extractYearlyRates(row) {
     return rates;
 }
 
+// ── SESSION & STAGING ENDPOINTS FOR RESUMABLE DYNAMIC IMPORTS ───────────
+
+router.get('/session/:dept_id', async (req, res, next) => {
+    try {
+        const active = stagingService.getActiveSession(req.params.dept_id, req.query.type);
+        res.json({
+            success: true,
+            result: active
+        });
+    } catch (err) { next(err); }
+});
+
+router.post('/session/init/:dept_id', async (req, res, next) => {
+    try {
+        const { importType, fileName, stepNo, headerConfig, headerList, excelData, unmatchedData } = req.body;
+        const result = stagingService.initSession({
+            deptId: req.params.dept_id,
+            importType: typeof importType === 'object' ? importType.name : importType,
+            fileName,
+            stepNo: stepNo || 2,
+            headerConfig,
+            headerList,
+            unmatchedData: unmatchedData || [],
+            rows: excelData || []
+        });
+        res.json({
+            success: true,
+            result
+        });
+    } catch (err) { next(err); }
+});
+
+router.put('/session/step/:dept_id', async (req, res, next) => {
+    try {
+        const { sessionId, stepNo, unmatchedData, headerList } = req.body;
+        if (sessionId) {
+            stagingService.updateSessionStep(sessionId, stepNo, unmatchedData, headerList);
+        }
+        res.json({ success: true });
+    } catch (err) { next(err); }
+});
+
+router.put('/session/sync_rows/:dept_id', async (req, res, next) => {
+    try {
+        const { sessionId, rows } = req.body;
+        if (sessionId && Array.isArray(rows)) {
+            stagingService.syncStagingRows(sessionId, rows);
+        }
+        res.json({ success: true });
+    } catch (err) { next(err); }
+});
+
+router.delete('/session/:dept_id', async (req, res, next) => {
+    try {
+        stagingService.clearSession(req.params.dept_id, req.query.type);
+        res.json({ success: true, message: 'Session cleared successfully.' });
+    } catch (err) { next(err); }
+});
 
 //get all unmatched or correction list
 router.get('/correction', async (req, res, next) => {
@@ -387,7 +446,7 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
     res.write(':ok\n\n');
 
     let isFinished = false;
-    const { importType, headerList, excelData } = req.body;
+    const { importType, headerList, excelData, sessionId } = req.body;
     const total = excelData.length;
     const fn = new ExcelFunctions([], req.params.dept_id);
     console.log(`[Excel Import] Starting ${importType.name} import. Total rows: ${total}`);
@@ -449,6 +508,11 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                     processed++;
                     console.log(`[Excel Import] Jawak row ${processed}/${total} processed. Status: ${status}`);
                     sendUpdate({ index: processed, total, status, result: { status, data: { ...row, newData } } });
+
+                    if (sessionId && status !== 'rejected') {
+                        const rowIdx = row.row_index !== undefined ? row.row_index : processed - 1;
+                        stagingService.markRowImported(sessionId, rowIdx);
+                    }
 
                     if (processed % 5 === 0) await new Promise(r => setImmediate(r));
                 }
@@ -595,11 +659,19 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                 }
                 sendUpdate({ index: i + 1, total, status: result.status, result });
 
+                if (sessionId && result.status !== 'rejected') {
+                    const rowIdx = row.row_index !== undefined ? row.row_index : i;
+                    stagingService.markRowImported(sessionId, rowIdx);
+                }
+
                 if ((i + 1) % 5 === 0) await new Promise(r => setImmediate(r));
             }
         }
 
         console.log(`[Excel Import] Finished ${importType.name} import.`);
+        if (sessionId) {
+            stagingService.clearSession(req.params.dept_id, importType.name);
+        }
         sendUpdate({ done: true });
 
     } catch (err) {

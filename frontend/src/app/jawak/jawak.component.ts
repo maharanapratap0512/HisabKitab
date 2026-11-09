@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -246,7 +246,17 @@ export class JawakComponent implements OnInit, OnDestroy {
     });
   }
 
+  @ViewChild('excelFileInput') excelFileInput!: ElementRef<HTMLInputElement>;
   excelFile: any;
+
+  onImportClick() {
+    this.gs.checkAndTriggerImport('jawak', this.excelFileInput?.nativeElement, () => {
+      this.excelFile = null;
+      this.showModal = 'ei_jawak';
+      $('#showModal').modal('show');
+    });
+  }
+
   excelImport(event: any) {
     this.excelFile = event;
     this.showModal = 'ei_jawak';

@@ -38,13 +38,18 @@ async function saveItemRate(deptId, data) {
         throw new Error('Item, Year, and Rate are required.');
     }
 
-    let whereCondition = `dept_id = ${dId} AND item_id = ${item_id} AND year = ${year}`;
+    const conditions = [
+        `dept_id = ${dId}`,
+        `item_id = ${item_id}`,
+        `year = ${year}`
+    ];
     if (subitem_id) {
-        whereCondition += ` AND subitem_id = ${subitem_id}`;
+        conditions.push(`subitem_id = ${subitem_id}`);
     } else {
-        whereCondition += ` AND (subitem_id IS NULL OR subitem_id = 0)`;
+        conditions.push(`(subitem_id IS NULL OR subitem_id = 0)`);
     }
 
+    const whereCondition = conditions.join(' AND ');
     const existing = itemRateTable.getOne(whereCondition, { full: false });
 
     if (existing) {
@@ -74,9 +79,10 @@ async function deleteItemRate(id) {
 
 /**
  * Bulk applies rate to matching Aawak & Jawak entries of a department for that item, subitem, and year.
+ * Only applies rate and recalculates amount where rate is null, 0, or not mentioned (unless overwrite is true).
  */
 async function applyItemRate(data) {
-    const { dept_id, item_id, subitem_id, year, rate } = data;
+    const { dept_id, item_id, subitem_id, year, rate, overwrite = false } = data;
 
     if (!dept_id || !item_id || !year || rate === undefined || rate === null) {
         throw new Error('Missing required parameters for applying rate.');
@@ -88,27 +94,32 @@ async function applyItemRate(data) {
     const yStr = String(year);
     const rVal = Number(rate);
 
-    let awkSql = '';
-    let jwkSql = '';
-    let awkParams = [];
-    let jwkParams = [];
+    const conditions = [
+        'dept_id = ?',
+        'item_id = ?',
+        "strftime('%Y', date) = ?"
+    ];
+    const params = [dId, iId, yStr];
 
     if (sId) {
-        awkSql = `UPDATE aawak SET rate = ?, actual_amt = ROUND(qty * ?, 2) WHERE dept_id = ? AND item_id = ? AND subitem_id = ? AND strftime('%Y', date) = ?`;
-        awkParams = [rVal, rVal, dId, iId, sId, yStr];
-
-        jwkSql = `UPDATE jawak SET rate = ?, actual_amt = ROUND(qty * ?, 2) WHERE dept_id = ? AND item_id = ? AND subitem_id = ? AND strftime('%Y', date) = ?`;
-        jwkParams = [rVal, rVal, dId, iId, sId, yStr];
+        conditions.push('subitem_id = ?');
+        params.push(sId);
     } else {
-        awkSql = `UPDATE aawak SET rate = ?, actual_amt = ROUND(qty * ?, 2) WHERE dept_id = ? AND item_id = ? AND (subitem_id IS NULL OR subitem_id = 0) AND strftime('%Y', date) = ?`;
-        awkParams = [rVal, rVal, dId, iId, yStr];
-
-        jwkSql = `UPDATE jawak SET rate = ?, actual_amt = ROUND(qty * ?, 2) WHERE dept_id = ? AND item_id = ? AND (subitem_id IS NULL OR subitem_id = 0) AND strftime('%Y', date) = ?`;
-        jwkParams = [rVal, rVal, dId, iId, yStr];
+        conditions.push('(subitem_id IS NULL OR subitem_id = 0)');
     }
 
-    const awkRes = db.prepare(awkSql).run(...awkParams);
-    const jwkRes = db.prepare(jwkSql).run(...jwkParams);
+    if (!overwrite) {
+        // Only update entries where rate is null, 0, or empty string
+        conditions.push("(rate IS NULL OR rate = 0 OR rate = '')");
+    }
+
+    const whereClause = conditions.join(' AND ');
+
+    const awkSql = `UPDATE aawak SET rate = ?, actual_amt = ROUND(COALESCE(qty, 0) * ?, 2), updated_at = datetime('now', 'localtime') WHERE ${whereClause}`;
+    const jwkSql = `UPDATE jawak SET rate = ?, actual_amt = ROUND(COALESCE(qty, 0) * ?, 2), updated_at = datetime('now', 'localtime') WHERE ${whereClause}`;
+
+    const awkRes = db.prepare(awkSql).run(rVal, rVal, ...params);
+    const jwkRes = db.prepare(jwkSql).run(rVal, rVal, ...params);
 
     return {
         success: true,
@@ -124,14 +135,18 @@ async function applyItemRate(data) {
 async function lookupItemRate(dept_id, item_id, subitem_id, year) {
     if (!item_id || !year) return null;
 
-    let where = `dept_id = ${Number(dept_id)} AND item_id = ${Number(item_id)} AND year = ${Number(year)}`;
+    const conditions = [
+        `dept_id = ${Number(dept_id)}`,
+        `item_id = ${Number(item_id)}`,
+        `year = ${Number(year)}`
+    ];
     if (subitem_id) {
-        where += ` AND subitem_id = ${Number(subitem_id)}`;
+        conditions.push(`subitem_id = ${Number(subitem_id)}`);
     } else {
-        where += ` AND (subitem_id IS NULL OR subitem_id = 0)`;
+        conditions.push(`(subitem_id IS NULL OR subitem_id = 0)`);
     }
 
-    const rec = itemRateTable.getOne(where, { full: false });
+    const rec = itemRateTable.getOne(conditions.join(' AND '), { full: false });
     return rec ? rec.rate : null;
 }
 

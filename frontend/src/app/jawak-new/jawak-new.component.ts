@@ -233,7 +233,17 @@ export class JawakNewComponent implements OnInit, OnDestroy {
     this.auth.updateSettings()
   }
 
+  @ViewChild('excelFileInput') excelFileInput!: ElementRef<HTMLInputElement>;
   excelFile: any;
+
+  onImportClick() {
+    this.gs.checkAndTriggerImport('jawak', this.excelFileInput?.nativeElement, () => {
+      this.excelFile = null;
+      this.showModal = 'ei_jawak';
+      $('#jawakPageModal').modal('show');
+    });
+  }
+
   excelImport(event: any) {
     this.excelFile = event;
     this.showModal = 'ei_jawak';

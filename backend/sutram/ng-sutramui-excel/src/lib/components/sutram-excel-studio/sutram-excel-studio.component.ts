@@ -14,7 +14,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   HostListener,
-  ViewChild
+  ViewChild,
+  ElementRef
 } from '@angular/core';
 import { Subject, Subscription, firstValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -23,7 +24,7 @@ import { SutramExcelStateService, ImportProgressState } from '../../services/sut
 import { SutramExcelApiService } from '../../services/sutram-excel-api.service';
 import { SutramExcelScannerService } from '../../services/sutram-excel-scanner.service';
 import { SutramAuditService } from '../../services/sutram-audit.service';
-import { SutramScanReport, SutramScanMatch, SutramTableConfig, SutramRow } from '../../models/sutram-excel.model';
+import { SutramScanReport, SutramScanMatch, SutramTableConfig, SutramRow, SutramCell, SutramHeaderConfig } from '../../models/sutram-excel.model';
 import { SutramGridComponent } from '../sutram-grid/sutram-grid.component';
 
 import { SutramRefCacheService } from '../../services/sutram-ref-cache.service';
@@ -67,6 +68,13 @@ export interface StudioSheetTab {
   lastSaved?: string;
 }
 
+export interface SavedLocalSheetItem {
+  sheetId: string;
+  title: string;
+  savedAt: string;
+  rowCount: number;
+}
+
 @Component({
   selector: 'sutram-excel-studio',
   templateUrl: './sutram-excel-studio.component.html',
@@ -100,13 +108,18 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   @Input() enableZoom: boolean = true;
 
   @ViewChild('grid') public gridComponent?: SutramGridComponent;
+  @ViewChild('fileInput') public fileInputRef?: ElementRef<HTMLInputElement>;
+  public savedSheetsList: SavedLocalSheetItem[] = [];
 
   // ── Top Ribbon Navigation & Catalogs State ───────────────────
-  public activeTopTab: 'home' | 'tables' | 'reports' = 'home';
+  public activeTopTab: 'home' | 'tables' | 'reports' | 'settings' = 'home';
   public tableSearchQuery: string = '';
   public reportSearchQuery: string = '';
   public favoriteTables: Set<string> = new Set<string>();
   public favoriteReports: Set<string> = new Set<string>();
+
+  // ── Configurable Boolean Display Settings ────────────────────
+  public booleanDisplayStyle: 'checkbox' | 'badge' = 'checkbox';
 
 
 
@@ -114,32 +127,36 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   public readonly reportsList = [
     {
       id: 'mn_awk_type_wise',
-      title: 'आवक प्रकार सार (Monthly Aawak Type Saar)',
-      desc: 'माह एवं प्रकार अनुसार आवक की कुल मात्रा, दर एवं अवशेष रिपोर्ट',
+      display_name: 'मासिक आवक प्रकार सार (Aawak Summary)',
+      title: 'मासिक आवक प्रकार सार (Aawak Summary)',
+      desc: 'Monthly Aawak Type Saar',
       icon: 'pi-chart-line',
       table: 'mn_awk_type_wise',
       category: 'Aawak / Inventory'
     },
     {
       id: 'mn_jwk_aj_type',
-      title: 'जावक प्रकार सार (Monthly Jawak Type Saar)',
-      desc: 'माह अनुसार प्रयुक्त एवं अन्य जावक का विश्लेषण विवरण',
+      display_name: 'मासिक जावक प्रकार सार (Jawak Summary)',
+      title: 'मासिक जावक प्रकार सार (Jawak Summary)',
+      desc: 'Monthly Jawak Type Saar',
       icon: 'pi-chart-bar',
       table: 'mn_jwk_aj_type',
       category: 'Jawak / Inventory'
     },
     {
       id: 'bachat_summary',
-      title: 'बचत स्टॉक सारांश (Bachat Stock Summary)',
-      desc: 'वर्तमान शेष, चालू, नया, पुराना, रिपेयरिंग एवं कबाड़ स्टॉक का समग्र विवरण',
+      display_name: 'बचत सारांश (Bachat Summary)',
+      title: 'बचत सारांश (Bachat Summary)',
+      desc: 'Bachat Stock Summary',
       icon: 'pi-percentage',
       table: 'bachat',
       category: 'Stock Balance'
     },
     {
       id: 'pbk_closing',
-      title: 'पीबीके क्लोजिंग रिपोर्ट (PBK Closing Statement)',
-      desc: 'वित्तीय वर्षानुसार पीबीके की वार्षिक क्लोजिंग एवं बैलेंस शीट',
+      display_name: 'पीबीके क्लोजिंग (PBK Closing)',
+      title: 'पीबीके क्लोजिंग (PBK Closing)',
+      desc: 'PBK Closing Statement',
       icon: 'pi-book',
       table: 'pbk_closing',
       category: 'Closing'
@@ -155,6 +172,16 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   public activeSheetId: string = 'rough_1';
   public sheetWorkbooks: { [sheetId: string]: { rows: any[]; config?: SutramTableConfig; totalDbRecords?: number; loadedDbRecordCount?: number; deletedRowIds?: any[]; deletedRowsQueue?: any[]; allConfigColumns?: StudioConfigColumn[]; selectedColumnKeys?: Set<string> } } = {};
   public loadedDbRecordCount: number = 0;
+
+  // Tab Renaming & Tab Context Menu State
+  public renamingTabId: string | null = null;
+  public renamingTabTitle: string = '';
+  public tabContextMenu: { visible: boolean; x: number; y: number; tab: StudioSheetTab | null } = {
+    visible: false,
+    x: 0,
+    y: 0,
+    tab: null
+  };
 
   // Zoom / Scale state
   public zoomLevel: number = 1.0;
@@ -174,6 +201,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   public selectedColumnKeys: Set<string> = new Set<string>();
   public expandedFkGroups: Set<string> = new Set<string>();
   public colSearchQuery: string = '';
+  public isExportingExcel: boolean = false;
 
   // Floating Sync Toast HUD State (Live toastr & result notification)
   public syncToast = {
@@ -192,9 +220,22 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   // Last database sync status per sheet (rendered in bottom status bar)
   public lastSyncPerSheet: { [sheetId: string]: { time: string; summary: string; hasError: boolean } } = {};
 
-  // Scanner modal state
+  // Scanner modal state & Dual-Mode Open File
   public showScannerModal: boolean = false;
   public scanReport: SutramScanReport | null = null;
+  public uploadedWorkbook: any = null;
+  public uploadedFileName: string = '';
+  public uploadedSheetNames: string[] = [];
+  public selectedUploadedSheet: string = '';
+  public uploadedAllRawRows: any[][] = [];
+  public uploadedSheetHeaders: string[] = [];
+  public uploadedRawRows: any[][] = [];
+  public uploadedSampleRows: any[][] = [];
+  public uploadedTotalRows: number = 0;
+  public scannerTargetTable: string = '';
+  public scannerTableConfig: SutramTableConfig | null = null;
+  public scannerAvailableHeaders: SutramHeaderConfig[] = [];
+  public isScannerConfigLoading: boolean = false;
   private pendingRawRows: any[] = [];
 
   // Correction sidebar state
@@ -205,9 +246,10 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   public rejectedRowsDuringImport: any[] = [];
   private isCancelRequested: boolean = false;
 
-  // DB Search Subject & Subscription
+  // DB Search & Ref Cache Subscriptions
   private searchSubject: Subject<string> = new Subject<string>();
   private searchSub?: Subscription;
+  private refLoadedSub?: Subscription;
 
   // Computed Active Cell Coordinate, Column Chip, and Formula Value
   public get activeCoord(): string {
@@ -552,6 +594,19 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         } else {
           rawVal = dr[colDef.col_name!] ?? dr[colDef.name] ?? dr[colDef.key];
         }
+
+        // Safe unwrapping for JSON / nested objects to prevent "[object Object]"
+        if (rawVal !== null && typeof rawVal === 'object') {
+          if (rawVal.display) rawVal = rawVal.display;
+          else if (rawVal.name) rawVal = rawVal.name;
+          else if (rawVal.title) rawVal = rawVal.title;
+          else if (rawVal.label) rawVal = rawVal.label;
+          else if (rawVal.url) rawVal = rawVal.url;
+          else if (Array.isArray(rawVal)) rawVal = rawVal.length > 0 ? JSON.stringify(rawVal) : '';
+          else if (Object.keys(rawVal).length === 0) rawVal = '';
+          else rawVal = JSON.stringify(rawVal);
+        }
+
         r.cells[key] = {
           value: String(rawVal ?? ''),
           isValid: true,
@@ -567,18 +622,23 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   }
 
   public get statusStripClass(): string {
+    if (this.isCurrentSheetReport) return 'strip-clean';
     if (this.state.stats().errorRows > 0) return 'strip-error';
     if (this.mode === 'intelligent') return 'strip-suggestion';
     return 'strip-clean';
   }
 
   public get statusStripIcon(): string {
+    if (this.isCurrentSheetReport) return 'pi-chart-bar text-primary';
     if (this.state.stats().errorRows > 0) return 'pi-exclamation-triangle text-danger';
     if (this.mode === 'intelligent') return 'pi-bolt text-primary';
     return 'pi-info-circle text-primary';
   }
 
   public get statusStripMessage(): string {
+    if (this.isCurrentSheetReport) {
+      return 'Report view loaded. Filter, sort, or export to Excel anytime.';
+    }
     if (this.state.stats().errorRows > 0) {
       return `शीट में ${this.state.stats().errorRows} पंक्तियों में अमान्य मान मिले हैं। कृपया सुधारें या 'गलतियाँ' साइडबार देखें।`;
     }
@@ -609,9 +669,18 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       document.body.classList.add('dark-mode');
     }
 
+    // Load persisted boolean display settings
+    const savedBoolStyle = localStorage.getItem('sutram_boolean_style');
+    if (savedBoolStyle && ['checkbox', 'badge'].includes(savedBoolStyle)) {
+      this.booleanDisplayStyle = savedBoolStyle as any;
+    }
+
     this.state.isAuditMode.set(this.mode === 'intelligent');
     this.state.filtersEnabled.set(this.enableFilters);
     this.state.sortingEnabled.set(this.enableSorting);
+
+    // Refresh saved local sheets list from localStorage
+    this.refreshSavedSheetsList();
 
     // Debounced direct database search
     this.searchSub = this.searchSubject.pipe(
@@ -624,11 +693,28 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Reactive listener: automatically re-audit current grid rows whenever a referenced FK dataset finishes caching
+    this.refLoadedSub = this.refCache.tableLoaded$.subscribe((loadedTable: string) => {
+      const cfg = this.state.config();
+      if (!cfg || !cfg.headers) return;
+      const cleanLoaded = (loadedTable || '').toLowerCase().trim();
+      const hasRef = cfg.headers.some((h: any) => (h.ref_table || '').toLowerCase().trim() === cleanLoaded);
+      if (hasRef) {
+        const rows = this.state.rows();
+        if (rows && rows.length > 0) {
+          this.audit.auditAll(rows, cfg.headers);
+          this.state.setRows([...rows]);
+          this.cdr.markForCheck();
+        }
+      }
+    });
+
     this.loadTablesList();
   }
 
   public ngOnDestroy(): void {
     this.searchSub?.unsubscribe();
+    this.refLoadedSub?.unsubscribe();
   }
 
   public setStudioMode(newMode: 'normal' | 'intelligent'): void {
@@ -666,33 +752,191 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   }
 
   public exportExcel(): void {
-    const rows = this.state.rows();
-    if (!rows || rows.length === 0) {
-      alert('डाउनलोड करने के लिए शीट में कोई डेटा नहीं है (No data to export)');
+    if (this.isExportingExcel) return;
+
+    const curTab = this.sheetTabs.find(t => t.id === this.activeSheetId);
+    const targetTable = curTab?.tableName || this.selectedTableName;
+    const isRough = this.isCurrentSheetRough;
+
+    // Case 1: Rough / Blank Sheet (In-Memory Export)
+    if (isRough || !targetTable) {
+      const rows = this.state.rows().filter(r => this.isRowPopulated(r));
+      if (!rows || rows.length === 0) {
+        alert('डाउनलोड करने के लिए शीट में कोई डेटा नहीं है (No data to export)');
+        return;
+      }
+      this.downloadExcelWorkbook(rows, this.activeSheetId || 'Sheet1');
       return;
     }
+
+    // Case 2: Database Table / Report -> Fetch ALL matching rows based on active filters, search & sort
+    const cfg = this.state.config();
+    if (!cfg) {
+      alert('तालिका कॉन्फ़िगरेशन अभी लोड नहीं हुआ है (Configuration not ready)');
+      return;
+    }
+
+    this.isExportingExcel = true;
+    this.cdr.markForCheck();
+
+    const activeSort = this.state.activeSort();
+    const columnFilters = this.state.columnFilters();
+    const searchQuery = this.state.dbSearchQuery().trim();
+
+    let sortColKey = activeSort?.colKey;
+    if (sortColKey && cfg) {
+      const foundCol = this.allConfigColumns.find(c => c.key === sortColKey || c.name === sortColKey);
+      if (foundCol && foundCol.col_name) {
+        sortColKey = foundCol.col_name;
+      } else {
+        const foundHeader = (cfg.headers || []).find((h: any) => h.name === sortColKey || h.col_name === sortColKey);
+        if (foundHeader && foundHeader.col_name) {
+          sortColKey = foundHeader.col_name;
+        }
+      }
+    }
+
+    const apiFilters = this.buildApiFilters();
+
+    this.api.getTableDataChunk(targetTable, {
+      export: true,
+      search: searchQuery || undefined,
+      sort: sortColKey,
+      order: activeSort?.order,
+      filters: Object.keys(apiFilters).length > 0 ? apiFilters : undefined
+    }).subscribe({
+      next: (res: { rows: any[]; total: number }) => {
+        this.isExportingExcel = false;
+        const dbRows = res.rows || [];
+        if (dbRows.length === 0) {
+          alert('फिल्टर के अनुसार कोई डेटा नहीं मिला (No matching records to export)');
+          this.cdr.markForCheck();
+          return;
+        }
+
+        // Convert db records to SutramRow format for clean column mapping & FK display
+        const builtRows: SutramRow[] = dbRows.map((dr: any, idx: number) => {
+          return this.convertDbRecordToSutramRow(dr, idx + 1, cfg);
+        });
+
+        // Overlay any unsaved in-memory edits for modified rows
+        const currentMemoryRows = this.state.rows();
+        const modifiedMemoryMap = new Map<any, SutramRow>();
+        for (const mr of currentMemoryRows) {
+          if (mr.isModified) {
+            const idVal = mr.cells['_id']?.value || mr.cells['id']?.value;
+            if (idVal) modifiedMemoryMap.set(String(idVal), mr);
+          }
+        }
+
+        if (modifiedMemoryMap.size > 0) {
+          builtRows.forEach(br => {
+            const idVal = br.cells['_id']?.value || br.cells['id']?.value;
+            if (idVal && modifiedMemoryMap.has(String(idVal))) {
+              const memRow = modifiedMemoryMap.get(String(idVal))!;
+              Object.keys(memRow.cells).forEach(k => {
+                if (memRow.cells[k]?.isModified) {
+                  br.cells[k] = { ...memRow.cells[k] };
+                }
+              });
+            }
+          });
+        }
+
+        // Include any newly added un-synced rows
+        const newMemoryRows = currentMemoryRows.filter(r => r.isNew && this.isRowPopulated(r));
+        const allFinalRows = [...newMemoryRows, ...builtRows];
+
+        const sheetTitle = curTab?.title || targetTable;
+        this.downloadExcelWorkbook(allFinalRows, sheetTitle);
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        this.isExportingExcel = false;
+        console.error('[SutramStudio] Export failed:', err);
+        alert('एक्सेल निर्यात विफल रहा (Export failed): ' + (err?.message || 'Server error'));
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private downloadExcelWorkbook(rows: SutramRow[], sheetName: string): void {
     const headers = this.visibleHeaders;
     const exportData = rows.map(r => {
       const obj: any = {};
       headers.forEach(h => {
-        obj[h.name] = r.cells[h.name]?.value ?? '';
+        const colTitle = h.name || h.col_name || h.key;
+        let cellVal = r.cells[h.key]?.value ?? r.cells[h.name]?.value ?? r.cells[h.col_name]?.value ?? '';
+        if (this.isBooleanColumn(h)) {
+          cellVal = this.isCellTrue(cellVal) ? 'Yes' : 'No';
+        }
+        obj[colTitle] = cellVal;
       });
       return obj;
     });
+
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, this.selectedTableName || 'Sheet1');
-    XLSX.writeFile(wb, `${this.selectedTableName || 'data'}_${Date.now()}.xlsx`);
+    const cleanSheetName = (sheetName || 'Sheet1').replace(/[*?:/\\\[\]]/g, '').slice(0, 31);
+    XLSX.utils.book_append_sheet(wb, ws, cleanSheetName);
+    const filename = `${sheetName || 'export'}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, filename);
   }
 
-  public setTopTab(tab: 'home' | 'tables' | 'reports'): void {
+  public isBooleanColumn(col: any): boolean {
+    if (!col) return false;
+    const t = (col.type || '').toLowerCase();
+    if (t === 'boolean' || t === 'bool') return true;
+    const colName = (col.col_name || col.name || col.key || '').toLowerCase();
+    return (
+      colName === 'active' ||
+      colName === 'verify' ||
+      colName.startsWith('is_') ||
+      colName.startsWith('has_') ||
+      colName.endsWith('_status') ||
+      colName.endsWith('_flag')
+    );
+  }
+
+  public isCellTrue(val: any): boolean {
+    return (
+      val === true ||
+      val === 1 ||
+      val === '1' ||
+      val === 'true' ||
+      val === 'TRUE' ||
+      val === 'yes' ||
+      val === 'YES' ||
+      val === 'y' ||
+      val === 'Y' ||
+      val === 'सक्रिय'
+    );
+  }
+
+  public setTopTab(tab: 'home' | 'tables' | 'reports' | 'settings'): void {
     this.activeTopTab = tab;
+    this.cdr.markForCheck();
+  }
+
+  public setBooleanStyle(style: 'checkbox' | 'badge'): void {
+    this.booleanDisplayStyle = style;
+    localStorage.setItem('sutram_boolean_style', style);
     this.cdr.markForCheck();
   }
 
   public get isCurrentSheetRough(): boolean {
     const cur = this.sheetTabs.find(t => t.id === this.activeSheetId);
     return !cur || cur.type === 'rough' || this.activeSheetId === 'blank' || this.activeSheetId.startsWith('rough_') || this.activeSheetId.startsWith('sheet_');
+  }
+
+  public get isCurrentSheetReport(): boolean {
+    const cur = this.sheetTabs.find(t => t.id === this.activeSheetId);
+    return !!cur && cur.type === 'report';
+  }
+
+  public get isCurrentSheetTable(): boolean {
+    const cur = this.sheetTabs.find(t => t.id === this.activeSheetId);
+    return !!cur && cur.type === 'table';
   }
 
   public get filteredTables(): Array<{ table: string; display_name: string }> {
@@ -756,9 +1000,10 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       this.switchSheet(foundTab.id);
     } else {
       const tableInfo = this.tablesList.find(t => t.table === tableName);
+      const tabTitle = tableInfo?.display_name || tableName;
       const newTab: StudioSheetTab = {
         id: tableName,
-        title: tableInfo?.display_name || tableName,
+        title: tabTitle,
         icon: 'pi-table',
         type: 'table',
         tableName: tableName,
@@ -772,14 +1017,17 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   }
 
   public openReportInSheet(report: any): void {
+    this.mode = 'normal';
+    this.state.isAuditMode.set(false);
     const tabId = 'rep_' + report.id;
     const foundTab = this.sheetTabs.find(t => t.id === tabId);
     if (foundTab) {
       this.switchSheet(foundTab.id);
     } else {
+      const reportTitle = report.display_name || report.title || report.table || report.id;
       const newTab: StudioSheetTab = {
         id: tabId,
-        title: report.title,
+        title: reportTitle,
         icon: report.icon || 'pi-chart-bar',
         type: 'report',
         tableName: report.table,
@@ -815,6 +1063,230 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  // ── Sheet Tab Inline Renaming & Context Menu ──────────────────
+
+  public startRenameTab(tab: StudioSheetTab, event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    this.renamingTabId = tab.id;
+    this.renamingTabTitle = tab.title;
+    this.closeTabContextMenu();
+    this.cdr.markForCheck();
+    setTimeout(() => {
+      const el = document.getElementById(`tab-rename-input-${tab.id}`) as HTMLInputElement;
+      if (el) {
+        el.focus();
+        el.select();
+      }
+    }, 50);
+  }
+
+  public saveTabRename(tab: StudioSheetTab): void {
+    if (this.renamingTabId !== tab.id) return;
+    const trimmed = (this.renamingTabTitle || '').trim();
+    if (trimmed && trimmed !== tab.title) {
+      tab.title = trimmed;
+      if (this.sheetWorkbooks[tab.id]?.config) {
+        this.sheetWorkbooks[tab.id].config!.display_name = trimmed;
+      }
+      if (this.activeSheetId === tab.id) {
+        const currentCfg = this.state.config();
+        if (currentCfg) {
+          this.state.setConfig({
+            ...currentCfg,
+            display_name: trimmed
+          });
+        }
+      }
+      try {
+        const localSaved = localStorage.getItem(`sutram_rough_${tab.id}`);
+        if (localSaved) {
+          const parsed = JSON.parse(localSaved);
+          parsed.title = trimmed;
+          localStorage.setItem(`sutram_rough_${tab.id}`, JSON.stringify(parsed));
+        }
+      } catch (e) {
+        console.warn('Could not update localStorage title:', e);
+      }
+    }
+    this.renamingTabId = null;
+    this.renamingTabTitle = '';
+    this.cdr.markForCheck();
+  }
+
+  public cancelTabRename(): void {
+    this.renamingTabId = null;
+    this.renamingTabTitle = '';
+    this.cdr.markForCheck();
+  }
+
+  public openTabContextMenu(event: MouseEvent, tab: StudioSheetTab): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const menuHeight = 85;
+    const menuWidth = 190;
+    const x = Math.min(event.clientX, window.innerWidth - menuWidth - 10);
+    const y = event.clientY + menuHeight > window.innerHeight
+      ? Math.max(10, event.clientY - menuHeight)
+      : event.clientY;
+    this.tabContextMenu = {
+      visible: true,
+      x,
+      y,
+      tab
+    };
+    this.cdr.markForCheck();
+  }
+
+  public closeTabContextMenu(): void {
+    if (this.tabContextMenu.visible) {
+      this.tabContextMenu.visible = false;
+      this.tabContextMenu.tab = null;
+      this.cdr.markForCheck();
+    }
+  }
+
+  public deleteSheet(tab: StudioSheetTab, event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    this.closeTabContextMenu();
+
+    const tabId = tab.id;
+
+    // 1. Remove from localStorage
+    try {
+      localStorage.removeItem(`sutram_rough_${tabId}`);
+    } catch (e) {
+      console.warn('Could not remove rough sheet from localStorage:', e);
+    }
+
+    // 2. Remove from in-memory cache and sync tracking
+    delete this.sheetWorkbooks[tabId];
+    delete this.lastSyncPerSheet[tabId];
+
+    // 3. Remove from sheetTabs
+    const idx = this.sheetTabs.findIndex(t => t.id === tabId);
+    if (idx >= 0) {
+      this.sheetTabs.splice(idx, 1);
+    }
+
+    // 4. If active sheet was deleted, switch to adjacent sheet or create new blank sheet
+    if (this.activeSheetId === tabId) {
+      if (this.sheetTabs.length > 0) {
+        const nextTab = this.sheetTabs[Math.max(0, idx - 1)] || this.sheetTabs[0];
+        this.switchSheet(nextTab.id);
+      } else {
+        this.addNewBlankSheet();
+      }
+    }
+
+    // 5. If this tab was a table tab pinned from favorites, unpin it
+    if (tab.type === 'table' && tab.tableName) {
+      this.favoriteTables.delete(tab.tableName);
+      localStorage.setItem('sutram_studio_favorites', JSON.stringify(Array.from(this.favoriteTables)));
+    }
+
+    this.refreshSavedSheetsList();
+    this.cdr.markForCheck();
+  }
+
+  // ── Saved Local Sheets Management & File Manager ──────────────
+
+  public refreshSavedSheetsList(): void {
+    const list: SavedLocalSheetItem[] = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('sutram_rough_')) {
+          const sheetId = key.replace('sutram_rough_', '');
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            list.push({
+              sheetId,
+              title: parsed.title || sheetId,
+              savedAt: parsed.savedAt || '',
+              rowCount: Array.isArray(parsed.rows) ? parsed.rows.length : 0
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading saved sheets from localStorage:', e);
+    }
+    this.savedSheetsList = list;
+    this.cdr.markForCheck();
+  }
+
+  public openFileManager(): void {
+    this.refreshSavedSheetsList();
+    this.showScannerModal = true;
+    this.cdr.markForCheck();
+  }
+
+  public triggerBrowseFile(): void {
+    if (this.fileInputRef?.nativeElement) {
+      this.fileInputRef.nativeElement.click();
+    }
+  }
+
+  public onOpenSavedSheet(sheetId: string): void {
+    this.showScannerModal = false;
+    let existingTab = this.sheetTabs.find(t => t.id === sheetId);
+    if (!existingTab) {
+      let sheetTitle = 'Saved Sheet';
+      try {
+        const raw = localStorage.getItem(`sutram_rough_${sheetId}`);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          sheetTitle = parsed.title || sheetTitle;
+        }
+      } catch {}
+
+      existingTab = {
+        id: sheetId,
+        title: sheetTitle,
+        icon: 'pi-file',
+        type: 'rough',
+        isLoaded: true
+      };
+      this.sheetTabs.push(existingTab);
+    }
+
+    this.switchSheet(sheetId);
+    this.cdr.markForCheck();
+  }
+
+  public onDeleteSavedSheet(sheetId: string): void {
+    try {
+      localStorage.removeItem(`sutram_rough_${sheetId}`);
+    } catch (e) {
+      console.warn('Could not remove sheet from localStorage:', e);
+    }
+    delete this.sheetWorkbooks[sheetId];
+    delete this.lastSyncPerSheet[sheetId];
+
+    const idx = this.sheetTabs.findIndex(t => t.id === sheetId);
+    if (idx >= 0) {
+      this.sheetTabs.splice(idx, 1);
+      if (this.activeSheetId === sheetId) {
+        if (this.sheetTabs.length > 0) {
+          const nextTab = this.sheetTabs[Math.max(0, idx - 1)] || this.sheetTabs[0];
+          this.switchSheet(nextTab.id);
+        } else {
+          this.addNewBlankSheet();
+        }
+      }
+    }
+
+    this.refreshSavedSheetsList();
+    this.cdr.markForCheck();
+  }
+
   public initBlankRoughSheet(): void {
     this.state.clearGrid();
     const defaultCols: StudioConfigColumn[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(c => ({
@@ -836,7 +1308,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
 
     const mockCfg: SutramTableConfig = {
       table: 'rough',
-      display_name: 'Sheet (रफ)',
+      display_name: 'Sheet 1',
       headers: roughHeaders,
       duplicateOn: []
     };
@@ -856,8 +1328,10 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       isModified: r.isModified
     }));
 
+    const curTab = this.sheetTabs.find(t => t.id === this.activeSheetId);
     const dataToSave = {
       sheetId: this.activeSheetId,
+      title: curTab?.title,
       savedAt: new Date().toLocaleTimeString(),
       rows: cleanRows,
       allConfigColumns: this.allConfigColumns,
@@ -867,6 +1341,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     try {
       localStorage.setItem(`sutram_rough_${this.activeSheetId}`, JSON.stringify(dataToSave));
       const curTab = this.sheetTabs.find(t => t.id === this.activeSheetId);
+      const isReport = curTab?.type === 'report';
       if (curTab) {
         curTab.lastSaved = new Date().toLocaleTimeString();
         curTab.recordCount = currentRows.length;
@@ -874,7 +1349,9 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
 
       this.lastSyncPerSheet[this.activeSheetId] = {
         time: new Date().toLocaleTimeString(),
-        summary: `${currentRows.length} पंक्तियाँ सुरक्षित (Saved locally)`,
+        summary: isReport
+          ? `${currentRows.length} पंक्तियाँ रिपोर्ट सुरक्षित (Report saved locally)`
+          : `${currentRows.length} पंक्तियाँ सुरक्षित (Saved locally)`,
         hasError: false
       };
 
@@ -882,7 +1359,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         visible: true,
         inProgress: false,
         percentage: 100,
-        title: 'रफ शीट स्थानीय रूप से सुरक्षित (Saved Locally)',
+        title: isReport ? 'रिपोर्ट स्थानीय रूप से सुरक्षित (Report Saved Locally)' : 'रफ शीट स्थानीय रूप से सुरक्षित (Saved Locally)',
         hasError: false,
         inserted: currentRows.length,
         updated: 0,
@@ -890,6 +1367,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         failed: 0,
         errors: []
       };
+      this.refreshSavedSheetsList();
       this.cdr.detectChanges();
 
       setTimeout(() => {
@@ -925,12 +1403,12 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         this.tablesList = tables;
 
         // Build active session sheets:
-        // 1. Always start with Sheet 1 (रफ)
+        // 1. Always start with Sheet 1
         const activeTabs: StudioSheetTab[] = [
-          { id: 'rough_1', title: 'Sheet 1 (रफ)', icon: 'pi-file', type: 'rough', isLoaded: true }
+          { id: 'rough_1', title: 'Sheet 1', icon: 'pi-file', type: 'rough', isLoaded: true }
         ];
 
-        // 2. Add pinned / favorite tables only
+        // 2. Add pinned / favorite tables (using display_name if mentioned, else table name)
         tables.forEach((t: any) => {
           if (this.favoriteTables.has(t.table)) {
             activeTabs.push({
@@ -1044,6 +1522,10 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         if (localSaved) {
           try {
             const parsed = JSON.parse(localSaved);
+            if (parsed.title) {
+              const currentTab = this.sheetTabs.find(t => t.id === tabId);
+              if (currentTab) currentTab.title = parsed.title;
+            }
             if (parsed.rows && parsed.rows.length > 0) {
               this.state.setRows(parsed.rows);
               if (parsed.allConfigColumns) this.allConfigColumns = parsed.allConfigColumns;
@@ -1063,11 +1545,17 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       this.gridComponent?.resetScroll();
       this.cdr.markForCheck();
     } else {
+      const curTab = this.sheetTabs.find(t => t.id === tabId);
+      if (curTab?.type === 'report') {
+        this.mode = 'normal';
+        this.state.isAuditMode.set(false);
+      }
+      const targetTable = curTab?.tableName || tabId;
       const saved = this.sheetWorkbooks[tabId];
       if (saved && saved.rows && saved.rows.length > 0) {
         // Instant in-memory restoration for previously visited sheets!
-        this.selectedTableName = tabId;
-        this.state.setActiveTable(tabId);
+        this.selectedTableName = targetTable;
+        this.state.setActiveTable(targetTable);
         if (saved.config) {
           this.state.setConfig(saved.config);
         }
@@ -1088,7 +1576,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       } else {
         // First visit: load config and data chunk 1
         this.gridComponent?.resetScroll();
-        this.onTableSelect(tabId, true);
+        this.onTableSelect(targetTable, true);
       }
     }
     this.cdr.markForCheck();
@@ -1099,7 +1587,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     const newId = `rough_${Date.now()}`;
     const newTab: StudioSheetTab = {
       id: newId,
-      title: `Sheet ${roughCount} (रफ)`,
+      title: `Sheet ${roughCount}`,
       icon: 'pi-file',
       type: 'rough',
       isLoaded: true
@@ -1159,14 +1647,40 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         if (matchKey) rawVal = dr[matchKey];
       }
 
+      // Safe unwrapping for JSON / nested objects to prevent "[object Object]"
+      if (rawVal !== null && typeof rawVal === 'object') {
+        if (rawVal.display) rawVal = rawVal.display;
+        else if (rawVal.name) rawVal = rawVal.name;
+        else if (rawVal.title) rawVal = rawVal.title;
+        else if (rawVal.label) rawVal = rawVal.label;
+        else if (rawVal.url) rawVal = rawVal.url;
+        else if (Array.isArray(rawVal)) rawVal = rawVal.length > 0 ? JSON.stringify(rawVal) : '';
+        else if (Object.keys(rawVal).length === 0) rawVal = '';
+        else rawVal = JSON.stringify(rawVal);
+      }
+
       const cellKey = col.key || col.name;
       const strVal = String(rawVal ?? '');
+
+      // Resolve true DB Foreign Key ID hint
+      let refIdVal: any = undefined;
+      if (col.is_fk_main || col.type === 'ref' || col.ref_table) {
+        const fkCol = col.col_name || `${col.ref_table}_id` || col.key;
+        if (dr[fkCol] !== undefined) {
+          refIdVal = dr[fkCol];
+        } else if (dr[`${col.key}_id`] !== undefined) {
+          refIdVal = dr[`${col.key}_id`];
+        } else if (dr[col.key] !== undefined && typeof dr[col.key] !== 'object') {
+          refIdVal = dr[col.key];
+        }
+      }
+
       cells[cellKey] = {
         value: strVal,
         originalValue: strVal,
         isValid: true,
         isModified: false,
-        refId: dr[col.col_name] !== undefined ? dr[col.col_name] : rawVal
+        refId: refIdVal !== undefined ? refIdVal : (col.col_name && dr[col.col_name] !== undefined ? dr[col.col_name] : rawVal)
       };
       if (col.name && col.name !== cellKey) {
         cells[col.name] = cells[cellKey];
@@ -1246,6 +1760,39 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Serializes active column filters into an API-ready filter object,
+   * automatically resolving FK display values to numeric/underlying IDs if applicable.
+   */
+  private buildApiFilters(): Record<string, any> {
+    const columnFilters = this.state.columnFilters();
+    const apiFilters: Record<string, any> = {};
+
+    for (const [colKey, valSet] of Object.entries(columnFilters)) {
+      if (valSet && (valSet as Set<any>).size > 0) {
+        let dbKey = colKey;
+        const foundCol = this.allConfigColumns.find(c => c.key === colKey || c.name === colKey);
+        if (foundCol && foundCol.col_name) {
+          dbKey = foundCol.col_name;
+        }
+
+        const rawVals = Array.from(valSet as Set<any>);
+        if (foundCol && (foundCol.is_fk_main || foundCol.type === 'ref' || foundCol.ref_table) && foundCol.ref_table) {
+          const options = this.refCache.getOptions(foundCol.ref_table);
+          apiFilters[dbKey] = rawVals.map(val => {
+            if (val === '__BLANK__') return '__BLANK__';
+            const match = options.find(o => o.display === val || String(o.id) === String(val));
+            return match ? match.id : val;
+          });
+        } else {
+          apiFilters[dbKey] = rawVals;
+        }
+      }
+    }
+
+    return apiFilters;
+  }
+
+  /**
    * Chunked lazy loading with direct database search, sort, and filters.
    */
   public loadDataChunk(
@@ -1257,7 +1804,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     const cfg = this.state.config();
     if (!cfg || !tableName) return;
 
-    if (this.state.isLoadingDb()) return;
+    if (this.state.isLoadingDb() && !isReset) return;
     this.state.isLoadingDb.set(true);
 
     const activeSort = this.state.activeSort();
@@ -1277,18 +1824,8 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Serialize column filters for backend API
-    const apiFilters: Record<string, any> = {};
-    for (const [colKey, valSet] of Object.entries(columnFilters)) {
-      if (valSet && (valSet as Set<any>).size > 0) {
-        let dbKey = colKey;
-        const foundCol = this.allConfigColumns.find(c => c.key === colKey || c.name === colKey);
-        if (foundCol && foundCol.col_name) {
-          dbKey = foundCol.col_name;
-        }
-        apiFilters[dbKey] = Array.from(valSet as Set<any>);
-      }
-    }
+    // Serialize column filters for backend API (resolving FK display values if needed)
+    const apiFilters = this.buildApiFilters();
 
     this.api.getTableDataChunk(tableName, {
       limit,
@@ -1320,7 +1857,19 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
           return this.convertDbRecordToSutramRow(dr, startIndex + idx + 1, cfg);
         });
 
-        this.audit.auditAll(builtRows, cfg.headers);
+        if (!this.isCurrentSheetReport) {
+          this.audit.auditAll(builtRows, cfg.headers);
+        } else {
+          builtRows.forEach(r => {
+            r.hasError = false;
+            if (r.cells) {
+              Object.values(r.cells).forEach((c: any) => {
+                c.isValid = true;
+                c.errorMessage = undefined;
+              });
+            }
+          });
+        }
 
         let combined = isReset ? builtRows : [...cleanExisting, ...builtRows];
         // Always ensure one trailing blank row at the very end (whether 0, 10, or 250+ records)
@@ -1360,12 +1909,50 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
    * Direct Database Searchbox Handlers
    */
   public onDbSearchInput(query: string): void {
+    this.state.dbSearchQuery.set(query);
     this.searchSubject.next(query);
   }
 
   public clearDbSearch(): void {
     this.state.dbSearchQuery.set('');
     this.searchSubject.next('');
+    if (this.selectedTableName) {
+      this.loadDataChunk(this.selectedTableName, 0, 100, true);
+    }
+    this.cdr.markForCheck();
+  }
+
+  public toggleBold(): void {
+    this.isBoldActive = !this.isBoldActive;
+    this.cdr.markForCheck();
+  }
+
+  public setTextAlign(align: 'left' | 'center' | 'right'): void {
+    this.textAlign = align;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Refresh Button Handler:
+   * Reloads table data from DB with a warning confirmation if tracked changes are unsynced.
+   */
+  public onRefreshData(): void {
+    if (!this.selectedTableName) return;
+
+    const pendingCount = this.state.pendingChangesCount();
+    if (pendingCount > 0) {
+      const confirmDiscard = window.confirm(
+        `Warning: You have ${pendingCount} unsaved change(s) in this sheet that will be lost.\n\nDo you want to discard your changes and reload from database?`
+      );
+      if (!confirmDiscard) {
+        return;
+      }
+    }
+
+    // Discard tracking and reload freshly from database
+    this.state.deletedRowIds.set([]);
+    this.state.deletedRowsQueue.set([]);
+    this.loadTableDataFromDb();
   }
 
   /**
@@ -1415,7 +2002,91 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // ── File Parsing & Header Scanning ───────────────────────────
+  // ── File Parsing & Dual-Mode Open File ───────────────────────────
+
+  public getExcelColLetter(colIdx: number): string {
+    let letter = '';
+    let temp = colIdx + 1;
+    while (temp > 0) {
+      const mod = (temp - 1) % 26;
+      letter = String.fromCharCode(65 + mod) + letter;
+      temp = Math.floor((temp - mod) / 26);
+    }
+    return letter;
+  }
+
+  public parseCurrentUploadedSheet(): void {
+    if (!this.uploadedWorkbook || !this.selectedUploadedSheet) return;
+    const worksheet = this.uploadedWorkbook.Sheets[this.selectedUploadedSheet];
+    if (!worksheet) return;
+
+    const rawJson: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+    if (!rawJson || rawJson.length === 0) {
+      this.uploadedAllRawRows = [];
+      this.uploadedSheetHeaders = [];
+      this.uploadedRawRows = [];
+      this.uploadedSampleRows = [];
+      this.uploadedTotalRows = 0;
+      this.scanReport = null;
+      return;
+    }
+
+    this.uploadedAllRawRows = rawJson;
+    this.uploadedTotalRows = rawJson.length;
+
+    // Intelligently detect the real header row for Format Matcher (handles merged/title row 0)
+    const detected = this.scanner.detectBestHeaderRow(rawJson, this.scannerTableConfig);
+    this.uploadedSheetHeaders = detected.headers;
+    this.uploadedRawRows = detected.dataRows;
+    this.uploadedSampleRows = this.uploadedRawRows.slice(0, 3);
+    this.pendingRawRows = this.uploadedRawRows;
+
+    if (this.scannerTableConfig) {
+      this.scanReport = this.scanner.scan(this.uploadedSheetHeaders, this.scannerTableConfig, this.uploadedSampleRows);
+      this.scanReport.headerRowIndex = detected.headerRowIndex;
+    }
+  }
+
+  public loadScannerTableConfig(tableName: string): void {
+    if (!tableName) return;
+    this.scannerTargetTable = tableName;
+
+    const applyTableCfg = (cfg: SutramTableConfig) => {
+      this.scannerTableConfig = cfg;
+      this.scannerAvailableHeaders = cfg.headers || [];
+
+      // Re-detect best header row now that we have the target table's schema
+      if (this.uploadedAllRawRows && this.uploadedAllRawRows.length > 0) {
+        const detected = this.scanner.detectBestHeaderRow(this.uploadedAllRawRows, cfg);
+        this.uploadedSheetHeaders = detected.headers;
+        this.uploadedRawRows = detected.dataRows;
+        this.uploadedSampleRows = this.uploadedRawRows.slice(0, 3);
+        this.pendingRawRows = this.uploadedRawRows;
+      }
+
+      this.scanReport = this.scanner.scan(this.uploadedSheetHeaders, cfg, this.uploadedSampleRows);
+      this.isScannerConfigLoading = false;
+      this.cdr.markForCheck();
+    };
+
+    const currentCfg = this.state.config();
+    if (currentCfg && currentCfg.table === tableName) {
+      applyTableCfg(currentCfg);
+      return;
+    }
+
+    this.isScannerConfigLoading = true;
+    this.api.getTableConfig(tableName).subscribe({
+      next: (cfg: SutramTableConfig) => {
+        applyTableCfg(cfg);
+      },
+      error: (err: any) => {
+        this.isScannerConfigLoading = false;
+        console.error('[SutramStudio] Load scanner table config failed:', err);
+        this.cdr.markForCheck();
+      }
+    });
+  }
 
   public onFileUpload(event: any): void {
     const file = event?.target?.files?.[0] || event?.files?.[0];
@@ -1425,40 +2096,205 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     reader.onload = (e: any) => {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
+      if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) return;
 
-      const rawJson: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-      if (!rawJson || rawJson.length === 0) return;
+      this.uploadedFileName = file.name;
+      this.uploadedWorkbook = workbook;
+      this.uploadedSheetNames = [...workbook.SheetNames];
+      this.selectedUploadedSheet = workbook.SheetNames[0];
 
-      const headers: string[] = (rawJson[0] || []).map(h => String(h || '').trim());
-      this.pendingRawRows = rawJson.slice(1);
+      this.parseCurrentUploadedSheet();
 
-      const cfg = this.state.config();
-      if (!cfg) return;
+      // Determine default target table for Mode 2
+      let defaultTable = this.selectedTableName;
+      if (!defaultTable && this.tablesList && this.tablesList.length > 0) {
+        defaultTable = this.tablesList[0].table;
+      }
 
-      // Run smart header scan
-      this.scanReport = this.scanner.scan(headers, cfg, this.pendingRawRows);
+      if (defaultTable) {
+        this.loadScannerTableConfig(defaultTable);
+      } else {
+        this.scanReport = null;
+        this.scannerTableConfig = null;
+        this.scannerAvailableHeaders = [];
+      }
+
+      this.refreshSavedSheetsList();
       this.showScannerModal = true;
       this.cdr.markForCheck();
     };
 
     reader.readAsArrayBuffer(file);
-    // Reset file input value
     if (event.target) event.target.value = '';
   }
 
-  public onScannerConfirmed(matches: SutramScanMatch[]): void {
-    const cfg = this.state.config();
-    if (!cfg) return;
-
-    const builtRows = this.scanner.buildSutramRows(this.pendingRawRows, matches, cfg.headers);
-    this.audit.auditAll(builtRows, cfg.headers);
-    const withBlank = this.ensureTrailingBlankRow(builtRows, cfg);
-    this.state.setRows(withBlank);
-    this.showScannerModal = false;
-    this.pendingRawRows = [];
+  public onUploadedSheetChange(sheetName: string): void {
+    if (!sheetName || sheetName === this.selectedUploadedSheet) return;
+    this.selectedUploadedSheet = sheetName;
+    this.parseCurrentUploadedSheet();
     this.cdr.markForCheck();
+  }
+
+  public onScannerTargetTableChange(tableName: string): void {
+    this.loadScannerTableConfig(tableName);
+  }
+
+  public onDirectOpenAsNormalSheet(data?: { sheetName: string; headers: string[] }): void {
+    const rawAllRows = this.uploadedAllRawRows || [];
+    if (rawAllRows.length === 0) return;
+
+    // 1. Calculate max columns across all rows in the raw sheet
+    let maxCols = 8;
+    for (const r of rawAllRows) {
+      if (Array.isArray(r) && r.length > maxCols) {
+        maxCols = r.length;
+      }
+    }
+    // At least 10 columns for comfortable spreadsheet view
+    maxCols = Math.max(maxCols, 10);
+
+    // 2. Generate standard Excel column definitions (A, B, C, D...)
+    const cols: StudioConfigColumn[] = [];
+    for (let c = 0; c < maxCols; c++) {
+      const letter = this.getExcelColLetter(c);
+      cols.push({
+        key: letter,
+        name: letter,
+        short_name: letter,
+        col_name: letter,
+        type: 'string',
+        default_selected: true
+      });
+    }
+
+    this.allConfigColumns = cols;
+    this.selectedColumnKeys = new Set(cols.map(c => c.key));
+
+    const roughHeaders: any[] = cols.map(c => ({
+      name: c.name,
+      col_name: c.col_name,
+      type: 'string'
+    }));
+
+    // Create unique tab for this rough sheet
+    const roughCount = this.sheetTabs.filter(t => t.type === 'rough').length + 1;
+    const sheetTitle = data?.sheetName || this.selectedUploadedSheet || this.uploadedFileName?.replace(/\.[^/.]+$/, '') || `Sheet ${roughCount}`;
+    const newId = `rough_${Date.now()}`;
+    const newTab: StudioSheetTab = {
+      id: newId,
+      title: sheetTitle,
+      icon: 'pi-file',
+      type: 'rough',
+      isLoaded: true
+    };
+    this.sheetTabs.push(newTab);
+
+    const mockCfg: SutramTableConfig = {
+      table: 'rough',
+      display_name: sheetTitle,
+      headers: roughHeaders,
+      duplicateOn: []
+    };
+    this.state.setConfig(mockCfg);
+
+    // 3. Populate all rows as-is starting from row 0!
+    // No row is discarded as a header: row 0 (e.g. merge & center title) appears in row 1!
+    const sutramRows: SutramRow[] = rawAllRows.map((rawRow: any[], rIdx: number) => {
+      const cells: Record<string, SutramCell> = {};
+      cols.forEach((col, cIdx) => {
+        const rawVal = Array.isArray(rawRow) ? rawRow[cIdx] : '';
+        const valStr = rawVal !== undefined && rawVal !== null ? String(rawVal) : '';
+        cells[col.key] = {
+          value: valStr,
+          originalValue: valStr,
+          isValid: true,
+          isModified: false
+        };
+      });
+      return {
+        rowNum: rIdx + 1,
+        cells,
+        hasError: false,
+        errorCount: 0,
+        _rawOriginal: rawRow
+      };
+    });
+
+    // Append 1 trailing blank row for immediate spreadsheet typing
+    const blankRow = this.createBlankRow(sutramRows.length + 1, mockCfg);
+    sutramRows.push(blankRow);
+
+    // 4. Switch to this new sheet tab in normal mode (audit mode disabled)
+    this.mode = 'normal';
+    this.state.isAuditMode.set(false);
+    this.selectedTableName = '';
+    this.state.setActiveTable(null);
+    this.activeSheetId = newId;
+    this.state.setRows(sutramRows);
+
+    // Save as local rough sheet immediately so it is tracked in saved sheets
+    this.saveRoughSheetLocally();
+
+    this.showScannerModal = false;
+    this.gridComponent?.resetScroll();
+    this.cdr.markForCheck();
+  }
+
+  public onScannerConfirmedMapped(event: { targetTable: string; matches: SutramScanMatch[] }): void {
+    const targetTable = event.targetTable;
+    if (!targetTable) return;
+
+    let foundTab = this.sheetTabs.find(t => t.id === targetTable || t.tableName === targetTable);
+    if (!foundTab) {
+      const tableInfo = this.tablesList.find(t => t.table === targetTable);
+      foundTab = {
+        id: targetTable,
+        title: tableInfo?.display_name || targetTable,
+        icon: 'pi-table',
+        type: 'table',
+        tableName: targetTable,
+        isLoaded: true
+      };
+      this.sheetTabs.push(foundTab);
+    }
+
+    const applyMappedData = (cfg: SutramTableConfig) => {
+      this.selectedTableName = targetTable;
+      this.activeSheetId = targetTable;
+      this.state.setActiveTable(targetTable);
+      this.state.setConfig(cfg);
+      this.buildConfigColumns(cfg);
+
+      const builtRows = this.scanner.buildSutramRows(this.uploadedRawRows, event.matches, cfg.headers);
+      this.audit.auditAll(builtRows, cfg.headers);
+      const withBlank = this.ensureTrailingBlankRow(builtRows, cfg);
+      this.state.setRows(withBlank);
+
+      this.showScannerModal = false;
+      this.uploadedRawRows = [];
+      this.gridComponent?.resetScroll();
+      this.cdr.markForCheck();
+    };
+
+    if (this.scannerTableConfig && this.scannerTableConfig.table === targetTable) {
+      applyMappedData(this.scannerTableConfig);
+    } else {
+      this.api.getTableConfig(targetTable).subscribe({
+        next: (cfg: SutramTableConfig) => {
+          this.scannerTableConfig = cfg;
+          applyMappedData(cfg);
+        },
+        error: (err: any) => {
+          console.error('[SutramStudio] Failed to load table config for mapping:', err);
+        }
+      });
+    }
+  }
+
+  public onScannerConfirmed(matches: SutramScanMatch[]): void {
+    if (this.scannerTargetTable) {
+      this.onScannerConfirmedMapped({ targetTable: this.scannerTargetTable, matches });
+    }
   }
 
   // ── Server-Side Verification ─────────────────────────────────
@@ -1772,12 +2608,37 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  @HostListener('document:click', ['$event'])
+  public onStudioGlobalClick(): void {
+    if (this.tabContextMenu.visible) {
+      this.closeTabContextMenu();
+    }
+  }
+
   @HostListener('document:keydown', ['$event'])
   public onStudioGlobalKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      if (this.renamingTabId) {
+        this.cancelTabRename();
+        return;
+      }
+      if (this.tabContextMenu.visible) {
+        this.closeTabContextMenu();
+        return;
+      }
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.toggleBold();
+      return;
+    }
+
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
       event.preventDefault();
       event.stopPropagation();
-      if (this.isCurrentSheetRough) {
+      if (this.isCurrentSheetRough || this.isCurrentSheetReport) {
         this.saveRoughSheetLocally();
         return;
       }
