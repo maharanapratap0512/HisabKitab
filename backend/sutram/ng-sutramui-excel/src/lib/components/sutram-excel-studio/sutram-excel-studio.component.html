@@ -29,7 +29,7 @@
                   (click)="setTopTab('tables')">
             <i class="pi pi-database"></i>
             <span>Tables</span>
-            <span class="ribbon-badge">{{ tablesList.length || 21 }}</span>
+            <span class="ribbon-badge">{{ tablesList.length }}</span>
           </button>
           <button type="button"
                   class="ribbon-tab-btn"
@@ -88,6 +88,102 @@
         <button class="cmd-btn" style="padding: 3px 6px;" (click)="toggleTheme()" title="Toggle Light / Dark Mode">
           <i class="pi" [ngClass]="isDarkMode ? 'pi-sun' : 'pi-moon'"></i>
         </button>
+
+        <!-- Reminder Bell Indicator with Unread Badge & Flyout Panel -->
+        <div class="reminder-bell-wrapper position-relative">
+          <button type="button"
+                  class="cmd-btn reminder-bell-btn"
+                  [class.has-reminders]="unreadReminderCount > 0"
+                  (click)="toggleBellFlyout()"
+                  [title]="unreadReminderCount > 0 ? (unreadReminderCount + ' Active Alert(s) - Click to view alerts') : 'No pending alerts'">
+            <i class="pi pi-bell" [class.bell-ringing]="unreadReminderCount > 0"></i>
+            <span *ngIf="unreadReminderCount > 0" class="reminder-badge-counter">{{ unreadReminderCount }}</span>
+          </button>
+
+          <!-- Floating Bell Flyout Menu -->
+          <div *ngIf="showBellFlyout" class="bell-flyout-panel shadow-lg">
+            <div class="flyout-header d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-2">
+                <i class="pi pi-bell text-primary"></i>
+                <strong style="font-size: 13px;">Active Reminders ({{ activeAlerts.length }})</strong>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                <button type="button" class="btn-flyout-icon" (click)="triggerReminderEvaluation()" title="Re-check rules now">
+                  <i class="pi pi-refresh"></i>
+                </button>
+                <button type="button" class="btn-flyout-icon" (click)="showBellFlyout = false" title="Close">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="flyout-list-body">
+              <div *ngIf="activeAlerts.length === 0" class="text-center py-4 text-muted" style="font-size: 12px;">
+                <i class="pi pi-check-circle text-success d-block mb-1" style="font-size: 20px;"></i>
+                कोई सक्रिय अलर्ट नहीं है (No pending alerts)
+              </div>
+
+              <div *ngFor="let alert of activeAlerts"
+                   class="flyout-item"
+                   [class.item-critical]="alert.severity === 'critical' || alert.is_permanent === 1"
+                   [class.item-warning]="alert.severity === 'warning'">
+                <div class="flyout-item-top d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="severity-dot"
+                          [class.dot-critical]="alert.severity === 'critical' || alert.is_permanent === 1"
+                          [class.dot-warning]="alert.severity === 'warning'"
+                          [class.dot-info]="alert.severity === 'info'"></span>
+                    <strong class="item-title text-truncate">{{ alert.rule_name }}</strong>
+                  </div>
+                  <span class="item-tag" [class.tag-critical]="alert.severity === 'critical'">
+                    {{ (alert.is_permanent === 1 ? 'PERM' : (alert.severity || 'ALERT')) | uppercase }}
+                  </span>
+                </div>
+
+                <div class="item-msg text-truncate mt-1" [title]="alert.message">
+                  {{ alert.message }}
+                </div>
+
+                <div class="item-actions d-flex align-items-center justify-content-between mt-2 pt-1 border-top">
+                  <span *ngIf="alert.action_table" class="item-table-name">
+                    <i class="pi pi-table"></i> {{ alert.action_table }}
+                  </span>
+                  <div class="d-flex align-items-center gap-1 ms-auto">
+                    <button *ngIf="alert.action_table" type="button" class="btn-flyout-act" (click)="goToTableFromReminder(alert.action_table)">
+                      <i class="pi pi-external-link"></i> Table
+                    </button>
+                    <button type="button" class="btn-flyout-act btn-dismiss" (click)="onDismissAlert(alert)">
+                      <i class="pi pi-check"></i> Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Flyout Footer -->
+            <div class="flyout-footer d-flex align-items-center justify-content-between">
+              <button type="button" class="btn-footer-sheet" (click)="openReminderResultsSheet()">
+                <i class="pi pi-table"></i>
+                <span>View Reminders Sheet</span>
+              </button>
+              <button type="button" class="btn-footer-manage" (click)="openReminderManagerModal()">
+                <i class="pi pi-cog"></i>
+                <span>Manage Rules</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User & Role Pill Indicator with Quick Role Toggle -->
+        <div class="user-role-badge-pill"
+             (click)="toggleRole()"
+             [title]="'Active User: ' + (currentUser.display_name || currentUser.username) + ' (' + (isAdmin ? 'Admin Mode' : 'Author Mode') + ')\nClick to toggle role'">
+          <i class="pi" [ngClass]="isAdmin ? 'pi-shield' : 'pi-user'" [style.color]="isAdmin ? '#a855f7' : '#10b981'"></i>
+          <span class="user-name-txt">{{ currentUser.username }}</span>
+          <span class="role-pill-tag" [class.admin-tag]="isAdmin" [class.author-tag]="isAuthor">
+            {{ isAdmin ? '👑 Admin' : '👤 Author' }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -121,9 +217,13 @@
         <!-- Section: Data Actions (Refresh, Open File, Export - Clear button removed) -->
         <div class="ribbon-group">
           <div class="ribbon-group-items">
-            <button *ngIf="!isCurrentSheetRough" class="ribbon-tool-btn" (click)="onRefreshData()" title="Refresh data from database">
+            <button *ngIf="!isCurrentSheetRough" class="ribbon-tool-btn" (click)="onRefreshData()" title="डेटाबेस से पुनः लोड करें (Refresh from Database)">
               <i class="pi pi-refresh text-success"></i>
               <span class="ribbon-tool-lbl">Refresh</span>
+            </button>
+            <button class="ribbon-tool-btn" (click)="onClearSheet()" title="शीट खाली करें (डेटाबेस सुरक्षित रहेगा)">
+              <i class="pi pi-eraser text-warning"></i>
+              <span class="ribbon-tool-lbl">Clear Sheet</span>
             </button>
             <button class="ribbon-tool-btn" (click)="openFileManager()" title="Open Excel (.xlsx) file or saved sheets">
               <i class="pi pi-folder-open"></i>
@@ -157,6 +257,46 @@
           </div>
           <span class="ribbon-group-name">Sort & Filter</span>
         </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Freeze Panes -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn" [class.active]="isHeaderFrozen" (click)="toggleHeaderFreeze()" title="शीर्ष पंक्ति फ़्रीज़ करें (Toggle Freeze Header Row)">
+              <i class="pi pi-bars"></i>
+              <span class="ribbon-tool-lbl">Freeze Row</span>
+            </button>
+            <button class="ribbon-tool-btn" [class.active]="frozenColKeys.length > 0" (click)="toggleActiveColumnFreeze()" title="सक्रिय कॉलम फ़्रीज़ करें (Toggle Freeze Selected Column)">
+              <i class="pi pi-lock"></i>
+              <span class="ribbon-tool-lbl">{{ frozenColKeys.length > 0 ? ('Frozen (' + frozenColKeys.length + ')') : 'Freeze Col' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">Freeze Panes</span>
+        </div>
+
+        <div class="ribbon-v-sep" *ngIf="isPasswordColumnActive"></div>
+
+        <!-- Section: Password Security (Visible when active column/cell is password type) -->
+        <div class="ribbon-group" *ngIf="isPasswordColumnActive">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    [class.active]="isCurrentColumnUnmasked"
+                    (click)="toggleActiveColumnMask()"
+                    [title]="isCurrentColumnUnmasked ? 'कॉलम डेटा मास्क करें (Mask Column Data 🔒)' : 'कॉलम डेटा अनमास्क करें (Unmask Column Data 🔓)'">
+              <i class="pi" [ngClass]="isCurrentColumnUnmasked ? 'pi-lock text-warning' : 'pi-lock-open text-primary'"></i>
+              <span class="ribbon-tool-lbl">{{ isCurrentColumnUnmasked ? 'Mask Col' : 'Unmask Col' }}</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    [class.active]="isCurrentCellUnmasked"
+                    (click)="toggleActiveCellMask()"
+                    [title]="isCurrentCellUnmasked ? 'सक्रिय सेल मास्क करें (Mask Cell Data 🔒)' : 'सक्रिय सेल अनमास्क करें (Unmask Cell Data 🔓)'">
+              <i class="pi" [ngClass]="isCurrentCellUnmasked ? 'pi-eye-slash text-warning' : 'pi-eye text-primary'"></i>
+              <span class="ribbon-tool-lbl">{{ isCurrentCellUnmasked ? 'Mask Cell' : 'Unmask Cell' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">Security 🔐</span>
+        </div>
       </div>
 
       <!-- RIBBON TAB 2: TABLES (Horizontal Scrolling Strip with Small Simple Boxes) -->
@@ -173,6 +313,19 @@
 
         <!-- Small simple boxes for each table -->
         <div class="ribbon-boxes-track">
+          <!-- 1st Small Box: Create New Table -->
+          <div class="ribbon-small-box create-table-box"
+               (click)="openCreateTable()"
+               title="Create new table in this database">
+            <div class="box-icon-wrap">
+              <i class="pi pi-plus"></i>
+            </div>
+            <div class="box-info">
+              <span class="box-name-eng-main">+ New Table</span>
+              <span class="box-name-eng-sub">Add table</span>
+            </div>
+          </div>
+
           <div *ngFor="let tbl of filteredTables"
                class="ribbon-small-box"
                [class.active-box]="isTableOpen(tbl.table)"
@@ -201,8 +354,14 @@
 
       <!-- RIBBON TAB 3: REPORTS (Horizontal Scrolling Strip with Small Simple Boxes) -->
       <div *ngIf="activeTopTab === 'reports'" class="ribbon-scroll-row">
+        <!-- Empty state when no dynamic reports or views exist -->
+        <div *ngIf="!reportsList || reportsList.length === 0" class="ribbon-empty-state">
+          <i class="pi pi-info-circle text-muted"></i>
+          <span class="text-muted">डेटाबेस में कोई रिपोर्ट या व्यू उपलब्ध नहीं है (No dynamic reports or views in database)</span>
+        </div>
+
         <!-- Quick search input inside reports strip -->
-        <div class="ribbon-search-field" style="width: 140px; min-width: 140px; margin-right: 6px;">
+        <div *ngIf="reportsList && reportsList.length > 0" class="ribbon-search-field" style="width: 140px; min-width: 140px; margin-right: 6px;">
           <i class="pi pi-search search-ico"></i>
           <input type="text"
                  class="ribbon-search-inp"
@@ -212,7 +371,7 @@
         </div>
 
         <!-- Small simple boxes for each report -->
-        <div class="ribbon-boxes-track">
+        <div *ngIf="reportsList && reportsList.length > 0" class="ribbon-boxes-track">
           <div *ngFor="let rep of filteredReports"
                class="ribbon-small-box report-box"
                [class.active-box]="isReportOpen(rep.id)"
@@ -229,7 +388,7 @@
             </button>
 
             <div class="box-icon-wrap report-icon-bg">
-              <i class="pi" [ngClass]="rep.icon"></i>
+              <i class="pi" [ngClass]="rep.icon || 'pi-chart-bar'"></i>
             </div>
             <div class="box-info">
               <span class="box-name-eng-main">{{ rep.display_name || rep.title || rep.table || rep.id }}</span>
@@ -239,8 +398,59 @@
         </div>
       </div>
 
-      <!-- RIBBON TAB 4: SETTINGS (Concise & Minimal: Checkbox & Badge) -->
+      <!-- RIBBON TAB 4: SETTINGS (Contextual to Active Open Sheet) -->
       <div *ngIf="activeTopTab === 'settings'" class="ribbon-content-row">
+        <!-- Active Sheet Context Badge -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items" style="align-items: center; padding: 2px 6px;">
+            <div class="active-sheet-badge-pill" [title]="'Active Sheet: ' + currentActiveSheetTitle">
+              <i class="pi" [ngClass]="isCurrentSheetRough ? 'pi-file' : (isCurrentSheetReport ? 'pi-chart-bar' : 'pi-table')"></i>
+              <span class="sheet-title-text">{{ currentActiveSheetTitle }}</span>
+            </div>
+          </div>
+          <span class="ribbon-group-name">ACTIVE SHEET</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Table & Column Configuration -->
+        <div class="ribbon-group" *ngIf="isCurrentSheetTable">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    (click)="colConfigOp.toggle($event)"
+                    title="Configure visible columns, display order, labels and formats">
+              <i class="pi pi-sliders-h" style="color: #6366f1;"></i>
+              <span class="ribbon-tool-lbl">Columns</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">DISPLAY</span>
+        </div>
+
+        <div class="ribbon-v-sep" *ngIf="isCurrentSheetTable"></div>
+
+        <!-- Section: Triggers (UI & DB In-Sheet Workbench) -->
+        <div class="ribbon-group" *ngIf="isCurrentSheetTable">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    [class.active]="activeInSheetTool === 'ui_sutras'"
+                    (click)="toggleInSheetTool('ui_sutras')"
+                    [title]="isAdmin ? 'UI Trigger: Reactive cell formulas & custom client logic' : 'View UI Triggers for this table'">
+              <i class="pi pi-desktop" style="color: #06b6d4;"></i>
+              <span class="ribbon-tool-lbl">UI {{ activeInSheetTool === 'ui_sutras' ? '●' : '' }}</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    [class.active]="activeInSheetTool === 'db_triggers'"
+                    (click)="toggleInSheetTool('db_triggers')"
+                    [title]="isAdmin ? 'DB Trigger: Server triggers, Raw SQL & database cascades' : 'View DB Triggers for this table'">
+              <i class="pi pi-database" style="color: #f59e0b;"></i>
+              <span class="ribbon-tool-lbl">DB {{ activeInSheetTool === 'db_triggers' ? '●' : '' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">AUTOMATION</span>
+        </div>
+
+        <div class="ribbon-v-sep" *ngIf="isCurrentSheetTable"></div>
+
         <!-- Section: Boolean Display Style (Only Checkbox and Badge) -->
         <div class="ribbon-group">
           <div class="ribbon-group-items">
@@ -259,7 +469,49 @@
               <span class="ribbon-tool-lbl">Badge</span>
             </button>
           </div>
-          <span class="ribbon-group-name">Boolean</span>
+          <span class="ribbon-group-name">BOOLEAN</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Users & Access Management (Native Sheet Tab!) -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    (click)="openUsersSheet()"
+                    title="User Management: Manage users and permissions in native sys_user sheet">
+              <i class="pi pi-users" style="color: #ec4899;"></i>
+              <span class="ribbon-tool-lbl">Users</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    (click)="toggleRole()"
+                    [title]="'Current Role: ' + currentUser.role + ' (Click to toggle role)'">
+              <i class="pi" [ngClass]="isAdmin ? 'pi-shield' : 'pi-user'" [style.color]="isAdmin ? '#a855f7' : '#10b981'"></i>
+              <span class="ribbon-tool-lbl">{{ isAdmin ? 'Admin' : 'Author' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">USERS & ACCESS</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Reminders & Watchdog Management -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    (click)="openReminderManagerModal()"
+                    title="Manage Reminder Rules & Watchdogs">
+              <i class="pi pi-sliders-h" style="color: #ec4899;"></i>
+              <span class="ribbon-tool-lbl">Manage</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    (click)="openReminderResultsSheet()"
+                    title="View Reminders & Watchdog Results Sheet">
+              <i class="pi pi-bell" style="color: #f59e0b;"></i>
+              <span class="ribbon-tool-lbl">View</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">REMINDERS</span>
         </div>
       </div>
 
@@ -297,124 +549,250 @@
     </div>
   </div>
 
-  <!-- Column Config Popover (Replicating Legacy Studio) -->
+  <!-- Column Config Popover (Unified 2-Section Double-Width Panel: Visibility + Sorting & Formatting) -->
   <p-overlayPanel #colConfigOp [dismissable]="true" styleClass="sutram-col-config-popover shadow-lg">
     <ng-template pTemplate="content">
-      <div class="col-dropdown-menu">
-        <!-- Header: Search Bar & Action Strip -->
-        <div class="col-dd-header">
-          <div class="col-dd-search-wrap">
-            <i class="pi pi-search col-dd-search-icon"></i>
-            <input type="text"
-                   class="col-dd-search-input"
-                   placeholder="Search columns / FK..."
-                   [(ngModel)]="colSearchQuery" />
-            <button *ngIf="colSearchQuery"
-                    type="button"
-                    class="btn-clear-search-inline"
-                    (click)="colSearchQuery = ''">
-              <i class="pi pi-times"></i>
-            </button>
-          </div>
-
-          <div class="col-dd-actions">
-            <div class="col-dd-actions-left">
-              <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(true)">All</button>
-              <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(false)">None</button>
-              <button type="button" class="col-dd-act-btn" (click)="resetDefaultColumns()">Reset</button>
+      <div class="col-dd-split-container">
+        
+        <!-- ── LEFT PANE: COLUMN VISIBILITY & GROUPS ── -->
+        <div class="col-dd-left-pane">
+          <!-- Header: Search Bar & Actions -->
+          <div class="col-dd-header">
+            <div class="col-dd-search-wrap">
+              <i class="pi pi-search col-dd-search-icon"></i>
+              <input type="text"
+                     class="col-dd-search-input"
+                     placeholder="Search columns / FK..."
+                     [(ngModel)]="colSearchQuery" />
+              <button *ngIf="colSearchQuery"
+                      type="button"
+                      class="btn-clear-search-inline"
+                      (click)="colSearchQuery = ''">
+                <i class="pi pi-times"></i>
+              </button>
             </div>
-            <span class="col-dd-count">{{ selectedColumnKeys.size }} of {{ allConfigColumns.length }} visible</span>
-          </div>
-        </div>
 
-        <!-- Body: Standard Columns & FK Groups -->
-        <div class="col-dd-body">
-          <!-- 1. Standard Columns -->
-          <ng-container *ngIf="filteredDirectCols.length > 0">
-            <div class="col-dd-section-title">Standard Columns</div>
-            <div *ngFor="let col of filteredDirectCols; trackBy: trackByColKey"
-                 class="col-dd-item"
-                 (click)="toggleColumnCheckbox(col.key)">
-              <div class="col-dd-item-left">
-                <input type="checkbox"
-                       class="custom-check"
-                       [checked]="isColumnSelected(col.key)"
-                       style="pointer-events: none;" />
-                <span class="col-dd-item-name" [title]="col.name">
-                  {{ col.name }}<span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
-                </span>
+            <div class="col-dd-actions">
+              <div class="col-dd-actions-left">
+                <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(true)">All</button>
+                <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(false)">None</button>
+                <button type="button" class="col-dd-act-btn" (click)="resetDefaultColumns()">Reset</button>
               </div>
-              <span class="type-badge">{{ col.type || 'string' }}</span>
+              <span class="col-dd-count">{{ selectedColumnKeys.size }} of {{ allConfigColumns.length }} visible</span>
             </div>
-          </ng-container>
+          </div>
 
-          <!-- 2. Foreign Key Reference Groups -->
-          <ng-container *ngIf="filteredFkGroups.length > 0">
-            <div class="col-dd-section-title" style="margin-top: 8px;">FK Reference Groups</div>
-            <div *ngFor="let grp of filteredFkGroups; trackBy: trackByGroupName"
-                 class="col-dd-group"
-                 [class.fk-active-group]="grp.selectedCount > 0">
-              <!-- Group Accordion Header -->
-              <div class="col-dd-group-header">
-                <div class="col-dd-group-left"
-                     (click)="toggleFkGroupExpand(grp.name)"
-                     style="cursor: pointer; flex-grow: 1;">
-                  <i class="pi pi-chevron-right fk-expand-toggle"
-                     [class.rotated]="isFkGroupExpanded(grp.name)"></i>
-                  <span class="col-dd-item-name">
-                    <i class="pi pi-link" style="color: var(--primary, #4f46e5); font-size: 10px; margin-right: 3px;"></i>
-                    <strong style="text-transform: capitalize;">{{ grp.name }}</strong>
-                    <span style="font-size: 10px; color: var(--text-muted); font-weight: 400; margin-left: 3px;">({{ grp.refTable }})</span>
-                  </span>
-                </div>
-                <div class="col-dd-group-right"
-                     (click)="toggleFkGroupAll(grp.name)"
-                     style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <!-- Body: Standard Columns & FK Groups -->
+          <div class="col-dd-body">
+            
+            <!-- 1. Standard Columns -->
+            <ng-container *ngIf="filteredDirectCols.length > 0">
+              <div class="col-dd-section-title">Standard Columns</div>
+              <div *ngFor="let col of filteredDirectCols; trackBy: trackByColKey"
+                   class="col-dd-item"
+                   (click)="toggleColumnCheckbox(col.key)">
+                <div class="col-dd-item-left">
                   <input type="checkbox"
                          class="custom-check"
-                         [checked]="grp.isAllChecked"
+                         [checked]="isColumnSelected(col.key)"
                          style="pointer-events: none;" />
-                  <span class="fk-group-pill"
-                        [style.background]="grp.selectedCount > 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(125, 125, 125, 0.1)'"
-                        [style.color]="grp.selectedCount > 0 ? '#059669' : 'var(--text-muted)'">
-                    {{ grp.selectedCount }}/{{ grp.totalCount }}
+                  <span class="col-dd-item-name" [title]="col.name">
+                    {{ col.short_name || col.name }}<span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
                   </span>
                 </div>
+                <span class="type-badge" [class.type-badge-pwd]="isPasswordCol(col)">{{ isPasswordCol(col) ? 'password' : (col.type || 'string') }}</span>
               </div>
+            </ng-container>
 
-              <!-- Group Sub-items (when expanded) -->
-              <div *ngIf="isFkGroupExpanded(grp.name)" class="col-dd-group-items">
-                <div *ngFor="let col of grp.columns; trackBy: trackByColKey"
-                     class="col-dd-item"
-                     (click)="toggleColumnCheckbox(col.key)">
-                  <div class="col-dd-item-left">
-                    <input type="checkbox"
-                           class="custom-check"
-                           [checked]="isColumnSelected(col.key)"
-                           style="pointer-events: none;" />
-                    <span class="col-dd-item-name"
-                          [style.font-weight]="col.is_fk_main ? '600' : 'normal'"
-                          [title]="col.name">
-                      {{ col.short_name || col.name }}
+            <!-- 2. Foreign Key & Computed Reference Groups -->
+            <ng-container *ngIf="filteredFkGroups.length > 0">
+              <div class="col-dd-section-title" style="margin-top: 8px;">FK Reference Groups</div>
+              <div *ngFor="let grp of filteredFkGroups; trackBy: trackByGroupName"
+                   class="col-dd-group"
+                   [class.fk-active-group]="grp.selectedCount > 0">
+                <!-- Group Accordion Header -->
+                <div class="col-dd-group-header">
+                  <div class="col-dd-group-left"
+                       (click)="toggleFkGroupExpand(grp.name)"
+                       style="cursor: pointer; flex-grow: 1;">
+                    <i class="pi pi-chevron-right fk-expand-toggle"
+                       [class.rotated]="isFkGroupExpanded(grp.name)"></i>
+                    <span class="col-dd-item-name">
+                      <i class="pi pi-link" style="color: var(--primary, #4f46e5); font-size: 10px; margin-right: 3px;"></i>
+                      <strong style="text-transform: capitalize;">{{ grp.name }}</strong>
+                      <span style="font-size: 10px; color: var(--text-muted); font-weight: 400; margin-left: 3px;">({{ grp.refTable }})</span>
                     </span>
                   </div>
-                  <span class="type-badge">{{ col.is_fk_main ? 'display' : (col.is_fk_raw ? 'id' : (col.type || 'string')) }}</span>
+                  <div class="col-dd-group-right"
+                       (click)="toggleFkGroupAll(grp.name)"
+                       style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <input type="checkbox"
+                           class="custom-check"
+                           [checked]="grp.isAllChecked"
+                           style="pointer-events: none;" />
+                    <span class="fk-group-pill"
+                          [style.background]="grp.selectedCount > 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(125, 125, 125, 0.1)'"
+                          [style.color]="grp.selectedCount > 0 ? '#059669' : 'var(--text-muted)'">
+                      {{ grp.selectedCount }}/{{ grp.totalCount }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Group Sub-items (when expanded) -->
+                <div *ngIf="isFkGroupExpanded(grp.name)" class="col-dd-group-items">
+                  <div *ngFor="let col of grp.columns; trackBy: trackByColKey"
+                       class="col-dd-item"
+                       (click)="toggleColumnCheckbox(col.key)">
+                    <div class="col-dd-item-left">
+                      <input type="checkbox"
+                             class="custom-check"
+                             [checked]="isColumnSelected(col.key)"
+                             style="pointer-events: none;" />
+                      <span class="col-dd-item-name"
+                             [style.font-weight]="col.is_fk_main ? '600' : 'normal'"
+                             [title]="col.name">
+                        {{ col.short_name || col.name }}
+                      </span>
+                    </div>
+                    <span class="type-badge">{{ col.is_fk_main ? 'display' : (col.is_fk_raw ? 'id' : (col.is_temp ? 'formula' : (col.type || 'string'))) }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </ng-container>
+            </ng-container>
 
-          <!-- Empty State -->
-          <div *ngIf="filteredDirectCols.length === 0 && filteredFkGroups.length === 0" class="col-dd-empty">
-            <i class="pi pi-search me-1"></i> No matching columns found
+            <!-- Empty State -->
+            <div *ngIf="filteredDirectCols.length === 0 && filteredFkGroups.length === 0" class="col-dd-empty">
+              <i class="pi pi-search me-1"></i> No matching columns found
+            </div>
           </div>
         </div>
 
-        <!-- Footer: Click outside hint + Done button -->
-        <div class="col-dd-footer">
-          <span class="small text-muted" style="font-size: 10.5px;">Click outside or press Esc</span>
-          <button type="button" class="btn btn-sm btn-primary py-1 px-3" style="font-size: 11.5px; font-weight: 600;" (click)="colConfigOp.hide()">Done</button>
+        <!-- ── RIGHT PANE: SELECTED COLUMNS ORDER & FORMATTING ── -->
+        <div class="col-dd-right-pane">
+          <!-- Right Header -->
+          <div class="col-dd-right-header">
+            <div class="col-dd-right-title-wrap">
+              <span class="col-dd-right-title">
+                <i class="pi pi-sliders-v text-primary me-1"></i> Selected Columns (क्रम एवं प्रारूप)
+              </span>
+              <span class="col-dd-right-badge">{{ selectedOrderedColumns.length }} Visible</span>
+            </div>
+            <div class="col-dd-right-sub">
+              Use <strong style="color: var(--primary, #4f46e5);">▲ / ▼</strong> to reorder, edit labels, or select formats
+            </div>
+          </div>
+
+          <!-- Right Body: Compact, Single-Row Column Cards -->
+          <div class="col-dd-right-body">
+            <div *ngIf="selectedOrderedColumns.length === 0" class="col-dd-empty">
+              <i class="pi pi-info-circle me-1"></i> No columns visible. Select columns on the left.
+            </div>
+
+            <div *ngFor="let col of selectedOrderedColumns; let i = index; trackBy: trackByColKey"
+                 class="col-sel-row">
+              
+              <!-- 1. Col Letter Badge: A, B, C... -->
+              <span class="col-sel-letter" [title]="'Column ' + getColLetter(i)">
+                {{ getColLetter(i) }}
+              </span>
+
+              <!-- 2. Reorder Buttons -->
+              <div class="col-sel-reorder">
+                <button type="button"
+                        class="btn-arrow"
+                        [disabled]="i === 0"
+                        (click)="moveSelectedColUp(col.key)"
+                        title="Move Up / Earlier">
+                  <i class="pi pi-chevron-up"></i>
+                </button>
+                <button type="button"
+                        class="btn-arrow"
+                        [disabled]="i === selectedOrderedColumns.length - 1"
+                        (click)="moveSelectedColDown(col.key)"
+                        title="Move Down / Later">
+                  <i class="pi pi-chevron-down"></i>
+                </button>
+              </div>
+
+              <!-- 3. Column Technical Identifier & Role Badge -->
+              <div class="col-sel-name-col">
+                <span class="col-sel-key" [title]="col.key">{{ col.col_name || col.key }}</span>
+                <span *ngIf="col.is_temp" class="badge-pill-fx" title="Computed Temp Formula">⚡ fx</span>
+                <span *ngIf="col.is_fk_main" class="badge-pill-fk" [title]="'FK Display: ' + col.ref_table">🔗 {{ col.ref_table }}</span>
+                <span *ngIf="col.is_fk_subcol" class="badge-pill-sub" [title]="'FK Subcol: ' + col.ref_table">↳ {{ col.sub_col_name }}</span>
+                <span *ngIf="col.is_fk_raw" class="badge-pill-raw" title="Raw foreign key ID"># id</span>
+                <span *ngIf="isPasswordCol(col)" class="badge-pill-pwd" title="Password Column (Masked)">🔒 password</span>
+                <span *ngIf="!col.is_temp && !col.is_fk_main && !col.is_fk_subcol && !col.is_fk_raw && !isPasswordCol(col)" class="badge-pill-std">{{ col.type || 'text' }}</span>
+              </div>
+
+              <!-- 4. Editable Label Input -->
+              <div class="col-sel-label-box">
+                <input type="text"
+                       class="col-sel-inp"
+                       [(ngModel)]="col.label"
+                       (ngModelChange)="onColumnLabelChange(col)"
+                       [placeholder]="col.short_name || col.name || col.key"
+                       title="Header display label" />
+              </div>
+
+              <!-- 5. Formatting Selector (Contextual) -->
+              <div class="col-sel-format-box">
+                <!-- Date Options -->
+                <select *ngIf="isDateCol(col) && !isPasswordCol(col)"
+                        class="col-sel-select"
+                        [(ngModel)]="col.display_format"
+                        (ngModelChange)="onColumnFormatChange(col)"
+                        title="Date Format">
+                  <option [value]="''">Default Date</option>
+                  <option *ngFor="let opt of dateFormatOptions" [value]="opt.value">{{ opt.label }}</option>
+                </select>
+
+                <!-- Number Options -->
+                <select *ngIf="isNumberCol(col) && !isPasswordCol(col)"
+                        class="col-sel-select"
+                        [(ngModel)]="col.display_format"
+                        (ngModelChange)="onColumnFormatChange(col)"
+                        title="Number Format">
+                  <option [value]="''">Default Number</option>
+                  <option *ngFor="let opt of numberDecimalOptions" [value]="opt.value">{{ opt.label }}</option>
+                </select>
+
+                <!-- Password Type indicator -->
+                <span *ngIf="isPasswordCol(col)" class="col-sel-type-lbl" style="color: #f59e0b; font-weight: 600;">
+                  <i class="pi pi-lock me-1"></i>Masked
+                </span>
+
+                <!-- Text / other: clean static type indicator -->
+                <span *ngIf="!isDateCol(col) && !isNumberCol(col) && !isPasswordCol(col)" class="col-sel-type-lbl">
+                  {{ col.is_temp ? 'Formula' : (col.type || 'Text') }}
+                </span>
+              </div>
+
+              <!-- 6. Remove / Hide Column Button -->
+              <button type="button"
+                      class="btn-sel-remove"
+                      (click)="toggleColumnCheckbox(col.key)"
+                      title="Hide this column from sheet">
+                <i class="pi pi-times"></i>
+              </button>
+
+            </div>
+          </div>
         </div>
+
+      </div>
+
+      <!-- Footer: Escape hint + Done button -->
+      <div class="col-dd-footer">
+        <span class="small text-muted" style="font-size: 11px;">
+          Click outside or press Esc
+        </span>
+        <button type="button"
+                class="btn btn-sm btn-primary py-1 px-3"
+                style="font-size: 11.5px; font-weight: 600;"
+                (click)="colConfigOp.hide()">
+          Done
+        </button>
       </div>
     </ng-template>
   </p-overlayPanel>
@@ -434,19 +812,226 @@
 
   <!-- 4. SPREADSHEET CANVAS (ALWAYS VISIBLE! 100% REMAINING HEIGHT) -->
   <main class="spreadsheet-canvas flex-grow-1" [style.zoom]="zoomLevel">
-    <sutram-grid #grid
+    <!-- In-Sheet Contextual Workbench (Triggers & Live Formulas Top Panel) -->
+    <sutram-in-sheet-workbench *ngIf="activeInSheetTool"
+                               [tool]="activeInSheetTool"
+                               [isDarkMode]="isDarkMode"
+                               [tableName]="currentActiveTableName"
+                               [tableTitle]="currentActiveSheetTitle"
+                               [isAdmin]="isAdmin"
+                               [uiSutrasList]="uiSutrasList"
+                               [targetColOptions]="targetColDropdownOptions"
+                               [currentTableColumns]="currentTableColumns"
+                               [referenceColumns]="referenceColumns"
+                               [isSavingUiSutras]="isSavingUiSutras"
+                               [dbTriggersList]="backendTriggersList"
+                               [tablesList]="tablesList"
+                               [visibleHeaders]="visibleHeaders"
+                               [reminderRulesList]="reminderRulesList"
+                               [isSavingReminderRule]="isSavingReminderRule"
+                               (close)="closeInSheetWorkbench()"
+                               (addUiSutra)="onWorkbenchAddUiSutra($event)"
+                               (removeUiSutra)="removeUiSutra($event)"
+                               (saveUiSutras)="saveUiSutras()"
+                               (createDbTrigger)="onWorkbenchCreateTrigger($event)"
+                               (deleteDbTrigger)="deleteBackendTrigger($event)"
+                               (createReminderRule)="onWorkbenchCreateReminderRule($event)"
+                               (updateReminderRule)="onWorkbenchUpdateReminderRule($event)"
+                               (deleteReminderRule)="onWorkbenchDeleteReminderRule($event)"
+                               (evaluateAllReminders)="triggerReminderEvaluation()"
+                               (openFullSheet)="openRemindersSheet()">
+    </sutram-in-sheet-workbench>
+
+    <!-- Dedicated Reminder Results Sheet Canvas (Universal Alert Results Dashboard) -->
+    <div *ngIf="isCurrentSheetReminderResults" class="reminder-results-sheet-canvas">
+      <!-- Toolbar -->
+      <div class="results-sheet-toolbar">
+        <!-- Filter Pills -->
+        <div class="toolbar-filter-pills">
+          <button type="button"
+                  class="filter-pill"
+                  [class.active]="reminderResultsFilter === 'all'"
+                  (click)="reminderResultsFilter = 'all'">
+            <span>All Alerts</span>
+            <span class="pill-count">{{ activeAlerts.length }}</span>
+          </button>
+          <button type="button"
+                  class="filter-pill pill-critical"
+                  [class.active]="reminderResultsFilter === 'critical'"
+                  (click)="reminderResultsFilter = 'critical'">
+            <span class="status-dot dot-critical"></span>
+            <span>Critical</span>
+            <span class="pill-count">{{ reminderCriticalCount }}</span>
+          </button>
+          <button type="button"
+                  class="filter-pill pill-warning"
+                  [class.active]="reminderResultsFilter === 'warning'"
+                  (click)="reminderResultsFilter = 'warning'">
+            <span class="status-dot dot-warning"></span>
+            <span>Warning</span>
+            <span class="pill-count">{{ reminderWarningCount }}</span>
+          </button>
+          <button type="button"
+                  class="filter-pill pill-info"
+                  [class.active]="reminderResultsFilter === 'info'"
+                  (click)="reminderResultsFilter = 'info'">
+            <span class="status-dot dot-info"></span>
+            <span>Info</span>
+            <span class="pill-count">{{ reminderInfoCount }}</span>
+          </button>
+        </div>
+
+        <!-- Search Box -->
+        <div class="toolbar-search-box">
+          <i class="pi pi-search search-icon"></i>
+          <input type="text"
+                 class="results-search-input"
+                 placeholder="Search by item, rule, or details..."
+                 [(ngModel)]="reminderResultsSearch">
+          <button *ngIf="reminderResultsSearch"
+                  type="button"
+                  class="btn-clear-search"
+                  (click)="reminderResultsSearch = ''">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <!-- Right Action Buttons -->
+        <div class="toolbar-actions-right">
+          <button type="button"
+                  class="btn-tb-action btn-refresh"
+                  (click)="triggerReminderEvaluation()"
+                  title="Evaluate & refresh all reminder rules now">
+            <i class="pi pi-refresh" [class.pi-spin]="isEvaluatingReminders"></i>
+            <span>{{ isEvaluatingReminders ? 'Checking...' : 'Re-check' }}</span>
+          </button>
+          <button type="button"
+                  class="btn-tb-action btn-manage"
+                  (click)="openReminderManagerModal()"
+                  title="Manage rules, alarms & watchdogs">
+            <i class="pi pi-cog"></i>
+            <span>Manage Rules</span>
+          </button>
+          <button type="button"
+                  class="btn-tb-action btn-export"
+                  (click)="exportReminderResultsExcel()"
+                  title="Export reminder results to Excel (XLSX)">
+            <i class="pi pi-file-excel"></i>
+            <span>Export Excel</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Excel Sheet Grid Container -->
+      <div class="results-excel-table-container">
+        <table class="results-excel-table">
+          <thead>
+            <tr>
+              <th class="col-idx">#</th>
+              <th class="col-priority">Priority</th>
+              <th class="col-rule">Reminder Name</th>
+              <th class="col-item">Affected Record / Item</th>
+              <th class="col-details">Alert Details & Condition</th>
+              <th class="col-table">Source Table</th>
+              <th class="col-time">Triggered At</th>
+              <th class="col-actions text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Empty state -->
+            <tr *ngIf="reminderResultItems.length === 0" class="empty-results-row">
+              <td colspan="8" class="text-center py-5">
+                <div class="empty-state-content">
+                  <i class="pi pi-check-circle empty-state-icon"></i>
+                  <div class="empty-state-title">No Active Reminders Found</div>
+                  <div class="empty-state-sub">All conditions are normal, or filters matched 0 alerts.</div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Data Rows with Color Coding -->
+            <tr *ngFor="let item of reminderResultItems; let idx = index"
+                class="results-data-row"
+                [class.row-critical]="item.priority === 'critical'"
+                [class.row-warning]="item.priority === 'warning'"
+                [class.row-info]="item.priority === 'info'">
+              <td class="col-idx text-center">{{ idx + 1 }}</td>
+              <td class="col-priority">
+                <span class="priority-badge"
+                      [class.badge-critical]="item.priority === 'critical'"
+                      [class.badge-warning]="item.priority === 'warning'"
+                      [class.badge-info]="item.priority === 'info'">
+                  <span class="status-dot"></span>
+                  {{ item.priority | uppercase }}
+                </span>
+              </td>
+              <td class="col-rule fw-bold">{{ item.rule_name }}</td>
+              <td class="col-item">
+                <span class="item-name-pill">{{ item.item_name }}</span>
+              </td>
+              <td class="col-details">{{ item.details }}</td>
+              <td class="col-table">
+                <span *ngIf="item.action_table" class="table-chip">
+                  <i class="pi pi-table"></i> {{ item.action_table }}
+                </span>
+                <span *ngIf="!item.action_table" class="text-muted">—</span>
+              </td>
+              <td class="col-time text-nowrap">
+                {{ item.triggered_at ? (item.triggered_at | date:'medium') : 'Just now' }}
+              </td>
+              <td class="col-actions">
+                <div class="row-action-btns">
+                  <button *ngIf="item.action_table"
+                          type="button"
+                          class="btn-row-act btn-goto-table"
+                          (click)="goToTableFromReminder(item.action_table, item.rawRecord)"
+                          title="Open {{ item.action_table }} sheet to inspect record">
+                    <i class="pi pi-external-link"></i>
+                    <span>Go to Table</span>
+                  </button>
+                  <button type="button"
+                          class="btn-row-act btn-dismiss-row"
+                          (click)="onDismissAlert({ log_id: item.log_id, rule_name: item.rule_name })"
+                          title="Dismiss this reminder">
+                    <i class="pi pi-check"></i>
+                    <span>Dismiss</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <sutram-grid *ngIf="!isCurrentSheetReminderResults"
+                 #grid
                  [headers]="visibleHeaders"
                  [rows]="state.rows()"
                  [filterOnlyErrors]="state.filterOnlyErrors()"
-                 [enableDelete]="enableDelete"
+                 [enableDelete]="enableDelete && currentSheetCanDelete"
                  [isBold]="isBoldActive"
                  [textAlign]="textAlign"
                  [booleanStyle]="booleanDisplayStyle"
+                 [unmaskedColumnsSet]="unmaskedColumnsSet"
+                 [unmaskedCellsSet]="unmaskedCellsSet"
+                 [frozenColKeys]="frozenColKeys"
+                 [isHeaderFrozen]="isHeaderFrozen"
                  (loadMore)="onLoadMore()"
                  (filterChanged)="onGridFilterChanged()"
                  (sortChanged)="onGridSortChanged()"
+                 (cellChanged)="onGridCellChanged($event)"
                  (solveAllTriggered)="onGridSolveAll($event)"
-                 (openConfig)="colConfigOp.toggle($event)">
+                 (openConfig)="colConfigOp.toggle($event)"
+                 (hideColumn)="onGridHideColumn($event)"
+                 (cycleFormat)="onGridCycleFormat($event)"
+                 (columnFreezeChange)="onGridColumnFreezeChange($event)"
+                 (headerFreezeChange)="onGridHeaderFreezeChange($event)"
+                 (columnFormatSelected)="onGridColumnFormatSelected($event)"
+                 (requestUnmask)="onGridRequestUnmask($event)"
+                 (requestMask)="onGridRequestMask($event)"
+                 (requestUnmaskCell)="onGridRequestUnmaskCell($event)"
+                 (requestMaskCell)="onGridRequestMaskCell($event)">
     </sutram-grid>
   </main>
 
@@ -516,13 +1101,13 @@
       <div class="tab-context-menu-item"
            (click)="startRenameTab(tabContextMenu.tab!, $event)">
         <i class="pi pi-pencil text-primary"></i>
-        <span>नाम बदलें (Rename Sheet)</span>
+        <span>Rename Sheet</span>
       </div>
       <div *ngIf="tabContextMenu.tab"
            class="tab-context-menu-item text-danger"
            (click)="deleteSheet(tabContextMenu.tab, $event)">
         <i class="pi pi-trash"></i>
-        <span>शीट हटाएं / डिलीट करें (Delete Sheet)</span>
+        <span>Delete Sheet</span>
       </div>
     </div>
 
@@ -607,11 +1192,14 @@
   <!-- Smart Header Scanner & Dual-Mode Open File Modal -->
   <sutram-header-scanner [(visible)]="showScannerModal"
                          [fileName]="uploadedFileName"
+                         [fileSize]="uploadedFileSize"
                          [sheetNames]="uploadedSheetNames"
                          [currentSheetName]="selectedUploadedSheet"
                          [sheetHeaders]="uploadedSheetHeaders"
                          [sampleRows]="uploadedSampleRows"
                          [totalRows]="uploadedTotalRows"
+                         [totalRawRowsCount]="uploadedAllRawRows ? uploadedAllRawRows.length : 0"
+                         [headerRowIndex]="scanReport ? scanReport.headerRowIndex : 0"
                          [tablesList]="tablesList"
                          [selectedTable]="scannerTargetTable"
                          [report]="scanReport"
@@ -620,11 +1208,13 @@
                          [savedSheets]="savedSheetsList"
                          (sheetChange)="onUploadedSheetChange($event)"
                          (targetTableChange)="onScannerTargetTableChange($event)"
+                         (headerRowChange)="onScannerHeaderRowChange($event)"
                          (openDirectNormal)="onDirectOpenAsNormalSheet($event)"
                          (openMappedToTable)="onScannerConfirmedMapped($event)"
                          (openSavedSheet)="onOpenSavedSheet($event)"
                          (deleteSavedSheet)="onDeleteSavedSheet($event)"
-                         (triggerFileInput)="triggerBrowseFile()">
+                         (triggerFileInput)="triggerBrowseFile()"
+                         (fileDropped)="onFileDropped($event)">
   </sutram-header-scanner>
 
   <!-- Batch Correction Sidebar -->
@@ -632,4 +1222,138 @@
                              [groups]="state.correctionGroups()">
   </sutram-correction-sidebar>
 
+
+  <!-- Unmask Security Challenge Dialog -->
+  <sutram-unmask-dialog [(visible)]="unmaskDialogState.visible"
+                        [tableName]="unmaskDialogState.tableName"
+                        [columnName]="unmaskDialogState.columnName"
+                        [targetType]="unmaskDialogState.targetType"
+                        [rowIdx]="unmaskDialogState.rowIdx"
+                        [isSubmitting]="unmaskDialogState.isSubmitting"
+                        [errorMessage]="unmaskDialogState.errorMessage"
+                        [isAdmin]="isAdmin"
+                        (verify)="onVerifyUnmask($event)"
+                        (setPin)="onSetColumnSecurity($event)">
+  </sutram-unmask-dialog>
+
+  <!-- Smart Reminder Builder & Manager (XL Size Modal) -->
+  <sutram-reminder-dialog [(visible)]="showReminderDialog"
+                          [isDarkMode]="isDarkMode"
+                          [rules]="reminderRulesList"
+                          [isSaving]="isSavingReminderRule"
+                          [tablesList]="tablesList"
+                          [currentTableName]="currentActiveTableName"
+                          (createRule)="onWorkbenchCreateReminderRule($event)"
+                          (updateRule)="onWorkbenchUpdateReminderRule($event)"
+                          (deleteRule)="onWorkbenchDeleteReminderRule($event)"
+                          (evaluateAll)="triggerReminderEvaluation()"
+                          (openIncomingRemindersSheet)="openReminderResultsSheet()">
+  </sutram-reminder-dialog>
+
+  <!-- Floating Reminder Alert Toast Notification Popup (Compact) -->
+  <div *ngIf="showReminderPopup && currentActiveAlert"
+       class="sutram-reminder-alert-toast shadow-lg"
+       [class.severity-critical]="currentActiveAlert.severity === 'critical' || currentActiveAlert.is_permanent === 1"
+       [class.severity-warning]="currentActiveAlert.severity === 'warning'"
+       [class.severity-info]="currentActiveAlert.severity === 'info'">
+
+    <!-- Toast Header -->
+    <div class="reminder-toast-header">
+      <div class="reminder-toast-title-area">
+        <span class="reminder-pulse-dot"
+              [class.dot-critical]="currentActiveAlert.severity === 'critical' || currentActiveAlert.is_permanent === 1"
+              [class.dot-warning]="currentActiveAlert.severity === 'warning'"
+              [class.dot-info]="currentActiveAlert.severity === 'info'"></span>
+        <i class="pi reminder-toast-icon"
+           [ngClass]="(currentActiveAlert.severity === 'critical' || currentActiveAlert.is_permanent === 1) ? 'pi-exclamation-triangle text-danger' : (currentActiveAlert.severity === 'warning' ? 'pi-bell text-warning' : 'pi-info-circle text-primary')"></i>
+        <strong class="reminder-rule-title text-truncate">{{ currentActiveAlert.rule_name || 'Reminder Alert' }}</strong>
+      </div>
+
+      <div class="reminder-toast-header-right">
+        <!-- Severity Tag -->
+        <span class="reminder-severity-tag"
+              [class.tag-critical]="currentActiveAlert.severity === 'critical' || currentActiveAlert.is_permanent === 1"
+              [class.tag-warning]="currentActiveAlert.severity === 'warning'"
+              [class.tag-info]="currentActiveAlert.severity === 'info'">
+          {{ (currentActiveAlert.is_permanent === 1 ? 'CRITICAL' : (currentActiveAlert.severity || 'ALERT')) | uppercase }}
+        </span>
+
+        <!-- Pager if multiple alerts -->
+        <div *ngIf="activeAlerts.length > 1" class="reminder-toast-pager">
+          <button class="pager-nav-btn" (click)="prevAlert()" [disabled]="currentAlertIndex === 0" title="Previous alert">‹</button>
+          <span>{{ currentAlertIndex + 1 }}/{{ activeAlerts.length }}</span>
+          <button class="pager-nav-btn" (click)="nextAlert()" [disabled]="currentAlertIndex === activeAlerts.length - 1" title="Next alert">›</button>
+        </div>
+
+        <!-- Close / Minimize Button -->
+        <button class="reminder-close-btn" (click)="closeReminderPopup()" title="Close notification">✕</button>
+      </div>
+    </div>
+
+    <!-- Toast Body -->
+    <div class="reminder-toast-body">
+      <div class="reminder-toast-message text-truncate" [title]="currentActiveAlert.message">
+        {{ currentActiveAlert.message }}
+      </div>
+      <div *ngIf="currentActiveAlert.table_name" class="reminder-meta-inline">
+        <span class="reminder-meta-chip">
+          <i class="pi pi-table"></i> {{ currentActiveAlert.table_name }}
+        </span>
+        <span *ngIf="currentActiveAlert.matching_count" class="reminder-meta-chip count-chip">
+          {{ currentActiveAlert.matching_count }} affected
+        </span>
+      </div>
+    </div>
+
+    <!-- Toast Footer / Action Buttons -->
+    <div class="reminder-toast-footer">
+      <div class="d-flex align-items-center gap-1">
+        <button type="button"
+                class="toast-btn toast-btn-view"
+                (click)="openReminderResultsSheet()"
+                title="Open Reminders Results Sheet">
+          <i class="pi pi-table"></i>
+          <span>View Sheet</span>
+        </button>
+        <button type="button"
+                class="toast-btn toast-btn-outline"
+                (click)="openReminderManagerModal()"
+                title="Manage reminder rules">
+          <i class="pi pi-cog"></i>
+          <span>Manage</span>
+        </button>
+      </div>
+
+      <div class="toast-footer-actions-right">
+        <button type="button"
+                class="toast-btn toast-btn-snooze"
+                [disabled]="isSnoozingAlert"
+                (click)="onSnoozeAlert(currentActiveAlert, 15)"
+                title="Snooze reminder for 15 minutes">
+          <i class="pi pi-clock"></i>
+          <span>{{ isSnoozingAlert ? '...' : 'Snooze 15m' }}</span>
+        </button>
+
+        <button type="button"
+                class="toast-btn toast-btn-dismiss"
+                [disabled]="isDismissingAlert"
+                (click)="onDismissAlert(currentActiveAlert)"
+                title="Dismiss this reminder">
+          <i class="pi pi-check"></i>
+          <span>{{ isDismissingAlert ? '...' : 'Dismiss' }}</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dynamic Table Designer Dialog (Native in Excel UI) -->
+  <sutram-table-designer-dialog
+    [(visible)]="showTableDesignerModal"
+    [isDarkMode]="isDarkMode"
+    [apiBase]="apiBase"
+    (tableCreated)="onTableCreated($event)">
+  </sutram-table-designer-dialog>
+
 </div>
+

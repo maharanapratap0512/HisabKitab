@@ -22,12 +22,17 @@
   height: 100%;
   overflow: hidden;
 
+  ::ng-deep .p-datatable-table {
+    table-layout: fixed !important;
+  }
+
   ::ng-deep .p-datatable-wrapper {
     height: 100% !important;
   }
 
   /* Big Header Row (38px) */
   ::ng-deep .p-datatable-thead > tr > th {
+    box-sizing: border-box !important;
     position: sticky;
     top: 0;
     z-index: 20;
@@ -53,14 +58,16 @@
     }
   }
 
-  /* Corner Config ⚙️ Trigger */
   /* Corner Config ⚙️ Trigger (34px, Authentic Excel Look) */
   ::ng-deep th.corner-th {
+    box-sizing: border-box !important;
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 40 !important;
     width: 34px !important;
     min-width: 34px !important;
     max-width: 34px !important;
-    left: 0;
-    z-index: 25 !important;
+    padding: 0 !important;
     text-align: center !important;
     background: var(--header-bg, #f1f5f9) !important;
     border-right: 1px solid rgba(125, 125, 125, 0.35) !important;
@@ -79,6 +86,19 @@
   }
 
   /* Column Header Controls */
+  .col-header-title {
+    .col-letter {
+      color: var(--text-muted, #64748b);
+      font-size: 11px;
+      margin-right: 5px;
+      font-weight: 700;
+    }
+    .col-label-text {
+      color: var(--header-text, #1e293b);
+      font-size: 12px;
+    }
+  }
+
   .col-header-controls {
     display: flex;
     align-items: center;
@@ -123,6 +143,7 @@
     color: var(--text, #0f172a) !important;
   }
   ::ng-deep .p-datatable-tbody > tr > td {
+    box-sizing: border-box !important;
     height: var(--cell-height, 23px) !important;
     padding: 0 !important;
     background-color: var(--surface, #ffffff) !important;
@@ -135,9 +156,10 @@
 
   /* Sticky Row Number TD (34px, Authentic Excel Look) */
   ::ng-deep td.row-num-td {
-    position: sticky;
-    left: 0;
-    z-index: 15;
+    box-sizing: border-box !important;
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 30 !important;
     width: 34px !important;
     min-width: 34px !important;
     max-width: 34px !important;
@@ -194,6 +216,47 @@
     .cell-box {
       background-color: transparent !important;
     }
+  }
+
+  /* Full Column Selected State (Authentic Excel Selection) */
+  ::ng-deep .p-datatable-thead > tr > th.col-header-selected,
+  ::ng-deep th.sutram-th.col-header-selected,
+  ::ng-deep th.col-header-selected {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #1d4ed8 !important;
+
+    .col-header-title {
+      color: #ffffff !important;
+      .col-letter { color: #ffffff !important; opacity: 0.95; font-weight: 700; }
+      .col-label-text { color: #ffffff !important; font-weight: 700; }
+      strong { color: #ffffff !important; opacity: 0.95; }
+      span { color: #ffffff !important; }
+      i { color: #ffffff !important; }
+    }
+    .col-sort-trigger i,
+    .col-filter-trigger i,
+    i.pi {
+      color: #ffffff !important;
+    }
+    .col-header-controls span {
+      background: rgba(255, 255, 255, 0.22) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    }
+  }
+
+  ::ng-deep .p-datatable-tbody > tr > td.col-selected,
+  ::ng-deep td.col-selected {
+    background-color: rgba(37, 99, 235, 0.12) !important;
+    border-left: 1px solid rgba(37, 99, 235, 0.35) !important;
+    border-right: 1px solid rgba(37, 99, 235, 0.35) !important;
+  }
+
+  ::ng-deep td.readonly-cell {
+    background-color: rgba(125, 125, 125, 0.02);
+    cursor: default;
   }
 
   /* Cell Box & Excel Active Cell Blue Outline */
@@ -320,6 +383,107 @@
     }
   }
 
+  /* Distinctive Elegant Amber / Golden Highlight for Highlighted Rows */
+  ::ng-deep tr.row-highlighted td {
+    background-color: var(--row-hl-bg, rgba(245, 158, 11, 0.12)) !important;
+
+    &.row-num-td {
+      background-color: rgba(245, 158, 11, 0.25) !important;
+      color: #b45309 !important;
+      font-weight: 700;
+      border-left: 3px solid #f59e0b !important;
+      position: relative;
+    }
+  }
+
+  ::ng-deep tr.row-highlighted:hover td {
+    background-color: var(--row-hl-hover-bg, rgba(245, 158, 11, 0.18)) !important;
+  }
+
+  .row-hl-icon {
+    font-size: 8.5px;
+    color: #f59e0b;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
+
+  .badge-hl-tag {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: rgba(245, 158, 11, 0.2);
+    color: #d97706;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Reminder Severity Color Coding ────────────────────── */
+  ::ng-deep tr.row-reminder-critical td {
+    background-color: var(--row-reminder-critical-bg, rgba(239, 68, 68, 0.12)) !important;
+
+    &.row-num-td {
+      background-color: rgba(239, 68, 68, 0.22) !important;
+      color: #b91c1c !important;
+      font-weight: 700;
+      border-left: 3px solid #ef4444 !important;
+    }
+  }
+
+  ::ng-deep tr.row-reminder-critical:hover td {
+    background-color: var(--row-reminder-critical-hover, rgba(239, 68, 68, 0.18)) !important;
+  }
+
+  ::ng-deep tr.row-reminder-warning td {
+    background-color: var(--row-reminder-warning-bg, rgba(245, 158, 11, 0.12)) !important;
+
+    &.row-num-td {
+      background-color: rgba(245, 158, 11, 0.22) !important;
+      color: #b45309 !important;
+      font-weight: 700;
+      border-left: 3px solid #f59e0b !important;
+    }
+  }
+
+  ::ng-deep tr.row-reminder-warning:hover td {
+    background-color: var(--row-reminder-warning-hover, rgba(245, 158, 11, 0.18)) !important;
+  }
+
+  ::ng-deep tr.row-reminder-info td {
+    background-color: var(--row-reminder-info-bg, rgba(99, 102, 241, 0.1)) !important;
+
+    &.row-num-td {
+      background-color: rgba(99, 102, 241, 0.2) !important;
+      color: #4338ca !important;
+      font-weight: 700;
+      border-left: 3px solid #6366f1 !important;
+    }
+  }
+
+  ::ng-deep tr.row-reminder-info:hover td {
+    background-color: var(--row-reminder-info-hover, rgba(99, 102, 241, 0.16)) !important;
+  }
+
+  .row-reminder-critical-icon {
+    font-size: 8.5px;
+    color: #ef4444;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
+
+  .row-reminder-warning-icon {
+    font-size: 8.5px;
+    color: #f59e0b;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
+
+  .row-reminder-info-icon {
+    font-size: 8.5px;
+    color: #6366f1;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
+
   /* Soft Light Green Shade for New Added Rows */
   ::ng-deep tr.row-new td {
     background-color: var(--row-new-bg, #dcfce7);
@@ -344,6 +508,12 @@
     padding: 0 6px;
     margin: 0;
     box-sizing: border-box;
+
+    &.date-editor {
+      padding: 0 2px;
+      font-size: 11px;
+      cursor: pointer;
+    }
   }
 }
 
@@ -399,6 +569,10 @@
       }
     }
 
+    &.has-submenu {
+      position: relative;
+    }
+
     kbd {
       font-size: 10px;
       padding: 1px 4px;
@@ -409,11 +583,171 @@
     }
   }
 
+  .submenu-arrow {
+    font-size: 9px;
+    color: var(--text-muted, #64748b);
+    margin-left: auto;
+    transition: transform 0.15s ease;
+  }
+
+  .badge-pwd-tag {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 600;
+    background: rgba(100, 116, 139, 0.15);
+    color: #64748b;
+
+    &.unmasked {
+      background: rgba(16, 185, 129, 0.15);
+      color: #059669;
+    }
+  }
+
+  .badge-freeze-tag {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 600;
+    background: rgba(79, 70, 229, 0.15);
+    color: var(--primary, #4f46e5);
+  }
+
+  .context-submenu {
+    position: absolute;
+    top: -4px;
+    left: 100%;
+    margin-left: 2px;
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--surface-border, #e2e8f0);
+    border-radius: 6px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22);
+    min-width: 220px;
+    max-width: 300px;
+    z-index: 100005;
+    padding: 4px 0;
+    white-space: nowrap;
+    animation: contextMenuPop 0.12s ease-out;
+
+    &.submenu-flip-left {
+      left: auto;
+      right: 100%;
+      margin-left: 0;
+      margin-right: 2px;
+    }
+  }
+
+  .context-submenu-header {
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted, #64748b);
+    background: rgba(125, 125, 125, 0.08);
+    border-bottom: 1px solid var(--surface-border, #e2e8f0);
+    margin-bottom: 3px;
+  }
+
+  .fmt-preview {
+    font-size: 10px;
+    color: var(--text-muted, #64748b);
+    font-family: monospace;
+    background: rgba(125, 125, 125, 0.1);
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: auto;
+  }
+
+  .active-format {
+    background: rgba(79, 70, 229, 0.1) !important;
+    color: var(--primary, #4f46e5) !important;
+    font-weight: 600;
+
+    .fmt-preview {
+      background: rgba(79, 70, 229, 0.18);
+      color: var(--primary, #4f46e5);
+    }
+  }
+
   .context-menu-divider {
     height: 1px;
     background: var(--surface-border, #e2e8f0);
     margin: 4px 0;
   }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Spreadsheet Freeze Panes (Column & Header Freeze)
+   Native PrimeNG [pFrozenColumn] + Smart Excel Left-Shift
+   ───────────────────────────────────────────────────────────── */
+.p-datatable-scrollable th.p-frozen-column,
+::ng-deep th.p-frozen-column,
+::ng-deep th.col-frozen {
+  position: sticky !important;
+  z-index: 28 !important;
+  background-color: #f1f5f9 !important;
+  box-sizing: border-box !important;
+}
+
+.p-datatable-scrollable th.p-frozen-column.col-header-selected,
+::ng-deep th.p-frozen-column.col-header-selected,
+::ng-deep th.col-frozen.col-header-selected {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+}
+
+.p-datatable-scrollable td.p-frozen-column,
+::ng-deep td.p-frozen-column,
+::ng-deep td.col-frozen {
+  position: sticky !important;
+  z-index: 15 !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box !important;
+}
+
+::ng-deep tr:hover td.p-frozen-column,
+::ng-deep tr:hover td.col-frozen {
+  background-color: #f8fafc !important;
+}
+
+::ng-deep td.p-frozen-column.col-selected,
+::ng-deep td.col-frozen.col-selected {
+  background-color: #e8f0fe !important; /* 100% OPAQUE Solid Light Blue - Prevents transparent bleed of scrolling unfreeze cells */
+  color: #1e293b !important;
+  border-left: 1px solid rgba(37, 99, 235, 0.45) !important;
+  border-right: 1px solid rgba(37, 99, 235, 0.45) !important;
+}
+
+::ng-deep tr:hover td.p-frozen-column.col-selected,
+::ng-deep tr:hover td.col-frozen.col-selected {
+  background-color: #dbeafe !important;
+}
+
+::ng-deep td.p-frozen-column.readonly-cell,
+::ng-deep td.col-frozen.readonly-cell {
+  background-color: #fafafa !important;
+}
+
+::ng-deep th.col-frozen-boundary,
+::ng-deep td.col-frozen-boundary {
+  border-right: 2px solid var(--primary, #4f46e5) !important;
+  box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Header Unfrozen Override */
+::ng-deep .header-unfrozen .p-datatable-thead > tr > th:not(.p-frozen-column):not(.col-frozen) {
+  position: static !important;
+  top: auto !important;
+}
+
+::ng-deep .header-unfrozen .p-datatable-thead > tr > th.p-frozen-column,
+::ng-deep .header-unfrozen .p-datatable-thead > tr > th.col-frozen {
+  top: auto !important;
+}
+
+::ng-deep .header-unfrozen .p-datatable-thead > tr > th.corner-config-th {
+  top: auto !important;
 }
 
 @keyframes contextMenuPop {
@@ -869,5 +1203,202 @@
         background: #2563eb;
       }
     }
+  }
+}
+
+:host-context([data-theme="dark"]),
+:host-context(.dark-theme),
+:host-context(.dark-mode) {
+  .col-header-title {
+    .col-letter {
+      color: #94a3b8;
+    }
+    .col-label-text {
+      color: #f8fafc;
+    }
+  }
+
+  ::ng-deep .p-datatable-thead > tr > th.col-header-selected,
+  ::ng-deep th.sutram-th.col-header-selected,
+  ::ng-deep th.col-header-selected {
+    background: #3b82f6 !important;
+    background-color: #3b82f6 !important;
+    border-color: #60a5fa !important;
+    color: #ffffff !important;
+
+    .col-header-title {
+      color: #ffffff !important;
+      .col-letter { color: #ffffff !important; }
+      .col-label-text { color: #ffffff !important; }
+      strong, span, i { color: #ffffff !important; }
+    }
+  }
+
+  ::ng-deep tr.row-highlighted td {
+    background-color: rgba(245, 158, 11, 0.16) !important;
+
+    &.row-num-td {
+      background-color: rgba(245, 158, 11, 0.3) !important;
+      color: #fbbf24 !important;
+      border-left: 3px solid #f59e0b !important;
+    }
+  }
+
+  ::ng-deep tr.row-highlighted:hover td {
+    background-color: rgba(245, 158, 11, 0.24) !important;
+  }
+
+  .badge-hl-tag {
+    background: rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+  }
+
+  ::ng-deep tr.row-reminder-critical td {
+    background-color: rgba(239, 68, 68, 0.16) !important;
+
+    &.row-num-td {
+      background-color: rgba(239, 68, 68, 0.3) !important;
+      color: #fca5a5 !important;
+      border-left: 3px solid #f87171 !important;
+    }
+  }
+
+  ::ng-deep tr.row-reminder-critical:hover td {
+    background-color: rgba(239, 68, 68, 0.24) !important;
+  }
+
+  ::ng-deep tr.row-reminder-warning td {
+    background-color: rgba(245, 158, 11, 0.16) !important;
+
+    &.row-num-td {
+      background-color: rgba(245, 158, 11, 0.3) !important;
+      color: #fbbf24 !important;
+      border-left: 3px solid #f59e0b !important;
+    }
+  }
+
+  ::ng-deep tr.row-reminder-warning:hover td {
+    background-color: rgba(245, 158, 11, 0.24) !important;
+  }
+
+  ::ng-deep tr.row-reminder-info td {
+    background-color: rgba(99, 102, 241, 0.16) !important;
+
+    &.row-num-td {
+      background-color: rgba(99, 102, 241, 0.3) !important;
+      color: #a5b4fc !important;
+      border-left: 3px solid #818cf8 !important;
+    }
+  }
+
+  ::ng-deep tr.row-reminder-info:hover td {
+    background-color: rgba(99, 102, 241, 0.24) !important;
+  }
+
+  /* ── Dark Mode Context Menu & Submenus ── */
+  .custom-context-menu,
+  .context-submenu {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+
+    .context-menu-item {
+      color: #f8fafc !important;
+
+      i {
+        color: #94a3b8;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+
+        i {
+          color: #818cf8 !important;
+        }
+      }
+
+      &.active-format {
+        background: rgba(99, 102, 241, 0.25) !important;
+        color: #a5b4fc !important;
+
+        .fmt-preview {
+          background: rgba(99, 102, 241, 0.35);
+          color: #c7d2fe;
+        }
+      }
+    }
+
+    .context-submenu-header {
+      background: #0f172a !important;
+      color: #94a3b8 !important;
+      border-bottom-color: #334155 !important;
+    }
+
+    .context-menu-divider {
+      background: #334155 !important;
+    }
+  }
+
+  /* ── Dark Mode Frozen Columns ── */
+  ::ng-deep th.corner-th {
+    background: #0f172a !important;
+    border-right-color: #334155 !important;
+  }
+
+  ::ng-deep td.row-num-td {
+    background: #0f172a !important;
+    border-right-color: #334155 !important;
+    color: #94a3b8 !important;
+  }
+
+  ::ng-deep th.p-frozen-column,
+  ::ng-deep th.col-frozen {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    box-sizing: border-box !important;
+    z-index: 28 !important;
+  }
+
+  ::ng-deep th.p-frozen-column.col-header-selected,
+  ::ng-deep th.col-frozen.col-header-selected {
+    background: #3b82f6 !important;
+    background-color: #3b82f6 !important;
+  }
+
+  ::ng-deep td.p-frozen-column,
+  ::ng-deep td.col-frozen {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    box-sizing: border-box !important;
+    z-index: 15 !important;
+  }
+
+  ::ng-deep tr:hover td.p-frozen-column,
+  ::ng-deep tr:hover td.col-frozen {
+    background-color: #1e293b !important;
+  }
+
+  ::ng-deep td.p-frozen-column.col-selected,
+  ::ng-deep td.col-frozen.col-selected {
+    background-color: #1e2c4f !important; /* 100% OPAQUE Solid Navy Dark Blue - Zero transparency, no data bleed */
+    border-left: 1px solid rgba(59, 130, 246, 0.45) !important;
+    border-right: 1px solid rgba(59, 130, 246, 0.45) !important;
+  }
+
+  ::ng-deep tr:hover td.p-frozen-column.col-selected,
+  ::ng-deep tr:hover td.col-frozen.col-selected {
+    background-color: #24345d !important;
+  }
+
+  ::ng-deep td.p-frozen-column.readonly-cell,
+  ::ng-deep td.col-frozen.readonly-cell {
+    background-color: #0f172a !important;
+  }
+
+  ::ng-deep th.col-frozen-boundary,
+  ::ng-deep td.col-frozen-boundary {
+    border-right: 2px solid #6366f1 !important;
+    box-shadow: 4px 0 10px -2px rgba(0, 0, 0, 0.5) !important;
   }
 }

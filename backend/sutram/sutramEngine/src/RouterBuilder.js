@@ -122,6 +122,225 @@ function buildRouter(engine) {
         }
     });
 
+    // ── Table UI Config & Sutras (sys_meta) ────────────────────
+    router.get('/_sutram/schema/table-config/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return ok(res, null);
+            const row = db.prepare(`SELECT value FROM sys_meta WHERE key = ?`).get(`table_ui_config:${tbl}`);
+            if (row && row.value) {
+                try { return ok(res, JSON.parse(row.value)); } catch {}
+            }
+            return ok(res, null);
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    router.post('/_sutram/schema/table-config/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const { display_name, columns = [], selected_keys = [] } = req.body;
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return fail(res, new Error('Database not accessible'), 500);
+            db.prepare(`
+                INSERT INTO sys_meta (key, value) VALUES (?, ?)
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            `).run(`table_ui_config:${tbl}`, JSON.stringify({
+                table_name: tbl,
+                display_name,
+                columns,
+                selected_keys,
+                updated_at: new Date().toISOString()
+            }));
+            ok(res, { success: true, message: `Configuration saved for table "${tbl}"` });
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    router.get('/_sutram/schema/ui-sutras/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return ok(res, []);
+            const row = db.prepare(`SELECT value FROM sys_meta WHERE key = ?`).get(`ui_sutras:${tbl}`);
+            if (row && row.value) {
+                try { return ok(res, JSON.parse(row.value)); } catch {}
+            }
+            return ok(res, []);
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    router.post('/_sutram/schema/ui-sutras/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const { formulas = [] } = req.body;
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return fail(res, new Error('Database not accessible'), 500);
+            db.prepare(`
+                INSERT INTO sys_meta (key, value) VALUES (?, ?)
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            `).run(`ui_sutras:${tbl}`, JSON.stringify(formulas));
+            ok(res, { success: true, message: `UI Sutras saved for table "${tbl}"` });
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    // ── Backend Triggers ──────────────────────────────────────
+    router.get('/_sutram/schema/triggers/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return ok(res, []);
+            const triggers = db.prepare(`SELECT * FROM sys_trigger WHERE source_table = ? AND active = 1`).all(tbl);
+            const getActions = db.prepare(`SELECT * FROM sys_trigger_action WHERE trigger_id = ? AND active = 1 ORDER BY sort_order ASC`);
+            for (const t of triggers) {
+                t.actions = getActions.all(t._id);
+            }
+            ok(res, triggers);
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    router.post('/_sutram/schema/triggers', (req, res) => {
+        try {
+            const { trigger_name, label, source_table, event, actions = [] } = req.body;
+            if (!trigger_name || !source_table || !event) {
+                return fail(res, new Error('trigger_name, source_table and event are required'), 400);
+            }
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return fail(res, new Error('Database not accessible'), 500);
+
+            const inTx = db.inTransaction;
+            if (!inTx) db.prepare('BEGIN').run();
+            try {
+                const existing = db.prepare(`SELECT _id FROM sys_trigger WHERE trigger_name = ?`).get(trigger_name);
+                let triggerId;
+                if (existing) {
+                    triggerId = existing._id;
+                    db.prepare(`
+                        UPDATE sys_trigger
+                        SET label = ?, source_table = ?, event = ?, updated_at = datetime('now', 'localtime')
+                        WHERE _id = ?
+                    `).run(label || trigger_name, source_table, event.toUpperCase(), triggerId);
+                    db.prepare(`DELETE FROM sys_trigger_action WHERE trigger_id = ?`).run(triggerId);
+                } else {
+                    const ins = db.prepare(`
+                        INSERT INTO sys_trigger (trigger_name, label, source_table, event)
+                        VALUES (?, ?, ?, ?)
+                    `).run(trigger_name, label || trigger_name, source_table, event.toUpperCase());
+                    triggerId = ins.lastInsertRowid;
+                }
+
+                const insAct = db.prepare(`
+                    INSERT INTO sys_trigger_action (trigger_id, sort_order, action_type, target_table, field_map, raw_sql)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                `);
+
+                for (let i = 0; i < actions.length; i++) {
+                    const a = actions[i];
+                    const fieldMapStr = typeof a.field_map === 'object' ? JSON.stringify(a.field_map) : (a.field_map || null);
+                    insAct.run(triggerId, a.sort_order ?? i, a.action_type || 'raw_sql', a.target_table || null, fieldMapStr, a.raw_sql || null);
+                }
+
+                if (!inTx) db.prepare('COMMIT').run();
+
+                if (engine.trigger?.load) {
+                    try { engine.trigger.load(); } catch {}
+                }
+
+                ok(res, { success: true, trigger_id: triggerId });
+            } catch (err) {
+                if (!inTx && db.inTransaction) db.prepare('ROLLBACK').run();
+                throw err;
+            }
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    router.delete('/_sutram/schema/triggers/:id', (req, res) => {
+        try {
+            const triggerId = req.params.id;
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return fail(res, new Error('Database not accessible'), 500);
+
+            const inTx = db.inTransaction;
+            if (!inTx) db.prepare('BEGIN').run();
+            try {
+                db.prepare(`DELETE FROM sys_trigger_action WHERE trigger_id = ?`).run(triggerId);
+                db.prepare(`DELETE FROM sys_trigger WHERE _id = ?`).run(triggerId);
+                if (!inTx) db.prepare('COMMIT').run();
+
+                if (engine.trigger?.load) {
+                    try { engine.trigger.load(); } catch {}
+                }
+
+                ok(res, { success: true });
+            } catch (err) {
+                if (!inTx && db.inTransaction) db.prepare('ROLLBACK').run();
+                throw err;
+            }
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    // ── Users Management ──────────────────────────────────────
+    router.get('/_sutram/schema/users', (req, res) => {
+        try {
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return ok(res, []);
+            const users = db.prepare(`SELECT _id, username, display_name, role, active, created_at, updated_at FROM sys_user ORDER BY _id ASC`).all();
+            ok(res, users);
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    router.post('/_sutram/schema/users', (req, res) => {
+        try {
+            const { username, password, display_name, role = 'author', active = 1 } = req.body;
+            if (!username?.trim() || !password?.trim()) {
+                return fail(res, new Error('Username and password are required'), 400);
+            }
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return fail(res, new Error('Database not accessible'), 500);
+            const ins = db.prepare(`
+                INSERT INTO sys_user (username, password, display_name, role, active)
+                VALUES (?, ?, ?, ?, ?)
+            `).run(username.trim(), password.trim(), display_name?.trim() || username.trim(), role, active ? 1 : 0);
+            ok(res, { success: true, _id: ins.lastInsertRowid });
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    router.put('/_sutram/schema/users/:id', (req, res) => {
+        try {
+            const id = req.params.id;
+            const { password, display_name, role, active } = req.body;
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return fail(res, new Error('Database not accessible'), 500);
+            if (password && String(password).trim() !== '') {
+                db.prepare(`
+                    UPDATE sys_user
+                    SET password = ?, display_name = ?, role = ?, active = ?, updated_at = datetime('now', 'localtime')
+                    WHERE _id = ?
+                `).run(password.trim(), display_name || '', role || 'author', active ? 1 : 0, id);
+            } else {
+                db.prepare(`
+                    UPDATE sys_user
+                    SET display_name = ?, role = ?, active = ?, updated_at = datetime('now', 'localtime')
+                    WHERE _id = ?
+                `).run(display_name || '', role || 'author', active ? 1 : 0, id);
+            }
+            ok(res, { success: true, _id: id });
+        } catch (e) { fail(res, e, 500); }
+    });
+
+    router.delete('/_sutram/schema/users/:id', (req, res) => {
+        try {
+            const id = req.params.id;
+            const db = engine.db;
+            if (!db || typeof db.prepare !== 'function') return fail(res, new Error('Database not accessible'), 500);
+            const target = db.prepare(`SELECT username FROM sys_user WHERE _id = ?`).get(id);
+            if (target && target.username === 'admin') {
+                return fail(res, new Error('Default admin user cannot be deleted'), 400);
+            }
+            db.prepare(`DELETE FROM sys_user WHERE _id = ?`).run(id);
+            ok(res, { success: true, _id: id });
+        } catch (e) { fail(res, e, 500); }
+    });
+
     // GET /_sutram/schema/:table — full column config for frontend
     router.get('/_sutram/schema/:table', (req, res) => {
         try {

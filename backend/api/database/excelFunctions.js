@@ -301,15 +301,49 @@ class ExcelFunctions {
       }
    }
 
+   _norm(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).trim().toLowerCase().normalize('NFC').replace(/\s+/g, ' ');
+   }
+
+   _getCorrectionKey(type, name) {
+      const t = this._norm(type);
+      if (name === null || name === undefined || name === '') {
+         return `${t}:__EMPTY__`;
+      }
+      if (Array.isArray(name)) {
+         const sorted = name.map(x => this._norm(x)).sort().join(',');
+         return `${t}:[${sorted}]`;
+      }
+      if (typeof name === 'object') {
+         const it = this._norm(name.item || name.name);
+         const sub = this._norm(name.subitem || name.extra_note);
+         return `${t}:${it}|${sub}`;
+      }
+      const str = this._norm(name);
+      if (t === 'item') {
+         return `${t}:${str}|`;
+      }
+      return `${t}:${str}`;
+   }
+
+   pushCorrection(item) {
+      if (!item || !item.type) return;
+      const key = this._getCorrectionKey(item.type, item.name);
+      const exists = this.correctionList.some(c => this._getCorrectionKey(c.type, c.name) === key);
+      if (!exists) {
+         this.correctionList.push(item);
+      }
+   }
+
    checkedButNotFound(data, listType) {
-      let found = false;
+      const targetKey = this._getCorrectionKey(listType, data);
       for (let i in this.correctionList) {
-         if (this.correctionList[i].type == listType && this.correctionList[i].name == data) {
-            found = true;
-            break;
+         if (this._getCorrectionKey(this.correctionList[i].type, this.correctionList[i].name) === targetKey) {
+            return true;
          }
       }
-      return found;
+      return false;
    }
 
    async matchMMs(data) {
@@ -319,19 +353,24 @@ class ExcelFunctions {
       if (this.dict.mm instanceof Promise) {
          this.dict.mm = await this.dict.mm.then((data) => { return data });
       }
-      // console.log("start matching", this.mm);
-      if (!this.checkedButNotFound(data, 'mm')) {
+      const cleanData = this._norm(data);
+      if (this.mm) {
          for (let i in this.mm) {
-            if ([this.mm[i].mm_hin, this.mm[i].mm_eng, this.mm[i].mm_code].includes(data)) {
+            const vals = [this.mm[i].mm_hin, this.mm[i].mm_eng, this.mm[i].mm_code].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.mm[i]._id;
             }
          }
+      }
+      if (this.dict.mm) {
          for (let i in this.dict.mm) {
-            if (this.dict.mm[i].name == data) {
+            if (this._norm(this.dict.mm[i].name) == cleanData) {
                return this.dict.mm[i].id;
             }
          }
-         this.correctionList.push({ type: 'mm', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'mm')) {
+         this.pushCorrection({ type: 'mm', name: data });
       }
       return null;
    }
@@ -343,19 +382,24 @@ class ExcelFunctions {
       if (this.dict.category instanceof Promise) {
          this.dict.category = await this.dict.category.then((data) => { return data });
       }
-      // console.log("start matching", this.category);
-      if (!this.checkedButNotFound(data, 'category')) {
+      const cleanData = this._norm(data);
+      if (this.category) {
          for (let i in this.category) {
-            if ([this.category[i].category_hin, this.category[i].category_eng, this.category[i].category_roman].includes(data)) {
+            const vals = [this.category[i].category_hin, this.category[i].category_eng, this.category[i].category_roman].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.category[i]._id;
             }
          }
+      }
+      if (this.dict.category) {
          for (let i in this.dict.category) {
-            if (this.dict.category[i].name == data) {
+            if (this._norm(this.dict.category[i].name) == cleanData) {
                return this.dict.category[i].id;
             }
          }
-         this.correctionList.push({ type: 'category', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'category')) {
+         this.pushCorrection({ type: 'category', name: data });
       }
       return null;
    }
@@ -363,31 +407,27 @@ class ExcelFunctions {
    async matchCategories(data) {
       let arr = [];
       let hasNull = false;
-      if (data) {
+      if (data && Array.isArray(data)) {
          for (let cat of data) {
-            let id = await this.matchCategory(cat.trim().toLowerCase());
+            let id = await this.matchCategory(this._norm(cat));
             arr.push(id);
             if (id === null) hasNull = true;
          }
       }
-      if (hasNull) {
-         // Remove individually-added correction entries for each element;
-         // replace with a single array-level correction entry.
-         const nameArr = data.map(c => c.trim().toLowerCase());
-         // Remove any single-element entries that were just added by matchCategory
+      if (hasNull && data && Array.isArray(data)) {
+         const nameArr = data.map(c => this._norm(c));
+         // Remove individually-added correction entries for these elements
          this.correctionList = this.correctionList.filter(
-            c => !(c.type === 'category' && nameArr.includes(c.name))
+            c => !(c.type === 'category' && !c.isArray && nameArr.includes(this._norm(c.name)))
          );
-         const key = nameArr.join(',');
-         if (!this.correctionList.some(c => c.type === 'category' && c.isArray && c.key === key)) {
-            this.correctionList.push({
-               type: 'category',
-               name: nameArr,   // array of strings for display
-               key: key,        // dedup key
-               isArray: true,
-               ids: arr          // partial ids (some may be null)
-            });
-         }
+         const key = nameArr.sort().join(',');
+         this.pushCorrection({
+            type: 'category',
+            name: nameArr,   // array of strings for display
+            key: key,        // dedup key
+            isArray: true,
+            ids: arr          // partial ids (some may be null)
+         });
       }
       return arr;
    }
@@ -399,19 +439,24 @@ class ExcelFunctions {
       if (this.dict.country instanceof Promise) {
          this.dict.country = await this.dict.country.then((data) => { return data });
       }
-      // console.log("start matching", this.country);
-      if (!this.checkedButNotFound(data, 'country')) {
+      const cleanData = this._norm(data);
+      if (this.country) {
          for (let i in this.country) {
-            if ([this.country[i].country_hin, this.country[i].country_eng].includes(data)) {
+            const vals = [this.country[i].country_hin, this.country[i].country_eng].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.country[i]._id;
             }
          }
+      }
+      if (this.dict.country) {
          for (let i in this.dict.country) {
-            if (this.dict.country[i].name == data) {
+            if (this._norm(this.dict.country[i].name) == cleanData) {
                return this.dict.country[i].id;
             }
          }
-         this.correctionList.push({ type: 'country', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'country')) {
+         this.pushCorrection({ type: 'country', name: data });
       }
       return null;
    }
@@ -423,19 +468,24 @@ class ExcelFunctions {
       if (this.dict.state instanceof Promise) {
          this.dict.state = await this.dict.state.then((data) => { return data });
       }
-      // console.log("start matching", this.state);
-      if (!this.checkedButNotFound(data, 'state')) {
+      const cleanData = this._norm(data);
+      if (this.state) {
          for (let i in this.state) {
-            if ([this.state[i].state_hin, this.state[i].state_eng].includes(data)) {
+            const vals = [this.state[i].state_hin, this.state[i].state_eng].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.state[i]._id;
             }
          }
+      }
+      if (this.dict.state) {
          for (let i in this.dict.state) {
-            if (this.dict.state[i].name == data) {
+            if (this._norm(this.dict.state[i].name) == cleanData) {
                return this.dict.state[i].id;
             }
          }
-         this.correctionList.push({ type: 'state', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'state')) {
+         this.pushCorrection({ type: 'state', name: data });
       }
       return null;
    }
@@ -447,19 +497,24 @@ class ExcelFunctions {
       if (this.dict.district instanceof Promise) {
          this.dict.district = await this.dict.district.then((data) => { return data });
       }
-      // console.log("start matching", this.state);
-      if (!this.checkedButNotFound(data, 'district')) {
+      const cleanData = this._norm(data);
+      if (this.district) {
          for (let i in this.district) {
-            if ([this.district[i].district_hin, this.district[i].district_eng].includes(data)) {
+            const vals = [this.district[i].district_hin, this.district[i].district_eng].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.district[i]._id;
             }
          }
+      }
+      if (this.dict.district) {
          for (let i in this.dict.district) {
-            if (this.dict.district[i].name == data) {
+            if (this._norm(this.dict.district[i].name) == cleanData) {
                return this.dict.district[i].id;
             }
          }
-         this.correctionList.push({ type: 'district', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'district')) {
+         this.pushCorrection({ type: 'district', name: data });
       }
       return null;
    }
@@ -471,18 +526,17 @@ class ExcelFunctions {
       if (this.dict.zone instanceof Promise) {
          this.dict.zone = await this.dict.zone.then((data) => { return data });
       }
-      if (!this.checkedButNotFound(data, 'zone')) {
+      const cleanData = this._norm(data);
+      if (this.zone) {
          for (let i in this.zone) {
-            if ([this.zone[i].zone_hin, this.zone[i].zone_eng].includes(data)) {
+            const vals = [this.zone[i].zone_hin, this.zone[i].zone_eng].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.zone[i]._id;
             }
          }
-         // for (let i in this.dict.zone) {
-         //    if (this.dict.zone[i].name == data) {
-         //       return this.dict.zone[i].id;
-         //    }
-         // }
-         this.correctionList.push({ type: 'zone', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'zone')) {
+         this.pushCorrection({ type: 'zone', name: data });
       }
       return null;
    }
@@ -494,19 +548,24 @@ class ExcelFunctions {
       if (this.dict.city instanceof Promise) {
          this.dict.city = await this.dict.city.then((data) => { return data });
       }
-      // console.log("start matching", this.city);
-      if (!this.checkedButNotFound(data, 'city')) {
+      const cleanData = this._norm(data);
+      if (this.city) {
          for (let i in this.city) {
-            if ([this.city[i].city_hin, this.city[i].city_eng].includes(data)) {
+            const vals = [this.city[i].city_hin, this.city[i].city_eng].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.city[i]._id;
             }
          }
+      }
+      if (this.dict.city) {
          for (let i in this.dict.city) {
-            if (this.dict.city[i].name == data) {
+            if (this._norm(this.dict.city[i].name) == cleanData) {
                return this.dict.city[i].id;
             }
          }
-         this.correctionList.push({ type: 'city', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'city')) {
+         this.pushCorrection({ type: 'city', name: data });
       }
       return null;
    }
@@ -518,19 +577,24 @@ class ExcelFunctions {
       if (this.dict.unit instanceof Promise) {
          this.dict.unit = await this.dict.unit.then((data) => { return data });
       }
-      // console.log("start matching", this.unit);
-      if (!this.checkedButNotFound(data, 'unit')) {
+      const cleanData = this._norm(data);
+      if (this.unit) {
          for (let i in this.unit) {
-            if ([this.unit[i].unit_short, this.unit[i].unit_full].includes(data)) {
+            const vals = [this.unit[i].unit_short, this.unit[i].unit_full].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.unit[i]._id;
             }
          }
+      }
+      if (this.dict.unit) {
          for (let i in this.dict.unit) {
-            if (this.dict.unit[i].name == data) {
+            if (this._norm(this.dict.unit[i].name) == cleanData) {
                return this.dict.unit[i].id;
             }
          }
-         this.correctionList.push({ type: 'unit', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'unit')) {
+         this.pushCorrection({ type: 'unit', name: data });
       }
       return null;
    }
@@ -542,18 +606,24 @@ class ExcelFunctions {
       if (this.dict.attribute instanceof Promise) {
          this.dict.attribute = await this.dict.attribute.then((data) => { return data });
       }
-      if (!this.checkedButNotFound(data, 'attribute')) {
+      const cleanData = this._norm(data);
+      if (this.attribute) {
          for (let i in this.attribute) {
-            if ([this.attribute[i].attribute_hin, this.attribute[i].attribute_eng, this.attribute[i].attribute_roman].includes(data)) {
+            const vals = [this.attribute[i].attribute_hin, this.attribute[i].attribute_eng, this.attribute[i].attribute_roman].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return this.attribute[i]._id;
             }
          }
+      }
+      if (this.dict.attribute) {
          for (let i in this.dict.attribute) {
-            if (this.dict.attribute[i].name == data) {
+            if (this._norm(this.dict.attribute[i].name) == cleanData) {
                return this.dict.attribute[i].id;
             }
          }
-         this.correctionList.push({ type: 'attribute', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'attribute')) {
+         this.pushCorrection({ type: 'attribute', name: data });
       }
       return null;
    }
@@ -565,27 +635,33 @@ class ExcelFunctions {
       if (this.dict.attributes_value instanceof Promise) {
          this.dict.attributes_value = await this.dict.attributes_value.then((data) => { return data });
       }
-      if (!this.checkedButNotFound(data, 'attributes_value')) {
+      const cleanData = this._norm(data);
+      if (this.attributes_value) {
          for (let i in this.attributes_value) {
-            if ([this.attributes_value[i].attribute_value_hin, this.attributes_value[i].attribute_value_eng, this.attributes_value[i].attribute_value_roman].includes(data)) {
+            const vals = [this.attributes_value[i].attribute_value_hin, this.attributes_value[i].attribute_value_eng, this.attributes_value[i].attribute_value_roman].filter(Boolean).map(v => this._norm(v));
+            if (vals.includes(cleanData)) {
                return { attribute_id: this.attributes_value[i].attribute_id, attribute_value_id: this.attributes_value[i]._id };
             }
          }
+      }
+      if (this.dict.attributes_value) {
          for (let i in this.dict.attributes_value) {
-            if (this.dict.attributes_value[i].name == data) {
+            if (this._norm(this.dict.attributes_value[i].name) == cleanData) {
                return { attribute_id: this.dict.attributes_value[i].id, attribute_value_id: this.dict.attributes_value[i].id2 };
             }
          }
-         this.correctionList.push({ type: 'attributes_value', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'attributes_value')) {
+         this.pushCorrection({ type: 'attributes_value', name: data });
       }
       return null;
    }
 
    async matchAttributeValues(data) {
       let arr = [];
-      if (data) {
+      if (data && Array.isArray(data)) {
          for (let val of data) {
-            let match = await this.matchAttributeValue(val.trim().toLowerCase());
+            let match = await this.matchAttributeValue(this._norm(val));
             if (match) arr.push(match);
          }
       }
@@ -599,19 +675,16 @@ class ExcelFunctions {
       if (this.dict.nimitt instanceof Promise) {
          this.dict.nimitt = await this.dict.nimitt.then((data) => { return data });
       }
-      // console.log("start matching", this.nimitt);
-      if (!this.checkedButNotFound(data, 'nimitt')) {
+      const cleanData = this._norm(data);
+      if (this.nimitt) {
          for (let i in this.nimitt) {
-            if (this.nimitt[i].roll_no == data) {
+            if (this._norm(this.nimitt[i].roll_no) == cleanData) {
                return this.nimitt[i]._id;
             }
          }
-         // for (let i in this.dict.nimitt) {
-         //    if (this.dict.nimitt[i].name == data) {
-         //       return this.dict.nimitt[i].id;
-         //    }
-         // }
-         this.correctionList.push({ type: 'nimitt', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'nimitt')) {
+         this.pushCorrection({ type: 'nimitt', name: data });
       }
       return null;
    }
@@ -622,19 +695,16 @@ class ExcelFunctions {
       if (this.dict.pbk instanceof Promise) {
          this.dict.pbk = await this.dict.pbk.then((data) => { return data });
       }
-      // console.log("start matching", this.pbk);
-      if (!this.checkedButNotFound(data, 'pbk')) {
+      const cleanData = this._norm(data);
+      if (this.pbk) {
          for (let i in this.pbk) {
-            if (this.pbk[i].roll_no == data) {
+            if (this._norm(this.pbk[i].roll_no) == cleanData) {
                return this.pbk[i]._id;
             }
          }
-         // for (let i in this.dict.pbk) {
-         //    if (this.dict.pbk[i].name == data) {
-         //       return this.dict.pbk[i].id;
-         //    }
-         // }
-         this.correctionList.push({ type: 'pbk', name: data });
+      }
+      if (!this.checkedButNotFound(data, 'pbk')) {
+         this.pushCorrection({ type: 'pbk', name: data });
       }
       return null;
    }
@@ -646,32 +716,33 @@ class ExcelFunctions {
          this.dict.item = await this.dict.item.then((data) => { return data });
       }
       let data = {
-         subitem: subitemStr && typeof subitemStr == 'string' ? subitemStr.trim().toLowerCase().normalize('NFC') : subitemStr,
-         item: itemStr && typeof itemStr == 'string' ? itemStr.trim().toLowerCase().normalize('NFC') : itemStr,
+         subitem: subitemStr && typeof subitemStr == 'string' ? subitemStr.trim().toLowerCase().normalize('NFC') : (subitemStr || ''),
+         item: itemStr && typeof itemStr == 'string' ? itemStr.trim().toLowerCase().normalize('NFC') : (itemStr || ''),
       }
 
-      if (!this.checkedButNotFound(data, 'subitem')) {
+      if (item_id && this.subitem) {
          for (let i in this.subitem) {
             if (this.subitem[i].item_id == item_id) {
-               const primaryNames = [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].filter(Boolean).map(n => n.trim().toLowerCase());
+               const primaryNames = [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].filter(Boolean).map(n => this._norm(n));
                let aliasList = [];
                if (Array.isArray(this.subitem[i].aliases)) {
-                  aliasList = this.subitem[i].aliases.map(a => typeof a === 'object' && a !== null ? (a.alias || '').trim().toLowerCase() : String(a || '').trim().toLowerCase()).filter(Boolean);
+                  aliasList = this.subitem[i].aliases.map(a => typeof a === 'object' && a !== null ? this._norm(a.alias) : this._norm(a)).filter(Boolean);
                }
-               if ([...primaryNames, ...aliasList].includes(data.subitem)) {
+               if ([...primaryNames, ...aliasList].includes(this._norm(data.subitem))) {
                   return this.subitem[i]._id;
                }
             }
          }
+      }
+      if (this.dict.item) {
          for (let i in this.dict.item) {
-            if (this.dict.item[i].name == data.item && this.dict.item[i].extra_note == data.subitem) {
+            if (this._norm(this.dict.item[i].name) == this._norm(data.item) && this._norm(this.dict.item[i].extra_note) == this._norm(data.subitem)) {
                return this.dict.item[i].id2;
             }
          }
-         // Prevent duplicate correction entries
-         if (!this.correctionList.find(c => c.type === 'item' && c.name.item === data.item && c.name.subitem === data.subitem)) {
-            this.correctionList.push({ type: 'item', name: data, id: item_id, id2: null });
-         }
+      }
+      if (!this.checkedButNotFound(data, 'item')) {
+         this.pushCorrection({ type: 'item', name: data, id: item_id, id2: null });
       }
       return null;
    }
@@ -687,86 +758,82 @@ class ExcelFunctions {
          this.dict.item = await this.dict.item.then((data) => { return data });
       }
       let data = {
-         item: row.item && typeof row.item == 'string' ? row.item.trim().toLowerCase().normalize('NFC') : row.item,
-         subitem: row.subitem && typeof row.subitem == 'string' ? row.subitem.trim().toLowerCase().normalize('NFC') : row.subitem,
+         item: row.item && typeof row.item == 'string' ? row.item.trim().toLowerCase().normalize('NFC') : (row.item || ''),
+         subitem: row.subitem && typeof row.subitem == 'string' ? row.subitem.trim().toLowerCase().normalize('NFC') : (row.subitem || ''),
       }
 
-      if (!this.checkedButNotFound(data, 'item')) {
+      if (this.item) {
          for (let i in this.item) {
-            if ([this.item[i].item_hin, this.item[i].item_eng, this.item[i].item_roman, this.item[i].item_code].includes(data.item)) {
+            const names = [this.item[i].item_hin, this.item[i].item_eng, this.item[i].item_roman, this.item[i].item_code].filter(Boolean).map(n => this._norm(n));
+            if (names.includes(this._norm(data.item))) {
                row.item_id = this.item[i]._id;
-               if (row.log) {
-                  console.log("item found")
-               }
                break;
             }
          }
-         if (!row.item_id) {
-            for (let i in this.dict.item) {
-               if (this.dict.item[i].name == data.item && this.dict.item[i].extra_note == data.subitem) {
-                  row.item_id = this.dict.item[i].id;
-                  row.subitem_id = this.dict.item[i].id2;
+      }
+      if (!row.item_id && this.dict.item) {
+         for (let i in this.dict.item) {
+            if (this._norm(this.dict.item[i].name) == this._norm(data.item) && (!data.subitem || this._norm(this.dict.item[i].extra_note) == this._norm(data.subitem))) {
+               row.item_id = this.dict.item[i].id;
+               row.subitem_id = this.dict.item[i].id2;
+               break;
+            }
+         }
+      }
+      if (row.item_id && data.subitem && !row.subitem_id && this.subitem) {
+         for (let i in this.subitem) {
+            if (this.subitem[i].item_id == row.item_id) {
+               const primaryNames = [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].filter(Boolean).map(n => this._norm(n));
+               let aliasList = [];
+               if (Array.isArray(this.subitem[i].aliases)) {
+                  aliasList = this.subitem[i].aliases.map(a => typeof a === 'object' && a !== null ? this._norm(a.alias) : this._norm(a)).filter(Boolean);
+               }
+               if ([...primaryNames, ...aliasList].includes(this._norm(data.subitem))) {
+                  row.subitem_id = this.subitem[i]._id;
                   break;
                }
             }
          }
-         if (row.log) {
-            console.log('start subitem search', row.item_id)
-         }
-         if (row.item_id && row.subitem && !row.subitem_id) {
-            for (let i in this.subitem) {
-               if (this.subitem[i].item_id == row.item_id) {
-                  const primaryNames = [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].filter(Boolean).map(n => n.trim().toLowerCase());
-                  let aliasList = [];
-                  if (Array.isArray(this.subitem[i].aliases)) {
-                     aliasList = this.subitem[i].aliases.map(a => typeof a === 'object' && a !== null ? (a.alias || '').trim().toLowerCase() : String(a || '').trim().toLowerCase()).filter(Boolean);
-                  }
-                  if ([...primaryNames, ...aliasList].includes(data.subitem)) {
-                     row.subitem_id = this.subitem[i]._id;
-                     if (row.log) {
-                        console.log("subitem found");
-                     }
-                     break;
-                  }
-               }
-            }
-         }
-         if (!row.item_id || (row.item_id && row.subitem && !row.subitem_id)) {
-            if (row.log) {
-               console.log("pushing in correction list")
-            }
-            this.correctionList.push({ type: 'item', name: data, id: row.item_id, id2: row.subitem_id });
+      }
+      if (!row.item_id || (row.item_id && data.subitem && !row.subitem_id)) {
+         if (!this.checkedButNotFound(data, 'item')) {
+            this.pushCorrection({ type: 'item', name: data, id: row.item_id, id2: row.subitem_id });
          }
       }
       return row;
    }
 
-   async matchItem(data) {
+   async matchItem(data, subitemVal = null) {
       if (this.item instanceof Promise) {
          this.item = await this.item.then((data) => { return data })
       }
       if (this.dict.item instanceof Promise) {
          this.dict.item = await this.dict.item.then((data) => { return data });
       }
-      // console.log("start matching", this.item);
-      if (!this.checkedButNotFound(data, 'item')) {
-         const cleanData = (typeof data === 'string' ? data : String(data || '')).trim().toLowerCase();
+      const cleanData = this._norm(data);
+      if (this.item) {
          for (let i in this.item) {
-            const h = (this.item[i].item_hin || '').trim().toLowerCase();
-            const e = (this.item[i].item_eng || '').trim().toLowerCase();
-            const r = (this.item[i].item_roman || '').trim().toLowerCase();
-            const c = (this.item[i].item_code || '').trim().toLowerCase();
-            if ([h, e, r, c].filter(Boolean).includes(cleanData)) {
+            const vals = [this.item[i].item_hin, this.item[i].item_eng, this.item[i].item_roman, this.item[i].item_code].filter(Boolean).map(n => this._norm(n));
+            if (vals.includes(cleanData)) {
                return this.item[i]._id;
             }
          }
+      }
+      if (this.dict.item) {
          for (let i in this.dict.item) {
-            const dName = (this.dict.item[i].name || '').trim().toLowerCase();
+            const dName = this._norm(this.dict.item[i].name);
             if (dName && dName === cleanData) {
                return this.dict.item[i].id;
             }
          }
-         this.correctionList.push({ type: 'item', name: data });
+      }
+      // If item is not found, and subitem is present in this row, let matchSubitem push
+      // the combined { item, subitem } correction row to avoid duplicate/orphaned rows!
+      const cleanSub = this._norm(subitemVal);
+      if (!cleanSub) {
+         if (!this.checkedButNotFound(data, 'item')) {
+            this.pushCorrection({ type: 'item', name: data });
+         }
       }
       return null;
    }
@@ -778,20 +845,22 @@ class ExcelFunctions {
       if (this.dict[listType] instanceof Promise) {
          this.dict[listType] = await this.dict[listType].then((data) => { return data });
       }
-      let slist = this.support_list.filter(s => s.list_type == listType);
-      let slistDict = this.dict[listType].filter(d => d.type == listType);
+      let slist = Array.isArray(this.support_list) ? this.support_list.filter(s => s.list_type == listType) : [];
+      let slistDict = Array.isArray(this.dict[listType]) ? this.dict[listType].filter(d => d.type == listType) : [];
+      const cleanData = this._norm(data);
+      for (let i in slist) {
+         const vals = [slist[i].list_name_hin, slist[i].list_name_eng, slist[i].list_name_roman].filter(Boolean).map(v => this._norm(v));
+         if (vals.includes(cleanData)) {
+            return slist[i][returnFieldName];
+         }
+      }
+      for (let i in slistDict) {
+         if (this._norm(slistDict[i].name) == cleanData) {
+            return slistDict[i].id;
+         }
+      }
       if (!this.checkedButNotFound(data, listType)) {
-         for (let i in slist) {
-            if ([slist[i].list_name_hin, slist[i].list_name_eng, slist[i].list_name_roman].includes(data)) {
-               return slist[i][returnFieldName];
-            }
-         }
-         for (let i in slistDict) {
-            if (slistDict[i].name == data) {
-               return slistDict[i].id;
-            }
-         }
-         this.correctionList.push({ type: listType, name: data });
+         this.pushCorrection({ type: listType, name: data });
       }
       return null;
    }

@@ -93,6 +93,20 @@ export class SutramExcelScannerService {
       const headerText = sheetHeaders[i] || '';
       const cleanHeader = cleanString(headerText);
 
+      // Extract up to 3 non-empty distinct sample values from sampleRows for this column
+      const colSamples: string[] = [];
+      if (Array.isArray(sampleRows)) {
+        for (const row of sampleRows) {
+          if (Array.isArray(row) && row[i] !== undefined && row[i] !== null) {
+            const strVal = String(row[i]).trim();
+            if (strVal && !colSamples.includes(strVal)) {
+              colSamples.push(strVal);
+              if (colSamples.length >= 3) break;
+            }
+          }
+        }
+      }
+
       let bestMatch: SutramHeaderConfig | null = null;
       let highestScore = 0;
 
@@ -122,7 +136,8 @@ export class SutramExcelScannerService {
           targetColKey: bestMatch.name,
           targetHeader: bestMatch,
           status: 'matched',
-          confidence: highestScore
+          confidence: highestScore,
+          sampleValues: colSamples
         });
       } else {
         matches.push({
@@ -130,7 +145,8 @@ export class SutramExcelScannerService {
           sheetHeader: headerText,
           targetColKey: null,
           status: 'unmatched',
-          confidence: highestScore
+          confidence: highestScore,
+          sampleValues: colSamples
         });
       }
     }
@@ -158,7 +174,8 @@ export class SutramExcelScannerService {
   public buildSutramRows(
     rawRows: any[],
     matches: SutramScanMatch[],
-    headers: SutramHeaderConfig[]
+    headers: SutramHeaderConfig[],
+    defaultValues: Record<string, any> = {}
   ): SutramRow[] {
     const validMatches = matches.filter(m => m.targetColKey);
 
@@ -176,6 +193,11 @@ export class SutramExcelScannerService {
           } else if (typeof rawRow === 'object' && rawRow !== null) {
             value = rawRow[match.sheetHeader] ?? rawRow[h.name] ?? '';
           }
+        }
+
+        // Apply default value fallback if value is empty and default is provided
+        if ((value === '' || value === null || value === undefined) && defaultValues && defaultValues[h.name] !== undefined) {
+          value = defaultValues[h.name];
         }
 
         const valStr = value !== null && value !== undefined ? String(value) : '';

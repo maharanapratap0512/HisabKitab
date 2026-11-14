@@ -23,6 +23,7 @@ import { ContextMenuModule } from 'primeng/contextmenu';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CheckboxModule } from 'primeng/checkbox';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 // Sutram Excel Components
 import { SutramExcelStudioComponent } from './components/sutram-excel-studio/sutram-excel-studio.component';
@@ -65,7 +66,8 @@ const COMPONENTS = [
     ContextMenuModule,
     AutoCompleteModule,
     OverlayPanelModule,
-    CheckboxModule
+    CheckboxModule,
+    MultiSelectModule
   ],
   providers: [
     SutramExcelApiService,

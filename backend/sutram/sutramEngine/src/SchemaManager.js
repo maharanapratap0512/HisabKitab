@@ -18,6 +18,7 @@ class SchemaManager {
     constructor(db, rebootstrap) {
         this.db = db;
         this.rebootstrap = rebootstrap; // callback → Engine.rebootstrap()
+        this.ensureHlColumns();
     }
 
     // ═════════════════════════════════════════════════════════
@@ -544,7 +545,15 @@ class SchemaManager {
             if (col.ref_table && col.ref_col) {
                 def.ref = `${col.ref_table}.${col.ref_col}`;
                 def.as = col.ref_as ?? col.ref_table;
-                def.select = col.ref_select ? JSON.parse(col.ref_select) : '*';
+                let parsedSelect = '*';
+                if (col.ref_select) {
+                    try {
+                        parsedSelect = JSON.parse(col.ref_select);
+                    } catch {
+                        parsedSelect = col.ref_select.includes(',') ? col.ref_select.split(',').map(s => s.trim()) : col.ref_select;
+                    }
+                }
+                def.select = parsedSelect;
             }
 
             result[col.column_name] = def;
@@ -588,8 +597,54 @@ class SchemaManager {
     // ── PRIVATE — CORE DDL ────────────────────────────────────
     // ═════════════════════════════════════════════════════════
 
+    ensureHlColumns() {
+        if (!this.db || typeof this.db.prepare !== 'function') return;
+        try {
+            const tables = this.db.prepare(`SELECT _id, table_name FROM sys_table WHERE is_system = 0 AND active = 1`).all();
+            for (const t of tables) {
+                const cols = this.db.prepare(`PRAGMA table_info("${t.table_name}")`).all();
+                if (!cols.some(c => c.name === 'hl')) {
+                    try {
+                        this.db.prepare(`ALTER TABLE "${t.table_name}" ADD COLUMN "hl" INTEGER DEFAULT 0`).run();
+                    } catch {}
+                }
+                const sysCol = this.db.prepare(`SELECT _id FROM sys_column WHERE table_id = ? AND column_name = 'hl'`).get(t._id);
+                if (!sysCol) {
+                    const maxOrder = this.db.prepare(`SELECT MAX(sort_order) as m FROM sys_column WHERE table_id = ?`).get(t._id)?.m ?? 99;
+                    this.db.prepare(`
+                        INSERT OR IGNORE INTO sys_column (table_id, column_name, label, col_type, is_required, default_value, is_pk, sort_order)
+                        VALUES (?, 'hl', 'Highlight Flag', 'number', 0, '0', 0, ?)
+                    `).run(t._id, maxOrder + 1);
+                }
+            }
+            // Ensure _id is never marked as is_required in sys_column so insert never demands it
+            try {
+                this.db.prepare(`UPDATE sys_column SET is_required = 0 WHERE column_name = '_id'`).run();
+            } catch {}
+        } catch {}
+    }
+
     // Internal create — no rebootstrap (caller decides when)
     _createTableInternal(tableName, label, description, columns, joins) {
+        const hasPk = (columns || []).some(c => c.is_pk || c.column_name === '_id');
+        const allColumns = hasPk
+            ? [...columns]
+            : [{ column_name: '_id', label: 'ID', col_type: 'number', sql_type: 'INTEGER', is_pk: 1, is_required: 0 }, ...(columns || [])];
+
+        // Automatic compulsory Highlight flag (hl) for every table
+        const hasHl = allColumns.some(c => c.column_name === 'hl');
+        if (!hasHl) {
+            allColumns.push({
+                column_name: 'hl',
+                label: 'Highlight Flag',
+                col_type: 'number',
+                sql_type: 'TINYINT',
+                is_pk: 0,
+                is_required: 0,
+                default_value: '0'
+            });
+        }
+
         this.db.transaction(() => {
             const tableRes = this.db.prepare(`
                 INSERT INTO sys_table (table_name, label, description)
@@ -598,20 +653,43 @@ class SchemaManager {
 
             const tableId = tableRes.lastInsertRowid;
 
-            for (let i = 0; i < columns.length; i++) {
-                this._insertColumn(tableId, columns[i], columns[i].sort_order ?? i);
+            for (let i = 0; i < allColumns.length; i++) {
+                this._insertColumn(tableId, allColumns[i], allColumns[i].sort_order ?? i);
             }
 
-            for (const join of joins) {
+            for (const join of (joins || [])) {
                 this._insertJoin(tableId, join);
             }
 
             // build + run CREATE TABLE
-            this.db.prepare(this._buildCreateSQL(tableName, columns)).run();
+            this.db.prepare(this._buildCreateSQL(tableName, allColumns)).run();
+
+            // build + run custom INDEXES if requested
+            for (const col of allColumns) {
+                if (col.has_index && col.column_name !== '_id') {
+                    const idxName = `idx_${tableName}_${col.column_name}`;
+                    this.db.prepare(`CREATE INDEX IF NOT EXISTS "${idxName}" ON "${tableName}"("${col.column_name}")`).run();
+                }
+            }
         })();
     }
 
     _insertColumn(tableId, col, sortOrder) {
+        const refSelectVal = Array.isArray(col.ref_select)
+            ? JSON.stringify(col.ref_select)
+            : (col.ref_select ? String(col.ref_select) : null);
+
+        let normalizedType = String(col.col_type || 'string').toLowerCase();
+        if (!['number', 'string', 'boolean', 'json'].includes(normalizedType)) {
+            if (['int', 'integer', 'bigint', 'decimal', 'numeric', 'float', 'fk'].includes(normalizedType)) {
+                normalizedType = 'number';
+            } else if (normalizedType === 'tinyint') {
+                normalizedType = 'boolean';
+            } else {
+                normalizedType = 'string';
+            }
+        }
+
         this.db.prepare(`
             INSERT INTO sys_column
               (table_id, column_name, label, col_type, is_required, default_value,
@@ -621,14 +699,14 @@ class SchemaManager {
             tableId,
             col.column_name,
             col.label ?? col.column_name,
-            col.col_type ?? 'string',
+            normalizedType,
             col.is_required ? 1 : 0,
-            col.default_value !== undefined ? String(col.default_value) : null,
+            col.default_value !== undefined && col.default_value !== null ? String(col.default_value) : null,
             col.is_pk ? 1 : 0,
             col.ref_table ?? null,
             col.ref_col ?? null,
             col.ref_as ?? null,
-            col.ref_select ?? null,
+            refSelectVal,
             sortOrder,
         );
     }
@@ -670,24 +748,43 @@ class SchemaManager {
 
             let colDef = `"${col.column_name}"`;
 
-            switch (col.col_type) {
-                case 'number': colDef += ' DECIMAL(10,2)'; break;
-                case 'boolean': colDef += ' TINYINT'; break;
-                case 'json': colDef += ' TEXT'; break;
-                default: colDef += ' TEXT';
+            if (col.sql_type) {
+                const upperSql = String(col.sql_type).toUpperCase();
+                if (col.length_precision && ['VARCHAR', 'CHAR', 'DECIMAL', 'NUMERIC', 'FLOAT'].includes(upperSql)) {
+                    colDef += ` ${upperSql}(${col.length_precision})`;
+                } else if (upperSql === 'ENUM' && col.length_precision) {
+                    colDef += ` TEXT CHECK("${col.column_name}" IN (${col.length_precision}))`;
+                } else {
+                    colDef += ` ${upperSql}`;
+                }
+            } else {
+                // 100% Backward compatibility for legacy callers without sql_type
+                switch (col.col_type) {
+                    case 'number': colDef += ' DECIMAL(10,2)'; break;
+                    case 'boolean': colDef += ' TINYINT'; break;
+                    case 'json': colDef += ' TEXT'; break;
+                    default: colDef += ' TEXT';
+                }
             }
 
             if (col.is_required) colDef += ' NOT NULL';
+            if (col.is_unique) colDef += ' UNIQUE';
 
-            if (col.default_value !== undefined && col.default_value !== null) {
-                const dv = col.col_type === 'string'
-                    ? `'${col.default_value}'`
-                    : col.default_value;
+            if (col.default_type === 'CURRENT_TIMESTAMP') {
+                colDef += ` DEFAULT (datetime('now', 'localtime'))`;
+            } else if (col.default_type === 'NULL') {
+                colDef += ` DEFAULT NULL`;
+            } else if (col.default_value !== undefined && col.default_value !== null && String(col.default_value).trim() !== '') {
+                const isNumeric = ['number', 'int', 'integer', 'decimal', 'boolean', 'tinyint'].includes(String(col.sql_type || col.col_type).toLowerCase());
+                const dv = isNumeric ? col.default_value : `'${col.default_value}'`;
                 colDef += ` DEFAULT ${dv}`;
             }
 
             if (col.ref_table && col.ref_col) {
                 colDef += ` REFERENCES "${col.ref_table}"("${col.ref_col}")`;
+                if (col.on_delete) {
+                    colDef += ` ON DELETE ${col.on_delete}`;
+                }
             }
 
             parts.push(colDef);
@@ -703,15 +800,26 @@ class SchemaManager {
     _buildAlterAddColumn(tableName, col) {
         let def = `ALTER TABLE "${tableName}" ADD COLUMN "${col.column_name}"`;
 
-        switch (col.col_type) {
-            case 'number': def += ' DECIMAL(10,2)'; break;
-            case 'boolean': def += ' TINYINT'; break;
-            case 'json': def += ' TEXT'; break;
-            default: def += ' TEXT';
+        if (col.sql_type) {
+            const upperSql = String(col.sql_type).toUpperCase();
+            if (col.length_precision && ['VARCHAR', 'CHAR', 'DECIMAL', 'NUMERIC', 'FLOAT'].includes(upperSql)) {
+                def += ` ${upperSql}(${col.length_precision})`;
+            } else {
+                def += ` ${upperSql}`;
+            }
+        } else {
+            // 100% Backward compatibility for legacy callers without sql_type
+            switch (col.col_type) {
+                case 'number': def += ' DECIMAL(10,2)'; break;
+                case 'boolean': def += ' TINYINT'; break;
+                case 'json': def += ' TEXT'; break;
+                default: def += ' TEXT';
+            }
         }
 
-        if (col.default_value !== undefined && col.default_value !== null) {
-            const dv = col.col_type === 'string' ? `'${col.default_value}'` : col.default_value;
+        if (col.default_value !== undefined && col.default_value !== null && String(col.default_value).trim() !== '') {
+            const isNumeric = ['number', 'int', 'integer', 'decimal', 'boolean', 'tinyint'].includes(String(col.sql_type || col.col_type).toLowerCase());
+            const dv = isNumeric ? col.default_value : `'${col.default_value}'`;
             def += ` DEFAULT ${dv}`;
         }
 

@@ -8,7 +8,7 @@
 
 import { Injectable, Inject, Optional } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of, catchError } from 'rxjs';
 import { SutramTableConfig } from '../models/sutram-excel.model';
 import { SutramCorrectionItem, DictionaryEntry } from '../models/sutram-correction.model';
 
@@ -50,6 +50,15 @@ export class SutramExcelApiService {
    */
   public getRegisteredTables(): Observable<Array<{ table: string; display_name: string }>> {
     return this.http.get<ApiResponse<Array<{ table: string; display_name: string }>>>(`${this.baseUri}/tables`).pipe(
+      map(res => res.result || [])
+    );
+  }
+
+  /**
+   * GET /reports - Fetch list of dynamic reports and views
+   */
+  public getReports(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/reports`).pipe(
       map(res => res.result || [])
     );
   }
@@ -254,4 +263,134 @@ export class SutramExcelApiService {
       })
     );
   }
+
+  /**
+   * GET table UI configuration (columns, labels, formats, sort order, selected_keys)
+   * Reads from ${this.baseUri}/table-ui-config/:table first, fallback to /api/_sutram/schema/table-config/:table
+   */
+  public getTableUiConfig(tableName: string): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.baseUri}/table-ui-config/${encodeURIComponent(tableName)}`).pipe(
+      map(res => res.result || null),
+      catchError(() => {
+        return this.http.get<ApiResponse<any>>(`/api/_sutram/schema/table-config/${encodeURIComponent(tableName)}`).pipe(
+          map(res => res.result || null),
+          catchError(() => of(null))
+        );
+      })
+    );
+  }
+
+  /**
+   * POST table UI configuration
+   * Saves to ${this.baseUri}/table-ui-config/:table first, fallback to /api/_sutram/schema/table-config/:table
+   */
+  public saveTableUiConfig(tableName: string, data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/table-ui-config/${encodeURIComponent(tableName)}`, data).pipe(
+      catchError(() => {
+        return this.http.post<ApiResponse<any>>(`/api/_sutram/schema/table-config/${encodeURIComponent(tableName)}`, data);
+      })
+    );
+  }
+
+  /**
+   * GET backend triggers for a table
+   */
+  public getTableTriggers(tableName: string): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/triggers/${encodeURIComponent(tableName)}`).pipe(
+      map(res => res.result || []),
+      catchError(() => {
+        return this.http.get<ApiResponse<any[]>>(`/api/_sutram/schema/triggers/${encodeURIComponent(tableName)}`).pipe(
+          map(res => res.result || []),
+          catchError(() => of([]))
+        );
+      })
+    );
+  }
+
+  /**
+   * POST backend trigger
+   */
+  public createTrigger(def: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/triggers`, def).pipe(
+      catchError(() => this.http.post<ApiResponse<any>>('/api/_sutram/schema/triggers', def))
+    );
+  }
+
+  /**
+   * DELETE backend trigger
+   */
+  public deleteTrigger(id: number | string): Observable<any> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUri}/triggers/${encodeURIComponent(id)}`).pipe(
+      catchError(() => this.http.delete<ApiResponse<any>>(`/api/_sutram/schema/triggers/${encodeURIComponent(id)}`))
+    );
+  }
+
+  /**
+   * GET UI sutras / formulas for a table
+   */
+  public getUiSutras(tableName: string): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/ui-sutras/${encodeURIComponent(tableName)}`).pipe(
+      map(res => res.result || []),
+      catchError(() => {
+        return this.http.get<ApiResponse<any[]>>(`/api/_sutram/schema/ui-sutras/${encodeURIComponent(tableName)}`).pipe(
+          map(res => res.result || []),
+          catchError(() => of([]))
+        );
+      })
+    );
+  }
+
+  /**
+   * POST UI sutras / formulas for a table
+   */
+  public saveUiSutras(tableName: string, formulas: any[]): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/ui-sutras/${encodeURIComponent(tableName)}`, { formulas }).pipe(
+      catchError(() => {
+        return this.http.post<ApiResponse<any>>(`/api/_sutram/schema/ui-sutras/${encodeURIComponent(tableName)}`, { formulas });
+      })
+    );
+  }
+
+  /**
+   * GET users list
+   */
+  public getUsers(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/users`).pipe(
+      map(res => res.result || []),
+      catchError(() => {
+        return this.http.get<ApiResponse<any[]>>('/api/_sutram/schema/users').pipe(
+          map(res => res.result || []),
+          catchError(() => of([]))
+        );
+      })
+    );
+  }
+
+  /**
+   * POST create user
+   */
+  public createUser(user: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/users`, user).pipe(
+      catchError(() => this.http.post<ApiResponse<any>>('/api/_sutram/schema/users', user))
+    );
+  }
+
+  /**
+   * PUT update user
+   */
+  public updateUser(id: number | string, user: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.baseUri}/users/${encodeURIComponent(id)}`, user).pipe(
+      catchError(() => this.http.put<ApiResponse<any>>(`/api/_sutram/schema/users/${encodeURIComponent(id)}`, user))
+    );
+  }
+
+  /**
+   * DELETE user
+   */
+  public deleteUser(id: number | string): Observable<any> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUri}/users/${encodeURIComponent(id)}`).pipe(
+      catchError(() => this.http.delete<ApiResponse<any>>(`/api/_sutram/schema/users/${encodeURIComponent(id)}`))
+    );
+  }
 }
+

@@ -139,7 +139,9 @@ class Engine {
         // TriggerManager and ReportManager always read from sys_
         // in managed mode, or from direct arrays in direct mode
         this.trigger = new TriggerManager(this.db);
+        this.triggers = this.trigger;
         this.report = new ReportManager(this.db);
+        this.reports = this.report;
         this.schema = new SchemaManager(this.db, () => this.rebootstrap());
         this.ui = new UiManager(this);
     }

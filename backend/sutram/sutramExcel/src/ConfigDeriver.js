@@ -69,11 +69,13 @@ class ConfigDeriver {
     // ─────────────────────────────────────────────────────────
 
     _fromColumn(colName, def) {
+        const isPk = colName === '_id' || def.is_pk === 1 || def.pk === true || def.primaryKey === true;
         const base = {
             col_name:  colName,
             name:      colName,
             alt_names: [colName],
-            not_null:  def.required === true || def.notNull === true,
+            not_null:  !isPk && (def.required === true || def.notNull === true),
+            is_pk:     isPk,
             type:      this._mapType(def),
         };
 
@@ -90,6 +92,7 @@ class ConfigDeriver {
             base.ref_field = colName;          // category_id
             base.ref_as    = refAs;            // 'category'
             base.ref_data  = refData;          // 'name'
+            base.ref_select = Array.isArray(select) ? select : (select && select !== '*' ? [select] : (refData ? [refData] : []));
             base.type      = 'ref';
 
             // col_name is category_id
@@ -139,9 +142,10 @@ class ConfigDeriver {
         if (ext.not_null !== undefined) merged.not_null = ext.not_null;
 
         // ref overrides (rarely needed — schema usually has it)
-        if (ext.ref_table) merged.ref_table = ext.ref_table;
-        if (ext.ref_field) merged.ref_field = ext.ref_field;
-        if (ext.ref_data)  merged.ref_data  = ext.ref_data;
+        if (ext.ref_table)  merged.ref_table  = ext.ref_table;
+        if (ext.ref_field)  merged.ref_field  = ext.ref_field;
+        if (ext.ref_data)   merged.ref_data   = ext.ref_data;
+        if (ext.ref_select) merged.ref_select = ext.ref_select;
 
         // name override
         if (ext.name) merged.name = ext.name;

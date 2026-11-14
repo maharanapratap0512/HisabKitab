@@ -149,4 +149,22 @@ module.exports = [
 
     ],
 
+    // ── version 2 — sys_user for user management and authentication ──
+    [
+        `CREATE TABLE IF NOT EXISTS sys_user (
+            _id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            username     TEXT NOT NULL UNIQUE,
+            password     TEXT NOT NULL,
+            display_name TEXT,
+            role         TEXT NOT NULL DEFAULT 'author' CHECK(role IN ('admin', 'author')),
+            active       INTEGER DEFAULT 1,
+            created_at   TEXT DEFAULT (datetime('now', 'localtime')),
+            updated_at   TEXT DEFAULT (datetime('now', 'localtime'))
+        )`,
+
+        `INSERT OR IGNORE INTO sys_user (username, password, display_name, role)
+         VALUES ('admin', 'sutram', 'System Administrator', 'admin')`
+    ],
+
 ];
+

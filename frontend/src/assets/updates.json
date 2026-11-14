@@ -21,6 +21,14 @@
                 "title_hin": "शेष प्रविष्टियों को जारी रखने और नया शुरू करने की सुविधा",
                 "desc": "During imports, completed entries are safely finished while remaining records stay saved. A helpful alert banner lets you resume remaining entries or start a fresh import at any time.",
                 "desc_hin": "इम्पोर्ट के दौरान सफलतापूर्वक जोड़ी गई प्रविष्टियां सुरक्षित हो जाती हैं और बाकी बची प्रविष्टियां सुरक्षित रहती हैं। आप जब चाहें बचे हुए रिकॉर्ड्स को जारी रख सकते हैं या नया सत्र शुरू कर सकते हैं।"
+            },
+            {
+                "type": "improved",
+                "module": "Excel Import",
+                "title": "Unique Correction List & Enhanced Dropdowns",
+                "title_hin": "विशिष्ट सुधार सूची एवं जावक टाइप ड्रॉपडाउन सुविधा",
+                "desc": "The correction table now groups identical missing names into a single unique row, allowing you to correct repeated items once for all matching rows. Full support for Jawak Type, Aawak Source, and Usage categories is also added.",
+                "desc_hin": "सुधार तालिका में अब एक जैसे सभी छूटे हुए नाम एक ही बार दिखेंगे, जिससे आपको बार-बार सुधारने की आवश्यकता नहीं होगी। साथ ही जावक टाइप, आवक स्रोत और उपयोग श्रेणी हेतु ड्रॉपडाउन विकल्प भी जोड़े गए हैं।"
             }
         ]
     },

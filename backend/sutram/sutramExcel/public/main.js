@@ -25505,15 +25505,15 @@ var Subject = function(_super) {
           _this.currentObservers = Array.from(_this.observers);
         }
         try {
-          for (var _b2 = __values(_this.currentObservers), _c2 = _b2.next(); !_c2.done; _c2 = _b2.next()) {
-            var observer = _c2.value;
+          for (var _b2 = __values(_this.currentObservers), _c13 = _b2.next(); !_c13.done; _c13 = _b2.next()) {
+            var observer = _c13.value;
             observer.next(value);
           }
         } catch (e_1_1) {
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (_c2 && !_c2.done && (_a2 = _b2.return))
+            if (_c13 && !_c13.done && (_a2 = _b2.return))
               _a2.call(_b2);
           } finally {
             if (e_1)
@@ -26876,7 +26876,7 @@ function share(options) {
   }
   var _a2 = options.connector, connector = _a2 === void 0 ? function() {
     return new Subject();
-  } : _a2, _b2 = options.resetOnError, resetOnError = _b2 === void 0 ? true : _b2, _c2 = options.resetOnComplete, resetOnComplete = _c2 === void 0 ? true : _c2, _d2 = options.resetOnRefCountZero, resetOnRefCountZero = _d2 === void 0 ? true : _d2;
+  } : _a2, _b2 = options.resetOnError, resetOnError = _b2 === void 0 ? true : _b2, _c13 = options.resetOnComplete, resetOnComplete = _c13 === void 0 ? true : _c13, _d2 = options.resetOnRefCountZero, resetOnRefCountZero = _d2 === void 0 ? true : _d2;
   return function(wrapperSource) {
     var connection;
     var resetConnection;
@@ -92955,6 +92955,2269 @@ var CheckboxModule = class _CheckboxModule {
   }]
 }] });
 
+// backend/sutram/ng-sutramui-excel/node_modules/primeng/fesm2022/primeng-multiselect.mjs
+var MULTISELECT_VALUE_ACCESSOR = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => MultiSelect),
+  multi: true
+};
+var MultiSelectItem = class _MultiSelectItem {
+  id;
+  option;
+  selected;
+  label;
+  disabled;
+  itemSize;
+  focused;
+  ariaPosInset;
+  ariaSetSize;
+  template;
+  checkIconTemplate;
+  onClick = new EventEmitter();
+  onMouseEnter = new EventEmitter();
+  onOptionClick(event2) {
+    this.onClick.emit({
+      originalEvent: event2,
+      option: this.option,
+      selected: this.selected
+    });
+  }
+  onOptionMouseEnter(event2) {
+    this.onMouseEnter.emit({
+      originalEvent: event2,
+      option: this.option,
+      selected: this.selected
+    });
+  }
+  static \u0275fac = \u0275\u0275ngDeclareFactory({ minVersion: "12.0.0", version: "16.2.0", ngImport: core_exports, type: _MultiSelectItem, deps: [], target: FactoryTarget2.Component });
+  static \u0275cmp = \u0275\u0275ngDeclareComponent({ minVersion: "14.0.0", version: "16.2.0", type: _MultiSelectItem, selector: "p-multiSelectItem", inputs: { id: "id", option: "option", selected: "selected", label: "label", disabled: "disabled", itemSize: "itemSize", focused: "focused", ariaPosInset: "ariaPosInset", ariaSetSize: "ariaSetSize", template: "template", checkIconTemplate: "checkIconTemplate" }, outputs: { onClick: "onClick", onMouseEnter: "onMouseEnter" }, host: { classAttribute: "p-element" }, ngImport: core_exports, template: `
+        <li
+            pRipple
+            [ngStyle]="{ height: itemSize + 'px' }"
+            class="p-multiselect-item"
+            [ngClass]="{ 'p-multiselect-item': true, 'p-highlight': selected, 'p-disabled': disabled, 'p-focus': focused }"
+            [id]="id"
+            [attr.aria-label]="label"
+            [attr.aria-setsize]="ariaSetSize"
+            [attr.aria-posinset]="ariaPosInset"
+            [attr.aria-selected]="selected"
+            [attr.data-p-focused]="focused"
+            [attr.data-p-highlight]="selected"
+            [attr.data-p-disabled]="disabled"
+            (click)="onOptionClick($event)"
+            (mouseenter)="onOptionMouseEnter($event)"
+        >
+            <div class="p-checkbox p-component">
+                <div class="p-checkbox-box" [ngClass]="{ 'p-highlight': selected }" [attr.aria-checked]="selected">
+                    <ng-container *ngIf="selected">
+                        <CheckIcon *ngIf="!checkIconTemplate" [styleClass]="'p-checkbox-icon'" [attr.aria-hidden]="true" />
+                        <span *ngIf="checkIconTemplate" class="p-checkbox-icon" [attr.aria-hidden]="true">
+                            <ng-template *ngTemplateOutlet="checkIconTemplate"></ng-template>
+                        </span>
+                    </ng-container>
+                </div>
+            </div>
+            <span *ngIf="!template">{{ label ?? 'empty' }}</span>
+            <ng-container *ngTemplateOutlet="template; context: { $implicit: option }"></ng-container>
+        </li>
+    `, isInline: true, dependencies: [{ kind: "directive", type: forwardRef(function() {
+    return NgClass;
+  }), selector: "[ngClass]", inputs: ["class", "ngClass"] }, { kind: "directive", type: forwardRef(function() {
+    return NgIf;
+  }), selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: forwardRef(function() {
+    return NgTemplateOutlet;
+  }), selector: "[ngTemplateOutlet]", inputs: ["ngTemplateOutletContext", "ngTemplateOutlet", "ngTemplateOutletInjector"] }, { kind: "directive", type: forwardRef(function() {
+    return NgStyle;
+  }), selector: "[ngStyle]", inputs: ["ngStyle"] }, { kind: "directive", type: forwardRef(function() {
+    return Ripple;
+  }), selector: "[pRipple]" }, { kind: "component", type: forwardRef(function() {
+    return CheckIcon;
+  }), selector: "CheckIcon" }], encapsulation: ViewEncapsulation$1.None });
+};
+\u0275\u0275ngDeclareClassMetadata({ minVersion: "12.0.0", version: "16.2.0", ngImport: core_exports, type: MultiSelectItem, decorators: [{
+  type: Component,
+  args: [{
+    selector: "p-multiSelectItem",
+    template: `
+        <li
+            pRipple
+            [ngStyle]="{ height: itemSize + 'px' }"
+            class="p-multiselect-item"
+            [ngClass]="{ 'p-multiselect-item': true, 'p-highlight': selected, 'p-disabled': disabled, 'p-focus': focused }"
+            [id]="id"
+            [attr.aria-label]="label"
+            [attr.aria-setsize]="ariaSetSize"
+            [attr.aria-posinset]="ariaPosInset"
+            [attr.aria-selected]="selected"
+            [attr.data-p-focused]="focused"
+            [attr.data-p-highlight]="selected"
+            [attr.data-p-disabled]="disabled"
+            (click)="onOptionClick($event)"
+            (mouseenter)="onOptionMouseEnter($event)"
+        >
+            <div class="p-checkbox p-component">
+                <div class="p-checkbox-box" [ngClass]="{ 'p-highlight': selected }" [attr.aria-checked]="selected">
+                    <ng-container *ngIf="selected">
+                        <CheckIcon *ngIf="!checkIconTemplate" [styleClass]="'p-checkbox-icon'" [attr.aria-hidden]="true" />
+                        <span *ngIf="checkIconTemplate" class="p-checkbox-icon" [attr.aria-hidden]="true">
+                            <ng-template *ngTemplateOutlet="checkIconTemplate"></ng-template>
+                        </span>
+                    </ng-container>
+                </div>
+            </div>
+            <span *ngIf="!template">{{ label ?? 'empty' }}</span>
+            <ng-container *ngTemplateOutlet="template; context: { $implicit: option }"></ng-container>
+        </li>
+    `,
+    encapsulation: ViewEncapsulation$1.None,
+    host: {
+      class: "p-element"
+    }
+  }]
+}], propDecorators: { id: [{
+  type: Input
+}], option: [{
+  type: Input
+}], selected: [{
+  type: Input
+}], label: [{
+  type: Input
+}], disabled: [{
+  type: Input
+}], itemSize: [{
+  type: Input
+}], focused: [{
+  type: Input
+}], ariaPosInset: [{
+  type: Input
+}], ariaSetSize: [{
+  type: Input
+}], template: [{
+  type: Input
+}], checkIconTemplate: [{
+  type: Input
+}], onClick: [{
+  type: Output
+}], onMouseEnter: [{
+  type: Output
+}] } });
+var MultiSelect = class _MultiSelect {
+  el;
+  renderer;
+  cd;
+  zone;
+  filterService;
+  config;
+  overlayService;
+  /**
+   * Unique identifier of the component
+   * @group Props
+   */
+  id;
+  /**
+   * Defines a string that labels the input for accessibility.
+   * @group Props
+   */
+  ariaLabel;
+  /**
+   * Inline style of the element.
+   * @group Props
+   */
+  style;
+  /**
+   * Style class of the element.
+   * @group Props
+   */
+  styleClass;
+  /**
+   * Inline style of the overlay panel.
+   * @group Props
+   */
+  panelStyle;
+  /**
+   * Style class of the overlay panel element.
+   * @group Props
+   */
+  panelStyleClass;
+  /**
+   * Identifier of the focus input to match a label defined for the component.
+   * @group Props
+   */
+  inputId;
+  /**
+   * When present, it specifies that the element should be disabled.
+   * @group Props
+   */
+  disabled;
+  /**
+   * When present, it specifies that the component cannot be edited.
+   * @group Props
+   */
+  readonly;
+  /**
+   * Whether to display options as grouped when nested options are provided.
+   * @group Props
+   */
+  group;
+  /**
+   * When specified, displays an input field to filter the items on keyup.
+   * @group Props
+   */
+  filter = true;
+  /**
+   * Defines placeholder of the filter input.
+   * @group Props
+   */
+  filterPlaceHolder;
+  /**
+   * Locale to use in filtering. The default locale is the host environment's current locale.
+   * @group Props
+   */
+  filterLocale;
+  /**
+   * Specifies the visibility of the options panel.
+   * @group Props
+   */
+  overlayVisible;
+  /**
+   * Index of the element in tabbing order.
+   * @group Props
+   */
+  tabindex = 0;
+  /**
+   * Target element to attach the overlay, valid values are "body" or a local ng-template variable of another element (note: use binding with brackets for template variables, e.g. [appendTo]="mydiv" for a div element having #mydiv as variable name).
+   * @group Props
+   */
+  appendTo;
+  /**
+   * A property to uniquely identify a value in options.
+   * @group Props
+   */
+  dataKey;
+  /**
+   * Name of the input element.
+   * @group Props
+   */
+  name;
+  /**
+   * Establishes relationships between the component and label(s) where its value should be one or more element IDs.
+   * @group Props
+   */
+  ariaLabelledBy;
+  /**
+   * Whether to show labels of selected item labels or use default label.
+   * @group Props
+   * @defaultValue true
+   */
+  set displaySelectedLabel(val) {
+    this._displaySelectedLabel = val;
+  }
+  get displaySelectedLabel() {
+    return this._displaySelectedLabel;
+  }
+  /**
+   * Decides how many selected item labels to show at most.
+   * @group Props
+   * @defaultValue 3
+   */
+  set maxSelectedLabels(val) {
+    this._maxSelectedLabels = val;
+  }
+  get maxSelectedLabels() {
+    return this._maxSelectedLabels;
+  }
+  /**
+   * Decides how many selected item labels to show at most.
+   * @group Props
+   */
+  selectionLimit;
+  /**
+   * Label to display after exceeding max selected labels e.g. ({0} items selected), defaults "ellipsis" keyword to indicate a text-overflow.
+   * @group Props
+   */
+  selectedItemsLabel = "{0} items selected";
+  /**
+   * Whether to show the checkbox at header to toggle all items at once.
+   * @group Props
+   */
+  showToggleAll = true;
+  /**
+   * Text to display when filtering does not return any results.
+   * @group Props
+   */
+  emptyFilterMessage = "";
+  /**
+   * Text to display when there is no data. Defaults to global value in i18n translation configuration.
+   * @group Props
+   */
+  emptyMessage = "";
+  /**
+   * Clears the filter value when hiding the dropdown.
+   * @group Props
+   */
+  resetFilterOnHide = false;
+  /**
+   * Icon class of the dropdown icon.
+   * @group Props
+   */
+  dropdownIcon;
+  /**
+   * Name of the label field of an option.
+   * @group Props
+   */
+  optionLabel;
+  /**
+   * Name of the value field of an option.
+   * @group Props
+   */
+  optionValue;
+  /**
+   * Name of the disabled field of an option.
+   * @group Props
+   */
+  optionDisabled;
+  /**
+   * Name of the label field of an option group.
+   * @group Props
+   */
+  optionGroupLabel = "label";
+  /**
+   * Name of the options field of an option group.
+   * @group Props
+   */
+  optionGroupChildren = "items";
+  /**
+   * Whether to show the header.
+   * @group Props
+   */
+  showHeader = true;
+  /**
+   * When filtering is enabled, filterBy decides which field or fields (comma separated) to search against.
+   * @group Props
+   */
+  filterBy;
+  /**
+   * Height of the viewport in pixels, a scrollbar is defined if height of list exceeds this value.
+   * @group Props
+   */
+  scrollHeight = "200px";
+  /**
+   * Defines if data is loaded and interacted with in lazy manner.
+   * @group Props
+   */
+  lazy = false;
+  /**
+   * Whether the data should be loaded on demand during scroll.
+   * @group Props
+   */
+  virtualScroll;
+  /**
+   * Height of an item in the list for VirtualScrolling.
+   * @group Props
+   */
+  virtualScrollItemSize;
+  /**
+   * Whether to use the scroller feature. The properties of scroller component can be used like an object in it.
+   * @group Props
+   */
+  virtualScrollOptions;
+  /**
+   * Whether to use overlay API feature. The properties of overlay API can be used like an object in it.
+   * @group Props
+   */
+  overlayOptions;
+  /**
+   * Defines a string that labels the filter input.
+   * @group Props
+   */
+  ariaFilterLabel;
+  /**
+   * Defines how the items are filtered.
+   * @group Props
+   */
+  filterMatchMode = "contains";
+  /**
+   * Advisory information to display in a tooltip on hover.
+   * @group Props
+   */
+  tooltip = "";
+  /**
+   * Position of the tooltip.
+   * @group Props
+   */
+  tooltipPosition = "right";
+  /**
+   * Type of CSS position.
+   * @group Props
+   */
+  tooltipPositionStyle = "absolute";
+  /**
+   * Style class of the tooltip.
+   * @group Props
+   */
+  tooltipStyleClass;
+  /**
+   * Applies focus to the filter element when the overlay is shown.
+   * @group Props
+   */
+  autofocusFilter = true;
+  /**
+   * Defines how the selected items are displayed.
+   * @group Props
+   */
+  display = "comma";
+  /**
+   * Defines the autocomplete is active.
+   * @group Props
+   */
+  autocomplete = "off";
+  /**
+   * When enabled, a clear icon is displayed to clear the value.
+   * @group Props
+   */
+  showClear = false;
+  /**
+   * @deprecated since v14.2.0, use overlayOptions property instead.
+   * Whether to automatically manage layering.
+   * @group Props
+   */
+  get autoZIndex() {
+    return this._autoZIndex;
+  }
+  set autoZIndex(val) {
+    this._autoZIndex = val;
+    console.warn("The autoZIndex property is deprecated since v14.2.0, use overlayOptions property instead.");
+  }
+  /**
+   * @deprecated since v14.2.0, use overlayOptions property instead.
+   * Base zIndex value to use in layering.
+   * @group Props
+   */
+  get baseZIndex() {
+    return this._baseZIndex;
+  }
+  set baseZIndex(val) {
+    this._baseZIndex = val;
+    console.warn("The baseZIndex property is deprecated since v14.2.0, use overlayOptions property instead.");
+  }
+  /**
+   * Transition options of the show animation.
+   * @group Props
+   * @deprecated since v14.2.0, use overlayOptions property instead.
+   */
+  get showTransitionOptions() {
+    return this._showTransitionOptions;
+  }
+  set showTransitionOptions(val) {
+    this._showTransitionOptions = val;
+    console.warn("The showTransitionOptions property is deprecated since v14.2.0, use overlayOptions property instead.");
+  }
+  /**
+   * Transition options of the hide animation.
+   * @group Props
+   * @deprecated since v14.2.0, use overlayOptions property instead.
+   */
+  get hideTransitionOptions() {
+    return this._hideTransitionOptions;
+  }
+  set hideTransitionOptions(val) {
+    this._hideTransitionOptions = val;
+    console.warn("The hideTransitionOptions property is deprecated since v14.2.0, use overlayOptions property instead.");
+  }
+  /**
+   * Label to display when there are no selections.
+   * @group Props
+   * @deprecated Use placeholder instead.
+   */
+  set defaultLabel(val) {
+    this._defaultLabel = val;
+    console.warn("defaultLabel property is deprecated since 16.6.0, use placeholder instead");
+  }
+  get defaultLabel() {
+    return this._defaultLabel;
+  }
+  /**
+   * Label to display when there are no selections.
+   * @group Props
+   */
+  set placeholder(val) {
+    this._placeholder = val;
+  }
+  get placeholder() {
+    return this._placeholder;
+  }
+  /**
+   * An array of objects to display as the available options.
+   * @group Props
+   */
+  get options() {
+    const options = this._options();
+    return options;
+  }
+  set options(val) {
+    this._options.set(val);
+  }
+  /**
+   * When specified, filter displays with this value.
+   * @group Props
+   */
+  get filterValue() {
+    return this._filterValue();
+  }
+  set filterValue(val) {
+    this._filterValue.set(val);
+  }
+  /**
+   * Item size of item to be virtual scrolled.
+   * @group Props
+   * @deprecated use virtualScrollItemSize property instead.
+   */
+  get itemSize() {
+    return this._itemSize;
+  }
+  set itemSize(val) {
+    this._itemSize = val;
+    console.warn("The itemSize property is deprecated, use virtualScrollItemSize property instead.");
+  }
+  /**
+   * Whether all data is selected.
+   * @group Props
+   */
+  get selectAll() {
+    return this._selectAll;
+  }
+  set selectAll(value) {
+    this._selectAll = value;
+  }
+  /**
+   * Fields used when filtering the options, defaults to optionLabel.
+   * @group Props
+   */
+  focusOnHover = false;
+  /**
+   * Fields used when filtering the options, defaults to optionLabel.
+   * @group Props
+   */
+  filterFields;
+  /**
+   * Determines if the option will be selected on focus.
+   * @group Props
+   */
+  selectOnFocus = false;
+  /**
+   * Whether to focus on the first visible or selected element when the overlay panel is shown.
+   * @group Props
+   */
+  autoOptionFocus = true;
+  /**
+   * Callback to invoke when value changes.
+   * @param {MultiSelectChangeEvent} event - Custom change event.
+   * @group Emits
+   */
+  onChange = new EventEmitter();
+  /**
+   * Callback to invoke when data is filtered.
+   * @param {MultiSelectFilterEvent} event - Custom filter event.
+   * @group Emits
+   */
+  onFilter = new EventEmitter();
+  /**
+   * Callback to invoke when multiselect receives focus.
+   * @param {MultiSelectFocusEvent} event - Custom focus event.
+   * @group Emits
+   */
+  onFocus = new EventEmitter();
+  /**
+   * Callback to invoke when multiselect loses focus.
+   * @param {MultiSelectBlurEvent} event - Custom blur event.
+   * @group Emits
+   */
+  onBlur = new EventEmitter();
+  /**
+   * Callback to invoke when component is clicked.
+   * @param {Event} event - Browser event.
+   * @group Emits
+   */
+  onClick = new EventEmitter();
+  /**
+   * Callback to invoke when input field is cleared.
+   * @group Emits
+   */
+  onClear = new EventEmitter();
+  /**
+   * Callback to invoke when overlay panel becomes visible.
+   * @group Emits
+   */
+  onPanelShow = new EventEmitter();
+  /**
+   * Callback to invoke when overlay panel becomes hidden.
+   * @group Emits
+   */
+  onPanelHide = new EventEmitter();
+  /**
+   * Callback to invoke in lazy mode to load new data.
+   * @param {MultiSelectLazyLoadEvent} event - Lazy load event.
+   * @group Emits
+   */
+  onLazyLoad = new EventEmitter();
+  /**
+   * Callback to invoke in lazy mode to load new data.
+   * @param {MultiSelectRemoveEvent} event - Remove event.
+   * @group Emits
+   */
+  onRemove = new EventEmitter();
+  /**
+   * Callback to invoke when all data is selected.
+   * @param {MultiSelectSelectAllChangeEvent} event - Custom select event.
+   * @group Emits
+   */
+  onSelectAllChange = new EventEmitter();
+  containerViewChild;
+  overlayViewChild;
+  filterInputChild;
+  focusInputViewChild;
+  itemsViewChild;
+  scroller;
+  lastHiddenFocusableElementOnOverlay;
+  firstHiddenFocusableElementOnOverlay;
+  headerCheckboxViewChild;
+  footerFacet;
+  headerFacet;
+  templates;
+  searchValue;
+  searchTimeout;
+  _selectAll = null;
+  _autoZIndex;
+  _baseZIndex;
+  _showTransitionOptions;
+  _hideTransitionOptions;
+  _defaultLabel;
+  _placeholder;
+  _itemSize;
+  _selectionLimit;
+  value;
+  _filteredOptions;
+  onModelChange = () => {
+  };
+  onModelTouched = () => {
+  };
+  valuesAsString;
+  focus;
+  filtered;
+  itemTemplate;
+  groupTemplate;
+  loaderTemplate;
+  headerTemplate;
+  filterTemplate;
+  footerTemplate;
+  emptyFilterTemplate;
+  emptyTemplate;
+  selectedItemsTemplate;
+  checkIconTemplate;
+  filterIconTemplate;
+  removeTokenIconTemplate;
+  closeIconTemplate;
+  clearIconTemplate;
+  dropdownIconTemplate;
+  headerCheckboxFocus;
+  filterOptions;
+  maxSelectionLimitReached;
+  preventModelTouched;
+  preventDocumentDefault;
+  focused = false;
+  itemsWrapper;
+  _displaySelectedLabel = true;
+  _maxSelectedLabels = 3;
+  modelValue = signal(null);
+  _filterValue = signal(null);
+  _options = signal(null);
+  startRangeIndex = signal(-1);
+  focusedOptionIndex = signal(-1);
+  selectedOptions;
+  get containerClass() {
+    return {
+      "p-multiselect p-component p-inputwrapper": true,
+      "p-disabled": this.disabled,
+      "p-multiselect-clearable": this.showClear && !this.disabled,
+      "p-multiselect-chip": this.display === "chip",
+      "p-focus": this.focused,
+      "p-inputwrapper-filled": ObjectUtils.isNotEmpty(this.modelValue()),
+      "p-inputwrapper-focus": this.focused || this.overlayVisible
+    };
+  }
+  get inputClass() {
+    return {
+      "p-multiselect-label p-inputtext": true,
+      "p-placeholder": (this.placeholder || this.defaultLabel) && (this.label() === this.placeholder || this.label() === this.defaultLabel),
+      "p-multiselect-label-empty": !this.selectedItemsTemplate && (this.label() === "p-emptylabel" || this.label().length === 0)
+    };
+  }
+  get panelClass() {
+    return {
+      "p-multiselect-panel p-component": true,
+      "p-input-filled": this.config.inputStyle === "filled",
+      "p-ripple-disabled": this.config.ripple === false
+    };
+  }
+  get labelClass() {
+    return {
+      "p-multiselect-label": true,
+      "p-placeholder": this.label() === this.placeholder || this.label() === this.defaultLabel,
+      "p-multiselect-label-empty": !this.placeholder && !this.defaultLabel && (!this.modelValue() || this.modelValue().length === 0)
+    };
+  }
+  get emptyMessageLabel() {
+    return this.emptyMessage || this.config.getTranslation(TranslationKeys.EMPTY_MESSAGE);
+  }
+  get emptyFilterMessageLabel() {
+    return this.emptyFilterMessage || this.config.getTranslation(TranslationKeys.EMPTY_FILTER_MESSAGE);
+  }
+  get filled() {
+    if (typeof this.modelValue() === "string")
+      return !!this.modelValue();
+    return this.modelValue() || this.modelValue() != null || this.modelValue() != void 0;
+  }
+  get isVisibleClearIcon() {
+    return this.modelValue() != null && this.modelValue() !== "" && ObjectUtils.isNotEmpty(this.modelValue()) && this.showClear && !this.disabled && this.filled;
+  }
+  get toggleAllAriaLabel() {
+    return this.config.translation.aria ? this.config.translation.aria[this.allSelected() ? "selectAll" : "unselectAll"] : void 0;
+  }
+  get closeAriaLabel() {
+    return this.config.translation.aria ? this.config.translation.aria.close : void 0;
+  }
+  visibleOptions = computed(() => {
+    const options = this.group ? this.flatOptions(this.options) : this.options || [];
+    if (this._filterValue()) {
+      const filteredOptions = this.filterService.filter(options, this.searchFields(), this._filterValue(), this.filterMatchMode, this.filterLocale);
+      if (this.group) {
+        const optionGroups = this.options || [];
+        const filtered = [];
+        optionGroups.forEach((group) => {
+          const groupChildren = this.getOptionGroupChildren(group);
+          const filteredItems = groupChildren.filter((item) => filteredOptions.includes(item));
+          if (filteredItems.length > 0)
+            filtered.push({ ...group, [typeof this.optionGroupChildren === "string" ? this.optionGroupChildren : "items"]: [...filteredItems] });
+        });
+        return this.flatOptions(filtered);
+      }
+      return filteredOptions;
+    }
+    return options;
+  });
+  label = computed(() => {
+    let label;
+    const modelValue = this.modelValue();
+    if (modelValue && modelValue.length && this.displaySelectedLabel) {
+      if (ObjectUtils.isNotEmpty(this.maxSelectedLabels) && modelValue.length > this.maxSelectedLabels) {
+        return this.getSelectedItemsLabel();
+      } else {
+        label = "";
+        for (let i = 0; i < modelValue.length; i++) {
+          if (i !== 0) {
+            label += ", ";
+          }
+          label += this.getLabelByValue(modelValue[i]);
+        }
+      }
+    } else {
+      label = this.placeholder || this.defaultLabel || "";
+    }
+    return label;
+  });
+  chipSelectedItems = computed(() => {
+    return ObjectUtils.isNotEmpty(this.maxSelectedLabels) && this.modelValue() && this.modelValue().length > this.maxSelectedLabels ? this.modelValue().slice(0, this.maxSelectedLabels) : this.modelValue();
+  });
+  constructor(el, renderer, cd, zone, filterService, config2, overlayService) {
+    this.el = el;
+    this.renderer = renderer;
+    this.cd = cd;
+    this.zone = zone;
+    this.filterService = filterService;
+    this.config = config2;
+    this.overlayService = overlayService;
+    effect(() => {
+      const modelValue = this.modelValue();
+      const visibleOptions = this.visibleOptions();
+      if (visibleOptions && ObjectUtils.isNotEmpty(visibleOptions) && modelValue) {
+        if (this.optionValue && this.optionLabel) {
+          this.selectedOptions = visibleOptions.filter((option) => modelValue.includes(option[this.optionLabel]) || modelValue.includes(option[this.optionValue]));
+        } else {
+          this.selectedOptions = [...modelValue];
+        }
+      }
+    });
+  }
+  ngOnInit() {
+    this.id = this.id || UniqueComponentId();
+    this.autoUpdateModel();
+    if (this.filterBy) {
+      this.filterOptions = {
+        filter: (value) => this.onFilterInputChange(value),
+        reset: () => this.resetFilter()
+      };
+    }
+  }
+  ngAfterContentInit() {
+    this.templates.forEach((item) => {
+      switch (item.getType()) {
+        case "item":
+          this.itemTemplate = item.template;
+          break;
+        case "group":
+          this.groupTemplate = item.template;
+          break;
+        case "selectedItems":
+          this.selectedItemsTemplate = item.template;
+          break;
+        case "header":
+          this.headerTemplate = item.template;
+          break;
+        case "filter":
+          this.filterTemplate = item.template;
+          break;
+        case "emptyfilter":
+          this.emptyFilterTemplate = item.template;
+          break;
+        case "empty":
+          this.emptyTemplate = item.template;
+          break;
+        case "footer":
+          this.footerTemplate = item.template;
+          break;
+        case "loader":
+          this.loaderTemplate = item.template;
+          break;
+        case "checkicon":
+          this.checkIconTemplate = item.template;
+          break;
+        case "filtericon":
+          this.filterIconTemplate = item.template;
+          break;
+        case "removetokenicon":
+          this.removeTokenIconTemplate = item.template;
+          break;
+        case "closeicon":
+          this.closeIconTemplate = item.template;
+          break;
+        case "clearicon":
+          this.clearIconTemplate = item.template;
+          break;
+        case "dropdownicon":
+          this.dropdownIconTemplate = item.template;
+          break;
+        default:
+          this.itemTemplate = item.template;
+          break;
+      }
+    });
+  }
+  ngAfterViewInit() {
+    if (this.overlayVisible) {
+      this.show();
+    }
+  }
+  ngAfterViewChecked() {
+    if (this.filtered) {
+      this.zone.runOutsideAngular(() => {
+        setTimeout(() => {
+          this.overlayViewChild?.alignOverlay();
+        }, 1);
+      });
+      this.filtered = false;
+    }
+  }
+  flatOptions(options) {
+    return (options || []).reduce((result, option, index) => {
+      result.push({ optionGroup: option, group: true, index });
+      const optionGroupChildren = this.getOptionGroupChildren(option);
+      optionGroupChildren && optionGroupChildren.forEach((o) => result.push(o));
+      return result;
+    }, []);
+  }
+  autoUpdateModel() {
+    if (this.selectOnFocus && this.autoOptionFocus && !this.hasSelectedOption()) {
+      this.focusedOptionIndex.set(this.findFirstFocusedOptionIndex());
+      const value = this.getOptionValue(this.visibleOptions()[this.focusedOptionIndex()]);
+      this.onOptionSelect({ originalEvent: null, option: [value] });
+    }
+  }
+  /**
+   * Updates the model value.
+   * @group Method
+   */
+  updateModel(value, event2) {
+    this.value = value;
+    this.onModelChange(value);
+    this.modelValue.set(value);
+  }
+  onInputClick(event2) {
+    event2.stopPropagation();
+    event2.preventDefault();
+    this.focusedOptionIndex.set(-1);
+  }
+  onOptionSelect(event2, isFocus = false, index = -1) {
+    const { originalEvent, option } = event2;
+    if (this.disabled || this.isOptionDisabled(option)) {
+      return;
+    }
+    let selected = this.isSelected(option);
+    let value = null;
+    if (selected) {
+      value = this.modelValue().filter((val) => !ObjectUtils.equals(val, this.getOptionValue(option), this.equalityKey()));
+    } else {
+      value = [...this.modelValue() || [], this.getOptionValue(option)];
+    }
+    this.updateModel(value, originalEvent);
+    index !== -1 && this.focusedOptionIndex.set(index);
+    isFocus && DomHandler.focus(this.focusInputViewChild?.nativeElement);
+    this.onChange.emit({
+      originalEvent: event2,
+      value,
+      itemValue: option
+    });
+  }
+  findSelectedOptionIndex() {
+    return this.hasSelectedOption() ? this.visibleOptions().findIndex((option) => this.isValidSelectedOption(option)) : -1;
+  }
+  onOptionSelectRange(event2, start = -1, end = -1) {
+    start === -1 && (start = this.findNearestSelectedOptionIndex(end, true));
+    end === -1 && (end = this.findNearestSelectedOptionIndex(start));
+    if (start !== -1 && end !== -1) {
+      const rangeStart = Math.min(start, end);
+      const rangeEnd = Math.max(start, end);
+      const value = this.visibleOptions().slice(rangeStart, rangeEnd + 1).filter((option) => this.isValidOption(option)).map((option) => this.getOptionValue(option));
+      this.updateModel(value, event2);
+    }
+  }
+  searchFields() {
+    return this.filterFields || [this.optionLabel];
+  }
+  findNearestSelectedOptionIndex(index, firstCheckUp = false) {
+    let matchedOptionIndex = -1;
+    if (this.hasSelectedOption()) {
+      if (firstCheckUp) {
+        matchedOptionIndex = this.findPrevSelectedOptionIndex(index);
+        matchedOptionIndex = matchedOptionIndex === -1 ? this.findNextSelectedOptionIndex(index) : matchedOptionIndex;
+      } else {
+        matchedOptionIndex = this.findNextSelectedOptionIndex(index);
+        matchedOptionIndex = matchedOptionIndex === -1 ? this.findPrevSelectedOptionIndex(index) : matchedOptionIndex;
+      }
+    }
+    return matchedOptionIndex > -1 ? matchedOptionIndex : index;
+  }
+  findPrevSelectedOptionIndex(index) {
+    const matchedOptionIndex = this.hasSelectedOption() && index > 0 ? ObjectUtils.findLastIndex(this.visibleOptions().slice(0, index), (option) => this.isValidSelectedOption(option)) : -1;
+    return matchedOptionIndex > -1 ? matchedOptionIndex : -1;
+  }
+  findFirstFocusedOptionIndex() {
+    const selectedIndex = this.findFirstSelectedOptionIndex();
+    return selectedIndex < 0 ? this.findFirstOptionIndex() : selectedIndex;
+  }
+  findFirstOptionIndex() {
+    return this.visibleOptions().findIndex((option) => this.isValidOption(option));
+  }
+  findFirstSelectedOptionIndex() {
+    return this.hasSelectedOption() ? this.visibleOptions().findIndex((option) => this.isValidSelectedOption(option)) : -1;
+  }
+  findNextSelectedOptionIndex(index) {
+    const matchedOptionIndex = this.hasSelectedOption() && index < this.visibleOptions().length - 1 ? this.visibleOptions().slice(index + 1).findIndex((option) => this.isValidSelectedOption(option)) : -1;
+    return matchedOptionIndex > -1 ? matchedOptionIndex + index + 1 : -1;
+  }
+  equalityKey() {
+    return this.optionValue ? null : this.dataKey;
+  }
+  hasSelectedOption() {
+    return ObjectUtils.isNotEmpty(this.modelValue());
+  }
+  isValidSelectedOption(option) {
+    return this.isValidOption(option) && this.isSelected(option);
+  }
+  isOptionGroup(option) {
+    return (this.group || this.optionGroupLabel) && option.optionGroup && option.group;
+  }
+  isValidOption(option) {
+    return option && !(this.isOptionDisabled(option) || this.isOptionGroup(option));
+  }
+  isOptionDisabled(option) {
+    let disabled = this.optionDisabled ? ObjectUtils.resolveFieldData(option, this.optionDisabled) : option && option.disabled !== void 0 ? option.disabled : false;
+    return disabled || this.maxSelectionLimitReached && !this.isSelected(option);
+  }
+  isSelected(option) {
+    const optionValue = this.getOptionValue(option);
+    return (this.modelValue() || []).some((value) => ObjectUtils.equals(value, optionValue, this.equalityKey()));
+  }
+  isOptionMatched(option) {
+    return this.isValidOption(option) && this.getOptionLabel(option).toLocaleLowerCase(this.filterLocale).startsWith(this.searchValue.toLocaleLowerCase(this.filterLocale));
+  }
+  isEmpty() {
+    return !this._options() || this.visibleOptions() && this.visibleOptions().length === 0;
+  }
+  getOptionIndex(index, scrollerOptions) {
+    return this.virtualScrollerDisabled ? index : scrollerOptions && scrollerOptions.getItemOptions(index)["index"];
+  }
+  getAriaPosInset(index) {
+    return (this.optionGroupLabel ? index - this.visibleOptions().slice(0, index).filter((option) => this.isOptionGroup(option)).length : index) + 1;
+  }
+  get ariaSetSize() {
+    return this.visibleOptions().filter((option) => !this.isOptionGroup(option)).length;
+  }
+  getLabelByValue(value) {
+    const options = this.group ? this.flatOptions(this._options()) : this._options() || [];
+    const matchedOption = options.find((option) => !this.isOptionGroup(option) && ObjectUtils.equals(this.getOptionValue(option), value, this.equalityKey()));
+    return matchedOption ? this.getOptionLabel(matchedOption) : null;
+  }
+  getSelectedItemsLabel() {
+    let pattern = /{(.*?)}/;
+    if (pattern.test(this.selectedItemsLabel)) {
+      return this.selectedItemsLabel.replace(this.selectedItemsLabel.match(pattern)[0], this.modelValue().length + "");
+    }
+    return this.selectedItemsLabel;
+  }
+  getOptionLabel(option) {
+    return this.optionLabel ? ObjectUtils.resolveFieldData(option, this.optionLabel) : option && option.label != void 0 ? option.label : option;
+  }
+  getOptionValue(option) {
+    return this.optionValue ? ObjectUtils.resolveFieldData(option, this.optionValue) : !this.optionLabel && option && option.value !== void 0 ? option.value : option;
+  }
+  getOptionGroupLabel(optionGroup) {
+    return this.optionGroupLabel ? ObjectUtils.resolveFieldData(optionGroup, this.optionGroupLabel) : optionGroup && optionGroup.label != void 0 ? optionGroup.label : optionGroup;
+  }
+  getOptionGroupChildren(optionGroup) {
+    return this.optionGroupChildren ? ObjectUtils.resolveFieldData(optionGroup, this.optionGroupChildren) : optionGroup.items;
+  }
+  onKeyDown(event2) {
+    if (this.disabled) {
+      event2.preventDefault();
+      return;
+    }
+    const metaKey = event2.metaKey || event2.ctrlKey;
+    switch (event2.code) {
+      case "ArrowDown":
+        this.onArrowDownKey(event2);
+        break;
+      case "ArrowUp":
+        this.onArrowUpKey(event2);
+        break;
+      case "Home":
+        this.onHomeKey(event2);
+        break;
+      case "End":
+        this.onEndKey(event2);
+        break;
+      case "PageDown":
+        this.onPageDownKey(event2);
+        break;
+      case "PageUp":
+        this.onPageUpKey(event2);
+        break;
+      case "Enter":
+      case "Space":
+        this.onEnterKey(event2);
+        break;
+      case "Escape":
+        this.onEscapeKey(event2);
+        break;
+      case "Tab":
+        this.onTabKey(event2);
+        break;
+      case "ShiftLeft":
+      case "ShiftRight":
+        this.onShiftKey();
+        break;
+      default:
+        if (event2.code === "KeyA" && metaKey) {
+          const value = this.visibleOptions().filter((option) => this.isValidOption(option)).map((option) => this.getOptionValue(option));
+          this.updateModel(value, event2);
+          event2.preventDefault();
+          break;
+        }
+        if (!metaKey && ObjectUtils.isPrintableCharacter(event2.key)) {
+          !this.overlayVisible && this.show();
+          this.searchOptions(event2, event2.key);
+          event2.preventDefault();
+        }
+        break;
+    }
+  }
+  onFilterKeyDown(event2) {
+    switch (event2.code) {
+      case "ArrowDown":
+        this.onArrowDownKey(event2);
+        break;
+      case "ArrowUp":
+        this.onArrowUpKey(event2, true);
+        break;
+      case "ArrowLeft":
+      case "ArrowRight":
+        this.onArrowLeftKey(event2, true);
+        break;
+      case "Home":
+        this.onHomeKey(event2, true);
+        break;
+      case "End":
+        this.onEndKey(event2, true);
+        break;
+      case "Enter":
+        this.onEnterKey(event2);
+        break;
+      case "Escape":
+        this.onEscapeKey(event2);
+        break;
+      case "Tab":
+        this.onTabKey(event2, true);
+        break;
+      default:
+        break;
+    }
+  }
+  onArrowLeftKey(event2, pressedInInputText = false) {
+    pressedInInputText && this.focusedOptionIndex.set(-1);
+  }
+  onArrowDownKey(event2) {
+    const optionIndex = this.focusedOptionIndex() !== -1 ? this.findNextOptionIndex(this.focusedOptionIndex()) : this.findFirstFocusedOptionIndex();
+    if (event2.shiftKey) {
+      this.onOptionSelectRange(event2, this.startRangeIndex(), optionIndex);
+    }
+    this.changeFocusedOptionIndex(event2, optionIndex);
+    !this.overlayVisible && this.show();
+    event2.preventDefault();
+    event2.stopPropagation();
+  }
+  onArrowUpKey(event2, pressedInInputText = false) {
+    if (event2.altKey && !pressedInInputText) {
+      if (this.focusedOptionIndex() !== -1) {
+        this.onOptionSelect(event2, this.visibleOptions()[this.focusedOptionIndex()]);
+      }
+      this.overlayVisible && this.hide();
+      event2.preventDefault();
+    } else {
+      const optionIndex = this.focusedOptionIndex() !== -1 ? this.findPrevOptionIndex(this.focusedOptionIndex()) : this.findLastFocusedOptionIndex();
+      if (event2.shiftKey) {
+        this.onOptionSelectRange(event2, optionIndex, this.startRangeIndex());
+      }
+      this.changeFocusedOptionIndex(event2, optionIndex);
+      !this.overlayVisible && this.show();
+      event2.preventDefault();
+    }
+    event2.stopPropagation();
+  }
+  onHomeKey(event2, pressedInInputText = false) {
+    const { currentTarget } = event2;
+    if (pressedInInputText) {
+      const len = currentTarget.value.length;
+      currentTarget.setSelectionRange(0, event2.shiftKey ? len : 0);
+      this.focusedOptionIndex.set(-1);
+    } else {
+      let metaKey = event2.metaKey || event2.ctrlKey;
+      let optionIndex = this.findFirstOptionIndex();
+      if (event2.shiftKey && metaKey) {
+        this.onOptionSelectRange(event2, optionIndex, this.startRangeIndex());
+      }
+      this.changeFocusedOptionIndex(event2, optionIndex);
+      !this.overlayVisible && this.show();
+    }
+    event2.preventDefault();
+  }
+  onEndKey(event2, pressedInInputText = false) {
+    const { currentTarget } = event2;
+    if (pressedInInputText) {
+      const len = currentTarget.value.length;
+      currentTarget.setSelectionRange(event2.shiftKey ? 0 : len, len);
+      this.focusedOptionIndex.set(-1);
+    } else {
+      let metaKey = event2.metaKey || event2.ctrlKey;
+      let optionIndex = this.findLastFocusedOptionIndex();
+      if (event2.shiftKey && metaKey) {
+        this.onOptionSelectRange(event2, this.startRangeIndex(), optionIndex);
+      }
+      this.changeFocusedOptionIndex(event2, optionIndex);
+      !this.overlayVisible && this.show();
+    }
+    event2.preventDefault();
+  }
+  onPageDownKey(event2) {
+    this.scrollInView(this.visibleOptions().length - 1);
+    event2.preventDefault();
+  }
+  onPageUpKey(event2) {
+    this.scrollInView(0);
+    event2.preventDefault();
+  }
+  onEnterKey(event2) {
+    if (!this.overlayVisible) {
+      this.onArrowDownKey(event2);
+    } else {
+      if (this.focusedOptionIndex() !== -1) {
+        if (event2.shiftKey) {
+          this.onOptionSelectRange(event2, this.focusedOptionIndex());
+        } else {
+          this.onOptionSelect({ originalEvent: event2, option: this.visibleOptions()[this.focusedOptionIndex()] });
+        }
+      }
+    }
+    event2.preventDefault();
+  }
+  onEscapeKey(event2) {
+    this.overlayVisible && this.hide(true);
+    event2.preventDefault();
+  }
+  onDeleteKey(event2) {
+    if (this.showClear) {
+      this.clear(event2);
+      event2.preventDefault();
+    }
+  }
+  onTabKey(event2, pressedInInputText = false) {
+    if (!pressedInInputText) {
+      if (this.overlayVisible && this.hasFocusableElements()) {
+        DomHandler.focus(event2.shiftKey ? this.lastHiddenFocusableElementOnOverlay.nativeElement : this.firstHiddenFocusableElementOnOverlay.nativeElement);
+        event2.preventDefault();
+      } else {
+        if (this.focusedOptionIndex() !== -1) {
+          this.onOptionSelect({ originalEvent: event2, option: this.visibleOptions()[this.focusedOptionIndex()] });
+        }
+        this.overlayVisible && this.hide(this.filter);
+      }
+    }
+  }
+  onShiftKey() {
+    this.startRangeIndex.set(this.focusedOptionIndex());
+  }
+  onContainerClick(event2) {
+    if (this.disabled || this.readonly || event2.target.isSameNode(this.focusInputViewChild?.nativeElement)) {
+      return;
+    }
+    if (event2.target.tagName === "INPUT" || event2.target.getAttribute("data-pc-section") === "clearicon" || event2.target.closest('[data-pc-section="clearicon"]')) {
+      event2.preventDefault();
+      return;
+    } else if (!this.overlayViewChild || !this.overlayViewChild.el.nativeElement.contains(event2.target)) {
+      this.overlayVisible ? this.hide(true) : this.show(true);
+    }
+    this.focusInputViewChild?.nativeElement.focus({ preventScroll: true });
+    this.onClick.emit(event2);
+    this.cd.detectChanges();
+  }
+  onFirstHiddenFocus(event2) {
+    const focusableEl = event2.relatedTarget === this.focusInputViewChild?.nativeElement ? DomHandler.getFirstFocusableElement(this.overlayViewChild?.overlayViewChild?.nativeElement, ':not([data-p-hidden-focusable="true"])') : this.focusInputViewChild?.nativeElement;
+    DomHandler.focus(focusableEl);
+  }
+  onInputFocus(event2) {
+    this.focused = true;
+    const focusedOptionIndex = this.focusedOptionIndex() !== -1 ? this.focusedOptionIndex() : this.overlayVisible && this.autoOptionFocus ? this.findFirstFocusedOptionIndex() : -1;
+    this.focusedOptionIndex.set(focusedOptionIndex);
+    this.overlayVisible && this.scrollInView(this.focusedOptionIndex());
+    this.onFocus.emit({ originalEvent: event2 });
+  }
+  onInputBlur(event2) {
+    this.focused = false;
+    this.onBlur.emit({ originalEvent: event2 });
+    if (!this.preventModelTouched) {
+      this.onModelTouched();
+    }
+    this.preventModelTouched = false;
+  }
+  onFilterInputChange(event2) {
+    let value = event2.target.value?.trim();
+    this._filterValue.set(value);
+    this.focusedOptionIndex.set(-1);
+    this.onFilter.emit({ originalEvent: event2, filter: this._filterValue() });
+    !this.virtualScrollerDisabled && this.scroller.scrollToIndex(0);
+  }
+  onLastHiddenFocus(event2) {
+    const focusableEl = event2.relatedTarget === this.focusInputViewChild?.nativeElement ? DomHandler.getLastFocusableElement(this.overlayViewChild?.overlayViewChild?.nativeElement, ':not([data-p-hidden-focusable="true"])') : this.focusInputViewChild?.nativeElement;
+    DomHandler.focus(focusableEl);
+  }
+  onOptionMouseEnter(event2, index) {
+    if (this.focusOnHover) {
+      this.changeFocusedOptionIndex(event2, index);
+    }
+  }
+  onHeaderCheckboxKeyDown(event2) {
+    if (this.disabled) {
+      event2.preventDefault();
+      return;
+    }
+    switch (event2.code) {
+      case "Space":
+        this.onToggleAll(event2);
+        break;
+      case "Enter":
+        this.onToggleAll(event2);
+        break;
+      default:
+        break;
+    }
+  }
+  onFilterBlur(event2) {
+    this.focusedOptionIndex.set(-1);
+  }
+  onHeaderCheckboxFocus() {
+    this.headerCheckboxFocus = true;
+  }
+  onHeaderCheckboxBlur() {
+    this.headerCheckboxFocus = false;
+  }
+  onToggleAll(event2) {
+    if (this.disabled || this.readonly) {
+      return;
+    }
+    if (this.selectAll !== null) {
+      this.onSelectAllChange.emit({
+        originalEvent: event2,
+        checked: !this.allSelected()
+      });
+    } else {
+      const value = this.allSelected() ? [] : this.visibleOptions().filter((option) => this.isValidOption(option)).map((option) => this.getOptionValue(option));
+      this.updateModel(value, event2);
+    }
+    DomHandler.focus(this.headerCheckboxViewChild.nativeElement);
+    this.headerCheckboxFocus = true;
+    event2.preventDefault();
+    event2.stopPropagation();
+  }
+  changeFocusedOptionIndex(event2, index) {
+    if (this.focusedOptionIndex() !== index) {
+      this.focusedOptionIndex.set(index);
+      this.scrollInView();
+    }
+  }
+  get virtualScrollerDisabled() {
+    return !this.virtualScroll;
+  }
+  scrollInView(index = -1) {
+    const id = index !== -1 ? `${this.id}_${index}` : this.focusedOptionId;
+    if (this.itemsViewChild && this.itemsViewChild.nativeElement) {
+      const element2 = DomHandler.findSingle(this.itemsViewChild.nativeElement, `li[id="${id}"]`);
+      if (element2) {
+        element2.scrollIntoView && element2.scrollIntoView({ block: "nearest", inline: "nearest" });
+      } else if (!this.virtualScrollerDisabled) {
+        setTimeout(() => {
+          this.virtualScroll && this.scroller?.scrollToIndex(index !== -1 ? index : this.focusedOptionIndex());
+        }, 0);
+      }
+    }
+  }
+  get focusedOptionId() {
+    return this.focusedOptionIndex() !== -1 ? `${this.id}_${this.focusedOptionIndex()}` : null;
+  }
+  checkSelectionLimit() {
+    if (this.selectionLimit && this.value && this.value.length === this.selectionLimit) {
+      this.maxSelectionLimitReached = true;
+    } else {
+      this.maxSelectionLimitReached = false;
+    }
+  }
+  writeValue(value) {
+    this.value = value;
+    this.modelValue.set(this.value);
+    this.checkSelectionLimit();
+    this.cd.markForCheck();
+  }
+  registerOnChange(fn2) {
+    this.onModelChange = fn2;
+  }
+  registerOnTouched(fn2) {
+    this.onModelTouched = fn2;
+  }
+  setDisabledState(val) {
+    this.disabled = val;
+    this.cd.markForCheck();
+  }
+  allSelected() {
+    return this.selectAll !== null ? this.selectAll : ObjectUtils.isNotEmpty(this.visibleOptions()) && this.visibleOptions().every((option) => this.isOptionGroup(option) || this.isOptionDisabled(option) || this.isSelected(option));
+  }
+  /**
+   * Displays the panel.
+   * @group Method
+   */
+  show(isFocus) {
+    this.overlayVisible = true;
+    const focusedOptionIndex = this.focusedOptionIndex() !== -1 ? this.focusedOptionIndex() : this.autoOptionFocus ? this.findFirstFocusedOptionIndex() : -1;
+    this.focusedOptionIndex.set(focusedOptionIndex);
+    if (isFocus) {
+      DomHandler.focus(this.focusInputViewChild?.nativeElement);
+    }
+    this.cd.markForCheck();
+  }
+  /**
+   * Hides the panel.
+   * @group Method
+   */
+  hide(isFocus) {
+    this.overlayVisible = false;
+    this.focusedOptionIndex.set(-1);
+    if (this.filter && this.resetFilterOnHide) {
+      this.resetFilter();
+    }
+    isFocus && DomHandler.focus(this.focusInputViewChild?.nativeElement);
+    this.onPanelHide.emit();
+    this.cd.markForCheck();
+  }
+  onOverlayAnimationStart(event2) {
+    switch (event2.toState) {
+      case "visible":
+        this.itemsWrapper = DomHandler.findSingle(this.overlayViewChild?.overlayViewChild?.nativeElement, this.virtualScroll ? ".p-scroller" : ".p-multiselect-items-wrapper");
+        this.virtualScroll && this.scroller?.setContentEl(this.itemsViewChild?.nativeElement);
+        if (this._options() && this._options().length) {
+          if (this.virtualScroll) {
+            const selectedIndex = ObjectUtils.isNotEmpty(this.modelValue()) ? this.focusedOptionIndex() : -1;
+            if (selectedIndex !== -1) {
+              this.scroller?.scrollToIndex(selectedIndex);
+            }
+          } else {
+            let selectedListItem = DomHandler.findSingle(this.itemsWrapper, ".p-multiselect-item.p-highlight");
+            if (selectedListItem) {
+              selectedListItem.scrollIntoView({ block: "nearest", inline: "center" });
+            }
+          }
+        }
+        this.onPanelShow.emit();
+      case "void":
+        this.itemsWrapper = null;
+        this.onModelTouched();
+        break;
+    }
+  }
+  resetFilter() {
+    if (this.filterInputChild && this.filterInputChild.nativeElement) {
+      this.filterInputChild.nativeElement.value = "";
+    }
+    this._filterValue.set(null);
+    this._filteredOptions = null;
+  }
+  close(event2) {
+    this.hide();
+    event2.preventDefault();
+    event2.stopPropagation();
+  }
+  clear(event2) {
+    this.value = null;
+    this.checkSelectionLimit();
+    this.updateModel(null, event2);
+    this.selectedOptions = null;
+    this.onClear.emit();
+    event2.stopPropagation();
+  }
+  removeOption(optionValue, event2) {
+    let value = this.modelValue().filter((val) => !ObjectUtils.equals(val, optionValue, this.equalityKey()));
+    this.updateModel(value, event2);
+    event2 && event2.stopPropagation();
+  }
+  findNextItem(item) {
+    let nextItem = item.nextElementSibling;
+    if (nextItem)
+      return DomHandler.hasClass(nextItem.children[0], "p-disabled") || DomHandler.isHidden(nextItem.children[0]) || DomHandler.hasClass(nextItem, "p-multiselect-item-group") ? this.findNextItem(nextItem) : nextItem.children[0];
+    else
+      return null;
+  }
+  findPrevItem(item) {
+    let prevItem = item.previousElementSibling;
+    if (prevItem)
+      return DomHandler.hasClass(prevItem.children[0], "p-disabled") || DomHandler.isHidden(prevItem.children[0]) || DomHandler.hasClass(prevItem, "p-multiselect-item-group") ? this.findPrevItem(prevItem) : prevItem.children[0];
+    else
+      return null;
+  }
+  findNextOptionIndex(index) {
+    const matchedOptionIndex = index < this.visibleOptions().length - 1 ? this.visibleOptions().slice(index + 1).findIndex((option) => this.isValidOption(option)) : -1;
+    return matchedOptionIndex > -1 ? matchedOptionIndex + index + 1 : index;
+  }
+  findPrevOptionIndex(index) {
+    const matchedOptionIndex = index > 0 ? ObjectUtils.findLastIndex(this.visibleOptions().slice(0, index), (option) => this.isValidOption(option)) : -1;
+    return matchedOptionIndex > -1 ? matchedOptionIndex : index;
+  }
+  findLastSelectedOptionIndex() {
+    return this.hasSelectedOption() ? ObjectUtils.findLastIndex(this.visibleOptions(), (option) => this.isValidSelectedOption(option)) : -1;
+  }
+  findLastFocusedOptionIndex() {
+    const selectedIndex = this.findLastSelectedOptionIndex();
+    return selectedIndex < 0 ? this.findLastOptionIndex() : selectedIndex;
+  }
+  findLastOptionIndex() {
+    return ObjectUtils.findLastIndex(this.visibleOptions(), (option) => this.isValidOption(option));
+  }
+  searchOptions(event2, char) {
+    this.searchValue = (this.searchValue || "") + char;
+    let optionIndex = -1;
+    let matched = false;
+    if (this.focusedOptionIndex() !== -1) {
+      optionIndex = this.visibleOptions().slice(this.focusedOptionIndex()).findIndex((option) => this.isOptionMatched(option));
+      optionIndex = optionIndex === -1 ? this.visibleOptions().slice(0, this.focusedOptionIndex()).findIndex((option) => this.isOptionMatched(option)) : optionIndex + this.focusedOptionIndex();
+    } else {
+      optionIndex = this.visibleOptions().findIndex((option) => this.isOptionMatched(option));
+    }
+    if (optionIndex !== -1) {
+      matched = true;
+    }
+    if (optionIndex === -1 && this.focusedOptionIndex() === -1) {
+      optionIndex = this.findFirstFocusedOptionIndex();
+    }
+    if (optionIndex !== -1) {
+      this.changeFocusedOptionIndex(event2, optionIndex);
+    }
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    this.searchTimeout = setTimeout(() => {
+      this.searchValue = "";
+      this.searchTimeout = null;
+    }, 500);
+    return matched;
+  }
+  activateFilter() {
+    if (this.hasFilter() && this._options) {
+      let searchFields = (this.filterBy || this.optionLabel || "label").split(",");
+      if (this.group) {
+        let filteredGroups = [];
+        for (let optgroup of this.options) {
+          let filteredSubOptions = this.filterService.filter(this.getOptionGroupChildren(optgroup), searchFields, this.filterValue, this.filterMatchMode, this.filterLocale);
+          if (filteredSubOptions && filteredSubOptions.length) {
+            filteredGroups.push({ ...optgroup, ...{ [this.optionGroupChildren]: filteredSubOptions } });
+          }
+        }
+        this._filteredOptions = filteredGroups;
+      } else {
+        this._filteredOptions = this.filterService.filter(this.options, searchFields, this._filterValue, this.filterMatchMode, this.filterLocale);
+      }
+    } else {
+      this._filteredOptions = null;
+    }
+  }
+  hasFocusableElements() {
+    return DomHandler.getFocusableElements(this.overlayViewChild.overlayViewChild.nativeElement, ':not([data-p-hidden-focusable="true"])').length > 0;
+  }
+  hasFilter() {
+    return this._filterValue() && this._filterValue().trim().length > 0;
+  }
+  static \u0275fac = \u0275\u0275ngDeclareFactory({ minVersion: "12.0.0", version: "16.2.0", ngImport: core_exports, type: _MultiSelect, deps: [{ token: ElementRef }, { token: Renderer2 }, { token: ChangeDetectorRef }, { token: NgZone }, { token: FilterService }, { token: PrimeNGConfig }, { token: OverlayService }], target: FactoryTarget2.Component });
+  static \u0275cmp = \u0275\u0275ngDeclareComponent({ minVersion: "14.0.0", version: "16.2.0", type: _MultiSelect, selector: "p-multiSelect", inputs: { id: "id", ariaLabel: "ariaLabel", style: "style", styleClass: "styleClass", panelStyle: "panelStyle", panelStyleClass: "panelStyleClass", inputId: "inputId", disabled: "disabled", readonly: "readonly", group: "group", filter: "filter", filterPlaceHolder: "filterPlaceHolder", filterLocale: "filterLocale", overlayVisible: "overlayVisible", tabindex: "tabindex", appendTo: "appendTo", dataKey: "dataKey", name: "name", ariaLabelledBy: "ariaLabelledBy", displaySelectedLabel: "displaySelectedLabel", maxSelectedLabels: "maxSelectedLabels", selectionLimit: "selectionLimit", selectedItemsLabel: "selectedItemsLabel", showToggleAll: "showToggleAll", emptyFilterMessage: "emptyFilterMessage", emptyMessage: "emptyMessage", resetFilterOnHide: "resetFilterOnHide", dropdownIcon: "dropdownIcon", optionLabel: "optionLabel", optionValue: "optionValue", optionDisabled: "optionDisabled", optionGroupLabel: "optionGroupLabel", optionGroupChildren: "optionGroupChildren", showHeader: "showHeader", filterBy: "filterBy", scrollHeight: "scrollHeight", lazy: "lazy", virtualScroll: "virtualScroll", virtualScrollItemSize: "virtualScrollItemSize", virtualScrollOptions: "virtualScrollOptions", overlayOptions: "overlayOptions", ariaFilterLabel: "ariaFilterLabel", filterMatchMode: "filterMatchMode", tooltip: "tooltip", tooltipPosition: "tooltipPosition", tooltipPositionStyle: "tooltipPositionStyle", tooltipStyleClass: "tooltipStyleClass", autofocusFilter: "autofocusFilter", display: "display", autocomplete: "autocomplete", showClear: "showClear", autoZIndex: "autoZIndex", baseZIndex: "baseZIndex", showTransitionOptions: "showTransitionOptions", hideTransitionOptions: "hideTransitionOptions", defaultLabel: "defaultLabel", placeholder: "placeholder", options: "options", filterValue: "filterValue", itemSize: "itemSize", selectAll: "selectAll", focusOnHover: "focusOnHover", filterFields: "filterFields", selectOnFocus: "selectOnFocus", autoOptionFocus: "autoOptionFocus" }, outputs: { onChange: "onChange", onFilter: "onFilter", onFocus: "onFocus", onBlur: "onBlur", onClick: "onClick", onClear: "onClear", onPanelShow: "onPanelShow", onPanelHide: "onPanelHide", onLazyLoad: "onLazyLoad", onRemove: "onRemove", onSelectAllChange: "onSelectAllChange" }, host: { properties: { "class.p-inputwrapper-filled": "filled", "class.p-inputwrapper-focus": "focused || overlayVisible" }, classAttribute: "p-element p-inputwrapper" }, providers: [MULTISELECT_VALUE_ACCESSOR], queries: [{ propertyName: "footerFacet", first: true, predicate: Footer, descendants: true }, { propertyName: "headerFacet", first: true, predicate: Header, descendants: true }, { propertyName: "templates", predicate: PrimeTemplate }], viewQueries: [{ propertyName: "containerViewChild", first: true, predicate: ["container"], descendants: true }, { propertyName: "overlayViewChild", first: true, predicate: ["overlay"], descendants: true }, { propertyName: "filterInputChild", first: true, predicate: ["filterInput"], descendants: true }, { propertyName: "focusInputViewChild", first: true, predicate: ["focusInput"], descendants: true }, { propertyName: "itemsViewChild", first: true, predicate: ["items"], descendants: true }, { propertyName: "scroller", first: true, predicate: ["scroller"], descendants: true }, { propertyName: "lastHiddenFocusableElementOnOverlay", first: true, predicate: ["lastHiddenFocusableEl"], descendants: true }, { propertyName: "firstHiddenFocusableElementOnOverlay", first: true, predicate: ["firstHiddenFocusableEl"], descendants: true }, { propertyName: "headerCheckboxViewChild", first: true, predicate: ["headerCheckbox"], descendants: true }], ngImport: core_exports, template: `
+        <div #container [attr.id]="id" [ngClass]="containerClass" [ngStyle]="style" [class]="styleClass" (click)="onContainerClick($event)">
+            <div class="p-hidden-accessible" [attr.data-p-hidden-accessible]="true">
+                <input
+                    #focusInput
+                    [pTooltip]="tooltip"
+                    [tooltipPosition]="tooltipPosition"
+                    [positionStyle]="tooltipPositionStyle"
+                    [tooltipStyleClass]="tooltipStyleClass"
+                    [attr.aria-disabled]="disabled"
+                    [attr.id]="inputId"
+                    role="combobox"
+                    [attr.aria-label]="ariaLabel"
+                    [attr.aria-labelledby]="ariaLabelledBy"
+                    [attr.aria-haspopup]="'listbox'"
+                    [attr.aria-expanded]="overlayVisible"
+                    [attr.aria-controls]="id + '_list'"
+                    [attr.tabindex]="!disabled ? tabindex : -1"
+                    [attr.aria-activedescendant]="focused ? focusedOptionId : undefined"
+                    (focus)="onInputFocus($event)"
+                    (blur)="onInputBlur($event)"
+                    (keydown)="onKeyDown($event)"
+                />
+            </div>
+            <div class="p-multiselect-label-container" [pTooltip]="tooltip" [tooltipPosition]="tooltipPosition" [positionStyle]="tooltipPositionStyle" [tooltipStyleClass]="tooltipStyleClass">
+                <div [ngClass]="labelClass">
+                    <ng-container *ngIf="!selectedItemsTemplate">
+                        <ng-container *ngIf="display === 'comma'">{{ label() || 'empty' }}</ng-container>
+                        <ng-container *ngIf="display === 'chip'">
+                            <div #token *ngFor="let item of chipSelectedItems(); let i = index" class="p-multiselect-token">
+                                <span class="p-multiselect-token-label">{{ getLabelByValue(item) }}</span>
+                                <ng-container *ngIf="!disabled">
+                                    <TimesCircleIcon *ngIf="!removeTokenIconTemplate" [styleClass]="'p-multiselect-token-icon'" (click)="removeOption(item, event)" [attr.data-pc-section]="'clearicon'" [attr.aria-hidden]="true" />
+                                    <span *ngIf="removeTokenIconTemplate" class="p-multiselect-token-icon" (click)="removeOption(item, event)" [attr.data-pc-section]="'clearicon'" [attr.aria-hidden]="true">
+                                        <ng-container *ngTemplateOutlet="removeTokenIconTemplate"></ng-container>
+                                    </span>
+                                </ng-container>
+                            </div>
+                            <ng-container *ngIf="!modelValue() || modelValue().length === 0">{{ placeholder || defaultLabel || 'empty' }}</ng-container>
+                        </ng-container>
+                    </ng-container>
+                    <ng-container *ngTemplateOutlet="selectedItemsTemplate; context: { $implicit: selectedOptions, removeChip: removeOption.bind(this) }"></ng-container>
+                </div>
+                <ng-container *ngIf="isVisibleClearIcon">
+                    <TimesIcon *ngIf="!clearIconTemplate" [styleClass]="'p-multiselect-clear-icon'" (click)="clear($event)" [attr.data-pc-section]="'clearicon'" [attr.aria-hidden]="true" />
+                    <span *ngIf="clearIconTemplate" class="p-multiselect-clear-icon" (click)="clear($event)" [attr.data-pc-section]="'clearicon'" [attr.aria-hidden]="true">
+                        <ng-template *ngTemplateOutlet="clearIconTemplate"></ng-template>
+                    </span>
+                </ng-container>
+            </div>
+            <div class="p-multiselect-trigger">
+                <ng-container *ngIf="!dropdownIconTemplate">
+                    <span *ngIf="dropdownIcon" class="p-multiselect-trigger-icon" [ngClass]="dropdownIcon" [attr.data-pc-section]="'triggericon'" [attr.aria-hidden]="true"></span>
+                    <ChevronDownIcon *ngIf="!dropdownIcon" [styleClass]="'p-multiselect-trigger-icon'" [attr.data-pc-section]="'triggericon'" [attr.aria-hidden]="true" />
+                </ng-container>
+                <span *ngIf="dropdownIconTemplate" class="p-multiselect-trigger-icon" [attr.data-pc-section]="'triggericon'" [attr.aria-hidden]="true">
+                    <ng-template *ngTemplateOutlet="dropdownIconTemplate"></ng-template>
+                </span>
+            </div>
+            <p-overlay
+                #overlay
+                [(visible)]="overlayVisible"
+                [options]="overlayOptions"
+                [target]="'@parent'"
+                [appendTo]="appendTo"
+                [autoZIndex]="autoZIndex"
+                [baseZIndex]="baseZIndex"
+                [showTransitionOptions]="showTransitionOptions"
+                [hideTransitionOptions]="hideTransitionOptions"
+                (onAnimationStart)="onOverlayAnimationStart($event)"
+                (onHide)="hide()"
+            >
+                <ng-template pTemplate="content">
+                    <div [ngClass]="'p-multiselect-panel p-component'" [ngStyle]="panelStyle" [class]="panelStyleClass">
+                        <span
+                            #firstHiddenFocusableEl
+                            role="presentation"
+                            [attr.aria-hidden]="'true'"
+                            class="p-hidden-accessible p-hidden-focusable"
+                            [attr.tabindex]="0"
+                            (focus)="onFirstHiddenFocus($event)"
+                            [attr.data-p-hidden-accessible]="true"
+                            [attr.data-p-hidden-focusable]="true"
+                        >
+                        </span>
+                        <div class="p-multiselect-header" *ngIf="showHeader">
+                            <ng-content select="p-header"></ng-content>
+                            <ng-container *ngTemplateOutlet="headerTemplate"></ng-container>
+                            <ng-container *ngIf="filterTemplate; else builtInFilterElement">
+                                <ng-container *ngTemplateOutlet="filterTemplate; context: { options: filterOptions }"></ng-container>
+                            </ng-container>
+                            <ng-template #builtInFilterElement>
+                                <div
+                                    class="p-checkbox p-component"
+                                    *ngIf="showToggleAll && !selectionLimit"
+                                    [ngClass]="{ 'p-checkbox-disabled': disabled || toggleAllDisabled }"
+                                    (click)="onToggleAll($event)"
+                                    (keydown)="onHeaderCheckboxKeyDown($event)"
+                                >
+                                    <div class="p-hidden-accessible" [attr.data-p-hidden-accessible]="true">
+                                        <input
+                                            #headerCheckbox
+                                            type="checkbox"
+                                            [readonly]="readonly"
+                                            [attr.checked]="allSelected()"
+                                            (focus)="onHeaderCheckboxFocus()"
+                                            (blur)="onHeaderCheckboxBlur()"
+                                            [disabled]="disabled || toggleAllDisabled"
+                                            [attr.aria-label]="toggleAllAriaLabel"
+                                        />
+                                    </div>
+                                    <div class="p-checkbox-box" role="checkbox" [attr.aria-checked]="allSelected()" [ngClass]="{ 'p-highlight': allSelected(), 'p-focus': headerCheckboxFocus, 'p-disabled': disabled || toggleAllDisabled }">
+                                        <ng-container *ngIf="allSelected()">
+                                            <CheckIcon [styleClass]="'p-checkbox-icon'" *ngIf="!checkIconTemplate" [attr.aria-hidden]="true" />
+                                            <span *ngIf="checkIconTemplate" class="p-checkbox-icon" [attr.aria-hidden]="true">
+                                                <ng-template *ngTemplateOutlet="checkIconTemplate; context: { $implicit: allSelected() }"></ng-template>
+                                            </span>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                                <div class="p-multiselect-filter-container" *ngIf="filter">
+                                    <input
+                                        #filterInput
+                                        type="text"
+                                        [attr.autocomplete]="autocomplete"
+                                        [attr.placeholder]="filterPlaceHolder"
+                                        role="searchbox"
+                                        [attr.aria-owns]="id + '_list'"
+                                        [attr.aria-activedescendant]="focusedOptionId"
+                                        [value]="_filterValue() || ''"
+                                        (input)="onFilterInputChange($event)"
+                                        (keydown)="onFilterKeyDown($event)"
+                                        (click)="onInputClick($event)"
+                                        (blur)="onFilterBlur($event)"
+                                        class="p-multiselect-filter p-inputtext p-component"
+                                        [disabled]="disabled"
+                                        [attr.placeholder]="filterPlaceHolder"
+                                        [attr.aria-label]="ariaFilterLabel"
+                                    />
+                                    <SearchIcon [styleClass]="'p-multiselect-filter-icon'" *ngIf="!filterIconTemplate" />
+                                    <span *ngIf="filterIconTemplate" class="p-multiselect-filter-icon">
+                                        <ng-template *ngTemplateOutlet="filterIconTemplate"></ng-template>
+                                    </span>
+                                </div>
+
+                                <button class="p-multiselect-close p-link p-button-icon-only" type="button" (click)="close($event)" pRipple>
+                                    <TimesIcon [styleClass]="'p-multiselect-close-icon'" *ngIf="!closeIconTemplate" />
+                                    <span *ngIf="closeIconTemplate" class="p-multiselect-close-icon">
+                                        <ng-template *ngTemplateOutlet="closeIconTemplate"></ng-template>
+                                    </span>
+                                </button>
+                            </ng-template>
+                        </div>
+                        <div class="p-multiselect-items-wrapper" [style.max-height]="virtualScroll ? 'auto' : scrollHeight || 'auto'">
+                            <p-scroller
+                                *ngIf="virtualScroll"
+                                #scroller
+                                [items]="visibleOptions()"
+                                [style]="{ height: scrollHeight }"
+                                [itemSize]="virtualScrollItemSize || _itemSize"
+                                [autoSize]="true"
+                                [tabindex]="-1"
+                                [lazy]="lazy"
+                                (onLazyLoad)="onLazyLoad.emit($event)"
+                                [options]="virtualScrollOptions"
+                            >
+                                <ng-template pTemplate="content" let-items let-scrollerOptions="options">
+                                    <ng-container *ngTemplateOutlet="buildInItems; context: { $implicit: items, options: scrollerOptions }"></ng-container>
+                                </ng-template>
+                                <ng-container *ngIf="loaderTemplate">
+                                    <ng-template pTemplate="loader" let-scrollerOptions="options">
+                                        <ng-container *ngTemplateOutlet="loaderTemplate; context: { options: scrollerOptions }"></ng-container>
+                                    </ng-template>
+                                </ng-container>
+                            </p-scroller>
+                            <ng-container *ngIf="!virtualScroll">
+                                <ng-container *ngTemplateOutlet="buildInItems; context: { $implicit: visibleOptions(), options: {} }"></ng-container>
+                            </ng-container>
+
+                            <ng-template #buildInItems let-items let-scrollerOptions="options">
+                                <ul #items class="p-multiselect-items p-component" [ngClass]="scrollerOptions.contentStyleClass" [style]="scrollerOptions.contentStyle" role="listbox" aria-multiselectable="true">
+                                    <ng-template ngFor let-option [ngForOf]="items" let-i="index">
+                                        <ng-container *ngIf="isOptionGroup(option)">
+                                            <li [attr.id]="id + '_' + getOptionIndex(i, scrollerOptions)" class="p-multiselect-item-group" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }" role="option">
+                                                <span *ngIf="!groupTemplate">{{ getOptionGroupLabel(option.optionGroup) }}</span>
+                                                <ng-container *ngTemplateOutlet="groupTemplate; context: { $implicit: option.optionGroup }"></ng-container>
+                                            </li>
+                                        </ng-container>
+                                        <ng-container *ngIf="!isOptionGroup(option)">
+                                            <p-multiSelectItem
+                                                [id]="id + '_' + getOptionIndex(i, scrollerOptions)"
+                                                [option]="option"
+                                                [selected]="isSelected(option)"
+                                                [label]="getOptionLabel(option)"
+                                                [disabled]="isOptionDisabled(option)"
+                                                [template]="itemTemplate"
+                                                [checkIconTemplate]="checkIconTemplate"
+                                                [itemSize]="scrollerOptions.itemSize"
+                                                [focused]="focusedOptionIndex() === getOptionIndex(i, scrollerOptions)"
+                                                [ariaPosInset]="getAriaPosInset(getOptionIndex(i, scrollerOptions))"
+                                                [ariaSetSize]="ariaSetSize"
+                                                (onClick)="onOptionSelect($event, false, getOptionIndex(i, scrollerOptions))"
+                                                (onMouseEnter)="onOptionMouseEnter($event, getOptionIndex(i, scrollerOptions))"
+                                            ></p-multiSelectItem>
+                                        </ng-container>
+                                    </ng-template>
+
+                                    <li *ngIf="hasFilter() && isEmpty()" class="p-multiselect-empty-message" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }">
+                                        <ng-container *ngIf="!emptyFilterTemplate && !emptyTemplate; else emptyFilter">
+                                            {{ emptyFilterMessageLabel }}
+                                        </ng-container>
+                                        <ng-container #emptyFilter *ngTemplateOutlet="emptyFilterTemplate || emptyTemplate"></ng-container>
+                                    </li>
+                                    <li *ngIf="!hasFilter() && isEmpty()" class="p-multiselect-empty-message" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }">
+                                        <ng-container *ngIf="!emptyTemplate; else empty">
+                                            {{ emptyMessageLabel }}
+                                        </ng-container>
+                                        <ng-container #empty *ngTemplateOutlet="emptyTemplate"></ng-container>
+                                    </li>
+                                </ul>
+                            </ng-template>
+                        </div>
+                        <div class="p-multiselect-footer" *ngIf="footerFacet || footerTemplate">
+                            <ng-content select="p-footer"></ng-content>
+                            <ng-container *ngTemplateOutlet="footerTemplate"></ng-container>
+                        </div>
+
+                        <span
+                            #lastHiddenFocusableEl
+                            role="presentation"
+                            [attr.aria-hidden]="true"
+                            class="p-hidden-accessible p-hidden-focusable"
+                            [attr.tabindex]="0"
+                            (focus)="onLastHiddenFocus($event)"
+                            [attr.data-p-hidden-accessible]="true"
+                            [attr.data-p-hidden-focusable]="true"
+                        ></span>
+                    </div>
+                </ng-template>
+            </p-overlay>
+        </div>
+    `, isInline: true, styles: ["@layer primeng{.p-multiselect{display:inline-flex;cursor:pointer;position:relative;-webkit-user-select:none;user-select:none}.p-multiselect-trigger{display:flex;align-items:center;justify-content:center;flex-shrink:0}.p-multiselect-label-container{overflow:hidden;flex:1 1 auto;cursor:pointer;display:flex}.p-multiselect-label{display:block;white-space:nowrap;cursor:pointer;overflow:hidden;text-overflow:ellipsis}.p-multiselect-label-empty{overflow:hidden;visibility:hidden}.p-multiselect-token{cursor:default;display:inline-flex;align-items:center;flex:0 0 auto}.p-multiselect-token-icon{cursor:pointer}.p-multiselect-token-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px}.p-multiselect-items-wrapper{overflow:auto}.p-multiselect-items{margin:0;padding:0;list-style-type:none}.p-multiselect-item{cursor:pointer;display:flex;align-items:center;font-weight:400;white-space:nowrap;position:relative;overflow:hidden}.p-multiselect-header{display:flex;align-items:center;justify-content:space-between}.p-multiselect-filter-container{position:relative;flex:1 1 auto}.p-multiselect-filter-icon{position:absolute;top:50%;margin-top:-.5rem}.p-multiselect-filter-container .p-inputtext{width:100%}.p-multiselect-close{display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative}.p-fluid .p-multiselect{display:flex}.p-multiselect-clear-icon{position:absolute;top:50%;margin-top:-.5rem;cursor:pointer}.p-multiselect-clearable{position:relative}}\n"], dependencies: [{ kind: "directive", type: forwardRef(function() {
+    return NgClass;
+  }), selector: "[ngClass]", inputs: ["class", "ngClass"] }, { kind: "directive", type: forwardRef(function() {
+    return NgForOf;
+  }), selector: "[ngFor][ngForOf]", inputs: ["ngForOf", "ngForTrackBy", "ngForTemplate"] }, { kind: "directive", type: forwardRef(function() {
+    return NgIf;
+  }), selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: forwardRef(function() {
+    return NgTemplateOutlet;
+  }), selector: "[ngTemplateOutlet]", inputs: ["ngTemplateOutletContext", "ngTemplateOutlet", "ngTemplateOutletInjector"] }, { kind: "directive", type: forwardRef(function() {
+    return NgStyle;
+  }), selector: "[ngStyle]", inputs: ["ngStyle"] }, { kind: "component", type: forwardRef(function() {
+    return Overlay;
+  }), selector: "p-overlay", inputs: ["visible", "mode", "style", "styleClass", "contentStyle", "contentStyleClass", "target", "appendTo", "autoZIndex", "baseZIndex", "showTransitionOptions", "hideTransitionOptions", "listener", "responsive", "options"], outputs: ["visibleChange", "onBeforeShow", "onShow", "onBeforeHide", "onHide", "onAnimationStart", "onAnimationDone"] }, { kind: "directive", type: forwardRef(function() {
+    return PrimeTemplate;
+  }), selector: "[pTemplate]", inputs: ["type", "pTemplate"] }, { kind: "directive", type: forwardRef(function() {
+    return Tooltip;
+  }), selector: "[pTooltip]", inputs: ["tooltipPosition", "tooltipEvent", "appendTo", "positionStyle", "tooltipStyleClass", "tooltipZIndex", "escape", "showDelay", "hideDelay", "life", "positionTop", "positionLeft", "autoHide", "fitContent", "hideOnEscape", "pTooltip", "tooltipDisabled", "tooltipOptions"] }, { kind: "directive", type: forwardRef(function() {
+    return Ripple;
+  }), selector: "[pRipple]" }, { kind: "component", type: forwardRef(function() {
+    return Scroller;
+  }), selector: "p-scroller", inputs: ["id", "style", "styleClass", "tabindex", "items", "itemSize", "scrollHeight", "scrollWidth", "orientation", "step", "delay", "resizeDelay", "appendOnly", "inline", "lazy", "disabled", "loaderDisabled", "columns", "showSpacer", "showLoader", "numToleratedItems", "loading", "autoSize", "trackBy", "options"], outputs: ["onLazyLoad", "onScroll", "onScrollIndexChange"] }, { kind: "component", type: forwardRef(function() {
+    return CheckIcon;
+  }), selector: "CheckIcon" }, { kind: "component", type: forwardRef(function() {
+    return SearchIcon;
+  }), selector: "SearchIcon" }, { kind: "component", type: forwardRef(function() {
+    return TimesCircleIcon;
+  }), selector: "TimesCircleIcon" }, { kind: "component", type: forwardRef(function() {
+    return TimesIcon;
+  }), selector: "TimesIcon" }, { kind: "component", type: forwardRef(function() {
+    return ChevronDownIcon;
+  }), selector: "ChevronDownIcon" }, { kind: "component", type: forwardRef(function() {
+    return MultiSelectItem;
+  }), selector: "p-multiSelectItem", inputs: ["id", "option", "selected", "label", "disabled", "itemSize", "focused", "ariaPosInset", "ariaSetSize", "template", "checkIconTemplate"], outputs: ["onClick", "onMouseEnter"] }], changeDetection: ChangeDetectionStrategy2.OnPush, encapsulation: ViewEncapsulation$1.None });
+};
+\u0275\u0275ngDeclareClassMetadata({ minVersion: "12.0.0", version: "16.2.0", ngImport: core_exports, type: MultiSelect, decorators: [{
+  type: Component,
+  args: [{ selector: "p-multiSelect", template: `
+        <div #container [attr.id]="id" [ngClass]="containerClass" [ngStyle]="style" [class]="styleClass" (click)="onContainerClick($event)">
+            <div class="p-hidden-accessible" [attr.data-p-hidden-accessible]="true">
+                <input
+                    #focusInput
+                    [pTooltip]="tooltip"
+                    [tooltipPosition]="tooltipPosition"
+                    [positionStyle]="tooltipPositionStyle"
+                    [tooltipStyleClass]="tooltipStyleClass"
+                    [attr.aria-disabled]="disabled"
+                    [attr.id]="inputId"
+                    role="combobox"
+                    [attr.aria-label]="ariaLabel"
+                    [attr.aria-labelledby]="ariaLabelledBy"
+                    [attr.aria-haspopup]="'listbox'"
+                    [attr.aria-expanded]="overlayVisible"
+                    [attr.aria-controls]="id + '_list'"
+                    [attr.tabindex]="!disabled ? tabindex : -1"
+                    [attr.aria-activedescendant]="focused ? focusedOptionId : undefined"
+                    (focus)="onInputFocus($event)"
+                    (blur)="onInputBlur($event)"
+                    (keydown)="onKeyDown($event)"
+                />
+            </div>
+            <div class="p-multiselect-label-container" [pTooltip]="tooltip" [tooltipPosition]="tooltipPosition" [positionStyle]="tooltipPositionStyle" [tooltipStyleClass]="tooltipStyleClass">
+                <div [ngClass]="labelClass">
+                    <ng-container *ngIf="!selectedItemsTemplate">
+                        <ng-container *ngIf="display === 'comma'">{{ label() || 'empty' }}</ng-container>
+                        <ng-container *ngIf="display === 'chip'">
+                            <div #token *ngFor="let item of chipSelectedItems(); let i = index" class="p-multiselect-token">
+                                <span class="p-multiselect-token-label">{{ getLabelByValue(item) }}</span>
+                                <ng-container *ngIf="!disabled">
+                                    <TimesCircleIcon *ngIf="!removeTokenIconTemplate" [styleClass]="'p-multiselect-token-icon'" (click)="removeOption(item, event)" [attr.data-pc-section]="'clearicon'" [attr.aria-hidden]="true" />
+                                    <span *ngIf="removeTokenIconTemplate" class="p-multiselect-token-icon" (click)="removeOption(item, event)" [attr.data-pc-section]="'clearicon'" [attr.aria-hidden]="true">
+                                        <ng-container *ngTemplateOutlet="removeTokenIconTemplate"></ng-container>
+                                    </span>
+                                </ng-container>
+                            </div>
+                            <ng-container *ngIf="!modelValue() || modelValue().length === 0">{{ placeholder || defaultLabel || 'empty' }}</ng-container>
+                        </ng-container>
+                    </ng-container>
+                    <ng-container *ngTemplateOutlet="selectedItemsTemplate; context: { $implicit: selectedOptions, removeChip: removeOption.bind(this) }"></ng-container>
+                </div>
+                <ng-container *ngIf="isVisibleClearIcon">
+                    <TimesIcon *ngIf="!clearIconTemplate" [styleClass]="'p-multiselect-clear-icon'" (click)="clear($event)" [attr.data-pc-section]="'clearicon'" [attr.aria-hidden]="true" />
+                    <span *ngIf="clearIconTemplate" class="p-multiselect-clear-icon" (click)="clear($event)" [attr.data-pc-section]="'clearicon'" [attr.aria-hidden]="true">
+                        <ng-template *ngTemplateOutlet="clearIconTemplate"></ng-template>
+                    </span>
+                </ng-container>
+            </div>
+            <div class="p-multiselect-trigger">
+                <ng-container *ngIf="!dropdownIconTemplate">
+                    <span *ngIf="dropdownIcon" class="p-multiselect-trigger-icon" [ngClass]="dropdownIcon" [attr.data-pc-section]="'triggericon'" [attr.aria-hidden]="true"></span>
+                    <ChevronDownIcon *ngIf="!dropdownIcon" [styleClass]="'p-multiselect-trigger-icon'" [attr.data-pc-section]="'triggericon'" [attr.aria-hidden]="true" />
+                </ng-container>
+                <span *ngIf="dropdownIconTemplate" class="p-multiselect-trigger-icon" [attr.data-pc-section]="'triggericon'" [attr.aria-hidden]="true">
+                    <ng-template *ngTemplateOutlet="dropdownIconTemplate"></ng-template>
+                </span>
+            </div>
+            <p-overlay
+                #overlay
+                [(visible)]="overlayVisible"
+                [options]="overlayOptions"
+                [target]="'@parent'"
+                [appendTo]="appendTo"
+                [autoZIndex]="autoZIndex"
+                [baseZIndex]="baseZIndex"
+                [showTransitionOptions]="showTransitionOptions"
+                [hideTransitionOptions]="hideTransitionOptions"
+                (onAnimationStart)="onOverlayAnimationStart($event)"
+                (onHide)="hide()"
+            >
+                <ng-template pTemplate="content">
+                    <div [ngClass]="'p-multiselect-panel p-component'" [ngStyle]="panelStyle" [class]="panelStyleClass">
+                        <span
+                            #firstHiddenFocusableEl
+                            role="presentation"
+                            [attr.aria-hidden]="'true'"
+                            class="p-hidden-accessible p-hidden-focusable"
+                            [attr.tabindex]="0"
+                            (focus)="onFirstHiddenFocus($event)"
+                            [attr.data-p-hidden-accessible]="true"
+                            [attr.data-p-hidden-focusable]="true"
+                        >
+                        </span>
+                        <div class="p-multiselect-header" *ngIf="showHeader">
+                            <ng-content select="p-header"></ng-content>
+                            <ng-container *ngTemplateOutlet="headerTemplate"></ng-container>
+                            <ng-container *ngIf="filterTemplate; else builtInFilterElement">
+                                <ng-container *ngTemplateOutlet="filterTemplate; context: { options: filterOptions }"></ng-container>
+                            </ng-container>
+                            <ng-template #builtInFilterElement>
+                                <div
+                                    class="p-checkbox p-component"
+                                    *ngIf="showToggleAll && !selectionLimit"
+                                    [ngClass]="{ 'p-checkbox-disabled': disabled || toggleAllDisabled }"
+                                    (click)="onToggleAll($event)"
+                                    (keydown)="onHeaderCheckboxKeyDown($event)"
+                                >
+                                    <div class="p-hidden-accessible" [attr.data-p-hidden-accessible]="true">
+                                        <input
+                                            #headerCheckbox
+                                            type="checkbox"
+                                            [readonly]="readonly"
+                                            [attr.checked]="allSelected()"
+                                            (focus)="onHeaderCheckboxFocus()"
+                                            (blur)="onHeaderCheckboxBlur()"
+                                            [disabled]="disabled || toggleAllDisabled"
+                                            [attr.aria-label]="toggleAllAriaLabel"
+                                        />
+                                    </div>
+                                    <div class="p-checkbox-box" role="checkbox" [attr.aria-checked]="allSelected()" [ngClass]="{ 'p-highlight': allSelected(), 'p-focus': headerCheckboxFocus, 'p-disabled': disabled || toggleAllDisabled }">
+                                        <ng-container *ngIf="allSelected()">
+                                            <CheckIcon [styleClass]="'p-checkbox-icon'" *ngIf="!checkIconTemplate" [attr.aria-hidden]="true" />
+                                            <span *ngIf="checkIconTemplate" class="p-checkbox-icon" [attr.aria-hidden]="true">
+                                                <ng-template *ngTemplateOutlet="checkIconTemplate; context: { $implicit: allSelected() }"></ng-template>
+                                            </span>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                                <div class="p-multiselect-filter-container" *ngIf="filter">
+                                    <input
+                                        #filterInput
+                                        type="text"
+                                        [attr.autocomplete]="autocomplete"
+                                        [attr.placeholder]="filterPlaceHolder"
+                                        role="searchbox"
+                                        [attr.aria-owns]="id + '_list'"
+                                        [attr.aria-activedescendant]="focusedOptionId"
+                                        [value]="_filterValue() || ''"
+                                        (input)="onFilterInputChange($event)"
+                                        (keydown)="onFilterKeyDown($event)"
+                                        (click)="onInputClick($event)"
+                                        (blur)="onFilterBlur($event)"
+                                        class="p-multiselect-filter p-inputtext p-component"
+                                        [disabled]="disabled"
+                                        [attr.placeholder]="filterPlaceHolder"
+                                        [attr.aria-label]="ariaFilterLabel"
+                                    />
+                                    <SearchIcon [styleClass]="'p-multiselect-filter-icon'" *ngIf="!filterIconTemplate" />
+                                    <span *ngIf="filterIconTemplate" class="p-multiselect-filter-icon">
+                                        <ng-template *ngTemplateOutlet="filterIconTemplate"></ng-template>
+                                    </span>
+                                </div>
+
+                                <button class="p-multiselect-close p-link p-button-icon-only" type="button" (click)="close($event)" pRipple>
+                                    <TimesIcon [styleClass]="'p-multiselect-close-icon'" *ngIf="!closeIconTemplate" />
+                                    <span *ngIf="closeIconTemplate" class="p-multiselect-close-icon">
+                                        <ng-template *ngTemplateOutlet="closeIconTemplate"></ng-template>
+                                    </span>
+                                </button>
+                            </ng-template>
+                        </div>
+                        <div class="p-multiselect-items-wrapper" [style.max-height]="virtualScroll ? 'auto' : scrollHeight || 'auto'">
+                            <p-scroller
+                                *ngIf="virtualScroll"
+                                #scroller
+                                [items]="visibleOptions()"
+                                [style]="{ height: scrollHeight }"
+                                [itemSize]="virtualScrollItemSize || _itemSize"
+                                [autoSize]="true"
+                                [tabindex]="-1"
+                                [lazy]="lazy"
+                                (onLazyLoad)="onLazyLoad.emit($event)"
+                                [options]="virtualScrollOptions"
+                            >
+                                <ng-template pTemplate="content" let-items let-scrollerOptions="options">
+                                    <ng-container *ngTemplateOutlet="buildInItems; context: { $implicit: items, options: scrollerOptions }"></ng-container>
+                                </ng-template>
+                                <ng-container *ngIf="loaderTemplate">
+                                    <ng-template pTemplate="loader" let-scrollerOptions="options">
+                                        <ng-container *ngTemplateOutlet="loaderTemplate; context: { options: scrollerOptions }"></ng-container>
+                                    </ng-template>
+                                </ng-container>
+                            </p-scroller>
+                            <ng-container *ngIf="!virtualScroll">
+                                <ng-container *ngTemplateOutlet="buildInItems; context: { $implicit: visibleOptions(), options: {} }"></ng-container>
+                            </ng-container>
+
+                            <ng-template #buildInItems let-items let-scrollerOptions="options">
+                                <ul #items class="p-multiselect-items p-component" [ngClass]="scrollerOptions.contentStyleClass" [style]="scrollerOptions.contentStyle" role="listbox" aria-multiselectable="true">
+                                    <ng-template ngFor let-option [ngForOf]="items" let-i="index">
+                                        <ng-container *ngIf="isOptionGroup(option)">
+                                            <li [attr.id]="id + '_' + getOptionIndex(i, scrollerOptions)" class="p-multiselect-item-group" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }" role="option">
+                                                <span *ngIf="!groupTemplate">{{ getOptionGroupLabel(option.optionGroup) }}</span>
+                                                <ng-container *ngTemplateOutlet="groupTemplate; context: { $implicit: option.optionGroup }"></ng-container>
+                                            </li>
+                                        </ng-container>
+                                        <ng-container *ngIf="!isOptionGroup(option)">
+                                            <p-multiSelectItem
+                                                [id]="id + '_' + getOptionIndex(i, scrollerOptions)"
+                                                [option]="option"
+                                                [selected]="isSelected(option)"
+                                                [label]="getOptionLabel(option)"
+                                                [disabled]="isOptionDisabled(option)"
+                                                [template]="itemTemplate"
+                                                [checkIconTemplate]="checkIconTemplate"
+                                                [itemSize]="scrollerOptions.itemSize"
+                                                [focused]="focusedOptionIndex() === getOptionIndex(i, scrollerOptions)"
+                                                [ariaPosInset]="getAriaPosInset(getOptionIndex(i, scrollerOptions))"
+                                                [ariaSetSize]="ariaSetSize"
+                                                (onClick)="onOptionSelect($event, false, getOptionIndex(i, scrollerOptions))"
+                                                (onMouseEnter)="onOptionMouseEnter($event, getOptionIndex(i, scrollerOptions))"
+                                            ></p-multiSelectItem>
+                                        </ng-container>
+                                    </ng-template>
+
+                                    <li *ngIf="hasFilter() && isEmpty()" class="p-multiselect-empty-message" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }">
+                                        <ng-container *ngIf="!emptyFilterTemplate && !emptyTemplate; else emptyFilter">
+                                            {{ emptyFilterMessageLabel }}
+                                        </ng-container>
+                                        <ng-container #emptyFilter *ngTemplateOutlet="emptyFilterTemplate || emptyTemplate"></ng-container>
+                                    </li>
+                                    <li *ngIf="!hasFilter() && isEmpty()" class="p-multiselect-empty-message" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }">
+                                        <ng-container *ngIf="!emptyTemplate; else empty">
+                                            {{ emptyMessageLabel }}
+                                        </ng-container>
+                                        <ng-container #empty *ngTemplateOutlet="emptyTemplate"></ng-container>
+                                    </li>
+                                </ul>
+                            </ng-template>
+                        </div>
+                        <div class="p-multiselect-footer" *ngIf="footerFacet || footerTemplate">
+                            <ng-content select="p-footer"></ng-content>
+                            <ng-container *ngTemplateOutlet="footerTemplate"></ng-container>
+                        </div>
+
+                        <span
+                            #lastHiddenFocusableEl
+                            role="presentation"
+                            [attr.aria-hidden]="true"
+                            class="p-hidden-accessible p-hidden-focusable"
+                            [attr.tabindex]="0"
+                            (focus)="onLastHiddenFocus($event)"
+                            [attr.data-p-hidden-accessible]="true"
+                            [attr.data-p-hidden-focusable]="true"
+                        ></span>
+                    </div>
+                </ng-template>
+            </p-overlay>
+        </div>
+    `, host: {
+    class: "p-element p-inputwrapper",
+    "[class.p-inputwrapper-filled]": "filled",
+    "[class.p-inputwrapper-focus]": "focused || overlayVisible"
+  }, providers: [MULTISELECT_VALUE_ACCESSOR], changeDetection: ChangeDetectionStrategy2.OnPush, encapsulation: ViewEncapsulation$1.None, styles: ["@layer primeng{.p-multiselect{display:inline-flex;cursor:pointer;position:relative;-webkit-user-select:none;user-select:none}.p-multiselect-trigger{display:flex;align-items:center;justify-content:center;flex-shrink:0}.p-multiselect-label-container{overflow:hidden;flex:1 1 auto;cursor:pointer;display:flex}.p-multiselect-label{display:block;white-space:nowrap;cursor:pointer;overflow:hidden;text-overflow:ellipsis}.p-multiselect-label-empty{overflow:hidden;visibility:hidden}.p-multiselect-token{cursor:default;display:inline-flex;align-items:center;flex:0 0 auto}.p-multiselect-token-icon{cursor:pointer}.p-multiselect-token-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px}.p-multiselect-items-wrapper{overflow:auto}.p-multiselect-items{margin:0;padding:0;list-style-type:none}.p-multiselect-item{cursor:pointer;display:flex;align-items:center;font-weight:400;white-space:nowrap;position:relative;overflow:hidden}.p-multiselect-header{display:flex;align-items:center;justify-content:space-between}.p-multiselect-filter-container{position:relative;flex:1 1 auto}.p-multiselect-filter-icon{position:absolute;top:50%;margin-top:-.5rem}.p-multiselect-filter-container .p-inputtext{width:100%}.p-multiselect-close{display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative}.p-fluid .p-multiselect{display:flex}.p-multiselect-clear-icon{position:absolute;top:50%;margin-top:-.5rem;cursor:pointer}.p-multiselect-clearable{position:relative}}\n"] }]
+}], ctorParameters: function() {
+  return [{ type: ElementRef }, { type: Renderer2 }, { type: ChangeDetectorRef }, { type: NgZone }, { type: FilterService }, { type: PrimeNGConfig }, { type: OverlayService }];
+}, propDecorators: { id: [{
+  type: Input
+}], ariaLabel: [{
+  type: Input
+}], style: [{
+  type: Input
+}], styleClass: [{
+  type: Input
+}], panelStyle: [{
+  type: Input
+}], panelStyleClass: [{
+  type: Input
+}], inputId: [{
+  type: Input
+}], disabled: [{
+  type: Input
+}], readonly: [{
+  type: Input
+}], group: [{
+  type: Input
+}], filter: [{
+  type: Input
+}], filterPlaceHolder: [{
+  type: Input
+}], filterLocale: [{
+  type: Input
+}], overlayVisible: [{
+  type: Input
+}], tabindex: [{
+  type: Input
+}], appendTo: [{
+  type: Input
+}], dataKey: [{
+  type: Input
+}], name: [{
+  type: Input
+}], ariaLabelledBy: [{
+  type: Input
+}], displaySelectedLabel: [{
+  type: Input
+}], maxSelectedLabels: [{
+  type: Input
+}], selectionLimit: [{
+  type: Input
+}], selectedItemsLabel: [{
+  type: Input
+}], showToggleAll: [{
+  type: Input
+}], emptyFilterMessage: [{
+  type: Input
+}], emptyMessage: [{
+  type: Input
+}], resetFilterOnHide: [{
+  type: Input
+}], dropdownIcon: [{
+  type: Input
+}], optionLabel: [{
+  type: Input
+}], optionValue: [{
+  type: Input
+}], optionDisabled: [{
+  type: Input
+}], optionGroupLabel: [{
+  type: Input
+}], optionGroupChildren: [{
+  type: Input
+}], showHeader: [{
+  type: Input
+}], filterBy: [{
+  type: Input
+}], scrollHeight: [{
+  type: Input
+}], lazy: [{
+  type: Input
+}], virtualScroll: [{
+  type: Input
+}], virtualScrollItemSize: [{
+  type: Input
+}], virtualScrollOptions: [{
+  type: Input
+}], overlayOptions: [{
+  type: Input
+}], ariaFilterLabel: [{
+  type: Input
+}], filterMatchMode: [{
+  type: Input
+}], tooltip: [{
+  type: Input
+}], tooltipPosition: [{
+  type: Input
+}], tooltipPositionStyle: [{
+  type: Input
+}], tooltipStyleClass: [{
+  type: Input
+}], autofocusFilter: [{
+  type: Input
+}], display: [{
+  type: Input
+}], autocomplete: [{
+  type: Input
+}], showClear: [{
+  type: Input
+}], autoZIndex: [{
+  type: Input
+}], baseZIndex: [{
+  type: Input
+}], showTransitionOptions: [{
+  type: Input
+}], hideTransitionOptions: [{
+  type: Input
+}], defaultLabel: [{
+  type: Input
+}], placeholder: [{
+  type: Input
+}], options: [{
+  type: Input
+}], filterValue: [{
+  type: Input
+}], itemSize: [{
+  type: Input
+}], selectAll: [{
+  type: Input
+}], focusOnHover: [{
+  type: Input
+}], filterFields: [{
+  type: Input
+}], selectOnFocus: [{
+  type: Input
+}], autoOptionFocus: [{
+  type: Input
+}], onChange: [{
+  type: Output
+}], onFilter: [{
+  type: Output
+}], onFocus: [{
+  type: Output
+}], onBlur: [{
+  type: Output
+}], onClick: [{
+  type: Output
+}], onClear: [{
+  type: Output
+}], onPanelShow: [{
+  type: Output
+}], onPanelHide: [{
+  type: Output
+}], onLazyLoad: [{
+  type: Output
+}], onRemove: [{
+  type: Output
+}], onSelectAllChange: [{
+  type: Output
+}], containerViewChild: [{
+  type: ViewChild,
+  args: ["container"]
+}], overlayViewChild: [{
+  type: ViewChild,
+  args: ["overlay"]
+}], filterInputChild: [{
+  type: ViewChild,
+  args: ["filterInput"]
+}], focusInputViewChild: [{
+  type: ViewChild,
+  args: ["focusInput"]
+}], itemsViewChild: [{
+  type: ViewChild,
+  args: ["items"]
+}], scroller: [{
+  type: ViewChild,
+  args: ["scroller"]
+}], lastHiddenFocusableElementOnOverlay: [{
+  type: ViewChild,
+  args: ["lastHiddenFocusableEl"]
+}], firstHiddenFocusableElementOnOverlay: [{
+  type: ViewChild,
+  args: ["firstHiddenFocusableEl"]
+}], headerCheckboxViewChild: [{
+  type: ViewChild,
+  args: ["headerCheckbox"]
+}], footerFacet: [{
+  type: ContentChild,
+  args: [Footer]
+}], headerFacet: [{
+  type: ContentChild,
+  args: [Header]
+}], templates: [{
+  type: ContentChildren,
+  args: [PrimeTemplate]
+}] } });
+var MultiSelectModule = class _MultiSelectModule {
+  static \u0275fac = \u0275\u0275ngDeclareFactory({ minVersion: "12.0.0", version: "16.2.0", ngImport: core_exports, type: _MultiSelectModule, deps: [], target: FactoryTarget2.NgModule });
+  static \u0275mod = \u0275\u0275ngDeclareNgModule({ minVersion: "14.0.0", version: "16.2.0", ngImport: core_exports, type: _MultiSelectModule, declarations: [MultiSelect, MultiSelectItem], imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, CheckIcon, SearchIcon, TimesCircleIcon, TimesIcon, ChevronDownIcon, CheckIcon], exports: [MultiSelect, OverlayModule, SharedModule, ScrollerModule] });
+  static \u0275inj = \u0275\u0275ngDeclareInjector({ minVersion: "12.0.0", version: "16.2.0", ngImport: core_exports, type: _MultiSelectModule, imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, CheckIcon, SearchIcon, TimesCircleIcon, TimesIcon, ChevronDownIcon, CheckIcon, OverlayModule, SharedModule, ScrollerModule] });
+};
+\u0275\u0275ngDeclareClassMetadata({ minVersion: "12.0.0", version: "16.2.0", ngImport: core_exports, type: MultiSelectModule, decorators: [{
+  type: NgModule,
+  args: [{
+    imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, CheckIcon, SearchIcon, TimesCircleIcon, TimesIcon, ChevronDownIcon, CheckIcon],
+    exports: [MultiSelect, OverlayModule, SharedModule, ScrollerModule],
+    declarations: [MultiSelect, MultiSelectItem]
+  }]
+}] });
+
 // backend/sutram/ng-sutramui-excel/node_modules/xlsx/xlsx.mjs
 var XLSX = {};
 XLSX.version = "0.18.5";
@@ -124395,13 +126658,13 @@ function parse_TST_TableDataList(M, root) {
   return data;
 }
 function parse_TST_TileRowInfo(u8, type) {
-  var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i, _j2, _k, _l, _m, _n;
+  var _a2, _b2, _c13, _d2, _e2, _f2, _g2, _h2, _i, _j2, _k, _l, _m, _n;
   var pb = parse_shallow(u8);
   var R = varint_to_i32(pb[1][0].data) >>> 0;
   var cnt = varint_to_i32(pb[2][0].data) >>> 0;
   var wide_offsets = ((_b2 = (_a2 = pb[8]) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.data) && varint_to_i32(pb[8][0].data) > 0 || false;
   var used_storage_u8, used_storage;
-  if (((_d2 = (_c2 = pb[7]) == null ? void 0 : _c2[0]) == null ? void 0 : _d2.data) && type != 0) {
+  if (((_d2 = (_c13 = pb[7]) == null ? void 0 : _c13[0]) == null ? void 0 : _d2.data) && type != 0) {
     used_storage_u8 = (_f2 = (_e2 = pb[7]) == null ? void 0 : _e2[0]) == null ? void 0 : _f2.data;
     used_storage = (_h2 = (_g2 = pb[6]) == null ? void 0 : _g2[0]) == null ? void 0 : _h2.data;
   } else if (((_j2 = (_i = pb[4]) == null ? void 0 : _i[0]) == null ? void 0 : _j2.data) && type != 1) {
@@ -124528,7 +126791,7 @@ function parse_TN_DocumentArchive(M, root) {
   return out;
 }
 function parse_numbers_iwa(cfb) {
-  var _a2, _b2, _c2, _d2;
+  var _a2, _b2, _c13, _d2;
   var M = {}, indices = [];
   cfb.FullPaths.forEach(function(p) {
     if (p.match(/\.iwpv2/))
@@ -124556,7 +126819,7 @@ function parse_numbers_iwa(cfb) {
   });
   if (!indices.length)
     throw new Error("File has no messages");
-  var docroot = ((_d2 = (_c2 = (_b2 = (_a2 = M == null ? void 0 : M[1]) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.meta) == null ? void 0 : _c2[1]) == null ? void 0 : _d2[0].data) && varint_to_i32(M[1][0].meta[1][0].data) == 1 && M[1][0];
+  var docroot = ((_d2 = (_c13 = (_b2 = (_a2 = M == null ? void 0 : M[1]) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.meta) == null ? void 0 : _c13[1]) == null ? void 0 : _d2[0].data) && varint_to_i32(M[1][0].meta[1][0].data) == 1 && M[1][0];
   if (!docroot)
     indices.forEach(function(idx) {
       M[idx].forEach(function(iwam) {
@@ -124574,10 +126837,10 @@ function parse_numbers_iwa(cfb) {
   return parse_TN_DocumentArchive(M, docroot);
 }
 function write_tile_row(tri, data, SST) {
-  var _a2, _b2, _c2, _d2;
+  var _a2, _b2, _c13, _d2;
   if (!((_a2 = tri[6]) == null ? void 0 : _a2[0]) || !((_b2 = tri[7]) == null ? void 0 : _b2[0]))
     throw "Mutation only works on post-BNC storages!";
-  var wide_offsets = ((_d2 = (_c2 = tri[8]) == null ? void 0 : _c2[0]) == null ? void 0 : _d2.data) && varint_to_i32(tri[8][0].data) > 0 || false;
+  var wide_offsets = ((_d2 = (_c13 = tri[8]) == null ? void 0 : _c13[0]) == null ? void 0 : _d2.data) && varint_to_i32(tri[8][0].data) > 0 || false;
   if (wide_offsets)
     throw "Math only works with normal offsets";
   var cnt = 0;
@@ -126717,9 +128980,11 @@ var SutramExcelStateService = class _SutramExcelStateService {
     this.rows.update((current) => {
       const copy = [...current];
       const targetRow = copy[rowIdx];
-      if (!targetRow || !targetRow.cells[colKey])
+      if (!targetRow)
         return current;
-      const cell = { ...targetRow.cells[colKey] };
+      if (!targetRow.cells)
+        targetRow.cells = {};
+      const cell = targetRow.cells[colKey] ? { ...targetRow.cells[colKey] } : { value: void 0, isValid: true };
       if (cell.originalValue === void 0) {
         cell.originalValue = cell.value;
       }
@@ -126727,8 +128992,11 @@ var SutramExcelStateService = class _SutramExcelStateService {
       const strOrig = String(cell.originalValue ?? "").trim();
       const actuallyChanged = strNew !== strOrig;
       cell.value = newValue;
-      if (refId !== void 0)
+      if (refId !== void 0) {
         cell.refId = refId;
+      } else {
+        cell.refId = newValue;
+      }
       if (actuallyChanged) {
         cell.isModified = true;
       } else if (!targetRow.isNew) {
@@ -126749,12 +129017,16 @@ var SutramExcelStateService = class _SutramExcelStateService {
     const newRowNum = currentRows.length + 1;
     const cells = {};
     headers.forEach((h) => {
-      cells[h.name] = {
+      const cellObj = {
         value: "",
         isValid: true,
         isModified: false,
         isNew: true
       };
+      cells[h.name] = cellObj;
+      if (h.col_name && h.col_name !== h.name) {
+        cells[h.col_name] = cellObj;
+      }
     });
     const newRow = {
       rowNum: newRowNum,
@@ -126993,6 +129265,12 @@ var SutramExcelApiService = class _SutramExcelApiService {
     return this.http.get(`${this.baseUri}/tables`).pipe(map((res) => res.result || []));
   }
   /**
+   * GET /reports - Fetch list of dynamic reports and views
+   */
+  getReports() {
+    return this.http.get(`${this.baseUri}/reports`).pipe(map((res) => res.result || []));
+  }
+  /**
    * GET /config/:table - Fetch derived schema and column config
    */
   getTableConfig(tableName) {
@@ -127110,6 +129388,86 @@ var SutramExcelApiService = class _SutramExcelApiService {
       }
       return res.result || { status: "deleted", count: ids.length, ids };
     }));
+  }
+  /**
+   * GET table UI configuration (columns, labels, formats, sort order, selected_keys)
+   * Reads from ${this.baseUri}/table-ui-config/:table first, fallback to /api/_sutram/schema/table-config/:table
+   */
+  getTableUiConfig(tableName) {
+    return this.http.get(`${this.baseUri}/table-ui-config/${encodeURIComponent(tableName)}`).pipe(map((res) => res.result || null), catchError(() => {
+      return this.http.get(`/api/_sutram/schema/table-config/${encodeURIComponent(tableName)}`).pipe(map((res) => res.result || null), catchError(() => of(null)));
+    }));
+  }
+  /**
+   * POST table UI configuration
+   * Saves to ${this.baseUri}/table-ui-config/:table first, fallback to /api/_sutram/schema/table-config/:table
+   */
+  saveTableUiConfig(tableName, data) {
+    return this.http.post(`${this.baseUri}/table-ui-config/${encodeURIComponent(tableName)}`, data).pipe(catchError(() => {
+      return this.http.post(`/api/_sutram/schema/table-config/${encodeURIComponent(tableName)}`, data);
+    }));
+  }
+  /**
+   * GET backend triggers for a table
+   */
+  getTableTriggers(tableName) {
+    return this.http.get(`${this.baseUri}/triggers/${encodeURIComponent(tableName)}`).pipe(map((res) => res.result || []), catchError(() => {
+      return this.http.get(`/api/_sutram/schema/triggers/${encodeURIComponent(tableName)}`).pipe(map((res) => res.result || []), catchError(() => of([])));
+    }));
+  }
+  /**
+   * POST backend trigger
+   */
+  createTrigger(def) {
+    return this.http.post(`${this.baseUri}/triggers`, def).pipe(catchError(() => this.http.post("/api/_sutram/schema/triggers", def)));
+  }
+  /**
+   * DELETE backend trigger
+   */
+  deleteTrigger(id) {
+    return this.http.delete(`${this.baseUri}/triggers/${encodeURIComponent(id)}`).pipe(catchError(() => this.http.delete(`/api/_sutram/schema/triggers/${encodeURIComponent(id)}`)));
+  }
+  /**
+   * GET UI sutras / formulas for a table
+   */
+  getUiSutras(tableName) {
+    return this.http.get(`${this.baseUri}/ui-sutras/${encodeURIComponent(tableName)}`).pipe(map((res) => res.result || []), catchError(() => {
+      return this.http.get(`/api/_sutram/schema/ui-sutras/${encodeURIComponent(tableName)}`).pipe(map((res) => res.result || []), catchError(() => of([])));
+    }));
+  }
+  /**
+   * POST UI sutras / formulas for a table
+   */
+  saveUiSutras(tableName, formulas) {
+    return this.http.post(`${this.baseUri}/ui-sutras/${encodeURIComponent(tableName)}`, { formulas }).pipe(catchError(() => {
+      return this.http.post(`/api/_sutram/schema/ui-sutras/${encodeURIComponent(tableName)}`, { formulas });
+    }));
+  }
+  /**
+   * GET users list
+   */
+  getUsers() {
+    return this.http.get(`${this.baseUri}/users`).pipe(map((res) => res.result || []), catchError(() => {
+      return this.http.get("/api/_sutram/schema/users").pipe(map((res) => res.result || []), catchError(() => of([])));
+    }));
+  }
+  /**
+   * POST create user
+   */
+  createUser(user) {
+    return this.http.post(`${this.baseUri}/users`, user).pipe(catchError(() => this.http.post("/api/_sutram/schema/users", user)));
+  }
+  /**
+   * PUT update user
+   */
+  updateUser(id, user) {
+    return this.http.put(`${this.baseUri}/users/${encodeURIComponent(id)}`, user).pipe(catchError(() => this.http.put(`/api/_sutram/schema/users/${encodeURIComponent(id)}`, user)));
+  }
+  /**
+   * DELETE user
+   */
+  deleteUser(id) {
+    return this.http.delete(`${this.baseUri}/users/${encodeURIComponent(id)}`).pipe(catchError(() => this.http.delete(`/api/_sutram/schema/users/${encodeURIComponent(id)}`)));
   }
   static \u0275fac = function SutramExcelApiService_Factory(t) {
     return new (t || _SutramExcelApiService)(\u0275\u0275inject(HttpClient), \u0275\u0275inject(SUTRAM_EXCEL_API_BASE, 8));
@@ -127296,10 +129654,31 @@ var SutramRefCacheService = class _SutramRefCacheService {
   cache = /* @__PURE__ */ new Map();
   formattedCache = /* @__PURE__ */ new Map();
   inFlight = /* @__PURE__ */ new Map();
+  tableConfigs = /* @__PURE__ */ new Map();
   /** Emits the table name whenever a reference dataset finishes loading and caching */
   tableLoaded$ = new Subject();
   constructor(api) {
     this.api = api;
+  }
+  /**
+   * Registers custom display configuration (e.g. ref_select multi-columns, ref_data)
+   * for a reference table and immediately re-evaluates cached formatted options.
+   */
+  registerTableConfig(table, config2) {
+    if (!table)
+      return;
+    const cleanTable = table.toLowerCase().trim();
+    const existing = this.tableConfigs.get(cleanTable);
+    const newSelect = config2.ref_select || (config2.ref_data ? [config2.ref_data] : []);
+    const oldSelect = existing?.ref_select || (existing?.ref_data ? [existing.ref_data] : []);
+    const changed = JSON.stringify(newSelect) !== JSON.stringify(oldSelect);
+    this.tableConfigs.set(cleanTable, {
+      ref_select: newSelect,
+      ref_data: config2.ref_data
+    });
+    if (this.cache.has(cleanTable) && (changed || !this.formattedCache.has(cleanTable))) {
+      this.buildFormattedCache(cleanTable, this.cache.get(cleanTable));
+    }
   }
   /**
    * Checks whether reference data for a given table is currently cached in memory.
@@ -127350,10 +129729,12 @@ var SutramRefCacheService = class _SutramRefCacheService {
     }
   }
   /**
-   * Formats a record following AGENTS.md Rule 8:
-   * {{ item.hin }} : {{ item.eng }}{{ item.code ? ' : ' + item.code : '' }}
+   * Formats a record following AGENTS.md Rule 8 & universal display configuration:
+   * 1. Uses explicit ref_select display columns if configured.
+   * 2. Uses bilingual {{ item.hin }} : {{ item.eng }} with code badge.
+   * 3. Fallbacks to dynamic heuristic inspection without domain hardcoding.
    */
-  formatOption(table, item) {
+  formatOption(table, item, overrideSelect) {
     if (!item) {
       return { id: null, display: "", raw: null };
     }
@@ -127362,6 +129743,25 @@ var SutramRefCacheService = class _SutramRefCacheService {
     let eng = "";
     let code = "";
     let id = item[`${tbl}_id`] ?? item.id ?? item._id ?? item.item_id ?? item.code;
+    const tableCfg = this.tableConfigs.get(tbl);
+    const selectCols = overrideSelect && overrideSelect.length > 0 ? overrideSelect : tableCfg?.ref_select && tableCfg.ref_select.length > 0 ? tableCfg.ref_select : tableCfg?.ref_data ? [tableCfg.ref_data] : null;
+    if (selectCols && selectCols.length > 0) {
+      const extractedVals = selectCols.map((c) => item[c]).filter((v) => v !== void 0 && v !== null && String(v).trim() !== "");
+      if (extractedVals.length > 0) {
+        const candidateCodeKey = Object.keys(item).find((k) => /code|sku|roll/i.test(k) && !/_id$/i.test(k) && k !== "id");
+        if (candidateCodeKey && item[candidateCodeKey]) {
+          code = String(item[candidateCodeKey]).trim();
+        }
+        const displayStr = extractedVals.map((v) => String(v).trim()).join(" : ");
+        return {
+          id,
+          display: displayStr,
+          code: code || void 0,
+          raw: item,
+          parentId: item.parent_id ?? item.item_id ?? item.parent_item_id
+        };
+      }
+    }
     switch (tbl) {
       case "mm":
         hin = item.mm_hin || "";
@@ -127454,8 +129854,19 @@ var SutramRefCacheService = class _SutramRefCacheService {
       default:
         hin = item[`${tbl}_hin`] || item.name_hin || item.title_hin || item.label_hin || "";
         eng = item[`${tbl}_eng`] || item.name_eng || item.title_eng || item.name || item.title || "";
-        code = item[`${tbl}_code`] || item.code || "";
+        code = item[`${tbl}_code`] || item.code || item.sku || "";
         id = item._id ?? item[`${tbl}_id`] ?? item.id;
+        if (!hin && !eng) {
+          const keys2 = Object.keys(item);
+          const nameKey = keys2.find((k) => /name|title|label|desc|item|party/i.test(k) && !/_id$/i.test(k) && k !== "id");
+          if (nameKey && item[nameKey]) {
+            eng = String(item[nameKey]);
+          }
+          const codeKey = keys2.find((k) => /code|sku|roll|num/i.test(k) && !/_id$/i.test(k) && k !== "id");
+          if (codeKey && item[codeKey]) {
+            code = String(item[codeKey]);
+          }
+        }
         break;
     }
     let display = "";
@@ -127904,82 +130315,89 @@ var SutramClipboardService = class _SutramClipboardService {
 // backend/sutram/ng-sutramui-excel/playground/out-tsc/src/lib/components/sutram-grid/sutram-grid.component.js
 function SutramGridComponent_div_1_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
-    const _r13 = \u0275\u0275getCurrentView();
+    const _r14 = \u0275\u0275getCurrentView();
     \u0275\u0275elementContainerStart(0);
     \u0275\u0275elementStart(1, "div", 14);
     \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_1_Template_div_click_1_listener() {
-      \u0275\u0275restoreView(_r13);
-      const ctx_r12 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r12.copyActiveCell());
+      \u0275\u0275restoreView(_r14);
+      const ctx_r13 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r13.copyActiveCell());
     });
-    \u0275\u0275element(2, "i", 18);
+    \u0275\u0275element(2, "i", 21);
     \u0275\u0275elementStart(3, "span");
     \u0275\u0275text(4, "\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902 (Copy)");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "kbd", 19);
+    \u0275\u0275elementStart(5, "kbd", 22);
     \u0275\u0275text(6, "Ctrl+C");
     \u0275\u0275elementEnd()();
     \u0275\u0275elementStart(7, "div", 14);
     \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_1_Template_div_click_7_listener() {
-      \u0275\u0275restoreView(_r13);
-      const ctx_r14 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r14.cutActiveCell());
+      \u0275\u0275restoreView(_r14);
+      const ctx_r15 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r15.cutActiveCell());
     });
-    \u0275\u0275element(8, "i", 20);
+    \u0275\u0275element(8, "i", 23);
     \u0275\u0275elementStart(9, "span");
     \u0275\u0275text(10, "\u0915\u091F \u0915\u0930\u0947\u0902 (Cut)");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "kbd", 19);
+    \u0275\u0275elementStart(11, "kbd", 22);
     \u0275\u0275text(12, "Ctrl+X");
     \u0275\u0275elementEnd()();
     \u0275\u0275elementStart(13, "div", 14);
     \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_1_Template_div_click_13_listener() {
-      \u0275\u0275restoreView(_r13);
-      const ctx_r15 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r15.pasteToActiveCell());
+      \u0275\u0275restoreView(_r14);
+      const ctx_r16 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r16.pasteToActiveCell());
     });
-    \u0275\u0275element(14, "i", 21);
+    \u0275\u0275element(14, "i", 24);
     \u0275\u0275elementStart(15, "span");
     \u0275\u0275text(16, "\u092A\u0947\u0938\u094D\u091F \u0915\u0930\u0947\u0902 (Paste)");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(17, "kbd", 19);
+    \u0275\u0275elementStart(17, "kbd", 22);
     \u0275\u0275text(18, "Ctrl+V");
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(19, "div", 22);
+    \u0275\u0275element(19, "div", 18);
     \u0275\u0275elementContainerEnd();
   }
 }
 function SutramGridComponent_div_1_ng_container_2_Template(rf, ctx) {
   if (rf & 1) {
-    const _r17 = \u0275\u0275getCurrentView();
+    const _r18 = \u0275\u0275getCurrentView();
     \u0275\u0275elementContainerStart(0);
     \u0275\u0275elementStart(1, "div", 14);
     \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_2_Template_div_click_1_listener() {
-      \u0275\u0275restoreView(_r17);
-      const ctx_r16 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r16.copySelectedRow());
+      \u0275\u0275restoreView(_r18);
+      const ctx_r17 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r17.copySelectedRow());
     });
-    \u0275\u0275element(2, "i", 18);
+    \u0275\u0275element(2, "i", 21);
     \u0275\u0275elementStart(3, "span");
     \u0275\u0275text(4, "\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902 (Copy)");
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(5, "div", 22);
+    \u0275\u0275element(5, "div", 18);
     \u0275\u0275elementContainerEnd();
   }
 }
-function SutramGridComponent_div_1_ng_container_15_Template(rf, ctx) {
+function SutramGridComponent_div_1_span_20_Template(rf, ctx) {
   if (rf & 1) {
-    const _r19 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 25);
+    \u0275\u0275text(1, "HL");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramGridComponent_div_1_ng_container_21_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r20 = \u0275\u0275getCurrentView();
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275element(1, "div", 22);
-    \u0275\u0275elementStart(2, "div", 23);
-    \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_15_Template_div_click_2_listener() {
-      \u0275\u0275restoreView(_r19);
-      const ctx_r18 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r18.deleteRow());
+    \u0275\u0275element(1, "div", 18);
+    \u0275\u0275elementStart(2, "div", 26);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_ng_container_21_Template_div_click_2_listener() {
+      \u0275\u0275restoreView(_r20);
+      const ctx_r19 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r19.deleteRow());
     });
-    \u0275\u0275element(3, "i", 24);
-    \u0275\u0275elementStart(4, "span", 25);
+    \u0275\u0275element(3, "i", 27);
+    \u0275\u0275elementStart(4, "span", 28);
     \u0275\u0275text(5, "\u092A\u0902\u0915\u094D\u0924\u093F \u0939\u091F\u093E\u090F\u0902 (Delete Row)");
     \u0275\u0275elementEnd()();
     \u0275\u0275elementContainerEnd();
@@ -127987,7 +130405,7 @@ function SutramGridComponent_div_1_ng_container_15_Template(rf, ctx) {
 }
 function SutramGridComponent_div_1_Template(rf, ctx) {
   if (rf & 1) {
-    const _r22 = \u0275\u0275getCurrentView();
+    const _r23 = \u0275\u0275getCurrentView();
     \u0275\u0275elementStart(0, "div", 12);
     \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_0_listener($event) {
       return $event.stopPropagation();
@@ -127996,9 +130414,9 @@ function SutramGridComponent_div_1_Template(rf, ctx) {
     \u0275\u0275template(2, SutramGridComponent_div_1_ng_container_2_Template, 6, 0, "ng-container", 13);
     \u0275\u0275elementStart(3, "div", 14);
     \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_3_listener() {
-      \u0275\u0275restoreView(_r22);
-      const ctx_r21 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r21.insertRowAbove());
+      \u0275\u0275restoreView(_r23);
+      const ctx_r22 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r22.insertRowAbove());
     });
     \u0275\u0275element(4, "i", 15);
     \u0275\u0275elementStart(5, "span");
@@ -128006,9 +130424,9 @@ function SutramGridComponent_div_1_Template(rf, ctx) {
     \u0275\u0275elementEnd()();
     \u0275\u0275elementStart(7, "div", 14);
     \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_7_listener() {
-      \u0275\u0275restoreView(_r22);
-      const ctx_r23 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r23.insertRowBelow());
+      \u0275\u0275restoreView(_r23);
+      const ctx_r24 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r24.insertRowBelow());
     });
     \u0275\u0275element(8, "i", 16);
     \u0275\u0275elementStart(9, "span");
@@ -128016,15 +130434,28 @@ function SutramGridComponent_div_1_Template(rf, ctx) {
     \u0275\u0275elementEnd()();
     \u0275\u0275elementStart(11, "div", 14);
     \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_11_listener() {
-      \u0275\u0275restoreView(_r22);
-      const ctx_r24 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r24.duplicateRow());
+      \u0275\u0275restoreView(_r23);
+      const ctx_r25 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r25.duplicateRow());
     });
     \u0275\u0275element(12, "i", 17);
     \u0275\u0275elementStart(13, "span");
     \u0275\u0275text(14, "\u092A\u0902\u0915\u094D\u0924\u093F \u0921\u0941\u092A\u094D\u0932\u093F\u0915\u0947\u091F \u0915\u0930\u0947\u0902 (Duplicate Row)");
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(15, SutramGridComponent_div_1_ng_container_15_Template, 6, 0, "ng-container", 13);
+    \u0275\u0275element(15, "div", 18);
+    \u0275\u0275elementStart(16, "div", 14);
+    \u0275\u0275listener("click", function SutramGridComponent_div_1_Template_div_click_16_listener() {
+      \u0275\u0275restoreView(_r23);
+      const ctx_r26 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r26.toggleRowHighlight());
+    });
+    \u0275\u0275element(17, "i", 19);
+    \u0275\u0275elementStart(18, "span");
+    \u0275\u0275text(19);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(20, SutramGridComponent_div_1_span_20_Template, 2, 0, "span", 20);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(21, SutramGridComponent_div_1_ng_container_21_Template, 6, 0, "ng-container", 13);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -128034,77 +130465,86 @@ function SutramGridComponent_div_1_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r0.contextMenuState.type === "cell");
     \u0275\u0275advance(1);
     \u0275\u0275property("ngIf", ctx_r0.contextMenuState.type === "row");
-    \u0275\u0275advance(13);
+    \u0275\u0275advance(15);
+    \u0275\u0275styleProp("color", ctx_r0.isRowHighlighted(ctx_r0.contextMenuState.row) ? "#f59e0b" : "inherit");
+    \u0275\u0275property("ngClass", ctx_r0.isRowHighlighted(ctx_r0.contextMenuState.row) ? "pi-bookmark-fill" : "pi-bookmark");
+    \u0275\u0275advance(1);
+    \u0275\u0275styleProp("font-weight", ctx_r0.isRowHighlighted(ctx_r0.contextMenuState.row) ? "600" : "normal");
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", ctx_r0.isRowHighlighted(ctx_r0.contextMenuState.row) ? "\u0939\u093E\u0907\u0932\u093E\u0907\u091F \u0939\u091F\u093E\u090F\u0902 (Remove Highlight)" : "\u0939\u093E\u0907\u0932\u093E\u0907\u091F \u0915\u0930\u0947\u0902 (Highlight Row)", " ");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r0.isRowHighlighted(ctx_r0.contextMenuState.row));
+    \u0275\u0275advance(1);
     \u0275\u0275property("ngIf", ctx_r0.enableDelete);
   }
 }
 function SutramGridComponent_div_2_div_7_span_3_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275elementStart(0, "span", 38);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const opt_r27 = \u0275\u0275nextContext().$implicit;
+    const opt_r29 = \u0275\u0275nextContext().$implicit;
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(opt_r27.code);
+    \u0275\u0275textInterpolate(opt_r29.code);
   }
 }
 function SutramGridComponent_div_2_div_7_Template(rf, ctx) {
   if (rf & 1) {
-    const _r32 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 32);
+    const _r34 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 35);
     \u0275\u0275listener("mousedown", function SutramGridComponent_div_2_div_7_Template_div_mousedown_0_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r32);
-      const opt_r27 = restoredCtx.$implicit;
-      const ctx_r31 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r31.selectDropdownOption(opt_r27, $event, true));
+      const restoredCtx = \u0275\u0275restoreView(_r34);
+      const opt_r29 = restoredCtx.$implicit;
+      const ctx_r33 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r33.selectDropdownOption(opt_r29, $event, true));
     });
-    \u0275\u0275elementStart(1, "span", 33);
+    \u0275\u0275elementStart(1, "span", 36);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(3, SutramGridComponent_div_2_div_7_span_3_Template, 2, 1, "span", 34);
+    \u0275\u0275template(3, SutramGridComponent_div_2_div_7_span_3_Template, 2, 1, "span", 37);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const opt_r27 = ctx.$implicit;
-    const i_r28 = ctx.index;
-    const ctx_r25 = \u0275\u0275nextContext(2);
-    \u0275\u0275classProp("highlighted", i_r28 === ctx_r25.highlightedIdx);
+    const opt_r29 = ctx.$implicit;
+    const i_r30 = ctx.index;
+    const ctx_r27 = \u0275\u0275nextContext(2);
+    \u0275\u0275classProp("highlighted", i_r30 === ctx_r27.highlightedIdx);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(opt_r27.display);
+    \u0275\u0275textInterpolate(opt_r29.display);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", opt_r27.code);
+    \u0275\u0275property("ngIf", opt_r29.code && !opt_r29.display.includes(opt_r29.code));
   }
 }
 function SutramGridComponent_div_2_div_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 36);
-    \u0275\u0275element(1, "i", 37);
+    \u0275\u0275elementStart(0, "div", 39);
+    \u0275\u0275element(1, "i", 40);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r26 = \u0275\u0275nextContext(2);
+    const ctx_r28 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" No matching ", (ctx_r26.editingColDef == null ? null : ctx_r26.editingColDef.ref_table) || (ctx_r26.editingColDef == null ? null : ctx_r26.editingColDef.name), " found ");
+    \u0275\u0275textInterpolate1(" No matching ", (ctx_r28.editingColDef == null ? null : ctx_r28.editingColDef.ref_table) || (ctx_r28.editingColDef == null ? null : ctx_r28.editingColDef.name), " found ");
   }
 }
 function SutramGridComponent_div_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 26);
+    \u0275\u0275elementStart(0, "div", 29);
     \u0275\u0275listener("mousedown", function SutramGridComponent_div_2_Template_div_mousedown_0_listener($event) {
       return $event.preventDefault();
     });
-    \u0275\u0275elementStart(1, "div", 27)(2, "span");
+    \u0275\u0275elementStart(1, "div", 30)(2, "span");
     \u0275\u0275text(3);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "small", 28);
+    \u0275\u0275elementStart(4, "small", 31);
     \u0275\u0275text(5, "\u2191\u2193 to navigate, Enter to select");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "div", 29);
-    \u0275\u0275template(7, SutramGridComponent_div_2_div_7_Template, 4, 4, "div", 30);
-    \u0275\u0275template(8, SutramGridComponent_div_2_div_8_Template, 3, 1, "div", 31);
+    \u0275\u0275elementStart(6, "div", 32);
+    \u0275\u0275template(7, SutramGridComponent_div_2_div_7_Template, 4, 4, "div", 33);
+    \u0275\u0275template(8, SutramGridComponent_div_2_div_8_Template, 3, 1, "div", 34);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
@@ -128120,252 +130560,252 @@ function SutramGridComponent_div_2_Template(rf, ctx) {
 }
 function SutramGridComponent_ng_template_5_div_0_span_6_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 70);
+    \u0275\u0275elementStart(0, "span", 73);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r35 = \u0275\u0275nextContext(3);
+    const ctx_r37 = \u0275\u0275nextContext(3);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", ctx_r35.activeFilterCol.ref_table || "ref", " ");
+    \u0275\u0275textInterpolate1(" ", ctx_r37.activeFilterCol.ref_table || "ref", " ");
   }
 }
 function SutramGridComponent_ng_template_5_div_0_i_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "i", 71);
+    \u0275\u0275element(0, "i", 74);
   }
 }
 function SutramGridComponent_ng_template_5_div_0_button_13_Template(rf, ctx) {
   if (rf & 1) {
-    const _r43 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 72);
+    const _r45 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 75);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_button_13_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r43);
-      const ctx_r42 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r42.filterChecklistSearch = "");
+      \u0275\u0275restoreView(_r45);
+      const ctx_r44 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r44.filterChecklistSearch = "");
     });
-    \u0275\u0275element(1, "i", 47);
+    \u0275\u0275element(1, "i", 50);
     \u0275\u0275elementEnd();
   }
 }
 function SutramGridComponent_ng_template_5_div_0_i_27_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "i", 73);
+    \u0275\u0275element(0, "i", 76);
   }
 }
 function SutramGridComponent_ng_template_5_div_0_div_30_span_6_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 81);
+    \u0275\u0275elementStart(0, "span", 84);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const item_r44 = \u0275\u0275nextContext().$implicit;
+    const item_r46 = \u0275\u0275nextContext().$implicit;
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(item_r44.code);
+    \u0275\u0275textInterpolate(item_r46.code);
   }
 }
 function SutramGridComponent_ng_template_5_div_0_div_30_span_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 82);
+    \u0275\u0275elementStart(0, "span", 85);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const item_r44 = \u0275\u0275nextContext().$implicit;
+    const item_r46 = \u0275\u0275nextContext().$implicit;
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(item_r44.count);
+    \u0275\u0275textInterpolate(item_r46.count);
   }
 }
 function SutramGridComponent_ng_template_5_div_0_div_30_Template(rf, ctx) {
   if (rf & 1) {
-    const _r50 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 74);
+    const _r52 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 77);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_div_30_Template_div_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r50);
-      const item_r44 = restoredCtx.$implicit;
-      const ctx_r49 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r49.toggleChecklistItem(item_r44.value));
+      const restoredCtx = \u0275\u0275restoreView(_r52);
+      const item_r46 = restoredCtx.$implicit;
+      const ctx_r51 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r51.toggleChecklistItem(item_r46.value));
     });
-    \u0275\u0275elementStart(1, "div", 75)(2, "input", 76);
+    \u0275\u0275elementStart(1, "div", 78)(2, "input", 79);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_div_30_Template_input_click_2_listener($event) {
       return $event.stopPropagation();
     })("change", function SutramGridComponent_ng_template_5_div_0_div_30_Template_input_change_2_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r50);
-      const item_r44 = restoredCtx.$implicit;
-      const ctx_r52 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r52.toggleChecklistItem(item_r44.value));
+      const restoredCtx = \u0275\u0275restoreView(_r52);
+      const item_r46 = restoredCtx.$implicit;
+      const ctx_r54 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r54.toggleChecklistItem(item_r46.value));
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "span", 77);
+    \u0275\u0275elementStart(3, "span", 80);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "div", 78);
-    \u0275\u0275template(6, SutramGridComponent_ng_template_5_div_0_div_30_span_6_Template, 2, 1, "span", 79);
-    \u0275\u0275template(7, SutramGridComponent_ng_template_5_div_0_div_30_span_7_Template, 2, 1, "span", 80);
+    \u0275\u0275elementStart(5, "div", 81);
+    \u0275\u0275template(6, SutramGridComponent_ng_template_5_div_0_div_30_span_6_Template, 2, 1, "span", 82);
+    \u0275\u0275template(7, SutramGridComponent_ng_template_5_div_0_div_30_span_7_Template, 2, 1, "span", 83);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
-    const item_r44 = ctx.$implicit;
-    const ctx_r39 = \u0275\u0275nextContext(3);
+    const item_r46 = ctx.$implicit;
+    const ctx_r41 = \u0275\u0275nextContext(3);
     \u0275\u0275advance(2);
-    \u0275\u0275property("checked", ctx_r39.selectedChecklistValues.has(item_r44.value));
+    \u0275\u0275property("checked", ctx_r41.selectedChecklistValues.has(item_r46.value));
     \u0275\u0275advance(1);
-    \u0275\u0275property("title", item_r44.display);
+    \u0275\u0275property("title", item_r46.display);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", item_r44.display, " ");
+    \u0275\u0275textInterpolate1(" ", item_r46.display, " ");
     \u0275\u0275advance(2);
-    \u0275\u0275property("ngIf", item_r44.code);
+    \u0275\u0275property("ngIf", item_r46.code);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", item_r44.count !== void 0 && item_r44.count > 0);
+    \u0275\u0275property("ngIf", item_r46.count !== void 0 && item_r46.count > 0);
   }
 }
 function SutramGridComponent_ng_template_5_div_0_div_31_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 83);
-    \u0275\u0275element(1, "i", 73);
+    \u0275\u0275elementStart(0, "div", 86);
+    \u0275\u0275element(1, "i", 76);
     \u0275\u0275text(2, " Loading distinct values from database... ");
     \u0275\u0275elementEnd();
   }
 }
 function SutramGridComponent_ng_template_5_div_0_div_32_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 83);
-    \u0275\u0275element(1, "i", 37);
+    \u0275\u0275elementStart(0, "div", 86);
+    \u0275\u0275element(1, "i", 40);
     \u0275\u0275text(2, " No matching values ");
     \u0275\u0275elementEnd();
   }
 }
 function SutramGridComponent_ng_template_5_div_0_Template(rf, ctx) {
   if (rf & 1) {
-    const _r54 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 39)(1, "div", 40)(2, "div", 41);
-    \u0275\u0275element(3, "i", 42);
-    \u0275\u0275elementStart(4, "span", 43);
+    const _r56 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 42)(1, "div", 43)(2, "div", 44);
+    \u0275\u0275element(3, "i", 45);
+    \u0275\u0275elementStart(4, "span", 46);
     \u0275\u0275text(5);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(6, SutramGridComponent_ng_template_5_div_0_span_6_Template, 2, 1, "span", 44);
-    \u0275\u0275template(7, SutramGridComponent_ng_template_5_div_0_i_7_Template, 1, 0, "i", 45);
+    \u0275\u0275template(6, SutramGridComponent_ng_template_5_div_0_span_6_Template, 2, 1, "span", 47);
+    \u0275\u0275template(7, SutramGridComponent_ng_template_5_div_0_i_7_Template, 1, 0, "i", 48);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "button", 46);
+    \u0275\u0275elementStart(8, "button", 49);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_8_listener() {
-      \u0275\u0275restoreView(_r54);
+      \u0275\u0275restoreView(_r56);
       \u0275\u0275nextContext(2);
       const _r2 = \u0275\u0275reference(4);
       return \u0275\u0275resetView(_r2.hide());
     });
-    \u0275\u0275element(9, "i", 47);
+    \u0275\u0275element(9, "i", 50);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(10, "div", 48);
-    \u0275\u0275element(11, "i", 49);
-    \u0275\u0275elementStart(12, "input", 50);
+    \u0275\u0275elementStart(10, "div", 51);
+    \u0275\u0275element(11, "i", 52);
+    \u0275\u0275elementStart(12, "input", 53);
     \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_5_div_0_Template_input_ngModelChange_12_listener($event) {
-      \u0275\u0275restoreView(_r54);
-      const ctx_r55 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r55.filterChecklistSearch = $event);
+      \u0275\u0275restoreView(_r56);
+      const ctx_r57 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r57.filterChecklistSearch = $event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275template(13, SutramGridComponent_ng_template_5_div_0_button_13_Template, 2, 0, "button", 51);
+    \u0275\u0275template(13, SutramGridComponent_ng_template_5_div_0_button_13_Template, 2, 0, "button", 54);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "div", 52)(15, "label", 53)(16, "input", 54);
+    \u0275\u0275elementStart(14, "div", 55)(15, "label", 56)(16, "input", 57);
     \u0275\u0275listener("change", function SutramGridComponent_ng_template_5_div_0_Template_input_change_16_listener($event) {
-      \u0275\u0275restoreView(_r54);
-      const ctx_r56 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r56.toggleSelectAllChecklist($event));
+      \u0275\u0275restoreView(_r56);
+      const ctx_r58 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r58.toggleSelectAllChecklist($event));
     });
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(17, "span");
     \u0275\u0275text(18, "(Select All)");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(19, "div", 55)(20, "button", 56);
+    \u0275\u0275elementStart(19, "div", 58)(20, "button", 59);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_20_listener() {
-      \u0275\u0275restoreView(_r54);
-      const ctx_r57 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r57.selectAllFilteredItems());
+      \u0275\u0275restoreView(_r56);
+      const ctx_r59 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r59.selectAllFilteredItems());
     });
     \u0275\u0275text(21, "All");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "span", 57);
+    \u0275\u0275elementStart(22, "span", 60);
     \u0275\u0275text(23, "\xB7");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(24, "button", 56);
+    \u0275\u0275elementStart(24, "button", 59);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_24_listener() {
-      \u0275\u0275restoreView(_r54);
-      const ctx_r58 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r58.clearAllFilteredItems());
+      \u0275\u0275restoreView(_r56);
+      const ctx_r60 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r60.clearAllFilteredItems());
     });
     \u0275\u0275text(25, "Clear");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(26, "span", 58);
-    \u0275\u0275template(27, SutramGridComponent_ng_template_5_div_0_i_27_Template, 1, 0, "i", 59);
+    \u0275\u0275elementStart(26, "span", 61);
+    \u0275\u0275template(27, SutramGridComponent_ng_template_5_div_0_i_27_Template, 1, 0, "i", 62);
     \u0275\u0275text(28);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(29, "div", 60);
-    \u0275\u0275template(30, SutramGridComponent_ng_template_5_div_0_div_30_Template, 8, 5, "div", 61);
-    \u0275\u0275template(31, SutramGridComponent_ng_template_5_div_0_div_31_Template, 3, 0, "div", 62);
-    \u0275\u0275template(32, SutramGridComponent_ng_template_5_div_0_div_32_Template, 3, 0, "div", 62);
+    \u0275\u0275elementStart(29, "div", 63);
+    \u0275\u0275template(30, SutramGridComponent_ng_template_5_div_0_div_30_Template, 8, 5, "div", 64);
+    \u0275\u0275template(31, SutramGridComponent_ng_template_5_div_0_div_31_Template, 3, 0, "div", 65);
+    \u0275\u0275template(32, SutramGridComponent_ng_template_5_div_0_div_32_Template, 3, 0, "div", 65);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(33, "div", 63)(34, "button", 64);
+    \u0275\u0275elementStart(33, "div", 66)(34, "button", 67);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_34_listener() {
-      \u0275\u0275restoreView(_r54);
-      const ctx_r59 = \u0275\u0275nextContext(2);
+      \u0275\u0275restoreView(_r56);
+      const ctx_r61 = \u0275\u0275nextContext(2);
       const _r2 = \u0275\u0275reference(4);
-      return \u0275\u0275resetView(ctx_r59.clearCurrentColFilter(_r2));
+      return \u0275\u0275resetView(ctx_r61.clearCurrentColFilter(_r2));
     });
-    \u0275\u0275element(35, "i", 65);
+    \u0275\u0275element(35, "i", 68);
     \u0275\u0275text(36, "Reset ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(37, "div", 66)(38, "button", 67);
+    \u0275\u0275elementStart(37, "div", 69)(38, "button", 70);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_38_listener() {
-      \u0275\u0275restoreView(_r54);
+      \u0275\u0275restoreView(_r56);
       \u0275\u0275nextContext(2);
       const _r2 = \u0275\u0275reference(4);
       return \u0275\u0275resetView(_r2.hide());
     });
     \u0275\u0275text(39, " Cancel ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(40, "button", 68);
+    \u0275\u0275elementStart(40, "button", 71);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_5_div_0_Template_button_click_40_listener() {
-      \u0275\u0275restoreView(_r54);
-      const ctx_r61 = \u0275\u0275nextContext(2);
+      \u0275\u0275restoreView(_r56);
+      const ctx_r63 = \u0275\u0275nextContext(2);
       const _r2 = \u0275\u0275reference(4);
-      return \u0275\u0275resetView(ctx_r61.applyCurrentColFilter(_r2));
+      return \u0275\u0275resetView(ctx_r63.applyCurrentColFilter(_r2));
     });
-    \u0275\u0275element(41, "i", 69);
+    \u0275\u0275element(41, "i", 72);
     \u0275\u0275text(42, " Apply ");
     \u0275\u0275elementEnd()()()();
   }
   if (rf & 2) {
-    const ctx_r34 = \u0275\u0275nextContext(2);
+    const ctx_r36 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(4);
-    \u0275\u0275property("title", ctx_r34.activeFilterCol.name);
+    \u0275\u0275property("title", ctx_r36.activeFilterCol.name);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(ctx_r34.activeFilterCol.name);
+    \u0275\u0275textInterpolate(ctx_r36.activeFilterCol.name);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r34.activeFilterCol.ref_table || ctx_r34.activeFilterCol.type === "ref");
+    \u0275\u0275property("ngIf", ctx_r36.activeFilterCol.ref_table || ctx_r36.activeFilterCol.type === "ref");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r34.isFilterLoading);
+    \u0275\u0275property("ngIf", ctx_r36.isFilterLoading);
     \u0275\u0275advance(5);
-    \u0275\u0275property("ngModel", ctx_r34.filterChecklistSearch);
+    \u0275\u0275property("ngModel", ctx_r36.filterChecklistSearch);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r34.filterChecklistSearch);
+    \u0275\u0275property("ngIf", ctx_r36.filterChecklistSearch);
     \u0275\u0275advance(3);
-    \u0275\u0275property("checked", ctx_r34.isAllChecklistSelected());
+    \u0275\u0275property("checked", ctx_r36.isAllChecklistSelected());
     \u0275\u0275advance(11);
-    \u0275\u0275property("ngIf", ctx_r34.isFilterLoading);
+    \u0275\u0275property("ngIf", ctx_r36.isFilterLoading);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate2("", ctx_r34.selectedChecklistValues.size, " / ", ctx_r34.currentChecklistItems.length, " ");
+    \u0275\u0275textInterpolate2("", ctx_r36.selectedChecklistValues.size, " / ", ctx_r36.currentChecklistItems.length, " ");
     \u0275\u0275advance(2);
-    \u0275\u0275property("ngForOf", ctx_r34.filteredChecklistItems);
+    \u0275\u0275property("ngForOf", ctx_r36.filteredChecklistItems);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r34.isFilterLoading && ctx_r34.filteredChecklistItems.length === 0);
+    \u0275\u0275property("ngIf", ctx_r36.isFilterLoading && ctx_r36.filteredChecklistItems.length === 0);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", !ctx_r34.isFilterLoading && ctx_r34.filteredChecklistItems.length === 0);
+    \u0275\u0275property("ngIf", !ctx_r36.isFilterLoading && ctx_r36.filteredChecklistItems.length === 0);
   }
 }
 function SutramGridComponent_ng_template_5_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275template(0, SutramGridComponent_ng_template_5_div_0_Template, 43, 13, "div", 38);
+    \u0275\u0275template(0, SutramGridComponent_ng_template_5_div_0_Template, 43, 13, "div", 41);
   }
   if (rf & 2) {
     const ctx_r3 = \u0275\u0275nextContext();
@@ -128374,414 +130814,482 @@ function SutramGridComponent_ng_template_5_Template(rf, ctx) {
 }
 function SutramGridComponent_ng_template_8_th_4_span_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 100);
+    \u0275\u0275elementStart(0, "span", 104);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
 function SutramGridComponent_ng_template_8_th_4_span_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 101);
+    \u0275\u0275elementStart(0, "span", 105);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const col_r64 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275property("title", "Reference: " + (col_r64.ref_table || col_r64.group));
+    const col_r66 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("title", "Reference: " + (col_r66.ref_table || col_r66.group));
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", col_r64.ref_table || col_r64.group, " ");
+    \u0275\u0275textInterpolate1(" ", col_r66.ref_table || col_r66.group, " ");
   }
 }
 function SutramGridComponent_ng_template_8_th_4_span_10_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 102);
+    \u0275\u0275elementStart(0, "span", 106);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const col_r64 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275property("title", "FK: " + (col_r64.ref_table || col_r64.name));
+    const col_r66 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("title", "FK: " + (col_r66.ref_table || col_r66.name));
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", col_r64.ref_table || col_r64.name, " ");
+    \u0275\u0275textInterpolate1(" ", col_r66.ref_table || col_r66.name, " ");
   }
 }
 function SutramGridComponent_ng_template_8_th_4_span_11_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 103);
+    \u0275\u0275elementStart(0, "span", 107);
     \u0275\u0275text(1, " id ");
     \u0275\u0275elementEnd();
   }
 }
 function SutramGridComponent_ng_template_8_th_4_span_12_Template(rf, ctx) {
   if (rf & 1) {
-    const _r76 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "span", 104);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_span_12_Template_span_click_0_listener() {
-      \u0275\u0275restoreView(_r76);
-      const col_r64 = \u0275\u0275nextContext().$implicit;
-      const ctx_r74 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r74.onHeaderClick(col_r64));
-    });
-    \u0275\u0275element(1, "i", 105);
+    \u0275\u0275elementStart(0, "span", 108);
+    \u0275\u0275text(1, " fx ");
     \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const col_r64 = \u0275\u0275nextContext().$implicit;
-    const ctx_r70 = \u0275\u0275nextContext(2);
-    let tmp_0_0;
-    let tmp_1_0;
-    let tmp_2_0;
-    \u0275\u0275classProp("is-sorted", ((tmp_0_0 = ctx_r70.state.activeSort()) == null ? null : tmp_0_0.colKey) === (col_r64.key || col_r64.name));
-    \u0275\u0275property("title", ((tmp_1_0 = ctx_r70.state.activeSort()) == null ? null : tmp_1_0.colKey) === (col_r64.key || col_r64.name) ? ((tmp_1_0 = ctx_r70.state.activeSort()) == null ? null : tmp_1_0.order) === "ASC" ? "Sorted: ASC" : "Sorted: DESC" : "Sort");
-    \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", ((tmp_2_0 = ctx_r70.state.activeSort()) == null ? null : tmp_2_0.colKey) === (col_r64.key || col_r64.name) ? ((tmp_2_0 = ctx_r70.state.activeSort()) == null ? null : tmp_2_0.order) === "ASC" ? "pi-sort-amount-up-alt text-primary" : "pi-sort-amount-down text-primary" : "pi-sort-alt text-muted");
   }
 }
 function SutramGridComponent_ng_template_8_th_4_span_13_Template(rf, ctx) {
   if (rf & 1) {
-    const _r80 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "span", 106);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_span_13_Template_span_click_0_listener($event) {
-      \u0275\u0275restoreView(_r80);
-      const col_r64 = \u0275\u0275nextContext().$implicit;
-      const ctx_r78 = \u0275\u0275nextContext(2);
-      const _r2 = \u0275\u0275reference(4);
-      return \u0275\u0275resetView(ctx_r78.openColumnFilter($event, col_r64, _r2));
+    const _r79 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 109);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_span_13_Template_span_click_0_listener() {
+      \u0275\u0275restoreView(_r79);
+      const col_r66 = \u0275\u0275nextContext().$implicit;
+      const ctx_r77 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r77.onHeaderClick(col_r66));
     });
-    \u0275\u0275element(1, "i", 105);
+    \u0275\u0275element(1, "i", 19);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const col_r64 = \u0275\u0275nextContext().$implicit;
-    const ctx_r71 = \u0275\u0275nextContext(2);
-    \u0275\u0275classProp("is-filtered", ctx_r71.isColumnFiltered(col_r64.key || col_r64.name));
-    \u0275\u0275property("title", ctx_r71.isColumnFiltered(col_r64.key || col_r64.name) ? "Filter Active" : "Filter");
+    const col_r66 = \u0275\u0275nextContext().$implicit;
+    const ctx_r73 = \u0275\u0275nextContext(2);
+    let tmp_0_0;
+    let tmp_1_0;
+    let tmp_2_0;
+    \u0275\u0275classProp("is-sorted", ((tmp_0_0 = ctx_r73.state.activeSort()) == null ? null : tmp_0_0.colKey) === (col_r66.key || col_r66.name));
+    \u0275\u0275property("title", ((tmp_1_0 = ctx_r73.state.activeSort()) == null ? null : tmp_1_0.colKey) === (col_r66.key || col_r66.name) ? ((tmp_1_0 = ctx_r73.state.activeSort()) == null ? null : tmp_1_0.order) === "ASC" ? "Sorted: ASC" : "Sorted: DESC" : "Sort");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", ctx_r71.isColumnFiltered(col_r64.key || col_r64.name) ? "pi-filter-fill text-primary" : "pi-filter");
+    \u0275\u0275property("ngClass", ((tmp_2_0 = ctx_r73.state.activeSort()) == null ? null : tmp_2_0.colKey) === (col_r66.key || col_r66.name) ? ((tmp_2_0 = ctx_r73.state.activeSort()) == null ? null : tmp_2_0.order) === "ASC" ? "pi-sort-amount-up-alt text-primary" : "pi-sort-amount-down text-primary" : "pi-sort-alt text-muted");
+  }
+}
+function SutramGridComponent_ng_template_8_th_4_span_14_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r83 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 110);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_span_14_Template_span_click_0_listener($event) {
+      \u0275\u0275restoreView(_r83);
+      const col_r66 = \u0275\u0275nextContext().$implicit;
+      const ctx_r81 = \u0275\u0275nextContext(2);
+      const _r2 = \u0275\u0275reference(4);
+      return \u0275\u0275resetView(ctx_r81.openColumnFilter($event, col_r66, _r2));
+    });
+    \u0275\u0275element(1, "i", 19);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const col_r66 = \u0275\u0275nextContext().$implicit;
+    const ctx_r74 = \u0275\u0275nextContext(2);
+    \u0275\u0275classProp("is-filtered", ctx_r74.isColumnFiltered(col_r66.key || col_r66.name));
+    \u0275\u0275property("title", ctx_r74.isColumnFiltered(col_r66.key || col_r66.name) ? "Filter Active" : "Filter");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngClass", ctx_r74.isColumnFiltered(col_r66.key || col_r66.name) ? "pi-filter-fill text-primary" : "pi-filter");
   }
 }
 function SutramGridComponent_ng_template_8_th_4_Template(rf, ctx) {
   if (rf & 1) {
-    const _r83 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "th", 88);
+    const _r86 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "th", 91);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_Template_th_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r83);
-      const col_r64 = restoredCtx.$implicit;
-      const ctx_r82 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r82.onHeaderClick(col_r64));
+      const restoredCtx = \u0275\u0275restoreView(_r86);
+      const col_r66 = restoredCtx.$implicit;
+      const ctx_r85 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r85.onHeaderClick(col_r66));
     });
-    \u0275\u0275elementStart(1, "div", 89)(2, "span", 90)(3, "strong", 91);
+    \u0275\u0275elementStart(1, "div", 92)(2, "span", 93)(3, "strong", 94);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "span", 92);
+    \u0275\u0275elementStart(5, "span", 95);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(7, SutramGridComponent_ng_template_8_th_4_span_7_Template, 2, 0, "span", 93);
+    \u0275\u0275template(7, SutramGridComponent_ng_template_8_th_4_span_7_Template, 2, 0, "span", 96);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "div", 94);
+    \u0275\u0275elementStart(8, "div", 97);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_th_4_Template_div_click_8_listener($event) {
       return $event.stopPropagation();
     });
-    \u0275\u0275template(9, SutramGridComponent_ng_template_8_th_4_span_9_Template, 2, 2, "span", 95);
-    \u0275\u0275template(10, SutramGridComponent_ng_template_8_th_4_span_10_Template, 2, 2, "span", 96);
-    \u0275\u0275template(11, SutramGridComponent_ng_template_8_th_4_span_11_Template, 2, 0, "span", 97);
-    \u0275\u0275template(12, SutramGridComponent_ng_template_8_th_4_span_12_Template, 2, 4, "span", 98);
-    \u0275\u0275template(13, SutramGridComponent_ng_template_8_th_4_span_13_Template, 2, 4, "span", 99);
+    \u0275\u0275template(9, SutramGridComponent_ng_template_8_th_4_span_9_Template, 2, 2, "span", 98);
+    \u0275\u0275template(10, SutramGridComponent_ng_template_8_th_4_span_10_Template, 2, 2, "span", 99);
+    \u0275\u0275template(11, SutramGridComponent_ng_template_8_th_4_span_11_Template, 2, 0, "span", 100);
+    \u0275\u0275template(12, SutramGridComponent_ng_template_8_th_4_span_12_Template, 2, 0, "span", 101);
+    \u0275\u0275template(13, SutramGridComponent_ng_template_8_th_4_span_13_Template, 2, 4, "span", 102);
+    \u0275\u0275template(14, SutramGridComponent_ng_template_8_th_4_span_14_Template, 2, 4, "span", 103);
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
-    const col_r64 = ctx.$implicit;
-    const idx_r65 = ctx.index;
-    const ctx_r63 = \u0275\u0275nextContext(2);
-    \u0275\u0275styleProp("width", ctx_r63.getColumnWidth(col_r64), "px")("min-width", ctx_r63.getColumnWidth(col_r64), "px")("max-width", ctx_r63.getColumnWidth(col_r64), "px");
-    \u0275\u0275classProp("sortable-th", ctx_r63.state.sortingEnabled());
+    const col_r66 = ctx.$implicit;
+    const idx_r67 = ctx.index;
+    const ctx_r65 = \u0275\u0275nextContext(2);
+    \u0275\u0275styleProp("width", ctx_r65.getColumnWidth(col_r66), "px")("min-width", ctx_r65.getColumnWidth(col_r66), "px")("max-width", ctx_r65.getColumnWidth(col_r66), "px");
+    \u0275\u0275classProp("sortable-th", ctx_r65.state.sortingEnabled());
     \u0275\u0275advance(2);
-    \u0275\u0275property("title", col_r64.description || col_r64.short_name || col_r64.name);
+    \u0275\u0275property("title", col_r66.description || col_r66.short_name || col_r66.name);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r63.getColLetter(idx_r65));
+    \u0275\u0275textInterpolate(ctx_r65.getColLetter(idx_r67));
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(col_r64.short_name || col_r64.name);
+    \u0275\u0275textInterpolate(col_r66.label || col_r66.short_name || col_r66.name);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", col_r64.not_null);
+    \u0275\u0275property("ngIf", col_r66.not_null);
     \u0275\u0275advance(2);
-    \u0275\u0275property("ngIf", col_r64.is_fk_subcol);
+    \u0275\u0275property("ngIf", col_r66.is_fk_subcol);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", !col_r64.is_fk_subcol && (col_r64.type === "ref" || col_r64.ref_table || col_r64.is_fk_main));
+    \u0275\u0275property("ngIf", !col_r66.is_fk_subcol && (col_r66.type === "ref" || col_r66.ref_table || col_r66.is_fk_main));
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", col_r64.is_fk_raw);
+    \u0275\u0275property("ngIf", col_r66.is_fk_raw);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r63.state.sortingEnabled());
+    \u0275\u0275property("ngIf", col_r66.is_temp || col_r66.is_virtual);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r63.state.filtersEnabled());
+    \u0275\u0275property("ngIf", ctx_r65.state.sortingEnabled());
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r65.state.filtersEnabled());
   }
 }
 function SutramGridComponent_ng_template_8_Template(rf, ctx) {
   if (rf & 1) {
-    const _r86 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "tr")(1, "th", 84);
+    const _r89 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "tr")(1, "th", 87);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_8_Template_th_click_1_listener($event) {
-      \u0275\u0275restoreView(_r86);
-      const ctx_r85 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r85.openConfig.emit($event));
+      \u0275\u0275restoreView(_r89);
+      const ctx_r88 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r88.openConfig.emit($event));
     });
-    \u0275\u0275elementStart(2, "div", 85);
-    \u0275\u0275element(3, "i", 86);
+    \u0275\u0275elementStart(2, "div", 88);
+    \u0275\u0275element(3, "i", 89);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(4, SutramGridComponent_ng_template_8_th_4_Template, 14, 17, "th", 87);
+    \u0275\u0275template(4, SutramGridComponent_ng_template_8_th_4_Template, 15, 18, "th", 90);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const columns_r62 = ctx.$implicit;
+    const columns_r64 = ctx.$implicit;
     \u0275\u0275advance(4);
-    \u0275\u0275property("ngForOf", columns_r62);
+    \u0275\u0275property("ngForOf", columns_r64);
   }
 }
 function SutramGridComponent_ng_template_9_span_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 112);
+    \u0275\u0275elementStart(0, "span", 117);
     \u0275\u0275text(1, "+");
     \u0275\u0275elementEnd();
   }
 }
 function SutramGridComponent_ng_template_9_span_3_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 113);
+    \u0275\u0275elementStart(0, "span", 118);
     \u0275\u0275text(1, "\u2022");
     \u0275\u0275elementEnd();
   }
 }
-function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template(rf, ctx) {
+function SutramGridComponent_ng_template_9_i_4_Template(rf, ctx) {
   if (rf & 1) {
-    const _r99 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "input", 117, 118);
-    \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template_input_ngModelChange_1_listener($event) {
-      \u0275\u0275restoreView(_r99);
-      const ctx_r98 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r98.editingValue = $event);
-    })("input", function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template_input_input_1_listener() {
-      \u0275\u0275restoreView(_r99);
-      const col_r93 = \u0275\u0275nextContext().$implicit;
-      const row_r87 = \u0275\u0275nextContext().$implicit;
-      const ctx_r100 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r100.onEditorInput(ctx_r100.editingValue, col_r93, row_r87));
-    })("keydown", function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template_input_keydown_1_listener($event) {
-      \u0275\u0275restoreView(_r99);
-      const col_r93 = \u0275\u0275nextContext().$implicit;
-      const ctx_r104 = \u0275\u0275nextContext();
-      const rowIndex_r88 = ctx_r104.rowIndex;
-      const row_r87 = ctx_r104.$implicit;
-      const ctx_r103 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r103.onCellEditorKeydown($event, rowIndex_r88, col_r93.key || col_r93.name, row_r87));
-    })("blur", function SutramGridComponent_ng_template_9_td_6_ng_container_2_Template_input_blur_1_listener() {
-      \u0275\u0275restoreView(_r99);
-      const col_r93 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275element(0, "i", 119);
+  }
+}
+function SutramGridComponent_ng_template_9_td_7_ng_container_2_input_1_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r106 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "input", 125, 126);
+    \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_9_td_7_ng_container_2_input_1_Template_input_ngModelChange_0_listener($event) {
+      \u0275\u0275restoreView(_r106);
+      const ctx_r105 = \u0275\u0275nextContext(4);
+      return \u0275\u0275resetView(ctx_r105.editingValue = $event);
+    })("input", function SutramGridComponent_ng_template_9_td_7_ng_container_2_input_1_Template_input_input_0_listener() {
+      \u0275\u0275restoreView(_r106);
+      const col_r97 = \u0275\u0275nextContext(2).$implicit;
+      const row_r90 = \u0275\u0275nextContext().$implicit;
       const ctx_r107 = \u0275\u0275nextContext();
-      const rowIndex_r88 = ctx_r107.rowIndex;
-      const row_r87 = ctx_r107.$implicit;
-      const ctx_r106 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r106.onCellEditorBlur(rowIndex_r88, col_r93.key || col_r93.name, row_r87));
+      return \u0275\u0275resetView(ctx_r107.onEditorInput(ctx_r107.editingValue, col_r97, row_r90));
+    })("keydown", function SutramGridComponent_ng_template_9_td_7_ng_container_2_input_1_Template_input_keydown_0_listener($event) {
+      \u0275\u0275restoreView(_r106);
+      const col_r97 = \u0275\u0275nextContext(2).$implicit;
+      const ctx_r111 = \u0275\u0275nextContext();
+      const rowIndex_r91 = ctx_r111.rowIndex;
+      const row_r90 = ctx_r111.$implicit;
+      const ctx_r110 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r110.onCellEditorKeydown($event, rowIndex_r91, col_r97.key || col_r97.name, row_r90));
+    })("blur", function SutramGridComponent_ng_template_9_td_7_ng_container_2_input_1_Template_input_blur_0_listener() {
+      \u0275\u0275restoreView(_r106);
+      const col_r97 = \u0275\u0275nextContext(2).$implicit;
+      const ctx_r114 = \u0275\u0275nextContext();
+      const rowIndex_r91 = ctx_r114.rowIndex;
+      const row_r90 = ctx_r114.$implicit;
+      const ctx_r113 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r113.onCellEditorBlur(rowIndex_r91, col_r97.key || col_r97.name, row_r90));
     });
     \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r101 = \u0275\u0275nextContext(4);
+    \u0275\u0275property("ngModel", ctx_r101.editingValue);
+  }
+}
+function SutramGridComponent_ng_template_9_td_7_ng_container_2_ng_template_2_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r118 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "input", 127, 126);
+    \u0275\u0275listener("ngModelChange", function SutramGridComponent_ng_template_9_td_7_ng_container_2_ng_template_2_Template_input_ngModelChange_0_listener($event) {
+      \u0275\u0275restoreView(_r118);
+      const ctx_r117 = \u0275\u0275nextContext(4);
+      return \u0275\u0275resetView(ctx_r117.editingValue = $event);
+    })("input", function SutramGridComponent_ng_template_9_td_7_ng_container_2_ng_template_2_Template_input_input_0_listener() {
+      \u0275\u0275restoreView(_r118);
+      const col_r97 = \u0275\u0275nextContext(2).$implicit;
+      const row_r90 = \u0275\u0275nextContext().$implicit;
+      const ctx_r119 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r119.onEditorInput(ctx_r119.editingValue, col_r97, row_r90));
+    })("keydown", function SutramGridComponent_ng_template_9_td_7_ng_container_2_ng_template_2_Template_input_keydown_0_listener($event) {
+      \u0275\u0275restoreView(_r118);
+      const col_r97 = \u0275\u0275nextContext(2).$implicit;
+      const ctx_r123 = \u0275\u0275nextContext();
+      const rowIndex_r91 = ctx_r123.rowIndex;
+      const row_r90 = ctx_r123.$implicit;
+      const ctx_r122 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r122.onCellEditorKeydown($event, rowIndex_r91, col_r97.key || col_r97.name, row_r90));
+    })("blur", function SutramGridComponent_ng_template_9_td_7_ng_container_2_ng_template_2_Template_input_blur_0_listener() {
+      \u0275\u0275restoreView(_r118);
+      const col_r97 = \u0275\u0275nextContext(2).$implicit;
+      const ctx_r126 = \u0275\u0275nextContext();
+      const rowIndex_r91 = ctx_r126.rowIndex;
+      const row_r90 = ctx_r126.$implicit;
+      const ctx_r125 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r125.onCellEditorBlur(rowIndex_r91, col_r97.key || col_r97.name, row_r90));
+    });
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r103 = \u0275\u0275nextContext(4);
+    \u0275\u0275styleProp("font-weight", ctx_r103.isBold ? "700" : "normal")("text-align", ctx_r103.textAlign);
+    \u0275\u0275property("ngModel", ctx_r103.editingValue);
+  }
+}
+function SutramGridComponent_ng_template_9_td_7_ng_container_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275template(1, SutramGridComponent_ng_template_9_td_7_ng_container_2_input_1_Template, 2, 1, "input", 123);
+    \u0275\u0275template(2, SutramGridComponent_ng_template_9_td_7_ng_container_2_ng_template_2_Template, 2, 5, "ng-template", null, 124, \u0275\u0275templateRefExtractor);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
-    const ctx_r94 = \u0275\u0275nextContext(3);
+    const _r102 = \u0275\u0275reference(3);
+    const col_r97 = \u0275\u0275nextContext().$implicit;
+    const ctx_r98 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(1);
-    \u0275\u0275styleProp("font-weight", ctx_r94.isBold ? "700" : "normal")("text-align", ctx_r94.textAlign);
-    \u0275\u0275property("ngModel", ctx_r94.editingValue);
+    \u0275\u0275property("ngIf", ctx_r98.isDateColumn(col_r97))("ngIfElse", _r102);
   }
 }
-function SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_div_2_i_1_Template(rf, ctx) {
+function SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_div_2_i_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "i", 69);
+    \u0275\u0275element(0, "i", 72);
   }
 }
-function SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_div_2_Template(rf, ctx) {
+function SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_div_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 123);
-    \u0275\u0275template(1, SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_div_2_i_1_Template, 1, 0, "i", 124);
+    \u0275\u0275elementStart(0, "div", 132);
+    \u0275\u0275template(1, SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_div_2_i_1_Template, 1, 0, "i", 133);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const col_r93 = \u0275\u0275nextContext(3).$implicit;
-    const row_r87 = \u0275\u0275nextContext().$implicit;
-    const ctx_r112 = \u0275\u0275nextContext();
-    \u0275\u0275classProp("checked", ctx_r112.isCellTrue(row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].value));
+    const col_r97 = \u0275\u0275nextContext(3).$implicit;
+    const row_r90 = \u0275\u0275nextContext().$implicit;
+    const ctx_r132 = \u0275\u0275nextContext();
+    \u0275\u0275classProp("checked", ctx_r132.isCellTrue(row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].value));
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r112.isCellTrue(row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].value));
+    \u0275\u0275property("ngIf", ctx_r132.isCellTrue(row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].value));
   }
 }
-function SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_span_3_Template(rf, ctx) {
+function SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_span_3_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 125);
-    \u0275\u0275element(1, "i", 105);
-    \u0275\u0275elementStart(2, "span", 126);
+    \u0275\u0275elementStart(0, "span", 134);
+    \u0275\u0275element(1, "i", 19);
+    \u0275\u0275elementStart(2, "span", 135);
     \u0275\u0275text(3);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
-    const col_r93 = \u0275\u0275nextContext(3).$implicit;
-    const row_r87 = \u0275\u0275nextContext().$implicit;
-    const ctx_r113 = \u0275\u0275nextContext();
-    \u0275\u0275classProp("badge-true", ctx_r113.isCellTrue(row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].value))("badge-false", !ctx_r113.isCellTrue(row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].value));
+    const col_r97 = \u0275\u0275nextContext(3).$implicit;
+    const row_r90 = \u0275\u0275nextContext().$implicit;
+    const ctx_r133 = \u0275\u0275nextContext();
+    \u0275\u0275classProp("badge-true", ctx_r133.isCellTrue(row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].value))("badge-false", !ctx_r133.isCellTrue(row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].value));
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", ctx_r113.isCellTrue(row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].value) ? "pi-check" : "pi-times");
+    \u0275\u0275property("ngClass", ctx_r133.isCellTrue(row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].value) ? "pi-check" : "pi-times");
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r113.isCellTrue(row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].value) ? "Yes" : "No");
+    \u0275\u0275textInterpolate(ctx_r133.isCellTrue(row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].value) ? "Yes" : "No");
   }
 }
-function SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_Template(rf, ctx) {
+function SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_Template(rf, ctx) {
   if (rf & 1) {
-    const _r121 = \u0275\u0275getCurrentView();
+    const _r141 = \u0275\u0275getCurrentView();
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 120);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_Template_div_click_1_listener($event) {
-      \u0275\u0275restoreView(_r121);
-      const col_r93 = \u0275\u0275nextContext(2).$implicit;
-      const ctx_r120 = \u0275\u0275nextContext();
-      const rowIndex_r88 = ctx_r120.rowIndex;
-      const row_r87 = ctx_r120.$implicit;
-      const ctx_r119 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r119.toggleBooleanCell(rowIndex_r88, col_r93.key || col_r93.name, row_r87, $event));
+    \u0275\u0275elementStart(1, "div", 129);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_Template_div_click_1_listener($event) {
+      \u0275\u0275restoreView(_r141);
+      const col_r97 = \u0275\u0275nextContext(2).$implicit;
+      const ctx_r140 = \u0275\u0275nextContext();
+      const rowIndex_r91 = ctx_r140.rowIndex;
+      const row_r90 = ctx_r140.$implicit;
+      const ctx_r139 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r139.toggleBooleanCell(rowIndex_r91, col_r97.key || col_r97.name, row_r90, $event));
     });
-    \u0275\u0275template(2, SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_div_2_Template, 2, 3, "div", 121);
-    \u0275\u0275template(3, SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_span_3_Template, 4, 6, "span", 122);
+    \u0275\u0275template(2, SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_div_2_Template, 2, 3, "div", 130);
+    \u0275\u0275template(3, SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_span_3_Template, 4, 6, "span", 131);
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
-    const col_r93 = \u0275\u0275nextContext(2).$implicit;
-    const row_r87 = \u0275\u0275nextContext().$implicit;
-    const ctx_r109 = \u0275\u0275nextContext();
+    const col_r97 = \u0275\u0275nextContext(2).$implicit;
+    const row_r90 = \u0275\u0275nextContext().$implicit;
+    const ctx_r129 = \u0275\u0275nextContext();
     \u0275\u0275advance(1);
-    \u0275\u0275property("title", ctx_r109.isCellTrue(row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].value) ? "Yes" : "No");
+    \u0275\u0275property("title", ctx_r129.isCellTrue(row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].value) ? "Yes" : "No");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r109.booleanStyle === "checkbox");
+    \u0275\u0275property("ngIf", ctx_r129.booleanStyle === "checkbox");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r109.booleanStyle === "badge");
+    \u0275\u0275property("ngIf", ctx_r129.booleanStyle === "badge");
   }
 }
-function SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_template_1_Template(rf, ctx) {
+function SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_template_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 127);
+    \u0275\u0275elementStart(0, "span", 136);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const col_r93 = \u0275\u0275nextContext(2).$implicit;
-    const row_r87 = \u0275\u0275nextContext().$implicit;
-    const ctx_r111 = \u0275\u0275nextContext();
-    \u0275\u0275styleProp("text-align", ctx_r111.textAlign);
+    const col_r97 = \u0275\u0275nextContext(2).$implicit;
+    const row_r90 = \u0275\u0275nextContext().$implicit;
+    const ctx_r131 = \u0275\u0275nextContext();
+    \u0275\u0275styleProp("text-align", ctx_r131.textAlign);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].value);
+    \u0275\u0275textInterpolate(ctx_r131.formatCellValue(col_r97, row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].value));
   }
 }
-function SutramGridComponent_ng_template_9_td_6_ng_template_3_Template(rf, ctx) {
+function SutramGridComponent_ng_template_9_td_7_ng_template_3_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275template(0, SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_container_0_Template, 4, 3, "ng-container", 115);
-    \u0275\u0275template(1, SutramGridComponent_ng_template_9_td_6_ng_template_3_ng_template_1_Template, 2, 3, "ng-template", null, 119, \u0275\u0275templateRefExtractor);
+    \u0275\u0275template(0, SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_container_0_Template, 4, 3, "ng-container", 121);
+    \u0275\u0275template(1, SutramGridComponent_ng_template_9_td_7_ng_template_3_ng_template_1_Template, 2, 3, "ng-template", null, 128, \u0275\u0275templateRefExtractor);
   }
   if (rf & 2) {
-    const _r110 = \u0275\u0275reference(2);
-    const col_r93 = \u0275\u0275nextContext().$implicit;
-    const ctx_r96 = \u0275\u0275nextContext(2);
-    \u0275\u0275property("ngIf", ctx_r96.isBooleanColumn(col_r93))("ngIfElse", _r110);
+    const _r130 = \u0275\u0275reference(2);
+    const col_r97 = \u0275\u0275nextContext().$implicit;
+    const ctx_r100 = \u0275\u0275nextContext(2);
+    \u0275\u0275property("ngIf", ctx_r100.isBooleanColumn(col_r97))("ngIfElse", _r130);
   }
 }
-function SutramGridComponent_ng_template_9_td_6_Template(rf, ctx) {
+function SutramGridComponent_ng_template_9_td_7_Template(rf, ctx) {
   if (rf & 1) {
-    const _r130 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "td")(1, "div", 114);
-    \u0275\u0275listener("click", function SutramGridComponent_ng_template_9_td_6_Template_div_click_1_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r130);
-      const col_r93 = restoredCtx.$implicit;
-      const rowIndex_r88 = \u0275\u0275nextContext().rowIndex;
-      const ctx_r128 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r128.onCellClick(rowIndex_r88, col_r93.key || col_r93.name, $event));
-    })("dblclick", function SutramGridComponent_ng_template_9_td_6_Template_div_dblclick_1_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r130);
-      const col_r93 = restoredCtx.$implicit;
-      const ctx_r132 = \u0275\u0275nextContext();
-      const rowIndex_r88 = ctx_r132.rowIndex;
-      const row_r87 = ctx_r132.$implicit;
-      const ctx_r131 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r131.startCellEdit(rowIndex_r88, col_r93.key || col_r93.name, row_r87, $event));
-    })("contextmenu", function SutramGridComponent_ng_template_9_td_6_Template_div_contextmenu_1_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r130);
-      const col_r93 = restoredCtx.$implicit;
-      const ctx_r134 = \u0275\u0275nextContext();
-      const rowIndex_r88 = ctx_r134.rowIndex;
-      const row_r87 = ctx_r134.$implicit;
-      const ctx_r133 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r133.openCellContextMenu($event, rowIndex_r88, col_r93.key || col_r93.name, row_r87));
+    const _r150 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "td")(1, "div", 120);
+    \u0275\u0275listener("click", function SutramGridComponent_ng_template_9_td_7_Template_div_click_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r150);
+      const col_r97 = restoredCtx.$implicit;
+      const rowIndex_r91 = \u0275\u0275nextContext().rowIndex;
+      const ctx_r148 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r148.onCellClick(rowIndex_r91, col_r97.key || col_r97.name, $event));
+    })("dblclick", function SutramGridComponent_ng_template_9_td_7_Template_div_dblclick_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r150);
+      const col_r97 = restoredCtx.$implicit;
+      const ctx_r152 = \u0275\u0275nextContext();
+      const rowIndex_r91 = ctx_r152.rowIndex;
+      const row_r90 = ctx_r152.$implicit;
+      const ctx_r151 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r151.startCellEdit(rowIndex_r91, col_r97.key || col_r97.name, row_r90, $event));
+    })("contextmenu", function SutramGridComponent_ng_template_9_td_7_Template_div_contextmenu_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r150);
+      const col_r97 = restoredCtx.$implicit;
+      const ctx_r154 = \u0275\u0275nextContext();
+      const rowIndex_r91 = ctx_r154.rowIndex;
+      const row_r90 = ctx_r154.$implicit;
+      const ctx_r153 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r153.openCellContextMenu($event, rowIndex_r91, col_r97.key || col_r97.name, row_r90));
     });
-    \u0275\u0275template(2, SutramGridComponent_ng_template_9_td_6_ng_container_2_Template, 3, 5, "ng-container", 115);
-    \u0275\u0275template(3, SutramGridComponent_ng_template_9_td_6_ng_template_3_Template, 3, 2, "ng-template", null, 116, \u0275\u0275templateRefExtractor);
+    \u0275\u0275template(2, SutramGridComponent_ng_template_9_td_7_ng_container_2_Template, 4, 2, "ng-container", 121);
+    \u0275\u0275template(3, SutramGridComponent_ng_template_9_td_7_ng_template_3_Template, 3, 2, "ng-template", null, 122, \u0275\u0275templateRefExtractor);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
-    const col_r93 = ctx.$implicit;
-    const _r95 = \u0275\u0275reference(4);
-    const ctx_r135 = \u0275\u0275nextContext();
-    const rowIndex_r88 = ctx_r135.rowIndex;
-    const row_r87 = ctx_r135.$implicit;
-    const ctx_r92 = \u0275\u0275nextContext();
+    const col_r97 = ctx.$implicit;
+    const _r99 = \u0275\u0275reference(4);
+    const ctx_r155 = \u0275\u0275nextContext();
+    const rowIndex_r91 = ctx_r155.rowIndex;
+    const row_r90 = ctx_r155.$implicit;
+    const ctx_r96 = \u0275\u0275nextContext();
     let tmp_6_0;
-    \u0275\u0275styleProp("width", ctx_r92.getColumnWidth(col_r93), "px")("min-width", ctx_r92.getColumnWidth(col_r93), "px")("max-width", ctx_r92.getColumnWidth(col_r93), "px");
+    \u0275\u0275styleProp("width", ctx_r96.getColumnWidth(col_r97), "px")("min-width", ctx_r96.getColumnWidth(col_r97), "px")("max-width", ctx_r96.getColumnWidth(col_r97), "px");
     \u0275\u0275advance(1);
-    \u0275\u0275styleProp("font-weight", ctx_r92.isBold ? "700" : "normal")("justify-content", ctx_r92.textAlign === "center" ? "center" : ctx_r92.textAlign === "right" ? "flex-end" : "flex-start")("text-align", ctx_r92.textAlign);
-    \u0275\u0275classProp("cell-active", ((tmp_6_0 = ctx_r92.state.selectedCell()) == null ? null : tmp_6_0.rowIdx) === rowIndex_r88 && ((tmp_6_0 = ctx_r92.state.selectedCell()) == null ? null : tmp_6_0.colKey) === (col_r93.key || col_r93.name))("cell-editing", ctx_r92.isCellEditing(rowIndex_r88, col_r93.key || col_r93.name))("cell-bad", ctx_r92.state.isAuditMode() && row_r87.cells[col_r93.key || col_r93.name] && (row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].isValid) === false)("cell-edited", row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].isModified)("cell-new", row_r87.isNew && ctx_r92.isRowPopulated(row_r87));
-    \u0275\u0275property("title", (row_r87.cells[col_r93.key || col_r93.name] == null ? null : row_r87.cells[col_r93.key || col_r93.name].errorMessage) || "");
+    \u0275\u0275styleProp("font-weight", ctx_r96.isBold ? "700" : "normal")("justify-content", ctx_r96.textAlign === "center" ? "center" : ctx_r96.textAlign === "right" ? "flex-end" : "flex-start")("text-align", ctx_r96.textAlign);
+    \u0275\u0275classProp("cell-active", ((tmp_6_0 = ctx_r96.state.selectedCell()) == null ? null : tmp_6_0.rowIdx) === rowIndex_r91 && ((tmp_6_0 = ctx_r96.state.selectedCell()) == null ? null : tmp_6_0.colKey) === (col_r97.key || col_r97.name))("cell-editing", ctx_r96.isCellEditing(rowIndex_r91, col_r97.key || col_r97.name))("cell-bad", ctx_r96.state.isAuditMode() && row_r90.cells[col_r97.key || col_r97.name] && (row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].isValid) === false)("cell-edited", row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].isModified)("cell-new", row_r90.isNew && ctx_r96.isRowPopulated(row_r90));
+    \u0275\u0275property("title", (row_r90.cells[col_r97.key || col_r97.name] == null ? null : row_r90.cells[col_r97.key || col_r97.name].errorMessage) || "");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r92.isCellEditing(rowIndex_r88, col_r93.key || col_r93.name))("ngIfElse", _r95);
+    \u0275\u0275property("ngIf", ctx_r96.isCellEditing(rowIndex_r91, col_r97.key || col_r97.name))("ngIfElse", _r99);
   }
 }
 function SutramGridComponent_ng_template_9_Template(rf, ctx) {
   if (rf & 1) {
-    const _r137 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "tr")(1, "td", 107);
+    const _r157 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "tr")(1, "td", 111);
     \u0275\u0275listener("click", function SutramGridComponent_ng_template_9_Template_td_click_1_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r137);
-      const rowIndex_r88 = restoredCtx.rowIndex;
-      const row_r87 = restoredCtx.$implicit;
-      const ctx_r136 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r136.onRowHeaderClick(rowIndex_r88, row_r87, $event));
+      const restoredCtx = \u0275\u0275restoreView(_r157);
+      const rowIndex_r91 = restoredCtx.rowIndex;
+      const row_r90 = restoredCtx.$implicit;
+      const ctx_r156 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r156.onRowHeaderClick(rowIndex_r91, row_r90, $event));
     })("contextmenu", function SutramGridComponent_ng_template_9_Template_td_contextmenu_1_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r137);
-      const row_r87 = restoredCtx.$implicit;
-      const rowIndex_r88 = restoredCtx.rowIndex;
-      const ctx_r138 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r138.openRowContextMenu($event, row_r87, rowIndex_r88));
+      const restoredCtx = \u0275\u0275restoreView(_r157);
+      const row_r90 = restoredCtx.$implicit;
+      const rowIndex_r91 = restoredCtx.rowIndex;
+      const ctx_r158 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r158.openRowContextMenu($event, row_r90, rowIndex_r91));
     });
-    \u0275\u0275template(2, SutramGridComponent_ng_template_9_span_2_Template, 2, 0, "span", 108);
-    \u0275\u0275template(3, SutramGridComponent_ng_template_9_span_3_Template, 2, 0, "span", 109);
-    \u0275\u0275elementStart(4, "span", 110);
-    \u0275\u0275text(5);
+    \u0275\u0275template(2, SutramGridComponent_ng_template_9_span_2_Template, 2, 0, "span", 112);
+    \u0275\u0275template(3, SutramGridComponent_ng_template_9_span_3_Template, 2, 0, "span", 113);
+    \u0275\u0275template(4, SutramGridComponent_ng_template_9_i_4_Template, 1, 0, "i", 114);
+    \u0275\u0275elementStart(5, "span", 115);
+    \u0275\u0275text(6);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(6, SutramGridComponent_ng_template_9_td_6_Template, 5, 25, "td", 111);
+    \u0275\u0275template(7, SutramGridComponent_ng_template_9_td_7_Template, 5, 25, "td", 116);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const row_r87 = ctx.$implicit;
-    const rowIndex_r88 = ctx.rowIndex;
-    const columns_r89 = ctx.columns;
+    const row_r90 = ctx.$implicit;
+    const rowIndex_r91 = ctx.rowIndex;
+    const columns_r92 = ctx.columns;
     const ctx_r6 = \u0275\u0275nextContext();
-    \u0275\u0275classProp("row-new", row_r87.isNew && ctx_r6.isRowPopulated(row_r87))("row-edited", !row_r87.isNew && row_r87.isModified)("row-has-error", ctx_r6.state.isAuditMode() && row_r87.hasError)("row-synced", row_r87.isSynced)("row-selected", ctx_r6.selectedRowIdx === rowIndex_r88);
+    \u0275\u0275classProp("row-new", row_r90.isNew && ctx_r6.isRowPopulated(row_r90))("row-edited", !row_r90.isNew && row_r90.isModified)("row-has-error", ctx_r6.state.isAuditMode() && row_r90.hasError)("row-synced", row_r90.isSynced)("row-selected", ctx_r6.selectedRowIdx === rowIndex_r91)("row-highlighted", ctx_r6.isRowHighlighted(row_r90));
     \u0275\u0275advance(2);
-    \u0275\u0275property("ngIf", row_r87.isNew && ctx_r6.isRowPopulated(row_r87));
+    \u0275\u0275property("ngIf", row_r90.isNew && ctx_r6.isRowPopulated(row_r90));
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", !row_r87.isNew && row_r87.isModified);
+    \u0275\u0275property("ngIf", !row_r90.isNew && row_r90.isModified);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r6.isRowHighlighted(row_r90));
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(row_r87.rowNum);
+    \u0275\u0275textInterpolate(row_r90.rowNum);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngForOf", columns_r89);
+    \u0275\u0275property("ngForOf", columns_r92);
   }
 }
 function SutramGridComponent_ng_template_10_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 128);
-    \u0275\u0275element(2, "i", 129);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 137);
+    \u0275\u0275element(2, "i", 138);
     \u0275\u0275text(3, " No data available. Open an Excel file or click 'Refresh' to load from database. ");
     \u0275\u0275elementEnd()();
   }
@@ -128793,20 +131301,20 @@ function SutramGridComponent_ng_template_10_Template(rf, ctx) {
 }
 function SutramGridComponent_div_11_Template(rf, ctx) {
   if (rf & 1) {
-    const _r140 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 130)(1, "div", 131)(2, "div", 132);
-    \u0275\u0275element(3, "i", 133);
-    \u0275\u0275elementStart(4, "strong", 134);
+    const _r160 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 139)(1, "div", 140)(2, "div", 141);
+    \u0275\u0275element(3, "i", 142);
+    \u0275\u0275elementStart(4, "strong", 143);
     \u0275\u0275text(5, "\u0938\u094D\u092E\u093E\u0930\u094D\u091F \u092C\u0948\u091A \u0938\u0941\u0927\u093E\u0930 (Solve All Matches)");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "button", 135);
+    \u0275\u0275elementStart(6, "button", 144);
     \u0275\u0275listener("click", function SutramGridComponent_div_11_Template_button_click_6_listener() {
-      \u0275\u0275restoreView(_r140);
-      const ctx_r139 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r139.dismissPrompt());
+      \u0275\u0275restoreView(_r160);
+      const ctx_r159 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r159.dismissPrompt());
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(7, "div", 136)(8, "p", 137);
+    \u0275\u0275elementStart(7, "div", 145)(8, "p", 146);
     \u0275\u0275text(9, " \u0906\u092A\u0928\u0947 \u092A\u0902\u0915\u094D\u0924\u093F ");
     \u0275\u0275elementStart(10, "strong");
     \u0275\u0275text(11);
@@ -128821,8 +131329,8 @@ function SutramGridComponent_div_11_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275text(18, "' \u091A\u0941\u0928\u093E \u0939\u0948\u0964 ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(19, "div", 138);
-    \u0275\u0275element(20, "i", 139);
+    \u0275\u0275elementStart(19, "div", 147);
+    \u0275\u0275element(20, "i", 148);
     \u0275\u0275elementStart(21, "span");
     \u0275\u0275text(22, " \u0915\u0949\u0932\u092E ");
     \u0275\u0275elementStart(23, "strong");
@@ -128834,29 +131342,29 @@ function SutramGridComponent_div_11_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275text(28, " \u0905\u0928\u094D\u092F \u092A\u0902\u0915\u094D\u0924\u093F\u092F\u094B\u0902 \u092E\u0947\u0902 \u092D\u0940 \u092F\u0939\u0940 \u0905\u092E\u093E\u0928\u094D\u092F \u092E\u093E\u0928 \u0939\u0948\u0964 ");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(29, "div", 140)(30, "input", 141);
+    \u0275\u0275elementStart(29, "div", 149)(30, "input", 150);
     \u0275\u0275listener("ngModelChange", function SutramGridComponent_div_11_Template_input_ngModelChange_30_listener($event) {
-      \u0275\u0275restoreView(_r140);
-      const ctx_r141 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r141.promptState.saveToDictionary = $event);
+      \u0275\u0275restoreView(_r160);
+      const ctx_r161 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r161.promptState.saveToDictionary = $event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(31, "label", 142);
+    \u0275\u0275elementStart(31, "label", 151);
     \u0275\u0275text(32, " \u092D\u0935\u093F\u0937\u094D\u092F \u0915\u0947 \u0932\u093F\u090F \u0921\u093F\u0915\u094D\u0936\u0928\u0930\u0940 \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902 (Save alias mapping to dictionary) ");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(33, "div", 143)(34, "button", 144);
+    \u0275\u0275elementStart(33, "div", 152)(34, "button", 153);
     \u0275\u0275listener("click", function SutramGridComponent_div_11_Template_button_click_34_listener() {
-      \u0275\u0275restoreView(_r140);
-      const ctx_r142 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r142.applySingleCellOnly());
+      \u0275\u0275restoreView(_r160);
+      const ctx_r162 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r162.applySingleCellOnly());
     });
     \u0275\u0275text(35, " \u0915\u0947\u0935\u0932 \u0907\u0938\u0940 \u092A\u0902\u0915\u094D\u0924\u093F \u092E\u0947\u0902 (Single Row Only) ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(36, "button", 145);
+    \u0275\u0275elementStart(36, "button", 154);
     \u0275\u0275listener("click", function SutramGridComponent_div_11_Template_button_click_36_listener() {
-      \u0275\u0275restoreView(_r140);
-      const ctx_r143 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r143.confirmSolveAll());
+      \u0275\u0275restoreView(_r160);
+      const ctx_r163 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r163.confirmSolveAll());
     });
     \u0275\u0275text(37);
     \u0275\u0275elementEnd()()();
@@ -129220,12 +131728,18 @@ var SutramGridComponent = class _SutramGridComponent {
     if (this.editingCell && (this.editingCell.rowIdx !== rowIdx || this.editingCell.colKey !== colKey)) {
       this.commitCellEdit();
     }
-    this.state.setSelectedCell({ rowIdx, colKey });
-    const colDef = this.headers.find((h) => h.name === colKey) || null;
+    const colDef = this.headers.find((h) => h.name === colKey || h.key === colKey) || null;
+    if (colDef && (colDef.is_temp || colDef.is_virtual || colDef.readonly)) {
+      return;
+    }
     this.editingColDef = colDef;
     const curVal = row.cells[colKey]?.value;
     this.originalEditingValue = curVal !== void 0 && curVal !== null ? String(curVal) : "";
-    this.editingValue = initialChar !== void 0 ? initialChar : this.originalEditingValue;
+    if (this.isDateColumn(colDef)) {
+      this.editingValue = this.normalizeToIsoDate(curVal);
+    } else {
+      this.editingValue = initialChar !== void 0 ? initialChar : this.originalEditingValue;
+    }
     this.editingCell = { rowIdx, colKey };
     setTimeout(() => {
       const inputEl = this.el.nativeElement.querySelector(".raw-cell-editor");
@@ -129279,6 +131793,13 @@ var SutramGridComponent = class _SutramGridComponent {
   updateFkOptions(col, query, row) {
     if (!col.ref_table)
       return;
+    const refCols = col.ref_select || (col.ref_data ? [col.ref_data] : []);
+    if (refCols.length > 0) {
+      this.refCache.registerTableConfig(col.ref_table, {
+        ref_select: refCols,
+        ref_data: col.ref_data
+      });
+    }
     let parentId = void 0;
     if (col.ref_table.toLowerCase() === "subitem" && row) {
       const itemHeader = this.headers.find((h) => h.ref_table === "item" || h.name.includes("item"));
@@ -129480,12 +132001,22 @@ var SutramGridComponent = class _SutramGridComponent {
               }
             }
           }
+        } else {
+          cell.refId = newVal;
+        }
+        if (col.col_name && col.col_name !== colKey && row.cells[col.col_name]) {
+          row.cells[col.col_name].value = cell.value;
+          row.cells[col.col_name].refId = cell.refId;
+          row.cells[col.col_name].isModified = cell.isModified;
         }
         row.isModified = row.isNew || Object.values(row.cells).some((c) => c && c.isModified);
         this.audit.validateCell(cell, col, row, this.headers);
         this.audit.validateRow(row, this.headers);
         this.cellChanged.emit({ rowIdx, colKey, value: cell.value });
         this.state.updateCellValue(rowIdx, colKey, cell.value, cell.refId);
+        if (col.col_name && col.col_name !== colKey) {
+          this.state.updateCellValue(rowIdx, col.col_name, cell.value, cell.refId);
+        }
         if (rowIdx === this.visibleRows.length - 1 && this.isRowPopulated(row)) {
           this.state.addNewBlankRow();
         }
@@ -129780,6 +132311,41 @@ var SutramGridComponent = class _SutramGridComponent {
         }
       });
     }
+  }
+  isRowHighlighted(row) {
+    if (!row)
+      return false;
+    return !!(row.isHighlighted || row.hl === 1 || row.hl === true || row.cells?.["hl"]?.value === 1 || row.cells?.["hl"]?.value === true || row.cells?.["hl"]?.value === "1" || row._rawOriginal?.hl === 1 || row._rawOriginal?.hl === true || row._rawOriginal?.hl === "1");
+  }
+  toggleRowHighlight() {
+    const row = this.contextMenuState.row || (this.contextMenuState.rowIdx >= 0 ? this.rows[this.contextMenuState.rowIdx] : null);
+    const rowIdx = this.contextMenuState.rowIdx;
+    this.closeContextMenu();
+    if (!row)
+      return;
+    const currentlyHl = this.isRowHighlighted(row);
+    const newHl = currentlyHl ? 0 : 1;
+    row.isHighlighted = newHl === 1;
+    row.hl = newHl;
+    if (!row.cells)
+      row.cells = {};
+    if (row.cells["hl"]) {
+      row.cells["hl"].value = newHl;
+      row.cells["hl"].isModified = true;
+    } else {
+      row.cells["hl"] = {
+        value: newHl,
+        isValid: true,
+        isModified: true
+      };
+    }
+    if (row._rawOriginal) {
+      row._rawOriginal.hl = newHl;
+    }
+    row.isModified = true;
+    this.state.updateCellValue(rowIdx, "hl", newHl);
+    this.cellChanged.emit({ rowIdx, colKey: "hl", value: newHl });
+    this.cdr.markForCheck();
   }
   copySelectedRow() {
     const row = this.contextMenuState.row || (this.contextMenuState.rowIdx >= 0 ? this.rows[this.contextMenuState.rowIdx] : null);
@@ -130129,6 +132695,68 @@ var SutramGridComponent = class _SutramGridComponent {
     }
     return Math.max(130, Math.min(220, (col.short_name || col.name || "").length * 10 + 35));
   }
+  // ── Date & Cell Formatting Helpers ───────────────────────────
+  isDateColumn(col) {
+    if (!col)
+      return false;
+    const t = (col.type || col.col_type || col.sql_type || "").toLowerCase();
+    const key = (col.key || col.name || col.col_name || "").toLowerCase();
+    return t === "date" || t === "datetime" || key.endsWith("_date") || key === "date";
+  }
+  normalizeToIsoDate(val) {
+    if (!val)
+      return "";
+    const str = String(val).trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(str))
+      return str.slice(0, 10);
+    const dmy = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (dmy) {
+      const [, d, m, y] = dmy;
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    return str;
+  }
+  formatCellValue(col, value) {
+    if (value === null || value === void 0 || value === "")
+      return "";
+    if (this.isDateColumn(col)) {
+      const fmt = col?.display_format || col?.format || "DD/MM/YYYY";
+      return this.formatDateValue(value, fmt);
+    }
+    if (col?.display_format && !isNaN(Number(value))) {
+      const fmt = col.display_format;
+      const num = Number(value);
+      if (fmt === "0")
+        return num.toLocaleString("en-IN", { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+      if (fmt === "2")
+        return num.toLocaleString("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+      if (fmt === "4")
+        return num.toLocaleString("en-IN", { maximumFractionDigits: 4, minimumFractionDigits: 4 });
+      if (fmt === "currency")
+        return "\u20B9 " + num.toLocaleString("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+    }
+    return String(value);
+  }
+  formatDateValue(val, fmt) {
+    if (!val)
+      return "";
+    const str = String(val).trim();
+    const parts = str.split("T")[0].split("-");
+    if (parts.length === 3 && parts[0].length === 4) {
+      const [y, m, d] = parts;
+      if (fmt === "DD/MM/YYYY")
+        return `${d.padStart(2, "0")}/${m.padStart(2, "0")}/${y}`;
+      if (fmt === "DD-MMM-YYYY") {
+        const months2 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const mIdx = parseInt(m, 10) - 1;
+        return `${d.padStart(2, "0")}-${months2[mIdx] || m}-${y}`;
+      }
+      if (fmt === "MM/DD/YYYY")
+        return `${m.padStart(2, "0")}/${d.padStart(2, "0")}/${y}`;
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    return str;
+  }
   static \u0275fac = function SutramGridComponent_Factory(t) {
     return new (t || _SutramGridComponent)(\u0275\u0275directiveInject(SutramExcelStateService), \u0275\u0275directiveInject(SutramClipboardService), \u0275\u0275directiveInject(SutramAuditService), \u0275\u0275directiveInject(SutramRefCacheService), \u0275\u0275directiveInject(SutramExcelApiService), \u0275\u0275directiveInject(ElementRef), \u0275\u0275directiveInject(ChangeDetectorRef));
   };
@@ -130144,20 +132772,20 @@ var SutramGridComponent = class _SutramGridComponent {
         return ctx.onWindowChange();
       }, false, \u0275\u0275resolveWindow);
     }
-  }, inputs: { headers: "headers", rows: "rows", filterOnlyErrors: "filterOnlyErrors", enableDelete: "enableDelete", isBold: "isBold", textAlign: "textAlign", booleanStyle: "booleanStyle" }, outputs: { cellChanged: "cellChanged", solveAllTriggered: "solveAllTriggered", loadMore: "loadMore", filterChanged: "filterChanged", sortChanged: "sortChanged", openConfig: "openConfig" }, features: [\u0275\u0275NgOnChangesFeature], decls: 12, vars: 15, consts: [[1, "sutram-grid-wrapper", 3, "contextmenu"], ["class", "custom-context-menu shadow-lg", 3, "top", "left", "click", 4, "ngIf"], ["class", "ref-dropdown-menu shadow-lg", 3, "top", "left", "min-width", "mousedown", 4, "ngIf"], ["styleClass", "sutram-col-filter-popover shadow-lg", 3, "showCloseIcon", "dismissable"], ["colFilterOp", ""], ["pTemplate", "content"], ["scrollHeight", "flex", "columnResizeMode", "expand", "styleClass", "p-datatable-gridlines p-datatable-sm sutram-grid-table", 3, "value", "columns", "virtualScroll", "virtualScrollItemSize", "virtualScrollOptions", "rowTrackBy", "scrollable", "resizableColumns", "reorderableColumns"], ["pTable", ""], ["pTemplate", "header"], ["pTemplate", "body"], ["pTemplate", "emptymessage"], ["class", "inline-solve-prompt card shadow-lg p-3", 4, "ngIf"], [1, "custom-context-menu", "shadow-lg", 3, "click"], [4, "ngIf"], [1, "context-menu-item", 3, "click"], [1, "pi", "pi-arrow-up"], [1, "pi", "pi-arrow-down"], [1, "pi", "pi-clone"], [1, "pi", "pi-copy"], [1, "ms-auto"], [1, "pi", "pi-file-edit"], [1, "pi", "pi-clipboard"], [1, "context-menu-divider"], [1, "context-menu-item", "text-danger", 3, "click"], [1, "pi", "pi-trash", 2, "color", "#ef4444"], [2, "color", "#ef4444", "font-weight", "600"], [1, "ref-dropdown-menu", "shadow-lg", 3, "mousedown"], [1, "ref-dropdown-header"], [2, "opacity", "0.8", "font-weight", "400"], [1, "ref-dropdown-items-wrap", 2, "max-height", "185px", "overflow-y", "auto"], ["class", "ref-dropdown-item", 3, "highlighted", "mousedown", 4, "ngFor", "ngForOf"], ["class", "ref-dropdown-empty", 4, "ngIf"], [1, "ref-dropdown-item", 3, "mousedown"], [1, "ref-item-label", "text-truncate"], ["class", "ref-item-badge", 4, "ngIf"], [1, "ref-item-badge"], [1, "ref-dropdown-empty"], [1, "pi", "pi-search", "me-1"], ["class", "filter-popover-content", 4, "ngIf"], [1, "filter-popover-content"], [1, "popover-header"], [1, "popover-title", "text-truncate"], [1, "pi", "pi-filter-fill", "text-primary"], [1, "col-name", "text-truncate", 3, "title"], ["class", "badge-type", 4, "ngIf"], ["class", "pi pi-spin pi-spinner text-primary ms-1", "style", "font-size: 11px;", "title", "Fetching from database...", 4, "ngIf"], ["type", "button", "title", "Close", 1, "btn-popover-close", 3, "click"], [1, "pi", "pi-times"], [1, "popover-search-wrap"], [1, "pi", "pi-search", "search-icon"], ["type", "text", "placeholder", "Search in list...", 1, "popover-search-input", 3, "ngModel", "ngModelChange"], ["type", "button", "class", "btn-clear-search-inline", 3, "click", 4, "ngIf"], [1, "popover-action-strip"], [1, "select-all-label"], ["type", "checkbox", 1, "custom-check", 3, "checked", "change"], [1, "quick-links"], ["type", "button", 1, "btn-link-action", 3, "click"], [1, "divider"], [1, "count-pill"], ["class", "pi pi-spin pi-spinner me-1", 4, "ngIf"], [1, "popover-checklist-items"], ["class", "checklist-item", 3, "click", 4, "ngFor", "ngForOf"], ["class", "empty-list-state", 4, "ngIf"], [1, "popover-footer"], ["type", "button", 1, "btn-filter-clear", 3, "click"], [1, "pi", "pi-trash", "me-1"], [1, "footer-actions-right"], ["type", "button", 1, "btn-filter-cancel", 3, "click"], ["type", "button", 1, "btn-filter-apply", 3, "click"], [1, "pi", "pi-check"], [1, "badge-type"], ["title", "Fetching from database...", 1, "pi", "pi-spin", "pi-spinner", "text-primary", "ms-1", 2, "font-size", "11px"], ["type", "button", 1, "btn-clear-search-inline", 3, "click"], [1, "pi", "pi-spin", "pi-spinner", "me-1"], [1, "checklist-item", 3, "click"], [1, "item-left", "text-truncate"], ["type", "checkbox", 1, "custom-check", 3, "checked", "click", "change"], [1, "item-label", "text-truncate", 3, "title"], [1, "item-right"], ["class", "item-code-chip", 4, "ngIf"], ["class", "item-count-badge", 4, "ngIf"], [1, "item-code-chip"], [1, "item-count-badge"], [1, "empty-list-state"], ["pFrozenColumn", "", "title", "Configure Columns (\u0915\u0949\u0932\u092E \u091A\u0941\u0928\u0947\u0902)", 1, "corner-th", "corner-config-th", 2, "width", "34px", "min-width", "34px", "max-width", "34px", "text-align", "center", 3, "click"], [2, "display", "flex", "align-items", "center", "justify-content", "center"], [1, "pi", "pi-cog", "corner-cog-icon", 2, "font-size", "12px", "color", "var(--text-muted, #64748b)"], ["pResizableColumn", "", "pReorderableColumn", "", "class", "sutram-th", 3, "width", "min-width", "max-width", "sortable-th", "click", 4, "ngFor", "ngForOf"], ["pResizableColumn", "", "pReorderableColumn", "", 1, "sutram-th", 3, "click"], [2, "display", "flex", "justify-content", "space-between", "align-items", "center", "position", "relative", "width", "100%"], [1, "col-header-title", "text-truncate", "d-flex", "align-items-center", 3, "title"], [2, "color", "var(--text-muted, #64748b)", "font-size", "11px", "margin-right", "5px"], [1, "text-truncate"], ["style", "color: #ef4444; margin-left: 2px;", 4, "ngIf"], [1, "col-header-controls", "d-flex", "align-items-center", 3, "click"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(16, 185, 129, 0.15); color: #059669; border-radius: 3px; font-weight: 600; margin-right: 4px;", 3, "title", 4, "ngIf"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(59, 130, 246, 0.15); color: #2563eb; border-radius: 3px; font-weight: 600; margin-right: 4px;", 3, "title", 4, "ngIf"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(245, 158, 11, 0.15); color: #d97706; border-radius: 3px; font-weight: 600; margin-right: 4px;", "title", "Raw ID", 4, "ngIf"], ["class", "col-sort-trigger", 3, "is-sorted", "title", "click", 4, "ngIf"], ["class", "col-filter-trigger", 3, "is-filtered", "title", "click", 4, "ngIf"], [2, "color", "#ef4444", "margin-left", "2px"], [2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(16, 185, 129, 0.15)", "color", "#059669", "border-radius", "3px", "font-weight", "600", "margin-right", "4px", 3, "title"], [2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(59, 130, 246, 0.15)", "color", "#2563eb", "border-radius", "3px", "font-weight", "600", "margin-right", "4px", 3, "title"], ["title", "Raw ID", 2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(245, 158, 11, 0.15)", "color", "#d97706", "border-radius", "3px", "font-weight", "600", "margin-right", "4px"], [1, "col-sort-trigger", 3, "title", "click"], [1, "pi", 3, "ngClass"], [1, "col-filter-trigger", 3, "title", "click"], ["pFrozenColumn", "", 1, "row-num-td", 2, "width", "34px", "min-width", "34px", "max-width", "34px", "text-align", "center", 3, "click", "contextmenu"], ["class", "row-state-dot dot-new", 4, "ngIf"], ["class", "row-state-dot dot-edited", 4, "ngIf"], [1, "row-num-text"], [3, "width", "min-width", "max-width", 4, "ngFor", "ngForOf"], [1, "row-state-dot", "dot-new"], [1, "row-state-dot", "dot-edited"], [1, "cell-box", 3, "title", "click", "dblclick", "contextmenu"], [4, "ngIf", "ngIfElse"], ["normalMode", ""], ["type", "text", 1, "raw-cell-editor", 3, "ngModel", "ngModelChange", "input", "keydown", "blur"], ["cellEditorInput", ""], ["standardCellText", ""], [1, "bool-cell-container", 3, "title", "click"], ["class", "bool-checkbox-box", 3, "checked", 4, "ngIf"], ["class", "bool-badge-pill", 3, "badge-true", "badge-false", 4, "ngIf"], [1, "bool-checkbox-box"], ["class", "pi pi-check", 4, "ngIf"], [1, "bool-badge-pill"], [1, "bool-badge-text"], [1, "cell-value-text", "text-truncate"], [1, "text-center", "py-4", "text-muted"], [1, "pi", "pi-file-excel", "me-2", 2, "font-size", "16px"], [1, "inline-solve-prompt", "card", "shadow-lg", "p-3"], [1, "d-flex", "align-items-center", "justify-content-between", "pb-2", "mb-2", "border-bottom"], [1, "d-flex", "align-items-center", "gap-2"], [1, "pi", "pi-bolt", "text-warning", 2, "font-size", "16px"], [1, "fs-7"], ["type", "button", 1, "btn-close", 3, "click"], [1, "prompt-body", "text-start", "mb-3"], [1, "small", "text-muted", "mb-2"], [1, "alert", "alert-warning", "py-2", "px-3", "small", "d-flex", "align-items-center", "gap-2", "m-0"], [1, "pi", "pi-info-circle"], [1, "form-check", "mt-2"], ["type", "checkbox", "id", "chkDict", 1, "form-check-input", 3, "ngModel", "ngModelChange"], ["for", "chkDict", 1, "form-check-label", "small", "cursor-pointer"], [1, "prompt-actions", "d-flex", "justify-content-end", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-secondary", 3, "click"], ["type", "button", 1, "btn", "btn-sm", "btn-success", 3, "click"]], template: function SutramGridComponent_Template(rf, ctx) {
+  }, inputs: { headers: "headers", rows: "rows", filterOnlyErrors: "filterOnlyErrors", enableDelete: "enableDelete", isBold: "isBold", textAlign: "textAlign", booleanStyle: "booleanStyle" }, outputs: { cellChanged: "cellChanged", solveAllTriggered: "solveAllTriggered", loadMore: "loadMore", filterChanged: "filterChanged", sortChanged: "sortChanged", openConfig: "openConfig" }, features: [\u0275\u0275NgOnChangesFeature], decls: 12, vars: 15, consts: [[1, "sutram-grid-wrapper", 3, "contextmenu"], ["class", "custom-context-menu shadow-lg", 3, "top", "left", "click", 4, "ngIf"], ["class", "ref-dropdown-menu shadow-lg", 3, "top", "left", "min-width", "mousedown", 4, "ngIf"], ["styleClass", "sutram-col-filter-popover shadow-lg", 3, "showCloseIcon", "dismissable"], ["colFilterOp", ""], ["pTemplate", "content"], ["scrollHeight", "flex", "columnResizeMode", "expand", "styleClass", "p-datatable-gridlines p-datatable-sm sutram-grid-table", 3, "value", "columns", "virtualScroll", "virtualScrollItemSize", "virtualScrollOptions", "rowTrackBy", "scrollable", "resizableColumns", "reorderableColumns"], ["pTable", ""], ["pTemplate", "header"], ["pTemplate", "body"], ["pTemplate", "emptymessage"], ["class", "inline-solve-prompt card shadow-lg p-3", 4, "ngIf"], [1, "custom-context-menu", "shadow-lg", 3, "click"], [4, "ngIf"], [1, "context-menu-item", 3, "click"], [1, "pi", "pi-arrow-up"], [1, "pi", "pi-arrow-down"], [1, "pi", "pi-clone"], [1, "context-menu-divider"], [1, "pi", 3, "ngClass"], ["class", "badge-hl-tag ms-auto", 4, "ngIf"], [1, "pi", "pi-copy"], [1, "ms-auto"], [1, "pi", "pi-file-edit"], [1, "pi", "pi-clipboard"], [1, "badge-hl-tag", "ms-auto"], [1, "context-menu-item", "text-danger", 3, "click"], [1, "pi", "pi-trash", 2, "color", "#ef4444"], [2, "color", "#ef4444", "font-weight", "600"], [1, "ref-dropdown-menu", "shadow-lg", 3, "mousedown"], [1, "ref-dropdown-header"], [2, "opacity", "0.8", "font-weight", "400"], [1, "ref-dropdown-items-wrap", 2, "max-height", "185px", "overflow-y", "auto"], ["class", "ref-dropdown-item", 3, "highlighted", "mousedown", 4, "ngFor", "ngForOf"], ["class", "ref-dropdown-empty", 4, "ngIf"], [1, "ref-dropdown-item", 3, "mousedown"], [1, "ref-item-label", "text-truncate"], ["class", "ref-item-badge", 4, "ngIf"], [1, "ref-item-badge"], [1, "ref-dropdown-empty"], [1, "pi", "pi-search", "me-1"], ["class", "filter-popover-content", 4, "ngIf"], [1, "filter-popover-content"], [1, "popover-header"], [1, "popover-title", "text-truncate"], [1, "pi", "pi-filter-fill", "text-primary"], [1, "col-name", "text-truncate", 3, "title"], ["class", "badge-type", 4, "ngIf"], ["class", "pi pi-spin pi-spinner text-primary ms-1", "style", "font-size: 11px;", "title", "Fetching from database...", 4, "ngIf"], ["type", "button", "title", "Close", 1, "btn-popover-close", 3, "click"], [1, "pi", "pi-times"], [1, "popover-search-wrap"], [1, "pi", "pi-search", "search-icon"], ["type", "text", "placeholder", "Search in list...", 1, "popover-search-input", 3, "ngModel", "ngModelChange"], ["type", "button", "class", "btn-clear-search-inline", 3, "click", 4, "ngIf"], [1, "popover-action-strip"], [1, "select-all-label"], ["type", "checkbox", 1, "custom-check", 3, "checked", "change"], [1, "quick-links"], ["type", "button", 1, "btn-link-action", 3, "click"], [1, "divider"], [1, "count-pill"], ["class", "pi pi-spin pi-spinner me-1", 4, "ngIf"], [1, "popover-checklist-items"], ["class", "checklist-item", 3, "click", 4, "ngFor", "ngForOf"], ["class", "empty-list-state", 4, "ngIf"], [1, "popover-footer"], ["type", "button", 1, "btn-filter-clear", 3, "click"], [1, "pi", "pi-trash", "me-1"], [1, "footer-actions-right"], ["type", "button", 1, "btn-filter-cancel", 3, "click"], ["type", "button", 1, "btn-filter-apply", 3, "click"], [1, "pi", "pi-check"], [1, "badge-type"], ["title", "Fetching from database...", 1, "pi", "pi-spin", "pi-spinner", "text-primary", "ms-1", 2, "font-size", "11px"], ["type", "button", 1, "btn-clear-search-inline", 3, "click"], [1, "pi", "pi-spin", "pi-spinner", "me-1"], [1, "checklist-item", 3, "click"], [1, "item-left", "text-truncate"], ["type", "checkbox", 1, "custom-check", 3, "checked", "click", "change"], [1, "item-label", "text-truncate", 3, "title"], [1, "item-right"], ["class", "item-code-chip", 4, "ngIf"], ["class", "item-count-badge", 4, "ngIf"], [1, "item-code-chip"], [1, "item-count-badge"], [1, "empty-list-state"], ["pFrozenColumn", "", "title", "Configure Columns (\u0915\u0949\u0932\u092E \u091A\u0941\u0928\u0947\u0902)", 1, "corner-th", "corner-config-th", 2, "width", "34px", "min-width", "34px", "max-width", "34px", "text-align", "center", 3, "click"], [2, "display", "flex", "align-items", "center", "justify-content", "center"], [1, "pi", "pi-cog", "corner-cog-icon", 2, "font-size", "12px", "color", "var(--text-muted, #64748b)"], ["pResizableColumn", "", "pReorderableColumn", "", "class", "sutram-th", 3, "width", "min-width", "max-width", "sortable-th", "click", 4, "ngFor", "ngForOf"], ["pResizableColumn", "", "pReorderableColumn", "", 1, "sutram-th", 3, "click"], [2, "display", "flex", "justify-content", "space-between", "align-items", "center", "position", "relative", "width", "100%"], [1, "col-header-title", "text-truncate", "d-flex", "align-items-center", 3, "title"], [2, "color", "var(--text-muted, #64748b)", "font-size", "11px", "margin-right", "5px"], [1, "text-truncate"], ["style", "color: #ef4444; margin-left: 2px;", 4, "ngIf"], [1, "col-header-controls", "d-flex", "align-items-center", 3, "click"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(16, 185, 129, 0.15); color: #059669; border-radius: 3px; font-weight: 600; margin-right: 4px;", 3, "title", 4, "ngIf"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(59, 130, 246, 0.15); color: #2563eb; border-radius: 3px; font-weight: 600; margin-right: 4px;", 3, "title", 4, "ngIf"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(245, 158, 11, 0.15); color: #d97706; border-radius: 3px; font-weight: 600; margin-right: 4px;", "title", "Raw ID", 4, "ngIf"], ["style", "font-size: 9px; padding: 1px 4px; background: rgba(139, 92, 246, 0.15); color: #7c3aed; border-radius: 3px; font-weight: 700; margin-right: 4px;", "title", "Formula Computed Temp Column (Read-Only)", 4, "ngIf"], ["class", "col-sort-trigger", 3, "is-sorted", "title", "click", 4, "ngIf"], ["class", "col-filter-trigger", 3, "is-filtered", "title", "click", 4, "ngIf"], [2, "color", "#ef4444", "margin-left", "2px"], [2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(16, 185, 129, 0.15)", "color", "#059669", "border-radius", "3px", "font-weight", "600", "margin-right", "4px", 3, "title"], [2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(59, 130, 246, 0.15)", "color", "#2563eb", "border-radius", "3px", "font-weight", "600", "margin-right", "4px", 3, "title"], ["title", "Raw ID", 2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(245, 158, 11, 0.15)", "color", "#d97706", "border-radius", "3px", "font-weight", "600", "margin-right", "4px"], ["title", "Formula Computed Temp Column (Read-Only)", 2, "font-size", "9px", "padding", "1px 4px", "background", "rgba(139, 92, 246, 0.15)", "color", "#7c3aed", "border-radius", "3px", "font-weight", "700", "margin-right", "4px"], [1, "col-sort-trigger", 3, "title", "click"], [1, "col-filter-trigger", 3, "title", "click"], ["pFrozenColumn", "", 1, "row-num-td", 2, "width", "34px", "min-width", "34px", "max-width", "34px", "text-align", "center", 3, "click", "contextmenu"], ["class", "row-state-dot dot-new", 4, "ngIf"], ["class", "row-state-dot dot-edited", 4, "ngIf"], ["class", "pi pi-bookmark-fill row-hl-icon", "title", "Highlighted Row", 4, "ngIf"], [1, "row-num-text"], [3, "width", "min-width", "max-width", 4, "ngFor", "ngForOf"], [1, "row-state-dot", "dot-new"], [1, "row-state-dot", "dot-edited"], ["title", "Highlighted Row", 1, "pi", "pi-bookmark-fill", "row-hl-icon"], [1, "cell-box", 3, "title", "click", "dblclick", "contextmenu"], [4, "ngIf", "ngIfElse"], ["normalMode", ""], ["type", "date", "class", "raw-cell-editor date-editor", 3, "ngModel", "ngModelChange", "input", "keydown", "blur", 4, "ngIf", "ngIfElse"], ["standardInput", ""], ["type", "date", 1, "raw-cell-editor", "date-editor", 3, "ngModel", "ngModelChange", "input", "keydown", "blur"], ["cellEditorInput", ""], ["type", "text", 1, "raw-cell-editor", 3, "ngModel", "ngModelChange", "input", "keydown", "blur"], ["standardCellText", ""], [1, "bool-cell-container", 3, "title", "click"], ["class", "bool-checkbox-box", 3, "checked", 4, "ngIf"], ["class", "bool-badge-pill", 3, "badge-true", "badge-false", 4, "ngIf"], [1, "bool-checkbox-box"], ["class", "pi pi-check", 4, "ngIf"], [1, "bool-badge-pill"], [1, "bool-badge-text"], [1, "cell-value-text", "text-truncate"], [1, "text-center", "py-4", "text-muted"], [1, "pi", "pi-file-excel", "me-2", 2, "font-size", "16px"], [1, "inline-solve-prompt", "card", "shadow-lg", "p-3"], [1, "d-flex", "align-items-center", "justify-content-between", "pb-2", "mb-2", "border-bottom"], [1, "d-flex", "align-items-center", "gap-2"], [1, "pi", "pi-bolt", "text-warning", 2, "font-size", "16px"], [1, "fs-7"], ["type", "button", 1, "btn-close", 3, "click"], [1, "prompt-body", "text-start", "mb-3"], [1, "small", "text-muted", "mb-2"], [1, "alert", "alert-warning", "py-2", "px-3", "small", "d-flex", "align-items-center", "gap-2", "m-0"], [1, "pi", "pi-info-circle"], [1, "form-check", "mt-2"], ["type", "checkbox", "id", "chkDict", 1, "form-check-input", 3, "ngModel", "ngModelChange"], ["for", "chkDict", 1, "form-check-label", "small", "cursor-pointer"], [1, "prompt-actions", "d-flex", "justify-content-end", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-secondary", 3, "click"], ["type", "button", 1, "btn", "btn-sm", "btn-success", 3, "click"]], template: function SutramGridComponent_Template(rf, ctx) {
     if (rf & 1) {
       \u0275\u0275elementStart(0, "div", 0);
       \u0275\u0275listener("contextmenu", function SutramGridComponent_Template_div_contextmenu_0_listener($event) {
         return $event.preventDefault();
       });
-      \u0275\u0275template(1, SutramGridComponent_div_1_Template, 16, 7, "div", 1);
+      \u0275\u0275template(1, SutramGridComponent_div_1_Template, 22, 14, "div", 1);
       \u0275\u0275template(2, SutramGridComponent_div_2_Template, 9, 10, "div", 2);
       \u0275\u0275elementStart(3, "p-overlayPanel", 3, 4);
       \u0275\u0275template(5, SutramGridComponent_ng_template_5_Template, 1, 1, "ng-template", 5);
       \u0275\u0275elementEnd();
       \u0275\u0275elementStart(6, "p-table", 6, 7);
       \u0275\u0275template(8, SutramGridComponent_ng_template_8_Template, 5, 1, "ng-template", 8);
-      \u0275\u0275template(9, SutramGridComponent_ng_template_9_Template, 7, 14, "ng-template", 9);
+      \u0275\u0275template(9, SutramGridComponent_ng_template_9_Template, 8, 17, "ng-template", 9);
       \u0275\u0275template(10, SutramGridComponent_ng_template_10_Template, 4, 1, "ng-template", 10);
       \u0275\u0275elementEnd();
       \u0275\u0275template(11, SutramGridComponent_div_11_Template, 38, 7, "div", 11);
@@ -130175,7 +132803,7 @@ var SutramGridComponent = class _SutramGridComponent {
       \u0275\u0275advance(5);
       \u0275\u0275property("ngIf", ctx.promptState.visible);
     }
-  }, dependencies: [NgClass, NgForOf, NgIf, DefaultValueAccessor, CheckboxControlValueAccessor, NgControlStatus, NgModel, Table, PrimeTemplate, FrozenColumn, ResizableColumn, ReorderableColumn, OverlayPanel], styles: ['\n\n\n\n\n\n\n\n\n\n\n\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.sutram-grid-wrapper[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n\n  ::ng-deep .p-datatable-wrapper {\n    height: 100% !important;\n  }\n\n  \n\n  ::ng-deep .p-datatable-thead > tr > th {\n    position: sticky;\n    top: 0;\n    z-index: 20;\n    background: var(--header-bg, #f1f5f9) !important;\n    color: var(--header-text, #1e293b) !important;\n    font-weight: 700 !important;\n    font-size: 13px !important;\n    height: var(--header-height, 38px) !important;\n    padding: 6px 10px !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;\n    white-space: nowrap !important;\n    user-select: none;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);\n\n    &.sortable-th {\n      cursor: pointer !important;\n      transition: background-color 0.15s ease;\n\n      &:hover {\n        background-color: rgba(125, 125, 125, 0.1) !important;\n      }\n    }\n  }\n\n  \n\n  \n\n  ::ng-deep th.corner-th {\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    left: 0;\n    z-index: 25 !important;\n    text-align: center !important;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    cursor: pointer;\n\n    .corner-cog-icon {\n      font-size: 10px !important;\n      color: var(--text-muted, #64748b);\n      transition: all 0.2s ease;\n    }\n\n    &:hover .corner-cog-icon {\n      color: var(--primary, #4f46e5) !important;\n      transform: rotate(45deg);\n    }\n  }\n\n  \n\n  .col-header-controls {\n    display: flex;\n    align-items: center;\n    gap: 1.5px;\n    margin-left: 2px;\n    flex-shrink: 0;\n  }\n  .col-sort-trigger, .col-filter-trigger {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 13px;\n    height: 13px;\n    border-radius: 2px;\n    cursor: pointer;\n    color: var(--text-muted, #64748b);\n    opacity: 0.65;\n    transition: all 0.12s ease;\n    font-size: 8px;\n    line-height: 1;\n\n    i.pi {\n      font-size: 8px !important;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.18);\n      opacity: 1;\n      color: var(--text, #0f172a);\n    }\n    &.is-sorted, &.is-filtered {\n      color: var(--primary, #4f46e5) !important;\n      opacity: 1 !important;\n      font-weight: 700;\n      background: var(--primary-soft, #e0e7ff);\n    }\n  }\n\n  \n\n  ::ng-deep .p-datatable-tbody > tr {\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n  }\n  ::ng-deep .p-datatable-tbody > tr > td {\n    height: var(--cell-height, 23px) !important;\n    padding: 0 !important;\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    vertical-align: middle;\n    font-size: 11.5px;\n  }\n\n  \n\n  ::ng-deep td.row-num-td {\n    position: sticky;\n    left: 0;\n    z-index: 15;\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    text-align: center;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    color: var(--text-muted, #64748b);\n    font-size: 11px;\n    font-weight: 500;\n    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n    user-select: none;\n    cursor: pointer;\n    letter-spacing: -0.2px;\n    padding: 0 !important;\n    transition: background-color 0.12s ease;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.16) !important;\n      color: var(--text, #1e293b);\n    }\n\n    .row-state-dot {\n      font-size: 10px;\n      font-weight: 700;\n      margin-right: 2px;\n      &.dot-new { color: #15803d; }\n      &.dot-edited { color: #b45309; }\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-selected {\n    background-color: rgba(59, 130, 246, 0.12) !important;\n\n    > td {\n      background-color: rgba(59, 130, 246, 0.12) !important;\n      border-top: 1px solid rgba(59, 130, 246, 0.4) !important;\n      border-bottom: 1px solid rgba(59, 130, 246, 0.4) !important;\n    }\n\n    > td.row-num-td {\n      background-color: #2563eb !important;\n      color: #ffffff !important;\n      font-weight: 700 !important;\n      border-top: 1px solid #2563eb !important;\n      border-bottom: 1px solid #2563eb !important;\n      border-right: 1px solid #1d4ed8 !important;\n\n      .row-state-dot {\n        color: #ffffff !important;\n      }\n    }\n\n    .cell-box {\n      background-color: transparent !important;\n    }\n  }\n\n  \n\n  .cell-box {\n    height: var(--cell-height, 23px);\n    padding: 0 6px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    display: flex;\n    align-items: center;\n    cursor: cell;\n    width: 100%;\n    position: relative;\n\n    &.cell-active {\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      z-index: 10;\n    }\n    &.cell-editing {\n      padding: 0 !important;\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      background: var(--surface, #ffffff) !important;\n      z-index: 20;\n    }\n    &.cell-bad {\n      background-color: rgba(244, 63, 94, 0.18) !important;\n      color: #f43f5e !important;\n      font-weight: 600;\n      box-shadow: inset 0 0 0 1px #f43f5e;\n    }\n    &.cell-edited {\n      background-color: var(--cell-edited-bg, #fef9c3) !important;\n      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);\n    }\n    &.cell-new {\n      background-color: var(--row-new-bg, #dcfce7) !important;\n    }\n  }\n\n\n  \n\n  .bool-cell-container {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 100%;\n    height: 100%;\n    user-select: none;\n    cursor: pointer;\n  }\n\n  .bool-checkbox-box {\n    width: 15px;\n    height: 15px;\n    border: 1.5px solid var(--text-muted, #94a3b8);\n    border-radius: 3px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.12s ease;\n    background: var(--surface, #ffffff);\n\n    &.checked {\n      background: #10b981;\n      border-color: #059669;\n      color: #ffffff;\n\n      i {\n        font-size: 9px;\n        font-weight: 800;\n      }\n    }\n\n    &:hover {\n      border-color: var(--primary, #4f46e5);\n      transform: scale(1.08);\n    }\n  }\n\n  .bool-badge-pill {\n    display: inline-flex;\n    align-items: center;\n    gap: 3px;\n    padding: 1px 6px;\n    border-radius: 999px;\n    font-size: 10px;\n    font-weight: 600;\n    line-height: 1.3;\n    transition: all 0.12s ease;\n\n    &.badge-true {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n      border: 1px solid rgba(16, 185, 129, 0.3);\n\n      i { font-size: 8.5px; }\n    }\n\n    &.badge-false {\n      background: rgba(100, 116, 139, 0.12);\n      color: #64748b;\n      border: 1px solid rgba(100, 116, 139, 0.25);\n\n      i { font-size: 8.5px; }\n    }\n\n    &:hover {\n      filter: brightness(1.08);\n      transform: scale(1.02);\n    }\n  }\n\n\n  \n\n  ::ng-deep tr.row-edited td {\n    background-color: var(--row-edited-bg, #fffbeb);\n\n    &.row-num-td {\n      background-color: rgba(234, 179, 8, 0.2) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid var(--cell-edited-border, #eab308) !important;\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-new td {\n    background-color: var(--row-new-bg, #dcfce7);\n\n    &.row-num-td {\n      background-color: rgba(34, 197, 94, 0.2) !important;\n      color: #15803d !important;\n      font-weight: 700;\n      border-left: 3px solid var(--row-new-border, #22c55e) !important;\n    }\n  }\n\n  .raw-cell-editor {\n    width: 100%;\n    height: 100%;\n    border: none;\n    outline: none;\n    background: transparent;\n    color: var(--text, inherit);\n    font-family: inherit;\n    font-size: 11.5px;\n    padding: 0 6px;\n    margin: 0;\n    box-sizing: border-box;\n  }\n}\n\n\n\n\n\n.custom-context-menu[_ngcontent-%COMP%] {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);\n  min-width: 220px;\n  max-width: 280px;\n  z-index: 100000;\n  padding: 4px 0;\n  white-space: nowrap;\n  animation: _ngcontent-%COMP%_contextMenuPop 0.12s ease-out;\n  user-select: none;\n\n  .context-menu-item {\n    padding: 6px 14px;\n    font-size: 11.5px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    color: var(--text, #0f172a);\n    transition: background 0.12s ease;\n    white-space: nowrap;\n\n    i {\n      font-size: 12px;\n      color: var(--text-muted, #64748b);\n      width: 14px;\n      text-align: center;\n      flex-shrink: 0;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.1);\n      color: var(--text, #0f172a);\n\n      i {\n        color: var(--primary, #4f46e5);\n      }\n    }\n\n    &.text-danger {\n      color: #ef4444 !important;\n      &:hover {\n        background: rgba(239, 68, 68, 0.1) !important;\n      }\n    }\n\n    kbd {\n      font-size: 10px;\n      padding: 1px 4px;\n      background: rgba(125, 125, 125, 0.12);\n      border-radius: 3px;\n      font-family: inherit;\n      color: var(--text-muted, #64748b);\n    }\n  }\n\n  .context-menu-divider {\n    height: 1px;\n    background: var(--surface-border, #e2e8f0);\n    margin: 4px 0;\n  }\n}\n\n@keyframes _ngcontent-%COMP%_contextMenuPop {\n  from {\n    opacity: 0;\n    transform: scale(0.96);\n  }\n  to {\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n\n\n\n\n.ref-dropdown-menu[_ngcontent-%COMP%] {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.2);\n  max-height: 220px;\n  overflow-y: auto;\n  z-index: 100001;\n  font-size: 11.5px;\n  font-family: inherit;\n  animation: _ngcontent-%COMP%_fadeInDropdown 0.12s ease-out;\n  box-sizing: border-box;\n\n  .ref-dropdown-header {\n    padding: 5px 9px;\n    font-size: 10px;\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    background: var(--header-bg, #f1f5f9);\n    color: var(--text-muted, #64748b);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    position: sticky;\n    top: 0;\n    z-index: 2;\n  }\n\n  .ref-dropdown-item {\n    padding: 6px 10px;\n    cursor: pointer;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    color: var(--text, #0f172a);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    transition: background 0.12s ease;\n    line-height: 1.3;\n\n    &:last-child {\n      border-bottom: none;\n    }\n\n    &:hover,\n    &.highlighted {\n      background: var(--primary-soft, #e0e7ff) !important;\n      color: var(--primary, #4f46e5) !important;\n      font-weight: 600;\n    }\n\n    .ref-item-badge {\n      font-size: 9.5px;\n      font-weight: 600;\n      padding: 1px 6px;\n      border-radius: 3px;\n      background: rgba(100, 116, 139, 0.15);\n      color: var(--text-muted, #64748b);\n      margin-left: 8px;\n      flex-shrink: 0;\n    }\n  }\n\n  .ref-dropdown-empty {\n    padding: 10px;\n    color: var(--text-muted, #64748b);\n    font-style: italic;\n    text-align: center;\n  }\n}\n\n@keyframes _ngcontent-%COMP%_fadeInDropdown {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n\n\n\n\n.inline-solve-prompt[_ngcontent-%COMP%] {\n  position: fixed;\n  bottom: 70px;\n  right: 25px;\n  z-index: 2100;\n  width: 440px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 8px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);\n  animation: _ngcontent-%COMP%_promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);\n}\n@keyframes _ngcontent-%COMP%_promptSlideUp {\n  from {\n    opacity: 0;\n    transform: translateY(16px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n\n\n\n\n  .sutram-col-filter-popover {\n  width: 290px !important;\n  font-size: 12px;\n  border-radius: 8px !important;\n  overflow: hidden;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n  }\n}\n\n.filter-popover-content[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  overflow: hidden;\n\n  .popover-header {\n    padding: 9px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.05);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n\n    .popover-title {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      font-weight: 700;\n      font-size: 12px;\n      color: var(--text, #0f172a);\n\n      .col-name {\n        max-width: 170px;\n      }\n      .badge-type {\n        font-size: 9px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(59, 130, 246, 0.15);\n        color: #2563eb;\n        font-weight: 600;\n      }\n    }\n\n    .btn-popover-close {\n      background: transparent;\n      border: none;\n      width: 22px;\n      height: 22px;\n      border-radius: 4px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      cursor: pointer;\n      color: var(--text-muted, #64748b);\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.15);\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-search-wrap {\n    position: relative;\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n\n    .search-icon {\n      position: absolute;\n      left: 18px;\n      top: 17px;\n      font-size: 11px;\n      color: var(--text-muted, #64748b);\n      pointer-events: none;\n    }\n    .popover-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      font-size: 11.5px;\n      border-radius: 5px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.15s, box-shadow 0.15s;\n\n      &:focus {\n        border-color: #3b82f6;\n        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);\n      }\n    }\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 18px;\n      top: 15px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      padding: 0;\n      font-size: 11px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-action-strip {\n    padding: 6px 12px;\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.02);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    font-size: 11px;\n\n    .select-all-label {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      cursor: pointer;\n      font-weight: 600;\n      color: var(--text, #0f172a);\n      user-select: none;\n      margin: 0;\n    }\n\n    .quick-links {\n      display: flex;\n      align-items: center;\n      gap: 4px;\n\n      .btn-link-action {\n        background: transparent;\n        border: none;\n        color: #3b82f6;\n        cursor: pointer;\n        padding: 0 3px;\n        font-size: 11px;\n        font-weight: 600;\n        text-decoration: none;\n\n        &:hover {\n          text-decoration: underline;\n        }\n      }\n      .divider {\n        color: var(--text-muted, #64748b);\n        opacity: 0.5;\n      }\n    }\n\n    .count-pill {\n      font-size: 10px;\n      color: var(--text-muted, #64748b);\n      font-weight: 500;\n    }\n  }\n\n  .popover-checklist-items {\n    max-height: 180px;\n    overflow-y: auto;\n    padding: 3px 0;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 4px;\n    }\n\n    .checklist-item {\n      padding: 5px 12px;\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      cursor: pointer;\n      user-select: none;\n      transition: background-color 0.1s ease;\n      color: var(--text, #0f172a);\n\n      &:hover {\n        background: rgba(59, 130, 246, 0.08);\n      }\n\n      .item-left {\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        flex-grow: 1;\n        min-width: 0;\n      }\n\n      .item-label {\n        font-size: 11.5px;\n        color: var(--text, #0f172a);\n      }\n\n      .item-right {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        flex-shrink: 0;\n      }\n\n      .item-code-chip {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n\n      .item-count-badge {\n        font-size: 10px;\n        padding: 1px 6px;\n        border-radius: 999px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n    }\n\n    .empty-list-state {\n      padding: 16px;\n      text-align: center;\n      color: var(--text-muted, #64748b);\n      font-size: 11.5px;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    accent-color: #3b82f6;\n    cursor: pointer;\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .popover-footer {\n    padding: 8px 12px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.04);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    gap: 8px;\n\n    .btn-filter-clear {\n      background: transparent;\n      border: 1px solid transparent;\n      color: #ef4444;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 8px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(239, 68, 68, 0.1);\n      }\n    }\n\n    .footer-actions-right {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n    }\n\n    .btn-filter-cancel {\n      background: transparent;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 10px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .btn-filter-apply {\n      background: #3b82f6;\n      border: 1px solid #3b82f6;\n      color: #ffffff;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 12px;\n      border-radius: 4px;\n      cursor: pointer;\n      display: inline-flex;\n      align-items: center;\n      gap: 4px;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: #2563eb;\n      }\n    }\n  }\n}'], changeDetection: 0 });
+  }, dependencies: [NgClass, NgForOf, NgIf, DefaultValueAccessor, CheckboxControlValueAccessor, NgControlStatus, NgModel, Table, PrimeTemplate, FrozenColumn, ResizableColumn, ReorderableColumn, OverlayPanel], styles: ['\n\n\n\n\n\n\n\n\n\n\n\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.sutram-grid-wrapper[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n\n  ::ng-deep .p-datatable-wrapper {\n    height: 100% !important;\n  }\n\n  \n\n  ::ng-deep .p-datatable-thead > tr > th {\n    position: sticky;\n    top: 0;\n    z-index: 20;\n    background: var(--header-bg, #f1f5f9) !important;\n    color: var(--header-text, #1e293b) !important;\n    font-weight: 700 !important;\n    font-size: 13px !important;\n    height: var(--header-height, 38px) !important;\n    padding: 6px 10px !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;\n    white-space: nowrap !important;\n    user-select: none;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);\n\n    &.sortable-th {\n      cursor: pointer !important;\n      transition: background-color 0.15s ease;\n\n      &:hover {\n        background-color: rgba(125, 125, 125, 0.1) !important;\n      }\n    }\n  }\n\n  \n\n  \n\n  ::ng-deep th.corner-th {\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    left: 0;\n    z-index: 25 !important;\n    text-align: center !important;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    cursor: pointer;\n\n    .corner-cog-icon {\n      font-size: 10px !important;\n      color: var(--text-muted, #64748b);\n      transition: all 0.2s ease;\n    }\n\n    &:hover .corner-cog-icon {\n      color: var(--primary, #4f46e5) !important;\n      transform: rotate(45deg);\n    }\n  }\n\n  \n\n  .col-header-controls {\n    display: flex;\n    align-items: center;\n    gap: 1.5px;\n    margin-left: 2px;\n    flex-shrink: 0;\n  }\n  .col-sort-trigger, .col-filter-trigger {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 13px;\n    height: 13px;\n    border-radius: 2px;\n    cursor: pointer;\n    color: var(--text-muted, #64748b);\n    opacity: 0.65;\n    transition: all 0.12s ease;\n    font-size: 8px;\n    line-height: 1;\n\n    i.pi {\n      font-size: 8px !important;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.18);\n      opacity: 1;\n      color: var(--text, #0f172a);\n    }\n    &.is-sorted, &.is-filtered {\n      color: var(--primary, #4f46e5) !important;\n      opacity: 1 !important;\n      font-weight: 700;\n      background: var(--primary-soft, #e0e7ff);\n    }\n  }\n\n  \n\n  ::ng-deep .p-datatable-tbody > tr {\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n  }\n  ::ng-deep .p-datatable-tbody > tr > td {\n    height: var(--cell-height, 23px) !important;\n    padding: 0 !important;\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    vertical-align: middle;\n    font-size: 11.5px;\n  }\n\n  \n\n  ::ng-deep td.row-num-td {\n    position: sticky;\n    left: 0;\n    z-index: 15;\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    text-align: center;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    color: var(--text-muted, #64748b);\n    font-size: 11px;\n    font-weight: 500;\n    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n    user-select: none;\n    cursor: pointer;\n    letter-spacing: -0.2px;\n    padding: 0 !important;\n    transition: background-color 0.12s ease;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.16) !important;\n      color: var(--text, #1e293b);\n    }\n\n    .row-state-dot {\n      font-size: 10px;\n      font-weight: 700;\n      margin-right: 2px;\n      &.dot-new { color: #15803d; }\n      &.dot-edited { color: #b45309; }\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-selected {\n    background-color: rgba(59, 130, 246, 0.12) !important;\n\n    > td {\n      background-color: rgba(59, 130, 246, 0.12) !important;\n      border-top: 1px solid rgba(59, 130, 246, 0.4) !important;\n      border-bottom: 1px solid rgba(59, 130, 246, 0.4) !important;\n    }\n\n    > td.row-num-td {\n      background-color: #2563eb !important;\n      color: #ffffff !important;\n      font-weight: 700 !important;\n      border-top: 1px solid #2563eb !important;\n      border-bottom: 1px solid #2563eb !important;\n      border-right: 1px solid #1d4ed8 !important;\n\n      .row-state-dot {\n        color: #ffffff !important;\n      }\n    }\n\n    .cell-box {\n      background-color: transparent !important;\n    }\n  }\n\n  \n\n  .cell-box {\n    height: var(--cell-height, 23px);\n    padding: 0 6px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    display: flex;\n    align-items: center;\n    cursor: cell;\n    width: 100%;\n    position: relative;\n\n    &.cell-active {\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      z-index: 10;\n    }\n    &.cell-editing {\n      padding: 0 !important;\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      background: var(--surface, #ffffff) !important;\n      z-index: 20;\n    }\n    &.cell-bad {\n      background-color: rgba(244, 63, 94, 0.18) !important;\n      color: #f43f5e !important;\n      font-weight: 600;\n      box-shadow: inset 0 0 0 1px #f43f5e;\n    }\n    &.cell-edited {\n      background-color: var(--cell-edited-bg, #fef9c3) !important;\n      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);\n    }\n    &.cell-new {\n      background-color: var(--row-new-bg, #dcfce7) !important;\n    }\n  }\n\n\n  \n\n  .bool-cell-container {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 100%;\n    height: 100%;\n    user-select: none;\n    cursor: pointer;\n  }\n\n  .bool-checkbox-box {\n    width: 15px;\n    height: 15px;\n    border: 1.5px solid var(--text-muted, #94a3b8);\n    border-radius: 3px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.12s ease;\n    background: var(--surface, #ffffff);\n\n    &.checked {\n      background: #10b981;\n      border-color: #059669;\n      color: #ffffff;\n\n      i {\n        font-size: 9px;\n        font-weight: 800;\n      }\n    }\n\n    &:hover {\n      border-color: var(--primary, #4f46e5);\n      transform: scale(1.08);\n    }\n  }\n\n  .bool-badge-pill {\n    display: inline-flex;\n    align-items: center;\n    gap: 3px;\n    padding: 1px 6px;\n    border-radius: 999px;\n    font-size: 10px;\n    font-weight: 600;\n    line-height: 1.3;\n    transition: all 0.12s ease;\n\n    &.badge-true {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n      border: 1px solid rgba(16, 185, 129, 0.3);\n\n      i { font-size: 8.5px; }\n    }\n\n    &.badge-false {\n      background: rgba(100, 116, 139, 0.12);\n      color: #64748b;\n      border: 1px solid rgba(100, 116, 139, 0.25);\n\n      i { font-size: 8.5px; }\n    }\n\n    &:hover {\n      filter: brightness(1.08);\n      transform: scale(1.02);\n    }\n  }\n\n\n  \n\n  ::ng-deep tr.row-edited td {\n    background-color: var(--row-edited-bg, #fffbeb);\n\n    &.row-num-td {\n      background-color: rgba(234, 179, 8, 0.2) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid var(--cell-edited-border, #eab308) !important;\n    }\n  }\n\n  \n\n  ::ng-deep tr.row-highlighted td {\n    background-color: var(--row-hl-bg, rgba(245, 158, 11, 0.12)) !important;\n\n    &.row-num-td {\n      background-color: rgba(245, 158, 11, 0.25) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid #f59e0b !important;\n      position: relative;\n    }\n  }\n\n  ::ng-deep tr.row-highlighted:hover td {\n    background-color: var(--row-hl-hover-bg, rgba(245, 158, 11, 0.18)) !important;\n  }\n\n  .row-hl-icon {\n    font-size: 8.5px;\n    color: #f59e0b;\n    margin-right: 2px;\n    vertical-align: middle;\n  }\n\n  .badge-hl-tag {\n    font-size: 9px;\n    font-weight: 700;\n    padding: 1px 4px;\n    border-radius: 3px;\n    background: rgba(245, 158, 11, 0.2);\n    color: #d97706;\n    letter-spacing: 0.5px;\n  }\n\n  \n\n  ::ng-deep tr.row-new td {\n    background-color: var(--row-new-bg, #dcfce7);\n\n    &.row-num-td {\n      background-color: rgba(34, 197, 94, 0.2) !important;\n      color: #15803d !important;\n      font-weight: 700;\n      border-left: 3px solid var(--row-new-border, #22c55e) !important;\n    }\n  }\n\n  .raw-cell-editor {\n    width: 100%;\n    height: 100%;\n    border: none;\n    outline: none;\n    background: transparent;\n    color: var(--text, inherit);\n    font-family: inherit;\n    font-size: 11.5px;\n    padding: 0 6px;\n    margin: 0;\n    box-sizing: border-box;\n\n    &.date-editor {\n      padding: 0 2px;\n      font-size: 11px;\n      cursor: pointer;\n    }\n  }\n}\n\n\n\n\n\n.custom-context-menu[_ngcontent-%COMP%] {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);\n  min-width: 220px;\n  max-width: 280px;\n  z-index: 100000;\n  padding: 4px 0;\n  white-space: nowrap;\n  animation: _ngcontent-%COMP%_contextMenuPop 0.12s ease-out;\n  user-select: none;\n\n  .context-menu-item {\n    padding: 6px 14px;\n    font-size: 11.5px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    color: var(--text, #0f172a);\n    transition: background 0.12s ease;\n    white-space: nowrap;\n\n    i {\n      font-size: 12px;\n      color: var(--text-muted, #64748b);\n      width: 14px;\n      text-align: center;\n      flex-shrink: 0;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.1);\n      color: var(--text, #0f172a);\n\n      i {\n        color: var(--primary, #4f46e5);\n      }\n    }\n\n    &.text-danger {\n      color: #ef4444 !important;\n      &:hover {\n        background: rgba(239, 68, 68, 0.1) !important;\n      }\n    }\n\n    kbd {\n      font-size: 10px;\n      padding: 1px 4px;\n      background: rgba(125, 125, 125, 0.12);\n      border-radius: 3px;\n      font-family: inherit;\n      color: var(--text-muted, #64748b);\n    }\n  }\n\n  .context-menu-divider {\n    height: 1px;\n    background: var(--surface-border, #e2e8f0);\n    margin: 4px 0;\n  }\n}\n\n@keyframes _ngcontent-%COMP%_contextMenuPop {\n  from {\n    opacity: 0;\n    transform: scale(0.96);\n  }\n  to {\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n\n\n\n\n.ref-dropdown-menu[_ngcontent-%COMP%] {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.2);\n  max-height: 220px;\n  overflow-y: auto;\n  z-index: 100001;\n  font-size: 11.5px;\n  font-family: inherit;\n  animation: _ngcontent-%COMP%_fadeInDropdown 0.12s ease-out;\n  box-sizing: border-box;\n\n  .ref-dropdown-header {\n    padding: 5px 9px;\n    font-size: 10px;\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    background: var(--header-bg, #f1f5f9);\n    color: var(--text-muted, #64748b);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    position: sticky;\n    top: 0;\n    z-index: 2;\n  }\n\n  .ref-dropdown-item {\n    padding: 6px 10px;\n    cursor: pointer;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    color: var(--text, #0f172a);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    transition: background 0.12s ease;\n    line-height: 1.3;\n\n    &:last-child {\n      border-bottom: none;\n    }\n\n    &:hover,\n    &.highlighted {\n      background: var(--primary-soft, #e0e7ff) !important;\n      color: var(--primary, #4f46e5) !important;\n      font-weight: 600;\n    }\n\n    .ref-item-badge {\n      font-size: 9.5px;\n      font-weight: 600;\n      padding: 1px 6px;\n      border-radius: 3px;\n      background: rgba(100, 116, 139, 0.15);\n      color: var(--text-muted, #64748b);\n      margin-left: 8px;\n      flex-shrink: 0;\n    }\n  }\n\n  .ref-dropdown-empty {\n    padding: 10px;\n    color: var(--text-muted, #64748b);\n    font-style: italic;\n    text-align: center;\n  }\n}\n\n@keyframes _ngcontent-%COMP%_fadeInDropdown {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n\n\n\n\n.inline-solve-prompt[_ngcontent-%COMP%] {\n  position: fixed;\n  bottom: 70px;\n  right: 25px;\n  z-index: 2100;\n  width: 440px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 8px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);\n  animation: _ngcontent-%COMP%_promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);\n}\n@keyframes _ngcontent-%COMP%_promptSlideUp {\n  from {\n    opacity: 0;\n    transform: translateY(16px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n\n\n\n\n  .sutram-col-filter-popover {\n  width: 290px !important;\n  font-size: 12px;\n  border-radius: 8px !important;\n  overflow: hidden;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n  }\n}\n\n.filter-popover-content[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  overflow: hidden;\n\n  .popover-header {\n    padding: 9px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.05);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n\n    .popover-title {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      font-weight: 700;\n      font-size: 12px;\n      color: var(--text, #0f172a);\n\n      .col-name {\n        max-width: 170px;\n      }\n      .badge-type {\n        font-size: 9px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(59, 130, 246, 0.15);\n        color: #2563eb;\n        font-weight: 600;\n      }\n    }\n\n    .btn-popover-close {\n      background: transparent;\n      border: none;\n      width: 22px;\n      height: 22px;\n      border-radius: 4px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      cursor: pointer;\n      color: var(--text-muted, #64748b);\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.15);\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-search-wrap {\n    position: relative;\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n\n    .search-icon {\n      position: absolute;\n      left: 18px;\n      top: 17px;\n      font-size: 11px;\n      color: var(--text-muted, #64748b);\n      pointer-events: none;\n    }\n    .popover-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      font-size: 11.5px;\n      border-radius: 5px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.15s, box-shadow 0.15s;\n\n      &:focus {\n        border-color: #3b82f6;\n        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);\n      }\n    }\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 18px;\n      top: 15px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      padding: 0;\n      font-size: 11px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-action-strip {\n    padding: 6px 12px;\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.02);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    font-size: 11px;\n\n    .select-all-label {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      cursor: pointer;\n      font-weight: 600;\n      color: var(--text, #0f172a);\n      user-select: none;\n      margin: 0;\n    }\n\n    .quick-links {\n      display: flex;\n      align-items: center;\n      gap: 4px;\n\n      .btn-link-action {\n        background: transparent;\n        border: none;\n        color: #3b82f6;\n        cursor: pointer;\n        padding: 0 3px;\n        font-size: 11px;\n        font-weight: 600;\n        text-decoration: none;\n\n        &:hover {\n          text-decoration: underline;\n        }\n      }\n      .divider {\n        color: var(--text-muted, #64748b);\n        opacity: 0.5;\n      }\n    }\n\n    .count-pill {\n      font-size: 10px;\n      color: var(--text-muted, #64748b);\n      font-weight: 500;\n    }\n  }\n\n  .popover-checklist-items {\n    max-height: 180px;\n    overflow-y: auto;\n    padding: 3px 0;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 4px;\n    }\n\n    .checklist-item {\n      padding: 5px 12px;\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      cursor: pointer;\n      user-select: none;\n      transition: background-color 0.1s ease;\n      color: var(--text, #0f172a);\n\n      &:hover {\n        background: rgba(59, 130, 246, 0.08);\n      }\n\n      .item-left {\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        flex-grow: 1;\n        min-width: 0;\n      }\n\n      .item-label {\n        font-size: 11.5px;\n        color: var(--text, #0f172a);\n      }\n\n      .item-right {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        flex-shrink: 0;\n      }\n\n      .item-code-chip {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n\n      .item-count-badge {\n        font-size: 10px;\n        padding: 1px 6px;\n        border-radius: 999px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n    }\n\n    .empty-list-state {\n      padding: 16px;\n      text-align: center;\n      color: var(--text-muted, #64748b);\n      font-size: 11.5px;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    accent-color: #3b82f6;\n    cursor: pointer;\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .popover-footer {\n    padding: 8px 12px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.04);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    gap: 8px;\n\n    .btn-filter-clear {\n      background: transparent;\n      border: 1px solid transparent;\n      color: #ef4444;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 8px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(239, 68, 68, 0.1);\n      }\n    }\n\n    .footer-actions-right {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n    }\n\n    .btn-filter-cancel {\n      background: transparent;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 10px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .btn-filter-apply {\n      background: #3b82f6;\n      border: 1px solid #3b82f6;\n      color: #ffffff;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 12px;\n      border-radius: 4px;\n      cursor: pointer;\n      display: inline-flex;\n      align-items: center;\n      gap: 4px;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: #2563eb;\n      }\n    }\n  }\n}\n\n[data-theme="dark"][_nghost-%COMP%], [data-theme="dark"]   [_nghost-%COMP%], .dark-theme[_nghost-%COMP%], .dark-theme   [_nghost-%COMP%], .dark-mode[_nghost-%COMP%], .dark-mode   [_nghost-%COMP%] {\n  ::ng-deep tr.row-highlighted td {\n    background-color: rgba(245, 158, 11, 0.16) !important;\n\n    &.row-num-td {\n      background-color: rgba(245, 158, 11, 0.3) !important;\n      color: #fbbf24 !important;\n      border-left: 3px solid #f59e0b !important;\n    }\n  }\n\n  ::ng-deep tr.row-highlighted:hover td {\n    background-color: rgba(245, 158, 11, 0.24) !important;\n  }\n\n  .badge-hl-tag {\n    background: rgba(245, 158, 11, 0.25);\n    color: #fbbf24;\n  }\n}'], changeDetection: 0 });
 };
 (function() {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SutramGridComponent, [{
@@ -130232,6 +132860,16 @@ var SutramGridComponent = class _SutramGridComponent {
       <span>\u092A\u0902\u0915\u094D\u0924\u093F \u0921\u0941\u092A\u094D\u0932\u093F\u0915\u0947\u091F \u0915\u0930\u0947\u0902 (Duplicate Row)</span>
     </div>
 
+    <!-- Toggle Row Highlight (Bookmark Action) -->
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" (click)="toggleRowHighlight()">
+      <i class="pi" [ngClass]="isRowHighlighted(contextMenuState.row) ? 'pi-bookmark-fill' : 'pi-bookmark'" [style.color]="isRowHighlighted(contextMenuState.row) ? '#f59e0b' : 'inherit'"></i>
+      <span [style.fontWeight]="isRowHighlighted(contextMenuState.row) ? '600' : 'normal'">
+        {{ isRowHighlighted(contextMenuState.row) ? '\u0939\u093E\u0907\u0932\u093E\u0907\u091F \u0939\u091F\u093E\u090F\u0902 (Remove Highlight)' : '\u0939\u093E\u0907\u0932\u093E\u0907\u091F \u0915\u0930\u0947\u0902 (Highlight Row)' }}
+      </span>
+      <span *ngIf="isRowHighlighted(contextMenuState.row)" class="badge-hl-tag ms-auto">HL</span>
+    </div>
+
     <!-- Delete Row (Soft Red) -->
     <ng-container *ngIf="enableDelete">
       <div class="context-menu-divider"></div>
@@ -130261,7 +132899,7 @@ var SutramGridComponent = class _SutramGridComponent {
            [class.highlighted]="i === highlightedIdx"
            (mousedown)="selectDropdownOption(opt, $event, true)">
         <span class="ref-item-label text-truncate">{{ opt.display }}</span>
-        <span *ngIf="opt.code" class="ref-item-badge">{{ opt.code }}</span>
+        <span *ngIf="opt.code && !opt.display.includes(opt.code)" class="ref-item-badge">{{ opt.code }}</span>
       </div>
 
       <div *ngIf="dropdownOptions.length === 0" class="ref-dropdown-empty">
@@ -130420,7 +133058,7 @@ var SutramGridComponent = class _SutramGridComponent {
           <div style="display: flex; justify-content: space-between; align-items: center; position: relative; width: 100%;">
             <span class="col-header-title text-truncate d-flex align-items-center" [title]="col.description || col.short_name || col.name">
               <strong style="color: var(--text-muted, #64748b); font-size: 11px; margin-right: 5px;">{{ getColLetter(idx) }}</strong>
-              <span class="text-truncate">{{ col.short_name || col.name }}</span>
+              <span class="text-truncate">{{ col.label || col.short_name || col.name }}</span>
               <span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
             </span>
 
@@ -130442,6 +133080,12 @@ var SutramGridComponent = class _SutramGridComponent {
                     style="font-size: 9px; padding: 1px 4px; background: rgba(245, 158, 11, 0.15); color: #d97706; border-radius: 3px; font-weight: 600; margin-right: 4px;"
                     title="Raw ID">
                 id
+              </span>
+
+              <span *ngIf="col.is_temp || col.is_virtual"
+                    style="font-size: 9px; padding: 1px 4px; background: rgba(139, 92, 246, 0.15); color: #7c3aed; border-radius: 3px; font-weight: 700; margin-right: 4px;"
+                    title="Formula Computed Temp Column (Read-Only)">
+                fx
               </span>
 
               <span *ngIf="state.sortingEnabled()"
@@ -130474,7 +133118,8 @@ var SutramGridComponent = class _SutramGridComponent {
           [class.row-edited]="!row.isNew && row.isModified"
           [class.row-has-error]="state.isAuditMode() && row.hasError"
           [class.row-synced]="row.isSynced"
-          [class.row-selected]="selectedRowIdx === rowIndex">
+          [class.row-selected]="selectedRowIdx === rowIndex"
+          [class.row-highlighted]="isRowHighlighted(row)">
 
         <!-- Sticky Row Number TD (34px, Authentic Excel Look) -->
         <td class="row-num-td"
@@ -130484,6 +133129,7 @@ var SutramGridComponent = class _SutramGridComponent {
             (contextmenu)="openRowContextMenu($event, row, rowIndex)">
           <span *ngIf="row.isNew && isRowPopulated(row)" class="row-state-dot dot-new">+</span>
           <span *ngIf="!row.isNew && row.isModified" class="row-state-dot dot-edited">\u2022</span>
+          <i *ngIf="isRowHighlighted(row)" class="pi pi-bookmark-fill row-hl-icon" title="Highlighted Row"></i>
           <span class="row-num-text">{{ row.rowNum }}</span>
         </td>
 
@@ -130509,15 +133155,25 @@ var SutramGridComponent = class _SutramGridComponent {
 
             <!-- In-Cell Edit Mode Input -->
             <ng-container *ngIf="isCellEditing(rowIndex, col.key || col.name); else normalMode">
-              <input #cellEditorInput
-                     type="text"
-                     class="raw-cell-editor"
+              <input *ngIf="isDateColumn(col); else standardInput"
+                     #cellEditorInput
+                     type="date"
+                     class="raw-cell-editor date-editor"
                      [(ngModel)]="editingValue"
-                     [style.fontWeight]="isBold ? '700' : 'normal'"
-                     [style.textAlign]="textAlign"
                      (input)="onEditorInput(editingValue, col, row)"
                      (keydown)="onCellEditorKeydown($event, rowIndex, col.key || col.name, row)"
                      (blur)="onCellEditorBlur(rowIndex, col.key || col.name, row)" />
+              <ng-template #standardInput>
+                <input #cellEditorInput
+                       type="text"
+                       class="raw-cell-editor"
+                       [(ngModel)]="editingValue"
+                       [style.fontWeight]="isBold ? '700' : 'normal'"
+                       [style.textAlign]="textAlign"
+                       (input)="onEditorInput(editingValue, col, row)"
+                       (keydown)="onCellEditorKeydown($event, rowIndex, col.key || col.name, row)"
+                       (blur)="onCellEditorBlur(rowIndex, col.key || col.name, row)" />
+              </ng-template>
             </ng-container>
 
             <!-- Normal Output Mode -->
@@ -130547,10 +133203,10 @@ var SutramGridComponent = class _SutramGridComponent {
                 </div>
               </ng-container>
 
-              <!-- 2. Standard Text Cell -->
+              <!-- 2. Standard Text Cell with Dynamic Formatting -->
               <ng-template #standardCellText>
                 <span class="cell-value-text text-truncate"
-                      [style.textAlign]="textAlign">{{ row.cells[col.key || col.name]?.value }}</span>
+                      [style.textAlign]="textAlign">{{ formatCellValue(col, row.cells[col.key || col.name]?.value) }}</span>
               </ng-template>
             </ng-template>
 
@@ -130611,7 +133267,7 @@ var SutramGridComponent = class _SutramGridComponent {
   </div>
 
 </div>
-`, styles: ['/**\n * sutram-grid.component.scss\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Pixel-Perfect Enterprise PrimeNG Virtual Table Styles.\n * Exact replication of Sutram Excel Studio v2.0 Grid:\n * Big Header Row (38px) + Compact Data Cells (23px).\n * In-cell inline editor, active cell blue outline, eye-protect\n * dirty state, custom context menu, and smart FK autocomplete dropdown.\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n */\n\n:host {\n  display: block;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.sutram-grid-wrapper {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n\n  ::ng-deep .p-datatable-wrapper {\n    height: 100% !important;\n  }\n\n  /* Big Header Row (38px) */\n  ::ng-deep .p-datatable-thead > tr > th {\n    position: sticky;\n    top: 0;\n    z-index: 20;\n    background: var(--header-bg, #f1f5f9) !important;\n    color: var(--header-text, #1e293b) !important;\n    font-weight: 700 !important;\n    font-size: 13px !important;\n    height: var(--header-height, 38px) !important;\n    padding: 6px 10px !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;\n    white-space: nowrap !important;\n    user-select: none;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);\n\n    &.sortable-th {\n      cursor: pointer !important;\n      transition: background-color 0.15s ease;\n\n      &:hover {\n        background-color: rgba(125, 125, 125, 0.1) !important;\n      }\n    }\n  }\n\n  /* Corner Config \u2699\uFE0F Trigger */\n  /* Corner Config \u2699\uFE0F Trigger (34px, Authentic Excel Look) */\n  ::ng-deep th.corner-th {\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    left: 0;\n    z-index: 25 !important;\n    text-align: center !important;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    cursor: pointer;\n\n    .corner-cog-icon {\n      font-size: 10px !important;\n      color: var(--text-muted, #64748b);\n      transition: all 0.2s ease;\n    }\n\n    &:hover .corner-cog-icon {\n      color: var(--primary, #4f46e5) !important;\n      transform: rotate(45deg);\n    }\n  }\n\n  /* Column Header Controls */\n  .col-header-controls {\n    display: flex;\n    align-items: center;\n    gap: 1.5px;\n    margin-left: 2px;\n    flex-shrink: 0;\n  }\n  .col-sort-trigger, .col-filter-trigger {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 13px;\n    height: 13px;\n    border-radius: 2px;\n    cursor: pointer;\n    color: var(--text-muted, #64748b);\n    opacity: 0.65;\n    transition: all 0.12s ease;\n    font-size: 8px;\n    line-height: 1;\n\n    i.pi {\n      font-size: 8px !important;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.18);\n      opacity: 1;\n      color: var(--text, #0f172a);\n    }\n    &.is-sorted, &.is-filtered {\n      color: var(--primary, #4f46e5) !important;\n      opacity: 1 !important;\n      font-weight: 700;\n      background: var(--primary-soft, #e0e7ff);\n    }\n  }\n\n  /* Compact Small Data Cells (23px height) */\n  ::ng-deep .p-datatable-tbody > tr {\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n  }\n  ::ng-deep .p-datatable-tbody > tr > td {\n    height: var(--cell-height, 23px) !important;\n    padding: 0 !important;\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    vertical-align: middle;\n    font-size: 11.5px;\n  }\n\n  /* Sticky Row Number TD (34px, Authentic Excel Look) */\n  ::ng-deep td.row-num-td {\n    position: sticky;\n    left: 0;\n    z-index: 15;\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    text-align: center;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    color: var(--text-muted, #64748b);\n    font-size: 11px;\n    font-weight: 500;\n    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n    user-select: none;\n    cursor: pointer;\n    letter-spacing: -0.2px;\n    padding: 0 !important;\n    transition: background-color 0.12s ease;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.16) !important;\n      color: var(--text, #1e293b);\n    }\n\n    .row-state-dot {\n      font-size: 10px;\n      font-weight: 700;\n      margin-right: 2px;\n      &.dot-new { color: #15803d; }\n      &.dot-edited { color: #b45309; }\n    }\n  }\n\n  /* Full Row Selected State (Authentic Excel Selection) */\n  ::ng-deep tr.row-selected {\n    background-color: rgba(59, 130, 246, 0.12) !important;\n\n    > td {\n      background-color: rgba(59, 130, 246, 0.12) !important;\n      border-top: 1px solid rgba(59, 130, 246, 0.4) !important;\n      border-bottom: 1px solid rgba(59, 130, 246, 0.4) !important;\n    }\n\n    > td.row-num-td {\n      background-color: #2563eb !important;\n      color: #ffffff !important;\n      font-weight: 700 !important;\n      border-top: 1px solid #2563eb !important;\n      border-bottom: 1px solid #2563eb !important;\n      border-right: 1px solid #1d4ed8 !important;\n\n      .row-state-dot {\n        color: #ffffff !important;\n      }\n    }\n\n    .cell-box {\n      background-color: transparent !important;\n    }\n  }\n\n  /* Cell Box & Excel Active Cell Blue Outline */\n  .cell-box {\n    height: var(--cell-height, 23px);\n    padding: 0 6px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    display: flex;\n    align-items: center;\n    cursor: cell;\n    width: 100%;\n    position: relative;\n\n    &.cell-active {\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      z-index: 10;\n    }\n    &.cell-editing {\n      padding: 0 !important;\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      background: var(--surface, #ffffff) !important;\n      z-index: 20;\n    }\n    &.cell-bad {\n      background-color: rgba(244, 63, 94, 0.18) !important;\n      color: #f43f5e !important;\n      font-weight: 600;\n      box-shadow: inset 0 0 0 1px #f43f5e;\n    }\n    &.cell-edited {\n      background-color: var(--cell-edited-bg, #fef9c3) !important;\n      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);\n    }\n    &.cell-new {\n      background-color: var(--row-new-bg, #dcfce7) !important;\n    }\n  }\n\n\n  /* Boolean Cell Component Styles */\n  .bool-cell-container {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 100%;\n    height: 100%;\n    user-select: none;\n    cursor: pointer;\n  }\n\n  .bool-checkbox-box {\n    width: 15px;\n    height: 15px;\n    border: 1.5px solid var(--text-muted, #94a3b8);\n    border-radius: 3px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.12s ease;\n    background: var(--surface, #ffffff);\n\n    &.checked {\n      background: #10b981;\n      border-color: #059669;\n      color: #ffffff;\n\n      i {\n        font-size: 9px;\n        font-weight: 800;\n      }\n    }\n\n    &:hover {\n      border-color: var(--primary, #4f46e5);\n      transform: scale(1.08);\n    }\n  }\n\n  .bool-badge-pill {\n    display: inline-flex;\n    align-items: center;\n    gap: 3px;\n    padding: 1px 6px;\n    border-radius: 999px;\n    font-size: 10px;\n    font-weight: 600;\n    line-height: 1.3;\n    transition: all 0.12s ease;\n\n    &.badge-true {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n      border: 1px solid rgba(16, 185, 129, 0.3);\n\n      i { font-size: 8.5px; }\n    }\n\n    &.badge-false {\n      background: rgba(100, 116, 139, 0.12);\n      color: #64748b;\n      border: 1px solid rgba(100, 116, 139, 0.25);\n\n      i { font-size: 8.5px; }\n    }\n\n    &:hover {\n      filter: brightness(1.08);\n      transform: scale(1.02);\n    }\n  }\n\n\n  /* Eye Protect Warm Yellow for Edited Rows */\n  ::ng-deep tr.row-edited td {\n    background-color: var(--row-edited-bg, #fffbeb);\n\n    &.row-num-td {\n      background-color: rgba(234, 179, 8, 0.2) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid var(--cell-edited-border, #eab308) !important;\n    }\n  }\n\n  /* Soft Light Green Shade for New Added Rows */\n  ::ng-deep tr.row-new td {\n    background-color: var(--row-new-bg, #dcfce7);\n\n    &.row-num-td {\n      background-color: rgba(34, 197, 94, 0.2) !important;\n      color: #15803d !important;\n      font-weight: 700;\n      border-left: 3px solid var(--row-new-border, #22c55e) !important;\n    }\n  }\n\n  .raw-cell-editor {\n    width: 100%;\n    height: 100%;\n    border: none;\n    outline: none;\n    background: transparent;\n    color: var(--text, inherit);\n    font-family: inherit;\n    font-size: 11.5px;\n    padding: 0 6px;\n    margin: 0;\n    box-sizing: border-box;\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Right Click Custom Context Menu (Clean, Sleek & Non-wrapping)\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.custom-context-menu {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);\n  min-width: 220px;\n  max-width: 280px;\n  z-index: 100000;\n  padding: 4px 0;\n  white-space: nowrap;\n  animation: contextMenuPop 0.12s ease-out;\n  user-select: none;\n\n  .context-menu-item {\n    padding: 6px 14px;\n    font-size: 11.5px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    color: var(--text, #0f172a);\n    transition: background 0.12s ease;\n    white-space: nowrap;\n\n    i {\n      font-size: 12px;\n      color: var(--text-muted, #64748b);\n      width: 14px;\n      text-align: center;\n      flex-shrink: 0;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.1);\n      color: var(--text, #0f172a);\n\n      i {\n        color: var(--primary, #4f46e5);\n      }\n    }\n\n    &.text-danger {\n      color: #ef4444 !important;\n      &:hover {\n        background: rgba(239, 68, 68, 0.1) !important;\n      }\n    }\n\n    kbd {\n      font-size: 10px;\n      padding: 1px 4px;\n      background: rgba(125, 125, 125, 0.12);\n      border-radius: 3px;\n      font-family: inherit;\n      color: var(--text-muted, #64748b);\n    }\n  }\n\n  .context-menu-divider {\n    height: 1px;\n    background: var(--surface-border, #e2e8f0);\n    margin: 4px 0;\n  }\n}\n\n@keyframes contextMenuPop {\n  from {\n    opacity: 0;\n    transform: scale(0.96);\n  }\n  to {\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Smart Mode Foreign Key Autocomplete Dropdown Menu\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.ref-dropdown-menu {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.2);\n  max-height: 220px;\n  overflow-y: auto;\n  z-index: 100001;\n  font-size: 11.5px;\n  font-family: inherit;\n  animation: fadeInDropdown 0.12s ease-out;\n  box-sizing: border-box;\n\n  .ref-dropdown-header {\n    padding: 5px 9px;\n    font-size: 10px;\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    background: var(--header-bg, #f1f5f9);\n    color: var(--text-muted, #64748b);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    position: sticky;\n    top: 0;\n    z-index: 2;\n  }\n\n  .ref-dropdown-item {\n    padding: 6px 10px;\n    cursor: pointer;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    color: var(--text, #0f172a);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    transition: background 0.12s ease;\n    line-height: 1.3;\n\n    &:last-child {\n      border-bottom: none;\n    }\n\n    &:hover,\n    &.highlighted {\n      background: var(--primary-soft, #e0e7ff) !important;\n      color: var(--primary, #4f46e5) !important;\n      font-weight: 600;\n    }\n\n    .ref-item-badge {\n      font-size: 9.5px;\n      font-weight: 600;\n      padding: 1px 6px;\n      border-radius: 3px;\n      background: rgba(100, 116, 139, 0.15);\n      color: var(--text-muted, #64748b);\n      margin-left: 8px;\n      flex-shrink: 0;\n    }\n  }\n\n  .ref-dropdown-empty {\n    padding: 10px;\n    color: var(--text-muted, #64748b);\n    font-style: italic;\n    text-align: center;\n  }\n}\n\n@keyframes fadeInDropdown {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Inline Batch Mistake Prompt Modal\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.inline-solve-prompt {\n  position: fixed;\n  bottom: 70px;\n  right: 25px;\n  z-index: 2100;\n  width: 440px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 8px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);\n  animation: promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);\n}\n@keyframes promptSlideUp {\n  from {\n    opacity: 0;\n    transform: translateY(16px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Column Header Filter Popover (Modern Enterprise UI)\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n::ng-deep .sutram-col-filter-popover {\n  width: 290px !important;\n  font-size: 12px;\n  border-radius: 8px !important;\n  overflow: hidden;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n  }\n}\n\n.filter-popover-content {\n  display: flex;\n  flex-direction: column;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  overflow: hidden;\n\n  .popover-header {\n    padding: 9px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.05);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n\n    .popover-title {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      font-weight: 700;\n      font-size: 12px;\n      color: var(--text, #0f172a);\n\n      .col-name {\n        max-width: 170px;\n      }\n      .badge-type {\n        font-size: 9px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(59, 130, 246, 0.15);\n        color: #2563eb;\n        font-weight: 600;\n      }\n    }\n\n    .btn-popover-close {\n      background: transparent;\n      border: none;\n      width: 22px;\n      height: 22px;\n      border-radius: 4px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      cursor: pointer;\n      color: var(--text-muted, #64748b);\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.15);\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-search-wrap {\n    position: relative;\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n\n    .search-icon {\n      position: absolute;\n      left: 18px;\n      top: 17px;\n      font-size: 11px;\n      color: var(--text-muted, #64748b);\n      pointer-events: none;\n    }\n    .popover-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      font-size: 11.5px;\n      border-radius: 5px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.15s, box-shadow 0.15s;\n\n      &:focus {\n        border-color: #3b82f6;\n        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);\n      }\n    }\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 18px;\n      top: 15px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      padding: 0;\n      font-size: 11px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-action-strip {\n    padding: 6px 12px;\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.02);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    font-size: 11px;\n\n    .select-all-label {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      cursor: pointer;\n      font-weight: 600;\n      color: var(--text, #0f172a);\n      user-select: none;\n      margin: 0;\n    }\n\n    .quick-links {\n      display: flex;\n      align-items: center;\n      gap: 4px;\n\n      .btn-link-action {\n        background: transparent;\n        border: none;\n        color: #3b82f6;\n        cursor: pointer;\n        padding: 0 3px;\n        font-size: 11px;\n        font-weight: 600;\n        text-decoration: none;\n\n        &:hover {\n          text-decoration: underline;\n        }\n      }\n      .divider {\n        color: var(--text-muted, #64748b);\n        opacity: 0.5;\n      }\n    }\n\n    .count-pill {\n      font-size: 10px;\n      color: var(--text-muted, #64748b);\n      font-weight: 500;\n    }\n  }\n\n  .popover-checklist-items {\n    max-height: 180px;\n    overflow-y: auto;\n    padding: 3px 0;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 4px;\n    }\n\n    .checklist-item {\n      padding: 5px 12px;\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      cursor: pointer;\n      user-select: none;\n      transition: background-color 0.1s ease;\n      color: var(--text, #0f172a);\n\n      &:hover {\n        background: rgba(59, 130, 246, 0.08);\n      }\n\n      .item-left {\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        flex-grow: 1;\n        min-width: 0;\n      }\n\n      .item-label {\n        font-size: 11.5px;\n        color: var(--text, #0f172a);\n      }\n\n      .item-right {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        flex-shrink: 0;\n      }\n\n      .item-code-chip {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n\n      .item-count-badge {\n        font-size: 10px;\n        padding: 1px 6px;\n        border-radius: 999px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n    }\n\n    .empty-list-state {\n      padding: 16px;\n      text-align: center;\n      color: var(--text-muted, #64748b);\n      font-size: 11.5px;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    accent-color: #3b82f6;\n    cursor: pointer;\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .popover-footer {\n    padding: 8px 12px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.04);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    gap: 8px;\n\n    .btn-filter-clear {\n      background: transparent;\n      border: 1px solid transparent;\n      color: #ef4444;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 8px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(239, 68, 68, 0.1);\n      }\n    }\n\n    .footer-actions-right {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n    }\n\n    .btn-filter-cancel {\n      background: transparent;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 10px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .btn-filter-apply {\n      background: #3b82f6;\n      border: 1px solid #3b82f6;\n      color: #ffffff;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 12px;\n      border-radius: 4px;\n      cursor: pointer;\n      display: inline-flex;\n      align-items: center;\n      gap: 4px;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: #2563eb;\n      }\n    }\n  }\n}\n'] }]
+`, styles: ['/**\n * sutram-grid.component.scss\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Pixel-Perfect Enterprise PrimeNG Virtual Table Styles.\n * Exact replication of Sutram Excel Studio v2.0 Grid:\n * Big Header Row (38px) + Compact Data Cells (23px).\n * In-cell inline editor, active cell blue outline, eye-protect\n * dirty state, custom context menu, and smart FK autocomplete dropdown.\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n */\n\n:host {\n  display: block;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.sutram-grid-wrapper {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n\n  ::ng-deep .p-datatable-wrapper {\n    height: 100% !important;\n  }\n\n  /* Big Header Row (38px) */\n  ::ng-deep .p-datatable-thead > tr > th {\n    position: sticky;\n    top: 0;\n    z-index: 20;\n    background: var(--header-bg, #f1f5f9) !important;\n    color: var(--header-text, #1e293b) !important;\n    font-weight: 700 !important;\n    font-size: 13px !important;\n    height: var(--header-height, 38px) !important;\n    padding: 6px 10px !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 2px solid rgba(125, 125, 125, 0.35) !important;\n    white-space: nowrap !important;\n    user-select: none;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);\n\n    &.sortable-th {\n      cursor: pointer !important;\n      transition: background-color 0.15s ease;\n\n      &:hover {\n        background-color: rgba(125, 125, 125, 0.1) !important;\n      }\n    }\n  }\n\n  /* Corner Config \u2699\uFE0F Trigger */\n  /* Corner Config \u2699\uFE0F Trigger (34px, Authentic Excel Look) */\n  ::ng-deep th.corner-th {\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    left: 0;\n    z-index: 25 !important;\n    text-align: center !important;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    cursor: pointer;\n\n    .corner-cog-icon {\n      font-size: 10px !important;\n      color: var(--text-muted, #64748b);\n      transition: all 0.2s ease;\n    }\n\n    &:hover .corner-cog-icon {\n      color: var(--primary, #4f46e5) !important;\n      transform: rotate(45deg);\n    }\n  }\n\n  /* Column Header Controls */\n  .col-header-controls {\n    display: flex;\n    align-items: center;\n    gap: 1.5px;\n    margin-left: 2px;\n    flex-shrink: 0;\n  }\n  .col-sort-trigger, .col-filter-trigger {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 13px;\n    height: 13px;\n    border-radius: 2px;\n    cursor: pointer;\n    color: var(--text-muted, #64748b);\n    opacity: 0.65;\n    transition: all 0.12s ease;\n    font-size: 8px;\n    line-height: 1;\n\n    i.pi {\n      font-size: 8px !important;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.18);\n      opacity: 1;\n      color: var(--text, #0f172a);\n    }\n    &.is-sorted, &.is-filtered {\n      color: var(--primary, #4f46e5) !important;\n      opacity: 1 !important;\n      font-weight: 700;\n      background: var(--primary-soft, #e0e7ff);\n    }\n  }\n\n  /* Compact Small Data Cells (23px height) */\n  ::ng-deep .p-datatable-tbody > tr {\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n  }\n  ::ng-deep .p-datatable-tbody > tr > td {\n    height: var(--cell-height, 23px) !important;\n    padding: 0 !important;\n    background-color: var(--surface, #ffffff) !important;\n    color: var(--text, #0f172a) !important;\n    border-right: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.18)) !important;\n    vertical-align: middle;\n    font-size: 11.5px;\n  }\n\n  /* Sticky Row Number TD (34px, Authentic Excel Look) */\n  ::ng-deep td.row-num-td {\n    position: sticky;\n    left: 0;\n    z-index: 15;\n    width: 34px !important;\n    min-width: 34px !important;\n    max-width: 34px !important;\n    text-align: center;\n    background: var(--header-bg, #f1f5f9) !important;\n    border-right: 1px solid rgba(125, 125, 125, 0.35) !important;\n    color: var(--text-muted, #64748b);\n    font-size: 11px;\n    font-weight: 500;\n    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n    user-select: none;\n    cursor: pointer;\n    letter-spacing: -0.2px;\n    padding: 0 !important;\n    transition: background-color 0.12s ease;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.16) !important;\n      color: var(--text, #1e293b);\n    }\n\n    .row-state-dot {\n      font-size: 10px;\n      font-weight: 700;\n      margin-right: 2px;\n      &.dot-new { color: #15803d; }\n      &.dot-edited { color: #b45309; }\n    }\n  }\n\n  /* Full Row Selected State (Authentic Excel Selection) */\n  ::ng-deep tr.row-selected {\n    background-color: rgba(59, 130, 246, 0.12) !important;\n\n    > td {\n      background-color: rgba(59, 130, 246, 0.12) !important;\n      border-top: 1px solid rgba(59, 130, 246, 0.4) !important;\n      border-bottom: 1px solid rgba(59, 130, 246, 0.4) !important;\n    }\n\n    > td.row-num-td {\n      background-color: #2563eb !important;\n      color: #ffffff !important;\n      font-weight: 700 !important;\n      border-top: 1px solid #2563eb !important;\n      border-bottom: 1px solid #2563eb !important;\n      border-right: 1px solid #1d4ed8 !important;\n\n      .row-state-dot {\n        color: #ffffff !important;\n      }\n    }\n\n    .cell-box {\n      background-color: transparent !important;\n    }\n  }\n\n  /* Cell Box & Excel Active Cell Blue Outline */\n  .cell-box {\n    height: var(--cell-height, 23px);\n    padding: 0 6px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    display: flex;\n    align-items: center;\n    cursor: cell;\n    width: 100%;\n    position: relative;\n\n    &.cell-active {\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      z-index: 10;\n    }\n    &.cell-editing {\n      padding: 0 !important;\n      box-shadow: inset 0 0 0 2px #3b82f6 !important;\n      background: var(--surface, #ffffff) !important;\n      z-index: 20;\n    }\n    &.cell-bad {\n      background-color: rgba(244, 63, 94, 0.18) !important;\n      color: #f43f5e !important;\n      font-weight: 600;\n      box-shadow: inset 0 0 0 1px #f43f5e;\n    }\n    &.cell-edited {\n      background-color: var(--cell-edited-bg, #fef9c3) !important;\n      box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.45);\n    }\n    &.cell-new {\n      background-color: var(--row-new-bg, #dcfce7) !important;\n    }\n  }\n\n\n  /* Boolean Cell Component Styles */\n  .bool-cell-container {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 100%;\n    height: 100%;\n    user-select: none;\n    cursor: pointer;\n  }\n\n  .bool-checkbox-box {\n    width: 15px;\n    height: 15px;\n    border: 1.5px solid var(--text-muted, #94a3b8);\n    border-radius: 3px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.12s ease;\n    background: var(--surface, #ffffff);\n\n    &.checked {\n      background: #10b981;\n      border-color: #059669;\n      color: #ffffff;\n\n      i {\n        font-size: 9px;\n        font-weight: 800;\n      }\n    }\n\n    &:hover {\n      border-color: var(--primary, #4f46e5);\n      transform: scale(1.08);\n    }\n  }\n\n  .bool-badge-pill {\n    display: inline-flex;\n    align-items: center;\n    gap: 3px;\n    padding: 1px 6px;\n    border-radius: 999px;\n    font-size: 10px;\n    font-weight: 600;\n    line-height: 1.3;\n    transition: all 0.12s ease;\n\n    &.badge-true {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n      border: 1px solid rgba(16, 185, 129, 0.3);\n\n      i { font-size: 8.5px; }\n    }\n\n    &.badge-false {\n      background: rgba(100, 116, 139, 0.12);\n      color: #64748b;\n      border: 1px solid rgba(100, 116, 139, 0.25);\n\n      i { font-size: 8.5px; }\n    }\n\n    &:hover {\n      filter: brightness(1.08);\n      transform: scale(1.02);\n    }\n  }\n\n\n  /* Eye Protect Warm Yellow for Edited Rows */\n  ::ng-deep tr.row-edited td {\n    background-color: var(--row-edited-bg, #fffbeb);\n\n    &.row-num-td {\n      background-color: rgba(234, 179, 8, 0.2) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid var(--cell-edited-border, #eab308) !important;\n    }\n  }\n\n  /* Distinctive Elegant Amber / Golden Highlight for Highlighted Rows */\n  ::ng-deep tr.row-highlighted td {\n    background-color: var(--row-hl-bg, rgba(245, 158, 11, 0.12)) !important;\n\n    &.row-num-td {\n      background-color: rgba(245, 158, 11, 0.25) !important;\n      color: #b45309 !important;\n      font-weight: 700;\n      border-left: 3px solid #f59e0b !important;\n      position: relative;\n    }\n  }\n\n  ::ng-deep tr.row-highlighted:hover td {\n    background-color: var(--row-hl-hover-bg, rgba(245, 158, 11, 0.18)) !important;\n  }\n\n  .row-hl-icon {\n    font-size: 8.5px;\n    color: #f59e0b;\n    margin-right: 2px;\n    vertical-align: middle;\n  }\n\n  .badge-hl-tag {\n    font-size: 9px;\n    font-weight: 700;\n    padding: 1px 4px;\n    border-radius: 3px;\n    background: rgba(245, 158, 11, 0.2);\n    color: #d97706;\n    letter-spacing: 0.5px;\n  }\n\n  /* Soft Light Green Shade for New Added Rows */\n  ::ng-deep tr.row-new td {\n    background-color: var(--row-new-bg, #dcfce7);\n\n    &.row-num-td {\n      background-color: rgba(34, 197, 94, 0.2) !important;\n      color: #15803d !important;\n      font-weight: 700;\n      border-left: 3px solid var(--row-new-border, #22c55e) !important;\n    }\n  }\n\n  .raw-cell-editor {\n    width: 100%;\n    height: 100%;\n    border: none;\n    outline: none;\n    background: transparent;\n    color: var(--text, inherit);\n    font-family: inherit;\n    font-size: 11.5px;\n    padding: 0 6px;\n    margin: 0;\n    box-sizing: border-box;\n\n    &.date-editor {\n      padding: 0 2px;\n      font-size: 11px;\n      cursor: pointer;\n    }\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Right Click Custom Context Menu (Clean, Sleek & Non-wrapping)\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.custom-context-menu {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);\n  min-width: 220px;\n  max-width: 280px;\n  z-index: 100000;\n  padding: 4px 0;\n  white-space: nowrap;\n  animation: contextMenuPop 0.12s ease-out;\n  user-select: none;\n\n  .context-menu-item {\n    padding: 6px 14px;\n    font-size: 11.5px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    color: var(--text, #0f172a);\n    transition: background 0.12s ease;\n    white-space: nowrap;\n\n    i {\n      font-size: 12px;\n      color: var(--text-muted, #64748b);\n      width: 14px;\n      text-align: center;\n      flex-shrink: 0;\n    }\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.1);\n      color: var(--text, #0f172a);\n\n      i {\n        color: var(--primary, #4f46e5);\n      }\n    }\n\n    &.text-danger {\n      color: #ef4444 !important;\n      &:hover {\n        background: rgba(239, 68, 68, 0.1) !important;\n      }\n    }\n\n    kbd {\n      font-size: 10px;\n      padding: 1px 4px;\n      background: rgba(125, 125, 125, 0.12);\n      border-radius: 3px;\n      font-family: inherit;\n      color: var(--text-muted, #64748b);\n    }\n  }\n\n  .context-menu-divider {\n    height: 1px;\n    background: var(--surface-border, #e2e8f0);\n    margin: 4px 0;\n  }\n}\n\n@keyframes contextMenuPop {\n  from {\n    opacity: 0;\n    transform: scale(0.96);\n  }\n  to {\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Smart Mode Foreign Key Autocomplete Dropdown Menu\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.ref-dropdown-menu {\n  position: fixed;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.2);\n  max-height: 220px;\n  overflow-y: auto;\n  z-index: 100001;\n  font-size: 11.5px;\n  font-family: inherit;\n  animation: fadeInDropdown 0.12s ease-out;\n  box-sizing: border-box;\n\n  .ref-dropdown-header {\n    padding: 5px 9px;\n    font-size: 10px;\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    background: var(--header-bg, #f1f5f9);\n    color: var(--text-muted, #64748b);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    position: sticky;\n    top: 0;\n    z-index: 2;\n  }\n\n  .ref-dropdown-item {\n    padding: 6px 10px;\n    cursor: pointer;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    color: var(--text, #0f172a);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    transition: background 0.12s ease;\n    line-height: 1.3;\n\n    &:last-child {\n      border-bottom: none;\n    }\n\n    &:hover,\n    &.highlighted {\n      background: var(--primary-soft, #e0e7ff) !important;\n      color: var(--primary, #4f46e5) !important;\n      font-weight: 600;\n    }\n\n    .ref-item-badge {\n      font-size: 9.5px;\n      font-weight: 600;\n      padding: 1px 6px;\n      border-radius: 3px;\n      background: rgba(100, 116, 139, 0.15);\n      color: var(--text-muted, #64748b);\n      margin-left: 8px;\n      flex-shrink: 0;\n    }\n  }\n\n  .ref-dropdown-empty {\n    padding: 10px;\n    color: var(--text-muted, #64748b);\n    font-style: italic;\n    text-align: center;\n  }\n}\n\n@keyframes fadeInDropdown {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Inline Batch Mistake Prompt Modal\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.inline-solve-prompt {\n  position: fixed;\n  bottom: 70px;\n  right: 25px;\n  z-index: 2100;\n  width: 440px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 8px;\n  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);\n  animation: promptSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);\n}\n@keyframes promptSlideUp {\n  from {\n    opacity: 0;\n    transform: translateY(16px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Column Header Filter Popover (Modern Enterprise UI)\n   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n::ng-deep .sutram-col-filter-popover {\n  width: 290px !important;\n  font-size: 12px;\n  border-radius: 8px !important;\n  overflow: hidden;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n  }\n}\n\n.filter-popover-content {\n  display: flex;\n  flex-direction: column;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  overflow: hidden;\n\n  .popover-header {\n    padding: 9px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.05);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n\n    .popover-title {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      font-weight: 700;\n      font-size: 12px;\n      color: var(--text, #0f172a);\n\n      .col-name {\n        max-width: 170px;\n      }\n      .badge-type {\n        font-size: 9px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(59, 130, 246, 0.15);\n        color: #2563eb;\n        font-weight: 600;\n      }\n    }\n\n    .btn-popover-close {\n      background: transparent;\n      border: none;\n      width: 22px;\n      height: 22px;\n      border-radius: 4px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      cursor: pointer;\n      color: var(--text-muted, #64748b);\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.15);\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-search-wrap {\n    position: relative;\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n\n    .search-icon {\n      position: absolute;\n      left: 18px;\n      top: 17px;\n      font-size: 11px;\n      color: var(--text-muted, #64748b);\n      pointer-events: none;\n    }\n    .popover-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      font-size: 11.5px;\n      border-radius: 5px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.15s, box-shadow 0.15s;\n\n      &:focus {\n        border-color: #3b82f6;\n        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);\n      }\n    }\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 18px;\n      top: 15px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      padding: 0;\n      font-size: 11px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .popover-action-strip {\n    padding: 6px 12px;\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.02);\n    border-bottom: 1px solid var(--cell-border, rgba(125, 125, 125, 0.1));\n    font-size: 11px;\n\n    .select-all-label {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      cursor: pointer;\n      font-weight: 600;\n      color: var(--text, #0f172a);\n      user-select: none;\n      margin: 0;\n    }\n\n    .quick-links {\n      display: flex;\n      align-items: center;\n      gap: 4px;\n\n      .btn-link-action {\n        background: transparent;\n        border: none;\n        color: #3b82f6;\n        cursor: pointer;\n        padding: 0 3px;\n        font-size: 11px;\n        font-weight: 600;\n        text-decoration: none;\n\n        &:hover {\n          text-decoration: underline;\n        }\n      }\n      .divider {\n        color: var(--text-muted, #64748b);\n        opacity: 0.5;\n      }\n    }\n\n    .count-pill {\n      font-size: 10px;\n      color: var(--text-muted, #64748b);\n      font-weight: 500;\n    }\n  }\n\n  .popover-checklist-items {\n    max-height: 180px;\n    overflow-y: auto;\n    padding: 3px 0;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 4px;\n    }\n\n    .checklist-item {\n      padding: 5px 12px;\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      gap: 8px;\n      cursor: pointer;\n      user-select: none;\n      transition: background-color 0.1s ease;\n      color: var(--text, #0f172a);\n\n      &:hover {\n        background: rgba(59, 130, 246, 0.08);\n      }\n\n      .item-left {\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        flex-grow: 1;\n        min-width: 0;\n      }\n\n      .item-label {\n        font-size: 11.5px;\n        color: var(--text, #0f172a);\n      }\n\n      .item-right {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        flex-shrink: 0;\n      }\n\n      .item-code-chip {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 3px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n\n      .item-count-badge {\n        font-size: 10px;\n        padding: 1px 6px;\n        border-radius: 999px;\n        background: rgba(125, 125, 125, 0.12);\n        color: var(--text-muted, #64748b);\n        font-weight: 500;\n      }\n    }\n\n    .empty-list-state {\n      padding: 16px;\n      text-align: center;\n      color: var(--text-muted, #64748b);\n      font-size: 11.5px;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    accent-color: #3b82f6;\n    cursor: pointer;\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .popover-footer {\n    padding: 8px 12px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    background: rgba(125, 125, 125, 0.04);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    gap: 8px;\n\n    .btn-filter-clear {\n      background: transparent;\n      border: 1px solid transparent;\n      color: #ef4444;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 8px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(239, 68, 68, 0.1);\n      }\n    }\n\n    .footer-actions-right {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n    }\n\n    .btn-filter-cancel {\n      background: transparent;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 10px;\n      border-radius: 4px;\n      cursor: pointer;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .btn-filter-apply {\n      background: #3b82f6;\n      border: 1px solid #3b82f6;\n      color: #ffffff;\n      font-size: 11px;\n      font-weight: 600;\n      padding: 3px 12px;\n      border-radius: 4px;\n      cursor: pointer;\n      display: inline-flex;\n      align-items: center;\n      gap: 4px;\n      transition: all 0.15s ease;\n\n      &:hover {\n        background: #2563eb;\n      }\n    }\n  }\n}\n\n:host-context([data-theme="dark"]),\n:host-context(.dark-theme),\n:host-context(.dark-mode) {\n  ::ng-deep tr.row-highlighted td {\n    background-color: rgba(245, 158, 11, 0.16) !important;\n\n    &.row-num-td {\n      background-color: rgba(245, 158, 11, 0.3) !important;\n      color: #fbbf24 !important;\n      border-left: 3px solid #f59e0b !important;\n    }\n  }\n\n  ::ng-deep tr.row-highlighted:hover td {\n    background-color: rgba(245, 158, 11, 0.24) !important;\n  }\n\n  .badge-hl-tag {\n    background: rgba(245, 158, 11, 0.25);\n    color: #fbbf24;\n  }\n}\n'] }]
   }], function() {
     return [{ type: SutramExcelStateService }, { type: SutramClipboardService }, { type: SutramAuditService }, { type: SutramRefCacheService }, { type: SutramExcelApiService }, { type: ElementRef }, { type: ChangeDetectorRef }];
   }, { headers: [{
@@ -131857,23 +134513,23 @@ var _c04 = ["grid"];
 var _c1 = ["fileInput"];
 function SutramExcelStudioComponent_div_34_Template(rf, ctx) {
   if (rf & 1) {
-    const _r23 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "button", 70);
+    const _r37 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 114)(1, "button", 115);
     \u0275\u0275listener("click", function SutramExcelStudioComponent_div_34_Template_button_click_1_listener() {
-      \u0275\u0275restoreView(_r23);
-      const ctx_r22 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r22.setStudioMode("normal"));
+      \u0275\u0275restoreView(_r37);
+      const ctx_r36 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r36.setStudioMode("normal"));
     });
-    \u0275\u0275element(2, "i", 71);
+    \u0275\u0275element(2, "i", 116);
     \u0275\u0275text(3, " Normal ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 70);
+    \u0275\u0275elementStart(4, "button", 115);
     \u0275\u0275listener("click", function SutramExcelStudioComponent_div_34_Template_button_click_4_listener() {
-      \u0275\u0275restoreView(_r23);
-      const ctx_r24 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r24.setStudioMode("intelligent"));
+      \u0275\u0275restoreView(_r37);
+      const ctx_r38 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r38.setStudioMode("intelligent"));
     });
-    \u0275\u0275element(5, "i", 72);
+    \u0275\u0275element(5, "i", 117);
     \u0275\u0275text(6, " Smart ");
     \u0275\u0275elementEnd()();
   }
@@ -131887,14 +134543,14 @@ function SutramExcelStudioComponent_div_34_Template(rf, ctx) {
 }
 function SutramExcelStudioComponent_button_35_Template(rf, ctx) {
   if (rf & 1) {
-    const _r26 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 73);
+    const _r40 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 118);
     \u0275\u0275listener("click", function SutramExcelStudioComponent_button_35_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r26);
-      const ctx_r25 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r25.saveRoughSheetLocally());
+      \u0275\u0275restoreView(_r40);
+      const ctx_r39 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r39.saveRoughSheetLocally());
     });
-    \u0275\u0275element(1, "i", 74);
+    \u0275\u0275element(1, "i", 119);
     \u0275\u0275elementStart(2, "span");
     \u0275\u0275text(3, "Save");
     \u0275\u0275elementEnd()();
@@ -131906,30 +134562,30 @@ function SutramExcelStudioComponent_button_35_Template(rf, ctx) {
 }
 function SutramExcelStudioComponent_button_36_span_4_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 78);
+    \u0275\u0275elementStart(0, "span", 123);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r27 = \u0275\u0275nextContext(2);
+    const ctx_r41 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate(ctx_r27.state.pendingChangesCount());
+    \u0275\u0275textInterpolate(ctx_r41.state.pendingChangesCount());
   }
 }
 function SutramExcelStudioComponent_button_36_Template(rf, ctx) {
   if (rf & 1) {
-    const _r29 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 75);
+    const _r43 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 120);
     \u0275\u0275listener("click", function SutramExcelStudioComponent_button_36_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r29);
-      const ctx_r28 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r28.startImport());
+      \u0275\u0275restoreView(_r43);
+      const ctx_r42 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r42.startImport());
     });
-    \u0275\u0275element(1, "i", 76);
+    \u0275\u0275element(1, "i", 121);
     \u0275\u0275elementStart(2, "span");
     \u0275\u0275text(3, "Sync DB");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(4, SutramExcelStudioComponent_button_36_span_4_Template, 2, 1, "span", 77);
+    \u0275\u0275template(4, SutramExcelStudioComponent_button_36_span_4_Template, 2, 1, "span", 122);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -131940,129 +134596,129 @@ function SutramExcelStudioComponent_button_36_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.state.pendingChangesCount() > 0);
   }
 }
-function SutramExcelStudioComponent_div_40_button_24_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_46_button_24_Template(rf, ctx) {
   if (rf & 1) {
-    const _r33 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 106);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_button_24_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r33);
-      const ctx_r32 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r32.onRefreshData());
+    const _r47 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 151);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_button_24_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r47);
+      const ctx_r46 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r46.onRefreshData());
     });
-    \u0275\u0275element(1, "i", 107);
-    \u0275\u0275elementStart(2, "span", 84);
+    \u0275\u0275element(1, "i", 152);
+    \u0275\u0275elementStart(2, "span", 129);
     \u0275\u0275text(3, "Refresh");
     \u0275\u0275elementEnd()();
   }
 }
-function SutramExcelStudioComponent_div_40_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_46_Template(rf, ctx) {
   if (rf & 1) {
-    const _r35 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 79)(1, "div", 80)(2, "div", 81)(3, "button", 82);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_3_listener() {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r34 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r34.toggleBold());
+    const _r49 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 124)(1, "div", 125)(2, "div", 126)(3, "button", 127);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_3_listener() {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r48 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r48.toggleBold());
     });
-    \u0275\u0275elementStart(4, "span", 83);
+    \u0275\u0275elementStart(4, "span", 128);
     \u0275\u0275text(5, "B");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "span", 84);
+    \u0275\u0275elementStart(6, "span", 129);
     \u0275\u0275text(7, "Bold");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(8, "div", 85)(9, "button", 86);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_9_listener() {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r36 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r36.setTextAlign("left"));
+    \u0275\u0275elementStart(8, "div", 130)(9, "button", 131);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_9_listener() {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r50 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r50.setTextAlign("left"));
     });
-    \u0275\u0275element(10, "i", 87);
+    \u0275\u0275element(10, "i", 132);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "button", 88);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_11_listener() {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r37 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r37.setTextAlign("center"));
+    \u0275\u0275elementStart(11, "button", 133);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_11_listener() {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r51 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r51.setTextAlign("center"));
     });
-    \u0275\u0275element(12, "i", 89);
+    \u0275\u0275element(12, "i", 134);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(13, "button", 90);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_13_listener() {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r38 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r38.setTextAlign("right"));
+    \u0275\u0275elementStart(13, "button", 135);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_13_listener() {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r52 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r52.setTextAlign("right"));
     });
-    \u0275\u0275element(14, "i", 91);
+    \u0275\u0275element(14, "i", 136);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(15, "button", 92);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_15_listener($event) {
-      \u0275\u0275restoreView(_r35);
+    \u0275\u0275elementStart(15, "button", 137);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_15_listener($event) {
+      \u0275\u0275restoreView(_r49);
       \u0275\u0275nextContext();
-      const _r10 = \u0275\u0275reference(60);
+      const _r10 = \u0275\u0275reference(66);
       return \u0275\u0275resetView(_r10.toggle($event));
     });
-    \u0275\u0275element(16, "i", 93);
-    \u0275\u0275elementStart(17, "span", 84);
+    \u0275\u0275element(16, "i", 138);
+    \u0275\u0275elementStart(17, "span", 129);
     \u0275\u0275text(18);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(19, "span", 94);
+    \u0275\u0275elementStart(19, "span", 139);
     \u0275\u0275text(20, "Format");
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(21, "div", 95);
-    \u0275\u0275elementStart(22, "div", 80)(23, "div", 81);
-    \u0275\u0275template(24, SutramExcelStudioComponent_div_40_button_24_Template, 4, 0, "button", 96);
-    \u0275\u0275elementStart(25, "button", 97);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_25_listener() {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r40 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r40.openFileManager());
+    \u0275\u0275element(21, "div", 140);
+    \u0275\u0275elementStart(22, "div", 125)(23, "div", 126);
+    \u0275\u0275template(24, SutramExcelStudioComponent_div_46_button_24_Template, 4, 0, "button", 141);
+    \u0275\u0275elementStart(25, "button", 142);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_25_listener() {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r54 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r54.openFileManager());
     });
-    \u0275\u0275element(26, "i", 98);
-    \u0275\u0275elementStart(27, "span", 84);
+    \u0275\u0275element(26, "i", 143);
+    \u0275\u0275elementStart(27, "span", 129);
     \u0275\u0275text(28, "Open File");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(29, "input", 99, 100);
-    \u0275\u0275listener("change", function SutramExcelStudioComponent_div_40_Template_input_change_29_listener($event) {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r41 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r41.onFileUpload($event));
+    \u0275\u0275elementStart(29, "input", 144, 145);
+    \u0275\u0275listener("change", function SutramExcelStudioComponent_div_46_Template_input_change_29_listener($event) {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r55 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r55.onFileUpload($event));
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(31, "button", 101);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_31_listener() {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r42 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r42.exportExcel());
+    \u0275\u0275elementStart(31, "button", 146);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_31_listener() {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r56 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r56.exportExcel());
     });
     \u0275\u0275element(32, "i", 21);
-    \u0275\u0275elementStart(33, "span", 84);
+    \u0275\u0275elementStart(33, "span", 129);
     \u0275\u0275text(34);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(35, "span", 94);
+    \u0275\u0275elementStart(35, "span", 139);
     \u0275\u0275text(36, "Data");
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(37, "div", 95);
-    \u0275\u0275elementStart(38, "div", 80)(39, "div", 81)(40, "button", 102);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_40_listener() {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r43 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r43.state.toggleFiltersEnabled());
+    \u0275\u0275element(37, "div", 140);
+    \u0275\u0275elementStart(38, "div", 125)(39, "div", 126)(40, "button", 147);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_40_listener() {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r57 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r57.state.toggleFiltersEnabled());
     });
-    \u0275\u0275element(41, "i", 103);
-    \u0275\u0275elementStart(42, "span", 84);
+    \u0275\u0275element(41, "i", 148);
+    \u0275\u0275elementStart(42, "span", 129);
     \u0275\u0275text(43, "Filters");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(44, "button", 104);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_40_Template_button_click_44_listener() {
-      \u0275\u0275restoreView(_r35);
-      const ctx_r44 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r44.state.toggleSortingEnabled());
+    \u0275\u0275elementStart(44, "button", 149);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_46_Template_button_click_44_listener() {
+      \u0275\u0275restoreView(_r49);
+      const ctx_r58 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r58.state.toggleSortingEnabled());
     });
-    \u0275\u0275element(45, "i", 105);
-    \u0275\u0275elementStart(46, "span", 84);
+    \u0275\u0275element(45, "i", 150);
+    \u0275\u0275elementStart(46, "span", 129);
     \u0275\u0275text(47, "Sorting");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(48, "span", 94);
+    \u0275\u0275elementStart(48, "span", 139);
     \u0275\u0275text(49, "Sort & Filter");
     \u0275\u0275elementEnd()()();
   }
@@ -132092,84 +134748,84 @@ function SutramExcelStudioComponent_div_40_Template(rf, ctx) {
     \u0275\u0275classProp("active", ctx_r3.state.sortingEnabled());
   }
 }
-function SutramExcelStudioComponent_div_41_button_4_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_47_button_4_Template(rf, ctx) {
   if (rf & 1) {
-    const _r48 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 114);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_41_button_4_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r48);
-      const ctx_r47 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r47.tableSearchQuery = "");
+    const _r62 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 159);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_47_button_4_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r62);
+      const ctx_r61 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r61.tableSearchQuery = "");
     });
     \u0275\u0275text(1, "\u2715");
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_div_41_div_6_span_8_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_47_div_6_span_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 121);
+    \u0275\u0275element(0, "span", 166);
   }
 }
-function SutramExcelStudioComponent_div_41_div_6_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_47_div_6_Template(rf, ctx) {
   if (rf & 1) {
-    const _r52 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 115);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_41_div_6_Template_div_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r52);
-      const tbl_r49 = restoredCtx.$implicit;
-      const ctx_r51 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r51.openTableInSheet(tbl_r49.table));
+    const _r66 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 160);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_47_div_6_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r66);
+      const tbl_r63 = restoredCtx.$implicit;
+      const ctx_r65 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r65.openTableInSheet(tbl_r63.table));
     });
-    \u0275\u0275elementStart(1, "button", 116);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_41_div_6_Template_button_click_1_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r52);
-      const tbl_r49 = restoredCtx.$implicit;
-      const ctx_r53 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r53.toggleFavoriteTable(tbl_r49.table, $event));
+    \u0275\u0275elementStart(1, "button", 161);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_47_div_6_Template_button_click_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r66);
+      const tbl_r63 = restoredCtx.$implicit;
+      const ctx_r67 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r67.toggleFavoriteTable(tbl_r63.table, $event));
     });
     \u0275\u0275element(2, "i", 21);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "div", 117);
+    \u0275\u0275elementStart(3, "div", 162);
     \u0275\u0275element(4, "i", 6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 118)(6, "span", 119);
+    \u0275\u0275elementStart(5, "div", 163)(6, "span", 164);
     \u0275\u0275text(7);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(8, SutramExcelStudioComponent_div_41_div_6_span_8_Template, 1, 0, "span", 120);
+    \u0275\u0275template(8, SutramExcelStudioComponent_div_47_div_6_span_8_Template, 1, 0, "span", 165);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const tbl_r49 = ctx.$implicit;
-    const ctx_r46 = \u0275\u0275nextContext(2);
-    \u0275\u0275classProp("active-box", ctx_r46.isTableOpen(tbl_r49.table));
-    \u0275\u0275property("title", tbl_r49.display_name ? tbl_r49.display_name + " (" + tbl_r49.table + ")" : tbl_r49.table);
+    const tbl_r63 = ctx.$implicit;
+    const ctx_r60 = \u0275\u0275nextContext(2);
+    \u0275\u0275classProp("active-box", ctx_r60.isTableOpen(tbl_r63.table));
+    \u0275\u0275property("title", tbl_r63.display_name ? tbl_r63.display_name + " (" + tbl_r63.table + ")" : tbl_r63.table);
     \u0275\u0275advance(1);
-    \u0275\u0275classProp("starred", ctx_r46.favoriteTables.has(tbl_r49.table));
-    \u0275\u0275property("title", ctx_r46.favoriteTables.has(tbl_r49.table) ? "Remove favorite" : "Add to startup sheets");
+    \u0275\u0275classProp("starred", ctx_r60.favoriteTables.has(tbl_r63.table));
+    \u0275\u0275property("title", ctx_r60.favoriteTables.has(tbl_r63.table) ? "Remove favorite" : "Add to startup sheets");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", ctx_r46.favoriteTables.has(tbl_r49.table) ? "pi-star-fill" : "pi-star");
+    \u0275\u0275property("ngClass", ctx_r60.favoriteTables.has(tbl_r63.table) ? "pi-star-fill" : "pi-star");
     \u0275\u0275advance(5);
-    \u0275\u0275textInterpolate(tbl_r49.display_name || tbl_r49.table);
+    \u0275\u0275textInterpolate(tbl_r63.display_name || tbl_r63.table);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r46.isTableOpen(tbl_r49.table));
+    \u0275\u0275property("ngIf", ctx_r60.isTableOpen(tbl_r63.table));
   }
 }
-function SutramExcelStudioComponent_div_41_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_47_Template(rf, ctx) {
   if (rf & 1) {
-    const _r55 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 108)(1, "div", 109);
-    \u0275\u0275element(2, "i", 32);
-    \u0275\u0275elementStart(3, "input", 110);
-    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_41_Template_input_ngModelChange_3_listener($event) {
-      \u0275\u0275restoreView(_r55);
-      const ctx_r54 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r54.tableSearchQuery = $event);
+    const _r69 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 153)(1, "div", 154);
+    \u0275\u0275element(2, "i", 35);
+    \u0275\u0275elementStart(3, "input", 155);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_47_Template_input_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r69);
+      const ctx_r68 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r68.tableSearchQuery = $event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275template(4, SutramExcelStudioComponent_div_41_button_4_Template, 2, 0, "button", 111);
+    \u0275\u0275template(4, SutramExcelStudioComponent_div_47_button_4_Template, 2, 0, "button", 156);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 112);
-    \u0275\u0275template(6, SutramExcelStudioComponent_div_41_div_6_Template, 9, 9, "div", 113);
+    \u0275\u0275elementStart(5, "div", 157);
+    \u0275\u0275template(6, SutramExcelStudioComponent_div_47_div_6_Template, 9, 9, "div", 158);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
@@ -132182,156 +134838,315 @@ function SutramExcelStudioComponent_div_41_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r4.filteredTables);
   }
 }
-function SutramExcelStudioComponent_div_42_button_4_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_48_div_1_Template(rf, ctx) {
   if (rf & 1) {
-    const _r59 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 114);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_42_button_4_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r59);
-      const ctx_r58 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r58.reportSearchQuery = "");
+    \u0275\u0275elementStart(0, "div", 170);
+    \u0275\u0275element(1, "i", 171);
+    \u0275\u0275elementStart(2, "span", 172);
+    \u0275\u0275text(3, "\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0915\u094B\u0908 \u0930\u093F\u092A\u094B\u0930\u094D\u091F \u092F\u093E \u0935\u094D\u092F\u0942 \u0909\u092A\u0932\u092C\u094D\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948 (No dynamic reports or views in database)");
+    \u0275\u0275elementEnd()();
+  }
+}
+function SutramExcelStudioComponent_div_48_div_2_button_3_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r75 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 159);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_48_div_2_button_3_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r75);
+      const ctx_r74 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r74.reportSearchQuery = "");
     });
     \u0275\u0275text(1, "\u2715");
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_div_42_div_6_span_8_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_48_div_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 121);
+    const _r77 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 154);
+    \u0275\u0275element(1, "i", 35);
+    \u0275\u0275elementStart(2, "input", 173);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_48_div_2_Template_input_ngModelChange_2_listener($event) {
+      \u0275\u0275restoreView(_r77);
+      const ctx_r76 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r76.reportSearchQuery = $event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(3, SutramExcelStudioComponent_div_48_div_2_button_3_Template, 2, 0, "button", 156);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r71 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngModel", ctx_r71.reportSearchQuery);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r71.reportSearchQuery);
   }
 }
-function SutramExcelStudioComponent_div_42_div_6_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_48_div_3_div_1_span_8_Template(rf, ctx) {
   if (rf & 1) {
-    const _r63 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 124);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_42_div_6_Template_div_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r63);
-      const rep_r60 = restoredCtx.$implicit;
-      const ctx_r62 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r62.openReportInSheet(rep_r60));
+    \u0275\u0275element(0, "span", 166);
+  }
+}
+function SutramExcelStudioComponent_div_48_div_3_div_1_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r82 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 175);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_48_div_3_div_1_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r82);
+      const rep_r79 = restoredCtx.$implicit;
+      const ctx_r81 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r81.openReportInSheet(rep_r79));
     });
-    \u0275\u0275elementStart(1, "button", 116);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_42_div_6_Template_button_click_1_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r63);
-      const rep_r60 = restoredCtx.$implicit;
-      const ctx_r64 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r64.toggleFavoriteReport(rep_r60.id, $event));
+    \u0275\u0275elementStart(1, "button", 161);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_48_div_3_div_1_Template_button_click_1_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r82);
+      const rep_r79 = restoredCtx.$implicit;
+      const ctx_r83 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r83.toggleFavoriteReport(rep_r79.id, $event));
     });
     \u0275\u0275element(2, "i", 21);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "div", 125);
+    \u0275\u0275elementStart(3, "div", 176);
     \u0275\u0275element(4, "i", 21);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 118)(6, "span", 119);
+    \u0275\u0275elementStart(5, "div", 163)(6, "span", 164);
     \u0275\u0275text(7);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(8, SutramExcelStudioComponent_div_42_div_6_span_8_Template, 1, 0, "span", 120);
+    \u0275\u0275template(8, SutramExcelStudioComponent_div_48_div_3_div_1_span_8_Template, 1, 0, "span", 165);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const rep_r60 = ctx.$implicit;
-    const ctx_r57 = \u0275\u0275nextContext(2);
-    \u0275\u0275classProp("active-box", ctx_r57.isReportOpen(rep_r60.id));
-    \u0275\u0275property("title", (rep_r60.display_name || rep_r60.title || rep_r60.table || rep_r60.id) + " \u2014 " + (rep_r60.desc || ""));
+    const rep_r79 = ctx.$implicit;
+    const ctx_r78 = \u0275\u0275nextContext(3);
+    \u0275\u0275classProp("active-box", ctx_r78.isReportOpen(rep_r79.id));
+    \u0275\u0275property("title", (rep_r79.display_name || rep_r79.title || rep_r79.table || rep_r79.id) + " \u2014 " + (rep_r79.desc || ""));
     \u0275\u0275advance(1);
-    \u0275\u0275classProp("starred", ctx_r57.favoriteReports.has(rep_r60.id));
-    \u0275\u0275property("title", ctx_r57.favoriteReports.has(rep_r60.id) ? "Remove favorite" : "Add to startup sheets");
+    \u0275\u0275classProp("starred", ctx_r78.favoriteReports.has(rep_r79.id));
+    \u0275\u0275property("title", ctx_r78.favoriteReports.has(rep_r79.id) ? "Remove favorite" : "Add to startup sheets");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", ctx_r57.favoriteReports.has(rep_r60.id) ? "pi-star-fill" : "pi-star");
+    \u0275\u0275property("ngClass", ctx_r78.favoriteReports.has(rep_r79.id) ? "pi-star-fill" : "pi-star");
     \u0275\u0275advance(2);
-    \u0275\u0275property("ngClass", rep_r60.icon);
+    \u0275\u0275property("ngClass", rep_r79.icon || "pi-chart-bar");
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(rep_r60.display_name || rep_r60.title || rep_r60.table || rep_r60.id);
+    \u0275\u0275textInterpolate(rep_r79.display_name || rep_r79.title || rep_r79.table || rep_r79.id);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r57.isReportOpen(rep_r60.id));
+    \u0275\u0275property("ngIf", ctx_r78.isReportOpen(rep_r79.id));
   }
 }
-function SutramExcelStudioComponent_div_42_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_48_div_3_Template(rf, ctx) {
   if (rf & 1) {
-    const _r66 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 108)(1, "div", 109);
-    \u0275\u0275element(2, "i", 32);
-    \u0275\u0275elementStart(3, "input", 122);
-    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_42_Template_input_ngModelChange_3_listener($event) {
-      \u0275\u0275restoreView(_r66);
-      const ctx_r65 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r65.reportSearchQuery = $event);
-    });
+    \u0275\u0275elementStart(0, "div", 157);
+    \u0275\u0275template(1, SutramExcelStudioComponent_div_48_div_3_div_1_Template, 9, 10, "div", 174);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(4, SutramExcelStudioComponent_div_42_button_4_Template, 2, 0, "button", 111);
+  }
+  if (rf & 2) {
+    const ctx_r72 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngForOf", ctx_r72.filteredReports);
+  }
+}
+function SutramExcelStudioComponent_div_48_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 153);
+    \u0275\u0275template(1, SutramExcelStudioComponent_div_48_div_1_Template, 4, 0, "div", 167);
+    \u0275\u0275template(2, SutramExcelStudioComponent_div_48_div_2_Template, 4, 2, "div", 168);
+    \u0275\u0275template(3, SutramExcelStudioComponent_div_48_div_3_Template, 2, 1, "div", 169);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 112);
-    \u0275\u0275template(6, SutramExcelStudioComponent_div_42_div_6_Template, 9, 10, "div", 123);
-    \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
     const ctx_r5 = \u0275\u0275nextContext();
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngModel", ctx_r5.reportSearchQuery);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r5.reportSearchQuery);
-    \u0275\u0275advance(2);
-    \u0275\u0275property("ngForOf", ctx_r5.filteredReports);
+    \u0275\u0275property("ngIf", !ctx_r5.reportsList || ctx_r5.reportsList.length === 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r5.reportsList && ctx_r5.reportsList.length > 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r5.reportsList && ctx_r5.reportsList.length > 0);
   }
 }
-function SutramExcelStudioComponent_div_43_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_49_div_10_Template(rf, ctx) {
   if (rf & 1) {
-    const _r68 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 79)(1, "div", 80)(2, "div", 81)(3, "button", 126);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_43_Template_button_click_3_listener() {
-      \u0275\u0275restoreView(_r68);
-      const ctx_r67 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r67.setBooleanStyle("checkbox"));
+    const _r88 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 125)(1, "div", 126)(2, "button", 189);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_49_div_10_Template_button_click_2_listener($event) {
+      \u0275\u0275restoreView(_r88);
+      \u0275\u0275nextContext(2);
+      const _r10 = \u0275\u0275reference(66);
+      return \u0275\u0275resetView(_r10.toggle($event));
     });
-    \u0275\u0275element(4, "i", 127);
-    \u0275\u0275elementStart(5, "span", 84);
-    \u0275\u0275text(6, "Checkbox");
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(7, "button", 128);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_43_Template_button_click_7_listener() {
-      \u0275\u0275restoreView(_r68);
-      const ctx_r69 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r69.setBooleanStyle("badge"));
-    });
-    \u0275\u0275element(8, "i", 129);
-    \u0275\u0275elementStart(9, "span", 84);
-    \u0275\u0275text(10, "Badge");
+    \u0275\u0275element(3, "i", 190);
+    \u0275\u0275elementStart(4, "span", 129);
+    \u0275\u0275text(5, "Columns");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(11, "span", 94);
-    \u0275\u0275text(12, "Boolean");
+    \u0275\u0275elementStart(6, "span", 139);
+    \u0275\u0275text(7, "DISPLAY");
+    \u0275\u0275elementEnd()();
+  }
+}
+function SutramExcelStudioComponent_div_49_div_11_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "div", 140);
+  }
+}
+function SutramExcelStudioComponent_div_49_div_12_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r90 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 125)(1, "div", 126)(2, "button", 191);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_49_div_12_Template_button_click_2_listener() {
+      \u0275\u0275restoreView(_r90);
+      const ctx_r89 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r89.isAdmin ? ctx_r89.openUiSutrasModal() : null);
+    });
+    \u0275\u0275element(3, "i", 192);
+    \u0275\u0275elementStart(4, "span", 129);
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "button", 191);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_49_div_12_Template_button_click_6_listener() {
+      \u0275\u0275restoreView(_r90);
+      const ctx_r91 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r91.isAdmin ? ctx_r91.openBackendSutrasModal() : null);
+    });
+    \u0275\u0275element(7, "i", 12);
+    \u0275\u0275elementStart(8, "span", 129);
+    \u0275\u0275text(9);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(10, "span", 139);
+    \u0275\u0275text(11, "TRIGGERS");
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r86 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275classProp("btn-disabled-role", !ctx_r86.isAdmin);
+    \u0275\u0275property("disabled", !ctx_r86.isAdmin)("title", ctx_r86.isAdmin ? "UI Trigger: Reactive cell formulas & custom client logic" : "UI Triggers require Admin role");
+    \u0275\u0275advance(1);
+    \u0275\u0275styleProp("color", ctx_r86.isAdmin ? "#06b6d4" : "#94a3b8");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("UI ", !ctx_r86.isAdmin ? "\u{1F512}" : "", "");
+    \u0275\u0275advance(1);
+    \u0275\u0275classProp("btn-disabled-role", !ctx_r86.isAdmin);
+    \u0275\u0275property("disabled", !ctx_r86.isAdmin)("title", ctx_r86.isAdmin ? "DB Trigger: Server triggers, Raw SQL & database cascades" : "DB Triggers require Admin role");
+    \u0275\u0275advance(1);
+    \u0275\u0275styleProp("color", ctx_r86.isAdmin ? "#f59e0b" : "#94a3b8");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("DB ", !ctx_r86.isAdmin ? "\u{1F512}" : "", "");
+  }
+}
+function SutramExcelStudioComponent_div_49_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r93 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 124)(1, "div", 125)(2, "div", 177)(3, "div", 178);
+    \u0275\u0275element(4, "i", 21);
+    \u0275\u0275elementStart(5, "span", 179);
+    \u0275\u0275text(6);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(7, "span", 139);
+    \u0275\u0275text(8, "ACTIVE SHEET");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275element(9, "div", 140);
+    \u0275\u0275template(10, SutramExcelStudioComponent_div_49_div_10_Template, 8, 0, "div", 180);
+    \u0275\u0275template(11, SutramExcelStudioComponent_div_49_div_11_Template, 1, 0, "div", 181);
+    \u0275\u0275template(12, SutramExcelStudioComponent_div_49_div_12_Template, 12, 14, "div", 180);
+    \u0275\u0275element(13, "div", 140);
+    \u0275\u0275elementStart(14, "div", 125)(15, "div", 126)(16, "button", 182);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_49_Template_button_click_16_listener() {
+      \u0275\u0275restoreView(_r93);
+      const ctx_r92 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r92.setBooleanStyle("checkbox"));
+    });
+    \u0275\u0275element(17, "i", 183);
+    \u0275\u0275elementStart(18, "span", 129);
+    \u0275\u0275text(19, "Checkbox");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(20, "button", 184);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_49_Template_button_click_20_listener() {
+      \u0275\u0275restoreView(_r93);
+      const ctx_r94 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r94.setBooleanStyle("badge"));
+    });
+    \u0275\u0275element(21, "i", 185);
+    \u0275\u0275elementStart(22, "span", 129);
+    \u0275\u0275text(23, "Badge");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(24, "span", 139);
+    \u0275\u0275text(25, "BOOLEAN");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275element(26, "div", 140);
+    \u0275\u0275elementStart(27, "div", 125)(28, "div", 126)(29, "button", 186);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_49_Template_button_click_29_listener() {
+      \u0275\u0275restoreView(_r93);
+      const ctx_r95 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r95.openUserManagementModal());
+    });
+    \u0275\u0275element(30, "i", 187);
+    \u0275\u0275elementStart(31, "span", 129);
+    \u0275\u0275text(32, "Users");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(33, "button", 188);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_49_Template_button_click_33_listener() {
+      \u0275\u0275restoreView(_r93);
+      const ctx_r96 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r96.toggleRole());
+    });
+    \u0275\u0275element(34, "i", 21);
+    \u0275\u0275elementStart(35, "span", 129);
+    \u0275\u0275text(36);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(37, "span", 139);
+    \u0275\u0275text(38, "USERS & ACCESS");
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
     const ctx_r6 = \u0275\u0275nextContext();
     \u0275\u0275advance(3);
+    \u0275\u0275property("title", "Active Sheet: " + ctx_r6.currentActiveSheetTitle);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngClass", ctx_r6.isCurrentSheetRough ? "pi-file" : ctx_r6.isCurrentSheetReport ? "pi-chart-bar" : "pi-table");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(ctx_r6.currentActiveSheetTitle);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngIf", ctx_r6.isCurrentSheetTable);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r6.isCurrentSheetTable);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r6.isCurrentSheetTable);
+    \u0275\u0275advance(4);
     \u0275\u0275classProp("active", ctx_r6.booleanDisplayStyle === "checkbox");
     \u0275\u0275advance(4);
     \u0275\u0275classProp("active", ctx_r6.booleanDisplayStyle === "badge");
+    \u0275\u0275advance(13);
+    \u0275\u0275property("title", "Current Role: " + ctx_r6.currentUser.role + " (Click to toggle role)");
+    \u0275\u0275advance(1);
+    \u0275\u0275styleProp("color", ctx_r6.isAdmin ? "#a855f7" : "#10b981");
+    \u0275\u0275property("ngClass", ctx_r6.isAdmin ? "pi-shield" : "pi-user");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(ctx_r6.isAdmin ? "Admin" : "Author");
   }
 }
-function SutramExcelStudioComponent_button_56_Template(rf, ctx) {
+function SutramExcelStudioComponent_button_62_Template(rf, ctx) {
   if (rf & 1) {
-    const _r71 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 130);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_button_56_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r71);
-      const ctx_r70 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r70.clearDbSearch());
+    const _r98 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 193);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_button_62_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r98);
+      const ctx_r97 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r97.clearDbSearch());
     });
     \u0275\u0275text(1, "\u2715");
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_span_57_Template(rf, ctx) {
+function SutramExcelStudioComponent_span_63_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 131);
-    \u0275\u0275element(1, "i", 132);
+    \u0275\u0275elementStart(0, "span", 194);
+    \u0275\u0275element(1, "i", 195);
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_div_58_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_64_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 133);
+    \u0275\u0275elementStart(0, "div", 196);
     \u0275\u0275element(1, "i", 12);
     \u0275\u0275elementStart(2, "span");
     \u0275\u0275text(3);
@@ -132343,260 +135158,622 @@ function SutramExcelStudioComponent_div_58_Template(rf, ctx) {
     \u0275\u0275textInterpolate2("", ctx_r9.state.rows().length, " / ", ctx_r9.state.totalDbRecords(), "");
   }
 }
-function SutramExcelStudioComponent_ng_template_61_button_5_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_button_6_Template(rf, ctx) {
   if (rf & 1) {
-    const _r77 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 149);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_button_5_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r77);
-      const ctx_r76 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r76.colSearchQuery = "");
+    const _r107 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 224);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_button_6_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r107);
+      const ctx_r106 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r106.colSearchQuery = "");
     });
-    \u0275\u0275element(1, "i", 150);
+    \u0275\u0275element(1, "i", 225);
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_ng_template_61_ng_container_17_div_3_span_5_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_ng_container_18_div_4_span_5_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 159);
+    \u0275\u0275elementStart(0, "span", 235);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_ng_template_61_ng_container_17_div_3_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_ng_container_18_div_4_Template(rf, ctx) {
   if (rf & 1) {
-    const _r82 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 153);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_ng_container_17_div_3_Template_div_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r82);
-      const col_r79 = restoredCtx.$implicit;
-      const ctx_r81 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r81.toggleColumnCheckbox(col_r79.key));
+    const _r112 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 229);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_ng_container_18_div_4_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r112);
+      const col_r109 = restoredCtx.$implicit;
+      const ctx_r111 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r111.toggleColumnCheckbox(col_r109.key));
     });
-    \u0275\u0275elementStart(1, "div", 154);
-    \u0275\u0275element(2, "input", 155);
-    \u0275\u0275elementStart(3, "span", 156);
+    \u0275\u0275elementStart(1, "div", 230);
+    \u0275\u0275element(2, "input", 231);
+    \u0275\u0275elementStart(3, "span", 232);
     \u0275\u0275text(4);
-    \u0275\u0275template(5, SutramExcelStudioComponent_ng_template_61_ng_container_17_div_3_span_5_Template, 2, 0, "span", 157);
+    \u0275\u0275template(5, SutramExcelStudioComponent_ng_template_67_ng_container_18_div_4_span_5_Template, 2, 0, "span", 233);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "span", 158);
+    \u0275\u0275elementStart(6, "span", 234);
     \u0275\u0275text(7);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
-    const col_r79 = ctx.$implicit;
-    const ctx_r78 = \u0275\u0275nextContext(3);
+    const col_r109 = ctx.$implicit;
+    const ctx_r108 = \u0275\u0275nextContext(3);
     \u0275\u0275advance(2);
-    \u0275\u0275property("checked", ctx_r78.isColumnSelected(col_r79.key));
+    \u0275\u0275property("checked", ctx_r108.isColumnSelected(col_r109.key));
     \u0275\u0275advance(1);
-    \u0275\u0275property("title", col_r79.name);
+    \u0275\u0275property("title", col_r109.name);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", col_r79.name, "");
+    \u0275\u0275textInterpolate1(" ", col_r109.name, "");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", col_r79.not_null);
+    \u0275\u0275property("ngIf", col_r109.not_null);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(col_r79.type || "string");
+    \u0275\u0275textInterpolate(col_r109.type || "string");
   }
 }
-function SutramExcelStudioComponent_ng_template_61_ng_container_17_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_ng_container_18_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 151);
-    \u0275\u0275text(2, "Standard Columns");
+    \u0275\u0275elementStart(1, "div", 226);
+    \u0275\u0275element(2, "i", 227);
+    \u0275\u0275text(3, " Standard Columns ");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(3, SutramExcelStudioComponent_ng_template_61_ng_container_17_div_3_Template, 8, 5, "div", 152);
+    \u0275\u0275template(4, SutramExcelStudioComponent_ng_template_67_ng_container_18_div_4_Template, 8, 5, "div", 228);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
-    const ctx_r73 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngForOf", ctx_r73.filteredDirectCols)("ngForTrackBy", ctx_r73.trackByColKey);
+    const ctx_r100 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngForOf", ctx_r100.filteredDirectCols)("ngForTrackBy", ctx_r100.trackByColKey);
   }
 }
-function SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_div_14_div_1_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_ng_container_19_div_4_span_8_Template(rf, ctx) {
   if (rf & 1) {
-    const _r89 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 153);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_div_14_div_1_Template_div_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r89);
-      const col_r87 = restoredCtx.$implicit;
-      const ctx_r88 = \u0275\u0275nextContext(5);
-      return \u0275\u0275resetView(ctx_r88.toggleColumnCheckbox(col_r87.key));
+    \u0275\u0275elementStart(0, "span", 243);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const col_r114 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1("(", col_r114.key, ")");
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_ng_container_19_div_4_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r118 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 239);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_ng_container_19_div_4_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r118);
+      const col_r114 = restoredCtx.$implicit;
+      const ctx_r117 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r117.toggleColumnCheckbox(col_r114.key));
     });
-    \u0275\u0275elementStart(1, "div", 154);
-    \u0275\u0275element(2, "input", 155);
-    \u0275\u0275elementStart(3, "span", 156);
+    \u0275\u0275elementStart(1, "div", 230);
+    \u0275\u0275element(2, "input", 231);
+    \u0275\u0275elementStart(3, "span", 240);
+    \u0275\u0275text(4, "fx");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "span", 232)(6, "strong");
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(8, SutramExcelStudioComponent_ng_template_67_ng_container_19_div_4_span_8_Template, 2, 1, "span", 241);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(9, "span", 242);
+    \u0275\u0275text(10, "formula");
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const col_r114 = ctx.$implicit;
+    const ctx_r113 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("checked", ctx_r113.isColumnSelected(col_r114.key));
+    \u0275\u0275advance(3);
+    \u0275\u0275property("title", col_r114.short_name || col_r114.name);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(col_r114.short_name || col_r114.name);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", col_r114.short_name && col_r114.short_name !== col_r114.key);
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_ng_container_19_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 236);
+    \u0275\u0275element(2, "i", 237);
+    \u0275\u0275text(3, " UI Formulas & Temp (fx) ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, SutramExcelStudioComponent_ng_template_67_ng_container_19_div_4_Template, 11, 4, "div", 238);
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r101 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngForOf", ctx_r101.filteredComputedCols)("ngForTrackBy", ctx_r101.trackByColKey);
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_div_13_div_1_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r125 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 229);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_div_13_div_1_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r125);
+      const col_r123 = restoredCtx.$implicit;
+      const ctx_r124 = \u0275\u0275nextContext(5);
+      return \u0275\u0275resetView(ctx_r124.toggleColumnCheckbox(col_r123.key));
+    });
+    \u0275\u0275elementStart(1, "div", 230);
+    \u0275\u0275element(2, "input", 231);
+    \u0275\u0275elementStart(3, "span", 232);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "span", 158);
+    \u0275\u0275elementStart(5, "span", 234);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
-    const col_r87 = ctx.$implicit;
-    const ctx_r86 = \u0275\u0275nextContext(5);
+    const col_r123 = ctx.$implicit;
+    const ctx_r122 = \u0275\u0275nextContext(5);
     \u0275\u0275advance(2);
-    \u0275\u0275property("checked", ctx_r86.isColumnSelected(col_r87.key));
+    \u0275\u0275property("checked", ctx_r122.isColumnSelected(col_r123.key));
     \u0275\u0275advance(1);
-    \u0275\u0275styleProp("font-weight", col_r87.is_fk_main ? "600" : "normal");
-    \u0275\u0275property("title", col_r87.name);
+    \u0275\u0275styleProp("font-weight", col_r123.is_fk_main ? "600" : "normal");
+    \u0275\u0275property("title", col_r123.name);
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", col_r87.short_name || col_r87.name, " ");
+    \u0275\u0275textInterpolate1(" ", col_r123.short_name || col_r123.name, " ");
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(col_r87.is_fk_main ? "display" : col_r87.is_fk_raw ? "id" : col_r87.type || "string");
+    \u0275\u0275textInterpolate(col_r123.is_fk_main ? "display" : col_r123.is_fk_raw ? "id" : col_r123.type || "string");
   }
 }
-function SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_div_14_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_div_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 173);
-    \u0275\u0275template(1, SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_div_14_div_1_Template, 7, 6, "div", 152);
+    \u0275\u0275elementStart(0, "div", 257);
+    \u0275\u0275template(1, SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_div_13_div_1_Template, 7, 6, "div", 228);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const grp_r84 = \u0275\u0275nextContext().$implicit;
-    const ctx_r85 = \u0275\u0275nextContext(3);
+    const grp_r120 = \u0275\u0275nextContext().$implicit;
+    const ctx_r121 = \u0275\u0275nextContext(3);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngForOf", grp_r84.columns)("ngForTrackBy", ctx_r85.trackByColKey);
+    \u0275\u0275property("ngForOf", grp_r120.columns)("ngForTrackBy", ctx_r121.trackByColKey);
   }
 }
-function SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_Template(rf, ctx) {
   if (rf & 1) {
-    const _r92 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 162)(1, "div", 163)(2, "div", 164);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_Template_div_click_2_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r92);
-      const grp_r84 = restoredCtx.$implicit;
-      const ctx_r91 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r91.toggleFkGroupExpand(grp_r84.name));
+    const _r128 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 247)(1, "div", 248)(2, "div", 249);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_Template_div_click_2_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r128);
+      const grp_r120 = restoredCtx.$implicit;
+      const ctx_r127 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r127.toggleFkGroupExpand(grp_r120.name));
     });
-    \u0275\u0275element(3, "i", 165);
-    \u0275\u0275elementStart(4, "span", 166);
-    \u0275\u0275element(5, "i", 167);
-    \u0275\u0275elementStart(6, "strong", 168);
-    \u0275\u0275text(7);
+    \u0275\u0275element(3, "i", 250);
+    \u0275\u0275elementStart(4, "span", 251)(5, "strong", 252);
+    \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "span", 169);
-    \u0275\u0275text(9);
+    \u0275\u0275elementStart(7, "span", 253);
+    \u0275\u0275text(8);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(10, "div", 170);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_Template_div_click_10_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r92);
-      const grp_r84 = restoredCtx.$implicit;
-      const ctx_r93 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r93.toggleFkGroupAll(grp_r84.name));
+    \u0275\u0275elementStart(9, "div", 254);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_Template_div_click_9_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r128);
+      const grp_r120 = restoredCtx.$implicit;
+      const ctx_r129 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r129.toggleFkGroupAll(grp_r120.name));
     });
-    \u0275\u0275element(11, "input", 155);
-    \u0275\u0275elementStart(12, "span", 171);
-    \u0275\u0275text(13);
+    \u0275\u0275element(10, "input", 231);
+    \u0275\u0275elementStart(11, "span", 255);
+    \u0275\u0275text(12);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275template(14, SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_div_14_Template, 2, 2, "div", 172);
+    \u0275\u0275template(13, SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_div_13_Template, 2, 2, "div", 256);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const grp_r84 = ctx.$implicit;
-    const ctx_r83 = \u0275\u0275nextContext(3);
-    \u0275\u0275classProp("fk-active-group", grp_r84.selectedCount > 0);
+    const grp_r120 = ctx.$implicit;
+    const ctx_r119 = \u0275\u0275nextContext(3);
+    \u0275\u0275classProp("fk-active-group", grp_r120.selectedCount > 0);
     \u0275\u0275advance(3);
-    \u0275\u0275classProp("rotated", ctx_r83.isFkGroupExpanded(grp_r84.name));
-    \u0275\u0275advance(4);
-    \u0275\u0275textInterpolate(grp_r84.name);
+    \u0275\u0275classProp("rotated", ctx_r119.isFkGroupExpanded(grp_r120.name));
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(grp_r120.name);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1("(", grp_r84.refTable, ")");
+    \u0275\u0275textInterpolate1("(", grp_r120.refTable, ")");
     \u0275\u0275advance(2);
-    \u0275\u0275property("checked", grp_r84.isAllChecked);
+    \u0275\u0275property("checked", grp_r120.isAllChecked);
     \u0275\u0275advance(1);
-    \u0275\u0275styleProp("background", grp_r84.selectedCount > 0 ? "rgba(16, 185, 129, 0.12)" : "rgba(125, 125, 125, 0.1)")("color", grp_r84.selectedCount > 0 ? "#059669" : "var(--text-muted)");
+    \u0275\u0275styleProp("background", grp_r120.selectedCount > 0 ? "rgba(16, 185, 129, 0.12)" : "rgba(125, 125, 125, 0.1)")("color", grp_r120.selectedCount > 0 ? "#059669" : "var(--text-muted)");
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate2(" ", grp_r84.selectedCount, "/", grp_r84.totalCount, " ");
+    \u0275\u0275textInterpolate2(" ", grp_r120.selectedCount, "/", grp_r120.totalCount, " ");
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r83.isFkGroupExpanded(grp_r84.name));
+    \u0275\u0275property("ngIf", ctx_r119.isFkGroupExpanded(grp_r120.name));
   }
 }
-function SutramExcelStudioComponent_ng_template_61_ng_container_18_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_ng_container_20_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 160);
-    \u0275\u0275text(2, "FK Reference Groups");
+    \u0275\u0275elementStart(1, "div", 244);
+    \u0275\u0275element(2, "i", 245);
+    \u0275\u0275text(3, " FK Reference Groups ");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(3, SutramExcelStudioComponent_ng_template_61_ng_container_18_div_3_Template, 15, 14, "div", 161);
+    \u0275\u0275template(4, SutramExcelStudioComponent_ng_template_67_ng_container_20_div_4_Template, 14, 14, "div", 246);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
-    const ctx_r74 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngForOf", ctx_r74.filteredFkGroups)("ngForTrackBy", ctx_r74.trackByGroupName);
+    const ctx_r102 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngForOf", ctx_r102.filteredFkGroups)("ngForTrackBy", ctx_r102.trackByGroupName);
   }
 }
-function SutramExcelStudioComponent_ng_template_61_div_19_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_div_21_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 174);
-    \u0275\u0275element(1, "i", 175);
+    \u0275\u0275elementStart(0, "div", 258);
+    \u0275\u0275element(1, "i", 259);
     \u0275\u0275text(2, " No matching columns found ");
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_ng_template_61_Template(rf, ctx) {
+function SutramExcelStudioComponent_ng_template_67_div_36_Template(rf, ctx) {
   if (rf & 1) {
-    const _r95 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 134)(1, "div", 135)(2, "div", 136);
-    \u0275\u0275element(3, "i", 137);
-    \u0275\u0275elementStart(4, "input", 138);
-    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_ng_template_61_Template_input_ngModelChange_4_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r94 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r94.colSearchQuery = $event);
-    });
+    \u0275\u0275elementStart(0, "div", 258);
+    \u0275\u0275element(1, "i", 260);
+    \u0275\u0275text(2, " No columns currently visible. Select columns on the left. ");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(5, SutramExcelStudioComponent_ng_template_61_button_5_Template, 2, 0, "button", 139);
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_span_13_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 283);
+    \u0275\u0275text(1, "\u26A1 fx");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "div", 140)(7, "div", 141)(8, "button", 142);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_Template_button_click_8_listener() {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r96 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r96.selectAllColumns(true));
-    });
-    \u0275\u0275text(9, "All");
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_span_14_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 284);
+    \u0275\u0275text(1);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(10, "button", 142);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_Template_button_click_10_listener() {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r97 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r97.selectAllColumns(false));
-    });
-    \u0275\u0275text(11, "None");
+  }
+  if (rf & 2) {
+    const col_r130 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("title", "FK Display: " + col_r130.ref_table);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1("\u{1F517} ", col_r130.ref_table, "");
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_span_15_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 285);
+    \u0275\u0275text(1);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(12, "button", 142);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_Template_button_click_12_listener() {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r98 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r98.resetDefaultColumns());
+  }
+  if (rf & 2) {
+    const col_r130 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("title", "FK Subcol: " + col_r130.ref_table);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1("\u21B3 ", col_r130.sub_col_name, "");
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_span_16_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 286);
+    \u0275\u0275text(1, "# id");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_span_17_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 287);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const col_r130 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(col_r130.type || "text");
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_div_21_option_4_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "option", 292);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const opt_r144 = ctx.$implicit;
+    \u0275\u0275property("value", opt_r144.value);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(opt_r144.label);
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_div_21_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r147 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 288)(1, "select", 289);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_ng_template_67_div_37_div_21_Template_select_ngModelChange_1_listener($event) {
+      \u0275\u0275restoreView(_r147);
+      const col_r130 = \u0275\u0275nextContext().$implicit;
+      return \u0275\u0275resetView(col_r130.display_format = $event);
+    })("ngModelChange", function SutramExcelStudioComponent_ng_template_67_div_37_div_21_Template_select_ngModelChange_1_listener() {
+      \u0275\u0275restoreView(_r147);
+      const col_r130 = \u0275\u0275nextContext().$implicit;
+      const ctx_r148 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r148.onColumnFormatChange(col_r130));
     });
-    \u0275\u0275text(13, "Reset");
+    \u0275\u0275elementStart(2, "option", 290);
+    \u0275\u0275text(3, "Default Date");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, SutramExcelStudioComponent_ng_template_67_div_37_div_21_option_4_Template, 2, 2, "option", 291);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(14, "span", 143);
-    \u0275\u0275text(15);
-    \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(16, "div", 144);
-    \u0275\u0275template(17, SutramExcelStudioComponent_ng_template_61_ng_container_17_Template, 4, 2, "ng-container", 42);
-    \u0275\u0275template(18, SutramExcelStudioComponent_ng_template_61_ng_container_18_Template, 4, 2, "ng-container", 42);
-    \u0275\u0275template(19, SutramExcelStudioComponent_ng_template_61_div_19_Template, 3, 0, "div", 145);
+  }
+  if (rf & 2) {
+    const col_r130 = \u0275\u0275nextContext().$implicit;
+    const ctx_r137 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngModel", col_r130.display_format);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngValue", null);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngForOf", ctx_r137.dateFormatOptions);
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_div_22_option_4_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "option", 292);
+    \u0275\u0275text(1);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(20, "div", 146)(21, "span", 147);
-    \u0275\u0275text(22, "Click outside or press Esc");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(23, "button", 148);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_61_Template_button_click_23_listener() {
-      \u0275\u0275restoreView(_r95);
-      \u0275\u0275nextContext();
-      const _r10 = \u0275\u0275reference(60);
-      return \u0275\u0275resetView(_r10.hide());
+  }
+  if (rf & 2) {
+    const opt_r152 = ctx.$implicit;
+    \u0275\u0275property("value", opt_r152.value);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(opt_r152.label);
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_div_22_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r155 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 288)(1, "select", 293);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_ng_template_67_div_37_div_22_Template_select_ngModelChange_1_listener($event) {
+      \u0275\u0275restoreView(_r155);
+      const col_r130 = \u0275\u0275nextContext().$implicit;
+      return \u0275\u0275resetView(col_r130.display_format = $event);
+    })("ngModelChange", function SutramExcelStudioComponent_ng_template_67_div_37_div_22_Template_select_ngModelChange_1_listener() {
+      \u0275\u0275restoreView(_r155);
+      const col_r130 = \u0275\u0275nextContext().$implicit;
+      const ctx_r156 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r156.onColumnFormatChange(col_r130));
     });
-    \u0275\u0275text(24, "Done");
+    \u0275\u0275elementStart(2, "option", 290);
+    \u0275\u0275text(3, "Raw Number");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, SutramExcelStudioComponent_ng_template_67_div_37_div_22_option_4_Template, 2, 2, "option", 291);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const col_r130 = \u0275\u0275nextContext().$implicit;
+    const ctx_r138 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngModel", col_r130.display_format);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngValue", null);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngForOf", ctx_r138.numberDecimalOptions);
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_div_23_span_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 297);
+    \u0275\u0275text(1, "Formula (fx)");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_div_23_span_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 298);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const col_r130 = \u0275\u0275nextContext(2).$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(col_r130.type || "Text");
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_div_23_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 294);
+    \u0275\u0275template(1, SutramExcelStudioComponent_ng_template_67_div_37_div_23_span_1_Template, 2, 0, "span", 295);
+    \u0275\u0275template(2, SutramExcelStudioComponent_ng_template_67_div_37_div_23_span_2_Template, 2, 1, "span", 296);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const col_r130 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", col_r130.is_temp);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !col_r130.is_temp);
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_div_37_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r164 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 261)(1, "div", 262)(2, "span", 263);
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "div", 264)(5, "button", 265);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_div_37_Template_button_click_5_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r164);
+      const col_r130 = restoredCtx.$implicit;
+      const ctx_r163 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r163.moveSelectedColUp(col_r130.key));
+    });
+    \u0275\u0275element(6, "i", 266);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(7, "button", 267);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_div_37_Template_button_click_7_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r164);
+      const col_r130 = restoredCtx.$implicit;
+      const ctx_r165 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r165.moveSelectedColDown(col_r130.key));
+    });
+    \u0275\u0275element(8, "i", 268);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(9, "div", 269)(10, "div", 270)(11, "span", 271);
+    \u0275\u0275text(12);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(13, SutramExcelStudioComponent_ng_template_67_div_37_span_13_Template, 2, 0, "span", 272);
+    \u0275\u0275template(14, SutramExcelStudioComponent_ng_template_67_div_37_span_14_Template, 2, 2, "span", 273);
+    \u0275\u0275template(15, SutramExcelStudioComponent_ng_template_67_div_37_span_15_Template, 2, 2, "span", 274);
+    \u0275\u0275template(16, SutramExcelStudioComponent_ng_template_67_div_37_span_16_Template, 2, 0, "span", 275);
+    \u0275\u0275template(17, SutramExcelStudioComponent_ng_template_67_div_37_span_17_Template, 2, 1, "span", 276);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(18, "div", 277)(19, "input", 278);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_ng_template_67_div_37_Template_input_ngModelChange_19_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r164);
+      const col_r130 = restoredCtx.$implicit;
+      return \u0275\u0275resetView(col_r130.label = $event);
+    })("ngModelChange", function SutramExcelStudioComponent_ng_template_67_div_37_Template_input_ngModelChange_19_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r164);
+      const col_r130 = restoredCtx.$implicit;
+      const ctx_r167 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r167.onColumnLabelChange(col_r130));
+    });
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(20, "div", 279);
+    \u0275\u0275template(21, SutramExcelStudioComponent_ng_template_67_div_37_div_21_Template, 5, 3, "div", 280);
+    \u0275\u0275template(22, SutramExcelStudioComponent_ng_template_67_div_37_div_22_Template, 5, 3, "div", 280);
+    \u0275\u0275template(23, SutramExcelStudioComponent_ng_template_67_div_37_div_23_Template, 3, 2, "div", 281);
+    \u0275\u0275elementStart(24, "button", 282);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_div_37_Template_button_click_24_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r164);
+      const col_r130 = restoredCtx.$implicit;
+      const ctx_r168 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r168.toggleColumnCheckbox(col_r130.key));
+    });
+    \u0275\u0275element(25, "i", 225);
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
-    const ctx_r11 = \u0275\u0275nextContext();
+    const col_r130 = ctx.$implicit;
+    const i_r131 = ctx.index;
+    const ctx_r105 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("title", "Column " + ctx_r105.getColLetter(i_r131));
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", ctx_r105.getColLetter(i_r131), " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("disabled", i_r131 === 0);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("disabled", i_r131 === ctx_r105.selectedOrderedColumns.length - 1);
     \u0275\u0275advance(4);
+    \u0275\u0275property("title", col_r130.key);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(col_r130.col_name || col_r130.key);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", col_r130.is_temp);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", col_r130.is_fk_main);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", col_r130.is_fk_subcol);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", col_r130.is_fk_raw);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !col_r130.is_temp && !col_r130.is_fk_main && !col_r130.is_fk_subcol && !col_r130.is_fk_raw);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngModel", col_r130.label)("placeholder", col_r130.short_name || col_r130.name || col_r130.key);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", ctx_r105.isDateCol(col_r130));
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r105.isNumberCol(col_r130));
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !ctx_r105.isDateCol(col_r130) && !ctx_r105.isNumberCol(col_r130));
+  }
+}
+function SutramExcelStudioComponent_ng_template_67_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r170 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 197)(1, "div", 198)(2, "div", 199)(3, "div", 200);
+    \u0275\u0275element(4, "i", 201);
+    \u0275\u0275elementStart(5, "input", 202);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_ng_template_67_Template_input_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r170);
+      const ctx_r169 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r169.colSearchQuery = $event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(6, SutramExcelStudioComponent_ng_template_67_button_6_Template, 2, 0, "button", 203);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(7, "div", 204)(8, "div", 205)(9, "button", 206);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_Template_button_click_9_listener() {
+      \u0275\u0275restoreView(_r170);
+      const ctx_r171 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r171.selectAllColumns(true));
+    });
+    \u0275\u0275text(10, "All");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(11, "button", 206);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_Template_button_click_11_listener() {
+      \u0275\u0275restoreView(_r170);
+      const ctx_r172 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r172.selectAllColumns(false));
+    });
+    \u0275\u0275text(12, "None");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(13, "button", 206);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_Template_button_click_13_listener() {
+      \u0275\u0275restoreView(_r170);
+      const ctx_r173 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r173.resetDefaultColumns());
+    });
+    \u0275\u0275text(14, "Reset");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(15, "span", 207);
+    \u0275\u0275text(16);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(17, "div", 208);
+    \u0275\u0275template(18, SutramExcelStudioComponent_ng_template_67_ng_container_18_Template, 5, 2, "ng-container", 45);
+    \u0275\u0275template(19, SutramExcelStudioComponent_ng_template_67_ng_container_19_Template, 5, 2, "ng-container", 45);
+    \u0275\u0275template(20, SutramExcelStudioComponent_ng_template_67_ng_container_20_Template, 5, 2, "ng-container", 45);
+    \u0275\u0275template(21, SutramExcelStudioComponent_ng_template_67_div_21_Template, 3, 0, "div", 209);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(22, "div", 210)(23, "div", 211)(24, "div", 212)(25, "span", 213);
+    \u0275\u0275element(26, "i", 214);
+    \u0275\u0275text(27, " Selected Columns (\u0915\u094D\u0930\u092E \u090F\u0935\u0902 \u092A\u094D\u0930\u093E\u0930\u0942\u092A) ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(28, "span", 215);
+    \u0275\u0275text(29);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(30, "div", 216);
+    \u0275\u0275text(31, " Use ");
+    \u0275\u0275elementStart(32, "strong", 217);
+    \u0275\u0275text(33, "\u25B2 / \u25BC");
+    \u0275\u0275elementEnd();
+    \u0275\u0275text(34, " to reorder, edit labels, or select formats ");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(35, "div", 218);
+    \u0275\u0275template(36, SutramExcelStudioComponent_ng_template_67_div_36_Template, 3, 0, "div", 209);
+    \u0275\u0275template(37, SutramExcelStudioComponent_ng_template_67_div_37_Template, 26, 16, "div", 219);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(38, "div", 220)(39, "span", 221);
+    \u0275\u0275element(40, "i", 222);
+    \u0275\u0275text(41, " Live updates active & saved to table ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(42, "button", 223);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_67_Template_button_click_42_listener() {
+      \u0275\u0275restoreView(_r170);
+      \u0275\u0275nextContext();
+      const _r10 = \u0275\u0275reference(66);
+      return \u0275\u0275resetView(_r10.hide());
+    });
+    \u0275\u0275text(43, " Done ");
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r11 = \u0275\u0275nextContext();
+    \u0275\u0275advance(5);
     \u0275\u0275property("ngModel", ctx_r11.colSearchQuery);
     \u0275\u0275advance(1);
     \u0275\u0275property("ngIf", ctx_r11.colSearchQuery);
@@ -132605,21 +135782,29 @@ function SutramExcelStudioComponent_ng_template_61_Template(rf, ctx) {
     \u0275\u0275advance(2);
     \u0275\u0275property("ngIf", ctx_r11.filteredDirectCols.length > 0);
     \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r11.filteredComputedCols.length > 0);
+    \u0275\u0275advance(1);
     \u0275\u0275property("ngIf", ctx_r11.filteredFkGroups.length > 0);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r11.filteredDirectCols.length === 0 && ctx_r11.filteredFkGroups.length === 0);
+    \u0275\u0275property("ngIf", ctx_r11.filteredDirectCols.length === 0 && ctx_r11.filteredComputedCols.length === 0 && ctx_r11.filteredFkGroups.length === 0);
+    \u0275\u0275advance(8);
+    \u0275\u0275textInterpolate1("", ctx_r11.selectedOrderedColumns.length, " Visible");
+    \u0275\u0275advance(7);
+    \u0275\u0275property("ngIf", ctx_r11.selectedOrderedColumns.length === 0);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngForOf", ctx_r11.selectedOrderedColumns)("ngForTrackBy", ctx_r11.trackByColKey);
   }
 }
-function SutramExcelStudioComponent_div_67_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_73_Template(rf, ctx) {
   if (rf & 1) {
-    const _r101 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div")(1, "button", 176);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_67_Template_button_click_1_listener() {
-      \u0275\u0275restoreView(_r101);
-      const ctx_r100 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r100.showSidebar = true);
+    const _r176 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div")(1, "button", 299);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_73_Template_button_click_1_listener() {
+      \u0275\u0275restoreView(_r176);
+      const ctx_r175 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r175.showSidebar = true);
     });
-    \u0275\u0275element(2, "i", 72);
+    \u0275\u0275element(2, "i", 117);
     \u0275\u0275text(3);
     \u0275\u0275elementEnd()();
   }
@@ -132629,170 +135814,170 @@ function SutramExcelStudioComponent_div_67_Template(rf, ctx) {
     \u0275\u0275textInterpolate1(" \u0917\u0932\u0924\u093F\u092F\u093E\u0901 (", ctx_r12.state.unresolvedCorrectionsCount(), ") ");
   }
 }
-function SutramExcelStudioComponent_div_73_span_2_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_79_span_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 184);
+    \u0275\u0275elementStart(0, "span", 307);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const tab_r102 = \u0275\u0275nextContext().$implicit;
+    const tab_r177 = \u0275\u0275nextContext().$implicit;
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", tab_r102.title, " ");
+    \u0275\u0275textInterpolate1(" ", tab_r177.title, " ");
   }
 }
-function SutramExcelStudioComponent_div_73_input_3_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_79_input_3_Template(rf, ctx) {
   if (rf & 1) {
-    const _r110 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "input", 185);
-    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_73_input_3_Template_input_ngModelChange_0_listener($event) {
-      \u0275\u0275restoreView(_r110);
-      const ctx_r109 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r109.renamingTabTitle = $event);
-    })("keyup.enter", function SutramExcelStudioComponent_div_73_input_3_Template_input_keyup_enter_0_listener() {
-      \u0275\u0275restoreView(_r110);
-      const tab_r102 = \u0275\u0275nextContext().$implicit;
-      const ctx_r111 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r111.saveTabRename(tab_r102));
-    })("keyup.escape", function SutramExcelStudioComponent_div_73_input_3_Template_input_keyup_escape_0_listener() {
-      \u0275\u0275restoreView(_r110);
-      const ctx_r113 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r113.cancelTabRename());
-    })("blur", function SutramExcelStudioComponent_div_73_input_3_Template_input_blur_0_listener() {
-      \u0275\u0275restoreView(_r110);
-      const tab_r102 = \u0275\u0275nextContext().$implicit;
-      const ctx_r114 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r114.saveTabRename(tab_r102));
-    })("click", function SutramExcelStudioComponent_div_73_input_3_Template_input_click_0_listener($event) {
+    const _r185 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "input", 308);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_79_input_3_Template_input_ngModelChange_0_listener($event) {
+      \u0275\u0275restoreView(_r185);
+      const ctx_r184 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r184.renamingTabTitle = $event);
+    })("keyup.enter", function SutramExcelStudioComponent_div_79_input_3_Template_input_keyup_enter_0_listener() {
+      \u0275\u0275restoreView(_r185);
+      const tab_r177 = \u0275\u0275nextContext().$implicit;
+      const ctx_r186 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r186.saveTabRename(tab_r177));
+    })("keyup.escape", function SutramExcelStudioComponent_div_79_input_3_Template_input_keyup_escape_0_listener() {
+      \u0275\u0275restoreView(_r185);
+      const ctx_r188 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r188.cancelTabRename());
+    })("blur", function SutramExcelStudioComponent_div_79_input_3_Template_input_blur_0_listener() {
+      \u0275\u0275restoreView(_r185);
+      const tab_r177 = \u0275\u0275nextContext().$implicit;
+      const ctx_r189 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r189.saveTabRename(tab_r177));
+    })("click", function SutramExcelStudioComponent_div_79_input_3_Template_input_click_0_listener($event) {
       return $event.stopPropagation();
     });
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const tab_r102 = \u0275\u0275nextContext().$implicit;
-    const ctx_r104 = \u0275\u0275nextContext();
-    \u0275\u0275property("id", "tab-rename-input-" + tab_r102.id)("ngModel", ctx_r104.renamingTabTitle);
+    const tab_r177 = \u0275\u0275nextContext().$implicit;
+    const ctx_r179 = \u0275\u0275nextContext();
+    \u0275\u0275property("id", "tab-rename-input-" + tab_r177.id)("ngModel", ctx_r179.renamingTabTitle);
   }
 }
-function SutramExcelStudioComponent_div_73_span_4_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_79_span_4_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 186);
+    \u0275\u0275elementStart(0, "span", 309);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const tab_r102 = \u0275\u0275nextContext().$implicit;
+    const tab_r177 = \u0275\u0275nextContext().$implicit;
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1(" ", tab_r102.recordCount, " ");
+    \u0275\u0275textInterpolate1(" ", tab_r177.recordCount, " ");
   }
 }
-function SutramExcelStudioComponent_div_73_button_5_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_79_button_5_Template(rf, ctx) {
   if (rf & 1) {
-    const _r121 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 187);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_73_button_5_Template_button_click_0_listener($event) {
-      \u0275\u0275restoreView(_r121);
-      const tab_r102 = \u0275\u0275nextContext().$implicit;
-      const ctx_r119 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r119.startRenameTab(tab_r102, $event));
+    const _r196 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 310);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_79_button_5_Template_button_click_0_listener($event) {
+      \u0275\u0275restoreView(_r196);
+      const tab_r177 = \u0275\u0275nextContext().$implicit;
+      const ctx_r194 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r194.startRenameTab(tab_r177, $event));
     });
-    \u0275\u0275element(1, "i", 188);
+    \u0275\u0275element(1, "i", 311);
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_div_73_button_6_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_79_button_6_Template(rf, ctx) {
   if (rf & 1) {
-    const _r124 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 189);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_73_button_6_Template_button_click_0_listener($event) {
-      \u0275\u0275restoreView(_r124);
-      const tab_r102 = \u0275\u0275nextContext().$implicit;
-      const ctx_r122 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r122.closeSheet(tab_r102.id, $event));
+    const _r199 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 312);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_79_button_6_Template_button_click_0_listener($event) {
+      \u0275\u0275restoreView(_r199);
+      const tab_r177 = \u0275\u0275nextContext().$implicit;
+      const ctx_r197 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r197.closeSheet(tab_r177.id, $event));
     });
     \u0275\u0275text(1, "\u2715");
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_div_73_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_79_Template(rf, ctx) {
   if (rf & 1) {
-    const _r126 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 177);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_73_Template_div_click_0_listener() {
-      const restoredCtx = \u0275\u0275restoreView(_r126);
-      const tab_r102 = restoredCtx.$implicit;
-      const ctx_r125 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r125.switchSheet(tab_r102.id));
-    })("dblclick", function SutramExcelStudioComponent_div_73_Template_div_dblclick_0_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r126);
-      const tab_r102 = restoredCtx.$implicit;
-      const ctx_r127 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r127.startRenameTab(tab_r102, $event));
-    })("contextmenu", function SutramExcelStudioComponent_div_73_Template_div_contextmenu_0_listener($event) {
-      const restoredCtx = \u0275\u0275restoreView(_r126);
-      const tab_r102 = restoredCtx.$implicit;
-      const ctx_r128 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r128.openTabContextMenu($event, tab_r102));
+    const _r201 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 300);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_79_Template_div_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r201);
+      const tab_r177 = restoredCtx.$implicit;
+      const ctx_r200 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r200.switchSheet(tab_r177.id));
+    })("dblclick", function SutramExcelStudioComponent_div_79_Template_div_dblclick_0_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r201);
+      const tab_r177 = restoredCtx.$implicit;
+      const ctx_r202 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r202.startRenameTab(tab_r177, $event));
+    })("contextmenu", function SutramExcelStudioComponent_div_79_Template_div_contextmenu_0_listener($event) {
+      const restoredCtx = \u0275\u0275restoreView(_r201);
+      const tab_r177 = restoredCtx.$implicit;
+      const ctx_r203 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r203.openTabContextMenu($event, tab_r177));
     });
-    \u0275\u0275element(1, "i", 178);
-    \u0275\u0275template(2, SutramExcelStudioComponent_div_73_span_2_Template, 2, 1, "span", 179);
-    \u0275\u0275template(3, SutramExcelStudioComponent_div_73_input_3_Template, 1, 2, "input", 180);
-    \u0275\u0275template(4, SutramExcelStudioComponent_div_73_span_4_Template, 2, 1, "span", 181);
-    \u0275\u0275template(5, SutramExcelStudioComponent_div_73_button_5_Template, 2, 0, "button", 182);
-    \u0275\u0275template(6, SutramExcelStudioComponent_div_73_button_6_Template, 2, 0, "button", 183);
+    \u0275\u0275element(1, "i", 301);
+    \u0275\u0275template(2, SutramExcelStudioComponent_div_79_span_2_Template, 2, 1, "span", 302);
+    \u0275\u0275template(3, SutramExcelStudioComponent_div_79_input_3_Template, 1, 2, "input", 303);
+    \u0275\u0275template(4, SutramExcelStudioComponent_div_79_span_4_Template, 2, 1, "span", 304);
+    \u0275\u0275template(5, SutramExcelStudioComponent_div_79_button_5_Template, 2, 0, "button", 305);
+    \u0275\u0275template(6, SutramExcelStudioComponent_div_79_button_6_Template, 2, 0, "button", 306);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const tab_r102 = ctx.$implicit;
+    const tab_r177 = ctx.$implicit;
     const ctx_r14 = \u0275\u0275nextContext();
-    \u0275\u0275classProp("active-tab", ctx_r14.activeSheetId === tab_r102.id);
+    \u0275\u0275classProp("active-tab", ctx_r14.activeSheetId === tab_r177.id);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngClass", tab_r102.icon);
+    \u0275\u0275property("ngClass", tab_r177.icon);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r14.renamingTabId !== tab_r102.id);
+    \u0275\u0275property("ngIf", ctx_r14.renamingTabId !== tab_r177.id);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r14.renamingTabId === tab_r102.id);
+    \u0275\u0275property("ngIf", ctx_r14.renamingTabId === tab_r177.id);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", tab_r102.isLoaded && (tab_r102.recordCount || 0) > 0);
+    \u0275\u0275property("ngIf", tab_r177.isLoaded && (tab_r177.recordCount || 0) > 0);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngIf", ctx_r14.renamingTabId !== tab_r102.id && (tab_r102.type === "rough" || tab_r102.id.startsWith("rough_") || tab_r102.id.startsWith("sheet_")));
+    \u0275\u0275property("ngIf", ctx_r14.renamingTabId !== tab_r177.id && (tab_r177.type === "rough" || tab_r177.id.startsWith("rough_") || tab_r177.id.startsWith("sheet_")));
     \u0275\u0275advance(1);
     \u0275\u0275property("ngIf", ctx_r14.sheetTabs.length > 1);
   }
 }
-function SutramExcelStudioComponent_div_76_div_5_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_82_div_5_Template(rf, ctx) {
   if (rf & 1) {
-    const _r131 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 194);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_76_div_5_Template_div_click_0_listener($event) {
-      \u0275\u0275restoreView(_r131);
-      const ctx_r130 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r130.deleteSheet(ctx_r130.tabContextMenu.tab, $event));
+    const _r206 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 317);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_82_div_5_Template_div_click_0_listener($event) {
+      \u0275\u0275restoreView(_r206);
+      const ctx_r205 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r205.deleteSheet(ctx_r205.tabContextMenu.tab, $event));
     });
-    \u0275\u0275element(1, "i", 195);
+    \u0275\u0275element(1, "i", 318);
     \u0275\u0275elementStart(2, "span");
     \u0275\u0275text(3, "\u0936\u0940\u091F \u0939\u091F\u093E\u090F\u0902 / \u0921\u093F\u0932\u0940\u091F \u0915\u0930\u0947\u0902 (Delete Sheet)");
     \u0275\u0275elementEnd()();
   }
 }
-function SutramExcelStudioComponent_div_76_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_82_Template(rf, ctx) {
   if (rf & 1) {
-    const _r134 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 190);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_76_Template_div_click_0_listener($event) {
+    const _r209 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 313);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_82_Template_div_click_0_listener($event) {
       return $event.stopPropagation();
     });
-    \u0275\u0275elementStart(1, "div", 191);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_76_Template_div_click_1_listener($event) {
-      \u0275\u0275restoreView(_r134);
-      const ctx_r133 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r133.startRenameTab(ctx_r133.tabContextMenu.tab, $event));
+    \u0275\u0275elementStart(1, "div", 314);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_82_Template_div_click_1_listener($event) {
+      \u0275\u0275restoreView(_r209);
+      const ctx_r208 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r208.startRenameTab(ctx_r208.tabContextMenu.tab, $event));
     });
-    \u0275\u0275element(2, "i", 192);
+    \u0275\u0275element(2, "i", 315);
     \u0275\u0275elementStart(3, "span");
     \u0275\u0275text(4, "\u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Rename Sheet)");
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(5, SutramExcelStudioComponent_div_76_div_5_Template, 4, 0, "div", 193);
+    \u0275\u0275template(5, SutramExcelStudioComponent_div_82_div_5_Template, 4, 0, "div", 316);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -132802,18 +135987,18 @@ function SutramExcelStudioComponent_div_76_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r15.tabContextMenu.tab);
   }
 }
-function SutramExcelStudioComponent_span_83_Template(rf, ctx) {
+function SutramExcelStudioComponent_span_89_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 196);
-    \u0275\u0275element(1, "i", 197);
+    \u0275\u0275elementStart(0, "span", 319);
+    \u0275\u0275element(1, "i", 320);
     \u0275\u0275text(2, "Loading more... ");
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_span_84_Template(rf, ctx) {
+function SutramExcelStudioComponent_span_90_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 198);
-    \u0275\u0275element(1, "i", 199);
+    \u0275\u0275elementStart(0, "span", 321);
+    \u0275\u0275element(1, "i", 322);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
   }
@@ -132823,16 +136008,16 @@ function SutramExcelStudioComponent_span_84_Template(rf, ctx) {
     \u0275\u0275textInterpolate1("", ctx_r17.state.deletedRowIds().length, " Deleted ");
   }
 }
-function SutramExcelStudioComponent_span_85_Template(rf, ctx) {
+function SutramExcelStudioComponent_span_91_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 200);
+    \u0275\u0275elementStart(0, "span", 323);
     \u0275\u0275text(1, "\u2713 100% In Sync");
     \u0275\u0275elementEnd();
   }
 }
-function SutramExcelStudioComponent_span_86_Template(rf, ctx) {
+function SutramExcelStudioComponent_span_92_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 201);
+    \u0275\u0275elementStart(0, "span", 324);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -132842,10 +136027,10 @@ function SutramExcelStudioComponent_span_86_Template(rf, ctx) {
     \u0275\u0275textInterpolate1("", ctx_r19.state.stats().errorRows, " \u0924\u094D\u0930\u0941\u091F\u093F\u092F\u093E\u0901");
   }
 }
-function SutramExcelStudioComponent_span_87_Template(rf, ctx) {
+function SutramExcelStudioComponent_span_93_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 202);
-    \u0275\u0275element(1, "i", 203);
+    \u0275\u0275elementStart(0, "span", 325);
+    \u0275\u0275element(1, "i", 326);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
   }
@@ -132856,128 +136041,128 @@ function SutramExcelStudioComponent_span_87_Template(rf, ctx) {
     \u0275\u0275textInterpolate2("\u0905\u0902\u0924\u093F\u092E \u0938\u093F\u0902\u0915 (", ctx_r20.lastSyncPerSheet[ctx_r20.activeSheetId].time, "): ", ctx_r20.lastSyncPerSheet[ctx_r20.activeSheetId].summary, " ");
   }
 }
-function SutramExcelStudioComponent_div_98_div_8_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_104_div_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 216)(1, "div", 217)(2, "span");
+    \u0275\u0275elementStart(0, "div", 339)(1, "div", 340)(2, "span");
     \u0275\u0275text(3);
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(4, "span");
     \u0275\u0275text(5);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "div", 218);
-    \u0275\u0275element(7, "div", 219);
+    \u0275\u0275elementStart(6, "div", 341);
+    \u0275\u0275element(7, "div", 342);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
-    const ctx_r135 = \u0275\u0275nextContext(2);
+    const ctx_r210 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate1("", ctx_r135.syncToast.percentage, "% \u092A\u0942\u0930\u094D\u0923");
+    \u0275\u0275textInterpolate1("", ctx_r210.syncToast.percentage, "% \u092A\u0942\u0930\u094D\u0923");
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate2("", ctx_r135.state.importProgress().current, " / ", ctx_r135.state.importProgress().total, "");
+    \u0275\u0275textInterpolate2("", ctx_r210.state.importProgress().current, " / ", ctx_r210.state.importProgress().total, "");
     \u0275\u0275advance(2);
-    \u0275\u0275styleProp("width", ctx_r135.syncToast.percentage, "%");
+    \u0275\u0275styleProp("width", ctx_r210.syncToast.percentage, "%");
   }
 }
-function SutramExcelStudioComponent_div_98_span_11_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_104_span_11_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 220);
-    \u0275\u0275element(1, "i", 65);
+    \u0275\u0275elementStart(0, "span", 343);
+    \u0275\u0275element(1, "i", 68);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r136 = \u0275\u0275nextContext(2);
+    const ctx_r211 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r136.syncToast.inserted, " Inserted ");
+    \u0275\u0275textInterpolate1(" ", ctx_r211.syncToast.inserted, " Inserted ");
   }
 }
-function SutramExcelStudioComponent_div_98_span_12_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_104_span_12_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 221);
-    \u0275\u0275element(1, "i", 222);
+    \u0275\u0275elementStart(0, "span", 344);
+    \u0275\u0275element(1, "i", 345);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r137 = \u0275\u0275nextContext(2);
+    const ctx_r212 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r137.syncToast.updated, " Updated ");
+    \u0275\u0275textInterpolate1(" ", ctx_r212.syncToast.updated, " Updated ");
   }
 }
-function SutramExcelStudioComponent_div_98_span_13_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_104_span_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 223);
-    \u0275\u0275element(1, "i", 195);
+    \u0275\u0275elementStart(0, "span", 346);
+    \u0275\u0275element(1, "i", 318);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r138 = \u0275\u0275nextContext(2);
+    const ctx_r213 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r138.syncToast.deleted, " Deleted ");
+    \u0275\u0275textInterpolate1(" ", ctx_r213.syncToast.deleted, " Deleted ");
   }
 }
-function SutramExcelStudioComponent_div_98_span_14_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_104_span_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 224);
-    \u0275\u0275element(1, "i", 150);
+    \u0275\u0275elementStart(0, "span", 347);
+    \u0275\u0275element(1, "i", 225);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r139 = \u0275\u0275nextContext(2);
+    const ctx_r214 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r139.syncToast.failed, " Failed ");
+    \u0275\u0275textInterpolate1(" ", ctx_r214.syncToast.failed, " Failed ");
   }
 }
-function SutramExcelStudioComponent_div_98_div_15_div_1_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_104_div_15_div_1_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementStart(0, "div");
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r142 = ctx.$implicit;
+    const err_r217 = ctx.$implicit;
     \u0275\u0275advance(1);
-    \u0275\u0275textInterpolate1("\u2022 ", err_r142, "");
+    \u0275\u0275textInterpolate1("\u2022 ", err_r217, "");
   }
 }
-function SutramExcelStudioComponent_div_98_div_15_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_104_div_15_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 225);
-    \u0275\u0275template(1, SutramExcelStudioComponent_div_98_div_15_div_1_Template, 2, 1, "div", 226);
+    \u0275\u0275elementStart(0, "div", 348);
+    \u0275\u0275template(1, SutramExcelStudioComponent_div_104_div_15_div_1_Template, 2, 1, "div", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r140 = \u0275\u0275nextContext(2);
+    const ctx_r215 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(1);
-    \u0275\u0275property("ngForOf", ctx_r140.syncToast.errors);
+    \u0275\u0275property("ngForOf", ctx_r215.syncToast.errors);
   }
 }
-function SutramExcelStudioComponent_div_98_Template(rf, ctx) {
+function SutramExcelStudioComponent_div_104_Template(rf, ctx) {
   if (rf & 1) {
-    const _r144 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 204)(1, "div", 205)(2, "div", 206);
+    const _r219 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 327)(1, "div", 328)(2, "div", 329);
     \u0275\u0275element(3, "i", 21);
     \u0275\u0275elementStart(4, "span");
     \u0275\u0275text(5);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "button", 207);
-    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_98_Template_button_click_6_listener() {
-      \u0275\u0275restoreView(_r144);
-      const ctx_r143 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r143.dismissSyncToast());
+    \u0275\u0275elementStart(6, "button", 330);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_104_Template_button_click_6_listener() {
+      \u0275\u0275restoreView(_r219);
+      const ctx_r218 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r218.dismissSyncToast());
     });
     \u0275\u0275text(7, "\u2715");
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(8, SutramExcelStudioComponent_div_98_div_8_Template, 8, 5, "div", 208);
-    \u0275\u0275elementStart(9, "div", 209)(10, "div", 210);
-    \u0275\u0275template(11, SutramExcelStudioComponent_div_98_span_11_Template, 3, 1, "span", 211);
-    \u0275\u0275template(12, SutramExcelStudioComponent_div_98_span_12_Template, 3, 1, "span", 212);
-    \u0275\u0275template(13, SutramExcelStudioComponent_div_98_span_13_Template, 3, 1, "span", 213);
-    \u0275\u0275template(14, SutramExcelStudioComponent_div_98_span_14_Template, 3, 1, "span", 214);
+    \u0275\u0275template(8, SutramExcelStudioComponent_div_104_div_8_Template, 8, 5, "div", 331);
+    \u0275\u0275elementStart(9, "div", 332)(10, "div", 333);
+    \u0275\u0275template(11, SutramExcelStudioComponent_div_104_span_11_Template, 3, 1, "span", 334);
+    \u0275\u0275template(12, SutramExcelStudioComponent_div_104_span_12_Template, 3, 1, "span", 335);
+    \u0275\u0275template(13, SutramExcelStudioComponent_div_104_span_13_Template, 3, 1, "span", 336);
+    \u0275\u0275template(14, SutramExcelStudioComponent_div_104_span_14_Template, 3, 1, "span", 337);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(15, SutramExcelStudioComponent_div_98_div_15_Template, 2, 1, "div", 215);
+    \u0275\u0275template(15, SutramExcelStudioComponent_div_104_div_15_Template, 2, 1, "div", 338);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
@@ -133000,6 +136185,949 @@ function SutramExcelStudioComponent_div_98_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r21.syncToast.errors.length > 0);
   }
 }
+function SutramExcelStudioComponent_div_113_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 349);
+    \u0275\u0275element(1, "i", 350);
+    \u0275\u0275elementStart(2, "span")(3, "strong");
+    \u0275\u0275text(4, "Author Mode (View Only):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275text(5, " \u0915\u0947\u0935\u0932 Admin \u0915\u094B UI \u0938\u0942\u0924\u094D\u0930 \u091C\u094B\u0921\u093C\u0928\u0947, \u092C\u0926\u0932\u0928\u0947 \u092F\u093E \u0939\u091F\u093E\u0928\u0947 \u0915\u093E \u0905\u0927\u093F\u0915\u093E\u0930 \u0939\u0948\u0964 (Only Admin can create/edit/delete triggers)");
+    \u0275\u0275elementEnd()();
+  }
+}
+function SutramExcelStudioComponent_div_114_div_8_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r224 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 371)(1, "label", 372);
+    \u0275\u0275text(2, "Display Name (\u0915\u0949\u0932\u092E \u0936\u0940\u0930\u094D\u0937\u0915):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "input", 373);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_114_div_8_Template_input_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r224);
+      const ctx_r223 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r223.newUiSutra.display_name = $event);
+    });
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r220 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngModel", ctx_r220.newUiSutra.display_name);
+  }
+}
+function SutramExcelStudioComponent_div_114_span_18_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r227 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 374);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_114_span_18_Template_span_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r227);
+      const col_r225 = restoredCtx.$implicit;
+      const ctx_r226 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r226.insertColIntoFormula(col_r225.name || col_r225.col_name));
+    });
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const col_r225 = ctx.$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" + [", col_r225.name || col_r225.col_name, "] ");
+  }
+}
+function SutramExcelStudioComponent_div_114_div_19_span_3_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r231 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 376);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_114_div_19_span_3_Template_span_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r231);
+      const rc_r229 = restoredCtx.$implicit;
+      const ctx_r230 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r230.insertColIntoFormula(rc_r229.name || rc_r229.key));
+    });
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const rc_r229 = ctx.$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" + [", rc_r229.name || rc_r229.key, "] ");
+  }
+}
+function SutramExcelStudioComponent_div_114_div_19_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 365)(1, "span", 362);
+    \u0275\u0275text(2, "Ref Columns (\u0938\u0942\u0924\u094D\u0930 \u0939\u0947\u0924\u0941):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(3, SutramExcelStudioComponent_div_114_div_19_span_3_Template, 2, 1, "span", 375);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r222 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngForOf", ctx_r222.referenceColumns);
+  }
+}
+function SutramExcelStudioComponent_div_114_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r233 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 351)(1, "div", 352);
+    \u0275\u0275text(2, "Add UI Reactive Trigger (\u0928\u092F\u093E UI \u0938\u0942\u0924\u094D\u0930 \u091C\u094B\u0921\u093C\u0947\u0902)");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 353)(4, "div")(5, "label", 354);
+    \u0275\u0275text(6, "Target Column (\u0932\u0915\u094D\u0937\u094D\u092F \u0915\u0949\u0932\u092E):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(7, "p-dropdown", 355);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_114_Template_p_dropdown_ngModelChange_7_listener($event) {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r232 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r232.selectedTargetColValue = $event);
+    })("onChange", function SutramExcelStudioComponent_div_114_Template_p_dropdown_onChange_7_listener($event) {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r234 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r234.onTargetColChange($event));
+    })("ngModelChange", function SutramExcelStudioComponent_div_114_Template_p_dropdown_ngModelChange_7_listener($event) {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r235 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r235.onTargetColChange($event));
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(8, SutramExcelStudioComponent_div_114_div_8_Template, 4, 1, "div", 356);
+    \u0275\u0275elementStart(9, "div", 357)(10, "label", 354);
+    \u0275\u0275text(11, "Formula / Expression / Code (e.g. [colB], [qty] * [rate], AGE([dob])):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "input", 358);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_114_Template_input_ngModelChange_12_listener($event) {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r236 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r236.newUiSutra.formula = $event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(13, "div", 359)(14, "button", 360);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_114_Template_button_click_14_listener() {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r237 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r237.addUiSutra());
+    });
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(15, "div", 361)(16, "span", 362);
+    \u0275\u0275text(17, "Table Columns:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(18, SutramExcelStudioComponent_div_114_span_18_Template, 2, 1, "span", 363);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(19, SutramExcelStudioComponent_div_114_div_19_Template, 4, 1, "div", 364);
+    \u0275\u0275elementStart(20, "div", 365)(21, "span", 362);
+    \u0275\u0275text(22, "Helpers:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(23, "span", 366);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_114_Template_span_click_23_listener() {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r238 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r238.insertFnIntoFormula("AGE([dob])"));
+    });
+    \u0275\u0275text(24, " + AGE([dob]) ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(25, "span", 367);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_114_Template_span_click_25_listener() {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r239 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r239.insertFnIntoFormula("DAYS([end_date], [start_date])"));
+    });
+    \u0275\u0275text(26, " + DAYS(d1, d2) ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(27, "span", 368);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_114_Template_span_click_27_listener() {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r240 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r240.insertFnIntoFormula("IF([condition], true_val, false_val)"));
+    });
+    \u0275\u0275text(28, " + IF(cond, a, b) ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(29, "span", 369);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_114_Template_span_click_29_listener() {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r241 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r241.insertFnIntoFormula("ROUND([val], 2)"));
+    });
+    \u0275\u0275text(30, " + ROUND(n, 2) ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(31, "span", 370);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_114_Template_span_click_31_listener() {
+      \u0275\u0275restoreView(_r233);
+      const ctx_r242 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r242.insertFnIntoFormula("UPPER([text])"));
+    });
+    \u0275\u0275text(32, " + UPPER(str) ");
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r23 = \u0275\u0275nextContext();
+    \u0275\u0275advance(4);
+    \u0275\u0275styleProp("flex", ctx_r23.newUiSutra.is_temp ? "0 0 260px" : "0 0 300px");
+    \u0275\u0275advance(3);
+    \u0275\u0275property("options", ctx_r23.targetColDropdownOptions)("ngModel", ctx_r23.selectedTargetColValue)("appendTo", "body");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r23.newUiSutra.is_temp);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngModel", ctx_r23.newUiSutra.formula);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("disabled", !ctx_r23.selectedTargetColValue || (ctx_r23.newUiSutra.is_temp ? !(ctx_r23.newUiSutra.display_name == null ? null : ctx_r23.newUiSutra.display_name.trim()) : !ctx_r23.newUiSutra.target_col) || !(ctx_r23.newUiSutra.formula == null ? null : ctx_r23.newUiSutra.formula.trim()));
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngForOf", ctx_r23.currentTableColumns);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r23.referenceColumns.length > 0);
+  }
+}
+function SutramExcelStudioComponent_div_117_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 377);
+    \u0275\u0275text(1, " \u0905\u092D\u0940 \u0907\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u092E\u0947\u0902 \u0915\u094B\u0908 UI \u0938\u0942\u0924\u094D\u0930 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u090A\u092A\u0930 \u0926\u093F\u090F \u0917\u090F \u092B\u0949\u0930\u094D\u092E \u0938\u0947 \u0928\u092F\u093E \u0938\u0942\u0924\u094D\u0930 \u091C\u094B\u0921\u093C\u0947\u0902\u0964 ");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_118_tr_15_span_4_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 389);
+    \u0275\u0275element(1, "i", 390);
+    \u0275\u0275text(2, "Temp (fx) ");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_118_tr_15_span_5_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 391);
+    \u0275\u0275element(1, "i", 392);
+    \u0275\u0275text(2, "DB Column ");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_118_tr_15_span_9_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 393);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const s_r244 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1("(", s_r244.target_col, ")");
+  }
+}
+function SutramExcelStudioComponent_div_118_tr_15_button_13_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r254 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 394);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_118_tr_15_button_13_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r254);
+      const i_r245 = \u0275\u0275nextContext().index;
+      const ctx_r252 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r252.removeUiSutra(i_r245));
+    });
+    \u0275\u0275element(1, "i", 318);
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_118_tr_15_span_14_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 298);
+    \u0275\u0275text(1, "\u{1F512} View");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_118_tr_15_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "tr")(1, "td", 381);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "td");
+    \u0275\u0275template(4, SutramExcelStudioComponent_div_118_tr_15_span_4_Template, 3, 0, "span", 382);
+    \u0275\u0275template(5, SutramExcelStudioComponent_div_118_tr_15_span_5_Template, 3, 0, "span", 383);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "td", 384)(7, "strong");
+    \u0275\u0275text(8);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(9, SutramExcelStudioComponent_div_118_tr_15_span_9_Template, 2, 1, "span", 385);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(10, "td", 386);
+    \u0275\u0275text(11);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "td", 387);
+    \u0275\u0275template(13, SutramExcelStudioComponent_div_118_tr_15_button_13_Template, 2, 0, "button", 388);
+    \u0275\u0275template(14, SutramExcelStudioComponent_div_118_tr_15_span_14_Template, 2, 0, "span", 296);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const s_r244 = ctx.$implicit;
+    const i_r245 = ctx.index;
+    const ctx_r243 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(i_r245 + 1);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", s_r244.is_temp);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !s_r244.is_temp);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(s_r244.display_name || s_r244.target_col);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", s_r244.is_temp && s_r244.target_col);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(s_r244.formula);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", ctx_r243.isAdmin);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !ctx_r243.isAdmin);
+  }
+}
+function SutramExcelStudioComponent_div_118_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 106)(1, "table", 107)(2, "thead")(3, "tr")(4, "th", 378);
+    \u0275\u0275text(5, "#");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "th", 379);
+    \u0275\u0275text(7, "\u092A\u094D\u0930\u0915\u093E\u0930 (Type)");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "th", 111);
+    \u0275\u0275text(9, "\u0915\u0949\u0932\u092E \u0928\u093E\u092E");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(10, "th");
+    \u0275\u0275text(11, "\u0938\u092E\u0940\u0915\u0930\u0923 (Formula)");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "th", 380);
+    \u0275\u0275text(13, "\u0939\u091F\u093E\u090F\u0902");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(14, "tbody");
+    \u0275\u0275template(15, SutramExcelStudioComponent_div_118_tr_15_Template, 15, 8, "tr", 113);
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r25 = \u0275\u0275nextContext();
+    \u0275\u0275advance(15);
+    \u0275\u0275property("ngForOf", ctx_r25.uiSutrasList);
+  }
+}
+function SutramExcelStudioComponent_ng_template_119_button_2_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r257 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 398);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_119_button_2_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r257);
+      const ctx_r256 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r256.saveUiSutras());
+    });
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r255 = \u0275\u0275nextContext(2);
+    \u0275\u0275property("loading", ctx_r255.isSavingUiSutras);
+  }
+}
+function SutramExcelStudioComponent_ng_template_119_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r259 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 395)(1, "button", 396);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_119_Template_button_click_1_listener() {
+      \u0275\u0275restoreView(_r259);
+      const ctx_r258 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r258.showUiSutrasModal = false);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(2, SutramExcelStudioComponent_ng_template_119_button_2_Template, 1, 1, "button", 397);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r26 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", ctx_r26.isAdmin);
+  }
+}
+function SutramExcelStudioComponent_div_126_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 349);
+    \u0275\u0275element(1, "i", 350);
+    \u0275\u0275elementStart(2, "span")(3, "strong");
+    \u0275\u0275text(4, "Author Mode (View Only):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275text(5, " \u0915\u0947\u0935\u0932 Admin \u0915\u094B \u092C\u0948\u0915\u090F\u0902\u0921 \u091F\u094D\u0930\u093F\u0917\u0930 \u091C\u094B\u0921\u093C\u0928\u0947 \u092F\u093E \u0939\u091F\u093E\u0928\u0947 \u0915\u093E \u0905\u0927\u093F\u0915\u093E\u0930 \u0939\u0948\u0964 (Only Admin can create/delete database triggers)");
+    \u0275\u0275elementEnd()();
+  }
+}
+function SutramExcelStudioComponent_div_127_div_16_span_15_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r267 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 415);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_127_div_16_span_15_Template_span_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r267);
+      const h_r265 = restoredCtx.$implicit;
+      const ctx_r266 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r266.insertColIntoTriggerSql(h_r265.name, ":new."));
+    });
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const h_r265 = ctx.$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" +:new.", h_r265.name, " ");
+  }
+}
+function SutramExcelStudioComponent_div_127_div_16_ng_container_16_span_1_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r271 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 417);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_127_div_16_ng_container_16_span_1_Template_span_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r271);
+      const h_r269 = restoredCtx.$implicit;
+      const ctx_r270 = \u0275\u0275nextContext(4);
+      return \u0275\u0275resetView(ctx_r270.insertColIntoTriggerSql(h_r269.name, ":old."));
+    });
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const h_r269 = ctx.$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" +:old.", h_r269.name, " ");
+  }
+}
+function SutramExcelStudioComponent_div_127_div_16_ng_container_16_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275template(1, SutramExcelStudioComponent_div_127_div_16_ng_container_16_span_1_Template, 2, 1, "span", 416);
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r263 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngForOf", ctx_r263.visibleHeaders);
+  }
+}
+function SutramExcelStudioComponent_div_127_div_16_div_17_span_3_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r275 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "span", 419);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_127_div_16_div_17_span_3_Template_span_click_0_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r275);
+      const t_r273 = restoredCtx.$implicit;
+      const ctx_r274 = \u0275\u0275nextContext(4);
+      return \u0275\u0275resetView(ctx_r274.insertTextIntoTriggerSql(t_r273.table));
+    });
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const t_r273 = ctx.$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", t_r273.table, " ");
+  }
+}
+function SutramExcelStudioComponent_div_127_div_16_div_17_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 365)(1, "span", 362);
+    \u0275\u0275text(2, "Tables:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(3, SutramExcelStudioComponent_div_127_div_16_div_17_span_3_Template, 2, 1, "span", 418);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r264 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngForOf", ctx_r264.tablesList);
+  }
+}
+function SutramExcelStudioComponent_div_127_div_16_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r277 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 409)(1, "div", 410)(2, "label", 411);
+    \u0275\u0275text(3, "SQL \u0915\u094D\u0935\u0947\u0930\u0940 (Raw SQL Query):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "span", 412);
+    \u0275\u0275text(5, "\u0928\u092F\u093E \u092E\u093E\u0928: ");
+    \u0275\u0275elementStart(6, "code");
+    \u0275\u0275text(7, ":new.col");
+    \u0275\u0275elementEnd();
+    \u0275\u0275text(8, " | \u092A\u0941\u0930\u093E\u0928\u093E \u092E\u093E\u0928: ");
+    \u0275\u0275elementStart(9, "code");
+    \u0275\u0275text(10, ":old.col");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(11, "textarea", 413);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_127_div_16_Template_textarea_ngModelChange_11_listener($event) {
+      \u0275\u0275restoreView(_r277);
+      const ctx_r276 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r276.newTriggerDef.raw_sql = $event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "div", 365)(13, "span", 362);
+    \u0275\u0275text(14, "Columns:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(15, SutramExcelStudioComponent_div_127_div_16_span_15_Template, 2, 1, "span", 414);
+    \u0275\u0275template(16, SutramExcelStudioComponent_div_127_div_16_ng_container_16_Template, 2, 1, "ng-container", 45);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(17, SutramExcelStudioComponent_div_127_div_16_div_17_Template, 4, 1, "div", 364);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r260 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(11);
+    \u0275\u0275property("ngModel", ctx_r260.newTriggerDef.raw_sql);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngForOf", ctx_r260.visibleHeaders);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r260.newTriggerDef.event !== "INSERT");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r260.tablesList.length > 0);
+  }
+}
+function SutramExcelStudioComponent_div_127_div_17_ng_template_5_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 426)(1, "span");
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "span", 427);
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const item_r280 = ctx.$implicit;
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(item_r280.display_name);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(item_r280.table);
+  }
+}
+function SutramExcelStudioComponent_div_127_div_17_ng_template_6_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 428);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(2, "span", 393);
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const item_r281 = ctx.$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(item_r281.display_name);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("(", item_r281.table, ")");
+  }
+}
+function SutramExcelStudioComponent_div_127_div_17_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r283 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 420)(1, "div", 404)(2, "label", 354);
+    \u0275\u0275text(3, "Target Table (\u0932\u0915\u094D\u0937\u094D\u092F \u0924\u093E\u0932\u093F\u0915\u093E):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "p-dropdown", 421);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_127_div_17_Template_p_dropdown_ngModelChange_4_listener($event) {
+      \u0275\u0275restoreView(_r283);
+      const ctx_r282 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r282.newTriggerDef.target_table = $event);
+    });
+    \u0275\u0275template(5, SutramExcelStudioComponent_div_127_div_17_ng_template_5_Template, 5, 2, "ng-template", 422);
+    \u0275\u0275template(6, SutramExcelStudioComponent_div_127_div_17_ng_template_6_Template, 4, 2, "ng-template", 423);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(7, "div", 424)(8, "label", 354);
+    \u0275\u0275text(9, "Field Mapping JSON (\u092B\u0940\u0932\u094D\u0921 \u092E\u0948\u092A):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(10, "input", 425);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_127_div_17_Template_input_ngModelChange_10_listener($event) {
+      \u0275\u0275restoreView(_r283);
+      const ctx_r284 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r284.newTriggerDef.field_map_str = $event);
+    });
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r261 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("options", ctx_r261.tablesList)("ngModel", ctx_r261.newTriggerDef.target_table)("filter", true)("appendTo", "body");
+    \u0275\u0275advance(6);
+    \u0275\u0275property("ngModel", ctx_r261.newTriggerDef.field_map_str);
+  }
+}
+var _c2 = function() {
+  return { label: "INSERT (\u0928\u0908 \u092A\u0902\u0915\u094D\u0924\u093F)", value: "INSERT" };
+};
+var _c3 = function() {
+  return { label: "UPDATE (\u0938\u0902\u0936\u094B\u0927\u0928)", value: "UPDATE" };
+};
+var _c4 = function() {
+  return { label: "DELETE (\u0935\u093F\u0932\u094B\u092A\u0928)", value: "DELETE" };
+};
+var _c5 = function(a0, a1, a2) {
+  return [a0, a1, a2];
+};
+var _c6 = function() {
+  return { label: "\u26A1 Raw SQL (\u0915\u0938\u094D\u091F\u092E SQL \u0915\u094D\u0935\u0947\u0930\u0940 \u2014 \u0905\u0928\u0941\u0936\u0902\u0938\u093F\u0924)", value: "raw_sql" };
+};
+var _c7 = function() {
+  return { label: "\u{1F504} Update Row (\u0905\u0928\u094D\u092F \u0924\u093E\u0932\u093F\u0915\u093E \u0905\u092A\u0921\u0947\u091F)", value: "update_row" };
+};
+var _c8 = function() {
+  return { label: "\u2795 Insert Row (\u0905\u0928\u094D\u092F \u0924\u093E\u0932\u093F\u0915\u093E \u092E\u0947\u0902 \u0907\u0928\u094D\u0938\u0930\u094D\u091F)", value: "insert_row" };
+};
+var _c9 = function() {
+  return { label: "\u274C Delete Row (\u0905\u0928\u094D\u092F \u0924\u093E\u0932\u093F\u0915\u093E \u0938\u0947 \u0935\u093F\u0932\u094B\u092A\u0928)", value: "delete_row" };
+};
+var _c10 = function(a0, a1, a2, a3) {
+  return [a0, a1, a2, a3];
+};
+function SutramExcelStudioComponent_div_127_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r286 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 351)(1, "div", 93);
+    \u0275\u0275text(2, "\u0928\u092F\u093E \u0938\u0930\u094D\u0935\u0930 \u091F\u094D\u0930\u093F\u0917\u0930 \u092C\u0928\u093E\u090F\u0902 (Create Database Trigger)");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 399)(4, "div", 400)(5, "label", 354);
+    \u0275\u0275text(6, "\u091F\u094D\u0930\u093F\u0917\u0930 \u0915\u093E \u0928\u093E\u092E (Identifier):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(7, "input", 401);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_127_Template_input_ngModelChange_7_listener($event) {
+      \u0275\u0275restoreView(_r286);
+      const ctx_r285 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r285.newTriggerDef.trigger_name = $event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(8, "div", 402)(9, "label", 354);
+    \u0275\u0275text(10, "\u0907\u0935\u0947\u0902\u091F (Event):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(11, "p-dropdown", 403);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_127_Template_p_dropdown_ngModelChange_11_listener($event) {
+      \u0275\u0275restoreView(_r286);
+      const ctx_r287 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r287.newTriggerDef.event = $event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(12, "div", 404)(13, "label", 354);
+    \u0275\u0275text(14, "\u0915\u093E\u0930\u094D\u0930\u0935\u093E\u0908 \u092A\u094D\u0930\u0915\u093E\u0930 (Action Type):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(15, "p-dropdown", 403);
+    \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_div_127_Template_p_dropdown_ngModelChange_15_listener($event) {
+      \u0275\u0275restoreView(_r286);
+      const ctx_r288 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r288.newTriggerDef.action_type = $event);
+    });
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275template(16, SutramExcelStudioComponent_div_127_div_16_Template, 18, 4, "div", 405);
+    \u0275\u0275template(17, SutramExcelStudioComponent_div_127_div_17_Template, 11, 5, "div", 406);
+    \u0275\u0275elementStart(18, "div", 407)(19, "button", 408);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_127_Template_button_click_19_listener() {
+      \u0275\u0275restoreView(_r286);
+      const ctx_r289 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r289.createBackendTrigger());
+    });
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r28 = \u0275\u0275nextContext();
+    \u0275\u0275advance(7);
+    \u0275\u0275property("ngModel", ctx_r28.newTriggerDef.trigger_name);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("options", \u0275\u0275pureFunction3(13, _c5, \u0275\u0275pureFunction0(10, _c2), \u0275\u0275pureFunction0(11, _c3), \u0275\u0275pureFunction0(12, _c4)))("ngModel", ctx_r28.newTriggerDef.event)("appendTo", "body");
+    \u0275\u0275advance(4);
+    \u0275\u0275property("options", \u0275\u0275pureFunction4(21, _c10, \u0275\u0275pureFunction0(17, _c6), \u0275\u0275pureFunction0(18, _c7), \u0275\u0275pureFunction0(19, _c8), \u0275\u0275pureFunction0(20, _c9)))("ngModel", ctx_r28.newTriggerDef.action_type)("appendTo", "body");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r28.newTriggerDef.action_type === "raw_sql");
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r28.newTriggerDef.action_type !== "raw_sql");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("disabled", !ctx_r28.newTriggerDef.trigger_name || ctx_r28.newTriggerDef.action_type === "raw_sql" && !ctx_r28.newTriggerDef.raw_sql);
+  }
+}
+function SutramExcelStudioComponent_div_130_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 377);
+    \u0275\u0275text(1, " \u0905\u092D\u0940 \u0907\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u092E\u0947\u0902 \u0915\u094B\u0908 \u092C\u0948\u0915\u090F\u0902\u0921 \u091F\u094D\u0930\u093F\u0917\u0930 \u0938\u0915\u094D\u0930\u093F\u092F \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u090A\u092A\u0930 \u0926\u093F\u090F \u0917\u090F \u092B\u0949\u0930\u094D\u092E \u0938\u0947 \u0928\u092F\u093E \u091F\u094D\u0930\u093F\u0917\u0930 \u092C\u0928\u093E\u090F\u0902\u0964 ");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_131_tr_17_code_13_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "code", 435);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const t_r291 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(t_r291.actions[0] == null ? null : t_r291.actions[0].raw_sql);
+  }
+}
+function SutramExcelStudioComponent_div_131_tr_17_span_14_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span");
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const t_r291 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate(t_r291.target_table || t_r291.actions && (t_r291.actions[0] == null ? null : t_r291.actions[0].target_table) || "Standard Action");
+  }
+}
+function SutramExcelStudioComponent_div_131_tr_17_button_16_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r301 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 394);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_div_131_tr_17_button_16_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r301);
+      const t_r291 = \u0275\u0275nextContext().$implicit;
+      const ctx_r299 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r299.deleteBackendTrigger(t_r291._id));
+    });
+    \u0275\u0275element(1, "i", 318);
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_131_tr_17_span_17_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 298);
+    \u0275\u0275text(1, "\u{1F512} View");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_div_131_tr_17_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "tr")(1, "td", 381);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "td", 384)(4, "strong");
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "td", 387)(7, "span", 431);
+    \u0275\u0275text(8);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(9, "td", 387)(10, "span", 432);
+    \u0275\u0275text(11);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(12, "td", 433);
+    \u0275\u0275template(13, SutramExcelStudioComponent_div_131_tr_17_code_13_Template, 2, 1, "code", 434);
+    \u0275\u0275template(14, SutramExcelStudioComponent_div_131_tr_17_span_14_Template, 2, 1, "span", 45);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(15, "td", 387);
+    \u0275\u0275template(16, SutramExcelStudioComponent_div_131_tr_17_button_16_Template, 2, 0, "button", 388);
+    \u0275\u0275template(17, SutramExcelStudioComponent_div_131_tr_17_span_17_Template, 2, 0, "span", 296);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const t_r291 = ctx.$implicit;
+    const i_r292 = ctx.index;
+    const ctx_r290 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(i_r292 + 1);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(t_r291.trigger_name);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngClass", t_r291.event === "INSERT" ? "event-pill-insert" : t_r291.event === "UPDATE" ? "event-pill-update" : "event-pill-delete");
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", t_r291.event, " ");
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(t_r291.actions && (t_r291.actions[0] == null ? null : t_r291.actions[0].action_type) || t_r291.action_type || "raw_sql");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", t_r291.actions && (t_r291.actions[0] == null ? null : t_r291.actions[0].raw_sql));
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !t_r291.actions || !(t_r291.actions[0] == null ? null : t_r291.actions[0].raw_sql));
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", ctx_r290.isAdmin);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !ctx_r290.isAdmin);
+  }
+}
+function SutramExcelStudioComponent_div_131_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 106)(1, "table", 107)(2, "thead")(3, "tr")(4, "th", 378);
+    \u0275\u0275text(5, "#");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "th", 111);
+    \u0275\u0275text(7, "\u091F\u094D\u0930\u093F\u0917\u0930 \u0928\u093E\u092E");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "th", 429);
+    \u0275\u0275text(9, "\u0907\u0935\u0947\u0902\u091F");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(10, "th", 430);
+    \u0275\u0275text(11, "\u092A\u094D\u0930\u0915\u093E\u0930");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "th");
+    \u0275\u0275text(13, "\u0915\u093E\u0930\u094D\u0930\u0935\u093E\u0908 / SQL \u0915\u094D\u0935\u0947\u0930\u0940");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(14, "th", 380);
+    \u0275\u0275text(15, "\u0939\u091F\u093E\u090F\u0902");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(16, "tbody");
+    \u0275\u0275template(17, SutramExcelStudioComponent_div_131_tr_17_Template, 18, 9, "tr", 113);
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r30 = \u0275\u0275nextContext();
+    \u0275\u0275advance(17);
+    \u0275\u0275property("ngForOf", ctx_r30.backendTriggersList);
+  }
+}
+function SutramExcelStudioComponent_ng_template_132_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r303 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 395)(1, "button", 436);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_132_Template_button_click_1_listener() {
+      \u0275\u0275restoreView(_r303);
+      const ctx_r302 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r302.showBackendSutrasModal = false);
+    });
+    \u0275\u0275elementEnd()();
+  }
+}
+function SutramExcelStudioComponent_button_156_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r305 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 437);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_button_156_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r305);
+      const ctx_r304 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r304.cancelUserEdit());
+    });
+    \u0275\u0275text(1, " Cancel Edit ");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_tr_196_span_6_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 444);
+    \u0275\u0275text(1, "Active");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_tr_196_i_20_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r312 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "i", 445);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_tr_196_i_20_Template_i_click_0_listener() {
+      \u0275\u0275restoreView(_r312);
+      const u_r306 = \u0275\u0275nextContext().$implicit;
+      const ctx_r310 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r310.deleteUser(u_r306));
+    });
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_tr_196_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r314 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "tr")(1, "td", 381);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "td")(4, "strong", 384);
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(6, SutramExcelStudioComponent_tr_196_span_6_Template, 2, 0, "span", 438);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(7, "td");
+    \u0275\u0275text(8);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(9, "td")(10, "span", 24);
+    \u0275\u0275text(11);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(12, "td", 387)(13, "span", 439);
+    \u0275\u0275text(14);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(15, "td", 412);
+    \u0275\u0275text(16);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(17, "td", 387)(18, "div", 440)(19, "i", 441);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_tr_196_Template_i_click_19_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r314);
+      const u_r306 = restoredCtx.$implicit;
+      const ctx_r313 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r313.editUser(u_r306));
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(20, SutramExcelStudioComponent_tr_196_i_20_Template, 1, 0, "i", 442);
+    \u0275\u0275elementStart(21, "button", 443);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_tr_196_Template_button_click_21_listener() {
+      const restoredCtx = \u0275\u0275restoreView(_r314);
+      const u_r306 = restoredCtx.$implicit;
+      const ctx_r315 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r315.setCurrentActiveUser(u_r306));
+    });
+    \u0275\u0275text(22);
+    \u0275\u0275elementEnd()()()();
+  }
+  if (rf & 2) {
+    const u_r306 = ctx.$implicit;
+    const i_r307 = ctx.index;
+    const ctx_r33 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(i_r307 + 1);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(u_r306.username);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", ctx_r33.currentUser.username === u_r306.username);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(u_r306.display_name || "\u2014");
+    \u0275\u0275advance(2);
+    \u0275\u0275classProp("admin-tag", u_r306.role === "admin")("author-tag", u_r306.role === "author");
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", u_r306.role === "admin" ? "\u{1F451} Admin" : "\u{1F464} Author", " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275classProp("active-pill", u_r306.active)("inactive-pill", !u_r306.active);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", u_r306.active ? "Active" : "Inactive", " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(u_r306.created_at || "\u2014");
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngIf", u_r306.username !== "admin");
+    \u0275\u0275advance(1);
+    \u0275\u0275classProp("btn-use-account-active", ctx_r33.currentUser.username === u_r306.username);
+    \u0275\u0275advance(1);
+    \u0275\u0275textInterpolate1(" ", ctx_r33.currentUser.username === u_r306.username ? "\u2713 Active" : "Switch", " ");
+  }
+}
+function SutramExcelStudioComponent_tr_197_span_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span");
+    \u0275\u0275element(1, "i", 320);
+    \u0275\u0275text(2, " \u0932\u094B\u0921 \u0939\u094B \u0930\u0939\u093E \u0939\u0948...");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_tr_197_span_3_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span");
+    \u0275\u0275text(1, "\u0915\u094B\u0908 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u093E (No users found)");
+    \u0275\u0275elementEnd();
+  }
+}
+function SutramExcelStudioComponent_tr_197_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "tr")(1, "td", 446);
+    \u0275\u0275template(2, SutramExcelStudioComponent_tr_197_span_2_Template, 3, 0, "span", 45);
+    \u0275\u0275template(3, SutramExcelStudioComponent_tr_197_span_3_Template, 2, 0, "span", 45);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r34 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", ctx_r34.isLoadingUsers);
+    \u0275\u0275advance(1);
+    \u0275\u0275property("ngIf", !ctx_r34.isLoadingUsers);
+  }
+}
+function SutramExcelStudioComponent_ng_template_198_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r319 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 395)(1, "button", 436);
+    \u0275\u0275listener("click", function SutramExcelStudioComponent_ng_template_198_Template_button_click_1_listener() {
+      \u0275\u0275restoreView(_r319);
+      const ctx_r318 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r318.showUserManagementModal = false);
+    });
+    \u0275\u0275elementEnd()();
+  }
+}
+var _c11 = function() {
+  return { width: "94vw", maxWidth: "980px" };
+};
+var _c12 = function() {
+  return { width: "94vw", maxWidth: "860px" };
+};
 var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
   state;
   api;
@@ -133009,7 +137137,10 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
   cdr;
   set table(tableName) {
     if (tableName) {
-      this.onTableSelect(tableName);
+      this.selectedTableName = tableName;
+      if (this.activeSheetId !== tableName) {
+        this.openTableInSheet(tableName);
+      }
     }
   }
   mode = "intelligent";
@@ -133041,45 +137172,8 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
   favoriteReports = /* @__PURE__ */ new Set();
   // ── Configurable Boolean Display Settings ────────────────────
   booleanDisplayStyle = "checkbox";
-  // ── Pre-configured Reports Catalog (CTE & SQL Views) ─────────
-  reportsList = [
-    {
-      id: "mn_awk_type_wise",
-      display_name: "\u092E\u093E\u0938\u093F\u0915 \u0906\u0935\u0915 \u092A\u094D\u0930\u0915\u093E\u0930 \u0938\u093E\u0930 (Aawak Summary)",
-      title: "\u092E\u093E\u0938\u093F\u0915 \u0906\u0935\u0915 \u092A\u094D\u0930\u0915\u093E\u0930 \u0938\u093E\u0930 (Aawak Summary)",
-      desc: "Monthly Aawak Type Saar",
-      icon: "pi-chart-line",
-      table: "mn_awk_type_wise",
-      category: "Aawak / Inventory"
-    },
-    {
-      id: "mn_jwk_aj_type",
-      display_name: "\u092E\u093E\u0938\u093F\u0915 \u091C\u093E\u0935\u0915 \u092A\u094D\u0930\u0915\u093E\u0930 \u0938\u093E\u0930 (Jawak Summary)",
-      title: "\u092E\u093E\u0938\u093F\u0915 \u091C\u093E\u0935\u0915 \u092A\u094D\u0930\u0915\u093E\u0930 \u0938\u093E\u0930 (Jawak Summary)",
-      desc: "Monthly Jawak Type Saar",
-      icon: "pi-chart-bar",
-      table: "mn_jwk_aj_type",
-      category: "Jawak / Inventory"
-    },
-    {
-      id: "bachat_summary",
-      display_name: "\u092C\u091A\u0924 \u0938\u093E\u0930\u093E\u0902\u0936 (Bachat Summary)",
-      title: "\u092C\u091A\u0924 \u0938\u093E\u0930\u093E\u0902\u0936 (Bachat Summary)",
-      desc: "Bachat Stock Summary",
-      icon: "pi-percentage",
-      table: "bachat",
-      category: "Stock Balance"
-    },
-    {
-      id: "pbk_closing",
-      display_name: "\u092A\u0940\u092C\u0940\u0915\u0947 \u0915\u094D\u0932\u094B\u091C\u093F\u0902\u0917 (PBK Closing)",
-      title: "\u092A\u0940\u092C\u0940\u0915\u0947 \u0915\u094D\u0932\u094B\u091C\u093F\u0902\u0917 (PBK Closing)",
-      desc: "PBK Closing Statement",
-      icon: "pi-book",
-      table: "pbk_closing",
-      category: "Closing"
-    }
-  ];
+  // ── Dynamic Reports & Views Catalog ──────────────────────────
+  reportsList = [];
   tablesList = [];
   selectedTableName = "";
   isLoadingConfig = false;
@@ -133196,7 +137290,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
   }
   isTechnicalCol(name) {
     const n = (name || "").toLowerCase();
-    return n === "_id" || n.includes("_by_dept_id") || n === "verify";
+    return n === "_id" || n.includes("_by_dept_id") || n === "verify" || n === "hl";
   }
   buildConfigColumns(cfg) {
     this.allConfigColumns = [];
@@ -133224,6 +137318,8 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
           is_fk_main: true,
           ref_table: refTbl,
           ref_as: refAs,
+          ref_select: h.ref_select,
+          ref_data: h.ref_data,
           type: "ref",
           not_null: !!h.not_null,
           default_selected: true
@@ -133303,22 +137399,33 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
     if (this.selectedColumnKeys.size === 0 && this.allConfigColumns.length > 0) {
       this.selectedColumnKeys.add(this.allConfigColumns[0].key);
     }
+    this.syncTempColumnsToGrid();
   }
   get filteredDirectCols() {
     const q = (this.colSearchQuery || "").trim().toLowerCase();
     return this.allConfigColumns.filter((c) => {
-      if (c.group)
+      if (c.group || c.is_temp)
         return false;
       if (!q)
         return true;
-      return c.name && c.name.toLowerCase().includes(q) || c.key && c.key.toLowerCase().includes(q);
+      return c.name && c.name.toLowerCase().includes(q) || c.short_name && c.short_name.toLowerCase().includes(q) || c.label && c.label.toLowerCase().includes(q) || c.key && c.key.toLowerCase().includes(q);
+    });
+  }
+  get filteredComputedCols() {
+    const q = (this.colSearchQuery || "").trim().toLowerCase();
+    return this.allConfigColumns.filter((c) => {
+      if (!c.is_temp && c.group !== "Computed (fx)")
+        return false;
+      if (!q)
+        return true;
+      return c.name && c.name.toLowerCase().includes(q) || c.short_name && c.short_name.toLowerCase().includes(q) || c.label && c.label.toLowerCase().includes(q) || c.key && c.key.toLowerCase().includes(q);
     });
   }
   get filteredFkGroups() {
     const q = (this.colSearchQuery || "").trim().toLowerCase();
     const groupsMap = /* @__PURE__ */ new Map();
     this.allConfigColumns.forEach((c) => {
-      if (c.group) {
+      if (c.group && !c.is_temp && c.group !== "Computed (fx)") {
         if (!groupsMap.has(c.group))
           groupsMap.set(c.group, []);
         groupsMap.get(c.group).push(c);
@@ -133329,7 +137436,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       const matchingCols = cols.filter((c) => {
         if (!q)
           return true;
-        return groupName.toLowerCase().includes(q) || c.name && c.name.toLowerCase().includes(q) || c.short_name && c.short_name.toLowerCase().includes(q);
+        return groupName.toLowerCase().includes(q) || c.name && c.name.toLowerCase().includes(q) || c.short_name && c.short_name.toLowerCase().includes(q) || c.label && c.label.toLowerCase().includes(q);
       });
       if (q && matchingCols.length === 0)
         continue;
@@ -133346,6 +137453,151 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       });
     }
     return result;
+  }
+  get selectedOrderedColumns() {
+    return this.allConfigColumns.filter((c) => this.selectedColumnKeys.has(c.key));
+  }
+  moveSelectedColUp(colKey) {
+    const selKeys = this.selectedOrderedColumns.map((c) => c.key);
+    const selIdx = selKeys.indexOf(colKey);
+    if (selIdx <= 0)
+      return;
+    const prevSelKey = selKeys[selIdx - 1];
+    const curIdx = this.allConfigColumns.findIndex((c) => c.key === colKey);
+    if (curIdx === -1)
+      return;
+    const [removed] = this.allConfigColumns.splice(curIdx, 1);
+    const targetIdx = this.allConfigColumns.findIndex((c) => c.key === prevSelKey);
+    if (targetIdx !== -1) {
+      this.allConfigColumns.splice(targetIdx, 0, removed);
+    } else {
+      this.allConfigColumns.unshift(removed);
+    }
+    this.allConfigColumns = [...this.allConfigColumns];
+    this.autoSaveColumnConfig();
+    this.cdr.markForCheck();
+  }
+  moveSelectedColDown(colKey) {
+    const selKeys = this.selectedOrderedColumns.map((c) => c.key);
+    const selIdx = selKeys.indexOf(colKey);
+    if (selIdx === -1 || selIdx >= selKeys.length - 1)
+      return;
+    const nextSelKey = selKeys[selIdx + 1];
+    const curIdx = this.allConfigColumns.findIndex((c) => c.key === colKey);
+    if (curIdx === -1)
+      return;
+    const [removed] = this.allConfigColumns.splice(curIdx, 1);
+    const targetIdx = this.allConfigColumns.findIndex((c) => c.key === nextSelKey);
+    if (targetIdx !== -1) {
+      this.allConfigColumns.splice(targetIdx + 1, 0, removed);
+    } else {
+      this.allConfigColumns.push(removed);
+    }
+    this.allConfigColumns = [...this.allConfigColumns];
+    this.autoSaveColumnConfig();
+    this.cdr.markForCheck();
+  }
+  isDateCol(col) {
+    if (!col)
+      return false;
+    const t = (col.type || col.field_type || "").toLowerCase();
+    const k = (col.key || col.name || col.col_name || "").toLowerCase();
+    return t === "date" || t === "datetime" || k.endsWith("_date") || k === "date";
+  }
+  isNumberCol(col) {
+    if (!col)
+      return false;
+    const t = (col.type || col.field_type || "").toLowerCase();
+    const k = (col.key || col.name || col.col_name || "").toLowerCase();
+    return t === "number" || t === "integer" || t === "numeric" || t === "float" || t === "decimal" || k === "price" || k === "amount" || k === "total" || k === "rate" || k === "qty" || k === "quantity";
+  }
+  saveColConfigTimeout = null;
+  onColumnLabelChange(col) {
+    this.cdr.markForCheck();
+    if (this.saveColConfigTimeout)
+      clearTimeout(this.saveColConfigTimeout);
+    this.saveColConfigTimeout = setTimeout(() => {
+      this.autoSaveColumnConfig();
+    }, 600);
+  }
+  onColumnFormatChange(col) {
+    this.cdr.markForCheck();
+    this.autoSaveColumnConfig();
+  }
+  autoSaveColumnConfig() {
+    const tbl = this.currentActiveTableName;
+    if (!tbl || this.isCurrentSheetReport || this.isCurrentSheetRough)
+      return;
+    const selectedKeys = Array.from(this.selectedColumnKeys);
+    const columnsPayload = this.allConfigColumns.map((c, i) => ({
+      key: c.key,
+      name: c.name,
+      col_name: c.col_name || c.name || c.key,
+      short_name: c.short_name,
+      label: c.label || c.short_name || c.name,
+      type: c.type,
+      field_type: c.type || "text",
+      visible_list: this.selectedColumnKeys.has(c.key),
+      display_format: c.display_format || null,
+      ref_select: c.ref_select || null,
+      sort_order: i
+    }));
+    const payload = {
+      table_name: tbl,
+      columns: columnsPayload,
+      selected_keys: selectedKeys
+    };
+    try {
+      localStorage.setItem(`sutram_table_col_config_${tbl}`, JSON.stringify(payload));
+    } catch {
+    }
+    this.api.saveTableUiConfig(tbl, payload).subscribe({
+      next: () => {
+      },
+      error: (err) => console.warn("[SutramStudio] Auto-saving col config error:", err)
+    });
+  }
+  applySavedUiConfig(savedConfig) {
+    if (!savedConfig)
+      return;
+    const savedCols = savedConfig.columns || (Array.isArray(savedConfig) ? savedConfig : []);
+    const selectedKeys = savedConfig.selected_keys || [];
+    if (Array.isArray(selectedKeys) && selectedKeys.length > 0) {
+      this.selectedColumnKeys = new Set(selectedKeys);
+      selectedKeys.forEach((k) => this.ensureRowCellsForColumn(k));
+    }
+    const colMap = /* @__PURE__ */ new Map();
+    savedCols.forEach((sc) => {
+      const k = sc.key || sc.name || sc.column_name;
+      if (k)
+        colMap.set(k, sc);
+    });
+    this.allConfigColumns.forEach((c) => {
+      const saved = colMap.get(c.key);
+      if (saved) {
+        if (saved.label !== void 0 && saved.label !== null && String(saved.label).trim() !== "") {
+          c.label = saved.label;
+        }
+        if (saved.display_format !== void 0)
+          c.display_format = saved.display_format;
+      }
+    });
+    if (savedCols.some((sc) => sc.sort_order !== void 0)) {
+      const orderMap = /* @__PURE__ */ new Map();
+      savedCols.forEach((sc, idx) => {
+        const k = sc.key || sc.name || sc.column_name;
+        if (k)
+          orderMap.set(k, sc.sort_order !== void 0 ? sc.sort_order : idx);
+      });
+      this.allConfigColumns.sort((a, b) => {
+        const orderA = orderMap.has(a.key) ? orderMap.get(a.key) : 9999;
+        const orderB = orderMap.has(b.key) ? orderMap.get(b.key) : 9999;
+        return orderA - orderB;
+      });
+    }
+    this.allConfigColumns = [...this.allConfigColumns];
+    this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.cdr.markForCheck();
   }
   isColumnSelected(key) {
     return this.selectedColumnKeys.has(key);
@@ -133381,6 +137633,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       this.ensureRowCellsForColumn(key);
     }
     this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.autoSaveColumnConfig();
     this.cdr.markForCheck();
   }
   toggleFkGroupAll(groupName) {
@@ -133403,6 +137656,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       }
     }
     this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.autoSaveColumnConfig();
     this.cdr.markForCheck();
   }
   selectAllColumns(selectAll = true) {
@@ -133422,6 +137676,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       }
     }
     this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.autoSaveColumnConfig();
     this.cdr.markForCheck();
   }
   resetDefaultColumns() {
@@ -133437,6 +137692,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       this.ensureRowCellsForColumn(this.allConfigColumns[0].key);
     }
     this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.autoSaveColumnConfig();
     this.cdr.markForCheck();
   }
   ensureRowCellsForColumn(key) {
@@ -133445,6 +137701,19 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       return;
     const rows = this.state.rows();
     let updated = false;
+    if (colDef.is_temp) {
+      rows.forEach((r, idx) => {
+        if (!r.cells)
+          r.cells = {};
+        if (!r.cells[key]) {
+          r.cells[key] = { value: "", isValid: true, isModified: false };
+        }
+        this.evaluateUiSutrasForRow(r, idx, true);
+      });
+      this.state.rows.set([...rows]);
+      this.cdr.markForCheck();
+      return;
+    }
     rows.forEach((r) => {
       if (r.cells && !r.cells[key] && r._rawOriginal) {
         const dr = r._rawOriginal;
@@ -133454,11 +137723,31 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
           if (refObj && typeof refObj === "object") {
             rawVal = refObj[colDef.sub_col_name];
           }
+          if (rawVal === void 0) {
+            rawVal = dr[key] ?? dr[`${colDef.ref_as || colDef.ref_table}.${colDef.sub_col_name}`] ?? dr[`${colDef.ref_table}_${colDef.sub_col_name}`] ?? dr[colDef.sub_col_name];
+          }
+          if (rawVal === void 0 && colDef.ref_table) {
+            const rawFkId = dr[colDef.col_name] ?? dr[`${colDef.ref_table}_id`] ?? dr[colDef.ref_table];
+            if (rawFkId !== void 0 && rawFkId !== null && rawFkId !== "") {
+              const match2 = this.refCache.findRefMatch(colDef.ref_table, "", void 0, rawFkId);
+              if (match2.found && match2.item && match2.item[colDef.sub_col_name] !== void 0) {
+                rawVal = match2.item[colDef.sub_col_name];
+              }
+            }
+          }
         } else if (colDef.is_fk_main || colDef.type === "ref") {
           const joined = dr[colDef.ref_as || colDef.name || colDef.ref_table];
           if (joined && typeof joined === "object") {
-            const formatted = this.refCache.formatOption(colDef.ref_table, joined);
+            const formatted = this.refCache.formatOption(colDef.ref_table, joined, colDef.ref_select);
             rawVal = formatted?.display;
+          } else {
+            const rawFkId = dr[colDef.col_name] ?? dr[colDef.key] ?? dr[`${colDef.ref_table}_id`];
+            if (rawFkId !== void 0 && rawFkId !== null && rawFkId !== "") {
+              const match2 = this.refCache.findRefMatch(colDef.ref_table, "", void 0, rawFkId);
+              if (match2.found && match2.display) {
+                rawVal = match2.display;
+              }
+            }
           }
         } else if (colDef.is_fk_raw) {
           rawVal = dr[colDef.col_name] ?? dr[colDef.key];
@@ -133546,6 +137835,16 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
     if (savedBoolStyle && ["checkbox", "badge"].includes(savedBoolStyle)) {
       this.booleanDisplayStyle = savedBoolStyle;
     }
+    const savedActiveUser = localStorage.getItem("sutram_active_user");
+    if (savedActiveUser) {
+      try {
+        const parsed = JSON.parse(savedActiveUser);
+        if (parsed && (parsed.role === "admin" || parsed.role === "author")) {
+          this.currentUser = parsed;
+        }
+      } catch {
+      }
+    }
     this.state.isAuditMode.set(this.mode === "intelligent");
     this.state.filtersEnabled.set(this.enableFilters);
     this.state.sortingEnabled.set(this.enableSorting);
@@ -133565,6 +137864,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       if (hasRef) {
         const rows = this.state.rows();
         if (rows && rows.length > 0) {
+          this.allConfigColumns.filter((c) => c.is_fk_subcol && (c.ref_table || "").toLowerCase().trim() === cleanLoaded && this.selectedColumnKeys.has(c.key)).forEach((c) => this.ensureRowCellsForColumn(c.key));
           this.audit.auditAll(rows, cfg.headers);
           this.state.setRows([...rows]);
           this.cdr.markForCheck();
@@ -133754,6 +138054,805 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
     const cur = this.sheetTabs.find((t) => t.id === this.activeSheetId);
     return !!cur && cur.type === "table";
   }
+  get currentActiveTableName() {
+    const cur = this.sheetTabs.find((t) => t.id === this.activeSheetId);
+    return cur?.tableName || (cur?.type === "table" ? cur.id : "") || this.selectedTableName || "";
+  }
+  get currentActiveSheetTitle() {
+    const cur = this.sheetTabs.find((t) => t.id === this.activeSheetId);
+    if (!cur || cur.type === "rough")
+      return "Rough Sheet";
+    return cur.title || cur.tableName || cur.id;
+  }
+  // ── Settings Modals State ─────────────────────────────────────
+  showTableConfigModal = false;
+  showUiSutrasModal = false;
+  showBackendSutrasModal = false;
+  // 1. Table & Column Configuration
+  tableConfigColumns = [];
+  isSavingTableConfig = false;
+  dateFormatOptions = [
+    { label: "DD/MM/YYYY (e.g. 10/11/2026)", value: "DD/MM/YYYY" },
+    { label: "YYYY-MM-DD (e.g. 2026-11-10)", value: "YYYY-MM-DD" },
+    { label: "DD-MMM-YYYY (e.g. 10-Nov-2026)", value: "DD-MMM-YYYY" },
+    { label: "MM/DD/YYYY (e.g. 11/10/2026)", value: "MM/DD/YYYY" }
+  ];
+  numberDecimalOptions = [
+    { label: "0 Decimals (\u092A\u0942\u0930\u094D\u0923\u093E\u0902\u0915 / Integer)", value: "0" },
+    { label: "2 Decimals (0.00)", value: "2" },
+    { label: "4 Decimals (0.0000)", value: "4" },
+    { label: "\u092E\u0941\u0926\u094D\u0930\u093E \u092A\u094D\u0930\u093E\u0930\u0942\u092A (\u20B9 Currency)", value: "currency" }
+  ];
+  // 2. UI Sutras (Client-side Reactive Formulas & Temp Display Columns)
+  uiSutrasList = [];
+  isSavingUiSutras = false;
+  selectedTargetColValue = null;
+  newUiSutra = {
+    target_col: "",
+    display_name: "",
+    formula: "",
+    is_temp: false
+  };
+  targetColDropdownOptions = [];
+  buildTargetColDropdownOptions() {
+    const list = [
+      { value: "__temp__", label: "\u2795 Temp Column (Virtual / \u0938\u094D\u0915\u094D\u0930\u0940\u0928-\u0913\u0928\u0932\u0940 Read-Only)", isTemp: true }
+    ];
+    let sourceCols = [];
+    if (this.allConfigColumns && this.allConfigColumns.length > 0) {
+      sourceCols = this.allConfigColumns.filter((c) => !c.is_temp && !c.is_virtual && !c.is_fk_subcol && !(c.key && c.key.includes(".")) && !c.sub_col_name);
+    }
+    if (sourceCols.length === 0 && this.state.headers().length > 0) {
+      sourceCols = this.state.headers().filter((h) => !h.is_temp && !h.is_virtual && !h.is_fk_subcol && !(h.key && h.key.includes(".")) && !h.sub_col_name);
+    }
+    if (sourceCols.length === 0) {
+      const cfg = this.state.config();
+      if (cfg && cfg.headers) {
+        sourceCols = cfg.headers.filter((h) => !h.is_temp && !h.is_virtual && !h.is_fk_subcol && !(h.key && h.key.includes(".")) && !h.sub_col_name);
+      }
+    }
+    const seen = /* @__PURE__ */ new Set();
+    for (const col of sourceCols) {
+      if (col.is_fk_subcol || col.key && col.key.includes(".") || col.sub_col_name)
+        continue;
+      const colId = col.name || col.col_name || col.key;
+      if (!colId || seen.has(colId))
+        continue;
+      seen.add(colId);
+      const displayLabel = col.name ? col.col_name && col.col_name !== col.name ? `${col.name} (${col.col_name})` : col.name : colId;
+      list.push({
+        value: colId,
+        label: `${displayLabel} (DB Column)`
+      });
+    }
+    this.targetColDropdownOptions = list;
+  }
+  get currentTableColumns() {
+    const list = [];
+    const sourceCols = this.allConfigColumns && this.allConfigColumns.length > 0 ? this.allConfigColumns : this.state.headers() || [];
+    const seen = /* @__PURE__ */ new Set();
+    for (const c of sourceCols) {
+      if (c.is_temp || c.is_virtual || c.is_fk_subcol || c.key && c.key.includes(".") || c.sub_col_name)
+        continue;
+      const colId = c.name || c.col_name || c.key;
+      if (!colId || seen.has(colId))
+        continue;
+      seen.add(colId);
+      list.push(c);
+    }
+    return list;
+  }
+  get referenceColumns() {
+    const list = [];
+    if (!this.allConfigColumns || this.allConfigColumns.length === 0)
+      return list;
+    const seen = /* @__PURE__ */ new Set();
+    for (const c of this.allConfigColumns) {
+      if (c.is_fk_subcol || c.key && c.key.includes(".") || c.sub_col_name) {
+        const colId = c.key || c.name || c.col_name;
+        if (!colId || seen.has(colId))
+          continue;
+        seen.add(colId);
+        list.push(c);
+      }
+    }
+    return list;
+  }
+  onTargetColChange(event2) {
+    const val = event2 && typeof event2 === "object" && "value" in event2 ? event2.value : event2;
+    this.selectedTargetColValue = val;
+    if (val === "__temp__") {
+      this.newUiSutra.is_temp = true;
+      this.newUiSutra.target_col = "";
+      this.newUiSutra.display_name = "";
+    } else if (val) {
+      this.newUiSutra.is_temp = false;
+      this.newUiSutra.target_col = val;
+      this.newUiSutra.display_name = val;
+    } else {
+      this.newUiSutra.is_temp = false;
+      this.newUiSutra.target_col = "";
+      this.newUiSutra.display_name = "";
+    }
+    this.cdr.markForCheck();
+  }
+  // 3. Backend Sutras (Server-side Triggers)
+  backendTriggersList = [];
+  isLoadingTriggers = false;
+  newTriggerDef = {
+    trigger_name: "",
+    event: "INSERT",
+    action_type: "raw_sql",
+    raw_sql: "",
+    target_table: "",
+    field_map_str: "{}"
+  };
+  // 4. Role & User Management (Frontend Rights Control)
+  currentUser = {
+    username: "admin",
+    display_name: "Administrator",
+    role: "admin"
+  };
+  showUserManagementModal = false;
+  usersList = [];
+  isLoadingUsers = false;
+  isSavingUser = false;
+  editingUserId = null;
+  userFormData = {
+    username: "",
+    password: "",
+    display_name: "",
+    role: "author",
+    active: 1
+  };
+  roleDropdownOptions = [
+    { label: "\u{1F451} Admin (\u092A\u0942\u0930\u094D\u0923 \u0928\u093F\u092F\u0902\u0924\u094D\u0930\u0923 - Triggers, Schema, Rules)", value: "admin" },
+    { label: "\u{1F464} Author (\u0911\u092A\u0930\u0947\u0936\u0928\u0932 - View, Edit, Column Visibility & Style)", value: "author" }
+  ];
+  get isAdmin() {
+    return this.currentUser?.role === "admin";
+  }
+  get isAuthor() {
+    return this.currentUser?.role === "author";
+  }
+  switchRole(role) {
+    if (!this.currentUser) {
+      this.currentUser = { username: "admin", display_name: "Administrator", role: "admin" };
+    }
+    this.currentUser.role = role;
+    localStorage.setItem("sutram_active_user", JSON.stringify(this.currentUser));
+    this.cdr.markForCheck();
+  }
+  toggleRole() {
+    this.switchRole(this.isAdmin ? "author" : "admin");
+  }
+  // ── Table Config Actions ─────────────────────────────────────
+  openTableConfigModal() {
+    const tbl = this.currentActiveTableName;
+    if (!tbl)
+      return;
+    this.api.getTableUiConfig(tbl).subscribe({
+      next: (res) => {
+        if (res && res.columns) {
+          this.tableConfigColumns = res.columns.filter((c) => c.name !== "hl" && c.column_name !== "hl");
+        } else {
+          this.tableConfigColumns = (this.allConfigColumns.length > 0 ? this.allConfigColumns : this.visibleHeaders).filter((c) => c.name !== "hl").map((c) => ({
+            column_name: c.name,
+            label: c.label || c.short_name || c.name,
+            field_type: c.type || "text",
+            visible_list: this.selectedColumnKeys.has(c.key || c.name),
+            display_format: c.display_format || null,
+            ref_select: c.ref_select || null,
+            sort_order: 0
+          }));
+        }
+        this.showTableConfigModal = true;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.tableConfigColumns = (this.allConfigColumns.length > 0 ? this.allConfigColumns : this.visibleHeaders).filter((c) => c.name !== "hl").map((c) => ({
+          column_name: c.name,
+          label: c.label || c.short_name || c.name,
+          field_type: c.type || "text",
+          visible_list: this.selectedColumnKeys.has(c.key || c.name),
+          display_format: c.display_format || null,
+          ref_select: c.ref_select || null,
+          sort_order: 0
+        }));
+        this.showTableConfigModal = true;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+  moveConfigColUp(idx) {
+    if (idx <= 0)
+      return;
+    const temp = this.tableConfigColumns[idx];
+    this.tableConfigColumns[idx] = this.tableConfigColumns[idx - 1];
+    this.tableConfigColumns[idx - 1] = temp;
+    this.tableConfigColumns.forEach((c, i) => c.sort_order = i);
+  }
+  moveConfigColDown(idx) {
+    if (idx >= this.tableConfigColumns.length - 1)
+      return;
+    const temp = this.tableConfigColumns[idx];
+    this.tableConfigColumns[idx] = this.tableConfigColumns[idx + 1];
+    this.tableConfigColumns[idx + 1] = temp;
+    this.tableConfigColumns.forEach((c, i) => c.sort_order = i);
+  }
+  saveTableConfig() {
+    const tbl = this.currentActiveTableName;
+    if (!tbl)
+      return;
+    this.isSavingTableConfig = true;
+    this.api.saveTableUiConfig(tbl, { columns: this.tableConfigColumns }).subscribe({
+      next: () => {
+        this.isSavingTableConfig = false;
+        this.showTableConfigModal = false;
+        const newSelected = /* @__PURE__ */ new Set();
+        this.tableConfigColumns.forEach((c) => {
+          if (c.visible_list !== false) {
+            newSelected.add(c.column_name || c.name);
+          }
+        });
+        this.selectedColumnKeys = newSelected;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSavingTableConfig = false;
+        console.error("[SutramStudio] Error saving table config:", err);
+      }
+    });
+  }
+  get nonTempHeaders() {
+    return this.visibleHeaders.filter((h) => !h.is_temp && !h.is_virtual);
+  }
+  // ── UI Sutras Actions ────────────────────────────────────────
+  loadUiSutras(tableName, callback) {
+    if (!tableName)
+      return;
+    this.api.getUiSutras(tableName).subscribe({
+      next: (list) => {
+        this.uiSutrasList = list || [];
+        this.syncTempColumnsToGrid();
+        if (callback)
+          callback();
+        const rows = this.state.rows();
+        if (rows && rows.length > 0 && this.uiSutrasList.length > 0) {
+          rows.forEach((r, idx) => this.evaluateUiSutrasForRow(r, idx, true));
+          this.state.rows.set([...rows]);
+        }
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.uiSutrasList = [];
+        if (callback)
+          callback();
+        this.cdr.markForCheck();
+      }
+    });
+  }
+  syncTempColumnsToGrid() {
+    if (!this.uiSutrasList || this.uiSutrasList.length === 0)
+      return;
+    let anyAdded = false;
+    for (const s of this.uiSutrasList) {
+      if (s.is_temp) {
+        const colKey = s.target_col;
+        const exists = this.allConfigColumns.some((c) => c.key === colKey);
+        if (!exists) {
+          const tempCol = {
+            key: colKey,
+            name: colKey,
+            short_name: s.display_name || colKey,
+            col_name: colKey,
+            group: "Computed (fx)",
+            is_temp: true,
+            is_virtual: true,
+            readonly: true,
+            type: "string",
+            not_null: false,
+            default_selected: true
+          };
+          this.allConfigColumns.push(tempCol);
+          this.selectedColumnKeys.add(colKey);
+          anyAdded = true;
+        } else {
+          if (!this.selectedColumnKeys.has(colKey)) {
+            this.selectedColumnKeys.add(colKey);
+            anyAdded = true;
+          }
+        }
+        const rows2 = this.state.rows();
+        for (const r of rows2) {
+          if (r.cells && !r.cells[colKey]) {
+            r.cells[colKey] = { value: "", isValid: true, isModified: false };
+          }
+        }
+      }
+    }
+    if (anyAdded) {
+      this.allConfigColumns = [...this.allConfigColumns];
+      this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    }
+    const rows = this.state.rows();
+    if (rows && rows.length > 0) {
+      rows.forEach((r, idx) => this.evaluateUiSutrasForRow(r, idx, true));
+      this.state.rows.set([...rows]);
+    }
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
+  }
+  openUiSutrasModal() {
+    const tbl = this.currentActiveTableName;
+    if (!tbl)
+      return;
+    this.loadUiSutras(tbl, () => {
+      this.buildTargetColDropdownOptions();
+      this.newUiSutra = { target_col: "", display_name: "", formula: "", is_temp: false };
+      this.selectedTargetColValue = null;
+      this.showUiSutrasModal = true;
+      this.cdr.markForCheck();
+    });
+  }
+  addUiSutra() {
+    if (!this.newUiSutra.formula)
+      return;
+    if (this.newUiSutra.is_temp) {
+      if (!this.newUiSutra.display_name?.trim())
+        return;
+      const cleanKey = this.newUiSutra.display_name.trim().toLowerCase().replace(/[^a-z0-9_]+/g, "_").replace(/^_+|_+$/g, "");
+      this.newUiSutra.target_col = cleanKey ? `col_${cleanKey}` : `temp_${Date.now()}`;
+    } else {
+      if (!this.newUiSutra.target_col)
+        return;
+      this.newUiSutra.display_name = this.newUiSutra.target_col;
+    }
+    this.uiSutrasList.push({ ...this.newUiSutra });
+    this.newUiSutra = { target_col: "", display_name: "", formula: "", is_temp: false };
+    this.selectedTargetColValue = null;
+    this.buildTargetColDropdownOptions();
+  }
+  removeUiSutra(idx) {
+    const removed = this.uiSutrasList[idx];
+    this.uiSutrasList.splice(idx, 1);
+    if (removed && removed.is_temp) {
+      this.allConfigColumns = this.allConfigColumns.filter((c) => c.key !== removed.target_col);
+      this.selectedColumnKeys.delete(removed.target_col);
+      this.buildTargetColDropdownOptions();
+      this.cdr.markForCheck();
+    }
+  }
+  insertColIntoFormula(colName) {
+    this.newUiSutra.formula = (this.newUiSutra.formula || "") + `[${colName}]`;
+  }
+  insertFnIntoFormula(fnText) {
+    this.newUiSutra.formula = (this.newUiSutra.formula || "") + fnText;
+  }
+  saveUiSutras() {
+    const tbl = this.currentActiveTableName;
+    if (!tbl)
+      return;
+    this.isSavingUiSutras = true;
+    this.api.saveUiSutras(tbl, this.uiSutrasList).subscribe({
+      next: () => {
+        this.isSavingUiSutras = false;
+        this.showUiSutrasModal = false;
+        this.syncTempColumnsToGrid();
+        const rows = this.state.rows();
+        rows.forEach((r, idx) => this.evaluateUiSutrasForRow(r, idx, false));
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSavingUiSutras = false;
+        console.error("[SutramStudio] Error saving UI sutras:", err);
+      }
+    });
+  }
+  // ── Backend Sutras Actions ───────────────────────────────────
+  openBackendSutrasModal() {
+    const tbl = this.currentActiveTableName;
+    if (!tbl)
+      return;
+    this.isLoadingTriggers = true;
+    this.api.getTableTriggers(tbl).subscribe({
+      next: (res) => {
+        this.isLoadingTriggers = false;
+        this.backendTriggersList = res || [];
+        this.newTriggerDef = {
+          trigger_name: `trg_${tbl}_sync`,
+          event: "INSERT",
+          action_type: "raw_sql",
+          raw_sql: "",
+          target_table: this.tablesList.length > 0 ? this.tablesList[0].table : "",
+          field_map_str: "{}"
+        };
+        this.showBackendSutrasModal = true;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isLoadingTriggers = false;
+        this.backendTriggersList = [];
+        this.newTriggerDef = {
+          trigger_name: `trg_${tbl}_sync`,
+          event: "INSERT",
+          action_type: "raw_sql",
+          raw_sql: "",
+          target_table: this.tablesList.length > 0 ? this.tablesList[0].table : "",
+          field_map_str: "{}"
+        };
+        this.showBackendSutrasModal = true;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+  insertColIntoTriggerSql(colName, prefix = ":new.") {
+    const snippet = `${prefix}${colName}`;
+    this.newTriggerDef.raw_sql = (this.newTriggerDef.raw_sql || "") + snippet;
+  }
+  insertTextIntoTriggerSql(text2) {
+    this.newTriggerDef.raw_sql = (this.newTriggerDef.raw_sql || "") + text2;
+  }
+  createBackendTrigger() {
+    const tbl = this.currentActiveTableName;
+    if (!tbl || !this.newTriggerDef.trigger_name)
+      return;
+    let fieldMap = {};
+    try {
+      fieldMap = JSON.parse(this.newTriggerDef.field_map_str || "{}");
+    } catch {
+    }
+    const payload = {
+      trigger_name: this.newTriggerDef.trigger_name,
+      label: this.newTriggerDef.trigger_name,
+      source_table: tbl,
+      event: this.newTriggerDef.event,
+      actions: [
+        {
+          sort_order: 0,
+          action_type: this.newTriggerDef.action_type || "raw_sql",
+          target_table: this.newTriggerDef.target_table || null,
+          field_map: fieldMap,
+          raw_sql: this.newTriggerDef.raw_sql ? this.newTriggerDef.raw_sql.trim() : null
+        }
+      ]
+    };
+    this.api.createTrigger(payload).subscribe({
+      next: () => {
+        this.openBackendSutrasModal();
+      },
+      error: (err) => console.error("[SutramStudio] Create trigger error:", err)
+    });
+  }
+  deleteBackendTrigger(id) {
+    this.api.deleteTrigger(id).subscribe({
+      next: () => {
+        this.backendTriggersList = this.backendTriggersList.filter((t) => t._id !== id);
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error("[SutramStudio] Delete trigger error:", err)
+    });
+  }
+  // ── User Management Actions ──────────────────────────────────
+  openUserManagementModal() {
+    this.showUserManagementModal = true;
+    this.editingUserId = null;
+    this.userFormData = {
+      username: "",
+      password: "",
+      display_name: "",
+      role: "author",
+      active: 1
+    };
+    this.loadUsers();
+    this.cdr.markForCheck();
+  }
+  loadUsers() {
+    this.isLoadingUsers = true;
+    this.api.getUsers().subscribe({
+      next: (users) => {
+        this.usersList = users || [];
+        this.isLoadingUsers = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isLoadingUsers = false;
+        console.error("[SutramStudio] Error loading users:", err);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+  openAddUser() {
+    this.editingUserId = null;
+    this.userFormData = {
+      username: "",
+      password: "",
+      display_name: "",
+      role: "author",
+      active: 1
+    };
+  }
+  editUser(u2) {
+    this.editingUserId = u2._id;
+    this.userFormData = {
+      username: u2.username,
+      password: "",
+      display_name: u2.display_name || u2.username,
+      role: u2.role || "author",
+      active: u2.active !== void 0 ? u2.active : 1
+    };
+  }
+  cancelUserEdit() {
+    this.editingUserId = null;
+    this.userFormData = { username: "", password: "", display_name: "", role: "author", active: 1 };
+  }
+  saveUser() {
+    if (!this.userFormData.username?.trim())
+      return;
+    if (!this.editingUserId && !this.userFormData.password?.trim())
+      return;
+    this.isSavingUser = true;
+    if (this.editingUserId) {
+      this.api.updateUser(this.editingUserId, this.userFormData).subscribe({
+        next: () => {
+          this.isSavingUser = false;
+          this.cancelUserEdit();
+          this.loadUsers();
+        },
+        error: (err) => {
+          this.isSavingUser = false;
+          alert("Error updating user: " + (err?.error?.error || err.message));
+        }
+      });
+    } else {
+      this.api.createUser(this.userFormData).subscribe({
+        next: () => {
+          this.isSavingUser = false;
+          this.cancelUserEdit();
+          this.loadUsers();
+        },
+        error: (err) => {
+          this.isSavingUser = false;
+          alert("Error creating user: " + (err?.error?.error || err.message));
+        }
+      });
+    }
+  }
+  deleteUser(u2) {
+    if (!confirm(`Are you sure you want to delete user "${u2.username}"?`))
+      return;
+    this.api.deleteUser(u2._id).subscribe({
+      next: () => {
+        this.loadUsers();
+      },
+      error: (err) => {
+        alert("Error deleting user: " + (err?.error?.error || err.message));
+      }
+    });
+  }
+  setCurrentActiveUser(u2) {
+    this.currentUser = {
+      username: u2.username,
+      display_name: u2.display_name || u2.username,
+      role: u2.role || "author"
+    };
+    localStorage.setItem("sutram_active_user", JSON.stringify(this.currentUser));
+    this.cdr.markForCheck();
+  }
+  // ── Reactive Cell Changed & Highlight Auto-persistence ────────
+  onGridCellChanged(event2) {
+    const rows = this.state.rows();
+    const row = rows[event2.rowIdx];
+    if (!row)
+      return;
+    if (event2.colKey === "hl") {
+      const rowId = row._rawOriginal?._id ?? row._rawOriginal?.id ?? row.cells?.["_id"]?.value;
+      if (rowId !== void 0 && rowId !== null && this.currentActiveTableName && !this.isCurrentSheetRough) {
+        this.api.updateRow(this.currentActiveTableName, {
+          _id: rowId,
+          hl: event2.value ? 1 : 0
+        }).subscribe({
+          next: () => {
+            if (row._rawOriginal)
+              row._rawOriginal.hl = event2.value ? 1 : 0;
+            this.cdr.markForCheck();
+          },
+          error: (err) => console.warn("[SutramStudio] Error persisting row highlight:", err)
+        });
+      }
+      return;
+    }
+    if (this.uiSutrasList.length > 0) {
+      this.evaluateUiSutrasForRow(row, event2.rowIdx);
+    }
+  }
+  evaluateUiSutrasForRow(row, rowIdx, isInitialOrDisplayLoad = false) {
+    if (!row || !row.cells || this.uiSutrasList.length === 0)
+      return;
+    let anyChanged = false;
+    const helpers = {
+      AGE: (dobVal) => {
+        if (!dobVal)
+          return "";
+        const birth = new Date(dobVal);
+        if (isNaN(birth.getTime()))
+          return "";
+        const today = /* @__PURE__ */ new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || m === 0 && today.getDate() < birth.getDate()) {
+          age--;
+        }
+        return age >= 0 ? age : 0;
+      },
+      DAYS: (d1, d2) => {
+        if (!d1 || !d2)
+          return 0;
+        const t1 = new Date(d1).getTime();
+        const t2 = new Date(d2).getTime();
+        if (isNaN(t1) || isNaN(t2))
+          return 0;
+        return Math.round(Math.abs(t2 - t1) / (1e3 * 60 * 60 * 24));
+      },
+      YEAR: (d) => {
+        if (!d)
+          return "";
+        const dt = new Date(d);
+        return isNaN(dt.getTime()) ? "" : dt.getFullYear();
+      },
+      MONTH: (d) => {
+        if (!d)
+          return "";
+        const dt = new Date(d);
+        return isNaN(dt.getTime()) ? "" : dt.getMonth() + 1;
+      },
+      DAY: (d) => {
+        if (!d)
+          return "";
+        const dt = new Date(d);
+        return isNaN(dt.getTime()) ? "" : dt.getDate();
+      },
+      IF: (cond, a, b) => cond ? a : b,
+      ROUND: (num, decimals = 2) => {
+        const n = Number(num);
+        if (isNaN(n))
+          return 0;
+        const factor = Math.pow(10, decimals);
+        return Math.round(n * factor) / factor;
+      },
+      UPPER: (str) => str !== null && str !== void 0 ? String(str).toUpperCase() : "",
+      LOWER: (str) => str !== null && str !== void 0 ? String(str).toLowerCase() : "",
+      COALESCE: (...args) => args.find((v) => v !== null && v !== void 0 && v !== "") ?? ""
+    };
+    const colNames = Object.keys(row.cells);
+    const getColValue = (colIdentifier) => {
+      if (!colIdentifier)
+        return void 0;
+      if (row.cells[colIdentifier] && row.cells[colIdentifier].value !== void 0) {
+        return row.cells[colIdentifier].value;
+      }
+      const match2 = this.allConfigColumns.find((c) => c.name === colIdentifier || c.col_name === colIdentifier || c.key === colIdentifier || c.short_name === colIdentifier);
+      if (match2) {
+        if (match2.col_name && row.cells[match2.col_name]?.value !== void 0) {
+          return row.cells[match2.col_name].value;
+        }
+        if (match2.name && row.cells[match2.name]?.value !== void 0) {
+          return row.cells[match2.name].value;
+        }
+        if (match2.key && row.cells[match2.key]?.value !== void 0) {
+          return row.cells[match2.key].value;
+        }
+      }
+      if (row[colIdentifier] !== void 0) {
+        return row[colIdentifier];
+      }
+      if (row._rawOriginal && row._rawOriginal[colIdentifier] !== void 0) {
+        return row._rawOriginal[colIdentifier];
+      }
+      return void 0;
+    };
+    for (const sutra of this.uiSutrasList) {
+      if (!sutra.target_col || !sutra.formula)
+        continue;
+      if (isInitialOrDisplayLoad && !sutra.is_temp) {
+        continue;
+      }
+      try {
+        const rawFormula = sutra.formula.trim();
+        let finalVal = void 0;
+        const directBracketMatch = rawFormula.match(/^\[([^\]]+)\]$/);
+        const directColName = directBracketMatch ? directBracketMatch[1] : colNames.includes(rawFormula) ? rawFormula : null;
+        if (directColName) {
+          const srcVal = getColValue(directColName);
+          finalVal = srcVal !== void 0 ? srcVal : null;
+        } else {
+          const rowData = {};
+          for (const c of colNames) {
+            rowData[c] = row.cells[c]?.value;
+          }
+          this.allConfigColumns.forEach((c) => {
+            const cell = row.cells[c.col_name] || row.cells[c.name] || (c.key ? row.cells[c.key] : void 0);
+            if (cell && cell.value !== void 0) {
+              if (c.col_name)
+                rowData[c.col_name] = cell.value;
+              if (c.name)
+                rowData[c.name] = cell.value;
+              if (c.key)
+                rowData[c.key] = cell.value;
+            }
+          });
+          for (const k of Object.keys(row)) {
+            if (k !== "cells" && !(k in rowData)) {
+              rowData[k] = row[k];
+            }
+          }
+          let code = rawFormula;
+          code = code.replace(/\[([^\]]+)\]/g, "row['$1']");
+          if (code.includes("return ")) {
+            const fn2 = new Function("row", "helpers", `
+              'use strict';
+              const { AGE, DAYS, YEAR, MONTH, DAY, IF, ROUND, UPPER, LOWER, COALESCE } = helpers;
+              ${code}
+            `);
+            finalVal = fn2(rowData, helpers);
+          } else {
+            const fn2 = new Function("row", "helpers", `
+              'use strict';
+              const { AGE, DAYS, YEAR, MONTH, DAY, IF, ROUND, UPPER, LOWER, COALESCE } = helpers;
+              return (${code});
+            `);
+            finalVal = fn2(rowData, helpers);
+          }
+        }
+        if (finalVal !== void 0) {
+          const currentVal = row.cells[sutra.target_col]?.value;
+          if (currentVal !== finalVal) {
+            if (sutra.is_temp) {
+              if (row.cells[sutra.target_col]) {
+                row.cells[sutra.target_col].value = finalVal;
+                row.cells[sutra.target_col].refId = finalVal;
+                row.cells[sutra.target_col].isModified = false;
+              } else {
+                row.cells[sutra.target_col] = { value: finalVal, refId: finalVal, isValid: true, isModified: false };
+              }
+              anyChanged = true;
+            } else {
+              const matchingCol = this.allConfigColumns.find((c) => c.name === sutra.target_col || c.col_name === sutra.target_col || c.key === sutra.target_col);
+              const keysToUpdate = /* @__PURE__ */ new Set();
+              keysToUpdate.add(sutra.target_col);
+              if (matchingCol?.col_name)
+                keysToUpdate.add(matchingCol.col_name);
+              if (matchingCol?.name)
+                keysToUpdate.add(matchingCol.name);
+              if (matchingCol?.key)
+                keysToUpdate.add(matchingCol.key);
+              keysToUpdate.forEach((k) => {
+                if (row.cells[k]) {
+                  row.cells[k].value = finalVal;
+                  row.cells[k].refId = finalVal;
+                  row.cells[k].isModified = true;
+                } else {
+                  row.cells[k] = { value: finalVal, refId: finalVal, isValid: true, isModified: true };
+                }
+              });
+              row.isModified = true;
+              this.state.updateCellValue(rowIdx, sutra.target_col, finalVal, finalVal);
+              if (matchingCol?.col_name && matchingCol.col_name !== sutra.target_col) {
+                this.state.updateCellValue(rowIdx, matchingCol.col_name, finalVal, finalVal);
+              }
+              anyChanged = true;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[SutramStudio] UI Sutra eval error for col", sutra.target_col, e);
+      }
+    }
+    if (anyChanged) {
+      this.cdr.markForCheck();
+    }
+  }
   get filteredTables() {
     const q = (this.tableSearchQuery || "").toLowerCase().trim();
     if (!q)
@@ -133861,7 +138960,26 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
         this.switchSheet(nextTab.id);
       }
     }
+    this.persistOpenTabs();
     this.cdr.markForCheck();
+  }
+  persistOpenTabs() {
+    try {
+      if (this.activeSheetId) {
+        localStorage.setItem("sutram_studio_last_active_tab", this.activeSheetId);
+      }
+      if (Array.isArray(this.sheetTabs) && this.sheetTabs.length > 0) {
+        const toSave = this.sheetTabs.map((t) => ({
+          id: t.id,
+          title: t.title,
+          type: t.type,
+          tableName: t.tableName,
+          reportId: t.reportId
+        }));
+        localStorage.setItem("sutram_studio_open_tabs", JSON.stringify(toSave));
+      }
+    } catch {
+    }
   }
   // ── Sheet Tab Inline Renaming & Context Menu ──────────────────
   startRenameTab(tab, event2) {
@@ -134140,6 +139258,28 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       console.error("[SutramStudio] Local save failed:", e);
     }
   }
+  /**
+   * Refreshes the list of tables in Sutram Studio (e.g. after dynamic table creation).
+   * Optionally opens and activates the specified table sheet.
+   */
+  refreshStudioTables(activeTableName) {
+    this.api.getRegisteredTables().subscribe({
+      next: (tables) => {
+        this.tablesList = tables || [];
+        if (activeTableName) {
+          this.openTableInSheet(activeTableName);
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error("[SutramStudio] Refresh tables failed:", err);
+        if (activeTableName) {
+          this.openTableInSheet(activeTableName);
+        }
+        this.cdr.markForCheck();
+      }
+    });
+  }
   loadTablesList() {
     const savedFavs = localStorage.getItem("sutram_studio_favorites");
     if (savedFavs) {
@@ -134148,7 +139288,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       } catch {
       }
     } else {
-      this.favoriteTables = /* @__PURE__ */ new Set(["item", "aawak", "bachat"]);
+      this.favoriteTables = /* @__PURE__ */ new Set();
     }
     const savedFavReps = localStorage.getItem("sutram_favorite_reports");
     if (savedFavReps) {
@@ -134157,14 +139297,63 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       } catch {
       }
     }
+    if (!this.reportsList || this.reportsList.length === 0) {
+      this.api.getReports().subscribe({
+        next: (reps) => {
+          this.reportsList = reps || [];
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.warn("[SutramStudio] Dynamic reports load warning:", err?.message || err);
+          this.reportsList = [];
+          this.cdr.markForCheck();
+        }
+      });
+    }
     this.api.getRegisteredTables().subscribe({
       next: (tables) => {
         this.tablesList = tables;
         const activeTabs = [
           { id: "rough_1", title: "Sheet 1", icon: "pi-file", type: "rough", isLoaded: true }
         ];
+        const existingTabIds = new Set(activeTabs.map((t) => t.id));
+        try {
+          const raw = localStorage.getItem("sutram_studio_open_tabs");
+          if (raw) {
+            const savedTabs = JSON.parse(raw);
+            if (Array.isArray(savedTabs)) {
+              savedTabs.forEach((st) => {
+                if (st.id && !existingTabIds.has(st.id)) {
+                  if (st.type === "table") {
+                    const tableInfo = tables.find((t) => t.table === (st.tableName || st.id));
+                    activeTabs.push({
+                      id: st.id,
+                      title: st.title || tableInfo?.display_name || st.tableName || st.id,
+                      icon: "pi-table",
+                      type: "table",
+                      tableName: st.tableName || st.id,
+                      isLoaded: false,
+                      recordCount: 0
+                    });
+                    existingTabIds.add(st.id);
+                  } else if (st.type === "rough" && st.id !== "rough_1") {
+                    activeTabs.push({
+                      id: st.id,
+                      title: st.title || "Sheet",
+                      icon: "pi-file",
+                      type: "rough",
+                      isLoaded: false
+                    });
+                    existingTabIds.add(st.id);
+                  }
+                }
+              });
+            }
+          }
+        } catch {
+        }
         tables.forEach((t) => {
-          if (this.favoriteTables.has(t.table)) {
+          if (this.favoriteTables.has(t.table) && !existingTabIds.has(t.table)) {
             activeTabs.push({
               id: t.table,
               title: t.display_name || t.table,
@@ -134174,19 +139363,22 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
               isLoaded: false,
               recordCount: 0
             });
+            existingTabIds.add(t.table);
           }
         });
         this.sheetTabs = activeTabs;
-        const firstTable = activeTabs.find((t) => t.type === "table");
-        if (firstTable) {
-          this.activeSheetId = firstTable.id;
-          this.selectedTableName = firstTable.id;
-          this.onTableSelect(firstTable.id, true);
+        const lastActive = localStorage.getItem("sutram_studio_last_active_tab");
+        const targetTab = lastActive && activeTabs.find((t) => t.id === lastActive) ? activeTabs.find((t) => t.id === lastActive) : activeTabs.find((t) => t.type === "table") || activeTabs[0];
+        if (targetTab.type === "table" && targetTab.tableName) {
+          this.activeSheetId = targetTab.id;
+          this.selectedTableName = targetTab.tableName;
+          this.onTableSelect(targetTab.tableName, true);
         } else {
-          this.activeSheetId = "rough_1";
+          this.activeSheetId = targetTab.id;
           this.selectedTableName = "";
-          this.switchSheet("rough_1");
+          this.switchSheet(targetTab.id);
         }
+        this.persistOpenTabs();
         this.cdr.markForCheck();
       },
       error: (err) => console.error("[SutramStudio] Load tables failed:", err)
@@ -134198,6 +139390,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
     this.selectedTableName = tableName;
     this.activeSheetId = tableName;
     this.state.setActiveTable(tableName);
+    this.persistOpenTabs();
     if (autoLoadData) {
       this.state.clearGrid();
       this.loadedDbRecordCount = 0;
@@ -134210,8 +139403,48 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
         if (autoLoadData || this.allConfigColumns.length === 0) {
           this.buildConfigColumns(cfg);
         }
+        let restoredFromLocal = false;
+        try {
+          const cached = localStorage.getItem(`sutram_table_col_config_${tableName}`);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && Array.isArray(parsed.selected_keys) && parsed.selected_keys.length > 0) {
+              this.applySavedUiConfig(parsed);
+              restoredFromLocal = true;
+            }
+          }
+        } catch {
+        }
+        this.api.getTableUiConfig(tableName).subscribe({
+          next: (uiRes) => {
+            if (uiRes && Array.isArray(uiRes.selected_keys) && uiRes.selected_keys.length > 0) {
+              this.applySavedUiConfig(uiRes);
+              try {
+                localStorage.setItem(`sutram_table_col_config_${tableName}`, JSON.stringify(uiRes));
+              } catch {
+              }
+            } else if (restoredFromLocal) {
+              this.autoSaveColumnConfig();
+            }
+          },
+          error: () => {
+          }
+        });
+        this.loadUiSutras(tableName, () => {
+          this.syncTempColumnsToGrid();
+        });
         if (cfg && cfg.headers) {
-          const refTables = cfg.headers.filter((h) => h.ref_table || h.type === "ref").map((h) => h.ref_table).filter(Boolean);
+          const refHeaders = cfg.headers.filter((h) => h.ref_table || h.type === "ref");
+          for (const h of refHeaders) {
+            const cols = h.ref_select || (h.ref_data ? [h.ref_data] : []);
+            if (h.ref_table && cols.length > 0) {
+              this.refCache.registerTableConfig(h.ref_table, {
+                ref_select: cols,
+                ref_data: h.ref_data
+              });
+            }
+          }
+          const refTables = refHeaders.map((h) => h.ref_table).filter(Boolean);
           this.refCache.preloadTables(refTables);
         }
         if (autoLoadData) {
@@ -134317,6 +139550,7 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
         this.onTableSelect(targetTable, true);
       }
     }
+    this.persistOpenTabs();
     this.cdr.markForCheck();
   }
   addNewBlankSheet() {
@@ -134357,12 +139591,32 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
         if (refObj && typeof refObj === "object") {
           rawVal = refObj[col.sub_col_name];
         }
+        if (rawVal === void 0) {
+          rawVal = dr[col.key] ?? dr[`${col.ref_as || col.ref_table}.${col.sub_col_name}`] ?? dr[`${col.ref_table}_${col.sub_col_name}`] ?? dr[col.sub_col_name];
+        }
+        if (rawVal === void 0 && col.ref_table) {
+          const rawFkId = dr[col.col_name] ?? dr[`${col.ref_table}_id`] ?? dr[col.ref_table];
+          if (rawFkId !== void 0 && rawFkId !== null && rawFkId !== "") {
+            const match2 = this.refCache.findRefMatch(col.ref_table, "", void 0, rawFkId);
+            if (match2.found && match2.item && match2.item[col.sub_col_name] !== void 0) {
+              rawVal = match2.item[col.sub_col_name];
+            }
+          }
+        }
       } else if (col.is_fk_main || col.type === "ref") {
         const joined = dr[col.ref_as || col.name || col.ref_table];
         if (joined && typeof joined === "object") {
-          const formatted = this.refCache.formatOption(col.ref_table, joined);
+          const formatted = this.refCache.formatOption(col.ref_table, joined, col.ref_select);
           if (formatted && formatted.display) {
             rawVal = formatted.display;
+          }
+        } else {
+          const rawFkId = dr[col.col_name] ?? dr[col.key] ?? dr[`${col.ref_table}_id`];
+          if (rawFkId !== void 0 && rawFkId !== null && rawFkId !== "") {
+            const match2 = this.refCache.findRefMatch(col.ref_table, "", void 0, rawFkId);
+            if (match2.found && match2.display) {
+              rawVal = match2.display;
+            }
           }
         }
       } else if (col.is_fk_raw) {
@@ -134420,12 +139674,26 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       if (col.name && col.name !== cellKey) {
         cells[col.name] = cells[cellKey];
       }
+      if (col.col_name && col.col_name !== cellKey) {
+        cells[col.col_name] = cells[cellKey];
+      }
     });
+    const isHl = !!(dr.hl === 1 || dr.hl === true || dr.hl === "1");
+    if (!cells["hl"]) {
+      cells["hl"] = {
+        value: isHl ? 1 : 0,
+        originalValue: isHl ? 1 : 0,
+        isValid: true,
+        isModified: false
+      };
+    }
     return {
       rowNum,
       cells,
       hasError: false,
       errorCount: 0,
+      isHighlighted: isHl,
+      hl: isHl ? 1 : 0,
       _rawOriginal: dr
     };
   }
@@ -134463,6 +139731,9 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
       };
       if (col.name && col.name !== cellKey) {
         cells[col.name] = cells[cellKey];
+      }
+      if (col.col_name && col.col_name !== cellKey) {
+        cells[col.col_name] = cells[cellKey];
       }
     });
     return {
@@ -134580,6 +139851,9 @@ var SutramExcelStudioComponent = class _SutramExcelStudioComponent {
         }
         let combined = isReset ? builtRows : [...cleanExisting, ...builtRows];
         combined = this.ensureTrailingBlankRow(combined, cfg);
+        if (this.uiSutrasList && this.uiSutrasList.length > 0) {
+          combined.forEach((r, idx) => this.evaluateUiSutrasForRow(r, idx, true));
+        }
         this.state.setRows(combined);
         const tab = this.sheetTabs.find((t) => t.id === tableName);
         if (tab) {
@@ -135087,28 +140361,61 @@ Do you want to discard your changes and reload from database?`);
         const r = rowsToSync[i];
         const payload = {};
         cfg.headers.forEach((h) => {
-          const cell = r.cells[h.name];
-          const val = cell?.refId !== void 0 ? cell.refId : cell?.value;
+          if (h.is_temp || h.is_virtual)
+            return;
+          const cell = r.cells[h.col_name] || r.cells[h.name] || (h.key ? r.cells[h.key] : void 0);
+          let val;
+          const isFk = !!(h.ref_table || h.type === "ref");
+          if (isFk) {
+            val = cell?.refId !== void 0 && cell?.refId !== null && cell?.refId !== "" ? cell.refId : cell?.value ?? null;
+          } else {
+            val = cell?.value !== void 0 && cell?.value !== null ? cell.value : cell?.refId !== void 0 && cell?.refId !== null ? cell.refId : null;
+          }
+          if (val === "") {
+            const colType = (h.type || "").toLowerCase();
+            if (["number", "integer", "int", "float", "double", "decimal", "date", "datetime", "timestamp"].includes(colType)) {
+              val = null;
+            }
+          }
           payload[h.col_name] = val;
         });
         const rowId = r._id || r._rawOriginal?._id || r._rawOriginal?.id;
         const isUpdate = !r.isNew && !!rowId;
         if (isUpdate) {
           payload._id = rowId;
+        } else {
+          delete payload._id;
+          delete payload.id;
+        }
+        if (r.hl !== void 0) {
+          payload.hl = r.hl ? 1 : 0;
         }
         try {
           const res = isUpdate ? await firstValueFrom(this.api.updateRow(this.selectedTableName, payload)) : await firstValueFrom(this.api.importRow(this.selectedTableName, payload));
           if (res?.status === "inserted") {
             progress.inserted++;
             syncedRowNums.push(r.rowNum);
+            const anyRes = res;
+            const newInsertedId = anyRes?.newData?._id || anyRes?.data?._id || (typeof anyRes?.newData === "number" ? anyRes.newData : null);
+            if (newInsertedId) {
+              r._id = newInsertedId;
+              if (r._rawOriginal)
+                r._rawOriginal._id = newInsertedId;
+              if (r.cells && r.cells["_id"])
+                r.cells["_id"].value = newInsertedId;
+              syncedRowNums.push(newInsertedId);
+            }
             if (rowId)
               syncedRowNums.push(rowId);
             this.state.totalDbRecords.update((n) => n + 1);
+            r.isNew = false;
+            r.isModified = false;
           } else if (res?.status === "updated") {
             progress.updated++;
             syncedRowNums.push(r.rowNum);
             if (rowId)
               syncedRowNums.push(rowId);
+            r.isModified = false;
           } else if (res?.status === "duplicate") {
             progress.duplicate++;
             syncedRowNums.push(r.rowNum);
@@ -135317,9 +140624,9 @@ Do you want to discard your changes and reload from database?`);
         return ctx.onStudioGlobalKeydown($event);
       }, false, \u0275\u0275resolveDocument);
     }
-  }, inputs: { table: "table", mode: "mode", apiBase: "apiBase", enableFilters: "enableFilters", enableSorting: "enableSorting", enableSearch: "enableSearch", enableControlBar: "enableControlBar", enableStatsBar: "enableStatsBar", enableUpload: "enableUpload", enableAudit: "enableAudit", enableAddRow: "enableAddRow", enableCorrections: "enableCorrections", enableLoadData: "enableLoadData", enableVerify: "enableVerify", enableSync: "enableSync", enableDelete: "enableDelete", enableTabs: "enableTabs", enableZoom: "enableZoom" }, decls: 101, vars: 68, consts: [[1, "sutram-excel-container"], [1, "studio-header"], [1, "ribbon-menu-bar"], [1, "menu-bar-left"], [1, "brand"], [1, "brand-icon"], [1, "pi", "pi-table"], [1, "brand-title"], [1, "version-tag"], [1, "ribbon-tabs-nav"], ["type", "button", 1, "ribbon-tab-btn", 3, "click"], [1, "pi", "pi-home"], [1, "pi", "pi-database"], [1, "ribbon-badge"], [1, "pi", "pi-chart-bar"], [1, "pi", "pi-cog"], [1, "menu-bar-right"], ["class", "mode-pill-toggle", 4, "ngIf"], ["type", "button", "class", "cmd-btn-save-top", 3, "title", "click", 4, "ngIf"], ["type", "button", "class", "cmd-btn-sync-top", "title", "Sync changes to Database (Ctrl+S)", 3, "has-pending", "disabled", "click", 4, "ngIf"], ["title", "Toggle Light / Dark Mode", 1, "cmd-btn", 2, "padding", "3px 6px", 3, "click"], [1, "pi", 3, "ngClass"], [1, "ribbon-strip"], ["class", "ribbon-content-row", 4, "ngIf"], ["class", "ribbon-scroll-row", 4, "ngIf"], [1, "formula-bar-row"], [1, "coord-box"], [1, "active-col-chip"], [2, "font-weight", "700", "font-style", "italic", "color", "var(--text-muted)", "margin", "0 4px"], ["type", "text", "placeholder", "Select a cell or type value here...", 1, "formula-input", 3, "ngModel", "ngModelChange"], [1, "formula-bar-right-area"], [1, "formula-search-field"], [1, "pi", "pi-search", "search-ico"], ["type", "text", "placeholder", "Direct DB Search...", 1, "formula-search-inp", 3, "ngModel", "ngModelChange"], ["class", "clear-btn-inline", "title", "Clear search", 3, "click", 4, "ngIf"], ["class", "spin-inline", 4, "ngIf"], ["class", "formula-record-pill", "title", "Total database records", 4, "ngIf"], ["styleClass", "sutram-col-config-popover shadow-lg", 3, "dismissable"], ["colConfigOp", ""], ["pTemplate", "content"], [1, "status-strip", 3, "ngClass"], [2, "display", "flex", "align-items", "center", "gap", "6px"], [4, "ngIf"], [1, "spreadsheet-canvas", "flex-grow-1"], [3, "headers", "rows", "filterOnlyErrors", "enableDelete", "isBold", "textAlign", "booleanStyle", "loadMore", "filterChanged", "sortChanged", "solveAllTriggered", "openConfig"], ["grid", ""], [1, "studio-footer"], [1, "sheet-tabs-bar"], ["class", "tab-pill", 3, "active-tab", "click", "dblclick", "contextmenu", 4, "ngFor", "ngForOf"], ["title", "Add Blank Sheet", 1, "add-tab-btn", 3, "click"], [1, "pi", "pi-plus", 2, "font-size", "10px"], ["class", "tab-context-menu", 3, "left", "top", "click", 4, "ngIf"], [1, "bottom-status-subrow"], [2, "display", "flex", "align-items", "center", "gap", "10px"], ["class", "text-primary small fw-semibold", 4, "ngIf"], ["class", "badge bg-soft-warning text-warning small fw-semibold", 4, "ngIf"], ["style", "color: #10b981; font-weight: 600;", 4, "ngIf"], ["style", "color: #ef4444; font-weight: 600;", 4, "ngIf"], ["class", "last-sync-badge", 3, "sync-error", 4, "ngIf"], [2, "font-size", "10.5px", "opacity", "0.8"], [1, "zoom-controls"], ["title", "Zoom Out (-10%)", 1, "zoom-btn", 3, "click"], [1, "pi", "pi-minus"], ["title", "Reset to 100%", 1, "zoom-display", 3, "click"], ["title", "Zoom In (+10%)", 1, "zoom-btn", 3, "click"], [1, "pi", "pi-plus"], ["class", "sync-toast-hud shadow-lg", 4, "ngIf"], [3, "visible", "fileName", "sheetNames", "currentSheetName", "sheetHeaders", "sampleRows", "totalRows", "tablesList", "selectedTable", "report", "availableHeaders", "isTableConfigLoading", "savedSheets", "visibleChange", "sheetChange", "targetTableChange", "openDirectNormal", "openMappedToTable", "openSavedSheet", "deleteSavedSheet", "triggerFileInput"], [3, "visible", "groups", "visibleChange"], [1, "mode-pill-toggle"], [1, "mode-pill-btn", 3, "click"], [1, "pi", "pi-pencil"], [1, "pi", "pi-bolt"], ["type", "button", 1, "cmd-btn-save-top", 3, "title", "click"], [1, "pi", "pi-save"], ["type", "button", "title", "Sync changes to Database (Ctrl+S)", 1, "cmd-btn-sync-top", 3, "disabled", "click"], [1, "pi", "pi-cloud-upload"], ["class", "sync-badge-count", 4, "ngIf"], [1, "sync-badge-count"], [1, "ribbon-content-row"], [1, "ribbon-group"], [1, "ribbon-group-items"], ["title", "Bold (Ctrl+B)", 1, "ribbon-tool-btn", 3, "click"], [2, "font-weight", "800", "font-size", "13px"], [1, "ribbon-tool-lbl"], [1, "ribbon-mini-col"], ["title", "Align Left", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-left"], ["title", "Align Center", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-center"], ["title", "Align Right", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-right"], ["title", "Choose Visible Columns", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-sliders-h", 2, "color", "var(--primary)"], [1, "ribbon-group-name"], [1, "ribbon-v-sep"], ["class", "ribbon-tool-btn", "title", "Refresh data from database", 3, "click", 4, "ngIf"], ["title", "Open Excel (.xlsx) file or saved sheets", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-folder-open"], ["type", "file", "accept", ".xlsx, .xls, .csv", 2, "display", "none", 3, "change"], ["fileInput", ""], ["title", "Export sheet to Excel", 1, "ribbon-tool-btn", 3, "disabled", "click"], ["title", "Toggle Filters", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-filter"], ["title", "Toggle Sorting", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-sort-alt"], ["title", "Refresh data from database", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-refresh", "text-success"], [1, "ribbon-scroll-row"], [1, "ribbon-search-field", 2, "width", "140px", "min-width", "140px", "margin-right", "6px"], ["type", "text", "placeholder", "Search tables...", 1, "ribbon-search-inp", 3, "ngModel", "ngModelChange"], ["class", "clear-btn-inline", 3, "click", 4, "ngIf"], [1, "ribbon-boxes-track"], ["class", "ribbon-small-box", 3, "active-box", "title", "click", 4, "ngFor", "ngForOf"], [1, "clear-btn-inline", 3, "click"], [1, "ribbon-small-box", 3, "title", "click"], ["type", "button", 1, "box-star-btn", 3, "title", "click"], [1, "box-icon-wrap"], [1, "box-info"], [1, "box-name-eng-main"], ["class", "box-dot", "title", "Sheet open", 4, "ngIf"], ["title", "Sheet open", 1, "box-dot"], ["type", "text", "placeholder", "Search reports...", 1, "ribbon-search-inp", 3, "ngModel", "ngModelChange"], ["class", "ribbon-small-box report-box", 3, "active-box", "title", "click", 4, "ngFor", "ngForOf"], [1, "ribbon-small-box", "report-box", 3, "title", "click"], [1, "box-icon-wrap", "report-icon-bg"], ["title", "Excel style clickable checkbox", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-check-square", 2, "color", "#10b981"], ["title", "Status pill badge (Yes / No)", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-tag", 2, "color", "#3b82f6"], ["title", "Clear search", 1, "clear-btn-inline", 3, "click"], [1, "spin-inline"], [1, "pi", "pi-spin", "pi-spinner"], ["title", "Total database records", 1, "formula-record-pill"], [1, "col-dropdown-menu"], [1, "col-dd-header"], [1, "col-dd-search-wrap"], [1, "pi", "pi-search", "col-dd-search-icon"], ["type", "text", "placeholder", "Search columns / FK...", 1, "col-dd-search-input", 3, "ngModel", "ngModelChange"], ["type", "button", "class", "btn-clear-search-inline", 3, "click", 4, "ngIf"], [1, "col-dd-actions"], [1, "col-dd-actions-left"], ["type", "button", 1, "col-dd-act-btn", 3, "click"], [1, "col-dd-count"], [1, "col-dd-body"], ["class", "col-dd-empty", 4, "ngIf"], [1, "col-dd-footer"], [1, "small", "text-muted", 2, "font-size", "10.5px"], ["type", "button", 1, "btn", "btn-sm", "btn-primary", "py-1", "px-3", 2, "font-size", "11.5px", "font-weight", "600", 3, "click"], ["type", "button", 1, "btn-clear-search-inline", 3, "click"], [1, "pi", "pi-times"], [1, "col-dd-section-title"], ["class", "col-dd-item", 3, "click", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "col-dd-item", 3, "click"], [1, "col-dd-item-left"], ["type", "checkbox", 1, "custom-check", 2, "pointer-events", "none", 3, "checked"], [1, "col-dd-item-name", 3, "title"], ["style", "color: #ef4444; margin-left: 2px;", 4, "ngIf"], [1, "type-badge"], [2, "color", "#ef4444", "margin-left", "2px"], [1, "col-dd-section-title", 2, "margin-top", "8px"], ["class", "col-dd-group", 3, "fk-active-group", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "col-dd-group"], [1, "col-dd-group-header"], [1, "col-dd-group-left", 2, "cursor", "pointer", "flex-grow", "1", 3, "click"], [1, "pi", "pi-chevron-right", "fk-expand-toggle"], [1, "col-dd-item-name"], [1, "pi", "pi-link", 2, "color", "var(--primary, #4f46e5)", "font-size", "10px", "margin-right", "3px"], [2, "text-transform", "capitalize"], [2, "font-size", "10px", "color", "var(--text-muted)", "font-weight", "400", "margin-left", "3px"], [1, "col-dd-group-right", 2, "cursor", "pointer", "display", "flex", "align-items", "center", "gap", "6px", 3, "click"], [1, "fk-group-pill"], ["class", "col-dd-group-items", 4, "ngIf"], [1, "col-dd-group-items"], [1, "col-dd-empty"], [1, "pi", "pi-search", "me-1"], [1, "cmd-btn", "cmd-btn-warning", 2, "padding", "2px 8px", 3, "click"], [1, "tab-pill", 3, "click", "dblclick", "contextmenu"], [1, "pi", 2, "font-size", "11px", 3, "ngClass"], ["class", "tab-title-text", "title", "\u0921\u092C\u0932-\u0915\u094D\u0932\u093F\u0915 \u092F\u093E \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0915\u0947 \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Double-click or right-click to rename)", 4, "ngIf"], ["type", "text", "class", "tab-inline-rename-input", 3, "id", "ngModel", "ngModelChange", "keyup.enter", "keyup.escape", "blur", "click", 4, "ngIf"], ["class", "sheet-tab-badge", 4, "ngIf"], ["type", "button", "class", "tab-edit-btn", "title", "\u0936\u0940\u091F \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Rename sheet)", 3, "click", 4, "ngIf"], ["type", "button", "class", "tab-close-btn", "title", "Close sheet", 3, "click", 4, "ngIf"], ["title", "\u0921\u092C\u0932-\u0915\u094D\u0932\u093F\u0915 \u092F\u093E \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0915\u0947 \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Double-click or right-click to rename)", 1, "tab-title-text"], ["type", "text", 1, "tab-inline-rename-input", 3, "id", "ngModel", "ngModelChange", "keyup.enter", "keyup.escape", "blur", "click"], [1, "sheet-tab-badge"], ["type", "button", "title", "\u0936\u0940\u091F \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Rename sheet)", 1, "tab-edit-btn", 3, "click"], [1, "pi", "pi-pencil", 2, "font-size", "8.5px"], ["type", "button", "title", "Close sheet", 1, "tab-close-btn", 3, "click"], [1, "tab-context-menu", 3, "click"], [1, "tab-context-menu-item", 3, "click"], [1, "pi", "pi-pencil", "text-primary"], ["class", "tab-context-menu-item text-danger", 3, "click", 4, "ngIf"], [1, "tab-context-menu-item", "text-danger", 3, "click"], [1, "pi", "pi-trash"], [1, "text-primary", "small", "fw-semibold"], [1, "pi", "pi-spin", "pi-spinner", "me-1"], [1, "badge", "bg-soft-warning", "text-warning", "small", "fw-semibold"], [1, "pi", "pi-trash", "me-1"], [2, "color", "#10b981", "font-weight", "600"], [2, "color", "#ef4444", "font-weight", "600"], [1, "last-sync-badge"], [1, "pi", "pi-history", "me-1"], [1, "sync-toast-hud", "shadow-lg"], [1, "sync-toast-header"], [1, "sync-toast-title"], [1, "sync-toast-close", 3, "click"], ["class", "sync-progress-wrap px-3 pt-2", 4, "ngIf"], [1, "sync-toast-body"], [1, "sync-toast-stats"], ["class", "sync-badge-chip chip-success", 4, "ngIf"], ["class", "sync-badge-chip chip-info", 4, "ngIf"], ["class", "sync-badge-chip chip-warning", 4, "ngIf"], ["class", "sync-badge-chip chip-danger", 4, "ngIf"], ["class", "sync-toast-errors", 4, "ngIf"], [1, "sync-progress-wrap", "px-3", "pt-2"], [1, "d-flex", "justify-content-between", "align-items-center", "mb-1", 2, "font-size", "11px", "color", "var(--text-muted, #64748b)"], [1, "sync-progress-track"], [1, "sync-progress-bar"], [1, "sync-badge-chip", "chip-success"], [1, "sync-badge-chip", "chip-info"], [1, "pi", "pi-refresh"], [1, "sync-badge-chip", "chip-warning"], [1, "sync-badge-chip", "chip-danger"], [1, "sync-toast-errors"], [4, "ngFor", "ngForOf"]], template: function SutramExcelStudioComponent_Template(rf, ctx) {
+  }, inputs: { table: "table", mode: "mode", apiBase: "apiBase", enableFilters: "enableFilters", enableSorting: "enableSorting", enableSearch: "enableSearch", enableControlBar: "enableControlBar", enableStatsBar: "enableStatsBar", enableUpload: "enableUpload", enableAudit: "enableAudit", enableAddRow: "enableAddRow", enableCorrections: "enableCorrections", enableLoadData: "enableLoadData", enableVerify: "enableVerify", enableSync: "enableSync", enableDelete: "enableDelete", enableTabs: "enableTabs", enableZoom: "enableZoom", reportsList: "reportsList" }, decls: 199, vars: 135, consts: [[1, "sutram-excel-container"], [1, "studio-header"], [1, "ribbon-menu-bar"], [1, "menu-bar-left"], [1, "brand"], [1, "brand-icon"], [1, "pi", "pi-table"], [1, "brand-title"], [1, "version-tag"], [1, "ribbon-tabs-nav"], ["type", "button", 1, "ribbon-tab-btn", 3, "click"], [1, "pi", "pi-home"], [1, "pi", "pi-database"], [1, "ribbon-badge"], [1, "pi", "pi-chart-bar"], [1, "pi", "pi-cog"], [1, "menu-bar-right"], ["class", "mode-pill-toggle", 4, "ngIf"], ["type", "button", "class", "cmd-btn-save-top", 3, "title", "click", 4, "ngIf"], ["type", "button", "class", "cmd-btn-sync-top", "title", "Sync changes to Database (Ctrl+S)", 3, "has-pending", "disabled", "click", 4, "ngIf"], ["title", "Toggle Light / Dark Mode", 1, "cmd-btn", 2, "padding", "3px 6px", 3, "click"], [1, "pi", 3, "ngClass"], [1, "user-role-badge-pill", 3, "title", "click"], [1, "user-name-txt"], [1, "role-pill-tag"], [1, "ribbon-strip"], ["class", "ribbon-content-row", 4, "ngIf"], ["class", "ribbon-scroll-row", 4, "ngIf"], [1, "formula-bar-row"], [1, "coord-box"], [1, "active-col-chip"], [2, "font-weight", "700", "font-style", "italic", "color", "var(--text-muted)", "margin", "0 4px"], ["type", "text", "placeholder", "Select a cell or type value here...", 1, "formula-input", 3, "ngModel", "ngModelChange"], [1, "formula-bar-right-area"], [1, "formula-search-field"], [1, "pi", "pi-search", "search-ico"], ["type", "text", "placeholder", "Direct DB Search...", 1, "formula-search-inp", 3, "ngModel", "ngModelChange"], ["class", "clear-btn-inline", "title", "Clear search", 3, "click", 4, "ngIf"], ["class", "spin-inline", 4, "ngIf"], ["class", "formula-record-pill", "title", "Total database records", 4, "ngIf"], ["styleClass", "sutram-col-config-popover shadow-lg", 3, "dismissable"], ["colConfigOp", ""], ["pTemplate", "content"], [1, "status-strip", 3, "ngClass"], [2, "display", "flex", "align-items", "center", "gap", "6px"], [4, "ngIf"], [1, "spreadsheet-canvas", "flex-grow-1"], [3, "headers", "rows", "filterOnlyErrors", "enableDelete", "isBold", "textAlign", "booleanStyle", "loadMore", "filterChanged", "sortChanged", "cellChanged", "solveAllTriggered", "openConfig"], ["grid", ""], [1, "studio-footer"], [1, "sheet-tabs-bar"], ["class", "tab-pill", 3, "active-tab", "click", "dblclick", "contextmenu", 4, "ngFor", "ngForOf"], ["title", "Add Blank Sheet", 1, "add-tab-btn", 3, "click"], [1, "pi", "pi-plus", 2, "font-size", "10px"], ["class", "tab-context-menu", 3, "left", "top", "click", 4, "ngIf"], [1, "bottom-status-subrow"], [2, "display", "flex", "align-items", "center", "gap", "10px"], ["class", "text-primary small fw-semibold", 4, "ngIf"], ["class", "badge bg-soft-warning text-warning small fw-semibold", 4, "ngIf"], ["style", "color: #10b981; font-weight: 600;", 4, "ngIf"], ["style", "color: #ef4444; font-weight: 600;", 4, "ngIf"], ["class", "last-sync-badge", 3, "sync-error", 4, "ngIf"], [2, "font-size", "10.5px", "opacity", "0.8"], [1, "zoom-controls"], ["title", "Zoom Out (-10%)", 1, "zoom-btn", 3, "click"], [1, "pi", "pi-minus"], ["title", "Reset to 100%", 1, "zoom-display", 3, "click"], ["title", "Zoom In (+10%)", 1, "zoom-btn", 3, "click"], [1, "pi", "pi-plus"], ["class", "sync-toast-hud shadow-lg", 4, "ngIf"], [3, "visible", "fileName", "sheetNames", "currentSheetName", "sheetHeaders", "sampleRows", "totalRows", "tablesList", "selectedTable", "report", "availableHeaders", "isTableConfigLoading", "savedSheets", "visibleChange", "sheetChange", "targetTableChange", "openDirectNormal", "openMappedToTable", "openSavedSheet", "deleteSavedSheet", "triggerFileInput"], [3, "visible", "groups", "visibleChange"], ["styleClass", "sutram-studio-dialog", 3, "visible", "modal", "dismissableMask", "draggable", "resizable", "header", "visibleChange"], [1, "dialog-body-wrap"], [1, "dialog-info-banner", "info"], [1, "pi", "pi-info-circle", "banner-icon"], ["class", "dialog-info-banner warning mb-2", 4, "ngIf"], ["class", "dialog-subcard", 4, "ngIf"], [1, "subcard-title", "mb-1"], ["class", "dialog-empty-box", 4, "ngIf"], ["class", "dialog-table-card", 4, "ngIf"], ["pTemplate", "footer"], [1, "dialog-info-banner", "warning"], [1, "pi", "pi-bolt", "banner-icon"], ["styleClass", "sutram-studio-dialog", "header", "\u{1F465} \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u090F\u0935\u0902 \u0905\u0927\u093F\u0915\u093E\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0928 (User & Rights Management)", 3, "visible", "modal", "dismissableMask", "draggable", "resizable", "visibleChange"], [1, "dialog-info-banner", "info", "d-flex", "justify-content-between", "align-items-center"], [1, "d-flex", "align-items-center", "gap-2"], [1, "pi", "pi-shield", "banner-icon"], [1, "d-flex", "align-items-center", "gap-1"], ["type", "button", 1, "btn-role-switch", 3, "click"], [1, "dialog-subtext"], [1, "subcard-config", "mb-2"], [1, "subcard-header", "d-flex", "justify-content-between", "align-items-center"], [1, "subcard-title"], ["type", "button", "class", "btn-link-mini text-muted", 3, "click", 4, "ngIf"], [1, "subcard-grid", "d-flex", "flex-wrap", "gap-2", "align-items-end", "mt-2"], [2, "flex", "1", "min-width", "140px"], [1, "field-lbl"], ["type", "text", "pInputText", "", "placeholder", "e.g. rohit", 1, "w-100", "formula-input", 3, "ngModel", "disabled", "ngModelChange"], ["type", "password", "pInputText", "", 1, "w-100", "formula-input", 3, "ngModel", "placeholder", "ngModelChange"], [2, "flex", "1.2", "min-width", "160px"], ["type", "text", "pInputText", "", "placeholder", "e.g. Rohit Sharma", 1, "w-100", "formula-input", 3, "ngModel", "ngModelChange"], ["styleClass", "w-100", 3, "options", "ngModel", "appendTo", "ngModelChange"], [2, "display", "flex", "align-items", "center", "gap", "8px", "padding-bottom", "6px"], ["label", "\u0938\u0915\u094D\u0930\u093F\u092F", 3, "binary", "ngModel", "ngModelChange"], ["pButton", "", "type", "button", "icon", "pi pi-check", 1, "p-button-sm", "p-button-primary", 3, "label", "loading", "click"], [1, "dialog-table-card"], [1, "dialog-data-table"], [1, "text-center", 2, "width", "35px"], [2, "width", "110px"], [1, "text-center", 2, "width", "80px"], [2, "width", "140px"], [1, "text-center", 2, "width", "130px"], [4, "ngFor", "ngForOf"], [1, "mode-pill-toggle"], [1, "mode-pill-btn", 3, "click"], [1, "pi", "pi-pencil"], [1, "pi", "pi-bolt"], ["type", "button", 1, "cmd-btn-save-top", 3, "title", "click"], [1, "pi", "pi-save"], ["type", "button", "title", "Sync changes to Database (Ctrl+S)", 1, "cmd-btn-sync-top", 3, "disabled", "click"], [1, "pi", "pi-cloud-upload"], ["class", "sync-badge-count", 4, "ngIf"], [1, "sync-badge-count"], [1, "ribbon-content-row"], [1, "ribbon-group"], [1, "ribbon-group-items"], ["title", "Bold (Ctrl+B)", 1, "ribbon-tool-btn", 3, "click"], [2, "font-weight", "800", "font-size", "13px"], [1, "ribbon-tool-lbl"], [1, "ribbon-mini-col"], ["title", "Align Left", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-left"], ["title", "Align Center", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-center"], ["title", "Align Right", 1, "ribbon-mini-btn", 3, "click"], [1, "pi", "pi-align-right"], ["title", "Choose Visible Columns", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-sliders-h", 2, "color", "var(--primary)"], [1, "ribbon-group-name"], [1, "ribbon-v-sep"], ["class", "ribbon-tool-btn", "title", "Refresh data from database", 3, "click", 4, "ngIf"], ["title", "Open Excel (.xlsx) file or saved sheets", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-folder-open"], ["type", "file", "accept", ".xlsx, .xls, .csv", 2, "display", "none", 3, "change"], ["fileInput", ""], ["title", "Export sheet to Excel", 1, "ribbon-tool-btn", 3, "disabled", "click"], ["title", "Toggle Filters", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-filter"], ["title", "Toggle Sorting", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-sort-alt"], ["title", "Refresh data from database", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-refresh", "text-success"], [1, "ribbon-scroll-row"], [1, "ribbon-search-field", 2, "width", "140px", "min-width", "140px", "margin-right", "6px"], ["type", "text", "placeholder", "Search tables...", 1, "ribbon-search-inp", 3, "ngModel", "ngModelChange"], ["class", "clear-btn-inline", 3, "click", 4, "ngIf"], [1, "ribbon-boxes-track"], ["class", "ribbon-small-box", 3, "active-box", "title", "click", 4, "ngFor", "ngForOf"], [1, "clear-btn-inline", 3, "click"], [1, "ribbon-small-box", 3, "title", "click"], ["type", "button", 1, "box-star-btn", 3, "title", "click"], [1, "box-icon-wrap"], [1, "box-info"], [1, "box-name-eng-main"], ["class", "box-dot", "title", "Sheet open", 4, "ngIf"], ["title", "Sheet open", 1, "box-dot"], ["class", "ribbon-empty-state", 4, "ngIf"], ["class", "ribbon-search-field", "style", "width: 140px; min-width: 140px; margin-right: 6px;", 4, "ngIf"], ["class", "ribbon-boxes-track", 4, "ngIf"], [1, "ribbon-empty-state"], [1, "pi", "pi-info-circle", "text-muted"], [1, "text-muted"], ["type", "text", "placeholder", "Search reports...", 1, "ribbon-search-inp", 3, "ngModel", "ngModelChange"], ["class", "ribbon-small-box report-box", 3, "active-box", "title", "click", 4, "ngFor", "ngForOf"], [1, "ribbon-small-box", "report-box", 3, "title", "click"], [1, "box-icon-wrap", "report-icon-bg"], [1, "ribbon-group-items", 2, "align-items", "center", "padding", "2px 6px"], [1, "active-sheet-badge-pill", 3, "title"], [1, "sheet-title-text"], ["class", "ribbon-group", 4, "ngIf"], ["class", "ribbon-v-sep", 4, "ngIf"], ["title", "Excel style clickable checkbox", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-check-square", 2, "color", "#10b981"], ["title", "Status pill badge (Yes / No)", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-tag", 2, "color", "#3b82f6"], ["title", "User Management: Manage users, roles (Admin / Author) and rights", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-users", 2, "color", "#ec4899"], [1, "ribbon-tool-btn", 3, "title", "click"], ["title", "Configure visible columns, display order, labels and formats", 1, "ribbon-tool-btn", 3, "click"], [1, "pi", "pi-sliders-h", 2, "color", "#6366f1"], [1, "ribbon-tool-btn", 3, "disabled", "title", "click"], [1, "pi", "pi-desktop"], ["title", "Clear search", 1, "clear-btn-inline", 3, "click"], [1, "spin-inline"], [1, "pi", "pi-spin", "pi-spinner"], ["title", "Total database records", 1, "formula-record-pill"], [1, "col-dd-split-container"], [1, "col-dd-left-pane"], [1, "col-dd-header"], [1, "col-dd-search-wrap"], [1, "pi", "pi-search", "col-dd-search-icon"], ["type", "text", "placeholder", "Search columns / FK / fx...", 1, "col-dd-search-input", 3, "ngModel", "ngModelChange"], ["type", "button", "class", "btn-clear-search-inline", 3, "click", 4, "ngIf"], [1, "col-dd-actions"], [1, "col-dd-actions-left"], ["type", "button", 1, "col-dd-act-btn", 3, "click"], [1, "col-dd-count"], [1, "col-dd-body"], ["class", "col-dd-empty", 4, "ngIf"], [1, "col-dd-right-pane"], [1, "col-dd-right-header"], [1, "col-dd-right-title-wrap"], [1, "col-dd-right-title"], [1, "pi", "pi-sliders-v", "text-primary", "me-1"], [1, "col-dd-right-badge"], [1, "col-dd-right-sub"], [2, "color", "var(--primary, #4f46e5)"], [1, "col-dd-right-body"], ["class", "col-selected-card", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "col-dd-footer"], [1, "small", "text-muted", 2, "font-size", "10.5px"], [1, "pi", "pi-check-circle", "text-success", "me-1"], ["type", "button", 1, "btn", "btn-sm", "btn-primary", "py-1", "px-3", 2, "font-size", "11.5px", "font-weight", "600", 3, "click"], ["type", "button", 1, "btn-clear-search-inline", 3, "click"], [1, "pi", "pi-times"], [1, "col-dd-section-title"], [1, "pi", "pi-list", 2, "font-size", "10px", "margin-right", "4px"], ["class", "col-dd-item", 3, "click", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "col-dd-item", 3, "click"], [1, "col-dd-item-left"], ["type", "checkbox", 1, "custom-check", 2, "pointer-events", "none", 3, "checked"], [1, "col-dd-item-name", 3, "title"], ["style", "color: #ef4444; margin-left: 2px;", 4, "ngIf"], [1, "type-badge"], [2, "color", "#ef4444", "margin-left", "2px"], [1, "col-dd-section-title", "fx-section-title"], [1, "pi", "pi-bolt", 2, "color", "#8b5cf6", "font-size", "10px", "margin-right", "4px"], ["class", "col-dd-item fx-item", 3, "click", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "col-dd-item", "fx-item", 3, "click"], [1, "badge-fx-mini"], ["style", "font-size: 10px; color: var(--text-muted); margin-left: 4px;", 4, "ngIf"], [1, "type-badge", "badge-fx-type"], [2, "font-size", "10px", "color", "var(--text-muted)", "margin-left", "4px"], [1, "col-dd-section-title", 2, "margin-top", "8px"], [1, "pi", "pi-link", 2, "color", "var(--primary, #4f46e5)", "font-size", "10px", "margin-right", "4px"], ["class", "col-dd-group", 3, "fk-active-group", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "col-dd-group"], [1, "col-dd-group-header"], [1, "col-dd-group-left", 2, "cursor", "pointer", "flex-grow", "1", 3, "click"], [1, "pi", "pi-chevron-right", "fk-expand-toggle"], [1, "col-dd-item-name"], [2, "text-transform", "capitalize"], [2, "font-size", "10px", "color", "var(--text-muted)", "font-weight", "400", "margin-left", "3px"], [1, "col-dd-group-right", 2, "cursor", "pointer", "display", "flex", "align-items", "center", "gap", "6px", 3, "click"], [1, "fk-group-pill"], ["class", "col-dd-group-items", 4, "ngIf"], [1, "col-dd-group-items"], [1, "col-dd-empty"], [1, "pi", "pi-search", "me-1"], [1, "pi", "pi-info-circle", "me-1"], [1, "col-selected-card"], [1, "col-card-order-controls"], [1, "col-card-letter-badge", 3, "title"], [1, "col-card-arrows"], ["type", "button", "title", "Move Left / Earlier", 1, "btn-arrow", 3, "disabled", "click"], [1, "pi", "pi-chevron-up"], ["type", "button", "title", "Move Right / Later", 1, "btn-arrow", 3, "disabled", "click"], [1, "pi", "pi-chevron-down"], [1, "col-card-meta"], [1, "col-card-meta-top"], [1, "col-card-key-txt", 3, "title"], ["class", "badge-fx-mini", "title", "Computed Temp Column", 4, "ngIf"], ["class", "badge-fk-pill", 3, "title", 4, "ngIf"], ["class", "badge-sub-pill", 3, "title", 4, "ngIf"], ["class", "badge-raw-pill", "title", "Raw foreign key ID", 4, "ngIf"], ["class", "badge-std-pill", 4, "ngIf"], [1, "col-card-label-wrap"], ["type", "text", "title", "Edit header label", 1, "col-card-label-inp", 3, "ngModel", "placeholder", "ngModelChange"], [1, "col-card-format-ctrls"], ["class", "col-card-select-wrap", 4, "ngIf"], ["class", "col-card-plain-type", 4, "ngIf"], ["type", "button", "title", "Hide this column from sheet", 1, "btn-col-hide", 3, "click"], ["title", "Computed Temp Column", 1, "badge-fx-mini"], [1, "badge-fk-pill", 3, "title"], [1, "badge-sub-pill", 3, "title"], ["title", "Raw foreign key ID", 1, "badge-raw-pill"], [1, "badge-std-pill"], [1, "col-card-select-wrap"], ["title", "Choose date display format", 1, "col-card-select", 3, "ngModel", "ngModelChange"], [3, "ngValue"], [3, "value", 4, "ngFor", "ngForOf"], [3, "value"], ["title", "Choose number decimal format", 1, "col-card-select", 3, "ngModel", "ngModelChange"], [1, "col-card-plain-type"], ["class", "text-purple-xs", 4, "ngIf"], ["class", "text-muted-xs", 4, "ngIf"], [1, "text-purple-xs"], [1, "text-muted-xs"], [1, "cmd-btn", "cmd-btn-warning", 2, "padding", "2px 8px", 3, "click"], [1, "tab-pill", 3, "click", "dblclick", "contextmenu"], [1, "pi", 2, "font-size", "11px", 3, "ngClass"], ["class", "tab-title-text", "title", "\u0921\u092C\u0932-\u0915\u094D\u0932\u093F\u0915 \u092F\u093E \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0915\u0947 \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Double-click or right-click to rename)", 4, "ngIf"], ["type", "text", "class", "tab-inline-rename-input", 3, "id", "ngModel", "ngModelChange", "keyup.enter", "keyup.escape", "blur", "click", 4, "ngIf"], ["class", "sheet-tab-badge", 4, "ngIf"], ["type", "button", "class", "tab-edit-btn", "title", "\u0936\u0940\u091F \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Rename sheet)", 3, "click", 4, "ngIf"], ["type", "button", "class", "tab-close-btn", "title", "Close sheet", 3, "click", 4, "ngIf"], ["title", "\u0921\u092C\u0932-\u0915\u094D\u0932\u093F\u0915 \u092F\u093E \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0915\u0947 \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Double-click or right-click to rename)", 1, "tab-title-text"], ["type", "text", 1, "tab-inline-rename-input", 3, "id", "ngModel", "ngModelChange", "keyup.enter", "keyup.escape", "blur", "click"], [1, "sheet-tab-badge"], ["type", "button", "title", "\u0936\u0940\u091F \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902 (Rename sheet)", 1, "tab-edit-btn", 3, "click"], [1, "pi", "pi-pencil", 2, "font-size", "8.5px"], ["type", "button", "title", "Close sheet", 1, "tab-close-btn", 3, "click"], [1, "tab-context-menu", 3, "click"], [1, "tab-context-menu-item", 3, "click"], [1, "pi", "pi-pencil", "text-primary"], ["class", "tab-context-menu-item text-danger", 3, "click", 4, "ngIf"], [1, "tab-context-menu-item", "text-danger", 3, "click"], [1, "pi", "pi-trash"], [1, "text-primary", "small", "fw-semibold"], [1, "pi", "pi-spin", "pi-spinner", "me-1"], [1, "badge", "bg-soft-warning", "text-warning", "small", "fw-semibold"], [1, "pi", "pi-trash", "me-1"], [2, "color", "#10b981", "font-weight", "600"], [2, "color", "#ef4444", "font-weight", "600"], [1, "last-sync-badge"], [1, "pi", "pi-history", "me-1"], [1, "sync-toast-hud", "shadow-lg"], [1, "sync-toast-header"], [1, "sync-toast-title"], [1, "sync-toast-close", 3, "click"], ["class", "sync-progress-wrap px-3 pt-2", 4, "ngIf"], [1, "sync-toast-body"], [1, "sync-toast-stats"], ["class", "sync-badge-chip chip-success", 4, "ngIf"], ["class", "sync-badge-chip chip-info", 4, "ngIf"], ["class", "sync-badge-chip chip-warning", 4, "ngIf"], ["class", "sync-badge-chip chip-danger", 4, "ngIf"], ["class", "sync-toast-errors", 4, "ngIf"], [1, "sync-progress-wrap", "px-3", "pt-2"], [1, "d-flex", "justify-content-between", "align-items-center", "mb-1", 2, "font-size", "11px", "color", "var(--text-muted, #64748b)"], [1, "sync-progress-track"], [1, "sync-progress-bar"], [1, "sync-badge-chip", "chip-success"], [1, "sync-badge-chip", "chip-info"], [1, "pi", "pi-refresh"], [1, "sync-badge-chip", "chip-warning"], [1, "sync-badge-chip", "chip-danger"], [1, "sync-toast-errors"], [1, "dialog-info-banner", "warning", "mb-2"], [1, "pi", "pi-lock", "banner-icon"], [1, "dialog-subcard"], [1, "subcard-title", "mb-2"], [1, "subcard-grid", "d-flex", "align-items-end", "gap-2"], [1, "dialog-label"], ["optionLabel", "label", "optionValue", "value", "placeholder", "-- Select Target Column --", "styleClass", "dialog-ctrl-dropdown", 3, "options", "ngModel", "appendTo", "ngModelChange", "onChange"], ["style", "flex: 0 0 220px;", 4, "ngIf"], [2, "flex", "1 1 auto", "min-width", "220px"], ["type", "text", "pInputText", "", "placeholder", "e.g. [colB] or [qty] * [rate] or AGE([dob])", 1, "dialog-ctrl-input", "font-mono", 3, "ngModel", "ngModelChange"], [2, "flex", "0 0 75px"], ["pButton", "", "type", "button", "icon", "pi pi-plus", "label", "Add", 1, "p-button-sm", "p-button-success", "dialog-btn-add", "w-100", 3, "disabled", "click"], [1, "chips-row"], [1, "chips-label"], ["class", "quick-chip", "title", "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0924\u093E\u0932\u093F\u0915\u093E \u0915\u093E \u0915\u0949\u0932\u092E", 3, "click", 4, "ngFor", "ngForOf"], ["class", "chips-row mt-1", 4, "ngIf"], [1, "chips-row", "mt-1"], ["title", "Calculate age from Date of Birth", 1, "quick-chip", "chip-blue", 3, "click"], ["title", "Difference in days", 1, "quick-chip", "chip-blue", 3, "click"], ["title", "Conditional logic", 1, "quick-chip", "chip-blue", 3, "click"], ["title", "Round number", 1, "quick-chip", "chip-blue", 3, "click"], ["title", "Uppercase text", 1, "quick-chip", "chip-blue", 3, "click"], [2, "flex", "0 0 220px"], [1, "dialog-label", "text-primary"], ["type", "text", "pInputText", "", "placeholder", "e.g. Age, Full Name, Days Left", 1, "dialog-ctrl-input", "font-bold", 3, "ngModel", "ngModelChange"], ["title", "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0924\u093E\u0932\u093F\u0915\u093E \u0915\u093E \u0915\u0949\u0932\u092E", 1, "quick-chip", 3, "click"], ["class", "quick-chip chip-orange", "title", "\u0930\u0947\u092B\u0930\u0947\u0902\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u0915\u093E \u0915\u0949\u0932\u092E (\u0915\u0947\u0935\u0932 \u0938\u0942\u0924\u094D\u0930/\u092B\u0949\u0930\u094D\u092E\u0942\u0932\u093E \u092E\u0947\u0902 \u0921\u0947\u091F\u093E \u0909\u092A\u092F\u094B\u0917 \u0915\u0947 \u0932\u093F\u090F)", 3, "click", 4, "ngFor", "ngForOf"], ["title", "\u0930\u0947\u092B\u0930\u0947\u0902\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u0915\u093E \u0915\u0949\u0932\u092E (\u0915\u0947\u0935\u0932 \u0938\u0942\u0924\u094D\u0930/\u092B\u0949\u0930\u094D\u092E\u0942\u0932\u093E \u092E\u0947\u0902 \u0921\u0947\u091F\u093E \u0909\u092A\u092F\u094B\u0917 \u0915\u0947 \u0932\u093F\u090F)", 1, "quick-chip", "chip-orange", 3, "click"], [1, "dialog-empty-box"], [1, "text-center", 2, "width", "38px"], [2, "width", "100px"], [1, "text-center", 2, "width", "50px"], [1, "text-center", "text-muted", "font-mono", "col-idx"], ["class", "quick-chip chip-blue font-bold", 4, "ngIf"], ["class", "quick-chip chip-green font-bold", 4, "ngIf"], [1, "font-mono"], ["class", "text-muted-xs font-mono ms-1", 4, "ngIf"], [1, "font-mono", "text-primary", "formula-cell"], [1, "text-center"], ["type", "button", "class", "mini-del-btn", "title", "\u0939\u091F\u093E\u090F\u0902", 3, "click", 4, "ngIf"], [1, "quick-chip", "chip-blue", "font-bold"], [1, "pi", "pi-eye", "me-1"], [1, "quick-chip", "chip-green", "font-bold"], [1, "pi", "pi-database", "me-1"], [1, "text-muted-xs", "font-mono", "ms-1"], ["type", "button", "title", "\u0939\u091F\u093E\u090F\u0902", 1, "mini-del-btn", 3, "click"], [1, "dialog-footer-actions"], ["pButton", "", "type", "button", "label", "\u0930\u0926\u094D\u0926 \u0915\u0930\u0947\u0902 (Cancel)", 1, "p-button-text", "p-button-sm", "dialog-btn-cancel", 3, "click"], ["pButton", "", "type", "button", "label", "\u0938\u0947\u0935 \u0915\u0930\u0947\u0902 (Save Formulas)", "icon", "pi pi-check", "class", "p-button-sm p-button-primary dialog-btn-save", 3, "loading", "click", 4, "ngIf"], ["pButton", "", "type", "button", "label", "\u0938\u0947\u0935 \u0915\u0930\u0947\u0902 (Save Formulas)", "icon", "pi pi-check", 1, "p-button-sm", "p-button-primary", "dialog-btn-save", 3, "loading", "click"], [1, "subcard-grid", "mb-2"], [1, "subcard-col-4"], ["type", "text", "pInputText", "", "placeholder", "e.g. trg_stock_update", 1, "dialog-ctrl-input", "font-mono", 3, "ngModel", "ngModelChange"], [1, "subcard-col-3"], ["styleClass", "dialog-ctrl-dropdown", 3, "options", "ngModel", "appendTo", "ngModelChange"], [1, "subcard-col-5"], ["class", "mt-2", 4, "ngIf"], ["class", "subcard-grid mt-2", 4, "ngIf"], [1, "d-flex", "justify-content-end", "mt-2", "pt-1"], ["pButton", "", "type", "button", "icon", "pi pi-bolt", "label", "\u091F\u094D\u0930\u093F\u0917\u0930 \u092C\u0928\u093E\u090F\u0902 (Create Trigger)", 1, "p-button-sm", "p-button-warning", "dialog-btn-add", 3, "disabled", "click"], [1, "mt-2"], [1, "d-flex", "align-items-center", "justify-content-between", "mb-1"], [1, "dialog-label", "mb-0"], [1, "text-muted-xs", "font-mono"], ["rows", "3", "placeholder", "UPDATE target_table SET col = col + :new.qty WHERE id = :new.target_id;", 1, "dialog-ctrl-textarea", "font-mono", 3, "ngModel", "ngModelChange"], ["class", "quick-chip chip-green", 3, "click", 4, "ngFor", "ngForOf"], [1, "quick-chip", "chip-green", 3, "click"], ["class", "quick-chip chip-orange", 3, "click", 4, "ngFor", "ngForOf"], [1, "quick-chip", "chip-orange", 3, "click"], ["class", "quick-chip chip-blue", 3, "click", 4, "ngFor", "ngForOf"], [1, "quick-chip", "chip-blue", 3, "click"], [1, "subcard-grid", "mt-2"], ["optionLabel", "display_name", "optionValue", "table", "filterBy", "display_name,table", "placeholder", "-- Select Target Table --", "styleClass", "dialog-ctrl-dropdown", 3, "options", "ngModel", "filter", "appendTo", "ngModelChange"], ["pTemplate", "item"], ["pTemplate", "selectedItem"], [1, "subcard-col-7"], ["type", "text", "pInputText", "", "placeholder", '{"stock_qty": ":new.qty"}', 1, "dialog-ctrl-input", "font-mono", 3, "ngModel", "ngModelChange"], [1, "d-flex", "align-items-center", "justify-content-between", 2, "width", "100%"], [1, "text-muted-xs", "font-mono", "ms-2"], [1, "font-semibold"], [1, "text-center", 2, "width", "75px"], [1, "text-center", 2, "width", "85px"], [1, "event-pill", 3, "ngClass"], [1, "type-pill"], [1, "font-mono", "text-muted-xs"], ["class", "trigger-code-snippet", 4, "ngIf"], [1, "trigger-code-snippet"], ["pButton", "", "type", "button", "label", "\u092C\u0902\u0926 \u0915\u0930\u0947\u0902 (Close)", 1, "p-button-text", "p-button-sm", "dialog-btn-cancel", 3, "click"], ["type", "button", 1, "btn-link-mini", "text-muted", 3, "click"], ["class", "badge-current-user ms-1", 4, "ngIf"], [1, "status-pill"], [1, "d-flex", "align-items-center", "justify-content-center", "gap-2"], ["title", "Edit User", 1, "pi", "pi-pencil", "i-outline-primary", "cursor-pointer", 3, "click"], ["class", "pi pi-trash i-outline-danger cursor-pointer", "title", "Delete User", 3, "click", 4, "ngIf"], ["type", "button", "title", "Use this account", 1, "btn-use-account", 3, "click"], [1, "badge-current-user", "ms-1"], ["title", "Delete User", 1, "pi", "pi-trash", "i-outline-danger", "cursor-pointer", 3, "click"], ["colspan", "7", 1, "text-center", "text-muted", "py-3"]], template: function SutramExcelStudioComponent_Template(rf, ctx) {
     if (rf & 1) {
-      const _r145 = \u0275\u0275getCurrentView();
+      const _r320 = \u0275\u0275getCurrentView();
       \u0275\u0275elementStart(0, "div", 0)(1, "header", 1)(2, "div", 2)(3, "div", 3)(4, "div", 4)(5, "div", 5);
       \u0275\u0275element(6, "i", 6);
       \u0275\u0275elementEnd();
@@ -135376,130 +140683,285 @@ Do you want to discard your changes and reload from database?`);
         return ctx.toggleTheme();
       });
       \u0275\u0275element(38, "i", 21);
-      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementEnd();
       \u0275\u0275elementStart(39, "div", 22);
-      \u0275\u0275template(40, SutramExcelStudioComponent_div_40_Template, 50, 17, "div", 23);
-      \u0275\u0275template(41, SutramExcelStudioComponent_div_41_Template, 7, 3, "div", 24);
-      \u0275\u0275template(42, SutramExcelStudioComponent_div_42_Template, 7, 3, "div", 24);
-      \u0275\u0275template(43, SutramExcelStudioComponent_div_43_Template, 13, 4, "div", 23);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_div_click_39_listener() {
+        return ctx.toggleRole();
+      });
+      \u0275\u0275element(40, "i", 21);
+      \u0275\u0275elementStart(41, "span", 23);
+      \u0275\u0275text(42);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(43, "span", 24);
+      \u0275\u0275text(44);
+      \u0275\u0275elementEnd()()()();
+      \u0275\u0275elementStart(45, "div", 25);
+      \u0275\u0275template(46, SutramExcelStudioComponent_div_46_Template, 50, 17, "div", 26);
+      \u0275\u0275template(47, SutramExcelStudioComponent_div_47_Template, 7, 3, "div", 27);
+      \u0275\u0275template(48, SutramExcelStudioComponent_div_48_Template, 4, 3, "div", 27);
+      \u0275\u0275template(49, SutramExcelStudioComponent_div_49_Template, 39, 15, "div", 26);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(44, "div", 25)(45, "div", 26);
-      \u0275\u0275text(46);
+      \u0275\u0275elementStart(50, "div", 28)(51, "div", 29);
+      \u0275\u0275text(52);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(47, "span", 27);
-      \u0275\u0275text(48);
+      \u0275\u0275elementStart(53, "span", 30);
+      \u0275\u0275text(54);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(49, "span", 28);
-      \u0275\u0275text(50, "fx");
+      \u0275\u0275elementStart(55, "span", 31);
+      \u0275\u0275text(56, "fx");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(51, "input", 29);
-      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_51_listener($event) {
+      \u0275\u0275elementStart(57, "input", 32);
+      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_57_listener($event) {
         return ctx.onFormulaChange($event);
       });
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(52, "div", 30)(53, "div", 31);
-      \u0275\u0275element(54, "i", 32);
-      \u0275\u0275elementStart(55, "input", 33);
-      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_55_listener($event) {
+      \u0275\u0275elementStart(58, "div", 33)(59, "div", 34);
+      \u0275\u0275element(60, "i", 35);
+      \u0275\u0275elementStart(61, "input", 36);
+      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_61_listener($event) {
         return ctx.onDbSearchInput($event);
       });
       \u0275\u0275elementEnd();
-      \u0275\u0275template(56, SutramExcelStudioComponent_button_56_Template, 2, 0, "button", 34);
-      \u0275\u0275template(57, SutramExcelStudioComponent_span_57_Template, 2, 0, "span", 35);
+      \u0275\u0275template(62, SutramExcelStudioComponent_button_62_Template, 2, 0, "button", 37);
+      \u0275\u0275template(63, SutramExcelStudioComponent_span_63_Template, 2, 0, "span", 38);
       \u0275\u0275elementEnd();
-      \u0275\u0275template(58, SutramExcelStudioComponent_div_58_Template, 4, 2, "div", 36);
+      \u0275\u0275template(64, SutramExcelStudioComponent_div_64_Template, 4, 2, "div", 39);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(59, "p-overlayPanel", 37, 38);
-      \u0275\u0275template(61, SutramExcelStudioComponent_ng_template_61_Template, 25, 7, "ng-template", 39);
+      \u0275\u0275elementStart(65, "p-overlayPanel", 40, 41);
+      \u0275\u0275template(67, SutramExcelStudioComponent_ng_template_67_Template, 44, 12, "ng-template", 42);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(62, "div", 40)(63, "div", 41);
-      \u0275\u0275element(64, "i", 21);
-      \u0275\u0275elementStart(65, "span");
-      \u0275\u0275text(66);
+      \u0275\u0275elementStart(68, "div", 43)(69, "div", 44);
+      \u0275\u0275element(70, "i", 21);
+      \u0275\u0275elementStart(71, "span");
+      \u0275\u0275text(72);
       \u0275\u0275elementEnd()();
-      \u0275\u0275template(67, SutramExcelStudioComponent_div_67_Template, 4, 1, "div", 42);
+      \u0275\u0275template(73, SutramExcelStudioComponent_div_73_Template, 4, 1, "div", 45);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(68, "main", 43)(69, "sutram-grid", 44, 45);
-      \u0275\u0275listener("loadMore", function SutramExcelStudioComponent_Template_sutram_grid_loadMore_69_listener() {
+      \u0275\u0275elementStart(74, "main", 46)(75, "sutram-grid", 47, 48);
+      \u0275\u0275listener("loadMore", function SutramExcelStudioComponent_Template_sutram_grid_loadMore_75_listener() {
         return ctx.onLoadMore();
-      })("filterChanged", function SutramExcelStudioComponent_Template_sutram_grid_filterChanged_69_listener() {
+      })("filterChanged", function SutramExcelStudioComponent_Template_sutram_grid_filterChanged_75_listener() {
         return ctx.onGridFilterChanged();
-      })("sortChanged", function SutramExcelStudioComponent_Template_sutram_grid_sortChanged_69_listener() {
+      })("sortChanged", function SutramExcelStudioComponent_Template_sutram_grid_sortChanged_75_listener() {
         return ctx.onGridSortChanged();
-      })("solveAllTriggered", function SutramExcelStudioComponent_Template_sutram_grid_solveAllTriggered_69_listener($event) {
+      })("cellChanged", function SutramExcelStudioComponent_Template_sutram_grid_cellChanged_75_listener($event) {
+        return ctx.onGridCellChanged($event);
+      })("solveAllTriggered", function SutramExcelStudioComponent_Template_sutram_grid_solveAllTriggered_75_listener($event) {
         return ctx.onGridSolveAll($event);
-      })("openConfig", function SutramExcelStudioComponent_Template_sutram_grid_openConfig_69_listener($event) {
-        \u0275\u0275restoreView(_r145);
-        const _r10 = \u0275\u0275reference(60);
+      })("openConfig", function SutramExcelStudioComponent_Template_sutram_grid_openConfig_75_listener($event) {
+        \u0275\u0275restoreView(_r320);
+        const _r10 = \u0275\u0275reference(66);
         return \u0275\u0275resetView(_r10.toggle($event));
       });
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(71, "footer", 46)(72, "div", 47);
-      \u0275\u0275template(73, SutramExcelStudioComponent_div_73_Template, 7, 8, "div", 48);
-      \u0275\u0275elementStart(74, "button", 49);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_74_listener() {
+      \u0275\u0275elementStart(77, "footer", 49)(78, "div", 50);
+      \u0275\u0275template(79, SutramExcelStudioComponent_div_79_Template, 7, 8, "div", 51);
+      \u0275\u0275elementStart(80, "button", 52);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_80_listener() {
         return ctx.addNewBlankSheet();
       });
-      \u0275\u0275element(75, "i", 50);
+      \u0275\u0275element(81, "i", 53);
       \u0275\u0275elementEnd()();
-      \u0275\u0275template(76, SutramExcelStudioComponent_div_76_Template, 6, 5, "div", 51);
-      \u0275\u0275elementStart(77, "div", 52)(78, "div", 53)(79, "span");
-      \u0275\u0275text(80);
+      \u0275\u0275template(82, SutramExcelStudioComponent_div_82_Template, 6, 5, "div", 54);
+      \u0275\u0275elementStart(83, "div", 55)(84, "div", 56)(85, "span");
+      \u0275\u0275text(86);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(81, "span");
-      \u0275\u0275text(82);
+      \u0275\u0275elementStart(87, "span");
+      \u0275\u0275text(88);
       \u0275\u0275elementEnd();
-      \u0275\u0275template(83, SutramExcelStudioComponent_span_83_Template, 3, 0, "span", 54);
-      \u0275\u0275template(84, SutramExcelStudioComponent_span_84_Template, 3, 1, "span", 55);
-      \u0275\u0275template(85, SutramExcelStudioComponent_span_85_Template, 2, 0, "span", 56);
-      \u0275\u0275template(86, SutramExcelStudioComponent_span_86_Template, 2, 1, "span", 57);
-      \u0275\u0275template(87, SutramExcelStudioComponent_span_87_Template, 3, 4, "span", 58);
+      \u0275\u0275template(89, SutramExcelStudioComponent_span_89_Template, 3, 0, "span", 57);
+      \u0275\u0275template(90, SutramExcelStudioComponent_span_90_Template, 3, 1, "span", 58);
+      \u0275\u0275template(91, SutramExcelStudioComponent_span_91_Template, 2, 0, "span", 59);
+      \u0275\u0275template(92, SutramExcelStudioComponent_span_92_Template, 2, 1, "span", 60);
+      \u0275\u0275template(93, SutramExcelStudioComponent_span_93_Template, 3, 4, "span", 61);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(88, "div", 53)(89, "span", 59);
-      \u0275\u0275text(90, "Ctrl+S to Sync | Enter next row | Tab next col | Click # to select row");
+      \u0275\u0275elementStart(94, "div", 56)(95, "span", 62);
+      \u0275\u0275text(96, "Ctrl+S to Sync | Enter next row | Tab next col | Click # to select row");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(91, "div", 60)(92, "button", 61);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_92_listener() {
+      \u0275\u0275elementStart(97, "div", 63)(98, "button", 64);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_98_listener() {
         return ctx.zoomOut();
       });
-      \u0275\u0275element(93, "i", 62);
+      \u0275\u0275element(99, "i", 65);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(94, "span", 63);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_span_click_94_listener() {
+      \u0275\u0275elementStart(100, "span", 66);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_span_click_100_listener() {
         return ctx.resetZoom();
       });
-      \u0275\u0275text(95);
+      \u0275\u0275text(101);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(96, "button", 64);
-      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_96_listener() {
+      \u0275\u0275elementStart(102, "button", 67);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_102_listener() {
         return ctx.zoomIn();
       });
-      \u0275\u0275element(97, "i", 65);
+      \u0275\u0275element(103, "i", 68);
       \u0275\u0275elementEnd()()()()();
-      \u0275\u0275template(98, SutramExcelStudioComponent_div_98_Template, 16, 8, "div", 66);
-      \u0275\u0275elementStart(99, "sutram-header-scanner", 67);
-      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_header_scanner_visibleChange_99_listener($event) {
+      \u0275\u0275template(104, SutramExcelStudioComponent_div_104_Template, 16, 8, "div", 69);
+      \u0275\u0275elementStart(105, "sutram-header-scanner", 70);
+      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_header_scanner_visibleChange_105_listener($event) {
         return ctx.showScannerModal = $event;
-      })("sheetChange", function SutramExcelStudioComponent_Template_sutram_header_scanner_sheetChange_99_listener($event) {
+      })("sheetChange", function SutramExcelStudioComponent_Template_sutram_header_scanner_sheetChange_105_listener($event) {
         return ctx.onUploadedSheetChange($event);
-      })("targetTableChange", function SutramExcelStudioComponent_Template_sutram_header_scanner_targetTableChange_99_listener($event) {
+      })("targetTableChange", function SutramExcelStudioComponent_Template_sutram_header_scanner_targetTableChange_105_listener($event) {
         return ctx.onScannerTargetTableChange($event);
-      })("openDirectNormal", function SutramExcelStudioComponent_Template_sutram_header_scanner_openDirectNormal_99_listener($event) {
+      })("openDirectNormal", function SutramExcelStudioComponent_Template_sutram_header_scanner_openDirectNormal_105_listener($event) {
         return ctx.onDirectOpenAsNormalSheet($event);
-      })("openMappedToTable", function SutramExcelStudioComponent_Template_sutram_header_scanner_openMappedToTable_99_listener($event) {
+      })("openMappedToTable", function SutramExcelStudioComponent_Template_sutram_header_scanner_openMappedToTable_105_listener($event) {
         return ctx.onScannerConfirmedMapped($event);
-      })("openSavedSheet", function SutramExcelStudioComponent_Template_sutram_header_scanner_openSavedSheet_99_listener($event) {
+      })("openSavedSheet", function SutramExcelStudioComponent_Template_sutram_header_scanner_openSavedSheet_105_listener($event) {
         return ctx.onOpenSavedSheet($event);
-      })("deleteSavedSheet", function SutramExcelStudioComponent_Template_sutram_header_scanner_deleteSavedSheet_99_listener($event) {
+      })("deleteSavedSheet", function SutramExcelStudioComponent_Template_sutram_header_scanner_deleteSavedSheet_105_listener($event) {
         return ctx.onDeleteSavedSheet($event);
-      })("triggerFileInput", function SutramExcelStudioComponent_Template_sutram_header_scanner_triggerFileInput_99_listener() {
+      })("triggerFileInput", function SutramExcelStudioComponent_Template_sutram_header_scanner_triggerFileInput_105_listener() {
         return ctx.triggerBrowseFile();
       });
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(100, "sutram-correction-sidebar", 68);
-      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_correction_sidebar_visibleChange_100_listener($event) {
+      \u0275\u0275elementStart(106, "sutram-correction-sidebar", 71);
+      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_sutram_correction_sidebar_visibleChange_106_listener($event) {
         return ctx.showSidebar = $event;
       });
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(107, "p-dialog", 72);
+      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_p_dialog_visibleChange_107_listener($event) {
+        return ctx.showUiSutrasModal = $event;
+      });
+      \u0275\u0275elementStart(108, "div", 73)(109, "div", 74);
+      \u0275\u0275element(110, "i", 75);
+      \u0275\u0275elementStart(111, "span");
+      \u0275\u0275text(112, "\u091C\u092C \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0917\u094D\u0930\u093F\u0921 \u092E\u0947\u0902 \u0921\u0947\u091F\u093E \u091F\u093E\u0907\u092A \u0915\u0930\u0924\u093E \u0939\u0948, \u0924\u092C \u092F\u0939 \u0938\u0942\u0924\u094D\u0930 \u0924\u0924\u094D\u0915\u093E\u0932 \u0917\u0923\u0928\u093E \u0915\u0930\u0915\u0947 \u0938\u0902\u092C\u0902\u0927\u093F\u0924 \u0915\u0949\u0932\u092E \u0915\u094B \u0938\u094D\u0935\u0924\u0903 \u0905\u092A\u0921\u0947\u091F \u0915\u0930\u0924\u0947 \u0939\u0948\u0902\u0964");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275template(113, SutramExcelStudioComponent_div_113_Template, 6, 0, "div", 76);
+      \u0275\u0275template(114, SutramExcelStudioComponent_div_114_Template, 33, 10, "div", 77);
+      \u0275\u0275elementStart(115, "div", 78);
+      \u0275\u0275text(116, "\u0938\u0915\u094D\u0930\u093F\u092F \u0938\u0942\u0924\u094D\u0930 (Active UI Formulas):");
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(117, SutramExcelStudioComponent_div_117_Template, 2, 0, "div", 79);
+      \u0275\u0275template(118, SutramExcelStudioComponent_div_118_Template, 16, 1, "div", 80);
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(119, SutramExcelStudioComponent_ng_template_119_Template, 3, 1, "ng-template", 81);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(120, "p-dialog", 72);
+      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_p_dialog_visibleChange_120_listener($event) {
+        return ctx.showBackendSutrasModal = $event;
+      });
+      \u0275\u0275elementStart(121, "div", 73)(122, "div", 82);
+      \u0275\u0275element(123, "i", 83);
+      \u0275\u0275elementStart(124, "span");
+      \u0275\u0275text(125, "\u0938\u0930\u094D\u0935\u0930-\u0938\u093E\u0907\u0921 \u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u091F\u094D\u0930\u093F\u0917\u0930 \u2014 \u0907\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u092E\u0947\u0902 \u0921\u0947\u091F\u093E \u0907\u0928\u094D\u0938\u0930\u094D\u091F, \u0905\u092A\u0921\u0947\u091F \u092F\u093E \u0921\u093F\u0932\u0940\u091F \u0939\u094B\u0928\u0947 \u092A\u0930 \u0938\u094D\u0935\u0924\u0903 \u0915\u0938\u094D\u091F\u092E SQL \u0915\u094D\u0935\u0947\u0930\u0940 \u092F\u093E \u0915\u094D\u0930\u0949\u0938-\u0924\u093E\u0932\u093F\u0915\u093E \u0938\u093F\u0902\u0915 \u091A\u0932\u093E\u090F\u0902\u0964");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275template(126, SutramExcelStudioComponent_div_126_Template, 6, 0, "div", 76);
+      \u0275\u0275template(127, SutramExcelStudioComponent_div_127_Template, 20, 26, "div", 77);
+      \u0275\u0275elementStart(128, "div", 78);
+      \u0275\u0275text(129, "\u0938\u0915\u094D\u0930\u093F\u092F \u092C\u0948\u0915\u090F\u0902\u0921 \u091F\u094D\u0930\u093F\u0917\u0930\u094D\u0938 (Active Triggers):");
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(130, SutramExcelStudioComponent_div_130_Template, 2, 0, "div", 79);
+      \u0275\u0275template(131, SutramExcelStudioComponent_div_131_Template, 18, 1, "div", 80);
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(132, SutramExcelStudioComponent_ng_template_132_Template, 2, 0, "ng-template", 81);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(133, "p-dialog", 84);
+      \u0275\u0275listener("visibleChange", function SutramExcelStudioComponent_Template_p_dialog_visibleChange_133_listener($event) {
+        return ctx.showUserManagementModal = $event;
+      });
+      \u0275\u0275elementStart(134, "div", 73)(135, "div", 85)(136, "div", 86);
+      \u0275\u0275element(137, "i", 87);
+      \u0275\u0275elementStart(138, "span");
+      \u0275\u0275text(139, " \u0938\u0915\u094D\u0930\u093F\u092F \u0916\u093E\u0924\u093E: ");
+      \u0275\u0275elementStart(140, "strong");
+      \u0275\u0275text(141);
+      \u0275\u0275elementEnd();
+      \u0275\u0275text(142);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(143, "div", 88)(144, "button", 89);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_144_listener() {
+        return ctx.switchRole("admin");
+      });
+      \u0275\u0275text(145, " \u{1F451} Admin ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(146, "button", 89);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_146_listener() {
+        return ctx.switchRole("author");
+      });
+      \u0275\u0275text(147, " \u{1F464} Author ");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(148, "div", 90);
+      \u0275\u0275text(149, " Admin: \u092A\u0942\u0930\u094D\u0923 \u0905\u0927\u093F\u0915\u093E\u0930 (Triggers, Schema, Rules, User Management).");
+      \u0275\u0275element(150, "br");
+      \u0275\u0275text(151, " Author: \u0911\u092A\u0930\u0947\u0936\u0928\u0932 \u0905\u0927\u093F\u0915\u093E\u0930 (\u0921\u0947\u091F\u093E \u0909\u092A\u092F\u094B\u0917, \u0915\u0949\u0932\u092E \u0926\u0943\u0936\u094D\u092F\u0924\u093E Show/Hide, \u0921\u093F\u0938\u094D\u092A\u094D\u0932\u0947 \u092B\u0949\u0930\u094D\u092E\u0947\u091F\u093F\u0902\u0917). ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(152, "div", 91)(153, "div", 92)(154, "span", 93);
+      \u0275\u0275text(155);
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(156, SutramExcelStudioComponent_button_156_Template, 2, 0, "button", 94);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(157, "div", 95)(158, "div", 96)(159, "label", 97);
+      \u0275\u0275text(160, "\u092F\u0942\u091C\u0930\u0928\u0947\u092E (Username)*");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(161, "input", 98);
+      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_161_listener($event) {
+        return ctx.userFormData.username = $event;
+      });
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(162, "div", 96)(163, "label", 97);
+      \u0275\u0275text(164);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(165, "input", 99);
+      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_165_listener($event) {
+        return ctx.userFormData.password = $event;
+      });
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(166, "div", 100)(167, "label", 97);
+      \u0275\u0275text(168, "\u092A\u094D\u0930\u0926\u0930\u094D\u0936\u093F\u0924 \u0928\u093E\u092E (Display Name)");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(169, "input", 101);
+      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_input_ngModelChange_169_listener($event) {
+        return ctx.userFormData.display_name = $event;
+      });
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(170, "div", 100)(171, "label", 97);
+      \u0275\u0275text(172, "\u092D\u0942\u092E\u093F\u0915\u093E (Role)*");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(173, "p-dropdown", 102);
+      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_p_dropdown_ngModelChange_173_listener($event) {
+        return ctx.userFormData.role = $event;
+      });
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(174, "div", 103)(175, "p-checkbox", 104);
+      \u0275\u0275listener("ngModelChange", function SutramExcelStudioComponent_Template_p_checkbox_ngModelChange_175_listener($event) {
+        return ctx.userFormData.active = $event;
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(176, "button", 105);
+      \u0275\u0275listener("click", function SutramExcelStudioComponent_Template_button_click_176_listener() {
+        return ctx.saveUser();
+      });
+      \u0275\u0275elementEnd()()()();
+      \u0275\u0275elementStart(177, "div", 106)(178, "table", 107)(179, "thead")(180, "tr")(181, "th", 108);
+      \u0275\u0275text(182, "#");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(183, "th");
+      \u0275\u0275text(184, "\u092F\u0942\u091C\u0930\u0928\u0947\u092E");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(185, "th");
+      \u0275\u0275text(186, "\u092A\u094D\u0930\u0926\u0930\u094D\u0936\u093F\u0924 \u0928\u093E\u092E");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(187, "th", 109);
+      \u0275\u0275text(188, "\u092D\u0942\u092E\u093F\u0915\u093E (Role)");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(189, "th", 110);
+      \u0275\u0275text(190, "\u0938\u094D\u0925\u093F\u0924\u093F");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(191, "th", 111);
+      \u0275\u0275text(192, "\u092C\u0928\u093E\u092F\u093E \u0917\u092F\u093E");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(193, "th", 112);
+      \u0275\u0275text(194, "\u0915\u093E\u0930\u094D\u0930\u0935\u093E\u0908");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(195, "tbody");
+      \u0275\u0275template(196, SutramExcelStudioComponent_tr_196_Template, 23, 19, "tr", 113);
+      \u0275\u0275template(197, SutramExcelStudioComponent_tr_197_Template, 4, 2, "tr", 45);
+      \u0275\u0275elementEnd()()()();
+      \u0275\u0275template(198, SutramExcelStudioComponent_ng_template_198_Template, 2, 0, "ng-template", 81);
       \u0275\u0275elementEnd()();
     }
     if (rf & 2) {
@@ -135509,7 +140971,7 @@ Do you want to discard your changes and reload from database?`);
       \u0275\u0275advance(4);
       \u0275\u0275classProp("active", ctx.activeTopTab === "tables");
       \u0275\u0275advance(5);
-      \u0275\u0275textInterpolate(ctx.tablesList.length || 21);
+      \u0275\u0275textInterpolate(ctx.tablesList.length);
       \u0275\u0275advance(1);
       \u0275\u0275classProp("active", ctx.activeTopTab === "reports");
       \u0275\u0275advance(5);
@@ -135524,6 +140986,17 @@ Do you want to discard your changes and reload from database?`);
       \u0275\u0275property("ngIf", !ctx.isCurrentSheetRough && !ctx.isCurrentSheetReport);
       \u0275\u0275advance(2);
       \u0275\u0275property("ngClass", ctx.isDarkMode ? "pi-sun" : "pi-moon");
+      \u0275\u0275advance(1);
+      \u0275\u0275property("title", "Active User: " + (ctx.currentUser.display_name || ctx.currentUser.username) + " (" + (ctx.isAdmin ? "Admin Mode" : "Author Mode") + ")\nClick to toggle role");
+      \u0275\u0275advance(1);
+      \u0275\u0275styleProp("color", ctx.isAdmin ? "#a855f7" : "#10b981");
+      \u0275\u0275property("ngClass", ctx.isAdmin ? "pi-shield" : "pi-user");
+      \u0275\u0275advance(2);
+      \u0275\u0275textInterpolate(ctx.currentUser.username);
+      \u0275\u0275advance(1);
+      \u0275\u0275classProp("admin-tag", ctx.isAdmin)("author-tag", ctx.isAuthor);
+      \u0275\u0275advance(1);
+      \u0275\u0275textInterpolate1(" ", ctx.isAdmin ? "\u{1F451} Admin" : "\u{1F464} Author", " ");
       \u0275\u0275advance(2);
       \u0275\u0275property("ngIf", ctx.activeTopTab === "home");
       \u0275\u0275advance(1);
@@ -135586,8 +141059,65 @@ Do you want to discard your changes and reload from database?`);
       \u0275\u0275property("visible", ctx.showScannerModal)("fileName", ctx.uploadedFileName)("sheetNames", ctx.uploadedSheetNames)("currentSheetName", ctx.selectedUploadedSheet)("sheetHeaders", ctx.uploadedSheetHeaders)("sampleRows", ctx.uploadedSampleRows)("totalRows", ctx.uploadedTotalRows)("tablesList", ctx.tablesList)("selectedTable", ctx.scannerTargetTable)("report", ctx.scanReport)("availableHeaders", ctx.scannerAvailableHeaders)("isTableConfigLoading", ctx.isScannerConfigLoading)("savedSheets", ctx.savedSheetsList);
       \u0275\u0275advance(1);
       \u0275\u0275property("visible", ctx.showSidebar)("groups", ctx.state.correctionGroups());
+      \u0275\u0275advance(1);
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(132, _c11));
+      \u0275\u0275propertyInterpolate1("header", "\u{1F9EE} UI \u0938\u0942\u0924\u094D\u0930 \u0935\u093F\u0928\u094D\u092F\u093E\u0938 (Live Reactive Formulas): ", ctx.currentActiveSheetTitle, "");
+      \u0275\u0275property("visible", ctx.showUiSutrasModal)("modal", true)("dismissableMask", true)("draggable", false)("resizable", false);
+      \u0275\u0275advance(6);
+      \u0275\u0275property("ngIf", !ctx.isAdmin);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.isAdmin);
+      \u0275\u0275advance(3);
+      \u0275\u0275property("ngIf", ctx.uiSutrasList.length === 0);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.uiSutrasList.length > 0);
+      \u0275\u0275advance(2);
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(133, _c11));
+      \u0275\u0275propertyInterpolate1("header", "\u26A1 \u092C\u0948\u0915\u090F\u0902\u0921 \u0938\u0942\u0924\u094D\u0930 \u0935\u093F\u0928\u094D\u092F\u093E\u0938 (Server Database Triggers): ", ctx.currentActiveSheetTitle, "");
+      \u0275\u0275property("visible", ctx.showBackendSutrasModal)("modal", true)("dismissableMask", true)("draggable", false)("resizable", false);
+      \u0275\u0275advance(6);
+      \u0275\u0275property("ngIf", !ctx.isAdmin);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.isAdmin);
+      \u0275\u0275advance(3);
+      \u0275\u0275property("ngIf", ctx.backendTriggersList.length === 0);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.backendTriggersList.length > 0);
+      \u0275\u0275advance(2);
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(134, _c12));
+      \u0275\u0275property("visible", ctx.showUserManagementModal)("modal", true)("dismissableMask", true)("draggable", false)("resizable", false);
+      \u0275\u0275advance(8);
+      \u0275\u0275textInterpolate(ctx.currentUser.username);
+      \u0275\u0275advance(1);
+      \u0275\u0275textInterpolate1(" (", ctx.isAdmin ? "\u{1F451} Admin (\u092A\u0942\u0930\u094D\u0923 \u0905\u0927\u093F\u0915\u093E\u0930)" : "\u{1F464} Author (\u0938\u0940\u092E\u093F\u0924 \u0905\u0927\u093F\u0915\u093E\u0930)", ") ");
+      \u0275\u0275advance(2);
+      \u0275\u0275classProp("active-role", ctx.isAdmin);
+      \u0275\u0275advance(2);
+      \u0275\u0275classProp("active-role", ctx.isAuthor);
+      \u0275\u0275advance(9);
+      \u0275\u0275textInterpolate1(" ", ctx.editingUserId ? "\u270F\uFE0F \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0938\u0902\u092A\u093E\u0926\u093F\u0924 \u0915\u0930\u0947\u0902 (Edit User #" + ctx.editingUserId + ")" : "\u2795 \u0928\u092F\u093E \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u091C\u094B\u0921\u093C\u0947\u0902 (Add New User)", " ");
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.editingUserId);
+      \u0275\u0275advance(5);
+      \u0275\u0275property("ngModel", ctx.userFormData.username)("disabled", !!ctx.editingUserId);
+      \u0275\u0275advance(3);
+      \u0275\u0275textInterpolate(ctx.editingUserId ? "\u0928\u092F\u093E \u092A\u093E\u0938\u0935\u0930\u094D\u0921 (Password)" : "\u092A\u093E\u0938\u0935\u0930\u094D\u0921 (Password)*");
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngModel", ctx.userFormData.password)("placeholder", ctx.editingUserId ? "\u0916\u093E\u0932\u0940 \u091B\u094B\u0921\u093C\u0947\u0902 \u092F\u0926\u093F \u0928\u0939\u0940\u0902 \u092C\u0926\u0932\u0928\u093E" : "e.g. pass123");
+      \u0275\u0275advance(4);
+      \u0275\u0275property("ngModel", ctx.userFormData.display_name);
+      \u0275\u0275advance(4);
+      \u0275\u0275property("options", ctx.roleDropdownOptions)("ngModel", ctx.userFormData.role)("appendTo", "body");
+      \u0275\u0275advance(2);
+      \u0275\u0275property("binary", true)("ngModel", ctx.userFormData.active);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("label", ctx.editingUserId ? "\u0905\u092A\u0921\u0947\u091F" : "\u091C\u094B\u0921\u093C\u0947\u0902")("loading", ctx.isSavingUser);
+      \u0275\u0275advance(20);
+      \u0275\u0275property("ngForOf", ctx.usersList);
+      \u0275\u0275advance(1);
+      \u0275\u0275property("ngIf", ctx.usersList.length === 0);
     }
-  }, dependencies: [NgClass, NgForOf, NgIf, DefaultValueAccessor, NgControlStatus, NgModel, PrimeTemplate, OverlayPanel, SutramGridComponent, SutramHeaderScannerComponent, SutramCorrectionSidebarComponent], styles: ["\n\n\n\n\n\n\n\n\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 100%;\n}\n\n.sutram-excel-container[_ngcontent-%COMP%] {\n  --primary: #4f46e5;\n  --primary-hover: #4338ca;\n  --primary-soft: #e0e7ff;\n  --success: #10b981;\n  --success-soft: #d1fae5;\n  --warning: #f59e0b;\n  --warning-soft: #fef3c7;\n  --danger: #ef4444;\n  --danger-soft: #fee2e2;\n  --bg: #f8fafc;\n  --surface: #ffffff;\n  --surface-border: #e2e8f0;\n  --text: #0f172a;\n  --text-muted: #64748b;\n  --radius: 6px;\n  --header-bg: #f1f5f9;\n  --header-text: #1e293b;\n  --cell-border: rgba(125, 125, 125, 0.18);\n  --cell-height: 23px;\n  --header-height: 38px;\n  --cell-edited-bg: #fef9c3;\n  --cell-edited-border: #eab308;\n  --row-edited-bg: #fffbeb;\n  --row-new-bg: #dcfce7;\n  --row-new-border: #22c55e;\n\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\n  background-color: var(--bg);\n  color: var(--text);\n  height: 100%;\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  user-select: none;\n\n  &.dark-mode {\n    --bg: #0f172a;\n    --surface: #1e293b;\n    --surface-border: #334155;\n    --text: #f8fafc;\n    --text-muted: #94a3b8;\n    --header-bg: #1e293b;\n    --header-text: #cbd5e1;\n    --cell-border: rgba(255, 255, 255, 0.1);\n    --cell-edited-bg: rgba(234, 179, 8, 0.22);\n    --cell-edited-border: #facc15;\n    --row-edited-bg: rgba(234, 179, 8, 0.12);\n    --row-new-bg: rgba(34, 197, 94, 0.18);\n    --row-new-border: #4ade80;\n  }\n}\n\n\n\n\n\n.studio-header[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n  flex-shrink: 0;\n  user-select: none;\n}\n\n\n\n.ribbon-menu-bar[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 2px 10px;\n  height: 32px;\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n}\n\n.menu-bar-left[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.brand[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.brand-icon[_ngcontent-%COMP%] {\n  width: 22px;\n  height: 22px;\n  background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 11px;\n}\n.brand-title[_ngcontent-%COMP%] {\n  font-size: 11.5px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  color: var(--text);\n\n  .version-tag {\n    font-size: 9px;\n    padding: 1px 4px;\n    background: rgba(16, 185, 129, 0.18);\n    color: #059669;\n    border-radius: 3px;\n    font-weight: 700;\n  }\n}\n\n\n\n.ribbon-tabs-nav[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n}\n.ribbon-tab-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 3px 11px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.12s ease;\n\n  i {\n    font-size: 10.5px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.08);\n    color: var(--text);\n  }\n\n  &.active {\n    background: var(--surface);\n    color: var(--primary);\n    border-color: var(--surface-border) var(--surface-border) transparent var(--surface-border);\n    border-bottom: 2px solid var(--primary);\n    font-weight: 700;\n  }\n}\n.ribbon-badge[_ngcontent-%COMP%] {\n  font-size: 9px;\n  padding: 1px 4px;\n  border-radius: 999px;\n  background: rgba(79, 70, 229, 0.12);\n  color: var(--primary);\n  font-weight: 700;\n}\n\n.menu-bar-right[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.mode-pill-toggle[_ngcontent-%COMP%] {\n  background: rgba(125, 125, 125, 0.12);\n  border-radius: 999px;\n  padding: 2px;\n  display: flex;\n  gap: 2px;\n}\n.mode-pill-btn[_ngcontent-%COMP%] {\n  padding: 2px 9px;\n  border-radius: 999px;\n  font-size: 10px;\n  font-weight: 600;\n  border: none;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.15s ease;\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n\n  i { font-size: 9.5px; }\n}\n.mode-pill-btn.active-normal[_ngcontent-%COMP%] {\n  background: #3b82f6;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.35);\n}\n.mode-pill-btn.active-smart[_ngcontent-%COMP%] {\n  background: #10b981;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.35);\n}\n\n.cmd-btn-save-top[_ngcontent-%COMP%], .cmd-btn-sync-top[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 2px 10px;\n  height: 24px;\n  border-radius: 4px;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.15s ease;\n\n  i {\n    font-size: 11px;\n  }\n\n  &:hover:not(:disabled) {\n    background: rgba(125, 125, 125, 0.1);\n    border-color: var(--primary);\n    color: var(--primary);\n  }\n\n  &:disabled {\n    opacity: 0.5;\n    cursor: not-allowed;\n  }\n\n  &.has-pending {\n    background: #10b981;\n    color: #ffffff;\n    border-color: #059669;\n    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.35);\n\n    &:hover {\n      background: #059669;\n      color: #ffffff;\n    }\n  }\n\n  .sync-badge-count {\n    font-size: 9px;\n    padding: 1px 5px;\n    border-radius: 999px;\n    background: #ffffff;\n    color: #059669;\n    font-weight: 800;\n    line-height: 1;\n  }\n}\n\n\n\n.ribbon-strip[_ngcontent-%COMP%] {\n  background: var(--surface);\n  padding: 4px 10px;\n  height: 60px;\n  display: flex;\n  align-items: center;\n  overflow: hidden;\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);\n}\n\n\n\n.ribbon-content-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n}\n\n.ribbon-group[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  height: 52px;\n  padding: 0 4px;\n}\n\n.ribbon-group-items[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  flex-grow: 1;\n}\n\n.ribbon-group-name[_ngcontent-%COMP%] {\n  font-size: 8.5px;\n  color: var(--text-muted);\n  font-weight: 600;\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n  margin-top: 1px;\n}\n\n.ribbon-v-sep[_ngcontent-%COMP%] {\n  width: 1px;\n  height: 40px;\n  background: var(--surface-border);\n  opacity: 0.75;\n  margin: 0 4px;\n}\n\n.ribbon-tool-btn[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  gap: 2px;\n  padding: 2px 7px;\n  height: 42px;\n  border-radius: 4px;\n  border: 1px solid transparent;\n  background: transparent;\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.12s;\n  font-size: 10.5px;\n\n  i {\n    font-size: 13px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.09);\n    border-color: var(--surface-border);\n  }\n\n  &.active {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.3);\n    font-weight: 700;\n  }\n\n  .ribbon-tool-lbl {\n    font-size: 9px;\n    white-space: nowrap;\n    font-weight: 500;\n  }\n}\n\n.ribbon-mini-col[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: row;\n  gap: 2px;\n}\n\n.ribbon-mini-btn[_ngcontent-%COMP%] {\n  width: 22px;\n  height: 22px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 3px;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  font-size: 9.5px;\n\n  &:hover { background: rgba(125, 125, 125, 0.1); }\n\n  &.active-align {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.35);\n  }\n}\n\n.ribbon-search-field[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 165px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .ribbon-search-inp {\n    width: 100%;\n    height: 24px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.ribbon-btn-action[_ngcontent-%COMP%] {\n  background: var(--primary) !important;\n  color: #ffffff !important;\n  border-color: var(--primary) !important;\n  font-weight: 700 !important;\n\n  &:hover {\n    filter: brightness(1.1);\n  }\n\n  .sync-count-tag {\n    font-size: 8.5px;\n    padding: 0 4px;\n    background: #ffffff;\n    color: var(--primary);\n    border-radius: 999px;\n    font-weight: 800;\n    margin-left: 2px;\n  }\n}\n\n.ribbon-record-pill[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 24px;\n}\n\n\n\n.ribbon-scroll-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.ribbon-boxes-track[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  overflow-x: auto;\n  scrollbar-width: thin;\n  height: 100%;\n  flex-grow: 1;\n  padding: 2px 2px;\n\n  &::-webkit-scrollbar {\n    height: 4px;\n  }\n  &::-webkit-scrollbar-thumb {\n    background: rgba(125, 125, 125, 0.25);\n    border-radius: 2px;\n  }\n}\n\n.ribbon-small-box[_ngcontent-%COMP%] {\n  position: relative;\n  flex-shrink: 0;\n  min-width: 115px;\n  max-width: 140px;\n  height: 46px;\n  background: var(--surface);\n  border: 1px solid var(--surface-border);\n  border-radius: 5px;\n  padding: 3px 8px 3px 6px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  cursor: pointer;\n  transition: all 0.12s ease;\n  user-select: none;\n\n  &:hover {\n    border-color: var(--primary);\n    background: var(--primary-soft);\n    transform: translateY(-1px);\n    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);\n  }\n\n  &.active-box {\n    border-color: rgba(16, 185, 129, 0.6);\n    background: rgba(16, 185, 129, 0.08);\n  }\n\n  .box-star-btn {\n    position: absolute;\n    top: 2px;\n    right: 2px;\n    width: 15px;\n    height: 15px;\n    border: none;\n    background: transparent;\n    cursor: pointer;\n    color: var(--text-muted);\n    font-size: 9px;\n    padding: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 2;\n    transition: all 0.12s;\n\n    &:hover {\n      color: #f59e0b;\n      transform: scale(1.2);\n    }\n\n    &.starred {\n      color: #f59e0b;\n    }\n  }\n\n  .box-icon-wrap {\n    width: 25px;\n    height: 25px;\n    border-radius: 4px;\n    background: var(--primary-soft);\n    color: var(--primary);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 11px;\n    flex-shrink: 0;\n\n    &.report-icon-bg {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n    }\n  }\n\n  .box-info {\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    padding-right: 10px;\n\n    .box-name-eng-main {\n      font-size: 11px;\n      font-weight: 600;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-hin {\n      font-size: 10.5px;\n      font-weight: 700;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-eng {\n      font-size: 9px;\n      color: var(--text-muted);\n      font-family: monospace;\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n  }\n\n  .box-dot {\n    position: absolute;\n    bottom: 3px;\n    right: 3px;\n    width: 5px;\n    height: 5px;\n    border-radius: 50%;\n    background: #10b981;\n  }\n}\n\n.btn-group-cmd[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.cmd-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  cursor: pointer;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  transition: all 0.15s;\n  user-select: none;\n\n  i {\n    font-size: 10.5px;\n  }\n}\n.cmd-btn[_ngcontent-%COMP%]:hover { background: rgba(125, 125, 125, 0.1); }\n.cmd-btn.active[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.cmd-btn-primary[_ngcontent-%COMP%] { background: var(--primary); color: white; border-color: var(--primary); }\n.cmd-btn-primary[_ngcontent-%COMP%]:hover { background: var(--primary-hover); }\n.cmd-btn-success[_ngcontent-%COMP%] { background: var(--success); color: white; border-color: var(--success); }\n.cmd-btn-success[_ngcontent-%COMP%]:hover { background: #059669; }\n.cmd-btn-warning[_ngcontent-%COMP%] { background: var(--warning-soft); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }\n\n.sync-badge-count[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  background: #f59e0b;\n  color: #ffffff;\n  font-size: 9.5px;\n  font-weight: 700;\n  padding: 1px 5px;\n  border-radius: 999px;\n  margin-left: 4px;\n  line-height: 1.1;\n}\n\n\n\n.formula-bar-row[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n.coord-box[_ngcontent-%COMP%] {\n  width: 48px;\n  height: 22px;\n  line-height: 18px;\n  text-align: center;\n  font-weight: 700;\n  font-size: 11px;\n  padding: 1px 3px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  background: rgba(125, 125, 125, 0.05);\n}\n.active-col-chip[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n  padding: 1px 6px;\n  height: 20px;\n  line-height: 17px;\n  border-radius: 4px;\n  font-size: 10.5px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 170px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n.formula-input[_ngcontent-%COMP%] {\n  flex-grow: 1;\n  height: 22px;\n  padding: 2px 7px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 11.5px;\n  font-family: inherit;\n  outline: none;\n  background: var(--surface);\n  color: var(--text);\n}\n.formula-input[_ngcontent-%COMP%]:focus { border-color: var(--primary); }\n\n.formula-bar-right-area[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n  margin-left: 4px;\n}\n\n.formula-search-field[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 175px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .formula-search-inp {\n    width: 100%;\n    height: 22px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.formula-record-pill[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 22px;\n  white-space: nowrap;\n}\n.control-settings-bar[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  flex-shrink: 0;\n  font-size: 11px;\n}\n.ctrl-bar-left[_ngcontent-%COMP%], .ctrl-bar-right[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.ctrl-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 8px;\n  height: 23px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  user-select: none;\n\n  i {\n    font-size: 10px;\n  }\n}\n.ctrl-btn[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text);\n}\n.ctrl-btn.active[_ngcontent-%COMP%] {\n  color: var(--primary);\n  background: var(--primary-soft);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.ctrl-btn-danger[_ngcontent-%COMP%] {\n  color: var(--danger);\n  background: var(--danger-soft);\n  border-color: rgba(239, 68, 68, 0.3);\n}\n.ctrl-btn-danger[_ngcontent-%COMP%]:hover {\n  background: rgba(239, 68, 68, 0.2);\n}\n.ctrl-dot[_ngcontent-%COMP%] {\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  background: #10b981;\n  display: inline-block;\n}\n.ctrl-search-wrap[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  flex-grow: 1;\n  max-width: 420px;\n}\n.ctrl-search-icon[_ngcontent-%COMP%] {\n  position: absolute;\n  left: 8px;\n  color: var(--text-muted);\n  font-size: 10px;\n  pointer-events: none;\n}\n.ctrl-search-input[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 23px;\n  padding: 2px 24px 2px 24px;\n  border: 1px solid var(--surface-border);\n  border-radius: 999px;\n  font-size: 11px;\n  background: rgba(125, 125, 125, 0.05);\n  color: var(--text);\n  outline: none;\n  transition: all 0.15s;\n}\n.ctrl-search-input[_ngcontent-%COMP%]:focus {\n  border-color: var(--primary);\n  background: var(--surface);\n  box-shadow: 0 0 0 2px var(--primary-soft);\n}\n.ctrl-search-clear[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 6px;\n  background: none;\n  border: none;\n  font-size: 10px;\n  color: var(--text-muted);\n  cursor: pointer;\n  padding: 1px 4px;\n  border-radius: 50%;\n}\n.ctrl-search-clear[_ngcontent-%COMP%]:hover {\n  color: var(--danger);\n  background: rgba(125, 125, 125, 0.15);\n}\n.ctrl-search-spinner[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 24px;\n  color: var(--primary);\n  font-size: 10px;\n}\n.ctrl-record-badge[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  height: 21px;\n  border-radius: 999px;\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text-muted);\n  font-size: 10px;\n  font-weight: 600;\n  white-space: nowrap;\n\n  i {\n    font-size: 10px;\n  }\n}\n\n\n\n.status-strip[_ngcontent-%COMP%] {\n  padding: 3px 14px;\n  font-size: 11.5px;\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  background: rgba(125, 125, 125, 0.04);\n}\n.status-strip.strip-error[_ngcontent-%COMP%] { background: #fef2f2; color: #991b1b; }\n.status-strip.strip-clean[_ngcontent-%COMP%] { background: #f0fdf4; color: #166534; }\n.status-strip.strip-suggestion[_ngcontent-%COMP%] { background: #fffbeb; color: #92400e; }\n\n\n\n.spreadsheet-canvas[_ngcontent-%COMP%] {\n  flex-grow: 1;\n  overflow: hidden;\n  background: var(--surface);\n  position: relative;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n\n  sutram-grid {\n    display: block;\n    width: 100%;\n    height: 100%;\n    flex: 1;\n    min-height: 0;\n  }\n}\n\n\n\n.studio-footer[_ngcontent-%COMP%] {\n  flex-shrink: 0;\n  background: var(--surface);\n  border-top: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n}\n.sheet-tabs-bar[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  background: rgba(125, 125, 125, 0.05);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 2px 6px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.sheet-tabs-bar[_ngcontent-%COMP%]::-webkit-scrollbar { display: none; }\n\n.tab-pill[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 12px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11.5px;\n  font-weight: 600;\n  cursor: pointer;\n  color: var(--text-muted);\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  transition: all 0.15s;\n}\n.tab-pill[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.1);\n  color: var(--text);\n}\n.tab-pill.active-tab[_ngcontent-%COMP%] {\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-color: rgba(16, 185, 129, 0.25);\n  border-bottom: 2px solid #10b981;\n  font-weight: 700;\n}\n\n.sheet-tab-badge[_ngcontent-%COMP%] {\n  font-size: 9.5px;\n  padding: 1px 5px;\n  background: rgba(16, 185, 129, 0.2);\n  color: #059669;\n  border-radius: 999px;\n  font-weight: 700;\n}\n\n.add-tab-btn[_ngcontent-%COMP%] {\n  padding: 2px 8px;\n  border: 1px dashed rgba(125, 125, 125, 0.4);\n  border-radius: 4px;\n  background: transparent;\n  cursor: pointer;\n  color: var(--primary);\n  margin-left: 4px;\n}\n.add-tab-btn[_ngcontent-%COMP%]:hover { background: rgba(79, 70, 229, 0.1); }\n\n.sheet-tab-rough-badge[_ngcontent-%COMP%] {\n  font-size: 9px;\n  padding: 1px 4px;\n  background: rgba(245, 158, 11, 0.2);\n  color: #d97706;\n  border-radius: 3px;\n  font-weight: 700;\n  text-transform: uppercase;\n}\n\n.tab-close-btn[_ngcontent-%COMP%] {\n  margin-left: 3px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  font-size: 9.5px;\n  line-height: 1;\n  padding: 0;\n  transition: all 0.12s;\n\n  &:hover {\n    background: rgba(239, 68, 68, 0.18);\n    color: #ef4444;\n  }\n}\n\n.tab-edit-btn[_ngcontent-%COMP%] {\n  margin-left: 2px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  padding: 0;\n  opacity: 0.5;\n  transition: all 0.12s;\n\n  &:hover {\n    opacity: 1;\n    background: rgba(59, 130, 246, 0.15);\n    color: var(--primary, #3b82f6);\n  }\n}\n\n.tab-inline-rename-input[_ngcontent-%COMP%] {\n  font-size: 11px;\n  font-weight: 600;\n  padding: 1px 5px;\n  height: 19px;\n  min-width: 70px;\n  max-width: 160px;\n  border: 1px solid var(--primary, #3b82f6);\n  border-radius: 3px;\n  background: var(--surface-card, #ffffff);\n  color: var(--text, #1e293b);\n  outline: none;\n  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);\n}\n\n.tab-context-menu[_ngcontent-%COMP%] {\n  position: fixed;\n  z-index: 9999;\n  background: var(--surface-card, #ffffff);\n  border: 1px solid var(--surface-border, rgba(125, 125, 125, 0.25));\n  border-radius: 6px;\n  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);\n  min-width: 175px;\n  padding: 4px;\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n\n.tab-context-menu-item[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 6px 10px;\n  font-size: 11.5px;\n  font-weight: 500;\n  color: var(--text);\n  border-radius: 4px;\n  cursor: pointer;\n  user-select: none;\n  transition: background 0.12s;\n\n  i {\n    font-size: 12px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.12);\n  }\n\n  &.text-danger:hover {\n    background: rgba(239, 68, 68, 0.12);\n  }\n}\n\n.bottom-status-subrow[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 3px 14px;\n  font-size: 11px;\n  color: var(--text-muted);\n}\n.zoom-controls[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  padding: 1px 4px;\n}\n.zoom-btn[_ngcontent-%COMP%] {\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  color: var(--text);\n  padding: 1px 5px;\n  font-size: 11px;\n}\n.zoom-display[_ngcontent-%COMP%] {\n  font-weight: 700;\n  cursor: pointer;\n  padding: 0 4px;\n}\n\n\n\n.sync-toast-hud[_ngcontent-%COMP%] {\n  position: fixed;\n  top: 50px;\n  right: 20px;\n  z-index: 2500;\n  min-width: 320px;\n  max-width: 440px;\n  background: var(--surface);\n  color: var(--text);\n  border: 1px solid var(--surface-border);\n  border-radius: 8px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);\n  overflow: hidden;\n  animation: _ngcontent-%COMP%_toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);\n  font-size: 11.5px;\n}\n@keyframes _ngcontent-%COMP%_toastSlideIn {\n  from { opacity: 0; transform: translateY(-12px) scale(0.97); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n.sync-toast-header[_ngcontent-%COMP%] {\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--surface-border);\n  background: rgba(125, 125, 125, 0.04);\n}\n.sync-toast-title[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 7px;\n  font-weight: 700;\n  font-size: 12px;\n}\n.sync-toast-close[_ngcontent-%COMP%] {\n  background: none;\n  border: none;\n  color: var(--text-muted);\n  cursor: pointer;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 3px;\n}\n.sync-toast-close[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.12);\n  color: var(--text);\n}\n.sync-toast-body[_ngcontent-%COMP%] {\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n.sync-toast-stats[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-wrap: wrap;\n}\n.sync-badge-chip[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n}\n.chip-success[_ngcontent-%COMP%] {\n  background: var(--success-soft);\n  color: var(--success);\n}\n.chip-info[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n}\n.chip-warning[_ngcontent-%COMP%] {\n  background: var(--warning-soft);\n  color: #b45309;\n}\n.chip-danger[_ngcontent-%COMP%] {\n  background: var(--danger-soft);\n  color: var(--danger);\n}\n.sync-toast-errors[_ngcontent-%COMP%] {\n  margin-top: 4px;\n  padding: 6px 8px;\n  background: rgba(239, 68, 68, 0.08);\n  border: 1px solid rgba(239, 68, 68, 0.2);\n  border-radius: 4px;\n  font-size: 10.5px;\n  color: #ef4444;\n  max-height: 140px;\n  overflow-y: auto;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}\n\n\n\n.last-sync-badge[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  padding: 1px 7px;\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-radius: 4px;\n  font-weight: 600;\n  font-size: 10.5px;\n  border: 1px solid rgba(16, 185, 129, 0.25);\n\n  &.sync-error {\n    background: rgba(239, 68, 68, 0.12);\n    color: #ef4444;\n    border-color: rgba(239, 68, 68, 0.25);\n  }\n}\n\n\n\n.sync-progress-wrap[_ngcontent-%COMP%] {\n  width: 100%;\n}\n.sync-progress-track[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 6px;\n  background: rgba(125, 125, 125, 0.2);\n  border-radius: 999px;\n  overflow: hidden;\n}\n.sync-progress-bar[_ngcontent-%COMP%] {\n  height: 100%;\n  background: linear-gradient(90deg, #3b82f6, #10b981);\n  border-radius: 999px;\n  transition: width 0.2s ease-in-out;\n}\n\n\n\n\n\n  .sutram-col-config-popover {\n  width: 340px !important;\n  height: 500px !important;\n  max-height: calc(100vh - 120px) !important;\n  font-size: 11.5px;\n  border-radius: 8px !important;\n  overflow: hidden !important;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n  display: flex !important;\n  flex-direction: column !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n    width: 100% !important;\n    height: 100% !important;\n    display: flex !important;\n    flex-direction: column !important;\n    flex: 1 1 auto !important;\n    min-height: 0 !important;\n    overflow: hidden !important;\n  }\n}\n\n.col-dropdown-menu[_ngcontent-%COMP%] {\n  width: 100% !important;\n  height: 100% !important;\n  max-height: none !important;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n  flex: 1 1 auto;\n  min-height: 0;\n  user-select: none;\n\n  .col-dd-header {\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    flex-direction: column;\n    gap: 6px;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-search-wrap {\n    position: relative;\n    display: flex;\n    align-items: center;\n\n    .col-dd-search-icon {\n      position: absolute;\n      left: 8px;\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      pointer-events: none;\n    }\n\n    .col-dd-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      border-radius: 4px;\n      font-size: 11.5px;\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.12s;\n\n      &:focus {\n        border-color: var(--primary, #4f46e5);\n      }\n    }\n\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 8px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      font-size: 11px;\n      padding: 0;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .col-dd-actions {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 0 2px;\n\n    .col-dd-actions-left {\n      display: flex;\n      gap: 4px;\n    }\n\n    .col-dd-act-btn {\n      padding: 2px 7px;\n      font-size: 10.5px;\n      font-weight: 600;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--surface, #ffffff);\n      color: var(--text-muted, #64748b);\n      border-radius: 3px;\n      cursor: pointer;\n      transition: all 0.12s;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .col-dd-count {\n      font-size: 10.5px;\n      color: var(--text-muted, #64748b);\n      font-weight: 600;\n    }\n  }\n\n  .col-dd-body {\n    padding: 6px 8px;\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    flex: 1 1 0 !important;\n    min-height: 0 !important;\n    max-height: none !important;\n    display: flex;\n    flex-direction: column;\n    gap: 3px;\n    overscroll-behavior: contain;\n    scrollbar-width: thin;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-track {\n      background: rgba(125, 125, 125, 0.05);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb:hover {\n      background: var(--primary, #4f46e5);\n    }\n  }\n\n  .col-dd-section-title {\n    font-size: 10px;\n    font-weight: 700;\n    color: var(--text-muted, #64748b);\n    margin: 3px 0 2px 4px;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-item {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 4px 6px;\n    border-radius: 4px;\n    cursor: pointer;\n    user-select: none;\n    transition: background 0.1s;\n    font-size: 11.5px;\n    color: var(--text, #0f172a);\n    flex-shrink: 0 !important;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.08);\n    }\n\n    .col-dd-item-left {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n\n    .col-dd-item-name {\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    cursor: pointer;\n    accent-color: var(--primary, #4f46e5);\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .type-badge {\n    font-size: 9.5px;\n    padding: 1px 5px;\n    border-radius: 3px;\n    background: rgba(125, 125, 125, 0.12);\n    color: var(--text-muted, #64748b);\n    font-family: 'JetBrains Mono', monospace;\n    flex-shrink: 0;\n  }\n\n  \n\n  .col-dd-group {\n    border: 1px solid var(--surface-border, #e2e8f0);\n    border-radius: 5px;\n    margin: 3px 0;\n    overflow: hidden;\n    background: rgba(125, 125, 125, 0.02);\n    flex-shrink: 0 !important;\n\n    &.fk-active-group {\n      border-color: rgba(79, 70, 229, 0.35);\n    }\n\n    .col-dd-group-header {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding: 5px 8px;\n      background: rgba(125, 125, 125, 0.06);\n      cursor: pointer;\n      user-select: none;\n      font-size: 11.5px;\n      font-weight: 600;\n      flex-shrink: 0 !important;\n      min-height: 28px !important;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n      }\n\n      .col-dd-group-left {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        overflow: hidden;\n      }\n\n      .fk-expand-toggle {\n        font-size: 10px;\n        color: var(--text-muted, #64748b);\n        width: 12px;\n        text-align: center;\n        transition: transform 0.18s ease;\n\n        &.rotated {\n          transform: rotate(90deg);\n        }\n      }\n\n      .fk-group-pill {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 999px;\n        font-weight: 600;\n      }\n    }\n\n    .col-dd-group-items {\n      padding: 3px 4px 4px 18px;\n      background: var(--surface, #ffffff);\n      border-top: 1px solid var(--surface-border, #e2e8f0);\n      display: flex;\n      flex-direction: column;\n      gap: 2px;\n      max-height: none !important;\n      overflow: visible !important;\n    }\n  }\n\n  .col-dd-empty {\n    padding: 16px;\n    text-align: center;\n    color: var(--text-muted, #64748b);\n    font-size: 11.5px;\n  }\n\n  .col-dd-footer {\n    padding: 6px 10px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n}"], changeDetection: 0 });
+  }, dependencies: [NgClass, NgForOf, NgIf, NgSelectOption, \u0275NgSelectMultipleOption, DefaultValueAccessor, SelectControlValueAccessor, NgControlStatus, NgModel, PrimeTemplate, Dropdown, ButtonDirective, InputText, Dialog, OverlayPanel, Checkbox, SutramGridComponent, SutramHeaderScannerComponent, SutramCorrectionSidebarComponent], styles: ["\n\n\n\n\n\n\n\n\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 100%;\n}\n\n.sutram-excel-container[_ngcontent-%COMP%] {\n  --primary: #4f46e5;\n  --primary-hover: #4338ca;\n  --primary-soft: #e0e7ff;\n  --success: #10b981;\n  --success-soft: #d1fae5;\n  --warning: #f59e0b;\n  --warning-soft: #fef3c7;\n  --danger: #ef4444;\n  --danger-soft: #fee2e2;\n  --bg: #f8fafc;\n  --surface: #ffffff;\n  --surface-border: #e2e8f0;\n  --text: #0f172a;\n  --text-muted: #64748b;\n  --radius: 6px;\n  --header-bg: #f1f5f9;\n  --header-text: #1e293b;\n  --cell-border: rgba(125, 125, 125, 0.18);\n  --cell-height: 23px;\n  --header-height: 38px;\n  --cell-edited-bg: #fef9c3;\n  --cell-edited-border: #eab308;\n  --row-edited-bg: #fffbeb;\n  --row-new-bg: #dcfce7;\n  --row-new-border: #22c55e;\n\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\n  background-color: var(--bg);\n  color: var(--text);\n  height: 100%;\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  user-select: none;\n\n  &.dark-mode {\n    --bg: #0f172a;\n    --surface: #1e293b;\n    --surface-border: #334155;\n    --text: #f8fafc;\n    --text-muted: #94a3b8;\n    --header-bg: #1e293b;\n    --header-text: #cbd5e1;\n    --cell-border: rgba(255, 255, 255, 0.1);\n    --cell-edited-bg: rgba(234, 179, 8, 0.22);\n    --cell-edited-border: #facc15;\n    --row-edited-bg: rgba(234, 179, 8, 0.12);\n    --row-new-bg: rgba(34, 197, 94, 0.18);\n    --row-new-border: #4ade80;\n  }\n}\n\n\n\n\n\n.studio-header[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n  flex-shrink: 0;\n  user-select: none;\n}\n\n\n\n.ribbon-menu-bar[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 2px 10px;\n  height: 32px;\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n}\n\n.menu-bar-left[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.brand[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.brand-icon[_ngcontent-%COMP%] {\n  width: 22px;\n  height: 22px;\n  background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 11px;\n}\n.brand-title[_ngcontent-%COMP%] {\n  font-size: 11.5px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  color: var(--text);\n\n  .version-tag {\n    font-size: 9px;\n    padding: 1px 4px;\n    background: rgba(16, 185, 129, 0.18);\n    color: #059669;\n    border-radius: 3px;\n    font-weight: 700;\n  }\n}\n\n\n\n.ribbon-tabs-nav[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n}\n.ribbon-tab-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 3px 11px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.12s ease;\n\n  i {\n    font-size: 10.5px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.08);\n    color: var(--text);\n  }\n\n  &.active {\n    background: var(--surface);\n    color: var(--primary);\n    border-color: var(--surface-border) var(--surface-border) transparent var(--surface-border);\n    border-bottom: 2px solid var(--primary);\n    font-weight: 700;\n  }\n}\n.ribbon-badge[_ngcontent-%COMP%] {\n  font-size: 9px;\n  padding: 1px 4px;\n  border-radius: 999px;\n  background: rgba(79, 70, 229, 0.12);\n  color: var(--primary);\n  font-weight: 700;\n}\n\n.menu-bar-right[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.mode-pill-toggle[_ngcontent-%COMP%] {\n  background: rgba(125, 125, 125, 0.12);\n  border-radius: 999px;\n  padding: 2px;\n  display: flex;\n  gap: 2px;\n}\n.mode-pill-btn[_ngcontent-%COMP%] {\n  padding: 2px 9px;\n  border-radius: 999px;\n  font-size: 10px;\n  font-weight: 600;\n  border: none;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.15s ease;\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n\n  i { font-size: 9.5px; }\n}\n.mode-pill-btn.active-normal[_ngcontent-%COMP%] {\n  background: #3b82f6;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.35);\n}\n.mode-pill-btn.active-smart[_ngcontent-%COMP%] {\n  background: #10b981;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.35);\n}\n\n.cmd-btn-save-top[_ngcontent-%COMP%], .cmd-btn-sync-top[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 2px 10px;\n  height: 24px;\n  border-radius: 4px;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.15s ease;\n\n  i {\n    font-size: 11px;\n  }\n\n  &:hover:not(:disabled) {\n    background: rgba(125, 125, 125, 0.1);\n    border-color: var(--primary);\n    color: var(--primary);\n  }\n\n  &:disabled {\n    opacity: 0.5;\n    cursor: not-allowed;\n  }\n\n  &.has-pending {\n    background: #10b981;\n    color: #ffffff;\n    border-color: #059669;\n    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.35);\n\n    &:hover {\n      background: #059669;\n      color: #ffffff;\n    }\n  }\n\n  .sync-badge-count {\n    font-size: 9px;\n    padding: 1px 5px;\n    border-radius: 999px;\n    background: #ffffff;\n    color: #059669;\n    font-weight: 800;\n    line-height: 1;\n  }\n}\n\n\n\n.ribbon-strip[_ngcontent-%COMP%] {\n  background: var(--surface);\n  padding: 4px 10px;\n  height: 60px;\n  display: flex;\n  align-items: center;\n  overflow: hidden;\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);\n}\n\n\n\n.ribbon-content-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n}\n\n.ribbon-group[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  height: 52px;\n  padding: 0 4px;\n}\n\n.ribbon-group-items[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  flex-grow: 1;\n}\n\n.ribbon-group-name[_ngcontent-%COMP%] {\n  font-size: 8.5px;\n  color: var(--text-muted);\n  font-weight: 600;\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n  margin-top: 1px;\n}\n\n.ribbon-v-sep[_ngcontent-%COMP%] {\n  width: 1px;\n  height: 40px;\n  background: var(--surface-border);\n  opacity: 0.75;\n  margin: 0 4px;\n}\n\n.ribbon-tool-btn[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  gap: 2px;\n  padding: 2px 7px;\n  height: 42px;\n  border-radius: 4px;\n  border: 1px solid transparent;\n  background: transparent;\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.12s;\n  font-size: 10.5px;\n\n  i {\n    font-size: 13px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.09);\n    border-color: var(--surface-border);\n  }\n\n  &.active {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.3);\n    font-weight: 700;\n  }\n\n  .ribbon-tool-lbl {\n    font-size: 9px;\n    white-space: nowrap;\n    font-weight: 500;\n  }\n}\n\n.ribbon-mini-col[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: row;\n  gap: 2px;\n}\n\n.ribbon-mini-btn[_ngcontent-%COMP%] {\n  width: 22px;\n  height: 22px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 3px;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  font-size: 9.5px;\n\n  &:hover { background: rgba(125, 125, 125, 0.1); }\n\n  &.active-align {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.35);\n  }\n}\n\n.ribbon-search-field[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 165px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .ribbon-search-inp {\n    width: 100%;\n    height: 24px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.ribbon-btn-action[_ngcontent-%COMP%] {\n  background: var(--primary) !important;\n  color: #ffffff !important;\n  border-color: var(--primary) !important;\n  font-weight: 700 !important;\n\n  &:hover {\n    filter: brightness(1.1);\n  }\n\n  .sync-count-tag {\n    font-size: 8.5px;\n    padding: 0 4px;\n    background: #ffffff;\n    color: var(--primary);\n    border-radius: 999px;\n    font-weight: 800;\n    margin-left: 2px;\n  }\n}\n\n.ribbon-record-pill[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 24px;\n}\n\n\n\n.ribbon-scroll-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.ribbon-empty-state[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 11px;\n  color: var(--text-muted);\n  padding: 4px 12px;\n  background: rgba(125, 125, 125, 0.05);\n  border-radius: 4px;\n  border: 1px dashed var(--surface-border);\n}\n\n.ribbon-boxes-track[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  overflow-x: auto;\n  scrollbar-width: thin;\n  height: 100%;\n  flex-grow: 1;\n  padding: 2px 2px;\n\n  &::-webkit-scrollbar {\n    height: 4px;\n  }\n  &::-webkit-scrollbar-thumb {\n    background: rgba(125, 125, 125, 0.25);\n    border-radius: 2px;\n  }\n}\n\n.ribbon-small-box[_ngcontent-%COMP%] {\n  position: relative;\n  flex-shrink: 0;\n  min-width: 115px;\n  max-width: 140px;\n  height: 46px;\n  background: var(--surface);\n  border: 1px solid var(--surface-border);\n  border-radius: 5px;\n  padding: 3px 8px 3px 6px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  cursor: pointer;\n  transition: all 0.12s ease;\n  user-select: none;\n\n  &:hover {\n    border-color: var(--primary);\n    background: var(--primary-soft);\n    transform: translateY(-1px);\n    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);\n  }\n\n  &.active-box {\n    border-color: rgba(16, 185, 129, 0.6);\n    background: rgba(16, 185, 129, 0.08);\n  }\n\n  .box-star-btn {\n    position: absolute;\n    top: 2px;\n    right: 2px;\n    width: 15px;\n    height: 15px;\n    border: none;\n    background: transparent;\n    cursor: pointer;\n    color: var(--text-muted);\n    font-size: 9px;\n    padding: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 2;\n    transition: all 0.12s;\n\n    &:hover {\n      color: #f59e0b;\n      transform: scale(1.2);\n    }\n\n    &.starred {\n      color: #f59e0b;\n    }\n  }\n\n  .box-icon-wrap {\n    width: 25px;\n    height: 25px;\n    border-radius: 4px;\n    background: var(--primary-soft);\n    color: var(--primary);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 11px;\n    flex-shrink: 0;\n\n    &.report-icon-bg {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n    }\n  }\n\n  .box-info {\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    padding-right: 10px;\n\n    .box-name-eng-main {\n      font-size: 11px;\n      font-weight: 600;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-hin {\n      font-size: 10.5px;\n      font-weight: 700;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-eng {\n      font-size: 9px;\n      color: var(--text-muted);\n      font-family: monospace;\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n  }\n\n  .box-dot {\n    position: absolute;\n    bottom: 3px;\n    right: 3px;\n    width: 5px;\n    height: 5px;\n    border-radius: 50%;\n    background: #10b981;\n  }\n}\n\n.btn-group-cmd[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.cmd-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  cursor: pointer;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  transition: all 0.15s;\n  user-select: none;\n\n  i {\n    font-size: 10.5px;\n  }\n}\n.cmd-btn[_ngcontent-%COMP%]:hover { background: rgba(125, 125, 125, 0.1); }\n.cmd-btn.active[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.cmd-btn-primary[_ngcontent-%COMP%] { background: var(--primary); color: white; border-color: var(--primary); }\n.cmd-btn-primary[_ngcontent-%COMP%]:hover { background: var(--primary-hover); }\n.cmd-btn-success[_ngcontent-%COMP%] { background: var(--success); color: white; border-color: var(--success); }\n.cmd-btn-success[_ngcontent-%COMP%]:hover { background: #059669; }\n.cmd-btn-warning[_ngcontent-%COMP%] { background: var(--warning-soft); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }\n\n.sync-badge-count[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  background: #f59e0b;\n  color: #ffffff;\n  font-size: 9.5px;\n  font-weight: 700;\n  padding: 1px 5px;\n  border-radius: 999px;\n  margin-left: 4px;\n  line-height: 1.1;\n}\n\n\n\n.formula-bar-row[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n.coord-box[_ngcontent-%COMP%] {\n  width: 48px;\n  height: 22px;\n  line-height: 18px;\n  text-align: center;\n  font-weight: 700;\n  font-size: 11px;\n  padding: 1px 3px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  background: rgba(125, 125, 125, 0.05);\n}\n.active-col-chip[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n  padding: 1px 6px;\n  height: 20px;\n  line-height: 17px;\n  border-radius: 4px;\n  font-size: 10.5px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 170px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n.formula-input[_ngcontent-%COMP%] {\n  flex-grow: 1;\n  height: 22px;\n  padding: 2px 7px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 11.5px;\n  font-family: inherit;\n  outline: none;\n  background: var(--surface);\n  color: var(--text);\n}\n.formula-input[_ngcontent-%COMP%]:focus { border-color: var(--primary); }\n\n.formula-bar-right-area[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n  margin-left: 4px;\n}\n\n.formula-search-field[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 175px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .formula-search-inp {\n    width: 100%;\n    height: 22px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.formula-record-pill[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 22px;\n  white-space: nowrap;\n}\n.control-settings-bar[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  flex-shrink: 0;\n  font-size: 11px;\n}\n.ctrl-bar-left[_ngcontent-%COMP%], .ctrl-bar-right[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.ctrl-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 8px;\n  height: 23px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  user-select: none;\n\n  i {\n    font-size: 10px;\n  }\n}\n.ctrl-btn[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text);\n}\n.ctrl-btn.active[_ngcontent-%COMP%] {\n  color: var(--primary);\n  background: var(--primary-soft);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.ctrl-btn-danger[_ngcontent-%COMP%] {\n  color: var(--danger);\n  background: var(--danger-soft);\n  border-color: rgba(239, 68, 68, 0.3);\n}\n.ctrl-btn-danger[_ngcontent-%COMP%]:hover {\n  background: rgba(239, 68, 68, 0.2);\n}\n.ctrl-dot[_ngcontent-%COMP%] {\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  background: #10b981;\n  display: inline-block;\n}\n.ctrl-search-wrap[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  flex-grow: 1;\n  max-width: 420px;\n}\n.ctrl-search-icon[_ngcontent-%COMP%] {\n  position: absolute;\n  left: 8px;\n  color: var(--text-muted);\n  font-size: 10px;\n  pointer-events: none;\n}\n.ctrl-search-input[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 23px;\n  padding: 2px 24px 2px 24px;\n  border: 1px solid var(--surface-border);\n  border-radius: 999px;\n  font-size: 11px;\n  background: rgba(125, 125, 125, 0.05);\n  color: var(--text);\n  outline: none;\n  transition: all 0.15s;\n}\n.ctrl-search-input[_ngcontent-%COMP%]:focus {\n  border-color: var(--primary);\n  background: var(--surface);\n  box-shadow: 0 0 0 2px var(--primary-soft);\n}\n.ctrl-search-clear[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 6px;\n  background: none;\n  border: none;\n  font-size: 10px;\n  color: var(--text-muted);\n  cursor: pointer;\n  padding: 1px 4px;\n  border-radius: 50%;\n}\n.ctrl-search-clear[_ngcontent-%COMP%]:hover {\n  color: var(--danger);\n  background: rgba(125, 125, 125, 0.15);\n}\n.ctrl-search-spinner[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 24px;\n  color: var(--primary);\n  font-size: 10px;\n}\n.ctrl-record-badge[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  height: 21px;\n  border-radius: 999px;\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text-muted);\n  font-size: 10px;\n  font-weight: 600;\n  white-space: nowrap;\n\n  i {\n    font-size: 10px;\n  }\n}\n\n\n\n.status-strip[_ngcontent-%COMP%] {\n  padding: 3px 14px;\n  font-size: 11.5px;\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  background: rgba(125, 125, 125, 0.04);\n}\n.status-strip.strip-error[_ngcontent-%COMP%] { background: #fef2f2; color: #991b1b; }\n.status-strip.strip-clean[_ngcontent-%COMP%] { background: #f0fdf4; color: #166534; }\n.status-strip.strip-suggestion[_ngcontent-%COMP%] { background: #fffbeb; color: #92400e; }\n\n\n\n.spreadsheet-canvas[_ngcontent-%COMP%] {\n  flex-grow: 1;\n  overflow: hidden;\n  background: var(--surface);\n  position: relative;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n\n  sutram-grid {\n    display: block;\n    width: 100%;\n    height: 100%;\n    flex: 1;\n    min-height: 0;\n  }\n}\n\n\n\n.studio-footer[_ngcontent-%COMP%] {\n  flex-shrink: 0;\n  background: var(--surface);\n  border-top: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n}\n.sheet-tabs-bar[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  background: rgba(125, 125, 125, 0.05);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 2px 6px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.sheet-tabs-bar[_ngcontent-%COMP%]::-webkit-scrollbar { display: none; }\n\n.tab-pill[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 12px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11.5px;\n  font-weight: 600;\n  cursor: pointer;\n  color: var(--text-muted);\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  transition: all 0.15s;\n}\n.tab-pill[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.1);\n  color: var(--text);\n}\n.tab-pill.active-tab[_ngcontent-%COMP%] {\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-color: rgba(16, 185, 129, 0.25);\n  border-bottom: 2px solid #10b981;\n  font-weight: 700;\n}\n\n.sheet-tab-badge[_ngcontent-%COMP%] {\n  font-size: 9.5px;\n  padding: 1px 5px;\n  background: rgba(16, 185, 129, 0.2);\n  color: #059669;\n  border-radius: 999px;\n  font-weight: 700;\n}\n\n.add-tab-btn[_ngcontent-%COMP%] {\n  padding: 2px 8px;\n  border: 1px dashed rgba(125, 125, 125, 0.4);\n  border-radius: 4px;\n  background: transparent;\n  cursor: pointer;\n  color: var(--primary);\n  margin-left: 4px;\n}\n.add-tab-btn[_ngcontent-%COMP%]:hover { background: rgba(79, 70, 229, 0.1); }\n\n.sheet-tab-rough-badge[_ngcontent-%COMP%] {\n  font-size: 9px;\n  padding: 1px 4px;\n  background: rgba(245, 158, 11, 0.2);\n  color: #d97706;\n  border-radius: 3px;\n  font-weight: 700;\n  text-transform: uppercase;\n}\n\n.tab-close-btn[_ngcontent-%COMP%] {\n  margin-left: 3px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  font-size: 9.5px;\n  line-height: 1;\n  padding: 0;\n  transition: all 0.12s;\n\n  &:hover {\n    background: rgba(239, 68, 68, 0.18);\n    color: #ef4444;\n  }\n}\n\n.tab-edit-btn[_ngcontent-%COMP%] {\n  margin-left: 2px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  padding: 0;\n  opacity: 0.5;\n  transition: all 0.12s;\n\n  &:hover {\n    opacity: 1;\n    background: rgba(59, 130, 246, 0.15);\n    color: var(--primary, #3b82f6);\n  }\n}\n\n.tab-inline-rename-input[_ngcontent-%COMP%] {\n  font-size: 11px;\n  font-weight: 600;\n  padding: 1px 5px;\n  height: 19px;\n  min-width: 70px;\n  max-width: 160px;\n  border: 1px solid var(--primary, #3b82f6);\n  border-radius: 3px;\n  background: var(--surface-card, #ffffff);\n  color: var(--text, #1e293b);\n  outline: none;\n  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);\n}\n\n.tab-context-menu[_ngcontent-%COMP%] {\n  position: fixed;\n  z-index: 9999;\n  background: var(--surface-card, #ffffff);\n  border: 1px solid var(--surface-border, rgba(125, 125, 125, 0.25));\n  border-radius: 6px;\n  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);\n  min-width: 175px;\n  padding: 4px;\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n\n.tab-context-menu-item[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 6px 10px;\n  font-size: 11.5px;\n  font-weight: 500;\n  color: var(--text);\n  border-radius: 4px;\n  cursor: pointer;\n  user-select: none;\n  transition: background 0.12s;\n\n  i {\n    font-size: 12px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.12);\n  }\n\n  &.text-danger:hover {\n    background: rgba(239, 68, 68, 0.12);\n  }\n}\n\n.bottom-status-subrow[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 3px 14px;\n  font-size: 11px;\n  color: var(--text-muted);\n}\n.zoom-controls[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  padding: 1px 4px;\n}\n.zoom-btn[_ngcontent-%COMP%] {\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  color: var(--text);\n  padding: 1px 5px;\n  font-size: 11px;\n}\n.zoom-display[_ngcontent-%COMP%] {\n  font-weight: 700;\n  cursor: pointer;\n  padding: 0 4px;\n}\n\n\n\n.sync-toast-hud[_ngcontent-%COMP%] {\n  position: fixed;\n  top: 50px;\n  right: 20px;\n  z-index: 2500;\n  min-width: 320px;\n  max-width: 440px;\n  background: var(--surface);\n  color: var(--text);\n  border: 1px solid var(--surface-border);\n  border-radius: 8px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);\n  overflow: hidden;\n  animation: _ngcontent-%COMP%_toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);\n  font-size: 11.5px;\n}\n@keyframes _ngcontent-%COMP%_toastSlideIn {\n  from { opacity: 0; transform: translateY(-12px) scale(0.97); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n.sync-toast-header[_ngcontent-%COMP%] {\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--surface-border);\n  background: rgba(125, 125, 125, 0.04);\n}\n.sync-toast-title[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 7px;\n  font-weight: 700;\n  font-size: 12px;\n}\n.sync-toast-close[_ngcontent-%COMP%] {\n  background: none;\n  border: none;\n  color: var(--text-muted);\n  cursor: pointer;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 3px;\n}\n.sync-toast-close[_ngcontent-%COMP%]:hover {\n  background: rgba(125, 125, 125, 0.12);\n  color: var(--text);\n}\n.sync-toast-body[_ngcontent-%COMP%] {\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n.sync-toast-stats[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-wrap: wrap;\n}\n.sync-badge-chip[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n}\n.chip-success[_ngcontent-%COMP%] {\n  background: var(--success-soft);\n  color: var(--success);\n}\n.chip-info[_ngcontent-%COMP%] {\n  background: var(--primary-soft);\n  color: var(--primary);\n}\n.chip-warning[_ngcontent-%COMP%] {\n  background: var(--warning-soft);\n  color: #b45309;\n}\n.chip-danger[_ngcontent-%COMP%] {\n  background: var(--danger-soft);\n  color: var(--danger);\n}\n.sync-toast-errors[_ngcontent-%COMP%] {\n  margin-top: 4px;\n  padding: 6px 8px;\n  background: rgba(239, 68, 68, 0.08);\n  border: 1px solid rgba(239, 68, 68, 0.2);\n  border-radius: 4px;\n  font-size: 10.5px;\n  color: #ef4444;\n  max-height: 140px;\n  overflow-y: auto;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}\n\n\n\n.last-sync-badge[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  padding: 1px 7px;\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-radius: 4px;\n  font-weight: 600;\n  font-size: 10.5px;\n  border: 1px solid rgba(16, 185, 129, 0.25);\n\n  &.sync-error {\n    background: rgba(239, 68, 68, 0.12);\n    color: #ef4444;\n    border-color: rgba(239, 68, 68, 0.25);\n  }\n}\n\n\n\n.sync-progress-wrap[_ngcontent-%COMP%] {\n  width: 100%;\n}\n.sync-progress-track[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 6px;\n  background: rgba(125, 125, 125, 0.2);\n  border-radius: 999px;\n  overflow: hidden;\n}\n.sync-progress-bar[_ngcontent-%COMP%] {\n  height: 100%;\n  background: linear-gradient(90deg, #3b82f6, #10b981);\n  border-radius: 999px;\n  transition: width 0.2s ease-in-out;\n}\n\n\n\n\n\n  .sutram-col-config-popover {\n  width: min(94vw, 760px) !important;\n  height: 520px !important;\n  max-height: calc(100vh - 80px) !important;\n  font-size: 11.5px;\n  border-radius: 8px !important;\n  overflow: hidden !important;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n  display: flex !important;\n  flex-direction: column !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n    width: 100% !important;\n    height: 100% !important;\n    display: flex !important;\n    flex-direction: column !important;\n    flex: 1 1 auto !important;\n    min-height: 0 !important;\n    overflow: hidden !important;\n  }\n}\n\n.col-dd-split-container[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: row;\n  width: 100%;\n  flex: 1 1 0;\n  min-height: 0;\n  overflow: hidden;\n  background: var(--surface, #ffffff);\n}\n\n\n\n.col-dd-left-pane[_ngcontent-%COMP%] {\n  width: 325px;\n  min-width: 300px;\n  max-width: 340px;\n  border-right: 1px solid var(--surface-border, #e2e8f0);\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  min-height: 0;\n  background: var(--surface, #ffffff);\n  flex-shrink: 0;\n\n  .col-dd-header {\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    flex-direction: column;\n    gap: 6px;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-search-wrap {\n    position: relative;\n    display: flex;\n    align-items: center;\n\n    .col-dd-search-icon {\n      position: absolute;\n      left: 8px;\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      pointer-events: none;\n    }\n\n    .col-dd-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      border-radius: 4px;\n      font-size: 11.5px;\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.12s;\n\n      &:focus {\n        border-color: var(--primary, #4f46e5);\n      }\n    }\n\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 8px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      font-size: 11px;\n      padding: 0;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .col-dd-actions {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 0 2px;\n\n    .col-dd-actions-left {\n      display: flex;\n      gap: 4px;\n    }\n\n    .col-dd-act-btn {\n      padding: 2px 7px;\n      font-size: 10.5px;\n      font-weight: 600;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--surface, #ffffff);\n      color: var(--text-muted, #64748b);\n      border-radius: 3px;\n      cursor: pointer;\n      transition: all 0.12s;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .col-dd-count {\n      font-size: 10.5px;\n      color: var(--text-muted, #64748b);\n      font-weight: 600;\n    }\n  }\n\n  .col-dd-body {\n    padding: 6px 8px;\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    flex: 1 1 0 !important;\n    min-height: 0 !important;\n    display: flex;\n    flex-direction: column;\n    gap: 3px;\n    overscroll-behavior: contain;\n    scrollbar-width: thin;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-track {\n      background: rgba(125, 125, 125, 0.05);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb:hover {\n      background: var(--primary, #4f46e5);\n    }\n  }\n\n  .col-dd-section-title {\n    font-size: 10px;\n    font-weight: 700;\n    color: var(--text-muted, #64748b);\n    margin: 4px 0 2px 4px;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    flex-shrink: 0 !important;\n    display: flex;\n    align-items: center;\n\n    &.fx-section-title {\n      color: #7c3aed !important;\n      margin-top: 8px;\n    }\n  }\n\n  .col-dd-item {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 4px 6px;\n    border-radius: 4px;\n    cursor: pointer;\n    user-select: none;\n    transition: background 0.1s;\n    font-size: 11.5px;\n    color: var(--text, #0f172a);\n    flex-shrink: 0 !important;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.08);\n    }\n\n    &.fx-item:hover {\n      background: rgba(139, 92, 246, 0.08) !important;\n    }\n\n    .col-dd-item-left {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n\n    .col-dd-item-name {\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    cursor: pointer;\n    accent-color: var(--primary, #4f46e5);\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .badge-fx-mini {\n    font-size: 8.5px;\n    font-weight: 700;\n    padding: 1px 4px;\n    border-radius: 3px;\n    background: rgba(139, 92, 246, 0.15);\n    color: #7c3aed;\n    flex-shrink: 0;\n  }\n\n  .type-badge {\n    font-size: 9.5px;\n    padding: 1px 5px;\n    border-radius: 3px;\n    background: rgba(125, 125, 125, 0.12);\n    color: var(--text-muted, #64748b);\n    font-family: 'JetBrains Mono', monospace;\n    flex-shrink: 0;\n\n    &.badge-fx-type {\n      background: rgba(139, 92, 246, 0.12) !important;\n      color: #7c3aed !important;\n    }\n  }\n\n  \n\n  .col-dd-group {\n    border: 1px solid var(--surface-border, #e2e8f0);\n    border-radius: 5px;\n    margin: 3px 0;\n    overflow: hidden;\n    background: rgba(125, 125, 125, 0.02);\n    flex-shrink: 0 !important;\n\n    &.fk-active-group {\n      border-color: rgba(79, 70, 229, 0.35);\n    }\n\n    .col-dd-group-header {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding: 5px 8px;\n      background: rgba(125, 125, 125, 0.06);\n      cursor: pointer;\n      user-select: none;\n      font-size: 11.5px;\n      font-weight: 600;\n      flex-shrink: 0 !important;\n      min-height: 28px !important;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n      }\n\n      .col-dd-group-left {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        overflow: hidden;\n      }\n\n      .fk-expand-toggle {\n        font-size: 10px;\n        color: var(--text-muted, #64748b);\n        width: 12px;\n        text-align: center;\n        transition: transform 0.18s ease;\n\n        &.rotated {\n          transform: rotate(90deg);\n        }\n      }\n\n      .fk-group-pill {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 999px;\n        font-weight: 600;\n      }\n    }\n\n    .col-dd-group-items {\n      padding: 3px 4px 4px 18px;\n      background: var(--surface, #ffffff);\n      border-top: 1px solid var(--surface-border, #e2e8f0);\n      display: flex;\n      flex-direction: column;\n      gap: 2px;\n      max-height: none !important;\n      overflow: visible !important;\n    }\n  }\n\n  .col-dd-empty {\n    padding: 16px;\n    text-align: center;\n    color: var(--text-muted, #64748b);\n    font-size: 11.5px;\n  }\n}\n\n\n\n.col-dd-right-pane[_ngcontent-%COMP%] {\n  flex: 1 1 0;\n  min-width: 350px;\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  min-height: 0;\n  background: var(--surface-ground, rgba(125, 125, 125, 0.02));\n\n  .col-dd-right-header {\n    padding: 8px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: var(--surface, #ffffff);\n    display: flex;\n    flex-direction: column;\n    gap: 2px;\n    flex-shrink: 0;\n\n    .col-dd-right-title-wrap {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n\n      .col-dd-right-title {\n        font-size: 11.5px;\n        font-weight: 700;\n        color: var(--text, #0f172a);\n        display: flex;\n        align-items: center;\n      }\n\n      .col-dd-right-badge {\n        font-size: 10px;\n        font-weight: 600;\n        padding: 2px 7px;\n        border-radius: 999px;\n        background: rgba(79, 70, 229, 0.12);\n        color: var(--primary, #4f46e5);\n      }\n    }\n\n    .col-dd-right-sub {\n      font-size: 10px;\n      color: var(--text-muted, #64748b);\n    }\n  }\n\n  .col-dd-right-body {\n    padding: 8px 10px;\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    flex: 1 1 0;\n    min-height: 0;\n    display: flex;\n    flex-direction: column;\n    gap: 5px;\n    scrollbar-width: thin;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 3px;\n    }\n  }\n\n  .col-dd-empty {\n    padding: 20px;\n    text-align: center;\n    color: var(--text-muted, #64748b);\n    font-size: 11.5px;\n  }\n}\n\n\n\n.col-selected-card[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 5px 8px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  transition: all 0.15s ease;\n  flex-shrink: 0;\n\n  &:hover {\n    border-color: rgba(79, 70, 229, 0.4);\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);\n  }\n\n  \n\n  .col-card-order-controls {\n    display: flex;\n    align-items: center;\n    gap: 4px;\n    flex-shrink: 0;\n\n    .col-card-letter-badge {\n      width: 22px;\n      height: 22px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      background: rgba(125, 125, 125, 0.1);\n      color: var(--text, #0f172a);\n      border-radius: 4px;\n      font-size: 11px;\n      font-weight: 700;\n      font-family: monospace;\n    }\n\n    .col-card-arrows {\n      display: flex;\n      flex-direction: column;\n      gap: 1px;\n\n      .btn-arrow {\n        width: 16px;\n        height: 11px;\n        padding: 0;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        background: transparent;\n        border: 1px solid var(--surface-border, #e2e8f0);\n        border-radius: 2px;\n        color: var(--text-muted, #64748b);\n        cursor: pointer;\n        font-size: 7px;\n        transition: all 0.1s;\n\n        &:hover:not(:disabled) {\n          background: var(--primary, #4f46e5);\n          border-color: var(--primary, #4f46e5);\n          color: #ffffff;\n        }\n\n        &:disabled {\n          opacity: 0.3;\n          cursor: default;\n        }\n      }\n    }\n  }\n\n  \n\n  .col-card-meta {\n    display: flex;\n    flex-direction: column;\n    gap: 2px;\n    flex: 1 1 0;\n    min-width: 0;\n\n    .col-card-meta-top {\n      display: flex;\n      align-items: center;\n      gap: 4px;\n      overflow: hidden;\n\n      .col-card-key-txt {\n        font-size: 11px;\n        font-weight: 600;\n        color: var(--text, #0f172a);\n        overflow: hidden;\n        text-overflow: ellipsis;\n        white-space: nowrap;\n      }\n\n      .badge-fx-mini {\n        font-size: 8.5px;\n        font-weight: 700;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(139, 92, 246, 0.15);\n        color: #7c3aed;\n        flex-shrink: 0;\n      }\n\n      .badge-fk-pill {\n        font-size: 8.5px;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(59, 130, 246, 0.12);\n        color: #2563eb;\n        font-weight: 600;\n        flex-shrink: 0;\n      }\n      .badge-sub-pill {\n        font-size: 8.5px;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(16, 185, 129, 0.12);\n        color: #059669;\n        font-weight: 600;\n        flex-shrink: 0;\n      }\n      .badge-raw-pill {\n        font-size: 8.5px;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(245, 158, 11, 0.12);\n        color: #d97706;\n        font-weight: 600;\n        flex-shrink: 0;\n      }\n      .badge-std-pill {\n        font-size: 8.5px;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text-muted, #64748b);\n        font-family: monospace;\n        flex-shrink: 0;\n      }\n    }\n\n    .col-card-label-wrap {\n      display: flex;\n\n      .col-card-label-inp {\n        width: 100%;\n        height: 22px;\n        padding: 2px 6px;\n        font-size: 10.5px;\n        border: 1px solid var(--surface-border, #e2e8f0);\n        border-radius: 3px;\n        background: var(--bg, #f8fafc);\n        color: var(--text, #0f172a);\n        outline: none;\n        transition: border-color 0.12s;\n\n        &:focus {\n          border-color: var(--primary, #4f46e5);\n          background: var(--surface, #ffffff);\n        }\n      }\n    }\n  }\n\n  \n\n  .col-card-format-ctrls {\n    display: flex;\n    align-items: center;\n    gap: 6px;\n    flex-shrink: 0;\n\n    .col-card-select-wrap {\n      .col-card-select {\n        height: 24px;\n        font-size: 10px;\n        padding: 2px 4px;\n        border: 1px solid var(--surface-border, #e2e8f0);\n        border-radius: 4px;\n        background: var(--surface, #ffffff);\n        color: var(--text, #0f172a);\n        outline: none;\n        cursor: pointer;\n        max-width: 125px;\n\n        &:focus {\n          border-color: var(--primary, #4f46e5);\n        }\n      }\n    }\n\n    .col-card-plain-type {\n      min-width: 75px;\n      text-align: center;\n\n      .text-purple-xs {\n        font-size: 9.5px;\n        font-weight: 600;\n        color: #7c3aed;\n      }\n      .text-muted-xs {\n        font-size: 9.5px;\n        color: var(--text-muted, #64748b);\n      }\n    }\n\n    .btn-col-hide {\n      width: 22px;\n      height: 22px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      background: transparent;\n      border: 1px solid transparent;\n      border-radius: 4px;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      font-size: 11px;\n      transition: all 0.12s;\n\n      &:hover {\n        background: rgba(239, 68, 68, 0.1);\n        border-color: rgba(239, 68, 68, 0.2);\n        color: #ef4444;\n      }\n    }\n  }\n}\n\n\n\n.col-dd-footer[_ngcontent-%COMP%] {\n  padding: 6px 12px;\n  border-top: 1px solid var(--surface-border, #e2e8f0);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  background: var(--surface, #ffffff);\n  flex-shrink: 0 !important;\n}\n\n\n\n.active-sheet-badge-pill[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 10px;\n  border-radius: 6px;\n  background: rgba(99, 102, 241, 0.12);\n  border: 1px solid rgba(99, 102, 241, 0.3);\n  color: #4f46e5;\n  font-size: 11px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 170px;\n\n  i {\n    font-size: 11px;\n  }\n\n  .sheet-title-text {\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n  }\n}\n\n.dark-theme[_nghost-%COMP%]   .active-sheet-badge-pill[_ngcontent-%COMP%], .dark-theme   [_nghost-%COMP%]   .active-sheet-badge-pill[_ngcontent-%COMP%], .dark-mode[_nghost-%COMP%]   .active-sheet-badge-pill[_ngcontent-%COMP%], .dark-mode   [_nghost-%COMP%]   .active-sheet-badge-pill[_ngcontent-%COMP%] {\n  background: rgba(99, 102, 241, 0.22);\n  border-color: rgba(99, 102, 241, 0.45);\n  color: #818cf8;\n}\n\n\n\n\n\n\n\n\n  .sutram-studio-dialog {\n  .p-dialog-header {\n    background: var(--surface, #ffffff);\n    color: var(--text, #0f172a);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    padding: 8px 12px !important;\n    font-size: 12px !important;\n    font-weight: 700;\n\n    .p-dialog-title {\n      font-size: 12px !important;\n      font-weight: 700;\n      display: flex;\n      align-items: center;\n      gap: 6px;\n    }\n\n    .p-dialog-header-icon {\n      width: 22px !important;\n      height: 22px !important;\n      font-size: 11px !important;\n      border-radius: 4px;\n      color: var(--text-muted, #64748b);\n      &:hover {\n        background: var(--surface-hover, rgba(0,0,0,0.05));\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .p-dialog-content {\n    background: var(--surface-ground, #f8fafc);\n    color: var(--text, #0f172a);\n    padding: 10px 12px !important;\n    overflow-y: auto;\n    font-size: 11.5px;\n  }\n\n  .p-dialog-footer {\n    background: var(--surface, #ffffff);\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    padding: 7px 12px !important;\n  }\n}\n\n.dialog-body-wrap[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.dialog-subtext[_ngcontent-%COMP%] {\n  font-size: 11px;\n  color: var(--text-muted, #64748b);\n  line-height: 1.35;\n}\n\n.dialog-info-banner[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  padding: 6px 10px;\n  font-size: 11px;\n  border-radius: 5px;\n  line-height: 1.3;\n\n  &.info {\n    background: rgba(59, 130, 246, 0.08);\n    border: 1px solid rgba(59, 130, 246, 0.2);\n    color: var(--text, #0f172a);\n    .banner-icon { color: #2563eb; }\n  }\n\n  &.warning {\n    background: rgba(245, 158, 11, 0.08);\n    border: 1px solid rgba(245, 158, 11, 0.25);\n    color: var(--text, #0f172a);\n    .banner-icon { color: #d97706; }\n  }\n\n  .banner-icon {\n    font-size: 12px;\n    flex-shrink: 0;\n  }\n}\n\n.dialog-subcard[_ngcontent-%COMP%] {\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  padding: 8px 10px;\n}\n\n.subcard-title[_ngcontent-%COMP%] {\n  font-size: 11px;\n  font-weight: 700;\n  color: var(--text, #0f172a);\n  margin-bottom: 6px;\n}\n\n.subcard-grid[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: flex-end;\n  gap: 8px;\n  flex-wrap: wrap;\n\n  .subcard-col-2 { width: calc(16.66% - 7px); }\n  .subcard-col-3 { width: calc(25% - 6px); }\n  .subcard-col-4 { width: calc(33.33% - 6px); }\n  .subcard-col-5 { width: calc(41.66% - 5px); }\n  .subcard-col-6 { width: calc(50% - 4px); }\n  .subcard-col-7 { width: calc(58.33% - 4px); }\n}\n\n.dialog-label[_ngcontent-%COMP%] {\n  font-size: 10px;\n  font-weight: 700;\n  color: var(--text-muted, #64748b);\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n  margin-bottom: 3px;\n  display: block;\n}\n\n.dialog-ctrl-input[_ngcontent-%COMP%] {\n  height: 26px !important;\n  font-size: 11.5px !important;\n  padding: 2px 7px !important;\n  border-radius: 4px !important;\n  width: 100% !important;\n}\n\n.dialog-ctrl-textarea[_ngcontent-%COMP%] {\n  width: 100%;\n  padding: 5px 8px;\n  font-size: 11px;\n  line-height: 1.4;\n  border-radius: 4px;\n  border: 1px solid var(--surface-border, #cbd5e1);\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  resize: vertical;\n\n  &:focus {\n    outline: none;\n    border-color: #3b82f6;\n  }\n}\n\n  .dialog-ctrl-dropdown {\n  height: 26px !important;\n  font-size: 11.5px !important;\n  width: 100% !important;\n\n  .p-dropdown-label {\n    padding: 2px 7px !important;\n    font-size: 11.5px !important;\n    line-height: 22px !important;\n  }\n  .p-dropdown-trigger {\n    width: 22px !important;\n  }\n}\n\n.dialog-btn-add[_ngcontent-%COMP%] {\n  height: 26px !important;\n  font-size: 11px !important;\n  padding: 0 10px !important;\n  border-radius: 4px !important;\n}\n\n.chips-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 4px;\n  margin-top: 5px;\n}\n\n.chips-label[_ngcontent-%COMP%] {\n  font-size: 10px;\n  color: var(--text-muted, #64748b);\n  font-weight: 600;\n}\n\n.quick-chip[_ngcontent-%COMP%] {\n  font-size: 9.5px;\n  font-family: var(--font-mono, monospace);\n  padding: 1px 6px;\n  border-radius: 3px;\n  background: var(--surface-ground, #f1f5f9);\n  color: var(--text, #0f172a);\n  border: 1px solid var(--surface-border, #cbd5e1);\n  cursor: pointer;\n  user-select: none;\n  transition: all 0.15s ease;\n\n  &:hover {\n    background: #e2e8f0;\n    border-color: #94a3b8;\n  }\n\n  &.chip-green {\n    background: rgba(16, 185, 129, 0.08);\n    color: #059669;\n    border-color: rgba(16, 185, 129, 0.25);\n    &:hover { background: rgba(16, 185, 129, 0.18); }\n  }\n\n  &.chip-orange {\n    background: rgba(245, 158, 11, 0.08);\n    color: #d97706;\n    border-color: rgba(245, 158, 11, 0.25);\n    &:hover { background: rgba(245, 158, 11, 0.18); }\n  }\n\n  &.chip-blue {\n    background: rgba(59, 130, 246, 0.08);\n    color: #2563eb;\n    border-color: rgba(59, 130, 246, 0.25);\n    &:hover { background: rgba(59, 130, 246, 0.18); }\n  }\n}\n\n.dialog-table-card[_ngcontent-%COMP%] {\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 5px;\n  overflow: hidden;\n  max-height: 58vh;\n  overflow-y: auto;\n}\n\n.dialog-data-table[_ngcontent-%COMP%] {\n  width: 100%;\n  border-collapse: collapse;\n  font-size: 11.5px;\n\n  thead tr {\n    position: sticky;\n    top: 0;\n    z-index: 2;\n  }\n\n  th {\n    font-size: 10px;\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: 0.3px;\n    padding: 5px 8px;\n    background: var(--surface-ground, #f8fafc);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    color: var(--text-muted, #64748b);\n  }\n\n  td {\n    padding: 4px 8px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    vertical-align: middle;\n    color: var(--text, #0f172a);\n  }\n\n  tr:hover td {\n    background: var(--surface-hover, rgba(0,0,0,0.02));\n  }\n}\n\n.col-idx[_ngcontent-%COMP%] {\n  font-size: 10px;\n}\n\n.col-ident-cell[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n}\n\n.col-name-txt[_ngcontent-%COMP%] {\n  font-family: var(--font-mono, monospace);\n  font-weight: 600;\n  font-size: 11.5px;\n}\n\n.type-pill[_ngcontent-%COMP%] {\n  font-size: 9px;\n  font-weight: 600;\n  font-family: var(--font-mono, monospace);\n  padding: 1px 5px;\n  border-radius: 3px;\n  background: rgba(59, 130, 246, 0.08);\n  color: #2563eb;\n  border: 1px solid rgba(59, 130, 246, 0.2);\n  text-transform: lowercase;\n}\n\n.pk-pill[_ngcontent-%COMP%] {\n  font-size: 8.5px;\n  font-weight: 700;\n  font-family: var(--font-mono, monospace);\n  padding: 1px 4px;\n  border-radius: 3px;\n  background: rgba(245, 158, 11, 0.12);\n  color: #d97706;\n  border: 1px solid rgba(245, 158, 11, 0.25);\n}\n\n.event-pill[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 9.5px;\n  font-weight: 700;\n  font-family: var(--font-mono, monospace);\n  padding: 1px 6px;\n  border-radius: 3px;\n\n  &.event-pill-insert {\n    background: rgba(16, 185, 129, 0.1);\n    color: #059669;\n    border: 1px solid rgba(16, 185, 129, 0.25);\n  }\n  &.event-pill-update {\n    background: rgba(59, 130, 246, 0.1);\n    color: #2563eb;\n    border: 1px solid rgba(59, 130, 246, 0.25);\n  }\n  &.event-pill-delete {\n    background: rgba(239, 68, 68, 0.1);\n    color: #dc2626;\n    border: 1px solid rgba(239, 68, 68, 0.25);\n  }\n}\n\n.dialog-table-input[_ngcontent-%COMP%] {\n  height: 24px !important;\n  font-size: 11.5px !important;\n  padding: 2px 7px !important;\n  border-radius: 3px !important;\n  width: 100% !important;\n}\n\n  .dialog-table-dropdown {\n  height: 24px !important;\n  font-size: 11.5px !important;\n  width: 100% !important;\n\n  .p-dropdown-label {\n    padding: 1px 6px !important;\n    font-size: 11.5px !important;\n    line-height: 22px !important;\n  }\n  .p-dropdown-trigger {\n    width: 20px !important;\n  }\n}\n\n.text-muted-xs[_ngcontent-%COMP%] {\n  font-size: 10.5px;\n  color: var(--text-muted, #64748b);\n}\n\n.btn-group-mini[_ngcontent-%COMP%] {\n  display: inline-flex;\n  gap: 2px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 4px;\n  padding: 1px;\n}\n\n.mini-icon-btn[_ngcontent-%COMP%] {\n  width: 20px;\n  height: 18px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted, #64748b);\n  border-radius: 2px;\n  cursor: pointer;\n  padding: 0;\n\n  &:hover:not(:disabled) {\n    background: var(--surface-hover, rgba(0,0,0,0.06));\n    color: var(--text, #0f172a);\n  }\n  &:disabled {\n    opacity: 0.3;\n    cursor: default;\n  }\n  i {\n    font-size: 9px;\n  }\n}\n\n.mini-del-btn[_ngcontent-%COMP%] {\n  width: 22px;\n  height: 20px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: 1px solid rgba(239, 68, 68, 0.25);\n  background: rgba(239, 68, 68, 0.05);\n  color: #dc2626;\n  border-radius: 3px;\n  cursor: pointer;\n  padding: 0;\n\n  &:hover {\n    background: rgba(239, 68, 68, 0.15);\n  }\n  i {\n    font-size: 10px;\n  }\n}\n\n.formula-cell[_ngcontent-%COMP%] {\n  font-size: 11px;\n  font-weight: 600;\n}\n\n.trigger-code-snippet[_ngcontent-%COMP%] {\n  background: var(--surface-ground, #f1f5f9);\n  padding: 2px 5px;\n  border-radius: 3px;\n  font-size: 10.5px;\n  color: var(--text, #0f172a);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  white-space: pre-wrap;\n  word-break: break-all;\n}\n\n.dialog-empty-box[_ngcontent-%COMP%] {\n  text-align: center;\n  color: var(--text-muted, #64748b);\n  padding: 14px 10px;\n  font-size: 11px;\n  border: 1px dashed var(--surface-border, #cbd5e1);\n  border-radius: 5px;\n}\n\n.dialog-footer-actions[_ngcontent-%COMP%] {\n  display: flex;\n  justify-content: flex-end;\n  gap: 6px;\n}\n\n.dialog-btn-cancel[_ngcontent-%COMP%] {\n  height: 26px !important;\n  font-size: 11.5px !important;\n  padding: 0 10px !important;\n}\n\n.dialog-btn-save[_ngcontent-%COMP%] {\n  height: 26px !important;\n  font-size: 11.5px !important;\n  padding: 0 12px !important;\n}\n\n\n\n.user-role-badge-pill[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  background: var(--surface-card, rgba(0, 0, 0, 0.04));\n  border: 1px solid var(--surface-border, #e2e8f0);\n  padding: 2px 8px;\n  border-radius: 12px;\n  cursor: pointer;\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--text, #1e293b);\n  user-select: none;\n  transition: all 0.15s ease;\n\n  &:hover {\n    background: var(--surface-hover, rgba(0, 0, 0, 0.08));\n    border-color: var(--primary-color, #6366f1);\n  }\n\n  .user-name-txt {\n    font-size: 11px;\n    font-weight: 700;\n    font-family: monospace;\n  }\n}\n\n.role-pill-tag[_ngcontent-%COMP%] {\n  font-size: 9.5px;\n  font-weight: 700;\n  padding: 1px 6px;\n  border-radius: 999px;\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n\n  &.admin-tag {\n    background: rgba(168, 85, 247, 0.15);\n    color: #9333ea;\n    border: 1px solid rgba(168, 85, 247, 0.3);\n  }\n\n  &.author-tag {\n    background: rgba(16, 185, 129, 0.15);\n    color: #059669;\n    border: 1px solid rgba(16, 185, 129, 0.3);\n  }\n}\n\n.dark-mode[_ngcontent-%COMP%] {\n  .role-pill-tag {\n    &.admin-tag {\n      background: rgba(168, 85, 247, 0.25);\n      color: #c084fc;\n    }\n    &.author-tag {\n      background: rgba(16, 185, 129, 0.25);\n      color: #34d399;\n    }\n  }\n}\n\n.btn-disabled-role[_ngcontent-%COMP%] {\n  opacity: 0.55 !important;\n  cursor: not-allowed !important;\n  filter: grayscale(0.5);\n}\n\n.btn-role-switch[_ngcontent-%COMP%] {\n  background: transparent;\n  border: 1px solid var(--surface-border, #cbd5e1);\n  border-radius: 4px;\n  font-size: 11px;\n  font-weight: 600;\n  padding: 2px 8px;\n  color: var(--text-muted, #64748b);\n  cursor: pointer;\n  transition: all 0.15s ease;\n\n  &:hover {\n    color: var(--text, #0f172a);\n    border-color: var(--text, #0f172a);\n  }\n\n  &.active-role {\n    background: var(--primary-color, #6366f1);\n    color: #ffffff !important;\n    border-color: var(--primary-color, #6366f1);\n  }\n}\n\n.badge-current-user[_ngcontent-%COMP%] {\n  font-size: 9px;\n  font-weight: 700;\n  background: rgba(59, 130, 246, 0.15);\n  color: #2563eb;\n  padding: 1px 4px;\n  border-radius: 3px;\n}\n\n.status-pill[_ngcontent-%COMP%] {\n  font-size: 10px;\n  font-weight: 600;\n  padding: 1px 6px;\n  border-radius: 4px;\n\n  &.active-pill {\n    background: rgba(16, 185, 129, 0.15);\n    color: #059669;\n  }\n\n  &.inactive-pill {\n    background: rgba(100, 116, 139, 0.15);\n    color: #64748b;\n  }\n}\n\n.btn-use-account[_ngcontent-%COMP%] {\n  font-size: 10.5px;\n  font-weight: 600;\n  padding: 2px 6px;\n  border-radius: 4px;\n  border: 1px solid var(--surface-border, #cbd5e1);\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  cursor: pointer;\n  transition: all 0.15s;\n\n  &:hover {\n    background: var(--surface-hover, rgba(0, 0, 0, 0.05));\n    border-color: var(--primary-color, #6366f1);\n  }\n\n  &.btn-use-account-active {\n    background: rgba(16, 185, 129, 0.15);\n    color: #059669;\n    border-color: rgba(16, 185, 129, 0.4);\n    cursor: default;\n  }\n}\n\n.btn-link-mini[_ngcontent-%COMP%] {\n  background: none;\n  border: none;\n  font-size: 11px;\n  cursor: pointer;\n  text-decoration: underline;\n  padding: 0;\n}"], changeDetection: 0 });
 };
 (function() {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SutramExcelStudioComponent, [{
@@ -135623,7 +141153,7 @@ Do you want to discard your changes and reload from database?`);
                   (click)="setTopTab('tables')">
             <i class="pi pi-database"></i>
             <span>Tables</span>
-            <span class="ribbon-badge">{{ tablesList.length || 21 }}</span>
+            <span class="ribbon-badge">{{ tablesList.length }}</span>
           </button>
           <button type="button"
                   class="ribbon-tab-btn"
@@ -135682,6 +141212,17 @@ Do you want to discard your changes and reload from database?`);
         <button class="cmd-btn" style="padding: 3px 6px;" (click)="toggleTheme()" title="Toggle Light / Dark Mode">
           <i class="pi" [ngClass]="isDarkMode ? 'pi-sun' : 'pi-moon'"></i>
         </button>
+
+        <!-- User & Role Pill Indicator with Quick Role Toggle -->
+        <div class="user-role-badge-pill"
+             (click)="toggleRole()"
+             [title]="'Active User: ' + (currentUser.display_name || currentUser.username) + ' (' + (isAdmin ? 'Admin Mode' : 'Author Mode') + ')\\nClick to toggle role'">
+          <i class="pi" [ngClass]="isAdmin ? 'pi-shield' : 'pi-user'" [style.color]="isAdmin ? '#a855f7' : '#10b981'"></i>
+          <span class="user-name-txt">{{ currentUser.username }}</span>
+          <span class="role-pill-tag" [class.admin-tag]="isAdmin" [class.author-tag]="isAuthor">
+            {{ isAdmin ? '\u{1F451} Admin' : '\u{1F464} Author' }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -135795,8 +141336,14 @@ Do you want to discard your changes and reload from database?`);
 
       <!-- RIBBON TAB 3: REPORTS (Horizontal Scrolling Strip with Small Simple Boxes) -->
       <div *ngIf="activeTopTab === 'reports'" class="ribbon-scroll-row">
+        <!-- Empty state when no dynamic reports or views exist -->
+        <div *ngIf="!reportsList || reportsList.length === 0" class="ribbon-empty-state">
+          <i class="pi pi-info-circle text-muted"></i>
+          <span class="text-muted">\u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u092E\u0947\u0902 \u0915\u094B\u0908 \u0930\u093F\u092A\u094B\u0930\u094D\u091F \u092F\u093E \u0935\u094D\u092F\u0942 \u0909\u092A\u0932\u092C\u094D\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948 (No dynamic reports or views in database)</span>
+        </div>
+
         <!-- Quick search input inside reports strip -->
-        <div class="ribbon-search-field" style="width: 140px; min-width: 140px; margin-right: 6px;">
+        <div *ngIf="reportsList && reportsList.length > 0" class="ribbon-search-field" style="width: 140px; min-width: 140px; margin-right: 6px;">
           <i class="pi pi-search search-ico"></i>
           <input type="text"
                  class="ribbon-search-inp"
@@ -135806,7 +141353,7 @@ Do you want to discard your changes and reload from database?`);
         </div>
 
         <!-- Small simple boxes for each report -->
-        <div class="ribbon-boxes-track">
+        <div *ngIf="reportsList && reportsList.length > 0" class="ribbon-boxes-track">
           <div *ngFor="let rep of filteredReports"
                class="ribbon-small-box report-box"
                [class.active-box]="isReportOpen(rep.id)"
@@ -135823,7 +141370,7 @@ Do you want to discard your changes and reload from database?`);
             </button>
 
             <div class="box-icon-wrap report-icon-bg">
-              <i class="pi" [ngClass]="rep.icon"></i>
+              <i class="pi" [ngClass]="rep.icon || 'pi-chart-bar'"></i>
             </div>
             <div class="box-info">
               <span class="box-name-eng-main">{{ rep.display_name || rep.title || rep.table || rep.id }}</span>
@@ -135833,8 +141380,61 @@ Do you want to discard your changes and reload from database?`);
         </div>
       </div>
 
-      <!-- RIBBON TAB 4: SETTINGS (Concise & Minimal: Checkbox & Badge) -->
+      <!-- RIBBON TAB 4: SETTINGS (Contextual to Active Open Sheet) -->
       <div *ngIf="activeTopTab === 'settings'" class="ribbon-content-row">
+        <!-- Active Sheet Context Badge -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items" style="align-items: center; padding: 2px 6px;">
+            <div class="active-sheet-badge-pill" [title]="'Active Sheet: ' + currentActiveSheetTitle">
+              <i class="pi" [ngClass]="isCurrentSheetRough ? 'pi-file' : (isCurrentSheetReport ? 'pi-chart-bar' : 'pi-table')"></i>
+              <span class="sheet-title-text">{{ currentActiveSheetTitle }}</span>
+            </div>
+          </div>
+          <span class="ribbon-group-name">ACTIVE SHEET</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Table & Column Configuration -->
+        <div class="ribbon-group" *ngIf="isCurrentSheetTable">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    (click)="colConfigOp.toggle($event)"
+                    title="Configure visible columns, display order, labels and formats">
+              <i class="pi pi-sliders-h" style="color: #6366f1;"></i>
+              <span class="ribbon-tool-lbl">Columns</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">DISPLAY</span>
+        </div>
+
+        <div class="ribbon-v-sep" *ngIf="isCurrentSheetTable"></div>
+
+        <!-- Section: Triggers (UI & DB) -->
+        <div class="ribbon-group" *ngIf="isCurrentSheetTable">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    [disabled]="!isAdmin"
+                    [class.btn-disabled-role]="!isAdmin"
+                    (click)="isAdmin ? openUiSutrasModal() : null"
+                    [title]="isAdmin ? 'UI Trigger: Reactive cell formulas & custom client logic' : 'UI Triggers require Admin role'">
+              <i class="pi pi-desktop" [style.color]="isAdmin ? '#06b6d4' : '#94a3b8'"></i>
+              <span class="ribbon-tool-lbl">UI {{ !isAdmin ? '\u{1F512}' : '' }}</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    [disabled]="!isAdmin"
+                    [class.btn-disabled-role]="!isAdmin"
+                    (click)="isAdmin ? openBackendSutrasModal() : null"
+                    [title]="isAdmin ? 'DB Trigger: Server triggers, Raw SQL & database cascades' : 'DB Triggers require Admin role'">
+              <i class="pi pi-database" [style.color]="isAdmin ? '#f59e0b' : '#94a3b8'"></i>
+              <span class="ribbon-tool-lbl">DB {{ !isAdmin ? '\u{1F512}' : '' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">TRIGGERS</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
         <!-- Section: Boolean Display Style (Only Checkbox and Badge) -->
         <div class="ribbon-group">
           <div class="ribbon-group-items">
@@ -135853,7 +141453,28 @@ Do you want to discard your changes and reload from database?`);
               <span class="ribbon-tool-lbl">Badge</span>
             </button>
           </div>
-          <span class="ribbon-group-name">Boolean</span>
+          <span class="ribbon-group-name">BOOLEAN</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Users & Access Management -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    (click)="openUserManagementModal()"
+                    title="User Management: Manage users, roles (Admin / Author) and rights">
+              <i class="pi pi-users" style="color: #ec4899;"></i>
+              <span class="ribbon-tool-lbl">Users</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    (click)="toggleRole()"
+                    [title]="'Current Role: ' + currentUser.role + ' (Click to toggle role)'">
+              <i class="pi" [ngClass]="isAdmin ? 'pi-shield' : 'pi-user'" [style.color]="isAdmin ? '#a855f7' : '#10b981'"></i>
+              <span class="ribbon-tool-lbl">{{ isAdmin ? 'Admin' : 'Author' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">USERS & ACCESS</span>
         </div>
       </div>
 
@@ -135892,123 +141513,273 @@ Do you want to discard your changes and reload from database?`);
   </div>
 
   <!-- Column Config Popover (Replicating Legacy Studio) -->
+  <!-- Column Config Popover (Unified 2-Section Double-Width Panel) -->
   <p-overlayPanel #colConfigOp [dismissable]="true" styleClass="sutram-col-config-popover shadow-lg">
     <ng-template pTemplate="content">
-      <div class="col-dropdown-menu">
-        <!-- Header: Search Bar & Action Strip -->
-        <div class="col-dd-header">
-          <div class="col-dd-search-wrap">
-            <i class="pi pi-search col-dd-search-icon"></i>
-            <input type="text"
-                   class="col-dd-search-input"
-                   placeholder="Search columns / FK..."
-                   [(ngModel)]="colSearchQuery" />
-            <button *ngIf="colSearchQuery"
-                    type="button"
-                    class="btn-clear-search-inline"
-                    (click)="colSearchQuery = ''">
-              <i class="pi pi-times"></i>
-            </button>
-          </div>
-
-          <div class="col-dd-actions">
-            <div class="col-dd-actions-left">
-              <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(true)">All</button>
-              <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(false)">None</button>
-              <button type="button" class="col-dd-act-btn" (click)="resetDefaultColumns()">Reset</button>
+      <div class="col-dd-split-container">
+        
+        <!-- \u2500\u2500 LEFT PANE: COLUMN VISIBILITY & GROUPS \u2500\u2500 -->
+        <div class="col-dd-left-pane">
+          <!-- Header: Search Bar & Actions -->
+          <div class="col-dd-header">
+            <div class="col-dd-search-wrap">
+              <i class="pi pi-search col-dd-search-icon"></i>
+              <input type="text"
+                     class="col-dd-search-input"
+                     placeholder="Search columns / FK / fx..."
+                     [(ngModel)]="colSearchQuery" />
+              <button *ngIf="colSearchQuery"
+                      type="button"
+                      class="btn-clear-search-inline"
+                      (click)="colSearchQuery = ''">
+                <i class="pi pi-times"></i>
+              </button>
             </div>
-            <span class="col-dd-count">{{ selectedColumnKeys.size }} of {{ allConfigColumns.length }} visible</span>
-          </div>
-        </div>
 
-        <!-- Body: Standard Columns & FK Groups -->
-        <div class="col-dd-body">
-          <!-- 1. Standard Columns -->
-          <ng-container *ngIf="filteredDirectCols.length > 0">
-            <div class="col-dd-section-title">Standard Columns</div>
-            <div *ngFor="let col of filteredDirectCols; trackBy: trackByColKey"
-                 class="col-dd-item"
-                 (click)="toggleColumnCheckbox(col.key)">
-              <div class="col-dd-item-left">
-                <input type="checkbox"
-                       class="custom-check"
-                       [checked]="isColumnSelected(col.key)"
-                       style="pointer-events: none;" />
-                <span class="col-dd-item-name" [title]="col.name">
-                  {{ col.name }}<span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
-                </span>
+            <div class="col-dd-actions">
+              <div class="col-dd-actions-left">
+                <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(true)">All</button>
+                <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(false)">None</button>
+                <button type="button" class="col-dd-act-btn" (click)="resetDefaultColumns()">Reset</button>
               </div>
-              <span class="type-badge">{{ col.type || 'string' }}</span>
+              <span class="col-dd-count">{{ selectedColumnKeys.size }} of {{ allConfigColumns.length }} visible</span>
             </div>
-          </ng-container>
+          </div>
 
-          <!-- 2. Foreign Key Reference Groups -->
-          <ng-container *ngIf="filteredFkGroups.length > 0">
-            <div class="col-dd-section-title" style="margin-top: 8px;">FK Reference Groups</div>
-            <div *ngFor="let grp of filteredFkGroups; trackBy: trackByGroupName"
-                 class="col-dd-group"
-                 [class.fk-active-group]="grp.selectedCount > 0">
-              <!-- Group Accordion Header -->
-              <div class="col-dd-group-header">
-                <div class="col-dd-group-left"
-                     (click)="toggleFkGroupExpand(grp.name)"
-                     style="cursor: pointer; flex-grow: 1;">
-                  <i class="pi pi-chevron-right fk-expand-toggle"
-                     [class.rotated]="isFkGroupExpanded(grp.name)"></i>
-                  <span class="col-dd-item-name">
-                    <i class="pi pi-link" style="color: var(--primary, #4f46e5); font-size: 10px; margin-right: 3px;"></i>
-                    <strong style="text-transform: capitalize;">{{ grp.name }}</strong>
-                    <span style="font-size: 10px; color: var(--text-muted); font-weight: 400; margin-left: 3px;">({{ grp.refTable }})</span>
-                  </span>
-                </div>
-                <div class="col-dd-group-right"
-                     (click)="toggleFkGroupAll(grp.name)"
-                     style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <!-- Body: Standard Columns, Computed UI Formulas, FK Groups -->
+          <div class="col-dd-body">
+            
+            <!-- 1. Standard Direct Columns -->
+            <ng-container *ngIf="filteredDirectCols.length > 0">
+              <div class="col-dd-section-title">
+                <i class="pi pi-list" style="font-size: 10px; margin-right: 4px;"></i> Standard Columns
+              </div>
+              <div *ngFor="let col of filteredDirectCols; trackBy: trackByColKey"
+                   class="col-dd-item"
+                   (click)="toggleColumnCheckbox(col.key)">
+                <div class="col-dd-item-left">
                   <input type="checkbox"
                          class="custom-check"
-                         [checked]="grp.isAllChecked"
+                         [checked]="isColumnSelected(col.key)"
                          style="pointer-events: none;" />
-                  <span class="fk-group-pill"
-                        [style.background]="grp.selectedCount > 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(125, 125, 125, 0.1)'"
-                        [style.color]="grp.selectedCount > 0 ? '#059669' : 'var(--text-muted)'">
-                    {{ grp.selectedCount }}/{{ grp.totalCount }}
+                  <span class="col-dd-item-name" [title]="col.name">
+                    {{ col.name }}<span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
                   </span>
                 </div>
+                <span class="type-badge">{{ col.type || 'string' }}</span>
               </div>
+            </ng-container>
 
-              <!-- Group Sub-items (when expanded) -->
-              <div *ngIf="isFkGroupExpanded(grp.name)" class="col-dd-group-items">
-                <div *ngFor="let col of grp.columns; trackBy: trackByColKey"
-                     class="col-dd-item"
-                     (click)="toggleColumnCheckbox(col.key)">
-                  <div class="col-dd-item-left">
-                    <input type="checkbox"
-                           class="custom-check"
-                           [checked]="isColumnSelected(col.key)"
-                           style="pointer-events: none;" />
-                    <span class="col-dd-item-name"
-                          [style.font-weight]="col.is_fk_main ? '600' : 'normal'"
-                          [title]="col.name">
-                      {{ col.short_name || col.name }}
+            <!-- 2. UI Formulas & Computed Temp Columns (fx) -->
+            <ng-container *ngIf="filteredComputedCols.length > 0">
+              <div class="col-dd-section-title fx-section-title">
+                <i class="pi pi-bolt" style="color: #8b5cf6; font-size: 10px; margin-right: 4px;"></i> UI Formulas & Temp (fx)
+              </div>
+              <div *ngFor="let col of filteredComputedCols; trackBy: trackByColKey"
+                   class="col-dd-item fx-item"
+                   (click)="toggleColumnCheckbox(col.key)">
+                <div class="col-dd-item-left">
+                  <input type="checkbox"
+                         class="custom-check"
+                         [checked]="isColumnSelected(col.key)"
+                         style="pointer-events: none;" />
+                  <span class="badge-fx-mini">fx</span>
+                  <span class="col-dd-item-name" [title]="col.short_name || col.name">
+                    <strong>{{ col.short_name || col.name }}</strong>
+                    <span *ngIf="col.short_name && col.short_name !== col.key" style="font-size: 10px; color: var(--text-muted); margin-left: 4px;">({{ col.key }})</span>
+                  </span>
+                </div>
+                <span class="type-badge badge-fx-type">formula</span>
+              </div>
+            </ng-container>
+
+            <!-- 3. Foreign Key Reference Groups -->
+            <ng-container *ngIf="filteredFkGroups.length > 0">
+              <div class="col-dd-section-title" style="margin-top: 8px;">
+                <i class="pi pi-link" style="color: var(--primary, #4f46e5); font-size: 10px; margin-right: 4px;"></i> FK Reference Groups
+              </div>
+              <div *ngFor="let grp of filteredFkGroups; trackBy: trackByGroupName"
+                   class="col-dd-group"
+                   [class.fk-active-group]="grp.selectedCount > 0">
+                <!-- Group Accordion Header -->
+                <div class="col-dd-group-header">
+                  <div class="col-dd-group-left"
+                       (click)="toggleFkGroupExpand(grp.name)"
+                       style="cursor: pointer; flex-grow: 1;">
+                    <i class="pi pi-chevron-right fk-expand-toggle"
+                       [class.rotated]="isFkGroupExpanded(grp.name)"></i>
+                    <span class="col-dd-item-name">
+                      <strong style="text-transform: capitalize;">{{ grp.name }}</strong>
+                      <span style="font-size: 10px; color: var(--text-muted); font-weight: 400; margin-left: 3px;">({{ grp.refTable }})</span>
                     </span>
                   </div>
-                  <span class="type-badge">{{ col.is_fk_main ? 'display' : (col.is_fk_raw ? 'id' : (col.type || 'string')) }}</span>
+                  <div class="col-dd-group-right"
+                       (click)="toggleFkGroupAll(grp.name)"
+                       style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <input type="checkbox"
+                           class="custom-check"
+                           [checked]="grp.isAllChecked"
+                           style="pointer-events: none;" />
+                    <span class="fk-group-pill"
+                          [style.background]="grp.selectedCount > 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(125, 125, 125, 0.1)'"
+                          [style.color]="grp.selectedCount > 0 ? '#059669' : 'var(--text-muted)'">
+                      {{ grp.selectedCount }}/{{ grp.totalCount }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Group Sub-items (when expanded) -->
+                <div *ngIf="isFkGroupExpanded(grp.name)" class="col-dd-group-items">
+                  <div *ngFor="let col of grp.columns; trackBy: trackByColKey"
+                       class="col-dd-item"
+                       (click)="toggleColumnCheckbox(col.key)">
+                    <div class="col-dd-item-left">
+                      <input type="checkbox"
+                             class="custom-check"
+                             [checked]="isColumnSelected(col.key)"
+                             style="pointer-events: none;" />
+                      <span class="col-dd-item-name"
+                            [style.font-weight]="col.is_fk_main ? '600' : 'normal'"
+                            [title]="col.name">
+                        {{ col.short_name || col.name }}
+                      </span>
+                    </div>
+                    <span class="type-badge">{{ col.is_fk_main ? 'display' : (col.is_fk_raw ? 'id' : (col.type || 'string')) }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </ng-container>
+            </ng-container>
 
-          <!-- Empty State -->
-          <div *ngIf="filteredDirectCols.length === 0 && filteredFkGroups.length === 0" class="col-dd-empty">
-            <i class="pi pi-search me-1"></i> No matching columns found
+            <!-- Empty State -->
+            <div *ngIf="filteredDirectCols.length === 0 && filteredComputedCols.length === 0 && filteredFkGroups.length === 0" class="col-dd-empty">
+              <i class="pi pi-search me-1"></i> No matching columns found
+            </div>
           </div>
         </div>
 
-        <!-- Footer: Click outside hint + Done button -->
-        <div class="col-dd-footer">
-          <span class="small text-muted" style="font-size: 10.5px;">Click outside or press Esc</span>
-          <button type="button" class="btn btn-sm btn-primary py-1 px-3" style="font-size: 11.5px; font-weight: 600;" (click)="colConfigOp.hide()">Done</button>
+        <!-- \u2500\u2500 RIGHT PANE: SELECTED COLUMNS ORDER & FORMATTING \u2500\u2500 -->
+        <div class="col-dd-right-pane">
+          <!-- Right Header -->
+          <div class="col-dd-right-header">
+            <div class="col-dd-right-title-wrap">
+              <span class="col-dd-right-title">
+                <i class="pi pi-sliders-v text-primary me-1"></i> Selected Columns (\u0915\u094D\u0930\u092E \u090F\u0935\u0902 \u092A\u094D\u0930\u093E\u0930\u0942\u092A)
+              </span>
+              <span class="col-dd-right-badge">{{ selectedOrderedColumns.length }} Visible</span>
+            </div>
+            <div class="col-dd-right-sub">
+              Use <strong style="color: var(--primary, #4f46e5);">\u25B2 / \u25BC</strong> to reorder, edit labels, or select formats
+            </div>
+          </div>
+
+          <!-- Right Body: Scrollable Cards -->
+          <div class="col-dd-right-body">
+            <div *ngIf="selectedOrderedColumns.length === 0" class="col-dd-empty">
+              <i class="pi pi-info-circle me-1"></i> No columns currently visible. Select columns on the left.
+            </div>
+
+            <div *ngFor="let col of selectedOrderedColumns; let i = index; trackBy: trackByColKey"
+                 class="col-selected-card">
+              
+              <!-- 1. Left: Order Index & Move Up / Down -->
+              <div class="col-card-order-controls">
+                <span class="col-card-letter-badge" [title]="'Column ' + getColLetter(i)">
+                  {{ getColLetter(i) }}
+                </span>
+                <div class="col-card-arrows">
+                  <button type="button"
+                          class="btn-arrow"
+                          [disabled]="i === 0"
+                          (click)="moveSelectedColUp(col.key)"
+                          title="Move Left / Earlier">
+                    <i class="pi pi-chevron-up"></i>
+                  </button>
+                  <button type="button"
+                          class="btn-arrow"
+                          [disabled]="i === selectedOrderedColumns.length - 1"
+                          (click)="moveSelectedColDown(col.key)"
+                          title="Move Right / Later">
+                    <i class="pi pi-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Middle: Column Identity & Editable Label -->
+              <div class="col-card-meta">
+                <div class="col-card-meta-top">
+                  <span class="col-card-key-txt" [title]="col.key">{{ col.col_name || col.key }}</span>
+                  <span *ngIf="col.is_temp" class="badge-fx-mini" title="Computed Temp Column">\u26A1 fx</span>
+                  <span *ngIf="col.is_fk_main" class="badge-fk-pill" [title]="'FK Display: ' + col.ref_table">\u{1F517} {{ col.ref_table }}</span>
+                  <span *ngIf="col.is_fk_subcol" class="badge-sub-pill" [title]="'FK Subcol: ' + col.ref_table">\u21B3 {{ col.sub_col_name }}</span>
+                  <span *ngIf="col.is_fk_raw" class="badge-raw-pill" title="Raw foreign key ID"># id</span>
+                  <span *ngIf="!col.is_temp && !col.is_fk_main && !col.is_fk_subcol && !col.is_fk_raw" class="badge-std-pill">{{ col.type || 'text' }}</span>
+                </div>
+                <div class="col-card-label-wrap">
+                  <input type="text"
+                         class="col-card-label-inp"
+                         [(ngModel)]="col.label"
+                         (ngModelChange)="onColumnLabelChange(col)"
+                         [placeholder]="col.short_name || col.name || col.key"
+                         title="Edit header label" />
+                </div>
+              </div>
+
+              <!-- 3. Right: Formatting Controls & Hide Button -->
+              <div class="col-card-format-ctrls">
+                <!-- Date Format Select -->
+                <div *ngIf="isDateCol(col)" class="col-card-select-wrap">
+                  <select class="col-card-select"
+                          [(ngModel)]="col.display_format"
+                          (ngModelChange)="onColumnFormatChange(col)"
+                          title="Choose date display format">
+                    <option [ngValue]="null">Default Date</option>
+                    <option *ngFor="let opt of dateFormatOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+
+                <!-- Number Format Select -->
+                <div *ngIf="isNumberCol(col)" class="col-card-select-wrap">
+                  <select class="col-card-select"
+                          [(ngModel)]="col.display_format"
+                          (ngModelChange)="onColumnFormatChange(col)"
+                          title="Choose number decimal format">
+                    <option [ngValue]="null">Raw Number</option>
+                    <option *ngFor="let opt of numberDecimalOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+
+                <!-- Static Indicator for Text / Fx -->
+                <div *ngIf="!isDateCol(col) && !isNumberCol(col)" class="col-card-plain-type">
+                  <span *ngIf="col.is_temp" class="text-purple-xs">Formula (fx)</span>
+                  <span *ngIf="!col.is_temp" class="text-muted-xs">{{ col.type || 'Text' }}</span>
+                </div>
+
+                <!-- Hide / Remove Column Button -->
+                <button type="button"
+                        class="btn-col-hide"
+                        (click)="toggleColumnCheckbox(col.key)"
+                        title="Hide this column from sheet">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+
+            </div>
+          </div>
         </div>
+
+      </div>
+
+      <!-- Footer: Auto-save status hint + Done button -->
+      <div class="col-dd-footer">
+        <span class="small text-muted" style="font-size: 10.5px;">
+          <i class="pi pi-check-circle text-success me-1"></i> Live updates active & saved to table
+        </span>
+        <button type="button"
+                class="btn btn-sm btn-primary py-1 px-3"
+                style="font-size: 11.5px; font-weight: 600;"
+                (click)="colConfigOp.hide()">
+          Done
+        </button>
       </div>
     </ng-template>
   </p-overlayPanel>
@@ -136039,6 +141810,7 @@ Do you want to discard your changes and reload from database?`);
                  (loadMore)="onLoadMore()"
                  (filterChanged)="onGridFilterChanged()"
                  (sortChanged)="onGridSortChanged()"
+                 (cellChanged)="onGridCellChanged($event)"
                  (solveAllTriggered)="onGridSolveAll($event)"
                  (openConfig)="colConfigOp.toggle($event)">
     </sutram-grid>
@@ -136226,8 +141998,546 @@ Do you want to discard your changes and reload from database?`);
                              [groups]="state.correctionGroups()">
   </sutram-correction-sidebar>
 
+
+  <!-- \u2500\u2500 2. UI Sutras (Client-side Reactive Formulas) Dialog \u2500\u2500\u2500\u2500\u2500 -->
+  <p-dialog [(visible)]="showUiSutrasModal"
+            [modal]="true"
+            [dismissableMask]="true"
+            [draggable]="false"
+            [resizable]="false"
+            [style]="{ width: '94vw', maxWidth: '980px' }"
+            styleClass="sutram-studio-dialog"
+            header="\u{1F9EE} UI \u0938\u0942\u0924\u094D\u0930 \u0935\u093F\u0928\u094D\u092F\u093E\u0938 (Live Reactive Formulas): {{ currentActiveSheetTitle }}">
+    <div class="dialog-body-wrap">
+      <div class="dialog-info-banner info">
+        <i class="pi pi-info-circle banner-icon"></i>
+        <span>\u091C\u092C \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0917\u094D\u0930\u093F\u0921 \u092E\u0947\u0902 \u0921\u0947\u091F\u093E \u091F\u093E\u0907\u092A \u0915\u0930\u0924\u093E \u0939\u0948, \u0924\u092C \u092F\u0939 \u0938\u0942\u0924\u094D\u0930 \u0924\u0924\u094D\u0915\u093E\u0932 \u0917\u0923\u0928\u093E \u0915\u0930\u0915\u0947 \u0938\u0902\u092C\u0902\u0927\u093F\u0924 \u0915\u0949\u0932\u092E \u0915\u094B \u0938\u094D\u0935\u0924\u0903 \u0905\u092A\u0921\u0947\u091F \u0915\u0930\u0924\u0947 \u0939\u0948\u0902\u0964</span>
+      </div>
+
+      <div *ngIf="!isAdmin" class="dialog-info-banner warning mb-2">
+        <i class="pi pi-lock banner-icon"></i>
+        <span><strong>Author Mode (View Only):</strong> \u0915\u0947\u0935\u0932 Admin \u0915\u094B UI \u0938\u0942\u0924\u094D\u0930 \u091C\u094B\u0921\u093C\u0928\u0947, \u092C\u0926\u0932\u0928\u0947 \u092F\u093E \u0939\u091F\u093E\u0928\u0947 \u0915\u093E \u0905\u0927\u093F\u0915\u093E\u0930 \u0939\u0948\u0964 (Only Admin can create/edit/delete triggers)</span>
+      </div>
+
+      <!-- Add New Formula Card -->
+      <div class="dialog-subcard" *ngIf="isAdmin">
+        <div class="subcard-title mb-2">Add UI Reactive Trigger (\u0928\u092F\u093E UI \u0938\u0942\u0924\u094D\u0930 \u091C\u094B\u0921\u093C\u0947\u0902)</div>
+
+        <div class="subcard-grid d-flex align-items-end gap-2">
+          <!-- Target Column Dropdown (1st option is Temp Column) -->
+          <div [style.flex]="newUiSutra.is_temp ? '0 0 260px' : '0 0 300px'">
+            <label class="dialog-label">Target Column (\u0932\u0915\u094D\u0937\u094D\u092F \u0915\u0949\u0932\u092E):</label>
+            <p-dropdown [options]="targetColDropdownOptions"
+                        [(ngModel)]="selectedTargetColValue"
+                        (onChange)="onTargetColChange($event)"
+                        (ngModelChange)="onTargetColChange($event)"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="-- Select Target Column --"
+                        styleClass="dialog-ctrl-dropdown"
+                        [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+
+          <!-- When Temp Column is selected: Display Name input shows up immediately! -->
+          <div *ngIf="newUiSutra.is_temp" style="flex: 0 0 220px;">
+            <label class="dialog-label text-primary">Display Name (\u0915\u0949\u0932\u092E \u0936\u0940\u0930\u094D\u0937\u0915):</label>
+            <input type="text"
+                   pInputText
+                   class="dialog-ctrl-input font-bold"
+                   [(ngModel)]="newUiSutra.display_name"
+                   placeholder="e.g. Age, Full Name, Days Left" />
+          </div>
+
+          <!-- Formula / Expression / Code input -->
+          <div style="flex: 1 1 auto; min-width: 220px;">
+            <label class="dialog-label">Formula / Expression / Code (e.g. [colB], [qty] * [rate], AGE([dob])):</label>
+            <input type="text"
+                   pInputText
+                   class="dialog-ctrl-input font-mono"
+                   [(ngModel)]="newUiSutra.formula"
+                   placeholder="e.g. [colB] or [qty] * [rate] or AGE([dob])" />
+          </div>
+
+          <!-- Add Button -->
+          <div style="flex: 0 0 75px;">
+            <button pButton type="button"
+                    icon="pi pi-plus"
+                    label="Add"
+                    class="p-button-sm p-button-success dialog-btn-add w-100"
+                    [disabled]="!selectedTargetColValue || (newUiSutra.is_temp ? !newUiSutra.display_name?.trim() : !newUiSutra.target_col) || !newUiSutra.formula?.trim()"
+                    (click)="addUiSutra()">
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Column Insert Chips: Current Table Columns -->
+        <div class="chips-row">
+          <span class="chips-label">Table Columns:</span>
+          <span *ngFor="let col of currentTableColumns"
+                class="quick-chip"
+                (click)="insertColIntoFormula(col.name || col.col_name)"
+                title="\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0924\u093E\u0932\u093F\u0915\u093E \u0915\u093E \u0915\u0949\u0932\u092E">
+            + [{{ col.name || col.col_name }}]
+          </span>
+        </div>
+
+        <!-- Quick Reference Columns Chips: Available for Formula calculations -->
+        <div class="chips-row mt-1" *ngIf="referenceColumns.length > 0">
+          <span class="chips-label">Ref Columns (\u0938\u0942\u0924\u094D\u0930 \u0939\u0947\u0924\u0941):</span>
+          <span *ngFor="let rc of referenceColumns"
+                class="quick-chip chip-orange"
+                (click)="insertColIntoFormula(rc.name || rc.key)"
+                title="\u0930\u0947\u092B\u0930\u0947\u0902\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u0915\u093E \u0915\u0949\u0932\u092E (\u0915\u0947\u0935\u0932 \u0938\u0942\u0924\u094D\u0930/\u092B\u0949\u0930\u094D\u092E\u0942\u0932\u093E \u092E\u0947\u0902 \u0921\u0947\u091F\u093E \u0909\u092A\u092F\u094B\u0917 \u0915\u0947 \u0932\u093F\u090F)">
+            + [{{ rc.name || rc.key }}]
+          </span>
+        </div>
+
+        <!-- Quick Helpers Insert Chips -->
+        <div class="chips-row mt-1">
+          <span class="chips-label">Helpers:</span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('AGE([dob])')" title="Calculate age from Date of Birth">
+            + AGE([dob])
+          </span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('DAYS([end_date], [start_date])')" title="Difference in days">
+            + DAYS(d1, d2)
+          </span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('IF([condition], true_val, false_val)')" title="Conditional logic">
+            + IF(cond, a, b)
+          </span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('ROUND([val], 2)')" title="Round number">
+            + ROUND(n, 2)
+          </span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('UPPER([text])')" title="Uppercase text">
+            + UPPER(str)
+          </span>
+        </div>
+      </div>
+
+      <!-- Existing Formulas List -->
+      <div class="subcard-title mb-1">\u0938\u0915\u094D\u0930\u093F\u092F \u0938\u0942\u0924\u094D\u0930 (Active UI Formulas):</div>
+      <div *ngIf="uiSutrasList.length === 0" class="dialog-empty-box">
+        \u0905\u092D\u0940 \u0907\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u092E\u0947\u0902 \u0915\u094B\u0908 UI \u0938\u0942\u0924\u094D\u0930 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u090A\u092A\u0930 \u0926\u093F\u090F \u0917\u090F \u092B\u0949\u0930\u094D\u092E \u0938\u0947 \u0928\u092F\u093E \u0938\u0942\u0924\u094D\u0930 \u091C\u094B\u0921\u093C\u0947\u0902\u0964
+      </div>
+
+      <div *ngIf="uiSutrasList.length > 0" class="dialog-table-card">
+        <table class="dialog-data-table">
+          <thead>
+            <tr>
+              <th style="width: 38px;" class="text-center">#</th>
+              <th style="width: 100px;">\u092A\u094D\u0930\u0915\u093E\u0930 (Type)</th>
+              <th style="width: 140px;">\u0915\u0949\u0932\u092E \u0928\u093E\u092E</th>
+              <th>\u0938\u092E\u0940\u0915\u0930\u0923 (Formula)</th>
+              <th style="width: 50px;" class="text-center">\u0939\u091F\u093E\u090F\u0902</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of uiSutrasList; let i = index">
+              <td class="text-center text-muted font-mono col-idx">{{ i + 1 }}</td>
+              <td>
+                <span *ngIf="s.is_temp" class="quick-chip chip-blue font-bold">
+                  <i class="pi pi-eye me-1"></i>Temp (fx)
+                </span>
+                <span *ngIf="!s.is_temp" class="quick-chip chip-green font-bold">
+                  <i class="pi pi-database me-1"></i>DB Column
+                </span>
+              </td>
+              <td class="font-mono">
+                <strong>{{ s.display_name || s.target_col }}</strong>
+                <span *ngIf="s.is_temp && s.target_col" class="text-muted-xs font-mono ms-1">({{ s.target_col }})</span>
+              </td>
+              <td class="font-mono text-primary formula-cell">{{ s.formula }}</td>
+              <td class="text-center">
+                <button *ngIf="isAdmin" type="button" class="mini-del-btn" (click)="removeUiSutra(i)" title="\u0939\u091F\u093E\u090F\u0902">
+                  <i class="pi pi-trash"></i>
+                </button>
+                <span *ngIf="!isAdmin" class="text-muted-xs">\u{1F512} View</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <button pButton type="button" label="\u0930\u0926\u094D\u0926 \u0915\u0930\u0947\u0902 (Cancel)" class="p-button-text p-button-sm dialog-btn-cancel" (click)="showUiSutrasModal = false"></button>
+        <button *ngIf="isAdmin" pButton type="button" label="\u0938\u0947\u0935 \u0915\u0930\u0947\u0902 (Save Formulas)" icon="pi pi-check" class="p-button-sm p-button-primary dialog-btn-save" [loading]="isSavingUiSutras" (click)="saveUiSutras()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- \u2500\u2500 3. Backend Sutras (Server Database Triggers) Dialog \u2500\u2500\u2500\u2500\u2500 -->
+  <p-dialog [(visible)]="showBackendSutrasModal"
+            [modal]="true"
+            [dismissableMask]="true"
+            [draggable]="false"
+            [resizable]="false"
+            [style]="{ width: '94vw', maxWidth: '980px' }"
+            styleClass="sutram-studio-dialog"
+            header="\u26A1 \u092C\u0948\u0915\u090F\u0902\u0921 \u0938\u0942\u0924\u094D\u0930 \u0935\u093F\u0928\u094D\u092F\u093E\u0938 (Server Database Triggers): {{ currentActiveSheetTitle }}">
+    <div class="dialog-body-wrap">
+      <div class="dialog-info-banner warning">
+        <i class="pi pi-bolt banner-icon"></i>
+        <span>\u0938\u0930\u094D\u0935\u0930-\u0938\u093E\u0907\u0921 \u0921\u0947\u091F\u093E\u092C\u0947\u0938 \u091F\u094D\u0930\u093F\u0917\u0930 \u2014 \u0907\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u092E\u0947\u0902 \u0921\u0947\u091F\u093E \u0907\u0928\u094D\u0938\u0930\u094D\u091F, \u0905\u092A\u0921\u0947\u091F \u092F\u093E \u0921\u093F\u0932\u0940\u091F \u0939\u094B\u0928\u0947 \u092A\u0930 \u0938\u094D\u0935\u0924\u0903 \u0915\u0938\u094D\u091F\u092E SQL \u0915\u094D\u0935\u0947\u0930\u0940 \u092F\u093E \u0915\u094D\u0930\u0949\u0938-\u0924\u093E\u0932\u093F\u0915\u093E \u0938\u093F\u0902\u0915 \u091A\u0932\u093E\u090F\u0902\u0964</span>
+      </div>
+
+      <div *ngIf="!isAdmin" class="dialog-info-banner warning mb-2">
+        <i class="pi pi-lock banner-icon"></i>
+        <span><strong>Author Mode (View Only):</strong> \u0915\u0947\u0935\u0932 Admin \u0915\u094B \u092C\u0948\u0915\u090F\u0902\u0921 \u091F\u094D\u0930\u093F\u0917\u0930 \u091C\u094B\u0921\u093C\u0928\u0947 \u092F\u093E \u0939\u091F\u093E\u0928\u0947 \u0915\u093E \u0905\u0927\u093F\u0915\u093E\u0930 \u0939\u0948\u0964 (Only Admin can create/delete database triggers)</span>
+      </div>
+
+      <!-- Add Trigger Card -->
+      <div class="dialog-subcard" *ngIf="isAdmin">
+        <div class="subcard-title">\u0928\u092F\u093E \u0938\u0930\u094D\u0935\u0930 \u091F\u094D\u0930\u093F\u0917\u0930 \u092C\u0928\u093E\u090F\u0902 (Create Database Trigger)</div>
+        
+        <!-- Row 1: Name, Event, Action Type -->
+        <div class="subcard-grid mb-2">
+          <div class="subcard-col-4">
+            <label class="dialog-label">\u091F\u094D\u0930\u093F\u0917\u0930 \u0915\u093E \u0928\u093E\u092E (Identifier):</label>
+            <input type="text"
+                   pInputText
+                   class="dialog-ctrl-input font-mono"
+                   [(ngModel)]="newTriggerDef.trigger_name"
+                   placeholder="e.g. trg_stock_update" />
+          </div>
+          <div class="subcard-col-3">
+            <label class="dialog-label">\u0907\u0935\u0947\u0902\u091F (Event):</label>
+            <p-dropdown [options]="[{label:'INSERT (\u0928\u0908 \u092A\u0902\u0915\u094D\u0924\u093F)', value:'INSERT'},{label:'UPDATE (\u0938\u0902\u0936\u094B\u0927\u0928)', value:'UPDATE'},{label:'DELETE (\u0935\u093F\u0932\u094B\u092A\u0928)', value:'DELETE'}]"
+                        [(ngModel)]="newTriggerDef.event"
+                        styleClass="dialog-ctrl-dropdown"
+                        [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+          <div class="subcard-col-5">
+            <label class="dialog-label">\u0915\u093E\u0930\u094D\u0930\u0935\u093E\u0908 \u092A\u094D\u0930\u0915\u093E\u0930 (Action Type):</label>
+            <p-dropdown [options]="[{label:'\u26A1 Raw SQL (\u0915\u0938\u094D\u091F\u092E SQL \u0915\u094D\u0935\u0947\u0930\u0940 \u2014 \u0905\u0928\u0941\u0936\u0902\u0938\u093F\u0924)', value:'raw_sql'},{label:'\u{1F504} Update Row (\u0905\u0928\u094D\u092F \u0924\u093E\u0932\u093F\u0915\u093E \u0905\u092A\u0921\u0947\u091F)', value:'update_row'},{label:'\u2795 Insert Row (\u0905\u0928\u094D\u092F \u0924\u093E\u0932\u093F\u0915\u093E \u092E\u0947\u0902 \u0907\u0928\u094D\u0938\u0930\u094D\u091F)', value:'insert_row'},{label:'\u274C Delete Row (\u0905\u0928\u094D\u092F \u0924\u093E\u0932\u093F\u0915\u093E \u0938\u0947 \u0935\u093F\u0932\u094B\u092A\u0928)', value:'delete_row'}]"
+                        [(ngModel)]="newTriggerDef.action_type"
+                        styleClass="dialog-ctrl-dropdown"
+                        [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+        </div>
+
+        <!-- Row 2A: Raw SQL Query Editor (Default & Primary Feature) -->
+        <div *ngIf="newTriggerDef.action_type === 'raw_sql'" class="mt-2">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <label class="dialog-label mb-0">SQL \u0915\u094D\u0935\u0947\u0930\u0940 (Raw SQL Query):</label>
+            <span class="text-muted-xs font-mono">\u0928\u092F\u093E \u092E\u093E\u0928: <code>:new.col</code> | \u092A\u0941\u0930\u093E\u0928\u093E \u092E\u093E\u0928: <code>:old.col</code></span>
+          </div>
+          <textarea rows="3"
+                    class="dialog-ctrl-textarea font-mono"
+                    [(ngModel)]="newTriggerDef.raw_sql"
+                    placeholder="UPDATE target_table SET col = col + :new.qty WHERE id = :new.target_id;"></textarea>
+          
+          <!-- Quick Column Tags for SQL -->
+          <div class="chips-row mt-1">
+            <span class="chips-label">Columns:</span>
+            <span *ngFor="let h of visibleHeaders"
+                  class="quick-chip chip-green"
+                  (click)="insertColIntoTriggerSql(h.name, ':new.')">
+              +:new.{{ h.name }}
+            </span>
+            <ng-container *ngIf="newTriggerDef.event !== 'INSERT'">
+              <span *ngFor="let h of visibleHeaders"
+                    class="quick-chip chip-orange"
+                    (click)="insertColIntoTriggerSql(h.name, ':old.')">
+                +:old.{{ h.name }}
+              </span>
+            </ng-container>
+          </div>
+
+          <!-- Quick Target Table Chips -->
+          <div class="chips-row mt-1" *ngIf="tablesList.length > 0">
+            <span class="chips-label">Tables:</span>
+            <span *ngFor="let t of tablesList"
+                  class="quick-chip chip-blue"
+                  (click)="insertTextIntoTriggerSql(t.table)">
+              {{ t.table }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Row 2B: OR Target Table & Field Map for update_row/insert_row -->
+        <div *ngIf="newTriggerDef.action_type !== 'raw_sql'" class="subcard-grid mt-2">
+          <div class="subcard-col-5">
+            <label class="dialog-label">Target Table (\u0932\u0915\u094D\u0937\u094D\u092F \u0924\u093E\u0932\u093F\u0915\u093E):</label>
+            <p-dropdown [options]="tablesList"
+                        [(ngModel)]="newTriggerDef.target_table"
+                        optionLabel="display_name"
+                        optionValue="table"
+                        [filter]="true"
+                        filterBy="display_name,table"
+                        placeholder="-- Select Target Table --"
+                        styleClass="dialog-ctrl-dropdown"
+                        [appendTo]="'body'">
+              <ng-template let-item pTemplate="item">
+                <div class="d-flex align-items-center justify-content-between" style="width: 100%;">
+                  <span>{{ item.display_name }}</span>
+                  <span class="text-muted-xs font-mono ms-2">{{ item.table }}</span>
+                </div>
+              </ng-template>
+              <ng-template let-item pTemplate="selectedItem">
+                <span class="font-semibold">{{ item.display_name }}</span>
+                <span class="text-muted-xs font-mono ms-1">({{ item.table }})</span>
+              </ng-template>
+            </p-dropdown>
+          </div>
+          <div class="subcard-col-7">
+            <label class="dialog-label">Field Mapping JSON (\u092B\u0940\u0932\u094D\u0921 \u092E\u0948\u092A):</label>
+            <input type="text"
+                   pInputText
+                   class="dialog-ctrl-input font-mono"
+                   [(ngModel)]="newTriggerDef.field_map_str"
+                   placeholder='{"stock_qty": ":new.qty"}' />
+          </div>
+        </div>
+
+        <!-- Submit Row -->
+        <div class="d-flex justify-content-end mt-2 pt-1">
+          <button pButton type="button"
+                  icon="pi pi-bolt"
+                  label="\u091F\u094D\u0930\u093F\u0917\u0930 \u092C\u0928\u093E\u090F\u0902 (Create Trigger)"
+                  class="p-button-sm p-button-warning dialog-btn-add"
+                  [disabled]="!newTriggerDef.trigger_name || (newTriggerDef.action_type === 'raw_sql' && !newTriggerDef.raw_sql)"
+                  (click)="createBackendTrigger()">
+          </button>
+        </div>
+      </div>
+
+      <!-- Existing Triggers List -->
+      <div class="subcard-title mb-1">\u0938\u0915\u094D\u0930\u093F\u092F \u092C\u0948\u0915\u090F\u0902\u0921 \u091F\u094D\u0930\u093F\u0917\u0930\u094D\u0938 (Active Triggers):</div>
+      <div *ngIf="backendTriggersList.length === 0" class="dialog-empty-box">
+        \u0905\u092D\u0940 \u0907\u0938 \u0924\u093E\u0932\u093F\u0915\u093E \u092E\u0947\u0902 \u0915\u094B\u0908 \u092C\u0948\u0915\u090F\u0902\u0921 \u091F\u094D\u0930\u093F\u0917\u0930 \u0938\u0915\u094D\u0930\u093F\u092F \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u090A\u092A\u0930 \u0926\u093F\u090F \u0917\u090F \u092B\u0949\u0930\u094D\u092E \u0938\u0947 \u0928\u092F\u093E \u091F\u094D\u0930\u093F\u0917\u0930 \u092C\u0928\u093E\u090F\u0902\u0964
+      </div>
+
+      <div *ngIf="backendTriggersList.length > 0" class="dialog-table-card">
+        <table class="dialog-data-table">
+          <thead>
+            <tr>
+              <th style="width: 38px;" class="text-center">#</th>
+              <th style="width: 140px;">\u091F\u094D\u0930\u093F\u0917\u0930 \u0928\u093E\u092E</th>
+              <th style="width: 75px;" class="text-center">\u0907\u0935\u0947\u0902\u091F</th>
+              <th style="width: 85px;" class="text-center">\u092A\u094D\u0930\u0915\u093E\u0930</th>
+              <th>\u0915\u093E\u0930\u094D\u0930\u0935\u093E\u0908 / SQL \u0915\u094D\u0935\u0947\u0930\u0940</th>
+              <th style="width: 50px;" class="text-center">\u0939\u091F\u093E\u090F\u0902</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of backendTriggersList; let i = index">
+              <td class="text-center text-muted font-mono col-idx">{{ i + 1 }}</td>
+              <td class="font-mono">
+                <strong>{{ t.trigger_name }}</strong>
+              </td>
+              <td class="text-center">
+                <span class="event-pill" [ngClass]="t.event === 'INSERT' ? 'event-pill-insert' : (t.event === 'UPDATE' ? 'event-pill-update' : 'event-pill-delete')">
+                  {{ t.event }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="type-pill">{{ (t.actions && t.actions[0]?.action_type) || t.action_type || 'raw_sql' }}</span>
+              </td>
+              <td class="font-mono text-muted-xs">
+                <code *ngIf="t.actions && t.actions[0]?.raw_sql" class="trigger-code-snippet">{{ t.actions[0]?.raw_sql }}</code>
+                <span *ngIf="!t.actions || !t.actions[0]?.raw_sql">{{ t.target_table || (t.actions && t.actions[0]?.target_table) || 'Standard Action' }}</span>
+              </td>
+              <td class="text-center">
+                <button *ngIf="isAdmin" type="button" class="mini-del-btn" (click)="deleteBackendTrigger(t._id)" title="\u0939\u091F\u093E\u090F\u0902">
+                  <i class="pi pi-trash"></i>
+                </button>
+                <span *ngIf="!isAdmin" class="text-muted-xs">\u{1F512} View</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <button pButton type="button" label="\u092C\u0902\u0926 \u0915\u0930\u0947\u0902 (Close)" class="p-button-text p-button-sm dialog-btn-cancel" (click)="showBackendSutrasModal = false"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- \u2500\u2500 4. User & Role Management Dialog \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 -->
+  <p-dialog [(visible)]="showUserManagementModal"
+            [modal]="true"
+            [dismissableMask]="true"
+            [draggable]="false"
+            [resizable]="false"
+            [style]="{ width: '94vw', maxWidth: '860px' }"
+            styleClass="sutram-studio-dialog"
+            header="\u{1F465} \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u090F\u0935\u0902 \u0905\u0927\u093F\u0915\u093E\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0928 (User & Rights Management)">
+    <div class="dialog-body-wrap">
+      <!-- Info / Quick Role Switch Banner -->
+      <div class="dialog-info-banner info d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <i class="pi pi-shield banner-icon"></i>
+          <span>
+            \u0938\u0915\u094D\u0930\u093F\u092F \u0916\u093E\u0924\u093E: <strong>{{ currentUser.username }}</strong>
+            ({{ isAdmin ? '\u{1F451} Admin (\u092A\u0942\u0930\u094D\u0923 \u0905\u0927\u093F\u0915\u093E\u0930)' : '\u{1F464} Author (\u0938\u0940\u092E\u093F\u0924 \u0905\u0927\u093F\u0915\u093E\u0930)' }})
+          </span>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <button type="button"
+                  class="btn-role-switch"
+                  [class.active-role]="isAdmin"
+                  (click)="switchRole('admin')">
+            \u{1F451} Admin
+          </button>
+          <button type="button"
+                  class="btn-role-switch"
+                  [class.active-role]="isAuthor"
+                  (click)="switchRole('author')">
+            \u{1F464} Author
+          </button>
+        </div>
+      </div>
+
+      <div class="dialog-subtext">
+        Admin: \u092A\u0942\u0930\u094D\u0923 \u0905\u0927\u093F\u0915\u093E\u0930 (Triggers, Schema, Rules, User Management).<br>
+        Author: \u0911\u092A\u0930\u0947\u0936\u0928\u0932 \u0905\u0927\u093F\u0915\u093E\u0930 (\u0921\u0947\u091F\u093E \u0909\u092A\u092F\u094B\u0917, \u0915\u0949\u0932\u092E \u0926\u0943\u0936\u094D\u092F\u0924\u093E Show/Hide, \u0921\u093F\u0938\u094D\u092A\u094D\u0932\u0947 \u092B\u0949\u0930\u094D\u092E\u0947\u091F\u093F\u0902\u0917).
+      </div>
+
+      <!-- Add / Edit User Form Card -->
+      <div class="subcard-config mb-2">
+        <div class="subcard-header d-flex justify-content-between align-items-center">
+          <span class="subcard-title">
+            {{ editingUserId ? '\u270F\uFE0F \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0938\u0902\u092A\u093E\u0926\u093F\u0924 \u0915\u0930\u0947\u0902 (Edit User #' + editingUserId + ')' : '\u2795 \u0928\u092F\u093E \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u091C\u094B\u0921\u093C\u0947\u0902 (Add New User)' }}
+          </span>
+          <button *ngIf="editingUserId" type="button" class="btn-link-mini text-muted" (click)="cancelUserEdit()">
+            Cancel Edit
+          </button>
+        </div>
+
+        <div class="subcard-grid d-flex flex-wrap gap-2 align-items-end mt-2">
+          <div style="flex: 1; min-width: 140px;">
+            <label class="field-lbl">\u092F\u0942\u091C\u0930\u0928\u0947\u092E (Username)*</label>
+            <input type="text"
+                   pInputText
+                   [(ngModel)]="userFormData.username"
+                   placeholder="e.g. rohit"
+                   [disabled]="!!editingUserId"
+                   class="w-100 formula-input" />
+          </div>
+
+          <div style="flex: 1; min-width: 140px;">
+            <label class="field-lbl">{{ editingUserId ? '\u0928\u092F\u093E \u092A\u093E\u0938\u0935\u0930\u094D\u0921 (Password)' : '\u092A\u093E\u0938\u0935\u0930\u094D\u0921 (Password)*' }}</label>
+            <input type="password"
+                   pInputText
+                   [(ngModel)]="userFormData.password"
+                   [placeholder]="editingUserId ? '\u0916\u093E\u0932\u0940 \u091B\u094B\u0921\u093C\u0947\u0902 \u092F\u0926\u093F \u0928\u0939\u0940\u0902 \u092C\u0926\u0932\u0928\u093E' : 'e.g. pass123'"
+                   class="w-100 formula-input" />
+          </div>
+
+          <div style="flex: 1.2; min-width: 160px;">
+            <label class="field-lbl">\u092A\u094D\u0930\u0926\u0930\u094D\u0936\u093F\u0924 \u0928\u093E\u092E (Display Name)</label>
+            <input type="text"
+                   pInputText
+                   [(ngModel)]="userFormData.display_name"
+                   placeholder="e.g. Rohit Sharma"
+                   class="w-100 formula-input" />
+          </div>
+
+          <div style="flex: 1.2; min-width: 160px;">
+            <label class="field-lbl">\u092D\u0942\u092E\u093F\u0915\u093E (Role)*</label>
+            <p-dropdown [options]="roleDropdownOptions"
+                        [(ngModel)]="userFormData.role"
+                        styleClass="w-100"
+                        [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 6px;">
+            <p-checkbox [binary]="true"
+                        label="\u0938\u0915\u094D\u0930\u093F\u092F"
+                        [(ngModel)]="userFormData.active">
+            </p-checkbox>
+            <button pButton
+                    type="button"
+                    [label]="editingUserId ? '\u0905\u092A\u0921\u0947\u091F' : '\u091C\u094B\u0921\u093C\u0947\u0902'"
+                    icon="pi pi-check"
+                    class="p-button-sm p-button-primary"
+                    [loading]="isSavingUser"
+                    (click)="saveUser()">
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users List Table -->
+      <div class="dialog-table-card">
+        <table class="dialog-data-table">
+          <thead>
+            <tr>
+              <th style="width: 35px;" class="text-center">#</th>
+              <th>\u092F\u0942\u091C\u0930\u0928\u0947\u092E</th>
+              <th>\u092A\u094D\u0930\u0926\u0930\u094D\u0936\u093F\u0924 \u0928\u093E\u092E</th>
+              <th style="width: 110px;">\u092D\u0942\u092E\u093F\u0915\u093E (Role)</th>
+              <th style="width: 80px;" class="text-center">\u0938\u094D\u0925\u093F\u0924\u093F</th>
+              <th style="width: 140px;">\u092C\u0928\u093E\u092F\u093E \u0917\u092F\u093E</th>
+              <th style="width: 130px;" class="text-center">\u0915\u093E\u0930\u094D\u0930\u0935\u093E\u0908</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usersList; let i = index">
+              <td class="text-center text-muted font-mono col-idx">{{ i + 1 }}</td>
+              <td>
+                <strong class="font-mono">{{ u.username }}</strong>
+                <span *ngIf="currentUser.username === u.username" class="badge-current-user ms-1">Active</span>
+              </td>
+              <td>{{ u.display_name || '\u2014' }}</td>
+              <td>
+                <span class="role-pill-tag" [class.admin-tag]="u.role === 'admin'" [class.author-tag]="u.role === 'author'">
+                  {{ u.role === 'admin' ? '\u{1F451} Admin' : '\u{1F464} Author' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="status-pill" [class.active-pill]="u.active" [class.inactive-pill]="!u.active">
+                  {{ u.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="text-muted-xs font-mono">{{ u.created_at || '\u2014' }}</td>
+              <td class="text-center">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <i class="pi pi-pencil i-outline-primary cursor-pointer"
+                     (click)="editUser(u)"
+                     title="Edit User">
+                  </i>
+                  <i *ngIf="u.username !== 'admin'"
+                     class="pi pi-trash i-outline-danger cursor-pointer"
+                     (click)="deleteUser(u)"
+                     title="Delete User">
+                  </i>
+                  <button type="button"
+                          class="btn-use-account"
+                          [class.btn-use-account-active]="currentUser.username === u.username"
+                          (click)="setCurrentActiveUser(u)"
+                          title="Use this account">
+                    {{ currentUser.username === u.username ? '\u2713 Active' : 'Switch' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="usersList.length === 0">
+              <td colspan="7" class="text-center text-muted py-3">
+                <span *ngIf="isLoadingUsers"><i class="pi pi-spin pi-spinner me-1"></i> \u0932\u094B\u0921 \u0939\u094B \u0930\u0939\u093E \u0939\u0948...</span>
+                <span *ngIf="!isLoadingUsers">\u0915\u094B\u0908 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u093E (No users found)</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <button pButton type="button" label="\u092C\u0902\u0926 \u0915\u0930\u0947\u0902 (Close)" class="p-button-text p-button-sm dialog-btn-cancel" (click)="showUserManagementModal = false"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
 </div>
-`, styles: ["/**\n * sutram-excel-studio.component.scss\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Pixel-Perfect Enterprise Excel Studio Styling.\n * Exact replication of Sutram Excel Studio v2.0 UI.\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n */\n\n:host {\n  display: block;\n  width: 100%;\n  height: 100%;\n}\n\n.sutram-excel-container {\n  --primary: #4f46e5;\n  --primary-hover: #4338ca;\n  --primary-soft: #e0e7ff;\n  --success: #10b981;\n  --success-soft: #d1fae5;\n  --warning: #f59e0b;\n  --warning-soft: #fef3c7;\n  --danger: #ef4444;\n  --danger-soft: #fee2e2;\n  --bg: #f8fafc;\n  --surface: #ffffff;\n  --surface-border: #e2e8f0;\n  --text: #0f172a;\n  --text-muted: #64748b;\n  --radius: 6px;\n  --header-bg: #f1f5f9;\n  --header-text: #1e293b;\n  --cell-border: rgba(125, 125, 125, 0.18);\n  --cell-height: 23px;\n  --header-height: 38px;\n  --cell-edited-bg: #fef9c3;\n  --cell-edited-border: #eab308;\n  --row-edited-bg: #fffbeb;\n  --row-new-bg: #dcfce7;\n  --row-new-border: #22c55e;\n\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\n  background-color: var(--bg);\n  color: var(--text);\n  height: 100%;\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  user-select: none;\n\n  &.dark-mode {\n    --bg: #0f172a;\n    --surface: #1e293b;\n    --surface-border: #334155;\n    --text: #f8fafc;\n    --text-muted: #94a3b8;\n    --header-bg: #1e293b;\n    --header-text: #cbd5e1;\n    --cell-border: rgba(255, 255, 255, 0.1);\n    --cell-edited-bg: rgba(234, 179, 8, 0.22);\n    --cell-edited-border: #facc15;\n    --row-edited-bg: rgba(234, 179, 8, 0.12);\n    --row-new-bg: rgba(34, 197, 94, 0.18);\n    --row-new-border: #4ade80;\n  }\n}\n\n/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n * 1. TOP EXCEL-STYLE RIBBON HEADER\n * \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */\n.studio-header {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n  flex-shrink: 0;\n  user-select: none;\n}\n\n/* 1A. Ribbon Top Menu Bar (Brand + Tabs + Mode Switcher) */\n.ribbon-menu-bar {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 2px 10px;\n  height: 32px;\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n}\n\n.menu-bar-left {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.brand-icon {\n  width: 22px;\n  height: 22px;\n  background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 11px;\n}\n.brand-title {\n  font-size: 11.5px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  color: var(--text);\n\n  .version-tag {\n    font-size: 9px;\n    padding: 1px 4px;\n    background: rgba(16, 185, 129, 0.18);\n    color: #059669;\n    border-radius: 3px;\n    font-weight: 700;\n  }\n}\n\n/* Ribbon Tabs Navigation */\n.ribbon-tabs-nav {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n}\n.ribbon-tab-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 3px 11px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.12s ease;\n\n  i {\n    font-size: 10.5px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.08);\n    color: var(--text);\n  }\n\n  &.active {\n    background: var(--surface);\n    color: var(--primary);\n    border-color: var(--surface-border) var(--surface-border) transparent var(--surface-border);\n    border-bottom: 2px solid var(--primary);\n    font-weight: 700;\n  }\n}\n.ribbon-badge {\n  font-size: 9px;\n  padding: 1px 4px;\n  border-radius: 999px;\n  background: rgba(79, 70, 229, 0.12);\n  color: var(--primary);\n  font-weight: 700;\n}\n\n.menu-bar-right {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.mode-pill-toggle {\n  background: rgba(125, 125, 125, 0.12);\n  border-radius: 999px;\n  padding: 2px;\n  display: flex;\n  gap: 2px;\n}\n.mode-pill-btn {\n  padding: 2px 9px;\n  border-radius: 999px;\n  font-size: 10px;\n  font-weight: 600;\n  border: none;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.15s ease;\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n\n  i { font-size: 9.5px; }\n}\n.mode-pill-btn.active-normal {\n  background: #3b82f6;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.35);\n}\n.mode-pill-btn.active-smart {\n  background: #10b981;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.35);\n}\n\n.cmd-btn-save-top,\n.cmd-btn-sync-top {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 2px 10px;\n  height: 24px;\n  border-radius: 4px;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.15s ease;\n\n  i {\n    font-size: 11px;\n  }\n\n  &:hover:not(:disabled) {\n    background: rgba(125, 125, 125, 0.1);\n    border-color: var(--primary);\n    color: var(--primary);\n  }\n\n  &:disabled {\n    opacity: 0.5;\n    cursor: not-allowed;\n  }\n\n  &.has-pending {\n    background: #10b981;\n    color: #ffffff;\n    border-color: #059669;\n    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.35);\n\n    &:hover {\n      background: #059669;\n      color: #ffffff;\n    }\n  }\n\n  .sync-badge-count {\n    font-size: 9px;\n    padding: 1px 5px;\n    border-radius: 999px;\n    background: #ffffff;\n    color: #059669;\n    font-weight: 800;\n    line-height: 1;\n  }\n}\n\n/* 1B. Ribbon Content Strip (Few cm area) */\n.ribbon-strip {\n  background: var(--surface);\n  padding: 4px 10px;\n  height: 60px;\n  display: flex;\n  align-items: center;\n  overflow: hidden;\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);\n}\n\n/* Home Panel Toolbar (Grouped items) */\n.ribbon-content-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n}\n\n.ribbon-group {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  height: 52px;\n  padding: 0 4px;\n}\n\n.ribbon-group-items {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  flex-grow: 1;\n}\n\n.ribbon-group-name {\n  font-size: 8.5px;\n  color: var(--text-muted);\n  font-weight: 600;\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n  margin-top: 1px;\n}\n\n.ribbon-v-sep {\n  width: 1px;\n  height: 40px;\n  background: var(--surface-border);\n  opacity: 0.75;\n  margin: 0 4px;\n}\n\n.ribbon-tool-btn {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  gap: 2px;\n  padding: 2px 7px;\n  height: 42px;\n  border-radius: 4px;\n  border: 1px solid transparent;\n  background: transparent;\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.12s;\n  font-size: 10.5px;\n\n  i {\n    font-size: 13px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.09);\n    border-color: var(--surface-border);\n  }\n\n  &.active {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.3);\n    font-weight: 700;\n  }\n\n  .ribbon-tool-lbl {\n    font-size: 9px;\n    white-space: nowrap;\n    font-weight: 500;\n  }\n}\n\n.ribbon-mini-col {\n  display: flex;\n  flex-direction: row;\n  gap: 2px;\n}\n\n.ribbon-mini-btn {\n  width: 22px;\n  height: 22px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 3px;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  font-size: 9.5px;\n\n  &:hover { background: rgba(125, 125, 125, 0.1); }\n\n  &.active-align {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.35);\n  }\n}\n\n.ribbon-search-field {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 165px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .ribbon-search-inp {\n    width: 100%;\n    height: 24px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.ribbon-btn-action {\n  background: var(--primary) !important;\n  color: #ffffff !important;\n  border-color: var(--primary) !important;\n  font-weight: 700 !important;\n\n  &:hover {\n    filter: brightness(1.1);\n  }\n\n  .sync-count-tag {\n    font-size: 8.5px;\n    padding: 0 4px;\n    background: #ffffff;\n    color: var(--primary);\n    border-radius: 999px;\n    font-weight: 800;\n    margin-left: 2px;\n  }\n}\n\n.ribbon-record-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 24px;\n}\n\n/* 1C. Tables & Reports Strip (Horizontal Scrolling Track with Small Boxes) */\n.ribbon-scroll-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.ribbon-boxes-track {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  overflow-x: auto;\n  scrollbar-width: thin;\n  height: 100%;\n  flex-grow: 1;\n  padding: 2px 2px;\n\n  &::-webkit-scrollbar {\n    height: 4px;\n  }\n  &::-webkit-scrollbar-thumb {\n    background: rgba(125, 125, 125, 0.25);\n    border-radius: 2px;\n  }\n}\n\n.ribbon-small-box {\n  position: relative;\n  flex-shrink: 0;\n  min-width: 115px;\n  max-width: 140px;\n  height: 46px;\n  background: var(--surface);\n  border: 1px solid var(--surface-border);\n  border-radius: 5px;\n  padding: 3px 8px 3px 6px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  cursor: pointer;\n  transition: all 0.12s ease;\n  user-select: none;\n\n  &:hover {\n    border-color: var(--primary);\n    background: var(--primary-soft);\n    transform: translateY(-1px);\n    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);\n  }\n\n  &.active-box {\n    border-color: rgba(16, 185, 129, 0.6);\n    background: rgba(16, 185, 129, 0.08);\n  }\n\n  .box-star-btn {\n    position: absolute;\n    top: 2px;\n    right: 2px;\n    width: 15px;\n    height: 15px;\n    border: none;\n    background: transparent;\n    cursor: pointer;\n    color: var(--text-muted);\n    font-size: 9px;\n    padding: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 2;\n    transition: all 0.12s;\n\n    &:hover {\n      color: #f59e0b;\n      transform: scale(1.2);\n    }\n\n    &.starred {\n      color: #f59e0b;\n    }\n  }\n\n  .box-icon-wrap {\n    width: 25px;\n    height: 25px;\n    border-radius: 4px;\n    background: var(--primary-soft);\n    color: var(--primary);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 11px;\n    flex-shrink: 0;\n\n    &.report-icon-bg {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n    }\n  }\n\n  .box-info {\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    padding-right: 10px;\n\n    .box-name-eng-main {\n      font-size: 11px;\n      font-weight: 600;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-hin {\n      font-size: 10.5px;\n      font-weight: 700;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-eng {\n      font-size: 9px;\n      color: var(--text-muted);\n      font-family: monospace;\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n  }\n\n  .box-dot {\n    position: absolute;\n    bottom: 3px;\n    right: 3px;\n    width: 5px;\n    height: 5px;\n    border-radius: 50%;\n    background: #10b981;\n  }\n}\n\n.btn-group-cmd {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.cmd-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  cursor: pointer;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  transition: all 0.15s;\n  user-select: none;\n\n  i {\n    font-size: 10.5px;\n  }\n}\n.cmd-btn:hover { background: rgba(125, 125, 125, 0.1); }\n.cmd-btn.active {\n  background: var(--primary-soft);\n  color: var(--primary);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.cmd-btn-primary { background: var(--primary); color: white; border-color: var(--primary); }\n.cmd-btn-primary:hover { background: var(--primary-hover); }\n.cmd-btn-success { background: var(--success); color: white; border-color: var(--success); }\n.cmd-btn-success:hover { background: #059669; }\n.cmd-btn-warning { background: var(--warning-soft); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }\n\n.sync-badge-count {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  background: #f59e0b;\n  color: #ffffff;\n  font-size: 9.5px;\n  font-weight: 700;\n  padding: 1px 5px;\n  border-radius: 999px;\n  margin-left: 4px;\n  line-height: 1.1;\n}\n\n/* 2. FORMULA BAR ROW */\n.formula-bar-row {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n.coord-box {\n  width: 48px;\n  height: 22px;\n  line-height: 18px;\n  text-align: center;\n  font-weight: 700;\n  font-size: 11px;\n  padding: 1px 3px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  background: rgba(125, 125, 125, 0.05);\n}\n.active-col-chip {\n  background: var(--primary-soft);\n  color: var(--primary);\n  padding: 1px 6px;\n  height: 20px;\n  line-height: 17px;\n  border-radius: 4px;\n  font-size: 10.5px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 170px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n.formula-input {\n  flex-grow: 1;\n  height: 22px;\n  padding: 2px 7px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 11.5px;\n  font-family: inherit;\n  outline: none;\n  background: var(--surface);\n  color: var(--text);\n}\n.formula-input:focus { border-color: var(--primary); }\n\n.formula-bar-right-area {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n  margin-left: 4px;\n}\n\n.formula-search-field {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 175px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .formula-search-inp {\n    width: 100%;\n    height: 22px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.formula-record-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 22px;\n  white-space: nowrap;\n}\n.control-settings-bar {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  flex-shrink: 0;\n  font-size: 11px;\n}\n.ctrl-bar-left, .ctrl-bar-right {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.ctrl-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 8px;\n  height: 23px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  user-select: none;\n\n  i {\n    font-size: 10px;\n  }\n}\n.ctrl-btn:hover {\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text);\n}\n.ctrl-btn.active {\n  color: var(--primary);\n  background: var(--primary-soft);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.ctrl-btn-danger {\n  color: var(--danger);\n  background: var(--danger-soft);\n  border-color: rgba(239, 68, 68, 0.3);\n}\n.ctrl-btn-danger:hover {\n  background: rgba(239, 68, 68, 0.2);\n}\n.ctrl-dot {\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  background: #10b981;\n  display: inline-block;\n}\n.ctrl-search-wrap {\n  position: relative;\n  display: flex;\n  align-items: center;\n  flex-grow: 1;\n  max-width: 420px;\n}\n.ctrl-search-icon {\n  position: absolute;\n  left: 8px;\n  color: var(--text-muted);\n  font-size: 10px;\n  pointer-events: none;\n}\n.ctrl-search-input {\n  width: 100%;\n  height: 23px;\n  padding: 2px 24px 2px 24px;\n  border: 1px solid var(--surface-border);\n  border-radius: 999px;\n  font-size: 11px;\n  background: rgba(125, 125, 125, 0.05);\n  color: var(--text);\n  outline: none;\n  transition: all 0.15s;\n}\n.ctrl-search-input:focus {\n  border-color: var(--primary);\n  background: var(--surface);\n  box-shadow: 0 0 0 2px var(--primary-soft);\n}\n.ctrl-search-clear {\n  position: absolute;\n  right: 6px;\n  background: none;\n  border: none;\n  font-size: 10px;\n  color: var(--text-muted);\n  cursor: pointer;\n  padding: 1px 4px;\n  border-radius: 50%;\n}\n.ctrl-search-clear:hover {\n  color: var(--danger);\n  background: rgba(125, 125, 125, 0.15);\n}\n.ctrl-search-spinner {\n  position: absolute;\n  right: 24px;\n  color: var(--primary);\n  font-size: 10px;\n}\n.ctrl-record-badge {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  height: 21px;\n  border-radius: 999px;\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text-muted);\n  font-size: 10px;\n  font-weight: 600;\n  white-space: nowrap;\n\n  i {\n    font-size: 10px;\n  }\n}\n\n/* 4. STATUS & BATCH SUGGESTION STRIP */\n.status-strip {\n  padding: 3px 14px;\n  font-size: 11.5px;\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  background: rgba(125, 125, 125, 0.04);\n}\n.status-strip.strip-error { background: #fef2f2; color: #991b1b; }\n.status-strip.strip-clean { background: #f0fdf4; color: #166534; }\n.status-strip.strip-suggestion { background: #fffbeb; color: #92400e; }\n\n/* 5. SPREADSHEET CANVAS */\n.spreadsheet-canvas {\n  flex-grow: 1;\n  overflow: hidden;\n  background: var(--surface);\n  position: relative;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n\n  sutram-grid {\n    display: block;\n    width: 100%;\n    height: 100%;\n    flex: 1;\n    min-height: 0;\n  }\n}\n\n/* 6. BOTTOM MULTI-SHEET TAB BAR & STATUS BAR */\n.studio-footer {\n  flex-shrink: 0;\n  background: var(--surface);\n  border-top: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n}\n.sheet-tabs-bar {\n  display: flex;\n  align-items: center;\n  background: rgba(125, 125, 125, 0.05);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 2px 6px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.sheet-tabs-bar::-webkit-scrollbar { display: none; }\n\n.tab-pill {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 12px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11.5px;\n  font-weight: 600;\n  cursor: pointer;\n  color: var(--text-muted);\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  transition: all 0.15s;\n}\n.tab-pill:hover {\n  background: rgba(125, 125, 125, 0.1);\n  color: var(--text);\n}\n.tab-pill.active-tab {\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-color: rgba(16, 185, 129, 0.25);\n  border-bottom: 2px solid #10b981;\n  font-weight: 700;\n}\n\n.sheet-tab-badge {\n  font-size: 9.5px;\n  padding: 1px 5px;\n  background: rgba(16, 185, 129, 0.2);\n  color: #059669;\n  border-radius: 999px;\n  font-weight: 700;\n}\n\n.add-tab-btn {\n  padding: 2px 8px;\n  border: 1px dashed rgba(125, 125, 125, 0.4);\n  border-radius: 4px;\n  background: transparent;\n  cursor: pointer;\n  color: var(--primary);\n  margin-left: 4px;\n}\n.add-tab-btn:hover { background: rgba(79, 70, 229, 0.1); }\n\n.sheet-tab-rough-badge {\n  font-size: 9px;\n  padding: 1px 4px;\n  background: rgba(245, 158, 11, 0.2);\n  color: #d97706;\n  border-radius: 3px;\n  font-weight: 700;\n  text-transform: uppercase;\n}\n\n.tab-close-btn {\n  margin-left: 3px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  font-size: 9.5px;\n  line-height: 1;\n  padding: 0;\n  transition: all 0.12s;\n\n  &:hover {\n    background: rgba(239, 68, 68, 0.18);\n    color: #ef4444;\n  }\n}\n\n.tab-edit-btn {\n  margin-left: 2px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  padding: 0;\n  opacity: 0.5;\n  transition: all 0.12s;\n\n  &:hover {\n    opacity: 1;\n    background: rgba(59, 130, 246, 0.15);\n    color: var(--primary, #3b82f6);\n  }\n}\n\n.tab-inline-rename-input {\n  font-size: 11px;\n  font-weight: 600;\n  padding: 1px 5px;\n  height: 19px;\n  min-width: 70px;\n  max-width: 160px;\n  border: 1px solid var(--primary, #3b82f6);\n  border-radius: 3px;\n  background: var(--surface-card, #ffffff);\n  color: var(--text, #1e293b);\n  outline: none;\n  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);\n}\n\n.tab-context-menu {\n  position: fixed;\n  z-index: 9999;\n  background: var(--surface-card, #ffffff);\n  border: 1px solid var(--surface-border, rgba(125, 125, 125, 0.25));\n  border-radius: 6px;\n  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);\n  min-width: 175px;\n  padding: 4px;\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n\n.tab-context-menu-item {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 6px 10px;\n  font-size: 11.5px;\n  font-weight: 500;\n  color: var(--text);\n  border-radius: 4px;\n  cursor: pointer;\n  user-select: none;\n  transition: background 0.12s;\n\n  i {\n    font-size: 12px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.12);\n  }\n\n  &.text-danger:hover {\n    background: rgba(239, 68, 68, 0.12);\n  }\n}\n\n.bottom-status-subrow {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 3px 14px;\n  font-size: 11px;\n  color: var(--text-muted);\n}\n.zoom-controls {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  padding: 1px 4px;\n}\n.zoom-btn {\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  color: var(--text);\n  padding: 1px 5px;\n  font-size: 11px;\n}\n.zoom-display {\n  font-weight: 700;\n  cursor: pointer;\n  padding: 0 4px;\n}\n\n/* 7. FLOATING SYNC TOAST HUD */\n.sync-toast-hud {\n  position: fixed;\n  top: 50px;\n  right: 20px;\n  z-index: 2500;\n  min-width: 320px;\n  max-width: 440px;\n  background: var(--surface);\n  color: var(--text);\n  border: 1px solid var(--surface-border);\n  border-radius: 8px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);\n  overflow: hidden;\n  animation: toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);\n  font-size: 11.5px;\n}\n@keyframes toastSlideIn {\n  from { opacity: 0; transform: translateY(-12px) scale(0.97); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n.sync-toast-header {\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--surface-border);\n  background: rgba(125, 125, 125, 0.04);\n}\n.sync-toast-title {\n  display: flex;\n  align-items: center;\n  gap: 7px;\n  font-weight: 700;\n  font-size: 12px;\n}\n.sync-toast-close {\n  background: none;\n  border: none;\n  color: var(--text-muted);\n  cursor: pointer;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 3px;\n}\n.sync-toast-close:hover {\n  background: rgba(125, 125, 125, 0.12);\n  color: var(--text);\n}\n.sync-toast-body {\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n.sync-toast-stats {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-wrap: wrap;\n}\n.sync-badge-chip {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n}\n.chip-success {\n  background: var(--success-soft);\n  color: var(--success);\n}\n.chip-info {\n  background: var(--primary-soft);\n  color: var(--primary);\n}\n.chip-warning {\n  background: var(--warning-soft);\n  color: #b45309;\n}\n.chip-danger {\n  background: var(--danger-soft);\n  color: var(--danger);\n}\n.sync-toast-errors {\n  margin-top: 4px;\n  padding: 6px 8px;\n  background: rgba(239, 68, 68, 0.08);\n  border: 1px solid rgba(239, 68, 68, 0.2);\n  border-radius: 4px;\n  font-size: 10.5px;\n  color: #ef4444;\n  max-height: 140px;\n  overflow-y: auto;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}\n\n/* Last Sync Status in Bottom Bar */\n.last-sync-badge {\n  display: inline-flex;\n  align-items: center;\n  padding: 1px 7px;\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-radius: 4px;\n  font-weight: 600;\n  font-size: 10.5px;\n  border: 1px solid rgba(16, 185, 129, 0.25);\n\n  &.sync-error {\n    background: rgba(239, 68, 68, 0.12);\n    color: #ef4444;\n    border-color: rgba(239, 68, 68, 0.25);\n  }\n}\n\n/* Live Progress Bar inside Toast */\n.sync-progress-wrap {\n  width: 100%;\n}\n.sync-progress-track {\n  width: 100%;\n  height: 6px;\n  background: rgba(125, 125, 125, 0.2);\n  border-radius: 999px;\n  overflow: hidden;\n}\n.sync-progress-bar {\n  height: 100%;\n  background: linear-gradient(90deg, #3b82f6, #10b981);\n  border-radius: 999px;\n  transition: width 0.2s ease-in-out;\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Instant Column Configuration Dropdown Menu (Replicating Legacy Studio)\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n::ng-deep .sutram-col-config-popover {\n  width: 340px !important;\n  height: 500px !important;\n  max-height: calc(100vh - 120px) !important;\n  font-size: 11.5px;\n  border-radius: 8px !important;\n  overflow: hidden !important;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n  display: flex !important;\n  flex-direction: column !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n    width: 100% !important;\n    height: 100% !important;\n    display: flex !important;\n    flex-direction: column !important;\n    flex: 1 1 auto !important;\n    min-height: 0 !important;\n    overflow: hidden !important;\n  }\n}\n\n.col-dropdown-menu {\n  width: 100% !important;\n  height: 100% !important;\n  max-height: none !important;\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  border-radius: 8px;\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n  flex: 1 1 auto;\n  min-height: 0;\n  user-select: none;\n\n  .col-dd-header {\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    flex-direction: column;\n    gap: 6px;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-search-wrap {\n    position: relative;\n    display: flex;\n    align-items: center;\n\n    .col-dd-search-icon {\n      position: absolute;\n      left: 8px;\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      pointer-events: none;\n    }\n\n    .col-dd-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      border-radius: 4px;\n      font-size: 11.5px;\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.12s;\n\n      &:focus {\n        border-color: var(--primary, #4f46e5);\n      }\n    }\n\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 8px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      font-size: 11px;\n      padding: 0;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .col-dd-actions {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 0 2px;\n\n    .col-dd-actions-left {\n      display: flex;\n      gap: 4px;\n    }\n\n    .col-dd-act-btn {\n      padding: 2px 7px;\n      font-size: 10.5px;\n      font-weight: 600;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--surface, #ffffff);\n      color: var(--text-muted, #64748b);\n      border-radius: 3px;\n      cursor: pointer;\n      transition: all 0.12s;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .col-dd-count {\n      font-size: 10.5px;\n      color: var(--text-muted, #64748b);\n      font-weight: 600;\n    }\n  }\n\n  .col-dd-body {\n    padding: 6px 8px;\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    flex: 1 1 0 !important;\n    min-height: 0 !important;\n    max-height: none !important;\n    display: flex;\n    flex-direction: column;\n    gap: 3px;\n    overscroll-behavior: contain;\n    scrollbar-width: thin;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-track {\n      background: rgba(125, 125, 125, 0.05);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb:hover {\n      background: var(--primary, #4f46e5);\n    }\n  }\n\n  .col-dd-section-title {\n    font-size: 10px;\n    font-weight: 700;\n    color: var(--text-muted, #64748b);\n    margin: 3px 0 2px 4px;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-item {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 4px 6px;\n    border-radius: 4px;\n    cursor: pointer;\n    user-select: none;\n    transition: background 0.1s;\n    font-size: 11.5px;\n    color: var(--text, #0f172a);\n    flex-shrink: 0 !important;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.08);\n    }\n\n    .col-dd-item-left {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n\n    .col-dd-item-name {\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    cursor: pointer;\n    accent-color: var(--primary, #4f46e5);\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .type-badge {\n    font-size: 9.5px;\n    padding: 1px 5px;\n    border-radius: 3px;\n    background: rgba(125, 125, 125, 0.12);\n    color: var(--text-muted, #64748b);\n    font-family: 'JetBrains Mono', monospace;\n    flex-shrink: 0;\n  }\n\n  /* FK Grouping */\n  .col-dd-group {\n    border: 1px solid var(--surface-border, #e2e8f0);\n    border-radius: 5px;\n    margin: 3px 0;\n    overflow: hidden;\n    background: rgba(125, 125, 125, 0.02);\n    flex-shrink: 0 !important;\n\n    &.fk-active-group {\n      border-color: rgba(79, 70, 229, 0.35);\n    }\n\n    .col-dd-group-header {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding: 5px 8px;\n      background: rgba(125, 125, 125, 0.06);\n      cursor: pointer;\n      user-select: none;\n      font-size: 11.5px;\n      font-weight: 600;\n      flex-shrink: 0 !important;\n      min-height: 28px !important;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n      }\n\n      .col-dd-group-left {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        overflow: hidden;\n      }\n\n      .fk-expand-toggle {\n        font-size: 10px;\n        color: var(--text-muted, #64748b);\n        width: 12px;\n        text-align: center;\n        transition: transform 0.18s ease;\n\n        &.rotated {\n          transform: rotate(90deg);\n        }\n      }\n\n      .fk-group-pill {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 999px;\n        font-weight: 600;\n      }\n    }\n\n    .col-dd-group-items {\n      padding: 3px 4px 4px 18px;\n      background: var(--surface, #ffffff);\n      border-top: 1px solid var(--surface-border, #e2e8f0);\n      display: flex;\n      flex-direction: column;\n      gap: 2px;\n      max-height: none !important;\n      overflow: visible !important;\n    }\n  }\n\n  .col-dd-empty {\n    padding: 16px;\n    text-align: center;\n    color: var(--text-muted, #64748b);\n    font-size: 11.5px;\n  }\n\n  .col-dd-footer {\n    padding: 6px 10px;\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n}\n\n\n\n"] }]
+
+`, styles: ["/**\n * sutram-excel-studio.component.scss\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Pixel-Perfect Enterprise Excel Studio Styling.\n * Exact replication of Sutram Excel Studio v2.0 UI.\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n */\n\n:host {\n  display: block;\n  width: 100%;\n  height: 100%;\n}\n\n.sutram-excel-container {\n  --primary: #4f46e5;\n  --primary-hover: #4338ca;\n  --primary-soft: #e0e7ff;\n  --success: #10b981;\n  --success-soft: #d1fae5;\n  --warning: #f59e0b;\n  --warning-soft: #fef3c7;\n  --danger: #ef4444;\n  --danger-soft: #fee2e2;\n  --bg: #f8fafc;\n  --surface: #ffffff;\n  --surface-border: #e2e8f0;\n  --text: #0f172a;\n  --text-muted: #64748b;\n  --radius: 6px;\n  --header-bg: #f1f5f9;\n  --header-text: #1e293b;\n  --cell-border: rgba(125, 125, 125, 0.18);\n  --cell-height: 23px;\n  --header-height: 38px;\n  --cell-edited-bg: #fef9c3;\n  --cell-edited-border: #eab308;\n  --row-edited-bg: #fffbeb;\n  --row-new-bg: #dcfce7;\n  --row-new-border: #22c55e;\n\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\n  background-color: var(--bg);\n  color: var(--text);\n  height: 100%;\n  width: 100%;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  user-select: none;\n\n  &.dark-mode {\n    --bg: #0f172a;\n    --surface: #1e293b;\n    --surface-border: #334155;\n    --text: #f8fafc;\n    --text-muted: #94a3b8;\n    --header-bg: #1e293b;\n    --header-text: #cbd5e1;\n    --cell-border: rgba(255, 255, 255, 0.1);\n    --cell-edited-bg: rgba(234, 179, 8, 0.22);\n    --cell-edited-border: #facc15;\n    --row-edited-bg: rgba(234, 179, 8, 0.12);\n    --row-new-bg: rgba(34, 197, 94, 0.18);\n    --row-new-border: #4ade80;\n  }\n}\n\n/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n * 1. TOP EXCEL-STYLE RIBBON HEADER\n * \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */\n.studio-header {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n  flex-shrink: 0;\n  user-select: none;\n}\n\n/* 1A. Ribbon Top Menu Bar (Brand + Tabs + Mode Switcher) */\n.ribbon-menu-bar {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 2px 10px;\n  height: 32px;\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n}\n\n.menu-bar-left {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.brand-icon {\n  width: 22px;\n  height: 22px;\n  background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 11px;\n}\n.brand-title {\n  font-size: 11.5px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  color: var(--text);\n\n  .version-tag {\n    font-size: 9px;\n    padding: 1px 4px;\n    background: rgba(16, 185, 129, 0.18);\n    color: #059669;\n    border-radius: 3px;\n    font-weight: 700;\n  }\n}\n\n/* Ribbon Tabs Navigation */\n.ribbon-tabs-nav {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n}\n.ribbon-tab-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 3px 11px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.12s ease;\n\n  i {\n    font-size: 10.5px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.08);\n    color: var(--text);\n  }\n\n  &.active {\n    background: var(--surface);\n    color: var(--primary);\n    border-color: var(--surface-border) var(--surface-border) transparent var(--surface-border);\n    border-bottom: 2px solid var(--primary);\n    font-weight: 700;\n  }\n}\n.ribbon-badge {\n  font-size: 9px;\n  padding: 1px 4px;\n  border-radius: 999px;\n  background: rgba(79, 70, 229, 0.12);\n  color: var(--primary);\n  font-weight: 700;\n}\n\n.menu-bar-right {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.mode-pill-toggle {\n  background: rgba(125, 125, 125, 0.12);\n  border-radius: 999px;\n  padding: 2px;\n  display: flex;\n  gap: 2px;\n}\n.mode-pill-btn {\n  padding: 2px 9px;\n  border-radius: 999px;\n  font-size: 10px;\n  font-weight: 600;\n  border: none;\n  cursor: pointer;\n  background: transparent;\n  color: var(--text-muted);\n  transition: all 0.15s ease;\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n\n  i { font-size: 9.5px; }\n}\n.mode-pill-btn.active-normal {\n  background: #3b82f6;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.35);\n}\n.mode-pill-btn.active-smart {\n  background: #10b981;\n  color: #ffffff;\n  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.35);\n}\n\n.cmd-btn-save-top,\n.cmd-btn-sync-top {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 2px 10px;\n  height: 24px;\n  border-radius: 4px;\n  font-size: 11px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.15s ease;\n\n  i {\n    font-size: 11px;\n  }\n\n  &:hover:not(:disabled) {\n    background: rgba(125, 125, 125, 0.1);\n    border-color: var(--primary);\n    color: var(--primary);\n  }\n\n  &:disabled {\n    opacity: 0.5;\n    cursor: not-allowed;\n  }\n\n  &.has-pending {\n    background: #10b981;\n    color: #ffffff;\n    border-color: #059669;\n    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.35);\n\n    &:hover {\n      background: #059669;\n      color: #ffffff;\n    }\n  }\n\n  .sync-badge-count {\n    font-size: 9px;\n    padding: 1px 5px;\n    border-radius: 999px;\n    background: #ffffff;\n    color: #059669;\n    font-weight: 800;\n    line-height: 1;\n  }\n}\n\n/* 1B. Ribbon Content Strip (Few cm area) */\n.ribbon-strip {\n  background: var(--surface);\n  padding: 4px 10px;\n  height: 60px;\n  display: flex;\n  align-items: center;\n  overflow: hidden;\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);\n}\n\n/* Home Panel Toolbar (Grouped items) */\n.ribbon-content-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n}\n\n.ribbon-group {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  height: 52px;\n  padding: 0 4px;\n}\n\n.ribbon-group-items {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  flex-grow: 1;\n}\n\n.ribbon-group-name {\n  font-size: 8.5px;\n  color: var(--text-muted);\n  font-weight: 600;\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n  margin-top: 1px;\n}\n\n.ribbon-v-sep {\n  width: 1px;\n  height: 40px;\n  background: var(--surface-border);\n  opacity: 0.75;\n  margin: 0 4px;\n}\n\n.ribbon-tool-btn {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  gap: 2px;\n  padding: 2px 7px;\n  height: 42px;\n  border-radius: 4px;\n  border: 1px solid transparent;\n  background: transparent;\n  color: var(--text);\n  cursor: pointer;\n  transition: all 0.12s;\n  font-size: 10.5px;\n\n  i {\n    font-size: 13px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.09);\n    border-color: var(--surface-border);\n  }\n\n  &.active {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.3);\n    font-weight: 700;\n  }\n\n  .ribbon-tool-lbl {\n    font-size: 9px;\n    white-space: nowrap;\n    font-weight: 500;\n  }\n}\n\n.ribbon-mini-col {\n  display: flex;\n  flex-direction: row;\n  gap: 2px;\n}\n\n.ribbon-mini-btn {\n  width: 22px;\n  height: 22px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 3px;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  cursor: pointer;\n  font-size: 9.5px;\n\n  &:hover { background: rgba(125, 125, 125, 0.1); }\n\n  &.active-align {\n    background: var(--primary-soft);\n    color: var(--primary);\n    border-color: rgba(79, 70, 229, 0.35);\n  }\n}\n\n.ribbon-search-field {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 165px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .ribbon-search-inp {\n    width: 100%;\n    height: 24px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.ribbon-btn-action {\n  background: var(--primary) !important;\n  color: #ffffff !important;\n  border-color: var(--primary) !important;\n  font-weight: 700 !important;\n\n  &:hover {\n    filter: brightness(1.1);\n  }\n\n  .sync-count-tag {\n    font-size: 8.5px;\n    padding: 0 4px;\n    background: #ffffff;\n    color: var(--primary);\n    border-radius: 999px;\n    font-weight: 800;\n    margin-left: 2px;\n  }\n}\n\n.ribbon-record-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 24px;\n}\n\n/* 1C. Tables & Reports Strip (Horizontal Scrolling Track with Small Boxes) */\n.ribbon-scroll-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n\n.ribbon-empty-state {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 11px;\n  color: var(--text-muted);\n  padding: 4px 12px;\n  background: rgba(125, 125, 125, 0.05);\n  border-radius: 4px;\n  border: 1px dashed var(--surface-border);\n}\n\n.ribbon-boxes-track {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  overflow-x: auto;\n  scrollbar-width: thin;\n  height: 100%;\n  flex-grow: 1;\n  padding: 2px 2px;\n\n  &::-webkit-scrollbar {\n    height: 4px;\n  }\n  &::-webkit-scrollbar-thumb {\n    background: rgba(125, 125, 125, 0.25);\n    border-radius: 2px;\n  }\n}\n\n.ribbon-small-box {\n  position: relative;\n  flex-shrink: 0;\n  min-width: 115px;\n  max-width: 140px;\n  height: 46px;\n  background: var(--surface);\n  border: 1px solid var(--surface-border);\n  border-radius: 5px;\n  padding: 3px 8px 3px 6px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  cursor: pointer;\n  transition: all 0.12s ease;\n  user-select: none;\n\n  &:hover {\n    border-color: var(--primary);\n    background: var(--primary-soft);\n    transform: translateY(-1px);\n    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);\n  }\n\n  &.active-box {\n    border-color: rgba(16, 185, 129, 0.6);\n    background: rgba(16, 185, 129, 0.08);\n  }\n\n  .box-star-btn {\n    position: absolute;\n    top: 2px;\n    right: 2px;\n    width: 15px;\n    height: 15px;\n    border: none;\n    background: transparent;\n    cursor: pointer;\n    color: var(--text-muted);\n    font-size: 9px;\n    padding: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 2;\n    transition: all 0.12s;\n\n    &:hover {\n      color: #f59e0b;\n      transform: scale(1.2);\n    }\n\n    &.starred {\n      color: #f59e0b;\n    }\n  }\n\n  .box-icon-wrap {\n    width: 25px;\n    height: 25px;\n    border-radius: 4px;\n    background: var(--primary-soft);\n    color: var(--primary);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 11px;\n    flex-shrink: 0;\n\n    &.report-icon-bg {\n      background: rgba(16, 185, 129, 0.15);\n      color: #059669;\n    }\n  }\n\n  .box-info {\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    padding-right: 10px;\n\n    .box-name-eng-main {\n      font-size: 11px;\n      font-weight: 600;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-hin {\n      font-size: 10.5px;\n      font-weight: 700;\n      color: var(--text);\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n\n    .box-name-eng {\n      font-size: 9px;\n      color: var(--text-muted);\n      font-family: monospace;\n      white-space: nowrap;\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n  }\n\n  .box-dot {\n    position: absolute;\n    bottom: 3px;\n    right: 3px;\n    width: 5px;\n    height: 5px;\n    border-radius: 50%;\n    background: #10b981;\n  }\n}\n\n.btn-group-cmd {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.cmd-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  cursor: pointer;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text);\n  transition: all 0.15s;\n  user-select: none;\n\n  i {\n    font-size: 10.5px;\n  }\n}\n.cmd-btn:hover { background: rgba(125, 125, 125, 0.1); }\n.cmd-btn.active {\n  background: var(--primary-soft);\n  color: var(--primary);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.cmd-btn-primary { background: var(--primary); color: white; border-color: var(--primary); }\n.cmd-btn-primary:hover { background: var(--primary-hover); }\n.cmd-btn-success { background: var(--success); color: white; border-color: var(--success); }\n.cmd-btn-success:hover { background: #059669; }\n.cmd-btn-warning { background: var(--warning-soft); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }\n\n.sync-badge-count {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  background: #f59e0b;\n  color: #ffffff;\n  font-size: 9.5px;\n  font-weight: 700;\n  padding: 1px 5px;\n  border-radius: 999px;\n  margin-left: 4px;\n  line-height: 1.1;\n}\n\n/* 2. FORMULA BAR ROW */\n.formula-bar-row {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n.coord-box {\n  width: 48px;\n  height: 22px;\n  line-height: 18px;\n  text-align: center;\n  font-weight: 700;\n  font-size: 11px;\n  padding: 1px 3px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  background: rgba(125, 125, 125, 0.05);\n}\n.active-col-chip {\n  background: var(--primary-soft);\n  color: var(--primary);\n  padding: 1px 6px;\n  height: 20px;\n  line-height: 17px;\n  border-radius: 4px;\n  font-size: 10.5px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 170px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n.formula-input {\n  flex-grow: 1;\n  height: 22px;\n  padding: 2px 7px;\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 11.5px;\n  font-family: inherit;\n  outline: none;\n  background: var(--surface);\n  color: var(--text);\n}\n.formula-input:focus { border-color: var(--primary); }\n\n.formula-bar-right-area {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n  margin-left: 4px;\n}\n\n.formula-search-field {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 175px;\n\n  .search-ico {\n    position: absolute;\n    left: 7px;\n    font-size: 9.5px;\n    color: var(--text-muted);\n    pointer-events: none;\n  }\n\n  .formula-search-inp {\n    width: 100%;\n    height: 22px;\n    padding: 2px 20px 2px 22px;\n    font-size: 10.5px;\n    border-radius: 4px;\n    border: 1px solid var(--surface-border);\n    background: var(--surface);\n    color: var(--text);\n    outline: none;\n    transition: border-color 0.12s ease;\n\n    &:focus {\n      border-color: var(--primary);\n    }\n  }\n\n  .clear-btn-inline {\n    position: absolute;\n    right: 5px;\n    background: transparent;\n    border: none;\n    font-size: 9px;\n    cursor: pointer;\n    color: var(--text-muted);\n  }\n\n  .spin-inline {\n    position: absolute;\n    right: 5px;\n    font-size: 9px;\n    color: var(--primary);\n  }\n}\n\n.formula-record-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  font-size: 10px;\n  font-weight: 600;\n  color: var(--text-muted);\n  height: 22px;\n  white-space: nowrap;\n}\n.control-settings-bar {\n  background: var(--surface);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 3px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  flex-shrink: 0;\n  font-size: 11px;\n}\n.ctrl-bar-left, .ctrl-bar-right {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.ctrl-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 8px;\n  height: 23px;\n  border-radius: var(--radius);\n  font-size: 10.5px;\n  font-weight: 600;\n  border: 1px solid var(--surface-border);\n  background: var(--surface);\n  color: var(--text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  user-select: none;\n\n  i {\n    font-size: 10px;\n  }\n}\n.ctrl-btn:hover {\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text);\n}\n.ctrl-btn.active {\n  color: var(--primary);\n  background: var(--primary-soft);\n  border-color: rgba(79, 70, 229, 0.35);\n}\n.ctrl-btn-danger {\n  color: var(--danger);\n  background: var(--danger-soft);\n  border-color: rgba(239, 68, 68, 0.3);\n}\n.ctrl-btn-danger:hover {\n  background: rgba(239, 68, 68, 0.2);\n}\n.ctrl-dot {\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  background: #10b981;\n  display: inline-block;\n}\n.ctrl-search-wrap {\n  position: relative;\n  display: flex;\n  align-items: center;\n  flex-grow: 1;\n  max-width: 420px;\n}\n.ctrl-search-icon {\n  position: absolute;\n  left: 8px;\n  color: var(--text-muted);\n  font-size: 10px;\n  pointer-events: none;\n}\n.ctrl-search-input {\n  width: 100%;\n  height: 23px;\n  padding: 2px 24px 2px 24px;\n  border: 1px solid var(--surface-border);\n  border-radius: 999px;\n  font-size: 11px;\n  background: rgba(125, 125, 125, 0.05);\n  color: var(--text);\n  outline: none;\n  transition: all 0.15s;\n}\n.ctrl-search-input:focus {\n  border-color: var(--primary);\n  background: var(--surface);\n  box-shadow: 0 0 0 2px var(--primary-soft);\n}\n.ctrl-search-clear {\n  position: absolute;\n  right: 6px;\n  background: none;\n  border: none;\n  font-size: 10px;\n  color: var(--text-muted);\n  cursor: pointer;\n  padding: 1px 4px;\n  border-radius: 50%;\n}\n.ctrl-search-clear:hover {\n  color: var(--danger);\n  background: rgba(125, 125, 125, 0.15);\n}\n.ctrl-search-spinner {\n  position: absolute;\n  right: 24px;\n  color: var(--primary);\n  font-size: 10px;\n}\n.ctrl-record-badge {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 1px 7px;\n  height: 21px;\n  border-radius: 999px;\n  background: rgba(125, 125, 125, 0.08);\n  color: var(--text-muted);\n  font-size: 10px;\n  font-weight: 600;\n  white-space: nowrap;\n\n  i {\n    font-size: 10px;\n  }\n}\n\n/* 4. STATUS & BATCH SUGGESTION STRIP */\n.status-strip {\n  padding: 3px 14px;\n  font-size: 11.5px;\n  border-bottom: 1px solid var(--surface-border);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-shrink: 0;\n  background: rgba(125, 125, 125, 0.04);\n}\n.status-strip.strip-error { background: #fef2f2; color: #991b1b; }\n.status-strip.strip-clean { background: #f0fdf4; color: #166534; }\n.status-strip.strip-suggestion { background: #fffbeb; color: #92400e; }\n\n/* 5. SPREADSHEET CANVAS */\n.spreadsheet-canvas {\n  flex-grow: 1;\n  overflow: hidden;\n  background: var(--surface);\n  position: relative;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n\n  sutram-grid {\n    display: block;\n    width: 100%;\n    height: 100%;\n    flex: 1;\n    min-height: 0;\n  }\n}\n\n/* 6. BOTTOM MULTI-SHEET TAB BAR & STATUS BAR */\n.studio-footer {\n  flex-shrink: 0;\n  background: var(--surface);\n  border-top: 1px solid var(--surface-border);\n  display: flex;\n  flex-direction: column;\n}\n.sheet-tabs-bar {\n  display: flex;\n  align-items: center;\n  background: rgba(125, 125, 125, 0.05);\n  border-bottom: 1px solid var(--surface-border);\n  padding: 2px 6px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.sheet-tabs-bar::-webkit-scrollbar { display: none; }\n\n.tab-pill {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 12px;\n  border-radius: 4px 4px 0 0;\n  font-size: 11.5px;\n  font-weight: 600;\n  cursor: pointer;\n  color: var(--text-muted);\n  border: 1px solid transparent;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  transition: all 0.15s;\n}\n.tab-pill:hover {\n  background: rgba(125, 125, 125, 0.1);\n  color: var(--text);\n}\n.tab-pill.active-tab {\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-color: rgba(16, 185, 129, 0.25);\n  border-bottom: 2px solid #10b981;\n  font-weight: 700;\n}\n\n.sheet-tab-badge {\n  font-size: 9.5px;\n  padding: 1px 5px;\n  background: rgba(16, 185, 129, 0.2);\n  color: #059669;\n  border-radius: 999px;\n  font-weight: 700;\n}\n\n.add-tab-btn {\n  padding: 2px 8px;\n  border: 1px dashed rgba(125, 125, 125, 0.4);\n  border-radius: 4px;\n  background: transparent;\n  cursor: pointer;\n  color: var(--primary);\n  margin-left: 4px;\n}\n.add-tab-btn:hover { background: rgba(79, 70, 229, 0.1); }\n\n.sheet-tab-rough-badge {\n  font-size: 9px;\n  padding: 1px 4px;\n  background: rgba(245, 158, 11, 0.2);\n  color: #d97706;\n  border-radius: 3px;\n  font-weight: 700;\n  text-transform: uppercase;\n}\n\n.tab-close-btn {\n  margin-left: 3px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  font-size: 9.5px;\n  line-height: 1;\n  padding: 0;\n  transition: all 0.12s;\n\n  &:hover {\n    background: rgba(239, 68, 68, 0.18);\n    color: #ef4444;\n  }\n}\n\n.tab-edit-btn {\n  margin-left: 2px;\n  width: 15px;\n  height: 15px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted);\n  border-radius: 3px;\n  cursor: pointer;\n  padding: 0;\n  opacity: 0.5;\n  transition: all 0.12s;\n\n  &:hover {\n    opacity: 1;\n    background: rgba(59, 130, 246, 0.15);\n    color: var(--primary, #3b82f6);\n  }\n}\n\n.tab-inline-rename-input {\n  font-size: 11px;\n  font-weight: 600;\n  padding: 1px 5px;\n  height: 19px;\n  min-width: 70px;\n  max-width: 160px;\n  border: 1px solid var(--primary, #3b82f6);\n  border-radius: 3px;\n  background: var(--surface-card, #ffffff);\n  color: var(--text, #1e293b);\n  outline: none;\n  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);\n}\n\n.tab-context-menu {\n  position: fixed;\n  z-index: 9999;\n  background: var(--surface-card, #ffffff);\n  border: 1px solid var(--surface-border, rgba(125, 125, 125, 0.25));\n  border-radius: 6px;\n  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);\n  min-width: 175px;\n  padding: 4px;\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n\n.tab-context-menu-item {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 6px 10px;\n  font-size: 11.5px;\n  font-weight: 500;\n  color: var(--text);\n  border-radius: 4px;\n  cursor: pointer;\n  user-select: none;\n  transition: background 0.12s;\n\n  i {\n    font-size: 12px;\n  }\n\n  &:hover {\n    background: rgba(125, 125, 125, 0.12);\n  }\n\n  &.text-danger:hover {\n    background: rgba(239, 68, 68, 0.12);\n  }\n}\n\n.bottom-status-subrow {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 3px 14px;\n  font-size: 11px;\n  color: var(--text-muted);\n}\n.zoom-controls {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  background: rgba(125, 125, 125, 0.08);\n  border: 1px solid var(--surface-border);\n  border-radius: 4px;\n  padding: 1px 4px;\n}\n.zoom-btn {\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  color: var(--text);\n  padding: 1px 5px;\n  font-size: 11px;\n}\n.zoom-display {\n  font-weight: 700;\n  cursor: pointer;\n  padding: 0 4px;\n}\n\n/* 7. FLOATING SYNC TOAST HUD */\n.sync-toast-hud {\n  position: fixed;\n  top: 50px;\n  right: 20px;\n  z-index: 2500;\n  min-width: 320px;\n  max-width: 440px;\n  background: var(--surface);\n  color: var(--text);\n  border: 1px solid var(--surface-border);\n  border-radius: 8px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);\n  overflow: hidden;\n  animation: toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);\n  font-size: 11.5px;\n}\n@keyframes toastSlideIn {\n  from { opacity: 0; transform: translateY(-12px) scale(0.97); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n.sync-toast-header {\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--surface-border);\n  background: rgba(125, 125, 125, 0.04);\n}\n.sync-toast-title {\n  display: flex;\n  align-items: center;\n  gap: 7px;\n  font-weight: 700;\n  font-size: 12px;\n}\n.sync-toast-close {\n  background: none;\n  border: none;\n  color: var(--text-muted);\n  cursor: pointer;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 3px;\n}\n.sync-toast-close:hover {\n  background: rgba(125, 125, 125, 0.12);\n  color: var(--text);\n}\n.sync-toast-body {\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n.sync-toast-stats {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-wrap: wrap;\n}\n.sync-badge-chip {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 8px;\n  border-radius: 999px;\n  font-size: 11px;\n  font-weight: 600;\n}\n.chip-success {\n  background: var(--success-soft);\n  color: var(--success);\n}\n.chip-info {\n  background: var(--primary-soft);\n  color: var(--primary);\n}\n.chip-warning {\n  background: var(--warning-soft);\n  color: #b45309;\n}\n.chip-danger {\n  background: var(--danger-soft);\n  color: var(--danger);\n}\n.sync-toast-errors {\n  margin-top: 4px;\n  padding: 6px 8px;\n  background: rgba(239, 68, 68, 0.08);\n  border: 1px solid rgba(239, 68, 68, 0.2);\n  border-radius: 4px;\n  font-size: 10.5px;\n  color: #ef4444;\n  max-height: 140px;\n  overflow-y: auto;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}\n\n/* Last Sync Status in Bottom Bar */\n.last-sync-badge {\n  display: inline-flex;\n  align-items: center;\n  padding: 1px 7px;\n  background: rgba(16, 185, 129, 0.12);\n  color: #10b981;\n  border-radius: 4px;\n  font-weight: 600;\n  font-size: 10.5px;\n  border: 1px solid rgba(16, 185, 129, 0.25);\n\n  &.sync-error {\n    background: rgba(239, 68, 68, 0.12);\n    color: #ef4444;\n    border-color: rgba(239, 68, 68, 0.25);\n  }\n}\n\n/* Live Progress Bar inside Toast */\n.sync-progress-wrap {\n  width: 100%;\n}\n.sync-progress-track {\n  width: 100%;\n  height: 6px;\n  background: rgba(125, 125, 125, 0.2);\n  border-radius: 999px;\n  overflow: hidden;\n}\n.sync-progress-bar {\n  height: 100%;\n  background: linear-gradient(90deg, #3b82f6, #10b981);\n  border-radius: 999px;\n  transition: width 0.2s ease-in-out;\n}\n\n/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n * Instant Column Configuration Dropdown Menu (Replicating Legacy Studio)\n * \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n::ng-deep .sutram-col-config-popover {\n  width: min(94vw, 760px) !important;\n  height: 520px !important;\n  max-height: calc(100vh - 80px) !important;\n  font-size: 11.5px;\n  border-radius: 8px !important;\n  overflow: hidden !important;\n  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;\n  border: 1px solid var(--surface-border, #e2e8f0) !important;\n  background: var(--surface, #ffffff) !important;\n  color: var(--text, #0f172a) !important;\n  display: flex !important;\n  flex-direction: column !important;\n\n  .p-overlaypanel-content {\n    padding: 0 !important;\n    background: transparent !important;\n    color: inherit !important;\n    width: 100% !important;\n    height: 100% !important;\n    display: flex !important;\n    flex-direction: column !important;\n    flex: 1 1 auto !important;\n    min-height: 0 !important;\n    overflow: hidden !important;\n  }\n}\n\n.col-dd-split-container {\n  display: flex;\n  flex-direction: row;\n  width: 100%;\n  flex: 1 1 0;\n  min-height: 0;\n  overflow: hidden;\n  background: var(--surface, #ffffff);\n}\n\n/* \u2500\u2500 LEFT PANE: VISIBILITY & GROUPS \u2500\u2500 */\n.col-dd-left-pane {\n  width: 325px;\n  min-width: 300px;\n  max-width: 340px;\n  border-right: 1px solid var(--surface-border, #e2e8f0);\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  min-height: 0;\n  background: var(--surface, #ffffff);\n  flex-shrink: 0;\n\n  .col-dd-header {\n    padding: 8px 10px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    display: flex;\n    flex-direction: column;\n    gap: 6px;\n    background: rgba(125, 125, 125, 0.03);\n    flex-shrink: 0 !important;\n  }\n\n  .col-dd-search-wrap {\n    position: relative;\n    display: flex;\n    align-items: center;\n\n    .col-dd-search-icon {\n      position: absolute;\n      left: 8px;\n      color: var(--text-muted, #64748b);\n      font-size: 11px;\n      pointer-events: none;\n    }\n\n    .col-dd-search-input {\n      width: 100%;\n      height: 28px;\n      padding: 4px 26px;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      border-radius: 4px;\n      font-size: 11.5px;\n      background: var(--bg, #f8fafc);\n      color: var(--text, #0f172a);\n      outline: none;\n      transition: border-color 0.12s;\n\n      &:focus {\n        border-color: var(--primary, #4f46e5);\n      }\n    }\n\n    .btn-clear-search-inline {\n      position: absolute;\n      right: 8px;\n      background: transparent;\n      border: none;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      font-size: 11px;\n      padding: 0;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n\n      &:hover {\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .col-dd-actions {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 0 2px;\n\n    .col-dd-actions-left {\n      display: flex;\n      gap: 4px;\n    }\n\n    .col-dd-act-btn {\n      padding: 2px 7px;\n      font-size: 10.5px;\n      font-weight: 600;\n      border: 1px solid var(--surface-border, #e2e8f0);\n      background: var(--surface, #ffffff);\n      color: var(--text-muted, #64748b);\n      border-radius: 3px;\n      cursor: pointer;\n      transition: all 0.12s;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text, #0f172a);\n      }\n    }\n\n    .col-dd-count {\n      font-size: 10.5px;\n      color: var(--text-muted, #64748b);\n      font-weight: 600;\n    }\n  }\n\n  .col-dd-body {\n    padding: 6px 8px;\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    flex: 1 1 0 !important;\n    min-height: 0 !important;\n    display: flex;\n    flex-direction: column;\n    gap: 3px;\n    overscroll-behavior: contain;\n    scrollbar-width: thin;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-track {\n      background: rgba(125, 125, 125, 0.05);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 3px;\n    }\n    &::-webkit-scrollbar-thumb:hover {\n      background: var(--primary, #4f46e5);\n    }\n  }\n\n  .col-dd-section-title {\n    font-size: 10px;\n    font-weight: 700;\n    color: var(--text-muted, #64748b);\n    margin: 4px 0 2px 4px;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    flex-shrink: 0 !important;\n    display: flex;\n    align-items: center;\n\n    &.fx-section-title {\n      color: #7c3aed !important;\n      margin-top: 8px;\n    }\n  }\n\n  .col-dd-item {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 4px 6px;\n    border-radius: 4px;\n    cursor: pointer;\n    user-select: none;\n    transition: background 0.1s;\n    font-size: 11.5px;\n    color: var(--text, #0f172a);\n    flex-shrink: 0 !important;\n\n    &:hover {\n      background: rgba(125, 125, 125, 0.08);\n    }\n\n    &.fx-item:hover {\n      background: rgba(139, 92, 246, 0.08) !important;\n    }\n\n    .col-dd-item-left {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n\n    .col-dd-item-name {\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .custom-check {\n    width: 14px;\n    height: 14px;\n    cursor: pointer;\n    accent-color: var(--primary, #4f46e5);\n    margin: 0;\n    flex-shrink: 0;\n  }\n\n  .badge-fx-mini {\n    font-size: 8.5px;\n    font-weight: 700;\n    padding: 1px 4px;\n    border-radius: 3px;\n    background: rgba(139, 92, 246, 0.15);\n    color: #7c3aed;\n    flex-shrink: 0;\n  }\n\n  .type-badge {\n    font-size: 9.5px;\n    padding: 1px 5px;\n    border-radius: 3px;\n    background: rgba(125, 125, 125, 0.12);\n    color: var(--text-muted, #64748b);\n    font-family: 'JetBrains Mono', monospace;\n    flex-shrink: 0;\n\n    &.badge-fx-type {\n      background: rgba(139, 92, 246, 0.12) !important;\n      color: #7c3aed !important;\n    }\n  }\n\n  /* FK Grouping */\n  .col-dd-group {\n    border: 1px solid var(--surface-border, #e2e8f0);\n    border-radius: 5px;\n    margin: 3px 0;\n    overflow: hidden;\n    background: rgba(125, 125, 125, 0.02);\n    flex-shrink: 0 !important;\n\n    &.fk-active-group {\n      border-color: rgba(79, 70, 229, 0.35);\n    }\n\n    .col-dd-group-header {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding: 5px 8px;\n      background: rgba(125, 125, 125, 0.06);\n      cursor: pointer;\n      user-select: none;\n      font-size: 11.5px;\n      font-weight: 600;\n      flex-shrink: 0 !important;\n      min-height: 28px !important;\n\n      &:hover {\n        background: rgba(125, 125, 125, 0.1);\n      }\n\n      .col-dd-group-left {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        overflow: hidden;\n      }\n\n      .fk-expand-toggle {\n        font-size: 10px;\n        color: var(--text-muted, #64748b);\n        width: 12px;\n        text-align: center;\n        transition: transform 0.18s ease;\n\n        &.rotated {\n          transform: rotate(90deg);\n        }\n      }\n\n      .fk-group-pill {\n        font-size: 9.5px;\n        padding: 1px 5px;\n        border-radius: 999px;\n        font-weight: 600;\n      }\n    }\n\n    .col-dd-group-items {\n      padding: 3px 4px 4px 18px;\n      background: var(--surface, #ffffff);\n      border-top: 1px solid var(--surface-border, #e2e8f0);\n      display: flex;\n      flex-direction: column;\n      gap: 2px;\n      max-height: none !important;\n      overflow: visible !important;\n    }\n  }\n\n  .col-dd-empty {\n    padding: 16px;\n    text-align: center;\n    color: var(--text-muted, #64748b);\n    font-size: 11.5px;\n  }\n}\n\n/* \u2500\u2500 RIGHT PANE: ORDER & FORMATTING \u2500\u2500 */\n.col-dd-right-pane {\n  flex: 1 1 0;\n  min-width: 350px;\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  min-height: 0;\n  background: var(--surface-ground, rgba(125, 125, 125, 0.02));\n\n  .col-dd-right-header {\n    padding: 8px 12px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    background: var(--surface, #ffffff);\n    display: flex;\n    flex-direction: column;\n    gap: 2px;\n    flex-shrink: 0;\n\n    .col-dd-right-title-wrap {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n\n      .col-dd-right-title {\n        font-size: 11.5px;\n        font-weight: 700;\n        color: var(--text, #0f172a);\n        display: flex;\n        align-items: center;\n      }\n\n      .col-dd-right-badge {\n        font-size: 10px;\n        font-weight: 600;\n        padding: 2px 7px;\n        border-radius: 999px;\n        background: rgba(79, 70, 229, 0.12);\n        color: var(--primary, #4f46e5);\n      }\n    }\n\n    .col-dd-right-sub {\n      font-size: 10px;\n      color: var(--text-muted, #64748b);\n    }\n  }\n\n  .col-dd-right-body {\n    padding: 8px 10px;\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    flex: 1 1 0;\n    min-height: 0;\n    display: flex;\n    flex-direction: column;\n    gap: 5px;\n    scrollbar-width: thin;\n\n    &::-webkit-scrollbar {\n      width: 5px;\n    }\n    &::-webkit-scrollbar-thumb {\n      background: rgba(125, 125, 125, 0.3);\n      border-radius: 3px;\n    }\n  }\n\n  .col-dd-empty {\n    padding: 20px;\n    text-align: center;\n    color: var(--text-muted, #64748b);\n    font-size: 11.5px;\n  }\n}\n\n/* \u2500\u2500 SELECTED COLUMN CARD IN RIGHT PANE \u2500\u2500 */\n.col-selected-card {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 5px 8px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  transition: all 0.15s ease;\n  flex-shrink: 0;\n\n  &:hover {\n    border-color: rgba(79, 70, 229, 0.4);\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);\n  }\n\n  /* 1. Left order & buttons */\n  .col-card-order-controls {\n    display: flex;\n    align-items: center;\n    gap: 4px;\n    flex-shrink: 0;\n\n    .col-card-letter-badge {\n      width: 22px;\n      height: 22px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      background: rgba(125, 125, 125, 0.1);\n      color: var(--text, #0f172a);\n      border-radius: 4px;\n      font-size: 11px;\n      font-weight: 700;\n      font-family: monospace;\n    }\n\n    .col-card-arrows {\n      display: flex;\n      flex-direction: column;\n      gap: 1px;\n\n      .btn-arrow {\n        width: 16px;\n        height: 11px;\n        padding: 0;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        background: transparent;\n        border: 1px solid var(--surface-border, #e2e8f0);\n        border-radius: 2px;\n        color: var(--text-muted, #64748b);\n        cursor: pointer;\n        font-size: 7px;\n        transition: all 0.1s;\n\n        &:hover:not(:disabled) {\n          background: var(--primary, #4f46e5);\n          border-color: var(--primary, #4f46e5);\n          color: #ffffff;\n        }\n\n        &:disabled {\n          opacity: 0.3;\n          cursor: default;\n        }\n      }\n    }\n  }\n\n  /* 2. Middle column meta & label */\n  .col-card-meta {\n    display: flex;\n    flex-direction: column;\n    gap: 2px;\n    flex: 1 1 0;\n    min-width: 0;\n\n    .col-card-meta-top {\n      display: flex;\n      align-items: center;\n      gap: 4px;\n      overflow: hidden;\n\n      .col-card-key-txt {\n        font-size: 11px;\n        font-weight: 600;\n        color: var(--text, #0f172a);\n        overflow: hidden;\n        text-overflow: ellipsis;\n        white-space: nowrap;\n      }\n\n      .badge-fx-mini {\n        font-size: 8.5px;\n        font-weight: 700;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(139, 92, 246, 0.15);\n        color: #7c3aed;\n        flex-shrink: 0;\n      }\n\n      .badge-fk-pill {\n        font-size: 8.5px;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(59, 130, 246, 0.12);\n        color: #2563eb;\n        font-weight: 600;\n        flex-shrink: 0;\n      }\n      .badge-sub-pill {\n        font-size: 8.5px;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(16, 185, 129, 0.12);\n        color: #059669;\n        font-weight: 600;\n        flex-shrink: 0;\n      }\n      .badge-raw-pill {\n        font-size: 8.5px;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(245, 158, 11, 0.12);\n        color: #d97706;\n        font-weight: 600;\n        flex-shrink: 0;\n      }\n      .badge-std-pill {\n        font-size: 8.5px;\n        padding: 0 4px;\n        border-radius: 3px;\n        background: rgba(125, 125, 125, 0.1);\n        color: var(--text-muted, #64748b);\n        font-family: monospace;\n        flex-shrink: 0;\n      }\n    }\n\n    .col-card-label-wrap {\n      display: flex;\n\n      .col-card-label-inp {\n        width: 100%;\n        height: 22px;\n        padding: 2px 6px;\n        font-size: 10.5px;\n        border: 1px solid var(--surface-border, #e2e8f0);\n        border-radius: 3px;\n        background: var(--bg, #f8fafc);\n        color: var(--text, #0f172a);\n        outline: none;\n        transition: border-color 0.12s;\n\n        &:focus {\n          border-color: var(--primary, #4f46e5);\n          background: var(--surface, #ffffff);\n        }\n      }\n    }\n  }\n\n  /* 3. Right format selector & hide button */\n  .col-card-format-ctrls {\n    display: flex;\n    align-items: center;\n    gap: 6px;\n    flex-shrink: 0;\n\n    .col-card-select-wrap {\n      .col-card-select {\n        height: 24px;\n        font-size: 10px;\n        padding: 2px 4px;\n        border: 1px solid var(--surface-border, #e2e8f0);\n        border-radius: 4px;\n        background: var(--surface, #ffffff);\n        color: var(--text, #0f172a);\n        outline: none;\n        cursor: pointer;\n        max-width: 125px;\n\n        &:focus {\n          border-color: var(--primary, #4f46e5);\n        }\n      }\n    }\n\n    .col-card-plain-type {\n      min-width: 75px;\n      text-align: center;\n\n      .text-purple-xs {\n        font-size: 9.5px;\n        font-weight: 600;\n        color: #7c3aed;\n      }\n      .text-muted-xs {\n        font-size: 9.5px;\n        color: var(--text-muted, #64748b);\n      }\n    }\n\n    .btn-col-hide {\n      width: 22px;\n      height: 22px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      background: transparent;\n      border: 1px solid transparent;\n      border-radius: 4px;\n      color: var(--text-muted, #64748b);\n      cursor: pointer;\n      font-size: 11px;\n      transition: all 0.12s;\n\n      &:hover {\n        background: rgba(239, 68, 68, 0.1);\n        border-color: rgba(239, 68, 68, 0.2);\n        color: #ef4444;\n      }\n    }\n  }\n}\n\n/* \u2500\u2500 OVERALL POPOVER FOOTER \u2500\u2500 */\n.col-dd-footer {\n  padding: 6px 12px;\n  border-top: 1px solid var(--surface-border, #e2e8f0);\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  background: var(--surface, #ffffff);\n  flex-shrink: 0 !important;\n}\n\n/* Active Sheet Context Badge Pill */\n.active-sheet-badge-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 10px;\n  border-radius: 6px;\n  background: rgba(99, 102, 241, 0.12);\n  border: 1px solid rgba(99, 102, 241, 0.3);\n  color: #4f46e5;\n  font-size: 11px;\n  font-weight: 600;\n  white-space: nowrap;\n  max-width: 170px;\n\n  i {\n    font-size: 11px;\n  }\n\n  .sheet-title-text {\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n  }\n}\n\n:host-context(.dark-theme) .active-sheet-badge-pill,\n:host-context(.dark-mode) .active-sheet-badge-pill {\n  background: rgba(99, 102, 241, 0.22);\n  border-color: rgba(99, 102, 241, 0.45);\n  color: #818cf8;\n}\n\n/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */\n/* \u2500\u2500 SUTRAM STUDIO MODALS & DIALOGS (Compact Excel Scaling) \u2500\u2500\u2500\u2500\u2500\u2500 */\n/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */\n\n::ng-deep .sutram-studio-dialog {\n  .p-dialog-header {\n    background: var(--surface, #ffffff);\n    color: var(--text, #0f172a);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    padding: 8px 12px !important;\n    font-size: 12px !important;\n    font-weight: 700;\n\n    .p-dialog-title {\n      font-size: 12px !important;\n      font-weight: 700;\n      display: flex;\n      align-items: center;\n      gap: 6px;\n    }\n\n    .p-dialog-header-icon {\n      width: 22px !important;\n      height: 22px !important;\n      font-size: 11px !important;\n      border-radius: 4px;\n      color: var(--text-muted, #64748b);\n      &:hover {\n        background: var(--surface-hover, rgba(0,0,0,0.05));\n        color: var(--text, #0f172a);\n      }\n    }\n  }\n\n  .p-dialog-content {\n    background: var(--surface-ground, #f8fafc);\n    color: var(--text, #0f172a);\n    padding: 10px 12px !important;\n    overflow-y: auto;\n    font-size: 11.5px;\n  }\n\n  .p-dialog-footer {\n    background: var(--surface, #ffffff);\n    border-top: 1px solid var(--surface-border, #e2e8f0);\n    padding: 7px 12px !important;\n  }\n}\n\n.dialog-body-wrap {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.dialog-subtext {\n  font-size: 11px;\n  color: var(--text-muted, #64748b);\n  line-height: 1.35;\n}\n\n.dialog-info-banner {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  padding: 6px 10px;\n  font-size: 11px;\n  border-radius: 5px;\n  line-height: 1.3;\n\n  &.info {\n    background: rgba(59, 130, 246, 0.08);\n    border: 1px solid rgba(59, 130, 246, 0.2);\n    color: var(--text, #0f172a);\n    .banner-icon { color: #2563eb; }\n  }\n\n  &.warning {\n    background: rgba(245, 158, 11, 0.08);\n    border: 1px solid rgba(245, 158, 11, 0.25);\n    color: var(--text, #0f172a);\n    .banner-icon { color: #d97706; }\n  }\n\n  .banner-icon {\n    font-size: 12px;\n    flex-shrink: 0;\n  }\n}\n\n.dialog-subcard {\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 6px;\n  padding: 8px 10px;\n}\n\n.subcard-title {\n  font-size: 11px;\n  font-weight: 700;\n  color: var(--text, #0f172a);\n  margin-bottom: 6px;\n}\n\n.subcard-grid {\n  display: flex;\n  align-items: flex-end;\n  gap: 8px;\n  flex-wrap: wrap;\n\n  .subcard-col-2 { width: calc(16.66% - 7px); }\n  .subcard-col-3 { width: calc(25% - 6px); }\n  .subcard-col-4 { width: calc(33.33% - 6px); }\n  .subcard-col-5 { width: calc(41.66% - 5px); }\n  .subcard-col-6 { width: calc(50% - 4px); }\n  .subcard-col-7 { width: calc(58.33% - 4px); }\n}\n\n.dialog-label {\n  font-size: 10px;\n  font-weight: 700;\n  color: var(--text-muted, #64748b);\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n  margin-bottom: 3px;\n  display: block;\n}\n\n.dialog-ctrl-input {\n  height: 26px !important;\n  font-size: 11.5px !important;\n  padding: 2px 7px !important;\n  border-radius: 4px !important;\n  width: 100% !important;\n}\n\n.dialog-ctrl-textarea {\n  width: 100%;\n  padding: 5px 8px;\n  font-size: 11px;\n  line-height: 1.4;\n  border-radius: 4px;\n  border: 1px solid var(--surface-border, #cbd5e1);\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  resize: vertical;\n\n  &:focus {\n    outline: none;\n    border-color: #3b82f6;\n  }\n}\n\n::ng-deep .dialog-ctrl-dropdown {\n  height: 26px !important;\n  font-size: 11.5px !important;\n  width: 100% !important;\n\n  .p-dropdown-label {\n    padding: 2px 7px !important;\n    font-size: 11.5px !important;\n    line-height: 22px !important;\n  }\n  .p-dropdown-trigger {\n    width: 22px !important;\n  }\n}\n\n.dialog-btn-add {\n  height: 26px !important;\n  font-size: 11px !important;\n  padding: 0 10px !important;\n  border-radius: 4px !important;\n}\n\n.chips-row {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 4px;\n  margin-top: 5px;\n}\n\n.chips-label {\n  font-size: 10px;\n  color: var(--text-muted, #64748b);\n  font-weight: 600;\n}\n\n.quick-chip {\n  font-size: 9.5px;\n  font-family: var(--font-mono, monospace);\n  padding: 1px 6px;\n  border-radius: 3px;\n  background: var(--surface-ground, #f1f5f9);\n  color: var(--text, #0f172a);\n  border: 1px solid var(--surface-border, #cbd5e1);\n  cursor: pointer;\n  user-select: none;\n  transition: all 0.15s ease;\n\n  &:hover {\n    background: #e2e8f0;\n    border-color: #94a3b8;\n  }\n\n  &.chip-green {\n    background: rgba(16, 185, 129, 0.08);\n    color: #059669;\n    border-color: rgba(16, 185, 129, 0.25);\n    &:hover { background: rgba(16, 185, 129, 0.18); }\n  }\n\n  &.chip-orange {\n    background: rgba(245, 158, 11, 0.08);\n    color: #d97706;\n    border-color: rgba(245, 158, 11, 0.25);\n    &:hover { background: rgba(245, 158, 11, 0.18); }\n  }\n\n  &.chip-blue {\n    background: rgba(59, 130, 246, 0.08);\n    color: #2563eb;\n    border-color: rgba(59, 130, 246, 0.25);\n    &:hover { background: rgba(59, 130, 246, 0.18); }\n  }\n}\n\n.dialog-table-card {\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 5px;\n  overflow: hidden;\n  max-height: 58vh;\n  overflow-y: auto;\n}\n\n.dialog-data-table {\n  width: 100%;\n  border-collapse: collapse;\n  font-size: 11.5px;\n\n  thead tr {\n    position: sticky;\n    top: 0;\n    z-index: 2;\n  }\n\n  th {\n    font-size: 10px;\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: 0.3px;\n    padding: 5px 8px;\n    background: var(--surface-ground, #f8fafc);\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    color: var(--text-muted, #64748b);\n  }\n\n  td {\n    padding: 4px 8px;\n    border-bottom: 1px solid var(--surface-border, #e2e8f0);\n    vertical-align: middle;\n    color: var(--text, #0f172a);\n  }\n\n  tr:hover td {\n    background: var(--surface-hover, rgba(0,0,0,0.02));\n  }\n}\n\n.col-idx {\n  font-size: 10px;\n}\n\n.col-ident-cell {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n}\n\n.col-name-txt {\n  font-family: var(--font-mono, monospace);\n  font-weight: 600;\n  font-size: 11.5px;\n}\n\n.type-pill {\n  font-size: 9px;\n  font-weight: 600;\n  font-family: var(--font-mono, monospace);\n  padding: 1px 5px;\n  border-radius: 3px;\n  background: rgba(59, 130, 246, 0.08);\n  color: #2563eb;\n  border: 1px solid rgba(59, 130, 246, 0.2);\n  text-transform: lowercase;\n}\n\n.pk-pill {\n  font-size: 8.5px;\n  font-weight: 700;\n  font-family: var(--font-mono, monospace);\n  padding: 1px 4px;\n  border-radius: 3px;\n  background: rgba(245, 158, 11, 0.12);\n  color: #d97706;\n  border: 1px solid rgba(245, 158, 11, 0.25);\n}\n\n.event-pill {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 9.5px;\n  font-weight: 700;\n  font-family: var(--font-mono, monospace);\n  padding: 1px 6px;\n  border-radius: 3px;\n\n  &.event-pill-insert {\n    background: rgba(16, 185, 129, 0.1);\n    color: #059669;\n    border: 1px solid rgba(16, 185, 129, 0.25);\n  }\n  &.event-pill-update {\n    background: rgba(59, 130, 246, 0.1);\n    color: #2563eb;\n    border: 1px solid rgba(59, 130, 246, 0.25);\n  }\n  &.event-pill-delete {\n    background: rgba(239, 68, 68, 0.1);\n    color: #dc2626;\n    border: 1px solid rgba(239, 68, 68, 0.25);\n  }\n}\n\n.dialog-table-input {\n  height: 24px !important;\n  font-size: 11.5px !important;\n  padding: 2px 7px !important;\n  border-radius: 3px !important;\n  width: 100% !important;\n}\n\n::ng-deep .dialog-table-dropdown {\n  height: 24px !important;\n  font-size: 11.5px !important;\n  width: 100% !important;\n\n  .p-dropdown-label {\n    padding: 1px 6px !important;\n    font-size: 11.5px !important;\n    line-height: 22px !important;\n  }\n  .p-dropdown-trigger {\n    width: 20px !important;\n  }\n}\n\n.text-muted-xs {\n  font-size: 10.5px;\n  color: var(--text-muted, #64748b);\n}\n\n.btn-group-mini {\n  display: inline-flex;\n  gap: 2px;\n  background: var(--surface, #ffffff);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  border-radius: 4px;\n  padding: 1px;\n}\n\n.mini-icon-btn {\n  width: 20px;\n  height: 18px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: none;\n  background: transparent;\n  color: var(--text-muted, #64748b);\n  border-radius: 2px;\n  cursor: pointer;\n  padding: 0;\n\n  &:hover:not(:disabled) {\n    background: var(--surface-hover, rgba(0,0,0,0.06));\n    color: var(--text, #0f172a);\n  }\n  &:disabled {\n    opacity: 0.3;\n    cursor: default;\n  }\n  i {\n    font-size: 9px;\n  }\n}\n\n.mini-del-btn {\n  width: 22px;\n  height: 20px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border: 1px solid rgba(239, 68, 68, 0.25);\n  background: rgba(239, 68, 68, 0.05);\n  color: #dc2626;\n  border-radius: 3px;\n  cursor: pointer;\n  padding: 0;\n\n  &:hover {\n    background: rgba(239, 68, 68, 0.15);\n  }\n  i {\n    font-size: 10px;\n  }\n}\n\n.formula-cell {\n  font-size: 11px;\n  font-weight: 600;\n}\n\n.trigger-code-snippet {\n  background: var(--surface-ground, #f1f5f9);\n  padding: 2px 5px;\n  border-radius: 3px;\n  font-size: 10.5px;\n  color: var(--text, #0f172a);\n  border: 1px solid var(--surface-border, #e2e8f0);\n  white-space: pre-wrap;\n  word-break: break-all;\n}\n\n.dialog-empty-box {\n  text-align: center;\n  color: var(--text-muted, #64748b);\n  padding: 14px 10px;\n  font-size: 11px;\n  border: 1px dashed var(--surface-border, #cbd5e1);\n  border-radius: 5px;\n}\n\n.dialog-footer-actions {\n  display: flex;\n  justify-content: flex-end;\n  gap: 6px;\n}\n\n.dialog-btn-cancel {\n  height: 26px !important;\n  font-size: 11.5px !important;\n  padding: 0 10px !important;\n}\n\n.dialog-btn-save {\n  height: 26px !important;\n  font-size: 11.5px !important;\n  padding: 0 12px !important;\n}\n\n/* \u2500\u2500 Role & User Management Styling \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.user-role-badge-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  background: var(--surface-card, rgba(0, 0, 0, 0.04));\n  border: 1px solid var(--surface-border, #e2e8f0);\n  padding: 2px 8px;\n  border-radius: 12px;\n  cursor: pointer;\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--text, #1e293b);\n  user-select: none;\n  transition: all 0.15s ease;\n\n  &:hover {\n    background: var(--surface-hover, rgba(0, 0, 0, 0.08));\n    border-color: var(--primary-color, #6366f1);\n  }\n\n  .user-name-txt {\n    font-size: 11px;\n    font-weight: 700;\n    font-family: monospace;\n  }\n}\n\n.role-pill-tag {\n  font-size: 9.5px;\n  font-weight: 700;\n  padding: 1px 6px;\n  border-radius: 999px;\n  text-transform: uppercase;\n  letter-spacing: 0.3px;\n\n  &.admin-tag {\n    background: rgba(168, 85, 247, 0.15);\n    color: #9333ea;\n    border: 1px solid rgba(168, 85, 247, 0.3);\n  }\n\n  &.author-tag {\n    background: rgba(16, 185, 129, 0.15);\n    color: #059669;\n    border: 1px solid rgba(16, 185, 129, 0.3);\n  }\n}\n\n.dark-mode {\n  .role-pill-tag {\n    &.admin-tag {\n      background: rgba(168, 85, 247, 0.25);\n      color: #c084fc;\n    }\n    &.author-tag {\n      background: rgba(16, 185, 129, 0.25);\n      color: #34d399;\n    }\n  }\n}\n\n.btn-disabled-role {\n  opacity: 0.55 !important;\n  cursor: not-allowed !important;\n  filter: grayscale(0.5);\n}\n\n.btn-role-switch {\n  background: transparent;\n  border: 1px solid var(--surface-border, #cbd5e1);\n  border-radius: 4px;\n  font-size: 11px;\n  font-weight: 600;\n  padding: 2px 8px;\n  color: var(--text-muted, #64748b);\n  cursor: pointer;\n  transition: all 0.15s ease;\n\n  &:hover {\n    color: var(--text, #0f172a);\n    border-color: var(--text, #0f172a);\n  }\n\n  &.active-role {\n    background: var(--primary-color, #6366f1);\n    color: #ffffff !important;\n    border-color: var(--primary-color, #6366f1);\n  }\n}\n\n.badge-current-user {\n  font-size: 9px;\n  font-weight: 700;\n  background: rgba(59, 130, 246, 0.15);\n  color: #2563eb;\n  padding: 1px 4px;\n  border-radius: 3px;\n}\n\n.status-pill {\n  font-size: 10px;\n  font-weight: 600;\n  padding: 1px 6px;\n  border-radius: 4px;\n\n  &.active-pill {\n    background: rgba(16, 185, 129, 0.15);\n    color: #059669;\n  }\n\n  &.inactive-pill {\n    background: rgba(100, 116, 139, 0.15);\n    color: #64748b;\n  }\n}\n\n.btn-use-account {\n  font-size: 10.5px;\n  font-weight: 600;\n  padding: 2px 6px;\n  border-radius: 4px;\n  border: 1px solid var(--surface-border, #cbd5e1);\n  background: var(--surface, #ffffff);\n  color: var(--text, #0f172a);\n  cursor: pointer;\n  transition: all 0.15s;\n\n  &:hover {\n    background: var(--surface-hover, rgba(0, 0, 0, 0.05));\n    border-color: var(--primary-color, #6366f1);\n  }\n\n  &.btn-use-account-active {\n    background: rgba(16, 185, 129, 0.15);\n    color: #059669;\n    border-color: rgba(16, 185, 129, 0.4);\n    cursor: default;\n  }\n}\n\n.btn-link-mini {\n  background: none;\n  border: none;\n  font-size: 11px;\n  cursor: pointer;\n  text-decoration: underline;\n  padding: 0;\n}\n\n\n\n\n\n"] }]
   }], function() {
     return [{ type: SutramExcelStateService }, { type: SutramExcelApiService }, { type: SutramExcelScannerService }, { type: SutramAuditService }, { type: SutramRefCacheService }, { type: ChangeDetectorRef }];
   }, { table: [{
@@ -136272,6 +142582,8 @@ Do you want to discard your changes and reload from database?`);
   }], fileInputRef: [{
     type: ViewChild,
     args: ["fileInput"]
+  }], reportsList: [{
+    type: Input
   }], onStudioGlobalClick: [{
     type: HostListener,
     args: ["document:click", ["$event"]]
@@ -136876,7 +143188,8 @@ var SutramExcelModule = class _SutramExcelModule {
     ContextMenuModule,
     AutoCompleteModule,
     OverlayPanelModule,
-    CheckboxModule
+    CheckboxModule,
+    MultiSelectModule
   ] });
 };
 (function() {
@@ -136898,7 +143211,8 @@ var SutramExcelModule = class _SutramExcelModule {
         ContextMenuModule,
         AutoCompleteModule,
         OverlayPanelModule,
-        CheckboxModule
+        CheckboxModule,
+        MultiSelectModule
       ],
       providers: [
         SutramExcelApiService,
@@ -136934,7 +143248,8 @@ var SutramExcelModule = class _SutramExcelModule {
     ContextMenuModule,
     AutoCompleteModule,
     OverlayPanelModule,
-    CheckboxModule
+    CheckboxModule,
+    MultiSelectModule
   ], exports: [
     SutramExcelStudioComponent,
     SutramGridComponent,

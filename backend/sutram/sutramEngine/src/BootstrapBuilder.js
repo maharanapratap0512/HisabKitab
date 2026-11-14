@@ -89,16 +89,27 @@ class BootstrapBuilder {
                 def.default = this._parseDefault(col.col_type, col.default_value);
             }
 
-            // required
-            if (col.is_required) def.required = true;
+            // required (primary key is auto-incremented by database)
+            if (col.is_required && col.column_name !== '_id' && !col.is_pk) {
+                def.required = true;
+            }
+            if (col.column_name === '_id' || col.is_pk) {
+                def.pk = true;
+            }
 
             // hasOne join — ref declared on this column
             if (col.ref_table && col.ref_col) {
                 def.ref    = `${col.ref_table}.${col.ref_col}`;
                 def.as     = col.ref_as ?? col.ref_table;
-                def.select = col.ref_select
-                    ? JSON.parse(col.ref_select)
-                    : '*';
+                let parsedSelect = '*';
+                if (col.ref_select) {
+                    try {
+                        parsedSelect = JSON.parse(col.ref_select);
+                    } catch {
+                        parsedSelect = col.ref_select.includes(',') ? col.ref_select.split(',').map(s => s.trim()) : col.ref_select;
+                    }
+                }
+                def.select = parsedSelect;
             }
 
             result[col.column_name] = def;

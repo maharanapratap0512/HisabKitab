@@ -1,0 +1,396 @@
+/**
+ * sutram-excel-api.service.ts
+ * ─────────────────────────────────────────────────────────────
+ * Type-safe HTTP Client for sutramExcel backend API.
+ * Communicates with /_sutram/excel/* endpoints.
+ * ─────────────────────────────────────────────────────────────
+ */
+
+import { Injectable, Inject, Optional } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, of, catchError } from 'rxjs';
+import { SutramTableConfig } from '../models/sutram-excel.model';
+import { SutramCorrectionItem, DictionaryEntry } from '../models/sutram-correction.model';
+
+export const SUTRAM_EXCEL_API_BASE = 'SUTRAM_EXCEL_API_BASE';
+
+interface ApiResponse<T = any> {
+  success: boolean;
+  result?: T;
+  error?: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SutramExcelApiService {
+  private baseUri: string;
+
+  constructor(
+    private http: HttpClient,
+    @Optional() @Inject(SUTRAM_EXCEL_API_BASE) apiBase?: string
+  ) {
+    this.baseUri = apiBase || '/_sutram/excel';
+    // Strip trailing slash if present
+    if (this.baseUri.endsWith('/')) {
+      this.baseUri = this.baseUri.slice(0, -1);
+    }
+  }
+
+  public setBaseUri(uri: string): void {
+    this.baseUri = uri.endsWith('/') ? uri.slice(0, -1) : uri;
+  }
+
+  public getBaseUri(): string {
+    return this.baseUri;
+  }
+
+  /**
+   * GET /tables - Fetch list of registered tables
+   */
+  public getRegisteredTables(): Observable<Array<{ table: string; display_name: string }>> {
+    return this.http.get<ApiResponse<Array<{ table: string; display_name: string }>>>(`${this.baseUri}/tables`).pipe(
+      map(res => res.result || [])
+    );
+  }
+
+  /**
+   * GET /reports - Fetch list of dynamic reports and views
+   */
+  public getReports(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/reports`).pipe(
+      map(res => res.result || [])
+    );
+  }
+
+  /**
+   * GET /config/:table - Fetch derived schema and column config
+   */
+  public getTableConfig(tableName: string): Observable<SutramTableConfig> {
+    return this.http.get<ApiResponse<SutramTableConfig>>(`${this.baseUri}/config/${tableName}`).pipe(
+      map(res => res.result!)
+    );
+  }
+
+  /**
+   * GET /ref-data/:table - Fetch reference lookup records for FK autocomplete and validation
+   */
+  public getRefData(tableName: string): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/ref-data/${tableName}`).pipe(
+      map(res => res.result || [])
+    );
+  }
+
+  /**
+   * GET live records for table using direct Sutram API (/api/sutram/:table)
+   */
+  public getTableData(tableName: string, limit: number = 500, offset: number = 0): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`/api/sutram/${tableName}?_limit=${limit}`).pipe(
+      map(res => res.result || [])
+    );
+  }
+
+  /**
+   * GET /data/:table - Chunked lazy-loading with direct DB search, sort, and filters support
+   */
+  public getTableDataChunk(
+    tableName: string,
+    opts: {
+      limit?: number;
+      offset?: number;
+      search?: string;
+      sort?: string;
+      order?: 'ASC' | 'DESC';
+      filters?: any;
+      export?: boolean;
+    } = {}
+  ): Observable<{ rows: any[]; total: number; offset: number; limit: number }> {
+    const params: string[] = [];
+    if (opts.export) {
+      params.push(`_export=1`);
+      params.push(`_limit=-1`);
+    } else {
+      params.push(`_limit=${opts.limit ?? 100}`);
+      params.push(`_offset=${opts.offset ?? 0}`);
+    }
+    params.push(`_full=1`);
+    if (opts.search) params.push(`_search=${encodeURIComponent(opts.search)}`);
+    if (opts.sort) params.push(`_sort=${encodeURIComponent(opts.sort)}&_order=${opts.order || 'ASC'}`);
+    if (opts.filters && Object.keys(opts.filters).length > 0) {
+      params.push(`_filters=${encodeURIComponent(JSON.stringify(opts.filters))}`);
+    }
+    const url = `${this.baseUri}/data/${tableName}?${params.join('&')}`;
+    return this.http.get<any>(url).pipe(
+      map(res => ({
+        rows: res.result || [],
+        total: res.total !== undefined ? res.total : (res.result?.length || 0),
+        offset: res.offset || 0,
+        limit: res.limit || (opts.limit ?? 100)
+      }))
+    );
+  }
+
+  /**
+   * GET /filter-values/:table/:column - Fetch distinct values and counts directly from database
+   */
+  public getColumnFilterValues(tableName: string, colName: string): Observable<{
+    values: Array<{ display: string; value: any; count?: number }>;
+    blankCount: number;
+  }> {
+    return this.http.get<ApiResponse<{
+      values: Array<{ display: string; value: any; count?: number }>;
+      blankCount: number;
+    }>>(`${this.baseUri}/filter-values/${encodeURIComponent(tableName)}/${encodeURIComponent(colName)}`).pipe(
+      map(res => res.result || { values: [], blankCount: 0 })
+    );
+  }
+
+  /**
+   * POST /verify/:table - Server-side FK matching, Unicode normalization, and dictionary check
+   */
+  public verifyRows(
+    tableName: string,
+    rows: any[]
+  ): Observable<{ rows: any[]; correctionList: SutramCorrectionItem[] }> {
+    return this.http.post<ApiResponse<{ rows: any[]; correctionList: SutramCorrectionItem[] }>>(
+      `${this.baseUri}/verify/${tableName}`,
+      { rows }
+    ).pipe(
+      map(res => res.result || { rows: [], correctionList: [] })
+    );
+  }
+
+  /**
+   * POST /import/:table - Single row trigger-aware insertion
+   */
+  public importRow(
+    tableName: string,
+    row: any
+  ): Observable<{ status: 'inserted' | 'updated' | 'duplicate' | 'rejected'; data?: any; error?: string }> {
+    return this.http.post<ApiResponse<{ status: any; data?: any }>>(
+      `${this.baseUri}/import/${tableName}`,
+      { row }
+    ).pipe(
+      map(res => {
+        if (!res.success) {
+          return { status: 'rejected', error: res.error || 'Import failed' };
+        }
+        return res.result || { status: 'inserted' };
+      })
+    );
+  }
+
+  /**
+   * POST /update/:table - Single row update on duplicate match
+   */
+  public updateRow(
+    tableName: string,
+    row: any
+  ): Observable<{ status: string; data?: any; error?: string }> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/update/${tableName}`, { row }).pipe(
+      map(res => res.result || { status: 'updated' })
+    );
+  }
+
+  /**
+   * POST /error-report - Generates styled ExcelJS workbook of rejected rows
+   */
+  public downloadErrorReport(tableName: string, rejectedRows: any[]): Observable<Blob> {
+    return this.http.post(`${this.baseUri}/error-report`, { table: tableName, rows: rejectedRows }, {
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * GET /dictionary - List all dictionary entries
+   */
+  public getDictionary(type?: string): Observable<DictionaryEntry[]> {
+    const url = type ? `${this.baseUri}/dictionary/${type}` : `${this.baseUri}/dictionary`;
+    return this.http.get<ApiResponse<DictionaryEntry[]>>(url).pipe(
+      map(res => res.result || [])
+    );
+  }
+
+  /**
+   * POST /dictionary - Add a new correction entry to xls_dictionary
+   */
+  public addDictionaryEntry(entry: {
+    type: string;
+    name: string;
+    ref_id: any;
+    ref_id2?: any;
+    extra_note?: string;
+  }): Observable<{ _id: number }> {
+    return this.http.post<ApiResponse<{ _id: number }>>(`${this.baseUri}/dictionary`, entry).pipe(
+      map(res => res.result || { _id: 0 })
+    );
+  }
+
+  /**
+   * PUT /dictionary/:id - Update an existing dictionary entry
+   */
+  public updateDictionaryEntry(id: number, patch: Partial<DictionaryEntry>): Observable<{ updated: boolean }> {
+    return this.http.put<ApiResponse<{ updated: boolean }>>(`${this.baseUri}/dictionary/${id}`, patch).pipe(
+      map(res => res.result || { updated: true })
+    );
+  }
+
+  /**
+   * DELETE /dictionary/:id - Soft-delete dictionary entry (active = 0)
+   */
+  public deleteDictionaryEntry(id: number): Observable<{ deleted: boolean }> {
+    return this.http.delete<ApiResponse<{ deleted: boolean }>>(`${this.baseUri}/dictionary/${id}`).pipe(
+      map(res => res.result || { deleted: true })
+    );
+  }
+
+  /**
+   * POST /delete/:table - Delete rows by id(s) via sutramEngine
+   */
+  public deleteRows(
+    tableName: string,
+    ids: any[]
+  ): Observable<{ status: string; count: number; ids: any[] }> {
+    return this.http.post<ApiResponse<{ status: string; count: number; ids: any[] }>>(
+      `${this.baseUri}/delete/${tableName}`,
+      { ids }
+    ).pipe(
+      map((res: ApiResponse<{ status: string; count: number; ids: any[] }>) => {
+        if (!res.success) {
+          throw new Error(res.error || 'Delete failed');
+        }
+        return res.result || { status: 'deleted', count: ids.length, ids };
+      })
+    );
+  }
+
+  /**
+   * GET table UI configuration (columns, labels, formats, sort order, selected_keys)
+   * Reads from ${this.baseUri}/table-ui-config/:table first, fallback to /api/_sutram/schema/table-config/:table
+   */
+  public getTableUiConfig(tableName: string): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.baseUri}/table-ui-config/${encodeURIComponent(tableName)}`).pipe(
+      map(res => res.result || null),
+      catchError(() => {
+        return this.http.get<ApiResponse<any>>(`/api/_sutram/schema/table-config/${encodeURIComponent(tableName)}`).pipe(
+          map(res => res.result || null),
+          catchError(() => of(null))
+        );
+      })
+    );
+  }
+
+  /**
+   * POST table UI configuration
+   * Saves to ${this.baseUri}/table-ui-config/:table first, fallback to /api/_sutram/schema/table-config/:table
+   */
+  public saveTableUiConfig(tableName: string, data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/table-ui-config/${encodeURIComponent(tableName)}`, data).pipe(
+      catchError(() => {
+        return this.http.post<ApiResponse<any>>(`/api/_sutram/schema/table-config/${encodeURIComponent(tableName)}`, data);
+      })
+    );
+  }
+
+  /**
+   * GET backend triggers for a table
+   */
+  public getTableTriggers(tableName: string): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/triggers/${encodeURIComponent(tableName)}`).pipe(
+      map(res => res.result || []),
+      catchError(() => {
+        return this.http.get<ApiResponse<any[]>>(`/api/_sutram/schema/triggers/${encodeURIComponent(tableName)}`).pipe(
+          map(res => res.result || []),
+          catchError(() => of([]))
+        );
+      })
+    );
+  }
+
+  /**
+   * POST backend trigger
+   */
+  public createTrigger(def: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/triggers`, def).pipe(
+      catchError(() => this.http.post<ApiResponse<any>>('/api/_sutram/schema/triggers', def))
+    );
+  }
+
+  /**
+   * DELETE backend trigger
+   */
+  public deleteTrigger(id: number | string): Observable<any> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUri}/triggers/${encodeURIComponent(id)}`).pipe(
+      catchError(() => this.http.delete<ApiResponse<any>>(`/api/_sutram/schema/triggers/${encodeURIComponent(id)}`))
+    );
+  }
+
+  /**
+   * GET UI sutras / formulas for a table
+   */
+  public getUiSutras(tableName: string): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/ui-sutras/${encodeURIComponent(tableName)}`).pipe(
+      map(res => res.result || []),
+      catchError(() => {
+        return this.http.get<ApiResponse<any[]>>(`/api/_sutram/schema/ui-sutras/${encodeURIComponent(tableName)}`).pipe(
+          map(res => res.result || []),
+          catchError(() => of([]))
+        );
+      })
+    );
+  }
+
+  /**
+   * POST UI sutras / formulas for a table
+   */
+  public saveUiSutras(tableName: string, formulas: any[]): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/ui-sutras/${encodeURIComponent(tableName)}`, { formulas }).pipe(
+      catchError(() => {
+        return this.http.post<ApiResponse<any>>(`/api/_sutram/schema/ui-sutras/${encodeURIComponent(tableName)}`, { formulas });
+      })
+    );
+  }
+
+  /**
+   * GET users list
+   */
+  public getUsers(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUri}/users`).pipe(
+      map(res => res.result || []),
+      catchError(() => {
+        return this.http.get<ApiResponse<any[]>>('/api/_sutram/schema/users').pipe(
+          map(res => res.result || []),
+          catchError(() => of([]))
+        );
+      })
+    );
+  }
+
+  /**
+   * POST create user
+   */
+  public createUser(user: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUri}/users`, user).pipe(
+      catchError(() => this.http.post<ApiResponse<any>>('/api/_sutram/schema/users', user))
+    );
+  }
+
+  /**
+   * PUT update user
+   */
+  public updateUser(id: number | string, user: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.baseUri}/users/${encodeURIComponent(id)}`, user).pipe(
+      catchError(() => this.http.put<ApiResponse<any>>(`/api/_sutram/schema/users/${encodeURIComponent(id)}`, user))
+    );
+  }
+
+  /**
+   * DELETE user
+   */
+  public deleteUser(id: number | string): Observable<any> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUri}/users/${encodeURIComponent(id)}`).pipe(
+      catchError(() => this.http.delete<ApiResponse<any>>(`/api/_sutram/schema/users/${encodeURIComponent(id)}`))
+    );
+  }
+}
+

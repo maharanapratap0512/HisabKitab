@@ -9,6 +9,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   OnInit,
   OnDestroy,
   ChangeDetectionStrategy,
@@ -41,9 +43,17 @@ export interface StudioConfigColumn {
   ref_table?: string;
   ref_as?: string;
   sub_col_name?: string;
+  ref_select?: string[];
+  ref_data?: string;
+  label?: string;
+  display_format?: string | null;
   type: string;
+  col_type?: string;
   not_null?: boolean;
   default_selected?: boolean;
+  is_temp?: boolean;
+  is_virtual?: boolean;
+  readonly?: boolean;
 }
 
 export interface StudioFkGroup {
@@ -73,6 +83,7 @@ export interface SavedLocalSheetItem {
   title: string;
   savedAt: string;
   rowCount: number;
+  type?: string;
 }
 
 @Component({
@@ -84,11 +95,72 @@ export interface SavedLocalSheetItem {
 export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   @Input() set table(tableName: string) {
     if (tableName) {
-      this.onTableSelect(tableName);
+      this.selectedTableName = tableName;
+      if (this.activeSheetId !== tableName) {
+        this.openTableInSheet(tableName);
+      }
     }
   }
+  @Input() set isDark(val: boolean) {
+    this.isDarkMode = !!val;
+    if (this.isDarkMode) {
+      document.body.classList.add('dark-mode');
+      document.body.classList.add('dark-theme');
+      document.body.setAttribute('data-theme', 'dark');
+      localStorage.setItem('sutram_dark_mode', 'true');
+    } else {
+      document.body.classList.remove('dark-mode');
+      document.body.classList.remove('dark-theme');
+      document.body.removeAttribute('data-theme');
+      localStorage.setItem('sutram_dark_mode', 'false');
+    }
+    this.cdr.markForCheck();
+  }
   @Input() mode: 'normal' | 'intelligent' = 'intelligent';
-  @Input() apiBase: string = '/_sutram/excel';
+
+  private _apiBase: string = '/_sutram/excel';
+  @Input() set apiBase(val: string) {
+    this._apiBase = val || '/_sutram/excel';
+    if (this.api) {
+      this.api.setBaseUri(this._apiBase);
+    }
+  }
+  get apiBase(): string {
+    return this._apiBase;
+  }
+
+  public getActiveProjectSlug(): string {
+    if (this._apiBase && this._apiBase.includes('?')) {
+      const q = this._apiBase.split('?')[1] || '';
+      const params = new URLSearchParams(q);
+      const p = params.get('project');
+      if (p) return p;
+    }
+    try {
+      const raw = localStorage.getItem('sutram_active_project');
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (p && p.project_slug) return p.project_slug;
+      }
+    } catch {}
+    return 'default';
+  }
+
+  @Output() public tableCreated = new EventEmitter<string>();
+
+  // ── Table Designer Modal State ──────────────────────────────
+  public showTableDesignerModal: boolean = false;
+
+  public openCreateTable(): void {
+    this.showTableDesignerModal = true;
+    this.cdr.markForCheck();
+  }
+
+  public onTableCreated(tableName: string): void {
+    this.refreshStudioTables(tableName);
+    this.tableCreated.emit(tableName);
+    this.cdr.markForCheck();
+  }
 
   // ── Declarative Feature Flags (Batteries-Included: All ON by default, toggleable by user flags) ──
   @Input() enableFilters: boolean = true;
@@ -123,45 +195,8 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
 
 
 
-  // ── Pre-configured Reports Catalog (CTE & SQL Views) ─────────
-  public readonly reportsList = [
-    {
-      id: 'mn_awk_type_wise',
-      display_name: 'मासिक आवक प्रकार सार (Aawak Summary)',
-      title: 'मासिक आवक प्रकार सार (Aawak Summary)',
-      desc: 'Monthly Aawak Type Saar',
-      icon: 'pi-chart-line',
-      table: 'mn_awk_type_wise',
-      category: 'Aawak / Inventory'
-    },
-    {
-      id: 'mn_jwk_aj_type',
-      display_name: 'मासिक जावक प्रकार सार (Jawak Summary)',
-      title: 'मासिक जावक प्रकार सार (Jawak Summary)',
-      desc: 'Monthly Jawak Type Saar',
-      icon: 'pi-chart-bar',
-      table: 'mn_jwk_aj_type',
-      category: 'Jawak / Inventory'
-    },
-    {
-      id: 'bachat_summary',
-      display_name: 'बचत सारांश (Bachat Summary)',
-      title: 'बचत सारांश (Bachat Summary)',
-      desc: 'Bachat Stock Summary',
-      icon: 'pi-percentage',
-      table: 'bachat',
-      category: 'Stock Balance'
-    },
-    {
-      id: 'pbk_closing',
-      display_name: 'पीबीके क्लोजिंग (PBK Closing)',
-      title: 'पीबीके क्लोजिंग (PBK Closing)',
-      desc: 'PBK Closing Statement',
-      icon: 'pi-book',
-      table: 'pbk_closing',
-      category: 'Closing'
-    }
-  ];
+  // ── Dynamic Reports & Views Catalog ──────────────────────────
+  @Input() public reportsList: any[] = [];
 
   public tablesList: Array<{ table: string; display_name: string }> = [];
   public selectedTableName: string = '';
@@ -170,7 +205,29 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   // Active Session Sheet Tabs (Rough & Favorites only)
   public sheetTabs: StudioSheetTab[] = [];
   public activeSheetId: string = 'rough_1';
-  public sheetWorkbooks: { [sheetId: string]: { rows: any[]; config?: SutramTableConfig; totalDbRecords?: number; loadedDbRecordCount?: number; deletedRowIds?: any[]; deletedRowsQueue?: any[]; allConfigColumns?: StudioConfigColumn[]; selectedColumnKeys?: Set<string> } } = {};
+  public sheetWorkbooks: { [sheetId: string]: { rows: any[]; config?: SutramTableConfig; totalDbRecords?: number; loadedDbRecordCount?: number; deletedRowIds?: any[]; deletedRowsQueue?: any[]; allConfigColumns?: StudioConfigColumn[]; selectedColumnKeys?: Set<string>; inSheetTool?: 'ui_sutras' | 'db_triggers' | 'reminders' | null; frozenColKeys?: string[]; isHeaderFrozen?: boolean; originalSchemaOrder?: Map<string, number> } } = {};
+
+  // ── Column & Header Freeze Panes State ────────────────────────
+  public originalSchemaOrder = new Map<string, number>();
+  public frozenColKeys: string[] = [];
+  public isHeaderFrozen: boolean = true;
+
+  // ── In-Sheet Contextual Workbench & Security State ────────────
+  public activeInSheetTool: 'ui_sutras' | 'db_triggers' | 'reminders' | null = null;
+  public unmaskedColumnsSet: Set<string> = new Set<string>();
+  public unmaskedCellsSet: Set<string> = new Set<string>();
+  public unmaskDialogState = {
+    visible: false,
+    tableName: '',
+    columnName: '',
+    targetType: 'column' as 'column' | 'cell',
+    rowIdx: undefined as number | undefined,
+    isSubmitting: false,
+    errorMessage: ''
+  };
+  public currentUserRightsMap: Map<string, { can_view: boolean; can_edit: boolean; can_delete: boolean; can_unmask: boolean }> = new Map();
+  public isSheetReadOnly: boolean = false;
+  public currentSheetCanDelete: boolean = true;
   public loadedDbRecordCount: number = 0;
 
   // Tab Renaming & Tab Context Menu State
@@ -186,6 +243,15 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   // Zoom / Scale state
   public zoomLevel: number = 1.0;
 
+  // ── Reminders & Smart Watchdog State ─────────────────────────
+  public activeAlerts: any[] = [];
+  public unreadReminderCount: number = 0;
+  public currentAlertIndex: number = 0;
+  public showReminderPopup: boolean = false;
+  public isSnoozingAlert: boolean = false;
+  public isDismissingAlert: boolean = false;
+  private reminderPollingTimer: any = null;
+
   // Dark Mode State
   public isDarkMode: boolean = false;
 
@@ -199,6 +265,10 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   // Rich Column Configuration Dropdown State (Matching Legacy Studio)
   public allConfigColumns: StudioConfigColumn[] = [];
   public selectedColumnKeys: Set<string> = new Set<string>();
+  private _cachedVisibleHeaders: any[] = [];
+  private _lastAllColsRef: any[] | null = null;
+  private _lastSelectedKeysVer: string = '';
+  private _lastHiddenKeysVer: string = '';
   public expandedFkGroups: Set<string> = new Set<string>();
   public colSearchQuery: string = '';
   public isExportingExcel: boolean = false;
@@ -225,6 +295,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   public scanReport: SutramScanReport | null = null;
   public uploadedWorkbook: any = null;
   public uploadedFileName: string = '';
+  public uploadedFileSize: number = 0;
   public uploadedSheetNames: string[] = [];
   public selectedUploadedSheet: string = '';
   public uploadedAllRawRows: any[][] = [];
@@ -274,11 +345,34 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   }
 
   public get visibleHeaders(): any[] {
-    if (this.allConfigColumns.length > 0) {
-      return this.allConfigColumns.filter(c => this.selectedColumnKeys.has(c.key));
+    const allCols = this.allConfigColumns;
+    const selectedKeys = this.selectedColumnKeys;
+    const hiddenKeys = this.hiddenColumnKeys;
+
+    const selVer = `${selectedKeys.size}_${Array.from(selectedKeys).join(',')}`;
+    const hidVer = `${hiddenKeys.size}_${Array.from(hiddenKeys).join(',')}`;
+
+    if (
+      this._lastAllColsRef === allCols &&
+      this._lastSelectedKeysVer === selVer &&
+      this._lastHiddenKeysVer === hidVer &&
+      this._cachedVisibleHeaders.length > 0
+    ) {
+      return this._cachedVisibleHeaders;
     }
-    const headers = this.state.headers();
-    return headers.filter(h => !this.hiddenColumnKeys.has(h.name));
+
+    this._lastAllColsRef = allCols;
+    this._lastSelectedKeysVer = selVer;
+    this._lastHiddenKeysVer = hidVer;
+
+    if (allCols.length > 0) {
+      this._cachedVisibleHeaders = allCols.filter(c => selectedKeys.has(c.key));
+    } else {
+      const headers = this.state.headers();
+      this._cachedVisibleHeaders = headers.filter(h => !hiddenKeys.has(h.name));
+    }
+
+    return this._cachedVisibleHeaders;
   }
 
   public get visibleHeadersCount(): number {
@@ -297,7 +391,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
 
   private isTechnicalCol(name: string): boolean {
     const n = (name || '').toLowerCase();
-    return n === '_id' || n.includes('_by_dept_id') || n === 'verify';
+    return n.includes('_by_dept_id') || n === 'verify' || n === 'hl';
   }
 
   public buildConfigColumns(cfg: SutramTableConfig): void {
@@ -330,6 +424,8 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
           is_fk_main: true,
           ref_table: refTbl,
           ref_as: refAs,
+          ref_select: h.ref_select,
+          ref_data: h.ref_data,
           type: 'ref',
           not_null: !!h.not_null,
           default_selected: true
@@ -350,6 +446,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
               col_name: subColName,
               group: refTbl,
               is_fk_subcol: true,
+              readonly: true,
               ref_table: refTbl,
               ref_as: refAs,
               sub_col_name: subColName,
@@ -376,6 +473,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         });
       } else {
         // Direct Standard Column
+        const isPwd = this.isPasswordCol(h) || this.isPasswordCol({ key: colName });
         this.allConfigColumns.push({
           key: colName,
           name: h.name || colName,
@@ -385,7 +483,8 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
           is_fk_subcol: false,
           is_fk_main: false,
           is_fk_raw: false,
-          type: h.type || 'string',
+          type: isPwd ? 'password' : (h.type || h.col_type || 'string'),
+          col_type: isPwd ? 'password' : (h.col_type || h.type || 'string'),
           not_null: !!h.not_null,
           default_selected: true
         });
@@ -399,21 +498,53 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         const colName = sc.col_name || sc.name;
         if (this.isTechnicalCol(colName) || processedCols.has(colName)) continue;
         processedCols.add(colName);
+        const isPk = !!sc.pk || colName === '_id';
+        const isPwd = this.isPasswordCol(sc) || this.isPasswordCol({ key: colName });
         this.allConfigColumns.push({
           key: colName,
           name: sc.name || colName,
-          short_name: sc.name || colName,
+          short_name: isPk ? `${colName} (id)` : (sc.name || colName),
           col_name: colName,
           group: null,
-          type: sc.type || 'string',
+          type: isPk ? 'id' : (isPwd ? 'password' : (sc.type || sc.col_type || 'string')),
+          col_type: isPk ? 'id' : (isPwd ? 'password' : (sc.col_type || sc.type || 'string')),
           not_null: !!sc.not_null,
           default_selected: false
         });
       }
     }
 
+    // Ensure _id primary key is always available for any table
+    if (!processedCols.has('_id')) {
+      this.allConfigColumns.unshift({
+        key: '_id',
+        name: '_id',
+        short_name: '_id (id)',
+        col_name: '_id',
+        group: null,
+        type: 'id',
+        not_null: false,
+        default_selected: false
+      });
+      processedCols.add('_id');
+    }
+
     if (this.selectedColumnKeys.size === 0 && this.allConfigColumns.length > 0) {
-      this.selectedColumnKeys.add(this.allConfigColumns[0].key);
+      const first = this.allConfigColumns.find(c => !c.group && c.key !== '_id') || this.allConfigColumns[0];
+      this.selectedColumnKeys.add(first.key);
+    }
+
+    // Always merge temporary formula columns from active uiSutrasList
+    this.syncTempColumnsToGrid();
+
+    // Record original schema order for freeze sorting
+    this.originalSchemaOrder.clear();
+    this.allConfigColumns.forEach((c, idx) => {
+      this.originalSchemaOrder.set(c.key, idx);
+    });
+
+    if (this.frozenColKeys.length > 0) {
+      this.reorderColumnsForFreeze();
     }
   }
 
@@ -423,6 +554,8 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       if (c.group) return false;
       if (!q) return true;
       return (c.name && c.name.toLowerCase().includes(q)) ||
+             (c.short_name && c.short_name.toLowerCase().includes(q)) ||
+             (c.label && c.label.toLowerCase().includes(q)) ||
              (c.key && c.key.toLowerCase().includes(q));
     });
   }
@@ -445,7 +578,9 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         if (!q) return true;
         return groupName.toLowerCase().includes(q) ||
                (c.name && c.name.toLowerCase().includes(q)) ||
-               (c.short_name && c.short_name.toLowerCase().includes(q));
+               (c.short_name && c.short_name.toLowerCase().includes(q)) ||
+               (c.label && c.label.toLowerCase().includes(q)) ||
+               (c.key && c.key.toLowerCase().includes(q));
       });
 
       if (q && matchingCols.length === 0) continue;
@@ -465,6 +600,326 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     }
 
     return result;
+  }
+
+
+
+  public get selectedOrderedColumns(): StudioConfigColumn[] {
+    return this.allConfigColumns.filter(c => this.selectedColumnKeys.has(c.key));
+  }
+
+  public moveSelectedColUp(colKey: string): void {
+    const selKeys = this.selectedOrderedColumns.map(c => c.key);
+    const selIdx = selKeys.indexOf(colKey);
+    if (selIdx <= 0) return;
+    const prevSelKey = selKeys[selIdx - 1];
+
+    const curIdx = this.allConfigColumns.findIndex(c => c.key === colKey);
+    if (curIdx === -1) return;
+    const [removed] = this.allConfigColumns.splice(curIdx, 1);
+
+    const targetIdx = this.allConfigColumns.findIndex(c => c.key === prevSelKey);
+    if (targetIdx !== -1) {
+      this.allConfigColumns.splice(targetIdx, 0, removed);
+    } else {
+      this.allConfigColumns.unshift(removed);
+    }
+    this.allConfigColumns = [...this.allConfigColumns];
+    this.autoSaveColumnConfig();
+    this.cdr.markForCheck();
+  }
+
+  // ── Column Freeze & Reordering Algorithm ────────────────────────
+  public reorderColumnsForFreeze(): void {
+    const frozenSet = new Set(this.frozenColKeys);
+
+    // Split into frozen and unfrozen
+    const frozenCols = this.allConfigColumns.filter(c => frozenSet.has(c.key));
+    const unfrozenCols = this.allConfigColumns.filter(c => !frozenSet.has(c.key));
+
+    // Sort frozen columns by original schema order so left-shift preserves natural sequence
+    frozenCols.sort((a, b) => {
+      const orderA = this.originalSchemaOrder.has(a.key) ? this.originalSchemaOrder.get(a.key)! : 9999;
+      const orderB = this.originalSchemaOrder.has(b.key) ? this.originalSchemaOrder.get(b.key)! : 9999;
+      return orderA - orderB;
+    });
+
+    // Sort unfrozen columns by original schema order so unfrozen columns preserve natural sequence
+    unfrozenCols.sort((a, b) => {
+      const orderA = this.originalSchemaOrder.has(a.key) ? this.originalSchemaOrder.get(a.key)! : 9999;
+      const orderB = this.originalSchemaOrder.has(b.key) ? this.originalSchemaOrder.get(b.key)! : 9999;
+      return orderA - orderB;
+    });
+
+    // Update frozenColKeys array to match the sorted order
+    this.frozenColKeys = frozenCols.map(c => c.key);
+
+    // All frozen columns are placed strictly to the left!
+    this.allConfigColumns = [...frozenCols, ...unfrozenCols];
+    this.cdr.markForCheck();
+  }
+
+  public onGridColumnFreezeChange(event: { colKey: string; action: string }): void {
+    if (!event) return;
+    const { colKey, action } = event;
+
+    if (action === 'freeze') {
+      if (colKey && !this.frozenColKeys.includes(colKey)) {
+        this.frozenColKeys = [...this.frozenColKeys, colKey];
+      }
+    } else if (action === 'unfreeze') {
+      this.frozenColKeys = this.frozenColKeys.filter(k => k !== colKey);
+    } else if (action === 'unfreeze_all') {
+      this.frozenColKeys = [];
+    } else if (action === 'freeze_to_here') {
+      const vHeaders = this.visibleHeaders;
+      const targetIdx = vHeaders.findIndex(c => (c.key || c.name) === colKey);
+      if (targetIdx >= 0) {
+        const toFreeze: string[] = [];
+        for (let i = 0; i <= targetIdx; i++) {
+          const k = vHeaders[i].key || vHeaders[i].name;
+          if (k) toFreeze.push(k);
+        }
+        const combined = new Set([...this.frozenColKeys, ...toFreeze]);
+        this.frozenColKeys = Array.from(combined);
+      }
+    }
+
+    this.reorderColumnsForFreeze();
+    if (this.gridComponent) {
+      this.gridComponent.frozenColKeys = [...this.frozenColKeys];
+      this.gridComponent.cdr.markForCheck();
+      this.gridComponent.recalculateFrozenColumns();
+    }
+    this.autoSaveColumnConfig();
+  }
+
+  public onGridHeaderFreezeChange(isFrozen: boolean): void {
+    this.isHeaderFrozen = isFrozen;
+    if (this.gridComponent) {
+      this.gridComponent.isHeaderFrozen = isFrozen;
+      this.gridComponent.cdr.markForCheck();
+    }
+    this.autoSaveColumnConfig();
+    this.cdr.markForCheck();
+  }
+
+  public onGridColumnFormatSelected(event: { col: any; colKey: string; format: string }): void {
+    if (!event) return;
+    const { colKey, format } = event;
+    const col = this.allConfigColumns.find(c => c.key === colKey);
+    if (col) {
+      col.display_format = format;
+    }
+    const vCol = this.visibleHeaders.find(c => (c.key || c.name) === colKey);
+    if (vCol) {
+      vCol.display_format = format;
+    }
+    this.autoSaveColumnConfig();
+    this.cdr.markForCheck();
+  }
+
+  public toggleHeaderFreeze(): void {
+    this.isHeaderFrozen = !this.isHeaderFrozen;
+    if (this.gridComponent) {
+      this.gridComponent.isHeaderFrozen = this.isHeaderFrozen;
+      this.gridComponent.cdr.markForCheck();
+    }
+    this.autoSaveColumnConfig();
+    this.cdr.markForCheck();
+  }
+
+  public toggleActiveColumnFreeze(): void {
+    const sel = this.state.selectedCell();
+    const activeKey = sel ? sel.colKey : (this.visibleHeaders[0]?.key || this.visibleHeaders[0]?.name);
+    if (!activeKey) return;
+    if (this.frozenColKeys.includes(activeKey)) {
+      this.frozenColKeys = this.frozenColKeys.filter(k => k !== activeKey);
+    } else {
+      this.frozenColKeys = [...this.frozenColKeys, activeKey];
+    }
+    this.reorderColumnsForFreeze();
+    if (this.gridComponent) {
+      this.gridComponent.frozenColKeys = [...this.frozenColKeys];
+      this.gridComponent.cdr.markForCheck();
+      this.gridComponent.recalculateFrozenColumns();
+    }
+    this.autoSaveColumnConfig();
+    this.cdr.markForCheck();
+  }
+
+  public moveSelectedColDown(colKey: string): void {
+    const selKeys = this.selectedOrderedColumns.map(c => c.key);
+    const selIdx = selKeys.indexOf(colKey);
+    if (selIdx === -1 || selIdx >= selKeys.length - 1) return;
+    const nextSelKey = selKeys[selIdx + 1];
+
+    const curIdx = this.allConfigColumns.findIndex(c => c.key === colKey);
+    if (curIdx === -1) return;
+    const [removed] = this.allConfigColumns.splice(curIdx, 1);
+
+    const targetIdx = this.allConfigColumns.findIndex(c => c.key === nextSelKey);
+    if (targetIdx !== -1) {
+      this.allConfigColumns.splice(targetIdx + 1, 0, removed);
+    } else {
+      this.allConfigColumns.push(removed);
+    }
+    this.allConfigColumns = [...this.allConfigColumns];
+    this.autoSaveColumnConfig();
+    this.cdr.markForCheck();
+  }
+
+  public isDateCol(col: any): boolean {
+    if (!col) return false;
+    const t = (col.type || col.field_type || col.col_type || '').toLowerCase();
+    const k = (col.key || col.name || col.col_name || '').toLowerCase();
+    return t === 'date' || t === 'datetime' || k.endsWith('_date') || k === 'date';
+  }
+
+  public isPasswordCol(col: any): boolean {
+    if (!col) return false;
+    const t = (col.type || col.field_type || col.col_type || '').toLowerCase();
+    const k = (col.key || col.name || col.col_name || '').toLowerCase();
+    return t === 'password' ||
+           k === 'password' ||
+           k.endsWith('_password') ||
+           k.includes('password') ||
+           k === 'pwd' ||
+           k.endsWith('_pwd') ||
+           k === 'pin' ||
+           k.endsWith('_pin') ||
+           k === 'secret' ||
+           k === 'secret_hash';
+  }
+
+  public isNumberCol(col: any): boolean {
+    if (!col) return false;
+    const t = (col.type || col.field_type || '').toLowerCase();
+    const k = (col.key || col.name || col.col_name || '').toLowerCase();
+    return t === 'number' || t === 'integer' || t === 'numeric' || t === 'float' || t === 'decimal' ||
+           k === 'price' || k === 'amount' || k === 'total' || k === 'rate' || k === 'qty' || k === 'quantity';
+  }
+
+  private saveColConfigTimeout: any = null;
+
+  public onColumnLabelChange(col: StudioConfigColumn): void {
+    this.cdr.markForCheck();
+    if (this.saveColConfigTimeout) clearTimeout(this.saveColConfigTimeout);
+    this.saveColConfigTimeout = setTimeout(() => {
+      this.autoSaveColumnConfig();
+    }, 600);
+  }
+
+  public onColumnFormatChange(col: StudioConfigColumn): void {
+    this.cdr.markForCheck();
+    this.autoSaveColumnConfig();
+  }
+
+  public autoSaveColumnConfig(): void {
+    const tbl = this.currentActiveTableName;
+    if (!tbl || this.isCurrentSheetReport || this.isCurrentSheetRough) return;
+
+    const selectedKeys = Array.from(this.selectedColumnKeys);
+    const columnsPayload = this.allConfigColumns.map((c, i) => ({
+      key: c.key,
+      name: c.name,
+      col_name: c.col_name || c.name || c.key,
+      short_name: c.short_name,
+      label: c.label || c.short_name || c.name,
+      type: c.type,
+      field_type: c.type || 'text',
+      visible_list: this.selectedColumnKeys.has(c.key),
+      display_format: c.display_format || null,
+      ref_select: c.ref_select || null,
+      sort_order: i
+    }));
+
+    const payload = {
+      table_name: tbl,
+      columns: columnsPayload,
+      selected_keys: selectedKeys,
+      frozen_columns: this.frozenColKeys,
+      is_header_frozen: this.isHeaderFrozen
+    };
+
+    // Save to localStorage immediately as local cache
+    try {
+      localStorage.setItem(`sutram_table_col_config_${tbl}`, JSON.stringify(payload));
+    } catch {}
+
+    // Save to backend sys_meta
+    this.api.saveTableUiConfig(tbl, payload).subscribe({
+      next: () => {},
+      error: (err) => console.warn('[SutramStudio] Auto-saving col config error:', err)
+    });
+  }
+
+  public applySavedUiConfig(savedConfig: any): void {
+    if (!savedConfig) return;
+    const savedCols: any[] = savedConfig.columns || (Array.isArray(savedConfig) ? savedConfig : []);
+    let selectedKeys: string[] = savedConfig.selected_keys || [];
+
+    // Fallback if selected_keys is empty but columns array has visible_list items
+    if ((!selectedKeys || selectedKeys.length === 0) && savedCols.length > 0) {
+      selectedKeys = savedCols
+        .filter((sc: any) => sc.visible_list !== false && sc.visible !== false)
+        .map((sc: any) => sc.key || sc.col_name || sc.name || sc.column_name)
+        .filter(Boolean);
+    }
+
+    // 1. Restore exact visibility selection
+    if (Array.isArray(selectedKeys) && selectedKeys.length > 0) {
+      this.selectedColumnKeys = new Set(selectedKeys);
+      selectedKeys.forEach(k => this.ensureRowCellsForColumn(k));
+    }
+
+    // 2. Restore custom label and display_format by exact key
+    const colMap = new Map<string, any>();
+    savedCols.forEach(sc => {
+      const k = sc.key || sc.name || sc.column_name;
+      if (k) colMap.set(k, sc);
+    });
+
+    this.allConfigColumns.forEach(c => {
+      const saved = colMap.get(c.key);
+      if (saved) {
+        if (saved.label !== undefined && saved.label !== null && String(saved.label).trim() !== '') {
+          c.label = saved.label;
+        }
+        if (saved.display_format !== undefined) c.display_format = saved.display_format;
+      }
+    });
+
+    // 3. Restore column order if sort_order was specified
+    if (savedCols.some((sc: any) => sc.sort_order !== undefined)) {
+      const orderMap = new Map<string, number>();
+      savedCols.forEach((sc, idx) => {
+        const k = sc.key || sc.name || sc.column_name;
+        if (k) orderMap.set(k, sc.sort_order !== undefined ? sc.sort_order : idx);
+      });
+
+      this.allConfigColumns.sort((a, b) => {
+        const orderA = orderMap.has(a.key) ? orderMap.get(a.key)! : 9999;
+        const orderB = orderMap.has(b.key) ? orderMap.get(b.key)! : 9999;
+        return orderA - orderB;
+      });
+    }
+
+    this.allConfigColumns = [...this.allConfigColumns];
+    this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+
+    // 4. Restore frozen columns and header freeze
+    if (savedConfig.frozen_columns && Array.isArray(savedConfig.frozen_columns)) {
+      this.frozenColKeys = [...savedConfig.frozen_columns];
+    }
+    if (savedConfig.is_header_frozen !== undefined) {
+      this.isHeaderFrozen = !!savedConfig.is_header_frozen;
+    }
+    if (this.frozenColKeys.length > 0) {
+      this.reorderColumnsForFreeze();
+    }
+
+    this.cdr.markForCheck();
   }
 
   public isColumnSelected(key: string): boolean {
@@ -494,6 +949,10 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  public toggleColumnSelection(key: string): void {
+    this.toggleColumnCheckbox(key);
+  }
+
   public toggleColumnCheckbox(key: string): void {
     if (this.selectedColumnKeys.has(key)) {
       if (this.selectedColumnKeys.size <= 1) {
@@ -505,6 +964,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       this.ensureRowCellsForColumn(key);
     }
     this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.autoSaveColumnConfig();
     this.cdr.markForCheck();
   }
 
@@ -529,6 +989,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       }
     }
     this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.autoSaveColumnConfig();
     this.cdr.markForCheck();
   }
 
@@ -549,6 +1010,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       }
     }
     this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.autoSaveColumnConfig();
     this.cdr.markForCheck();
   }
 
@@ -565,6 +1027,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       this.ensureRowCellsForColumn(this.allConfigColumns[0].key);
     }
     this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    this.autoSaveColumnConfig();
     this.cdr.markForCheck();
   }
 
@@ -573,6 +1036,19 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     if (!colDef) return;
     const rows = this.state.rows();
     let updated = false;
+
+    if (colDef.is_temp) {
+      rows.forEach((r, idx) => {
+        if (!r.cells) r.cells = {};
+        if (!r.cells[key]) {
+          r.cells[key] = { value: '', isValid: true, isModified: false };
+        }
+        this.evaluateUiSutrasForRow(r, idx, true);
+      });
+      this.state.rows.set([...rows]);
+      this.cdr.markForCheck();
+      return;
+    }
 
     rows.forEach(r => {
       if (r.cells && !r.cells[key] && r._rawOriginal) {
@@ -583,11 +1059,31 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
           if (refObj && typeof refObj === 'object') {
             rawVal = refObj[colDef.sub_col_name!];
           }
+          if (rawVal === undefined) {
+            rawVal = dr[key] ?? dr[`${colDef.ref_as || colDef.ref_table}.${colDef.sub_col_name}`] ?? dr[`${colDef.ref_table}_${colDef.sub_col_name}`] ?? dr[colDef.sub_col_name!];
+          }
+          if (rawVal === undefined && colDef.ref_table) {
+            const rawFkId = dr[colDef.col_name!] ?? dr[`${colDef.ref_table}_id`] ?? dr[colDef.ref_table!];
+            if (rawFkId !== undefined && rawFkId !== null && rawFkId !== '') {
+              const match = this.refCache.findRefMatch(colDef.ref_table, '', undefined, rawFkId);
+              if (match.found && match.item && match.item[colDef.sub_col_name!] !== undefined) {
+                rawVal = match.item[colDef.sub_col_name!];
+              }
+            }
+          }
         } else if (colDef.is_fk_main || colDef.type === 'ref') {
           const joined = dr[colDef.ref_as || colDef.name || colDef.ref_table!];
           if (joined && typeof joined === 'object') {
-            const formatted = this.refCache.formatOption(colDef.ref_table!, joined);
+            const formatted = this.refCache.formatOption(colDef.ref_table!, joined, colDef.ref_select);
             rawVal = formatted?.display;
+          } else {
+            const rawFkId = dr[colDef.col_name!] ?? dr[colDef.key] ?? dr[`${colDef.ref_table}_id`];
+            if (rawFkId !== undefined && rawFkId !== null && rawFkId !== '') {
+              const match = this.refCache.findRefMatch(colDef.ref_table!, '', undefined, rawFkId);
+              if (match.found && match.display) {
+                rawVal = match.display;
+              }
+            }
           }
         } else if (colDef.is_fk_raw) {
           rawVal = dr[colDef.col_name!] ?? dr[colDef.key];
@@ -661,6 +1157,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     if (this.apiBase) {
       this.api.setBaseUri(this.apiBase);
     }
+    this.audit.setRefCache(this.refCache);
 
     // Initialize & persist dark mode preference
     const savedTheme = localStorage.getItem('sutram_dark_mode');
@@ -674,6 +1171,18 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     if (savedBoolStyle && ['checkbox', 'badge'].includes(savedBoolStyle)) {
       this.booleanDisplayStyle = savedBoolStyle as any;
     }
+
+    // Load persisted active user and role
+    const savedActiveUser = localStorage.getItem('sutram_active_user');
+    if (savedActiveUser) {
+      try {
+        const parsed = JSON.parse(savedActiveUser);
+        if (parsed && (parsed.role === 'admin' || parsed.role === 'author')) {
+          this.currentUser = parsed;
+        }
+      } catch {}
+    }
+    this.loadCurrentUserRights();
 
     this.state.isAuditMode.set(this.mode === 'intelligent');
     this.state.filtersEnabled.set(this.enableFilters);
@@ -702,6 +1211,9 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       if (hasRef) {
         const rows = this.state.rows();
         if (rows && rows.length > 0) {
+          this.allConfigColumns
+            .filter(c => c.is_fk_subcol && (c.ref_table || '').toLowerCase().trim() === cleanLoaded && this.selectedColumnKeys.has(c.key))
+            .forEach(c => this.ensureRowCellsForColumn(c.key));
           this.audit.auditAll(rows, cfg.headers);
           this.state.setRows([...rows]);
           this.cdr.markForCheck();
@@ -710,11 +1222,21 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     });
 
     this.loadTablesList();
+
+    // Check active reminders on startup & pulse every 45s
+    this.checkActiveReminders(true);
+    this.reminderPollingTimer = setInterval(() => {
+      this.checkActiveReminders(false);
+    }, 45000);
   }
 
   public ngOnDestroy(): void {
     this.searchSub?.unsubscribe();
     this.refLoadedSub?.unsubscribe();
+    if (this.reminderPollingTimer) {
+      clearInterval(this.reminderPollingTimer);
+      this.reminderPollingTimer = null;
+    }
   }
 
   public setStudioMode(newMode: 'normal' | 'intelligent'): void {
@@ -939,10 +1461,945 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     return !!cur && cur.type === 'table';
   }
 
+  public get currentActiveTableName(): string {
+    const cur = this.sheetTabs.find(t => t.id === this.activeSheetId);
+    return cur?.tableName || (cur?.type === 'table' ? cur.id : '') || this.selectedTableName || '';
+  }
+
+  public get currentActiveSheetTitle(): string {
+    const cur = this.sheetTabs.find(t => t.id === this.activeSheetId);
+    if (!cur || cur.type === 'rough') return 'Rough Sheet';
+    return cur.title || cur.tableName || cur.id;
+  }
+
+  // ── Settings Modals State ─────────────────────────────────────
+  public showTableConfigModal: boolean = false;
+  public showUiSutrasModal: boolean = false;
+  public showBackendSutrasModal: boolean = false;
+
+  // 1. Table & Column Configuration
+  public tableConfigColumns: any[] = [];
+  public isSavingTableConfig: boolean = false;
+  public dateFormatOptions = [
+    { label: 'DD/MM/YYYY (e.g. 10/11/2026)', value: 'DD/MM/YYYY' },
+    { label: 'YYYY-MM-DD (e.g. 2026-11-10)', value: 'YYYY-MM-DD' },
+    { label: 'DD-MMM-YYYY (e.g. 10-Nov-2026)', value: 'DD-MMM-YYYY' },
+    { label: 'MM/DD/YYYY (e.g. 11/10/2026)', value: 'MM/DD/YYYY' }
+  ];
+  public numberDecimalOptions = [
+    { label: '0 Decimals (पूर्णांक / Integer)', value: '0' },
+    { label: '2 Decimals (0.00)', value: '2' },
+    { label: '4 Decimals (0.0000)', value: '4' },
+    { label: 'मुद्रा प्रारूप (₹ Currency)', value: 'currency' }
+  ];
+
+  // 2. UI Sutras (Client-side Reactive Formulas & Temp Display Columns)
+  public uiSutrasList: Array<{ target_col: string; display_name?: string; formula: string; is_temp?: boolean; desc?: string }> = [];
+  public isSavingUiSutras: boolean = false;
+  public selectedTargetColValue: string | null = null;
+  public newUiSutra: { target_col: string; display_name: string; formula: string; is_temp: boolean; desc?: string } = {
+    target_col: '',
+    display_name: '',
+    formula: '',
+    is_temp: false
+  };
+
+  public targetColDropdownOptions: Array<{ value: string; label: string; isTemp?: boolean }> = [];
+
+  public buildTargetColDropdownOptions(): void {
+    const list: Array<{ value: string; label: string; isTemp?: boolean }> = [
+      { value: '__temp__', label: '➕ Temp Column (Virtual / स्क्रीन-ओनली Read-Only)', isTemp: true }
+    ];
+
+    // Gather ONLY direct physical columns of the CURRENT table:
+    // Exclude temp/virtual columns and exclude reference table sub-columns (is_fk_subcol, dot notation)
+    let sourceCols: any[] = [];
+    if (this.allConfigColumns && this.allConfigColumns.length > 0) {
+      sourceCols = this.allConfigColumns.filter(c =>
+        !c.is_temp &&
+        !c.is_virtual &&
+        !c.is_fk_subcol &&
+        !(c.key && c.key.includes('.')) &&
+        !c.sub_col_name
+      );
+    }
+    if (sourceCols.length === 0 && this.state.headers().length > 0) {
+      sourceCols = this.state.headers().filter((h: any) =>
+        !h.is_temp &&
+        !h.is_virtual &&
+        !h.is_fk_subcol &&
+        !(h.key && h.key.includes('.')) &&
+        !h.sub_col_name
+      );
+    }
+    if (sourceCols.length === 0) {
+      const cfg = this.state.config();
+      if (cfg && cfg.headers) {
+        sourceCols = cfg.headers.filter((h: any) =>
+          !h.is_temp &&
+          !h.is_virtual &&
+          !h.is_fk_subcol &&
+          !(h.key && h.key.includes('.')) &&
+          !h.sub_col_name
+        );
+      }
+    }
+
+    const seen = new Set<string>();
+    for (const col of sourceCols) {
+      if (col.is_fk_subcol || (col.key && col.key.includes('.')) || col.sub_col_name) continue;
+      const colId = col.name || col.col_name || col.key;
+      if (!colId || seen.has(colId)) continue;
+      seen.add(colId);
+      const displayLabel = col.name
+        ? (col.col_name && col.col_name !== col.name ? `${col.name} (${col.col_name})` : col.name)
+        : colId;
+      list.push({
+        value: colId,
+        label: `${displayLabel} (DB Column)`
+      });
+    }
+    this.targetColDropdownOptions = list;
+  }
+
+  public get currentTableColumns(): any[] {
+    const list: any[] = [];
+    const sourceCols: any[] = (this.allConfigColumns && this.allConfigColumns.length > 0)
+      ? this.allConfigColumns
+      : (this.state.headers() || []);
+
+    const seen = new Set<string>();
+    for (const c of sourceCols) {
+      if (c.is_temp || c.is_virtual || c.is_fk_subcol || (c.key && c.key.includes('.')) || c.sub_col_name) continue;
+      const colId = c.name || c.col_name || c.key;
+      if (!colId || seen.has(colId)) continue;
+      seen.add(colId);
+      list.push(c);
+    }
+    return list;
+  }
+
+  public get referenceColumns(): any[] {
+    const list: any[] = [];
+    if (!this.allConfigColumns || this.allConfigColumns.length === 0) return list;
+
+    const seen = new Set<string>();
+    for (const c of this.allConfigColumns) {
+      if (c.is_fk_subcol || (c.key && c.key.includes('.')) || c.sub_col_name) {
+        const colId = c.key || c.name || c.col_name;
+        if (!colId || seen.has(colId)) continue;
+        seen.add(colId);
+        list.push(c);
+      }
+    }
+    return list;
+  }
+
+  public onTargetColChange(event: any): void {
+    const val = (event && typeof event === 'object' && 'value' in event) ? event.value : event;
+    this.selectedTargetColValue = val;
+    if (val === '__temp__') {
+      this.newUiSutra.is_temp = true;
+      this.newUiSutra.target_col = '';
+      this.newUiSutra.display_name = '';
+    } else if (val) {
+      this.newUiSutra.is_temp = false;
+      this.newUiSutra.target_col = val;
+      this.newUiSutra.display_name = val;
+    } else {
+      this.newUiSutra.is_temp = false;
+      this.newUiSutra.target_col = '';
+      this.newUiSutra.display_name = '';
+    }
+    this.cdr.markForCheck();
+  }
+
+  // 3. Backend Sutras (Server-side Triggers)
+  public backendTriggersList: any[] = [];
+  public isLoadingTriggers: boolean = false;
+  public newTriggerDef: any = {
+    trigger_name: '',
+    event: 'INSERT',
+    action_type: 'raw_sql',
+    raw_sql: '',
+    target_table: '',
+    field_map_str: '{}'
+  };
+
+  // 4. Role & User Management (Frontend Rights Control)
+  public currentUser: { username: string; display_name: string; role: 'admin' | 'author' } = {
+    username: 'admin',
+    display_name: 'Administrator',
+    role: 'admin'
+  };
+  public showUserManagementModal: boolean = false;
+  public usersList: any[] = [];
+  public isLoadingUsers: boolean = false;
+  public isSavingUser: boolean = false;
+  public editingUserId: number | null = null;
+  public userFormData: {
+    username: string;
+    password: string;
+    display_name: string;
+    role: 'admin' | 'author';
+    active: number;
+  } = {
+    username: '',
+    password: '',
+    display_name: '',
+    role: 'author',
+    active: 1
+  };
+  public roleDropdownOptions = [
+    { label: '👑 Admin (पूर्ण नियंत्रण - Triggers, Schema, Rules)', value: 'admin' },
+    { label: '👤 Author (ऑपरेशनल - View, Edit, Column Visibility & Style)', value: 'author' }
+  ];
+
+  public get isAdmin(): boolean {
+    return this.currentUser?.role === 'admin';
+  }
+
+  public get isAuthor(): boolean {
+    return this.currentUser?.role === 'author';
+  }
+
+  public switchRole(role: 'admin' | 'author'): void {
+    if (!this.currentUser) {
+      this.currentUser = { username: 'admin', display_name: 'Administrator', role: 'admin' };
+    }
+    this.currentUser.role = role;
+    localStorage.setItem('sutram_active_user', JSON.stringify(this.currentUser));
+    this.loadCurrentUserRights();
+    this.applyUserRightsToCurrentView();
+    this.cdr.markForCheck();
+  }
+
+  public toggleRole(): void {
+    this.switchRole(this.isAdmin ? 'author' : 'admin');
+  }
+
+  // ── Table Config Actions ─────────────────────────────────────
+  public openTableConfigModal(): void {
+    const tbl = this.currentActiveTableName;
+    if (!tbl) return;
+    this.api.getTableUiConfig(tbl).subscribe({
+      next: (res) => {
+        if (res && res.columns) {
+          this.tableConfigColumns = res.columns.filter((c: any) => c.name !== 'hl' && c.column_name !== 'hl');
+        } else {
+          this.tableConfigColumns = (this.allConfigColumns.length > 0 ? this.allConfigColumns : this.visibleHeaders)
+            .filter(c => c.name !== 'hl')
+            .map(c => ({
+              column_name: c.name,
+              label: c.label || c.short_name || c.name,
+              field_type: c.type || 'text',
+              visible_list: this.selectedColumnKeys.has(c.key || c.name),
+              display_format: c.display_format || null,
+              ref_select: c.ref_select || null,
+              sort_order: 0
+            }));
+        }
+        this.showTableConfigModal = true;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.tableConfigColumns = (this.allConfigColumns.length > 0 ? this.allConfigColumns : this.visibleHeaders)
+          .filter(c => c.name !== 'hl')
+          .map(c => ({
+            column_name: c.name,
+            label: c.label || c.short_name || c.name,
+            field_type: c.type || 'text',
+            visible_list: this.selectedColumnKeys.has(c.key || c.name),
+            display_format: c.display_format || null,
+            ref_select: c.ref_select || null,
+            sort_order: 0
+          }));
+        this.showTableConfigModal = true;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  public moveConfigColUp(idx: number): void {
+    if (idx <= 0) return;
+    const temp = this.tableConfigColumns[idx];
+    this.tableConfigColumns[idx] = this.tableConfigColumns[idx - 1];
+    this.tableConfigColumns[idx - 1] = temp;
+    this.tableConfigColumns.forEach((c, i) => c.sort_order = i);
+  }
+
+  public moveConfigColDown(idx: number): void {
+    if (idx >= this.tableConfigColumns.length - 1) return;
+    const temp = this.tableConfigColumns[idx];
+    this.tableConfigColumns[idx] = this.tableConfigColumns[idx + 1];
+    this.tableConfigColumns[idx + 1] = temp;
+    this.tableConfigColumns.forEach((c, i) => c.sort_order = i);
+  }
+
+  public saveTableConfig(): void {
+    const tbl = this.currentActiveTableName;
+    if (!tbl) return;
+    this.isSavingTableConfig = true;
+    this.api.saveTableUiConfig(tbl, { columns: this.tableConfigColumns }).subscribe({
+      next: () => {
+        this.isSavingTableConfig = false;
+        this.showTableConfigModal = false;
+        const newSelected = new Set<string>();
+        this.tableConfigColumns.forEach(c => {
+          if (c.visible_list !== false) {
+            newSelected.add(c.column_name || c.name);
+          }
+        });
+        this.selectedColumnKeys = newSelected;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSavingTableConfig = false;
+        console.error('[SutramStudio] Error saving table config:', err);
+      }
+    });
+  }
+
+  public get nonTempHeaders(): any[] {
+    return this.visibleHeaders.filter(h => !h.is_temp && !h.is_virtual);
+  }
+
+  // ── UI Sutras Actions ────────────────────────────────────────
+  public loadUiSutras(tableName: string, callback?: () => void): void {
+    if (!tableName) return;
+    this.api.getUiSutras(tableName).subscribe({
+      next: (list) => {
+        this.uiSutrasList = list || [];
+        this.syncTempColumnsToGrid();
+        if (callback) callback();
+        const rows = this.state.rows();
+        if (rows && rows.length > 0 && this.uiSutrasList.length > 0) {
+          rows.forEach((r, idx) => this.evaluateUiSutrasForRow(r, idx, true));
+          this.state.rows.set([...rows]);
+        }
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.uiSutrasList = [];
+        if (callback) callback();
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  public syncTempColumnsToGrid(): void {
+    if (!this.uiSutrasList || this.uiSutrasList.length === 0) return;
+    let anyAdded = false;
+
+    for (const s of this.uiSutrasList) {
+      if (s.is_temp) {
+        const colKey = s.target_col;
+        const exists = this.allConfigColumns.some(c => c.key === colKey);
+        if (!exists) {
+          const tempCol: StudioConfigColumn = {
+            key: colKey,
+            name: colKey,
+            short_name: s.display_name || colKey,
+            col_name: colKey,
+            group: 'Computed (fx)',
+            is_temp: true,
+            is_virtual: true,
+            readonly: true,
+            type: 'string',
+            not_null: false,
+            default_selected: true
+          };
+          this.allConfigColumns.push(tempCol);
+          this.selectedColumnKeys.add(colKey);
+          anyAdded = true;
+        } else {
+          if (!this.selectedColumnKeys.has(colKey)) {
+            this.selectedColumnKeys.add(colKey);
+            anyAdded = true;
+          }
+        }
+
+        // Initialize cell in all loaded rows if missing
+        const rows = this.state.rows();
+        for (const r of rows) {
+          if (r.cells && !r.cells[colKey]) {
+            r.cells[colKey] = { value: '', isValid: true, isModified: false };
+          }
+        }
+      }
+    }
+
+    if (anyAdded) {
+      this.allConfigColumns = [...this.allConfigColumns];
+      this.selectedColumnKeys = new Set(this.selectedColumnKeys);
+    }
+
+    const rows = this.state.rows();
+    if (rows && rows.length > 0) {
+      rows.forEach((r, idx) => this.evaluateUiSutrasForRow(r, idx, true));
+      this.state.rows.set([...rows]);
+    }
+
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
+  }
+
+  public openUiSutrasModal(): void {
+    const tbl = this.currentActiveTableName;
+    if (!tbl) return;
+    this.loadUiSutras(tbl, () => {
+      this.buildTargetColDropdownOptions();
+      this.newUiSutra = { target_col: '', display_name: '', formula: '', is_temp: false };
+      this.selectedTargetColValue = null;
+      this.showUiSutrasModal = true;
+      this.cdr.markForCheck();
+    });
+  }
+
+  public addUiSutra(): void {
+    if (!this.newUiSutra.formula) return;
+    if (this.newUiSutra.is_temp) {
+      if (!this.newUiSutra.display_name?.trim()) return;
+      const cleanKey = this.newUiSutra.display_name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+      this.newUiSutra.target_col = cleanKey ? `col_${cleanKey}` : `temp_${Date.now()}`;
+    } else {
+      if (!this.newUiSutra.target_col) return;
+      this.newUiSutra.display_name = this.newUiSutra.target_col;
+    }
+
+    this.uiSutrasList.push({ ...this.newUiSutra });
+    this.newUiSutra = { target_col: '', display_name: '', formula: '', is_temp: false };
+    this.selectedTargetColValue = null;
+    this.buildTargetColDropdownOptions();
+  }
+
+  public removeUiSutra(idx: number): void {
+    const removed = this.uiSutrasList[idx];
+    this.uiSutrasList.splice(idx, 1);
+    if (removed && removed.is_temp) {
+      this.allConfigColumns = this.allConfigColumns.filter(c => c.key !== removed.target_col);
+      this.selectedColumnKeys.delete(removed.target_col);
+      this.buildTargetColDropdownOptions();
+      this.cdr.markForCheck();
+    }
+  }
+
+  public insertColIntoFormula(colName: string): void {
+    this.newUiSutra.formula = (this.newUiSutra.formula || '') + `[${colName}]`;
+  }
+
+  public insertFnIntoFormula(fnText: string): void {
+    this.newUiSutra.formula = (this.newUiSutra.formula || '') + fnText;
+  }
+
+  public saveUiSutras(): void {
+    const tbl = this.currentActiveTableName;
+    if (!tbl) return;
+    this.isSavingUiSutras = true;
+    this.api.saveUiSutras(tbl, this.uiSutrasList).subscribe({
+      next: () => {
+        this.isSavingUiSutras = false;
+        this.showUiSutrasModal = false;
+        this.syncTempColumnsToGrid();
+        const rows = this.state.rows();
+        rows.forEach((r, idx) => this.evaluateUiSutrasForRow(r, idx, false));
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSavingUiSutras = false;
+        console.error('[SutramStudio] Error saving UI sutras:', err);
+      }
+    });
+  }
+
+  // ── Backend Sutras Actions ───────────────────────────────────
+  public openBackendSutrasModal(): void {
+    const tbl = this.currentActiveTableName;
+    if (!tbl) return;
+    this.isLoadingTriggers = true;
+    this.api.getTableTriggers(tbl).subscribe({
+      next: (res) => {
+        this.isLoadingTriggers = false;
+        this.backendTriggersList = res || [];
+        this.newTriggerDef = {
+          trigger_name: `trg_${tbl}_sync`,
+          event: 'INSERT',
+          action_type: 'raw_sql',
+          raw_sql: '',
+          target_table: this.tablesList.length > 0 ? this.tablesList[0].table : '',
+          field_map_str: '{}'
+        };
+        this.showBackendSutrasModal = true;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isLoadingTriggers = false;
+        this.backendTriggersList = [];
+        this.newTriggerDef = {
+          trigger_name: `trg_${tbl}_sync`,
+          event: 'INSERT',
+          action_type: 'raw_sql',
+          raw_sql: '',
+          target_table: this.tablesList.length > 0 ? this.tablesList[0].table : '',
+          field_map_str: '{}'
+        };
+        this.showBackendSutrasModal = true;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  public insertColIntoTriggerSql(colName: string, prefix: string = ':new.'): void {
+    const snippet = `${prefix}${colName}`;
+    this.newTriggerDef.raw_sql = (this.newTriggerDef.raw_sql || '') + snippet;
+  }
+
+  public insertTextIntoTriggerSql(text: string): void {
+    this.newTriggerDef.raw_sql = (this.newTriggerDef.raw_sql || '') + text;
+  }
+
+  public createBackendTrigger(): void {
+    const tbl = this.currentActiveTableName;
+    if (!tbl || !this.newTriggerDef.trigger_name) return;
+    let fieldMap = {};
+    try {
+      fieldMap = JSON.parse(this.newTriggerDef.field_map_str || '{}');
+    } catch {}
+
+    const payload = {
+      trigger_name: this.newTriggerDef.trigger_name,
+      label: this.newTriggerDef.trigger_name,
+      source_table: tbl,
+      event: this.newTriggerDef.event,
+      actions: [
+        {
+          sort_order: 0,
+          action_type: this.newTriggerDef.action_type || 'raw_sql',
+          target_table: this.newTriggerDef.target_table || null,
+          field_map: fieldMap,
+          raw_sql: this.newTriggerDef.raw_sql ? this.newTriggerDef.raw_sql.trim() : null
+        }
+      ]
+    };
+
+    this.api.createTrigger(payload).subscribe({
+      next: () => {
+        this.openBackendSutrasModal();
+      },
+      error: (err) => console.error('[SutramStudio] Create trigger error:', err)
+    });
+  }
+
+  public deleteBackendTrigger(id: number | string): void {
+    this.api.deleteTrigger(id).subscribe({
+      next: () => {
+        this.backendTriggersList = this.backendTriggersList.filter(t => t._id !== id);
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('[SutramStudio] Delete trigger error:', err)
+    });
+  }
+
+  // ── User Management Actions ──────────────────────────────────
+  public openUserManagementModal(): void {
+    this.showUserManagementModal = true;
+    this.editingUserId = null;
+    this.userFormData = {
+      username: '',
+      password: '',
+      display_name: '',
+      role: 'author',
+      active: 1
+    };
+    this.loadUsers();
+    this.cdr.markForCheck();
+  }
+
+  public loadUsers(): void {
+    this.isLoadingUsers = true;
+    this.api.getUsers().subscribe({
+      next: (users) => {
+        this.usersList = users || [];
+        this.isLoadingUsers = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isLoadingUsers = false;
+        console.error('[SutramStudio] Error loading users:', err);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  public openAddUser(): void {
+    this.editingUserId = null;
+    this.userFormData = {
+      username: '',
+      password: '',
+      display_name: '',
+      role: 'author',
+      active: 1
+    };
+  }
+
+  public editUser(u: any): void {
+    this.editingUserId = u._id;
+    this.userFormData = {
+      username: u.username,
+      password: '', // Blank unless modifying
+      display_name: u.display_name || u.username,
+      role: u.role || 'author',
+      active: u.active !== undefined ? u.active : 1
+    };
+  }
+
+  public cancelUserEdit(): void {
+    this.editingUserId = null;
+    this.userFormData = { username: '', password: '', display_name: '', role: 'author', active: 1 };
+  }
+
+  public saveUser(): void {
+    if (!this.userFormData.username?.trim()) return;
+    if (!this.editingUserId && !this.userFormData.password?.trim()) return;
+
+    this.isSavingUser = true;
+    if (this.editingUserId) {
+      this.api.updateUser(this.editingUserId, this.userFormData).subscribe({
+        next: () => {
+          this.isSavingUser = false;
+          this.cancelUserEdit();
+          this.loadUsers();
+        },
+        error: (err) => {
+          this.isSavingUser = false;
+          alert('Error updating user: ' + (err?.error?.error || err.message));
+        }
+      });
+    } else {
+      this.api.createUser(this.userFormData).subscribe({
+        next: () => {
+          this.isSavingUser = false;
+          this.cancelUserEdit();
+          this.loadUsers();
+        },
+        error: (err) => {
+          this.isSavingUser = false;
+          alert('Error creating user: ' + (err?.error?.error || err.message));
+        }
+      });
+    }
+  }
+
+  public deleteUser(u: any): void {
+    if (!confirm(`Are you sure you want to delete user "${u.username}"?`)) return;
+    this.api.deleteUser(u._id).subscribe({
+      next: () => {
+        this.loadUsers();
+      },
+      error: (err) => {
+        alert('Error deleting user: ' + (err?.error?.error || err.message));
+      }
+    });
+  }
+
+  public setCurrentActiveUser(u: any): void {
+    this.currentUser = {
+      username: u.username,
+      display_name: u.display_name || u.username,
+      role: u.role || 'author'
+    };
+    localStorage.setItem('sutram_active_user', JSON.stringify(this.currentUser));
+    this.cdr.markForCheck();
+  }
+
+  // ── Reactive Cell Changed & Highlight Auto-persistence ────────
+  public onGridCellChanged(event: { rowIdx: number; colKey: string; value: any }): void {
+    const rows = this.state.rows();
+    const row = rows[event.rowIdx];
+    if (!row) return;
+
+    // Foreign Key Reference Auto-Cascading (Feature 4):
+    // When main FK column changes, auto-update all linked read-only subcolumns from refCache
+    const colDef = this.allConfigColumns.find(c => c.key === event.colKey);
+    if (colDef && (colDef.ref_table || colDef.is_fk_main)) {
+      const refTbl = colDef.ref_table;
+      const refAs = colDef.ref_as || refTbl;
+      if (refTbl) {
+        const rawFkId = typeof event.value === 'number' ? event.value : undefined;
+        const match = this.refCache.findRefMatch(refTbl, typeof event.value === 'string' ? event.value : '', undefined, rawFkId);
+        if (match && match.found && match.item) {
+          const subCols = this.allConfigColumns.filter(c => c.is_fk_subcol && (c.ref_as === refAs || c.ref_table === refTbl));
+          subCols.forEach(sc => {
+            const propName = sc.sub_col_name || sc.col_name;
+            if (propName && match.item[propName] !== undefined) {
+              const newVal = match.item[propName];
+              if (!row.cells[sc.key]) {
+                row.cells[sc.key] = { value: newVal, isValid: true };
+              } else {
+                row.cells[sc.key].value = newVal;
+              }
+              if (row._rawOriginal) {
+                row._rawOriginal[sc.key] = newVal;
+                row._rawOriginal[propName] = newVal;
+              }
+            }
+          });
+          const rawIdCol = this.allConfigColumns.find(c => c.is_fk_raw && (c.ref_as === refAs || c.ref_table === refTbl));
+          if (rawIdCol && match.id !== undefined) {
+            if (!row.cells[rawIdCol.key]) {
+              row.cells[rawIdCol.key] = { value: match.id, isValid: true };
+            } else {
+              row.cells[rawIdCol.key].value = match.id;
+            }
+            if (row._rawOriginal) {
+              row._rawOriginal[rawIdCol.col_name || rawIdCol.key] = match.id;
+            }
+          }
+          this.cdr.markForCheck();
+        }
+      }
+    }
+
+    if (event.colKey === 'hl') {
+      const rowId = row._rawOriginal?._id ?? row._rawOriginal?.id ?? row.cells?.['_id']?.value;
+      if (rowId !== undefined && rowId !== null && this.currentActiveTableName && !this.isCurrentSheetRough) {
+        this.api.updateRow(this.currentActiveTableName, {
+          _id: rowId,
+          hl: event.value ? 1 : 0
+        }).subscribe({
+          next: () => {
+            if (row._rawOriginal) row._rawOriginal.hl = event.value ? 1 : 0;
+            this.cdr.markForCheck();
+          },
+          error: (err) => console.warn('[SutramStudio] Error persisting row highlight:', err)
+        });
+      }
+      return;
+    }
+
+    if (this.uiSutrasList.length > 0) {
+      this.evaluateUiSutrasForRow(row, event.rowIdx);
+    }
+  }
+
+  public evaluateUiSutrasForRow(row: SutramRow, rowIdx: number, isInitialOrDisplayLoad: boolean = false): void {
+    if (!row || !row.cells || this.uiSutrasList.length === 0) return;
+    let anyChanged = false;
+
+    const helpers = {
+      AGE: (dobVal: any) => {
+        if (!dobVal) return '';
+        const birth = new Date(dobVal);
+        if (isNaN(birth.getTime())) return '';
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+          age--;
+        }
+        return age >= 0 ? age : 0;
+      },
+      DAYS: (d1: any, d2: any) => {
+        if (!d1 || !d2) return 0;
+        const t1 = new Date(d1).getTime();
+        const t2 = new Date(d2).getTime();
+        if (isNaN(t1) || isNaN(t2)) return 0;
+        return Math.round(Math.abs(t2 - t1) / (1000 * 60 * 60 * 24));
+      },
+      YEAR: (d: any) => {
+        if (!d) return '';
+        const dt = new Date(d);
+        return isNaN(dt.getTime()) ? '' : dt.getFullYear();
+      },
+      MONTH: (d: any) => {
+        if (!d) return '';
+        const dt = new Date(d);
+        return isNaN(dt.getTime()) ? '' : dt.getMonth() + 1;
+      },
+      DAY: (d: any) => {
+        if (!d) return '';
+        const dt = new Date(d);
+        return isNaN(dt.getTime()) ? '' : dt.getDate();
+      },
+      IF: (cond: any, a: any, b: any) => (cond ? a : b),
+      ROUND: (num: any, decimals: number = 2) => {
+        const n = Number(num);
+        if (isNaN(n)) return 0;
+        const factor = Math.pow(10, decimals);
+        return Math.round(n * factor) / factor;
+      },
+      UPPER: (str: any) => (str !== null && str !== undefined ? String(str).toUpperCase() : ''),
+      LOWER: (str: any) => (str !== null && str !== undefined ? String(str).toLowerCase() : ''),
+      COALESCE: (...args: any[]) => args.find(v => v !== null && v !== undefined && v !== '') ?? ''
+    };
+
+    const colNames = Object.keys(row.cells);
+
+    // Helper to get raw or cell value across all aliases (col_name, name, key, short_name)
+    const getColValue = (colIdentifier: string): any => {
+      if (!colIdentifier) return undefined;
+      // 1. Direct cell match in row.cells
+      if (row.cells[colIdentifier] && row.cells[colIdentifier].value !== undefined) {
+        return row.cells[colIdentifier].value;
+      }
+      // 2. Match in allConfigColumns or cfg.headers by name, col_name, key, or short_name
+      const match = this.allConfigColumns.find(c =>
+        c.name === colIdentifier ||
+        c.col_name === colIdentifier ||
+        c.key === colIdentifier ||
+        c.short_name === colIdentifier
+      );
+      if (match) {
+        if (match.col_name && row.cells[match.col_name]?.value !== undefined) {
+          return row.cells[match.col_name].value;
+        }
+        if (match.name && row.cells[match.name]?.value !== undefined) {
+          return row.cells[match.name].value;
+        }
+        if (match.key && row.cells[match.key]?.value !== undefined) {
+          return row.cells[match.key].value;
+        }
+      }
+      // 3. Fallback to row root property or raw original
+      if ((row as any)[colIdentifier] !== undefined) {
+        return (row as any)[colIdentifier];
+      }
+      if (row._rawOriginal && row._rawOriginal[colIdentifier] !== undefined) {
+        return row._rawOriginal[colIdentifier];
+      }
+      return undefined;
+    };
+
+    for (const sutra of this.uiSutrasList) {
+      if (!sutra.target_col || !sutra.formula) continue;
+
+      // RULE: On initial/display load, ONLY calculate temp/virtual columns!
+      // Never overwrite stored database values in physical columns!
+      if (isInitialOrDisplayLoad && !sutra.is_temp) {
+        continue;
+      }
+
+      try {
+        const rawFormula = sutra.formula.trim();
+        let finalVal: any = undefined;
+
+        // 1. Direct Column Copy: e.g. [colB] or colB
+        const directBracketMatch = rawFormula.match(/^\[([^\]]+)\]$/);
+        const directColName = directBracketMatch ? directBracketMatch[1] : (colNames.includes(rawFormula) ? rawFormula : null);
+
+        if (directColName) {
+          const srcVal = getColValue(directColName);
+          finalVal = (srcVal !== undefined) ? srcVal : null;
+        } else {
+          // 2. Computed Expression / Function block
+          const rowData: Record<string, any> = {};
+          for (const c of colNames) {
+            rowData[c] = row.cells[c]?.value;
+          }
+          this.allConfigColumns.forEach(c => {
+            const cell = row.cells[c.col_name] || row.cells[c.name] || (c.key ? row.cells[c.key] : undefined);
+            if (cell && cell.value !== undefined) {
+              if (c.col_name) rowData[c.col_name] = cell.value;
+              if (c.name) rowData[c.name] = cell.value;
+              if (c.key) rowData[c.key] = cell.value;
+            }
+          });
+          for (const k of Object.keys(row)) {
+            if (k !== 'cells' && !(k in rowData)) {
+              rowData[k] = (row as any)[k];
+            }
+          }
+
+          let code = rawFormula;
+          code = code.replace(/\[([^\]]+)\]/g, "row['$1']");
+
+          if (code.includes('return ')) {
+            const fn = new Function('row', 'helpers', `
+              'use strict';
+              const { AGE, DAYS, YEAR, MONTH, DAY, IF, ROUND, UPPER, LOWER, COALESCE } = helpers;
+              ${code}
+            `);
+            finalVal = fn(rowData, helpers);
+          } else {
+            const fn = new Function('row', 'helpers', `
+              'use strict';
+              const { AGE, DAYS, YEAR, MONTH, DAY, IF, ROUND, UPPER, LOWER, COALESCE } = helpers;
+              return (${code});
+            `);
+            finalVal = fn(rowData, helpers);
+          }
+        }
+
+        if (finalVal !== undefined) {
+          const currentVal = row.cells[sutra.target_col]?.value;
+          if (currentVal !== finalVal) {
+            if (sutra.is_temp) {
+              // Temp column: In-memory only, never marks row modified/dirty
+              if (row.cells[sutra.target_col]) {
+                row.cells[sutra.target_col].value = finalVal;
+                row.cells[sutra.target_col].refId = finalVal;
+                row.cells[sutra.target_col].isModified = false;
+              } else {
+                row.cells[sutra.target_col] = { value: finalVal, refId: finalVal, isValid: true, isModified: false };
+              }
+              anyChanged = true;
+            } else {
+              // Real DB column: update all alias keys in row.cells and mark modified so it persists to DB
+              const matchingCol = this.allConfigColumns.find(c =>
+                c.name === sutra.target_col ||
+                c.col_name === sutra.target_col ||
+                c.key === sutra.target_col
+              );
+              const keysToUpdate = new Set<string>();
+              keysToUpdate.add(sutra.target_col);
+              if (matchingCol?.col_name) keysToUpdate.add(matchingCol.col_name);
+              if (matchingCol?.name) keysToUpdate.add(matchingCol.name);
+              if (matchingCol?.key) keysToUpdate.add(matchingCol.key);
+
+              keysToUpdate.forEach(k => {
+                if (row.cells[k]) {
+                  row.cells[k].value = finalVal;
+                  row.cells[k].refId = finalVal;
+                  row.cells[k].isModified = true;
+                } else {
+                  row.cells[k] = { value: finalVal, refId: finalVal, isValid: true, isModified: true };
+                }
+              });
+              row.isModified = true;
+
+              this.state.updateCellValue(rowIdx, sutra.target_col, finalVal, finalVal);
+              if (matchingCol?.col_name && matchingCol.col_name !== sutra.target_col) {
+                this.state.updateCellValue(rowIdx, matchingCol.col_name, finalVal, finalVal);
+              }
+              anyChanged = true;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[SutramStudio] UI Sutra eval error for col', sutra.target_col, e);
+      }
+    }
+    if (anyChanged) {
+      this.cdr.markForCheck();
+    }
+  }
+
   public get filteredTables(): Array<{ table: string; display_name: string }> {
+    let list = (this.tablesList || []).filter(t => !t.table.startsWith('sys_') && !t.table.startsWith('sqlite_'));
+    if (!this.isAdmin) {
+      list = list.filter(t => {
+        const rights = this.currentUserRightsMap.get(t.table);
+        return !rights || rights.can_view;
+      });
+    }
     const q = (this.tableSearchQuery || '').toLowerCase().trim();
-    if (!q) return this.tablesList;
-    return this.tablesList.filter(t =>
+    if (!q) return list;
+    return list.filter(t =>
       t.table.toLowerCase().includes(q) ||
       (t.display_name && t.display_name.toLowerCase().includes(q))
     );
@@ -995,6 +2452,13 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   }
 
   public openTableInSheet(tableName: string): void {
+    if (!this.isAdmin) {
+      const rights = this.currentUserRightsMap.get(tableName);
+      if (rights && !rights.can_view) {
+        alert(`Access Restricted: You do not have permission to view table "${tableName}".`);
+        return;
+      }
+    }
     const foundTab = this.sheetTabs.find(t => t.id === tableName || t.tableName === tableName);
     if (foundTab) {
       this.switchSheet(foundTab.id);
@@ -1060,7 +2524,29 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         this.switchSheet(nextTab.id);
       }
     }
+    this.persistOpenTabs();
     this.cdr.markForCheck();
+  }
+
+  public persistOpenTabs(): void {
+    try {
+      const slug = this.getActiveProjectSlug();
+      if (this.activeSheetId) {
+        localStorage.setItem(`sutram_studio_last_active_tab_${slug}`, this.activeSheetId);
+      }
+      if (Array.isArray(this.sheetTabs) && this.sheetTabs.length > 0) {
+        const toSave = this.sheetTabs
+          .filter(t => !t.tableName?.startsWith('sys_') && !t.tableName?.startsWith('sqlite_'))
+          .map(t => ({
+            id: t.id,
+            title: t.title,
+            type: t.type,
+            tableName: t.tableName,
+            reportId: t.reportId
+          }));
+        localStorage.setItem(`sutram_studio_open_tabs_${slug}`, JSON.stringify(toSave));
+      }
+    } catch {}
   }
 
   // ── Sheet Tab Inline Renaming & Context Menu ──────────────────
@@ -1101,11 +2587,10 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         }
       }
       try {
-        const localSaved = localStorage.getItem(`sutram_rough_${tab.id}`);
-        if (localSaved) {
-          const parsed = JSON.parse(localSaved);
+        const parsed = this.getRoughSheetData(tab.id);
+        if (parsed) {
           parsed.title = trimmed;
-          localStorage.setItem(`sutram_rough_${tab.id}`, JSON.stringify(parsed));
+          localStorage.setItem(this.getRoughSheetStorageKey(tab.id), JSON.stringify(parsed));
         }
       } catch (e) {
         console.warn('Could not update localStorage title:', e);
@@ -1159,6 +2644,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
 
     // 1. Remove from localStorage
     try {
+      localStorage.removeItem(this.getRoughSheetStorageKey(tabId));
       localStorage.removeItem(`sutram_rough_${tabId}`);
     } catch (e) {
       console.warn('Could not remove rough sheet from localStorage:', e);
@@ -1194,24 +2680,77 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // ── Saved Local Sheets Management & File Manager ──────────────
+  // ── Saved Local Sheets Management & File Manager (Project-Scoped) ─
+
+  public getRoughSheetStorageKey(sheetId: string): string {
+    const slug = this.getActiveProjectSlug();
+    return `sutram_rough_${slug}_${sheetId}`;
+  }
+
+  public getRoughSheetData(sheetId: string): any {
+    const slug = this.getActiveProjectSlug();
+    const scopedKey = `sutram_rough_${slug}_${sheetId}`;
+    let raw = localStorage.getItem(scopedKey);
+    if (!raw) {
+      // Check legacy unscoped key if project matches or is default
+      const legacyKey = `sutram_rough_${sheetId}`;
+      const legacyRaw = localStorage.getItem(legacyKey);
+      if (legacyRaw) {
+        try {
+          const parsed = JSON.parse(legacyRaw);
+          if (!parsed.projectSlug || parsed.projectSlug === slug) {
+            raw = legacyRaw;
+          }
+        } catch {}
+      }
+    }
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch {}
+    }
+    return null;
+  }
 
   public refreshSavedSheetsList(): void {
+    const slug = this.getActiveProjectSlug();
+    const prefix = `sutram_rough_${slug}_`;
     const list: SavedLocalSheetItem[] = [];
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('sutram_rough_')) {
-          const sheetId = key.replace('sutram_rough_', '');
+        if (key && key.startsWith(prefix)) {
+          const sheetId = key.replace(prefix, '');
           const raw = localStorage.getItem(key);
           if (raw) {
             const parsed = JSON.parse(raw);
             list.push({
               sheetId,
               title: parsed.title || sheetId,
-              savedAt: parsed.savedAt || '',
-              rowCount: Array.isArray(parsed.rows) ? parsed.rows.length : 0
+              savedAt: parsed.savedAt ? `${parsed.savedAtDate ? parsed.savedAtDate + ' • ' : ''}${parsed.savedAt}` : '',
+              rowCount: Array.isArray(parsed.rows) ? parsed.rows.length : 0,
+              type: parsed.type || 'rough'
             });
+          }
+        } else if (key && key.startsWith('sutram_rough_')) {
+          // Backward compatibility check for legacy keys created before project-scoping
+          const rest = key.replace('sutram_rough_', '');
+          if (!rest.includes('_rough_') && !rest.includes('_sheet_')) {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              try {
+                const parsed = JSON.parse(raw);
+                if (parsed.projectSlug === slug || (!parsed.projectSlug && slug === 'default')) {
+                  list.push({
+                    sheetId: rest,
+                    title: parsed.title || rest,
+                    savedAt: parsed.savedAt ? `${parsed.savedAtDate ? parsed.savedAtDate + ' • ' : ''}${parsed.savedAt}` : '',
+                    rowCount: Array.isArray(parsed.rows) ? parsed.rows.length : 0,
+                    type: parsed.type || 'rough'
+                  });
+                }
+              } catch {}
+            }
           }
         }
       }
@@ -1239,13 +2778,10 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     let existingTab = this.sheetTabs.find(t => t.id === sheetId);
     if (!existingTab) {
       let sheetTitle = 'Saved Sheet';
-      try {
-        const raw = localStorage.getItem(`sutram_rough_${sheetId}`);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          sheetTitle = parsed.title || sheetTitle;
-        }
-      } catch {}
+      const parsed = this.getRoughSheetData(sheetId);
+      if (parsed && parsed.title) {
+        sheetTitle = parsed.title;
+      }
 
       existingTab = {
         id: sheetId,
@@ -1262,7 +2798,9 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   }
 
   public onDeleteSavedSheet(sheetId: string): void {
+    const slug = this.getActiveProjectSlug();
     try {
+      localStorage.removeItem(`sutram_rough_${slug}_${sheetId}`);
       localStorage.removeItem(`sutram_rough_${sheetId}`);
     } catch (e) {
       console.warn('Could not remove sheet from localStorage:', e);
@@ -1329,17 +2867,22 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     }));
 
     const curTab = this.sheetTabs.find(t => t.id === this.activeSheetId);
+    const now = new Date();
+    const slug = this.getActiveProjectSlug();
     const dataToSave = {
       sheetId: this.activeSheetId,
+      projectSlug: slug,
       title: curTab?.title,
-      savedAt: new Date().toLocaleTimeString(),
+      savedAt: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      savedAtDate: now.toLocaleDateString(),
+      type: curTab?.type || 'rough',
       rows: cleanRows,
       allConfigColumns: this.allConfigColumns,
       selectedColumnKeys: Array.from(this.selectedColumnKeys)
     };
 
     try {
-      localStorage.setItem(`sutram_rough_${this.activeSheetId}`, JSON.stringify(dataToSave));
+      localStorage.setItem(this.getRoughSheetStorageKey(this.activeSheetId), JSON.stringify(dataToSave));
       const curTab = this.sheetTabs.find(t => t.id === this.activeSheetId);
       const isReport = curTab?.type === 'report';
       if (curTab) {
@@ -1381,6 +2924,29 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Refreshes the list of tables in Sutram Studio (e.g. after dynamic table creation).
+   * Optionally opens and activates the specified table sheet.
+   */
+  public refreshStudioTables(activeTableName?: string): void {
+    this.api.getRegisteredTables().subscribe({
+      next: (tables: any[]) => {
+        this.tablesList = (tables || []).filter(t => !t.table.startsWith('sys_') && !t.table.startsWith('sqlite_'));
+        if (activeTableName) {
+          this.openTableInSheet(activeTableName);
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        console.error('[SutramStudio] Refresh tables failed:', err);
+        if (activeTableName) {
+          this.openTableInSheet(activeTableName);
+        }
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   public loadTablesList(): void {
     const savedFavs = localStorage.getItem('sutram_studio_favorites');
     if (savedFavs) {
@@ -1388,7 +2954,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         this.favoriteTables = new Set(JSON.parse(savedFavs));
       } catch {}
     } else {
-      this.favoriteTables = new Set(['item', 'aawak', 'bachat']);
+      this.favoriteTables = new Set<string>();
     }
 
     const savedFavReps = localStorage.getItem('sutram_favorite_reports');
@@ -1398,9 +2964,24 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       } catch {}
     }
 
+    // Dynamic Reports fetching from API
+    if (!this.reportsList || this.reportsList.length === 0) {
+      this.api.getReports().subscribe({
+        next: (reps: any[]) => {
+          this.reportsList = reps || [];
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.warn('[SutramStudio] Dynamic reports load warning:', err?.message || err);
+          this.reportsList = [];
+          this.cdr.markForCheck();
+        }
+      });
+    }
+
     this.api.getRegisteredTables().subscribe({
       next: (tables: any[]) => {
-        this.tablesList = tables;
+        this.tablesList = (tables || []).filter(t => !t.table.startsWith('sys_') && !t.table.startsWith('sqlite_'));
 
         // Build active session sheets:
         // 1. Always start with Sheet 1
@@ -1408,9 +2989,50 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
           { id: 'rough_1', title: 'Sheet 1', icon: 'pi-file', type: 'rough', isLoaded: true }
         ];
 
-        // 2. Add pinned / favorite tables (using display_name if mentioned, else table name)
+        const existingTabIds = new Set(activeTabs.map(t => t.id));
+
+        // 2. Restore previously opened sheets/tabs if any (excluding system tables)
+        try {
+          const slug = this.getActiveProjectSlug();
+          const raw = localStorage.getItem(`sutram_studio_open_tabs_${slug}`);
+          if (raw) {
+            const savedTabs: any[] = JSON.parse(raw);
+            if (Array.isArray(savedTabs)) {
+              savedTabs.forEach((st: any) => {
+                if (st.id && !existingTabIds.has(st.id)) {
+                  const tblName = st.tableName || st.id;
+                  if (tblName.startsWith('sys_') || tblName.startsWith('sqlite_')) return;
+                  if (st.type === 'table') {
+                    const tableInfo = this.tablesList.find(t => t.table === tblName);
+                    activeTabs.push({
+                      id: st.id,
+                      title: st.title || tableInfo?.display_name || tblName,
+                      icon: 'pi-table',
+                      type: 'table',
+                      tableName: tblName,
+                      isLoaded: false,
+                      recordCount: 0
+                    });
+                    existingTabIds.add(st.id);
+                  } else if (st.type === 'rough' && st.id !== 'rough_1') {
+                    activeTabs.push({
+                      id: st.id,
+                      title: st.title || 'Sheet',
+                      icon: 'pi-file',
+                      type: 'rough',
+                      isLoaded: false
+                    });
+                    existingTabIds.add(st.id);
+                  }
+                }
+              });
+            }
+          }
+        } catch {}
+
+        // 3. Add pinned / favorite tables not already opened
         tables.forEach((t: any) => {
-          if (this.favoriteTables.has(t.table)) {
+          if (this.favoriteTables.has(t.table) && !existingTabIds.has(t.table)) {
             activeTabs.push({
               id: t.table,
               title: t.display_name || t.table,
@@ -1420,22 +3042,34 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
               isLoaded: false,
               recordCount: 0
             });
+            existingTabIds.add(t.table);
           }
         });
 
         this.sheetTabs = activeTabs;
 
-        // Choose initial active sheet: favorite table if available, else rough_1
-        const firstTable = activeTabs.find(t => t.type === 'table');
-        if (firstTable) {
-          this.activeSheetId = firstTable.id;
-          this.selectedTableName = firstTable.id;
-          this.onTableSelect(firstTable.id, true);
+        // Choose initial active sheet: Input table first, then project-scoped lastActive, else first table, else rough_1
+        const slug = this.getActiveProjectSlug();
+        const lastActive = localStorage.getItem(`sutram_studio_last_active_tab_${slug}`)
+          || localStorage.getItem('sutram_studio_last_active_tab');
+
+        const targetTab = (this.table && activeTabs.find(t => t.tableName === this.table))
+          ? activeTabs.find(t => t.tableName === this.table)!
+          : (lastActive && activeTabs.find(t => t.id === lastActive || t.tableName === lastActive))
+            ? activeTabs.find(t => t.id === lastActive || t.tableName === lastActive)!
+            : (activeTabs.find(t => t.type === 'table') || activeTabs[0]);
+
+        if (targetTab.type === 'table' && targetTab.tableName) {
+          this.activeSheetId = targetTab.id;
+          this.selectedTableName = targetTab.tableName;
+          localStorage.setItem(`sutram_studio_last_active_tab_${slug}`, targetTab.tableName);
+          this.onTableSelect(targetTab.tableName, true);
         } else {
-          this.activeSheetId = 'rough_1';
+          this.activeSheetId = targetTab.id;
           this.selectedTableName = '';
-          this.switchSheet('rough_1');
+          this.switchSheet(targetTab.id);
         }
+        this.persistOpenTabs();
         this.cdr.markForCheck();
       },
       error: (err: any) => console.error('[SutramStudio] Load tables failed:', err)
@@ -1447,6 +3081,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     this.selectedTableName = tableName;
     this.activeSheetId = tableName;
     this.state.setActiveTable(tableName);
+    this.persistOpenTabs();
 
     if (autoLoadData) {
       this.state.clearGrid();
@@ -1465,10 +3100,53 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
           this.buildConfigColumns(cfg);
         }
 
-        // Preload all referenced FK tables
+        // Check localStorage first for instant restore
+        let restoredFromLocal = false;
+        try {
+          const cached = localStorage.getItem(`sutram_table_col_config_${tableName}`);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && ((Array.isArray(parsed.selected_keys) && parsed.selected_keys.length > 0) || (Array.isArray(parsed.columns) && parsed.columns.length > 0))) {
+              this.applySavedUiConfig(parsed);
+              restoredFromLocal = true;
+            }
+          }
+        } catch {}
+
+        // Apply any saved UI column preferences from backend sys_meta
+        this.api.getTableUiConfig(tableName).subscribe({
+          next: (uiRes) => {
+            if (uiRes && ((Array.isArray(uiRes.selected_keys) && uiRes.selected_keys.length > 0) || (Array.isArray(uiRes.columns) && uiRes.columns.length > 0))) {
+              this.applySavedUiConfig(uiRes);
+              try {
+                localStorage.setItem(`sutram_table_col_config_${tableName}`, JSON.stringify(uiRes));
+              } catch {}
+            } else if (restoredFromLocal) {
+              // Sync local preferences to backend sys_meta if backend was clean
+              this.autoSaveColumnConfig();
+            }
+          },
+          error: () => {}
+        });
+
+        // Auto-load UI reactive sutras / formulas for this table and sync temp columns
+        this.loadUiSutras(tableName, () => {
+          this.syncTempColumnsToGrid();
+        });
+
+        // Preload all referenced FK tables and register their display configurations
         if (cfg && cfg.headers) {
-          const refTables = cfg.headers
-            .filter((h: any) => h.ref_table || h.type === 'ref')
+          const refHeaders = cfg.headers.filter((h: any) => h.ref_table || h.type === 'ref');
+          for (const h of refHeaders) {
+            const cols = h.ref_select || (h.ref_data ? [h.ref_data] : []);
+            if (h.ref_table && cols.length > 0) {
+              this.refCache.registerTableConfig(h.ref_table, {
+                ref_select: cols,
+                ref_data: h.ref_data
+              });
+            }
+          }
+          const refTables = refHeaders
             .map((h: any) => h.ref_table)
             .filter(Boolean);
           this.refCache.preloadTables(refTables);
@@ -1489,7 +3167,13 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
   }
 
   public switchSheet(tabId: string): void {
-    if (this.activeSheetId === tabId) return;
+    if (this.activeSheetId === tabId) {
+      const curTab = this.sheetTabs.find(t => t.id === tabId);
+      if (curTab?.type === 'table' && curTab.tableName && (this.state.rows().length === 0 || !this.state.config() || this.selectedTableName !== curTab.tableName)) {
+        this.onTableSelect(curTab.tableName, true);
+      }
+      return;
+    }
 
     // Preserve current sheet state
     if (this.activeSheetId) {
@@ -1501,11 +3185,18 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         deletedRowIds: this.state.deletedRowIds(),
         deletedRowsQueue: this.state.deletedRowsQueue(),
         allConfigColumns: [...this.allConfigColumns],
-        selectedColumnKeys: new Set(this.selectedColumnKeys)
+        selectedColumnKeys: new Set(this.selectedColumnKeys),
+        inSheetTool: this.activeInSheetTool,
+        frozenColKeys: [...this.frozenColKeys],
+        isHeaderFrozen: this.isHeaderFrozen,
+        originalSchemaOrder: new Map(this.originalSchemaOrder)
       };
     }
 
     this.activeSheetId = tabId;
+    const targetSaved = this.sheetWorkbooks[tabId];
+    this.activeInSheetTool = targetSaved?.inSheetTool ?? null;
+    this.applyUserRightsToCurrentView();
 
     if (tabId === 'blank' || tabId.startsWith('rough_') || tabId.startsWith('sheet_')) {
       this.selectedTableName = '';
@@ -1517,11 +3208,17 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         this.state.deletedRowsQueue.set(saved.deletedRowsQueue || []);
         if (saved.allConfigColumns) this.allConfigColumns = [...saved.allConfigColumns];
         if (saved.selectedColumnKeys) this.selectedColumnKeys = new Set(saved.selectedColumnKeys);
+        this.frozenColKeys = saved.frozenColKeys ? [...saved.frozenColKeys] : [];
+        this.isHeaderFrozen = saved.isHeaderFrozen !== undefined ? saved.isHeaderFrozen : true;
+        this.originalSchemaOrder = saved.originalSchemaOrder ? new Map(saved.originalSchemaOrder) : new Map();
+        if (this.frozenColKeys.length > 0) {
+          this.reorderColumnsForFreeze();
+          this.gridComponent?.recalculateFrozenColumns();
+        }
       } else {
-        const localSaved = localStorage.getItem(`sutram_rough_${tabId}`);
-        if (localSaved) {
+        const parsed = this.getRoughSheetData(tabId);
+        if (parsed) {
           try {
-            const parsed = JSON.parse(localSaved);
             if (parsed.title) {
               const currentTab = this.sheetTabs.find(t => t.id === tabId);
               if (currentTab) currentTab.title = parsed.title;
@@ -1530,6 +3227,23 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
               this.state.setRows(parsed.rows);
               if (parsed.allConfigColumns) this.allConfigColumns = parsed.allConfigColumns;
               if (parsed.selectedColumnKeys) this.selectedColumnKeys = new Set(parsed.selectedColumnKeys);
+
+              const roughHeaders: any[] = (this.allConfigColumns || []).map(c => ({
+                name: c.name,
+                col_name: c.col_name,
+                type: c.type || 'string'
+              }));
+              const mockCfg: SutramTableConfig = {
+                table: 'rough',
+                display_name: parsed.title || 'Sheet',
+                headers: roughHeaders,
+                duplicateOn: []
+              };
+              this.state.setConfig(mockCfg);
+              this.mode = 'normal';
+              this.state.isAuditMode.set(false);
+              this.selectedTableName = '';
+              this.state.setActiveTable(null);
             } else {
               this.initBlankRoughSheet();
             }
@@ -1563,6 +3277,13 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
           this.allConfigColumns = [...saved.allConfigColumns];
           this.selectedColumnKeys = new Set(saved.selectedColumnKeys);
         }
+        this.frozenColKeys = saved.frozenColKeys ? [...saved.frozenColKeys] : [];
+        this.isHeaderFrozen = saved.isHeaderFrozen !== undefined ? saved.isHeaderFrozen : true;
+        this.originalSchemaOrder = saved.originalSchemaOrder ? new Map(saved.originalSchemaOrder) : new Map();
+        if (this.frozenColKeys.length > 0) {
+          this.reorderColumnsForFreeze();
+          this.gridComponent?.recalculateFrozenColumns();
+        }
         this.state.setRows(saved.rows);
         this.state.deletedRowIds.set(saved.deletedRowIds || []);
         this.state.deletedRowsQueue.set(saved.deletedRowsQueue || []);
@@ -1574,11 +3295,15 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         }
         this.gridComponent?.resetScroll();
       } else {
-        // First visit: load config and data chunk 1
+        // First visit: reset freeze state for new table
+        this.frozenColKeys = [];
+        this.isHeaderFrozen = true;
+        this.originalSchemaOrder.clear();
         this.gridComponent?.resetScroll();
         this.onTableSelect(targetTable, true);
       }
     }
+    this.persistOpenTabs();
     this.cdr.markForCheck();
   }
 
@@ -1626,12 +3351,33 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         if (refObj && typeof refObj === 'object') {
           rawVal = refObj[col.sub_col_name];
         }
+        if (rawVal === undefined) {
+          rawVal = dr[col.key] ?? dr[`${col.ref_as || col.ref_table}.${col.sub_col_name}`] ?? dr[`${col.ref_table}_${col.sub_col_name}`] ?? dr[col.sub_col_name];
+        }
+        if (rawVal === undefined && col.ref_table) {
+          const rawFkId = dr[col.col_name] ?? dr[`${col.ref_table}_id`] ?? dr[col.ref_table];
+          if (rawFkId !== undefined && rawFkId !== null && rawFkId !== '') {
+            const match = this.refCache.findRefMatch(col.ref_table, '', undefined, rawFkId);
+            if (match.found && match.item && match.item[col.sub_col_name] !== undefined) {
+              rawVal = match.item[col.sub_col_name];
+            }
+          }
+        }
       } else if (col.is_fk_main || col.type === 'ref') {
         const joined = dr[col.ref_as || col.name || col.ref_table];
         if (joined && typeof joined === 'object') {
-          const formatted = this.refCache.formatOption(col.ref_table, joined);
+          const formatted = this.refCache.formatOption(col.ref_table, joined, col.ref_select);
           if (formatted && formatted.display) {
             rawVal = formatted.display;
+          }
+        } else {
+          // If not joined object, match by foreign key ID
+          const rawFkId = dr[col.col_name] ?? dr[col.key] ?? dr[`${col.ref_table}_id`];
+          if (rawFkId !== undefined && rawFkId !== null && rawFkId !== '') {
+            const match = this.refCache.findRefMatch(col.ref_table, '', undefined, rawFkId);
+            if (match.found && match.display) {
+              rawVal = match.display;
+            }
           }
         }
       } else if (col.is_fk_raw) {
@@ -1685,13 +3431,28 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       if (col.name && col.name !== cellKey) {
         cells[col.name] = cells[cellKey];
       }
+      if (col.col_name && col.col_name !== cellKey) {
+        cells[col.col_name] = cells[cellKey];
+      }
     });
+
+    const isHl = !!(dr.hl === 1 || dr.hl === true || dr.hl === '1');
+    if (!cells['hl']) {
+      cells['hl'] = {
+        value: isHl ? 1 : 0,
+        originalValue: isHl ? 1 : 0,
+        isValid: true,
+        isModified: false
+      };
+    }
 
     return {
       rowNum,
       cells,
       hasError: false,
       errorCount: 0,
+      isHighlighted: isHl,
+      hl: isHl ? 1 : 0,
       _rawOriginal: dr
     };
   }
@@ -1733,6 +3494,9 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       };
       if (col.name && col.name !== cellKey) {
         cells[col.name] = cells[cellKey];
+      }
+      if (col.col_name && col.col_name !== cellKey) {
+        cells[col.col_name] = cells[cellKey];
       }
     });
 
@@ -1875,6 +3639,11 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         // Always ensure one trailing blank row at the very end (whether 0, 10, or 250+ records)
         combined = this.ensureTrailingBlankRow(combined, cfg);
 
+        // Evaluate UI reactive sutras on loaded rows (initial display load: only temp columns)
+        if (this.uiSutrasList && this.uiSutrasList.length > 0) {
+          combined.forEach((r, idx) => this.evaluateUiSutrasForRow(r, idx, true));
+        }
+
         this.state.setRows(combined);
 
         const tab = this.sheetTabs.find((t: any) => t.id === tableName);
@@ -1953,6 +3722,73 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     this.state.deletedRowIds.set([]);
     this.state.deletedRowsQueue.set([]);
     this.loadTableDataFromDb();
+  }
+
+  /**
+   * Clear Active Sheet Handler:
+   * Empties the current sheet's local view (creates 1 fresh blank row for data entry).
+   * Does NOT delete database records. Warns user if pending unsynced changes exist.
+   */
+  public onClearSheet(): void {
+    const pendingCount = this.state.pendingChangesCount();
+    if (pendingCount > 0) {
+      const confirmClear = window.confirm(
+        `चेतावनी (Warning): इस शीट में ${pendingCount} अनसेव्ड बदलाव (unsaved changes) हैं जो खाली करने पर खो जाएंगे।\n\nक्या आप वाकई शीट को खाली करना चाहते हैं?\n(डेटाबेस का पुराना डेटा सुरक्षित रहेगा, डेटा पुनः लोड करने के लिए Refresh दबाएं)`
+      );
+      if (!confirmClear) {
+        return;
+      }
+    }
+
+    // 1. Reset pending deleted queues and modified state
+    this.state.deletedRowIds.set([]);
+    this.state.deletedRowsQueue.set([]);
+
+    // 2. Clear rows and set 1 clean blank row ready for input
+    const cfg = this.state.config();
+    if (cfg && cfg.table !== 'rough') {
+      const blankRow = this.createBlankRow(1, cfg);
+      this.state.setRows([blankRow]);
+    } else {
+      this.initBlankRoughSheet();
+    }
+
+    // 3. Update active sheet's cached workbook state
+    if (this.activeSheetId && this.sheetWorkbooks[this.activeSheetId]) {
+      this.sheetWorkbooks[this.activeSheetId].rows = this.state.rows();
+      this.sheetWorkbooks[this.activeSheetId].deletedRowIds = [];
+      this.sheetWorkbooks[this.activeSheetId].deletedRowsQueue = [];
+    }
+
+    // 4. Reset scroll
+    this.gridComponent?.resetScroll();
+    this.cdr.markForCheck();
+
+    // 5. Notify user that sheet is cleared and DB is untouched
+    this.syncToast = {
+      visible: true,
+      inProgress: false,
+      percentage: 100,
+      title: 'शीट खाली कर दी गई (Sheet Cleared - DB Safe)',
+      hasError: false,
+      inserted: 0,
+      updated: 0,
+      deleted: 0,
+      failed: 0,
+      errors: []
+    };
+    this.lastSyncPerSheet[this.activeSheetId] = {
+      time: new Date().toLocaleTimeString(),
+      summary: 'शीट खाली है (Sheet Cleared)',
+      hasError: false
+    };
+
+    setTimeout(() => {
+      if (this.syncToast.visible && !this.syncToast.inProgress && !this.syncToast.hasError) {
+        this.syncToast = { ...this.syncToast, visible: false };
+        this.cdr.detectChanges();
+      }
+    }, 2500);
   }
 
   /**
@@ -2088,9 +3924,9 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     });
   }
 
-  public onFileUpload(event: any): void {
-    const file = event?.target?.files?.[0] || event?.files?.[0];
+  public processLoadedFile(file: File): void {
     if (!file) return;
+    this.uploadedFileSize = file.size || 0;
 
     const reader = new FileReader();
     reader.onload = (e: any) => {
@@ -2125,7 +3961,36 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     };
 
     reader.readAsArrayBuffer(file);
-    if (event.target) event.target.value = '';
+  }
+
+  public onFileUpload(event: any): void {
+    const file = event?.target?.files?.[0] || event?.files?.[0];
+    if (file) {
+      this.processLoadedFile(file);
+    }
+    if (event?.target) event.target.value = '';
+  }
+
+  public onFileDropped(file: File): void {
+    if (file) {
+      this.processLoadedFile(file);
+    }
+  }
+
+  public onScannerHeaderRowChange(rowIndex: number): void {
+    if (!this.uploadedAllRawRows || this.uploadedAllRawRows.length <= rowIndex) return;
+    const detectedHeaders = (this.uploadedAllRawRows[rowIndex] || []).map((h: any) => String(h || '').trim());
+    const dataRows = this.uploadedAllRawRows.slice(rowIndex + 1);
+    this.uploadedSheetHeaders = detectedHeaders;
+    this.uploadedRawRows = dataRows;
+    this.uploadedSampleRows = dataRows.slice(0, 3);
+    this.pendingRawRows = dataRows;
+
+    if (this.scannerTableConfig) {
+      this.scanReport = this.scanner.scan(this.uploadedSheetHeaders, this.scannerTableConfig, this.uploadedSampleRows);
+      this.scanReport.headerRowIndex = rowIndex;
+    }
+    this.cdr.markForCheck();
   }
 
   public onUploadedSheetChange(sheetName: string): void {
@@ -2240,7 +4105,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  public onScannerConfirmedMapped(event: { targetTable: string; matches: SutramScanMatch[] }): void {
+  public onScannerConfirmedMapped(event: { targetTable: string; matches: SutramScanMatch[]; defaultValues?: Record<string, any> }): void {
     const targetTable = event.targetTable;
     if (!targetTable) return;
 
@@ -2265,7 +4130,7 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       this.state.setConfig(cfg);
       this.buildConfigColumns(cfg);
 
-      const builtRows = this.scanner.buildSutramRows(this.uploadedRawRows, event.matches, cfg.headers);
+      const builtRows = this.scanner.buildSutramRows(this.uploadedRawRows, event.matches, cfg.headers, event.defaultValues || {});
       this.audit.auditAll(builtRows, cfg.headers);
       const withBlank = this.ensureTrailingBlankRow(builtRows, cfg);
       this.state.setRows(withBlank);
@@ -2475,8 +4340,26 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         const payload: any = {};
 
         cfg.headers.forEach((h: any) => {
-          const cell = r.cells[h.name];
-          const val = cell?.refId !== undefined ? cell.refId : cell?.value;
+          if (h.is_temp || h.is_virtual) return;
+          const cell = r.cells[h.col_name] || r.cells[h.name] || (h.key ? r.cells[h.key] : undefined);
+          let val: any;
+          const isFk = !!(h.ref_table || h.type === 'ref');
+          if (isFk) {
+            val = (cell?.refId !== undefined && cell?.refId !== null && cell?.refId !== '')
+              ? cell.refId
+              : (cell?.value ?? null);
+          } else {
+            val = (cell?.value !== undefined && cell?.value !== null)
+              ? cell.value
+              : (cell?.refId !== undefined && cell?.refId !== null ? cell.refId : null);
+          }
+
+          if (val === '') {
+            const colType = (h.type || '').toLowerCase();
+            if (['number', 'integer', 'int', 'float', 'double', 'decimal', 'date', 'datetime', 'timestamp'].includes(colType)) {
+              val = null;
+            }
+          }
           payload[h.col_name] = val;
         });
 
@@ -2484,6 +4367,12 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
         const isUpdate = !r.isNew && !!rowId;
         if (isUpdate) {
           payload._id = rowId;
+        } else {
+          delete payload._id;
+          delete payload.id;
+        }
+        if (r.hl !== undefined) {
+          payload.hl = r.hl ? 1 : 0;
         }
 
         try {
@@ -2494,12 +4383,23 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
           if (res?.status === 'inserted') {
             progress.inserted++;
             syncedRowNums.push(r.rowNum);
+            const anyRes = res as any;
+            const newInsertedId = anyRes?.newData?._id || anyRes?.data?._id || (typeof anyRes?.newData === 'number' ? anyRes.newData : null);
+            if (newInsertedId) {
+              (r as any)._id = newInsertedId;
+              if (r._rawOriginal) r._rawOriginal._id = newInsertedId;
+              if (r.cells && r.cells['_id']) r.cells['_id'].value = newInsertedId;
+              syncedRowNums.push(newInsertedId);
+            }
             if (rowId) syncedRowNums.push(rowId);
             this.state.totalDbRecords.update((n: number) => n + 1);
+            r.isNew = false;
+            r.isModified = false;
           } else if (res?.status === 'updated') {
             progress.updated++;
             syncedRowNums.push(r.rowNum);
             if (rowId) syncedRowNums.push(rowId);
+            r.isModified = false;
           } else if (res?.status === 'duplicate') {
             progress.duplicate++;
             syncedRowNums.push(r.rowNum);
@@ -2718,4 +4618,705 @@ export class SutramExcelStudioComponent implements OnInit, OnDestroy {
       }).subscribe();
     }
   }
+
+  // ── Feature 1: In-Sheet Contextual Workbench Actions ──────────
+  public reminderRulesList: any[] = [];
+  public isSavingReminderRule: boolean = false;
+  public showReminderDialog: boolean = false;
+
+  public openReminderDialog(): void {
+    this.showReminderDialog = true;
+    this.loadReminderRules();
+    this.cdr.markForCheck();
+  }
+
+  public toggleInSheetTool(tool: 'ui_sutras' | 'db_triggers' | 'reminders'): void {
+    if (this.activeInSheetTool === tool) {
+      this.closeInSheetWorkbench();
+      return;
+    }
+
+    this.activeInSheetTool = tool;
+    if (this.sheetWorkbooks[this.activeSheetId]) {
+      this.sheetWorkbooks[this.activeSheetId].inSheetTool = tool;
+    }
+
+    const tbl = this.currentActiveTableName;
+    if (tool === 'ui_sutras') {
+      if (tbl && !this.isCurrentSheetRough) {
+        this.loadUiSutras(tbl, () => {
+          this.buildTargetColDropdownOptions();
+          this.cdr.markForCheck();
+        });
+      }
+    } else if (tool === 'db_triggers') {
+      if (tbl && !this.isCurrentSheetRough) {
+        this.isLoadingTriggers = true;
+        this.api.getTableTriggers(tbl).subscribe({
+          next: (res) => {
+            this.isLoadingTriggers = false;
+            this.backendTriggersList = res || [];
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.isLoadingTriggers = false;
+            this.backendTriggersList = [];
+            this.cdr.markForCheck();
+          }
+        });
+      }
+    } else if (tool === 'reminders') {
+      this.loadReminderRules();
+    }
+    this.cdr.markForCheck();
+  }
+
+  public loadReminderRules(): void {
+    this.api.getReminderRules().subscribe({
+      next: (rules) => {
+        this.reminderRulesList = Array.isArray(rules) ? rules : [];
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.warn('[SutramStudio] Error loading reminder rules:', err)
+    });
+  }
+
+  public onWorkbenchCreateReminderRule(rule: any): void {
+    this.isSavingReminderRule = true;
+    this.api.createReminderRule(rule).subscribe({
+      next: () => {
+        this.isSavingReminderRule = false;
+        this.loadReminderRules();
+        this.checkActiveReminders(false);
+        this.triggerReminderEvaluation();
+        alert('रिमाइंडर नियम सफलतापूर्वक सुरक्षित किया गया (Reminder rule created successfully)');
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSavingReminderRule = false;
+        console.error('[SutramStudio] Error creating reminder rule:', err);
+        alert('त्रुटि: रिमाइंडर सुरक्षित नहीं हो सका: ' + (err?.error?.error || err.message));
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  public onWorkbenchUpdateReminderRule(event: { id: any; rule: any }): void {
+    this.isSavingReminderRule = true;
+    this.api.updateReminderRule(event.id, event.rule).subscribe({
+      next: () => {
+        this.isSavingReminderRule = false;
+        this.loadReminderRules();
+        this.checkActiveReminders(false);
+        this.triggerReminderEvaluation();
+        alert('रिमाइंडर नियम अपडेट किया गया (Reminder rule updated)');
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSavingReminderRule = false;
+        console.error('[SutramStudio] Error updating reminder rule:', err);
+        alert('त्रुटि: रिमाइंडर अपडेट नहीं हो सका: ' + (err?.error?.error || err.message));
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  public onWorkbenchDeleteReminderRule(ruleId: any): void {
+    this.api.deleteReminderRule(ruleId).subscribe({
+      next: () => {
+        this.reminderRulesList = this.reminderRulesList.filter(r => r._id !== ruleId);
+        this.checkActiveReminders(false);
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('[SutramStudio] Error deleting reminder rule:', err);
+        alert('हटाने में त्रुटि: ' + (err?.error?.error || err.message));
+      }
+    });
+  }
+
+  public closeInSheetWorkbench(): void {
+    this.activeInSheetTool = null;
+    if (this.sheetWorkbooks[this.activeSheetId]) {
+      this.sheetWorkbooks[this.activeSheetId].inSheetTool = null;
+    }
+    this.cdr.markForCheck();
+  }
+
+  public onWorkbenchAddUiSutra(sutra: any): void {
+    this.uiSutrasList.push(sutra);
+    this.buildTargetColDropdownOptions();
+    this.cdr.markForCheck();
+  }
+
+  public onWorkbenchCreateTrigger(def: any): void {
+    const tbl = this.currentActiveTableName;
+    if (!tbl || !def.trigger_name) return;
+    let fieldMap = {};
+    try {
+      fieldMap = JSON.parse(def.field_map_str || '{}');
+    } catch {}
+
+    const payload = {
+      trigger_name: def.trigger_name,
+      label: def.trigger_name,
+      source_table: tbl,
+      event: def.event,
+      actions: [
+        {
+          sort_order: 0,
+          action_type: def.action_type || 'raw_sql',
+          target_table: def.target_table || null,
+          field_map: fieldMap,
+          raw_sql: def.raw_sql ? def.raw_sql.trim() : null
+        }
+      ]
+    };
+
+    this.api.createTrigger(payload).subscribe({
+      next: () => {
+        this.toggleInSheetTool('db_triggers');
+      },
+      error: (err) => console.error('[SutramStudio] Create trigger error:', err)
+    });
+  }
+
+  // ── Feature 2: Native sys_user Sheet Tab ──────────────────────
+  public openUsersSheet(): void {
+    const usersTab = this.sheetTabs.find(t => t.tableName === 'sys_user' || t.id === 'sys_user');
+    if (usersTab) {
+      if (this.activeSheetId === usersTab.id && (this.state.rows().length === 0 || !this.state.config() || this.selectedTableName !== 'sys_user')) {
+        this.onTableSelect('sys_user', true);
+      } else {
+        this.switchSheet(usersTab.id);
+      }
+    } else {
+      const newTab: StudioSheetTab = {
+        id: 'sys_user',
+        title: '👥 Users (उपयोगकर्ता)',
+        icon: 'pi-users',
+        type: 'table',
+        tableName: 'sys_user',
+        isLoaded: false,
+        recordCount: 0
+      };
+      this.sheetTabs.push(newTab);
+      this.switchSheet(newTab.id);
+    }
+    this.cdr.markForCheck();
+  }
+
+  // ── Feature 4: Native Reminders & Smart Watchdog Sheet ────────
+  public get currentActiveAlert(): any {
+    if (!this.activeAlerts || this.activeAlerts.length === 0) return null;
+    if (this.currentAlertIndex >= this.activeAlerts.length) this.currentAlertIndex = 0;
+    return this.activeAlerts[this.currentAlertIndex] || this.activeAlerts[0] || null;
+  }
+
+  public checkActiveReminders(autoOpenPopup: boolean = true): void {
+    this.api.getActiveReminders().subscribe({
+      next: (alerts: any[]) => {
+        this.activeAlerts = Array.isArray(alerts) ? alerts : [];
+        this.unreadReminderCount = this.activeAlerts.length;
+        if (this.unreadReminderCount > 0 && autoOpenPopup && !this.showReminderPopup) {
+          this.showReminderPopup = true;
+          this.currentAlertIndex = 0;
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.warn('[SutramStudio] Error fetching active reminders:', err)
+    });
+  }
+
+  public isEvaluatingReminders: boolean = false;
+
+  public triggerReminderEvaluation(): void {
+    this.isEvaluatingReminders = true;
+    this.cdr.markForCheck();
+    this.api.evaluateReminders(true).subscribe({
+      next: (res: any) => {
+        this.isEvaluatingReminders = false;
+        const triggered = res?.result?.triggered || [];
+        this.checkActiveReminders(true);
+        const count = res?.result?.total_rules ?? 0;
+        alert(`सफल: ${count} अनुस्मारक नियमों की जाँच की गई। ${triggered.length} सक्रिय अलर्ट मिले हैं।`);
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isEvaluatingReminders = false;
+        console.error('[SutramStudio] Reminder evaluation error:', err);
+        alert('त्रुटि: अनुस्मारक नियमों की जाँच विफल रही: ' + (err?.error?.error || err.message));
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  // ── Reminders & Smart Watchdog Actions ─────────────────────────
+  public showBellFlyout: boolean = false;
+  public reminderResultsFilter: 'all' | 'critical' | 'warning' | 'info' = 'all';
+  public reminderResultsSearch: string = '';
+
+  public get isCurrentSheetReminderResults(): boolean {
+    return this.activeSheetId === 'sheet_reminder_results';
+  }
+
+  public get reminderCriticalCount(): number {
+    return this.activeAlerts.filter(a => (a.severity === 'critical' || a.is_permanent === 1)).length;
+  }
+
+  public get reminderWarningCount(): number {
+    return this.activeAlerts.filter(a => a.severity === 'warning').length;
+  }
+
+  public get reminderInfoCount(): number {
+    return this.activeAlerts.filter(a => a.severity === 'info').length;
+  }
+
+  public get reminderResultItems(): any[] {
+    const list: any[] = [];
+    if (!this.activeAlerts || !Array.isArray(this.activeAlerts)) return [];
+
+    for (const alert of this.activeAlerts) {
+      const sev = (alert.severity || (alert.is_permanent ? 'critical' : 'warning')).toLowerCase();
+      const records = Array.isArray(alert.sampleRecords) && alert.sampleRecords.length > 0 ? alert.sampleRecords : [null];
+
+      for (const rec of records) {
+        let itemName = 'All Records';
+        let detailMsg = alert.message || '';
+
+        if (rec) {
+          itemName = rec.prod_name || rec.item_name || rec.name || rec.title || rec.vehicle_no || (`Record #${rec._id}`);
+          if (alert.target_column && rec[alert.target_column] !== undefined) {
+            detailMsg = `${alert.message} (${alert.target_column}: ${rec[alert.target_column]})`;
+          }
+        }
+
+        const item = {
+          log_id: alert.log_id,
+          rule_id: alert.rule_id,
+          priority: sev,
+          rule_name: alert.rule_name || 'Reminder Alert',
+          item_name: itemName,
+          details: detailMsg,
+          action_table: alert.action_table || alert.target_table || null,
+          triggered_at: alert.triggered_at,
+          rawRecord: rec
+        };
+
+        if (this.reminderResultsFilter !== 'all' && item.priority !== this.reminderResultsFilter) {
+          continue;
+        }
+
+        if (this.reminderResultsSearch && this.reminderResultsSearch.trim()) {
+          const q = this.reminderResultsSearch.toLowerCase();
+          const match = item.rule_name.toLowerCase().includes(q) ||
+                        item.item_name.toLowerCase().includes(q) ||
+                        item.details.toLowerCase().includes(q) ||
+                        (item.action_table && item.action_table.toLowerCase().includes(q));
+          if (!match) continue;
+        }
+
+        list.push(item);
+      }
+    }
+
+    return list;
+  }
+
+  public openReminderManagerModal(): void {
+    this.showReminderDialog = true;
+    this.showBellFlyout = false;
+    this.loadReminderRules();
+    this.cdr.markForCheck();
+  }
+
+  public openReminderResultsSheet(): void {
+    const tabId = 'sheet_reminder_results';
+    let foundTab = this.sheetTabs.find(t => t.id === tabId);
+    if (foundTab) {
+      this.switchSheet(tabId);
+    } else {
+      const newTab: StudioSheetTab = {
+        id: tabId,
+        title: 'Reminders',
+        icon: 'pi-bell',
+        type: 'reminder_inbox' as any,
+        isLoaded: true,
+        recordCount: this.activeAlerts.length
+      };
+      this.sheetTabs.push(newTab);
+      this.switchSheet(tabId);
+    }
+    this.showBellFlyout = false;
+    this.checkActiveReminders(false);
+    this.cdr.markForCheck();
+  }
+
+  public toggleBellFlyout(): void {
+    this.showBellFlyout = !this.showBellFlyout;
+    if (this.showBellFlyout) {
+      this.checkActiveReminders(false);
+    }
+    this.cdr.markForCheck();
+  }
+
+  public goToTableFromReminder(tableName: string, rawRecord?: any): void {
+    if (!tableName) return;
+    this.openTableInSheet(tableName);
+    this.showBellFlyout = false;
+  }
+
+  public exportReminderResultsExcel(): void {
+    const items = this.reminderResultItems;
+    if (!items || items.length === 0) {
+      alert('डाउनलोड करने के लिए कोई सक्रिय रिमाइंडर नहीं है (No active reminders to export)');
+      return;
+    }
+
+    const exportData = items.map((item, idx) => ({
+      '#': idx + 1,
+      'Priority': item.priority.toUpperCase(),
+      'Reminder Name': item.rule_name,
+      'Affected Item / Record': item.item_name,
+      'Alert Details': item.details,
+      'Target Table': item.action_table || '',
+      'Triggered Time': item.triggered_at ? new Date(item.triggered_at).toLocaleString() : ''
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Active Reminders');
+    const filename = `Active_Reminders_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, filename);
+  }
+
+  public openRemindersSheet(): void {
+    this.openReminderResultsSheet();
+  }
+
+  public openIncomingRemindersSheet(): void {
+    this.openReminderResultsSheet();
+  }
+
+  public openReminderHistorySheet(): void {
+    this.openReminderResultsSheet();
+  }
+
+  public onViewAllReminders(): void {
+    this.openReminderResultsSheet();
+  }
+
+  public onSnoozeAlert(alertItem: any, minutes: number = 15): void {
+    if (!alertItem || !alertItem.log_id) return;
+    this.isSnoozingAlert = true;
+    this.api.snoozeReminder(alertItem.log_id, minutes).subscribe({
+      next: () => {
+        this.isSnoozingAlert = false;
+        this.activeAlerts = this.activeAlerts.filter(a => a.log_id !== alertItem.log_id);
+        this.unreadReminderCount = this.activeAlerts.length;
+        if (this.currentAlertIndex >= this.activeAlerts.length) {
+          this.currentAlertIndex = Math.max(0, this.activeAlerts.length - 1);
+        }
+        if (this.activeAlerts.length === 0) {
+          this.showReminderPopup = false;
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSnoozingAlert = false;
+        console.error('[SutramStudio] Snooze error:', err);
+        alert('स्नूज़ विफल रहा: ' + (err?.error?.error || err.message));
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  public onDismissAlert(alertItem: any): void {
+    if (!alertItem || !alertItem.log_id) return;
+    this.isDismissingAlert = true;
+    const user = this.currentUser?.username || 'admin';
+    this.api.dismissReminder(alertItem.log_id, user, 'Dismissed from popup').subscribe({
+      next: () => {
+        this.isDismissingAlert = false;
+        this.activeAlerts = this.activeAlerts.filter(a => a.log_id !== alertItem.log_id);
+        this.unreadReminderCount = this.activeAlerts.length;
+        if (this.currentAlertIndex >= this.activeAlerts.length) {
+          this.currentAlertIndex = Math.max(0, this.activeAlerts.length - 1);
+        }
+        if (this.activeAlerts.length === 0) {
+          this.showReminderPopup = false;
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isDismissingAlert = false;
+        console.error('[SutramStudio] Dismiss error:', err);
+        const errMsg = err?.error?.error || err.message || 'Dismiss failed';
+        alert('हटाना विफल रहा (Dismiss failed): ' + errMsg);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  public closeReminderPopup(): void {
+    this.showReminderPopup = false;
+    this.cdr.markForCheck();
+  }
+
+  public nextAlert(): void {
+    if (this.currentAlertIndex < this.activeAlerts.length - 1) {
+      this.currentAlertIndex++;
+      this.cdr.markForCheck();
+    }
+  }
+
+  public prevAlert(): void {
+    if (this.currentAlertIndex > 0) {
+      this.currentAlertIndex--;
+      this.cdr.markForCheck();
+    }
+  }
+
+  // ── Feature 3: Author Role Rights & Permissions ───────────────
+  public loadCurrentUserRights(userId?: any): void {
+    const u = userId || this.currentUser?.username;
+    if (!u) return;
+    this.api.getUserRights(u).subscribe({
+      next: (rights: any[]) => {
+        this.currentUserRightsMap.clear();
+        if (Array.isArray(rights)) {
+          rights.forEach(r => {
+            this.currentUserRightsMap.set(r.table_name, {
+              can_view: r.can_view !== 0 && r.can_view !== false,
+              can_edit: r.can_edit !== 0 && r.can_edit !== false,
+              can_delete: r.can_delete !== 0 && r.can_delete !== false,
+              can_unmask: r.can_unmask !== 0 && r.can_unmask !== false
+            });
+          });
+        }
+        this.applyUserRightsToCurrentView();
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.warn('[SutramStudio] Error loading user rights:', err)
+    });
+  }
+
+  public applyUserRightsToCurrentView(): void {
+    if (this.isAdmin) {
+      this.isSheetReadOnly = false;
+      this.currentSheetCanDelete = true;
+      return;
+    }
+    const tbl = this.currentActiveTableName;
+    if (!tbl || this.isCurrentSheetRough) {
+      this.isSheetReadOnly = false;
+      this.currentSheetCanDelete = true;
+      return;
+    }
+    const rights = this.currentUserRightsMap.get(tbl);
+    if (rights) {
+      this.isSheetReadOnly = !rights.can_edit;
+      this.currentSheetCanDelete = !!rights.can_delete;
+      if (!rights.can_view) {
+        alert(`Access Restricted: You do not have permission to view table "${tbl}".`);
+        this.switchSheet('rough_1');
+      }
+    } else {
+      this.isSheetReadOnly = false;
+      this.currentSheetCanDelete = false;
+    }
+  }
+
+  // ── Feature 5 & 6: Column Selection, Context Actions & Unmask Security
+  public onGridHideColumn(colKey: string): void {
+    if (!colKey) return;
+    this.selectedColumnKeys.delete(colKey);
+    this.cdr.markForCheck();
+  }
+
+  public onGridCycleFormat(event: { col: any; type: 'text' | 'number' }): void {
+    if (!event || !event.col) return;
+    const col = event.col;
+    if (event.type === 'number') {
+      const cur = col.display_format || '0';
+      const order = ['0', '2', '4', 'currency'];
+      const nextIdx = (order.indexOf(cur) + 1) % order.length;
+      col.display_format = order[nextIdx];
+    } else {
+      const cur = col.display_format || 'DD/MM/YYYY';
+      const order = ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MMM-YYYY', 'MM/DD/YYYY'];
+      const nextIdx = (order.indexOf(cur) + 1) % order.length;
+      col.display_format = order[nextIdx];
+    }
+    this.saveTableConfig();
+    this.cdr.markForCheck();
+  }
+
+  public onGridRequestUnmask(event: { col: any; colKey: string; rowIdx?: number; targetType?: 'column' | 'cell' }): void {
+    const colKey = event?.colKey || event?.col?.col_name || event?.col?.name;
+    const tbl = this.currentActiveTableName;
+    if (!colKey || !tbl) return;
+
+    const rights = this.currentUserRightsMap.get(tbl);
+    const hasRight = this.isAdmin || (rights && rights.can_unmask);
+    if (!hasRight) {
+      alert('Access Restricted: You do not have "can_unmask" permission for this table.');
+      return;
+    }
+
+    this.unmaskDialogState = {
+      visible: true,
+      tableName: tbl,
+      columnName: colKey,
+      targetType: event.targetType || 'column',
+      rowIdx: event.rowIdx,
+      isSubmitting: false,
+      errorMessage: ''
+    };
+    this.cdr.markForCheck();
+  }
+
+  public onGridRequestUnmaskCell(event: { rowIdx: number; colKey: string; col: any }): void {
+    if (!event) return;
+    this.onGridRequestUnmask({
+      col: event.col,
+      colKey: event.colKey,
+      rowIdx: event.rowIdx,
+      targetType: 'cell'
+    });
+  }
+
+  public onGridRequestMaskCell(event: { rowIdx: number; colKey: string }): void {
+    if (!event || event.rowIdx === undefined || !event.colKey) return;
+    const cellKey = `${event.rowIdx}_${event.colKey}`;
+    this.unmaskedCellsSet.delete(cellKey);
+    if (this.gridComponent) {
+      this.gridComponent.unmaskedCellsSet.delete(cellKey);
+    }
+    this.cdr.markForCheck();
+  }
+
+  public onGridRequestMask(colKey: string): void {
+    if (!colKey) return;
+    this.unmaskedColumnsSet.delete(colKey);
+    this.cdr.markForCheck();
+  }
+
+  public onVerifyUnmask(payload: { table: string; column: string; secret: string }): void {
+    this.unmaskDialogState.isSubmitting = true;
+    this.unmaskDialogState.errorMessage = '';
+
+    this.api.verifyUnmask({
+      table: payload.table,
+      column: payload.column,
+      secret: payload.secret,
+      userId: this.currentUser?.username || (this.currentUser as any)?._id
+    }).subscribe({
+      next: (res: any) => {
+        this.unmaskDialogState.isSubmitting = false;
+        if (res?.success) {
+          if (this.unmaskDialogState.targetType === 'cell' && this.unmaskDialogState.rowIdx !== undefined) {
+            const cellKey = `${this.unmaskDialogState.rowIdx}_${payload.column}`;
+            this.unmaskedCellsSet.add(cellKey);
+            if (this.gridComponent) {
+              this.gridComponent.unmaskedCellsSet.add(cellKey);
+            }
+          } else {
+            this.unmaskedColumnsSet.add(payload.column);
+          }
+          this.unmaskDialogState.visible = false;
+          this.cdr.markForCheck();
+        } else {
+          this.unmaskDialogState.errorMessage = res?.error || 'Invalid password or security PIN.';
+          this.cdr.markForCheck();
+        }
+      },
+      error: (err: any) => {
+        this.unmaskDialogState.isSubmitting = false;
+        this.unmaskDialogState.errorMessage = err?.error?.error || 'Verification failed. Please check secret/PIN.';
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  // ── Home Ribbon Password Security Helpers ─────────────────────
+  public get activeColDef(): any {
+    const sel = this.state.selectedCell();
+    const activeKey = sel ? sel.colKey : (this.visibleHeaders[0]?.key || this.visibleHeaders[0]?.name);
+    if (!activeKey) return null;
+    return this.visibleHeaders.find(c => (c.key || c.name) === activeKey) || null;
+  }
+
+  public get isPasswordColumnActive(): boolean {
+    const col = this.activeColDef;
+    if (!col) return false;
+    const t = (col.type || col.field_type || col.col_type || '').toLowerCase();
+    const k = (col.key || col.name || col.col_name || '').toLowerCase();
+    return t === 'password' ||
+           k === 'password' ||
+           k.endsWith('_password') ||
+           k.includes('password') ||
+           k === 'pwd' ||
+           k.endsWith('_pwd') ||
+           k === 'pin' ||
+           k.endsWith('_pin') ||
+           k === 'secret' ||
+           k === 'secret_hash';
+  }
+
+  public get isCurrentColumnUnmasked(): boolean {
+    const col = this.activeColDef;
+    const key = col ? (col.key || col.name) : null;
+    return key ? this.unmaskedColumnsSet.has(key) : false;
+  }
+
+  public get isCurrentCellUnmasked(): boolean {
+    if (this.isCurrentColumnUnmasked) return true;
+    const sel = this.state.selectedCell();
+    if (!sel) return false;
+    const cellKey = `${sel.rowIdx}_${sel.colKey}`;
+    return this.unmaskedCellsSet.has(cellKey) || (this.gridComponent ? this.gridComponent.isCellUnmasked(sel.rowIdx, sel.colKey) : false);
+  }
+
+  public toggleActiveColumnMask(): void {
+    const col = this.activeColDef;
+    const key = col ? (col.key || col.name) : null;
+    if (!key) return;
+    if (this.unmaskedColumnsSet.has(key)) {
+      this.unmaskedColumnsSet.delete(key);
+      this.cdr.markForCheck();
+    } else {
+      this.onGridRequestUnmask({ col, colKey: key, targetType: 'column' });
+    }
+  }
+
+  public toggleActiveCellMask(): void {
+    const sel = this.state.selectedCell();
+    const col = this.activeColDef;
+    const key = col ? (col.key || col.name) : (sel ? sel.colKey : null);
+    if (!sel || !key) return;
+    const cellKey = `${sel.rowIdx}_${key}`;
+    if (this.isCurrentCellUnmasked && !this.isCurrentColumnUnmasked) {
+      this.unmaskedCellsSet.delete(cellKey);
+      if (this.gridComponent) {
+        this.gridComponent.unmaskedCellsSet.delete(cellKey);
+      }
+      this.cdr.markForCheck();
+    } else if (this.isCurrentColumnUnmasked) {
+      this.unmaskedColumnsSet.delete(key);
+      this.cdr.markForCheck();
+    } else {
+      this.onGridRequestUnmask({ col, colKey: key, rowIdx: sel.rowIdx, targetType: 'cell' });
+    }
+  }
+
+  public onSetColumnSecurity(payload: { table: string; column: string; secret: string }): void {
+    this.api.setColumnSecurity(payload).subscribe({
+      next: () => {
+        alert(`Security PIN set successfully for column "${payload.column}".`);
+      },
+      error: (err) => console.error('[SutramStudio] Set column security PIN error:', err)
+    });
+  }
+
 }

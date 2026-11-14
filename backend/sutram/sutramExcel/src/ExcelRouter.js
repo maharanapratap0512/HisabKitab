@@ -73,6 +73,19 @@ function buildExcelRouter(sutramExcel) {
     // ── GET /tables ───────────────────────────────────────────
     router.get('/tables', (req, res) => {
         try {
+            // Dynamically register any active tables from engine schema not yet in _configs
+            if (sutramExcel && sutramExcel.engine) {
+                const schema = sutramExcel.engine._schema || {};
+                for (const tableName of Object.keys(schema)) {
+                    if (tableName.startsWith('sys_') || tableName.startsWith('sqlite_')) continue;
+                    if (!sutramExcel._configs[tableName]) {
+                        try {
+                            const tbl = sutramExcel.engine.table(tableName);
+                            if (tbl) sutramExcel.register(tbl);
+                        } catch {}
+                    }
+                }
+            }
             const tables = Object.entries(sutramExcel._configs).map(([name, cfg]) => ({
                 table:        name,
                 display_name: cfg.display_name ?? name,
@@ -202,6 +215,337 @@ function buildExcelRouter(sutramExcel) {
             }
             ok(res, rows);
         } catch (e) { fail(res, e, 500); }
+    });
+
+    // ── Helper to resolve Database for sys_meta storage ───────
+    function getDb() {
+        let db = null;
+        if (sutramExcel.engine) {
+            db = sutramExcel.engine.db?.db || sutramExcel.engine.db;
+            if (!db && sutramExcel.engine._sutram) {
+                db = sutramExcel.engine._sutram.db?.db || sutramExcel.engine._sutram.db;
+            }
+        }
+        return db;
+    }
+
+    function ensureSysMeta(db) {
+        if (!db || typeof db.prepare !== 'function') return;
+        try {
+            db.prepare(`
+                CREATE TABLE IF NOT EXISTS sys_meta (
+                    key   TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+            `).run();
+        } catch {}
+    }
+
+    // ── GET /table-ui-config/:table ───────────────────────────
+    router.get('/table-ui-config/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return ok(res, null);
+            }
+            ensureSysMeta(db);
+            const row = db.prepare(`SELECT value FROM sys_meta WHERE key = ?`).get(`table_ui_config:${tbl}`);
+            if (row && row.value) {
+                try {
+                    const saved = JSON.parse(row.value);
+                    return ok(res, saved);
+                } catch {}
+            }
+            return ok(res, null);
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── POST /table-ui-config/:table ──────────────────────────
+    router.post('/table-ui-config/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const { display_name, columns = [], selected_keys = [] } = req.body;
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return fail(res, new Error('Database not accessible'), 500);
+            }
+            ensureSysMeta(db);
+            db.prepare(`
+                INSERT INTO sys_meta (key, value) VALUES (?, ?)
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            `).run(`table_ui_config:${tbl}`, JSON.stringify({
+                table_name: tbl,
+                display_name,
+                columns,
+                selected_keys,
+                updated_at: new Date().toISOString()
+            }));
+
+            ok(res, { success: true, message: `Configuration saved for table "${tbl}"` });
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── GET /ui-sutras/:table ─────────────────────────────────
+    router.get('/ui-sutras/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return ok(res, []);
+            }
+            ensureSysMeta(db);
+            const row = db.prepare(`SELECT value FROM sys_meta WHERE key = ?`).get(`ui_sutras:${tbl}`);
+            if (row && row.value) {
+                try {
+                    const parsed = JSON.parse(row.value);
+                    return ok(res, parsed);
+                } catch {}
+            }
+            return ok(res, []);
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── POST /ui-sutras/:table ────────────────────────────────
+    router.post('/ui-sutras/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const { formulas = [] } = req.body;
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return fail(res, new Error('Database not accessible'), 500);
+            }
+            ensureSysMeta(db);
+            db.prepare(`
+                INSERT INTO sys_meta (key, value) VALUES (?, ?)
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            `).run(`ui_sutras:${tbl}`, JSON.stringify(formulas));
+
+            ok(res, { success: true, message: `UI Sutras saved for table "${tbl}"` });
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── Helper to ensure sys_user exists ──────────────────────
+    function ensureSysUser(db) {
+        if (!db || typeof db.prepare !== 'function') return;
+        try {
+            db.prepare(`
+                CREATE TABLE IF NOT EXISTS sys_user (
+                    _id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username     TEXT NOT NULL UNIQUE,
+                    password     TEXT NOT NULL,
+                    display_name TEXT,
+                    role         TEXT NOT NULL DEFAULT 'author' CHECK(role IN ('admin', 'author')),
+                    active       INTEGER DEFAULT 1,
+                    created_at   TEXT DEFAULT (datetime('now', 'localtime')),
+                    updated_at   TEXT DEFAULT (datetime('now', 'localtime'))
+                )
+            `).run();
+            db.prepare(`
+                INSERT OR IGNORE INTO sys_user (username, password, display_name, role)
+                VALUES ('admin', 'sutram', 'System Administrator', 'admin')
+            `).run();
+        } catch {}
+    }
+
+    // ── GET /triggers/:table ──────────────────────────────────
+    router.get('/triggers/:table', (req, res) => {
+        try {
+            const tbl = req.params.table;
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') return ok(res, []);
+            const triggers = db.prepare(`SELECT * FROM sys_trigger WHERE source_table = ? AND active = 1`).all(tbl);
+            const getActions = db.prepare(`SELECT * FROM sys_trigger_action WHERE trigger_id = ? AND active = 1 ORDER BY sort_order ASC`);
+            for (const t of triggers) {
+                t.actions = getActions.all(t._id);
+            }
+            ok(res, triggers);
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── POST /triggers ────────────────────────────────────────
+    router.post('/triggers', (req, res) => {
+        try {
+            const { trigger_name, label, source_table, event, actions = [] } = req.body;
+            if (!trigger_name || !source_table || !event) {
+                return fail(res, new Error('trigger_name, source_table and event are required'), 400);
+            }
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return fail(res, new Error('Database not accessible'), 500);
+            }
+
+            const inTx = db.inTransaction;
+            if (!inTx) db.prepare('BEGIN').run();
+            try {
+                const existing = db.prepare(`SELECT _id FROM sys_trigger WHERE trigger_name = ?`).get(trigger_name);
+                let triggerId;
+                if (existing) {
+                    triggerId = existing._id;
+                    db.prepare(`
+                        UPDATE sys_trigger
+                        SET label = ?, source_table = ?, event = ?, updated_at = datetime('now', 'localtime')
+                        WHERE _id = ?
+                    `).run(label || trigger_name, source_table, event.toUpperCase(), triggerId);
+                    db.prepare(`DELETE FROM sys_trigger_action WHERE trigger_id = ?`).run(triggerId);
+                } else {
+                    const ins = db.prepare(`
+                        INSERT INTO sys_trigger (trigger_name, label, source_table, event)
+                        VALUES (?, ?, ?, ?)
+                    `).run(trigger_name, label || trigger_name, source_table, event.toUpperCase());
+                    triggerId = ins.lastInsertRowid;
+                }
+
+                const insAct = db.prepare(`
+                    INSERT INTO sys_trigger_action (trigger_id, sort_order, action_type, target_table, field_map, raw_sql)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                `);
+
+                for (let i = 0; i < actions.length; i++) {
+                    const a = actions[i];
+                    const fieldMapStr = typeof a.field_map === 'object' ? JSON.stringify(a.field_map) : (a.field_map || null);
+                    insAct.run(triggerId, a.sort_order ?? i, a.action_type || 'raw_sql', a.target_table || null, fieldMapStr, a.raw_sql || null);
+                }
+
+                if (!inTx) db.prepare('COMMIT').run();
+
+                if (sutramExcel?.engine?.trigger?.load) {
+                    try { sutramExcel.engine.trigger.load(); } catch {}
+                }
+
+                ok(res, { success: true, trigger_id: triggerId });
+            } catch (err) {
+                if (!inTx && db.inTransaction) db.prepare('ROLLBACK').run();
+                throw err;
+            }
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── DELETE /triggers/:id ──────────────────────────────────
+    router.delete('/triggers/:id', (req, res) => {
+        try {
+            const triggerId = req.params.id;
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return fail(res, new Error('Database not accessible'), 500);
+            }
+
+            const inTx = db.inTransaction;
+            if (!inTx) db.prepare('BEGIN').run();
+            try {
+                db.prepare(`DELETE FROM sys_trigger_action WHERE trigger_id = ?`).run(triggerId);
+                db.prepare(`DELETE FROM sys_trigger WHERE _id = ?`).run(triggerId);
+                if (!inTx) db.prepare('COMMIT').run();
+
+                if (sutramExcel?.engine?.trigger?.load) {
+                    try { sutramExcel.engine.trigger.load(); } catch {}
+                }
+
+                ok(res, { success: true });
+            } catch (err) {
+                if (!inTx && db.inTransaction) db.prepare('ROLLBACK').run();
+                throw err;
+            }
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── GET /users ────────────────────────────────────────────
+    router.get('/users', (req, res) => {
+        try {
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') return ok(res, []);
+            ensureSysUser(db);
+            const users = db.prepare(`SELECT _id, username, display_name, role, active, created_at, updated_at FROM sys_user ORDER BY _id ASC`).all();
+            ok(res, users);
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── POST /users ───────────────────────────────────────────
+    router.post('/users', (req, res) => {
+        try {
+            const { username, password, display_name, role = 'author', active = 1 } = req.body;
+            if (!username?.trim() || !password?.trim()) {
+                return fail(res, new Error('Username and password are required'), 400);
+            }
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return fail(res, new Error('Database not accessible'), 500);
+            }
+            ensureSysUser(db);
+            const ins = db.prepare(`
+                INSERT INTO sys_user (username, password, display_name, role, active)
+                VALUES (?, ?, ?, ?, ?)
+            `).run(username.trim(), password.trim(), display_name?.trim() || username.trim(), role, active ? 1 : 0);
+
+            ok(res, { success: true, _id: ins.lastInsertRowid });
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── PUT /users/:id ────────────────────────────────────────
+    router.put('/users/:id', (req, res) => {
+        try {
+            const id = req.params.id;
+            const { password, display_name, role, active } = req.body;
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return fail(res, new Error('Database not accessible'), 500);
+            }
+            ensureSysUser(db);
+            if (password && String(password).trim() !== '') {
+                db.prepare(`
+                    UPDATE sys_user
+                    SET password = ?, display_name = ?, role = ?, active = ?, updated_at = datetime('now', 'localtime')
+                    WHERE _id = ?
+                `).run(password.trim(), display_name || '', role || 'author', active ? 1 : 0, id);
+            } else {
+                db.prepare(`
+                    UPDATE sys_user
+                    SET display_name = ?, role = ?, active = ?, updated_at = datetime('now', 'localtime')
+                    WHERE _id = ?
+                `).run(display_name || '', role || 'author', active ? 1 : 0, id);
+            }
+            ok(res, { success: true, _id: id });
+        } catch (e) {
+            fail(res, e, 500);
+        }
+    });
+
+    // ── DELETE /users/:id ─────────────────────────────────────
+    router.delete('/users/:id', (req, res) => {
+        try {
+            const id = req.params.id;
+            const db = getDb();
+            if (!db || typeof db.prepare !== 'function') {
+                return fail(res, new Error('Database not accessible'), 500);
+            }
+            ensureSysUser(db);
+            const target = db.prepare(`SELECT username FROM sys_user WHERE _id = ?`).get(id);
+            if (target && target.username === 'admin') {
+                return fail(res, new Error('Default admin user cannot be deleted'), 400);
+            }
+            db.prepare(`DELETE FROM sys_user WHERE _id = ?`).run(id);
+            ok(res, { success: true, _id: id });
+        } catch (e) {
+            fail(res, e, 500);
+        }
     });
 
     // ── GET /data/:table ──────────────────────────────────────

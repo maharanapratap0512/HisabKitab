@@ -20,6 +20,7 @@ export interface SutramHeaderConfig {
   ref_table?: string;      // referenced table e.g. 'category'
   ref_field?: string;      // e.g. 'category_id'
   ref_data?: string;       // display text e.g. 'category_hin'
+  ref_select?: string[];   // configured multi-column display selection e.g. ['prod_name', 'sku']
   ref_as?: string;         // alias e.g. 'category'
   matchFields?: string[];  // custom matching fields
   width?: number;          // display width in grid
@@ -69,6 +70,8 @@ export interface SutramRow {
   isNew?: boolean;
   isModified?: boolean;
   isSynced?: boolean;
+  isHighlighted?: boolean;
+  hl?: number | boolean;
   _rawOriginal?: any;
 }
 
@@ -82,6 +85,7 @@ export interface SutramScanMatch {
   targetHeader?: SutramHeaderConfig;
   status: 'matched' | 'unmatched' | 'manual';
   confidence: number; // 0.0 to 1.0
+  sampleValues?: string[];
 }
 
 /**

@@ -87,4 +87,7 @@ const Engine = require('./src/Engine');
 //
 // ─────────────────────────────────────────────────────────────
 
-module.exports = { SutramEngine: Engine };
+module.exports = {
+  SutramEngine: Engine,
+  SchemaHeuristics: require('./src/SchemaHeuristics')
+};

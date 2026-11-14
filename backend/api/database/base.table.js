@@ -47,10 +47,6 @@ class BaseTable {
     static commit() { db.prepare('COMMIT').run(); }
     static rollback() { db.prepare('ROLLBACK').run(); }
 
-    begin() { BaseTable.begin(); }
-    commit() { BaseTable.commit(); }
-    rollback() { BaseTable.rollback(); }
-
 
 
     // ─────────────────────────────────────────────────────────

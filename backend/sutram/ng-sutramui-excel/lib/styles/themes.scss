@@ -1,0 +1,36 @@
+/**
+ * themes.scss
+ * ─────────────────────────────────────────────────────────────
+ * Theme integration for ng-sutramui-excel.
+ * Compatible with PrimeNG Aura, Lara, Nora and custom dark/light modes.
+ * Adheres to AGENTS.md Rule 1 (Dynamic Theme Native Inheritance).
+ * ─────────────────────────────────────────────────────────────
+ */
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  /* Light Theme Defaults */
+  --cell-edited-bg: #fff9db;
+  --cell-edited-text: #854d0e;
+  --row-new-bg: #edfbf0;
+  --cell-error-bg: rgba(239, 68, 68, 0.12);
+}
+
+.sutram-excel-dark,
+body.dark-mode {
+  --surface-ground: #0f172a;
+  --surface-card: #1e293b;
+  --surface-100: #334155;
+  --surface-border: #475569;
+  --text-color: #f8fafc;
+  --text-color-secondary: #94a3b8;
+
+  /* Dark Theme Palette (No harsh overrides, clean contrast) */
+  --cell-edited-bg: #3e3312;
+  --cell-edited-text: #fef08a;
+  --row-new-bg: #143522;
+  --cell-error-bg: rgba(239, 68, 68, 0.25);
+}

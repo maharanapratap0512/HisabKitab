@@ -94,6 +94,9 @@ class ExcelImporter {
 
         // 8. insert
         try {
+            if (row._id === null || row._id === undefined || row._id === '') {
+                delete row._id;
+            }
             const result = await this.engine.insert(tableConfig.table, row);
             return { status: 'inserted', data: row, newData: result };
         } catch (err) {
@@ -312,6 +315,8 @@ class ExcelImporter {
     _validateRequired(row, tableConfig) {
         const missing = [];
         for (const h of tableConfig.headers) {
+            // Primary key is auto-incremented by database on insert; never required in payload
+            if (h.is_pk || h.pk || h.col_name === '_id' || h.name === '_id') continue;
             if (!h.not_null) continue;
             const val = h.ref_field ? row[h.ref_field] : row[h.col_name];
             if (val === null || val === undefined || val === '') {

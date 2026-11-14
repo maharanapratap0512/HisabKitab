@@ -2920,7 +2920,7 @@ const unit = {
 const conditions = {
     vehicle_duplicate: `gadi_num = @gadi_num`,
     product_duplicate: `(product_code IS NOT NULL AND product_code = @product_code) OR (sr_num IS NOT NULL AND sr_num = @sr_num)`,
-    pbk_duplicate: `roll_no = @roll_no OR (pbk_hin = @pbk_hin AND gender = @gender AND state_id = @state_id)`,
+    pbk_duplicate: `roll_no = @roll_no`,
     nimitt_duplicate: `roll_no = @roll_no OR (nimitt_hin = @nimitt_hin AND gender = @gender AND state_id = @state_id)`,
     subitem_list_duplicate: `subitem_hin = @subitem_hin OR (subitem_eng IS NOT NULL AND subitem_eng = @subitem_eng) OR (subitem_roman IS NOT NULL AND subitem_roman = @subitem_roman)`,
     item_duplicate: `item_hin = @item_hin OR (item_eng IS NOT NULL AND item_eng = @item_eng) OR (item_roman IS NOT NULL AND item_roman = @item_roman) OR (item_code IS NOT NULL AND item_code = @item_code)`,

@@ -228,6 +228,41 @@ export class ExcelImportComponent implements OnInit, OnChanges {
     });
   }
 
+  deduplicateCorrectionList(list: any[]): any[] {
+    if (!Array.isArray(list)) return [];
+    const seen = new Set<string>();
+    const result: any[] = [];
+    for (const item of list) {
+      if (!item) continue;
+      const key = this.getCorrectionItemKey(item);
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(item);
+      }
+    }
+    return result;
+  }
+
+  getCorrectionItemKey(item: any): string {
+    const type = (item.type || '').toString().trim().toLowerCase();
+    const name = item.name;
+    if (name === null || name === undefined || name === '') {
+      return `${type}:__EMPTY__`;
+    }
+    if (Array.isArray(name)) {
+      const sorted = name.map((x: any) => (x ?? '').toString().trim().toLowerCase()).sort().join(',');
+      return `${type}:[${sorted}]`;
+    }
+    if (typeof name === 'object') {
+      const it = (name.item ?? name.name ?? '').toString().trim().toLowerCase();
+      const sub = (name.subitem ?? name.extra_note ?? '').toString().trim().toLowerCase();
+      return `${type}:${it}|${sub}`;
+    }
+    const str = (name ?? '').toString().trim().toLowerCase();
+    const extra = (item.extra_note ?? '').toString().trim().toLowerCase();
+    return type === 'item' ? `${type}:${str}|${extra}` : `${type}:${str}`;
+  }
+
   resumeSession() {
     if (!this.resumableSession) return;
     const s = this.resumableSession.session;
@@ -240,7 +275,8 @@ export class ExcelImportComponent implements OnInit, OnChanges {
     }
     this.headerConfig = Array.isArray(s.header_config) ? s.header_config : (typeof s.header_config === 'string' ? JSON.parse(s.header_config || '[]') : []);
     this.headerList = Array.isArray(s.header_list) ? s.header_list : (typeof s.header_list === 'string' ? JSON.parse(s.header_list || '[]') : []);
-    this.unmatchedData = Array.isArray(s.unmatched_data) ? s.unmatched_data : (typeof s.unmatched_data === 'string' ? JSON.parse(s.unmatched_data || '[]') : []);
+    const rawUnmatched = Array.isArray(s.unmatched_data) ? s.unmatched_data : (typeof s.unmatched_data === 'string' ? JSON.parse(s.unmatched_data || '[]') : []);
+    this.unmatchedData = this.deduplicateCorrectionList(rawUnmatched);
     this.excelArrObj = this.resumableSession.pendingRows || [];
 
     if (!this.headerList || !this.headerList.length) {
@@ -693,7 +729,7 @@ export class ExcelImportComponent implements OnInit, OnChanges {
       this.isLoader = false;
       if (res && res.excelData) {
         this.excelArrObj = res.excelData;
-        this.unmatchedData = res.correctionList || [];
+        this.unmatchedData = this.deduplicateCorrectionList(res.correctionList || []);
         this.stepNo = 3;
         // Save all data into database when pressing next!
         this.saveSessionInit(3);

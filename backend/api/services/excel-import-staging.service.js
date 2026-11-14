@@ -8,6 +8,37 @@ const stagingTable = new BaseTable('excel_import_staging');
 
 class ExcelImportStagingService {
 
+    deduplicateCorrectionList(list = []) {
+        if (!Array.isArray(list)) return [];
+        const seen = new Set();
+        const result = [];
+        for (const item of list) {
+            if (!item) continue;
+            const type = String(item.type || '').trim().toLowerCase();
+            let key;
+            const name = item.name;
+            if (name === null || name === undefined || name === '') {
+                key = `${type}:__EMPTY__`;
+            } else if (Array.isArray(name)) {
+                const s = name.map(x => String(x || '').trim().toLowerCase().normalize('NFC')).sort().join(',');
+                key = `${type}:[${s}]`;
+            } else if (typeof name === 'object') {
+                const it = String(name.item || name.name || '').trim().toLowerCase().normalize('NFC');
+                const sub = String(name.subitem || name.extra_note || '').trim().toLowerCase().normalize('NFC');
+                key = `${type}:${it}|${sub}`;
+            } else {
+                const str = String(name).trim().toLowerCase().normalize('NFC');
+                const extra = String(item.extra_note || '').trim().toLowerCase().normalize('NFC');
+                key = type === 'item' ? `${type}:${str}|${extra}` : `${type}:${str}`;
+            }
+            if (!seen.has(key)) {
+                seen.add(key);
+                result.push(item);
+            }
+        }
+        return result;
+    }
+
     /**
      * Get active session and pending rows for a department.
      * @param {number|string} deptId 
@@ -64,7 +95,7 @@ class ExcelImportStagingService {
                     step_no: session.step_no,
                     header_config: parseJson(session.header_config, []),
                     header_list: parseJson(session.header_list, []),
-                    unmatched_data: parseJson(session.unmatched_data, []),
+                    unmatched_data: this.deduplicateCorrectionList(parseJson(session.unmatched_data, [])),
                     total_count: session.total_count,
                     processed_count: session.processed_count
                 },
@@ -107,7 +138,7 @@ class ExcelImportStagingService {
                 step_no: Number(stepNo) || 2,
                 header_config: headerConfig,
                 header_list: headerList,
-                unmatched_data: unmatchedData || [],
+                unmatched_data: this.deduplicateCorrectionList(unmatchedData || []),
                 total_count: rows.length,
                 processed_count: 0
             };
@@ -145,7 +176,7 @@ class ExcelImportStagingService {
     updateSessionStep(sessionId, stepNo, unmatchedData = null, headerList = null) {
         try {
             const updateObj = { step_no: Number(stepNo) };
-            if (unmatchedData !== null) updateObj.unmatched_data = unmatchedData;
+            if (unmatchedData !== null) updateObj.unmatched_data = this.deduplicateCorrectionList(unmatchedData);
             if (headerList !== null) updateObj.header_list = headerList;
 
             sessionTable.updateById(updateObj, sessionId, false);

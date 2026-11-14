@@ -1,0 +1,1415 @@
+<!-- sutram-excel-studio.component.html -->
+<div class="sutram-excel-container" [class.dark-mode]="isDarkMode">
+
+  <!-- 1. TOP EXCEL-STYLE RIBBON HEADER (Few cm area) -->
+  <header class="studio-header">
+    <!-- Top Menu Bar: Brand, Ribbon Tabs, Mode Switch & Theme -->
+    <div class="ribbon-menu-bar">
+      <div class="menu-bar-left">
+        <div class="brand">
+          <div class="brand-icon"><i class="pi pi-table"></i></div>
+          <div class="brand-title">
+            <span>Sutram Studio</span>
+            <span class="version-tag">v2.0</span>
+          </div>
+        </div>
+
+        <!-- Excel Ribbon Tabs: Home, Tables, Reports -->
+        <nav class="ribbon-tabs-nav">
+          <button type="button"
+                  class="ribbon-tab-btn"
+                  [class.active]="activeTopTab === 'home'"
+                  (click)="setTopTab('home')">
+            <i class="pi pi-home"></i>
+            <span>Home</span>
+          </button>
+          <button type="button"
+                  class="ribbon-tab-btn"
+                  [class.active]="activeTopTab === 'tables'"
+                  (click)="setTopTab('tables')">
+            <i class="pi pi-database"></i>
+            <span>Tables</span>
+            <span class="ribbon-badge">{{ tablesList.length }}</span>
+          </button>
+          <button type="button"
+                  class="ribbon-tab-btn"
+                  [class.active]="activeTopTab === 'reports'"
+                  (click)="setTopTab('reports')">
+            <i class="pi pi-chart-bar"></i>
+            <span>Reports</span>
+            <span class="ribbon-badge">{{ reportsList.length }}</span>
+          </button>
+          <button type="button"
+                  class="ribbon-tab-btn"
+                  [class.active]="activeTopTab === 'settings'"
+                  (click)="setTopTab('settings')">
+            <i class="pi pi-cog"></i>
+            <span>Settings</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Menu Bar Right: Mode Switcher, Save / Sync DB, & Dark Mode Toggle -->
+      <div class="menu-bar-right">
+        <!-- Mode Switcher: Only for database tables -->
+        <div *ngIf="!isCurrentSheetRough && !isCurrentSheetReport" class="mode-pill-toggle">
+          <button class="mode-pill-btn" [class.active-normal]="mode === 'normal'" (click)="setStudioMode('normal')">
+            <i class="pi pi-pencil"></i> Normal
+          </button>
+          <button class="mode-pill-btn" [class.active-smart]="mode === 'intelligent'" (click)="setStudioMode('intelligent')">
+            <i class="pi pi-bolt"></i> Smart
+          </button>
+        </div>
+
+        <!-- Shifted: Save / Sync DB shifted between Mode Switcher and Theme Toggle -->
+        <!-- Case A: Rough Sheet OR Report Sheet -> Save Locally -->
+        <button *ngIf="isCurrentSheetRough || isCurrentSheetReport"
+                type="button"
+                class="cmd-btn-save-top"
+                (click)="saveRoughSheetLocally()"
+                [title]="isCurrentSheetReport ? 'Save report locally (Ctrl+S)' : 'Save sheet locally (Ctrl+S)'">
+          <i class="pi pi-save"></i>
+          <span>Save</span>
+        </button>
+
+        <!-- Case B: Database Entry Table Sheet -> Sync to DB -->
+        <button *ngIf="!isCurrentSheetRough && !isCurrentSheetReport"
+                type="button"
+                class="cmd-btn-sync-top"
+                [class.has-pending]="state.pendingChangesCount() > 0"
+                [disabled]="state.pendingChangesCount() === 0 || state.hasErrors()"
+                (click)="startImport()"
+                title="Sync changes to Database (Ctrl+S)">
+          <i class="pi pi-cloud-upload"></i>
+          <span>Sync DB</span>
+          <span *ngIf="state.pendingChangesCount() > 0" class="sync-badge-count">{{ state.pendingChangesCount() }}</span>
+        </button>
+
+        <button class="cmd-btn" style="padding: 3px 6px;" (click)="toggleTheme()" title="Toggle Light / Dark Mode">
+          <i class="pi" [ngClass]="isDarkMode ? 'pi-sun' : 'pi-moon'"></i>
+        </button>
+
+        <!-- User & Role Pill Indicator with Quick Role Toggle -->
+        <div class="user-role-badge-pill"
+             (click)="toggleRole()"
+             [title]="'Active User: ' + (currentUser.display_name || currentUser.username) + ' (' + (isAdmin ? 'Admin Mode' : 'Author Mode') + ')\nClick to toggle role'">
+          <i class="pi" [ngClass]="isAdmin ? 'pi-shield' : 'pi-user'" [style.color]="isAdmin ? '#a855f7' : '#10b981'"></i>
+          <span class="user-name-txt">{{ currentUser.username }}</span>
+          <span class="role-pill-tag" [class.admin-tag]="isAdmin" [class.author-tag]="isAuthor">
+            {{ isAdmin ? '👑 Admin' : '👤 Author' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ribbon Content Strip (Few cm area, switches with tabs, horizontally scrollable) -->
+    <div class="ribbon-strip">
+
+      <!-- RIBBON TAB 1: HOME TOOLS -->
+      <div *ngIf="activeTopTab === 'home'" class="ribbon-content-row">
+        <!-- Section: Style & Format -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn" [class.active]="isBoldActive" (click)="toggleBold()" title="Bold (Ctrl+B)">
+              <span style="font-weight: 800; font-size: 13px;">B</span>
+              <span class="ribbon-tool-lbl">Bold</span>
+            </button>
+            <div class="ribbon-mini-col">
+              <button class="ribbon-mini-btn" [class.active-align]="textAlign === 'left'" (click)="setTextAlign('left')" title="Align Left"><i class="pi pi-align-left"></i></button>
+              <button class="ribbon-mini-btn" [class.active-align]="textAlign === 'center'" (click)="setTextAlign('center')" title="Align Center"><i class="pi pi-align-center"></i></button>
+              <button class="ribbon-mini-btn" [class.active-align]="textAlign === 'right'" (click)="setTextAlign('right')" title="Align Right"><i class="pi pi-align-right"></i></button>
+            </div>
+            <button class="ribbon-tool-btn" (click)="colConfigOp.toggle($event)" title="Choose Visible Columns">
+              <i class="pi pi-sliders-h" style="color: var(--primary);"></i>
+              <span class="ribbon-tool-lbl">Columns ({{ visibleHeadersCount }})</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">Format</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Data Actions (Refresh, Open File, Export - Clear button removed) -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button *ngIf="!isCurrentSheetRough" class="ribbon-tool-btn" (click)="onRefreshData()" title="Refresh data from database">
+              <i class="pi pi-refresh text-success"></i>
+              <span class="ribbon-tool-lbl">Refresh</span>
+            </button>
+            <button class="ribbon-tool-btn" (click)="openFileManager()" title="Open Excel (.xlsx) file or saved sheets">
+              <i class="pi pi-folder-open"></i>
+              <span class="ribbon-tool-lbl">Open File</span>
+            </button>
+            <input #fileInput type="file" accept=".xlsx, .xls, .csv" style="display:none;" (change)="onFileUpload($event)">
+            <button class="ribbon-tool-btn"
+                    [disabled]="isExportingExcel"
+                    (click)="exportExcel()"
+                    title="Export sheet to Excel">
+              <i class="pi" [ngClass]="isExportingExcel ? 'pi-spin pi-spinner text-primary' : 'pi-download'"></i>
+              <span class="ribbon-tool-lbl">{{ isExportingExcel ? 'Exporting...' : 'Export' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">Data</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Sort & Filter -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn" [class.active]="state.filtersEnabled()" (click)="state.toggleFiltersEnabled()" title="Toggle Filters">
+              <i class="pi pi-filter"></i>
+              <span class="ribbon-tool-lbl">Filters</span>
+            </button>
+            <button class="ribbon-tool-btn" [class.active]="state.sortingEnabled()" (click)="state.toggleSortingEnabled()" title="Toggle Sorting">
+              <i class="pi pi-sort-alt"></i>
+              <span class="ribbon-tool-lbl">Sorting</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">Sort & Filter</span>
+        </div>
+      </div>
+
+      <!-- RIBBON TAB 2: TABLES (Horizontal Scrolling Strip with Small Simple Boxes) -->
+      <div *ngIf="activeTopTab === 'tables'" class="ribbon-scroll-row">
+        <!-- Quick search input inside tables strip -->
+        <div class="ribbon-search-field" style="width: 140px; min-width: 140px; margin-right: 6px;">
+          <i class="pi pi-search search-ico"></i>
+          <input type="text"
+                 class="ribbon-search-inp"
+                 placeholder="Search tables..."
+                 [(ngModel)]="tableSearchQuery">
+          <button *ngIf="tableSearchQuery" class="clear-btn-inline" (click)="tableSearchQuery = ''">✕</button>
+        </div>
+
+        <!-- Small simple boxes for each table -->
+        <div class="ribbon-boxes-track">
+          <div *ngFor="let tbl of filteredTables"
+               class="ribbon-small-box"
+               [class.active-box]="isTableOpen(tbl.table)"
+               (click)="openTableInSheet(tbl.table)"
+               [title]="tbl.display_name ? (tbl.display_name + ' (' + tbl.table + ')') : tbl.table">
+
+            <!-- Corner Star Favorite Button -->
+            <button type="button"
+                    class="box-star-btn"
+                    [class.starred]="favoriteTables.has(tbl.table)"
+                    (click)="toggleFavoriteTable(tbl.table, $event)"
+                    [title]="favoriteTables.has(tbl.table) ? 'Remove favorite' : 'Add to startup sheets'">
+              <i class="pi" [ngClass]="favoriteTables.has(tbl.table) ? 'pi-star-fill' : 'pi-star'"></i>
+            </button>
+
+            <div class="box-icon-wrap">
+              <i class="pi pi-table"></i>
+            </div>
+            <div class="box-info">
+              <span class="box-name-eng-main">{{ tbl.display_name || tbl.table }}</span>
+            </div>
+            <span *ngIf="isTableOpen(tbl.table)" class="box-dot" title="Sheet open"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIBBON TAB 3: REPORTS (Horizontal Scrolling Strip with Small Simple Boxes) -->
+      <div *ngIf="activeTopTab === 'reports'" class="ribbon-scroll-row">
+        <!-- Empty state when no dynamic reports or views exist -->
+        <div *ngIf="!reportsList || reportsList.length === 0" class="ribbon-empty-state">
+          <i class="pi pi-info-circle text-muted"></i>
+          <span class="text-muted">डेटाबेस में कोई रिपोर्ट या व्यू उपलब्ध नहीं है (No dynamic reports or views in database)</span>
+        </div>
+
+        <!-- Quick search input inside reports strip -->
+        <div *ngIf="reportsList && reportsList.length > 0" class="ribbon-search-field" style="width: 140px; min-width: 140px; margin-right: 6px;">
+          <i class="pi pi-search search-ico"></i>
+          <input type="text"
+                 class="ribbon-search-inp"
+                 placeholder="Search reports..."
+                 [(ngModel)]="reportSearchQuery">
+          <button *ngIf="reportSearchQuery" class="clear-btn-inline" (click)="reportSearchQuery = ''">✕</button>
+        </div>
+
+        <!-- Small simple boxes for each report -->
+        <div *ngIf="reportsList && reportsList.length > 0" class="ribbon-boxes-track">
+          <div *ngFor="let rep of filteredReports"
+               class="ribbon-small-box report-box"
+               [class.active-box]="isReportOpen(rep.id)"
+               (click)="openReportInSheet(rep)"
+               [title]="(rep.display_name || rep.title || rep.table || rep.id) + ' — ' + (rep.desc || '')">
+
+            <!-- Corner Star Favorite Button -->
+            <button type="button"
+                    class="box-star-btn"
+                    [class.starred]="favoriteReports.has(rep.id)"
+                    (click)="toggleFavoriteReport(rep.id, $event)"
+                    [title]="favoriteReports.has(rep.id) ? 'Remove favorite' : 'Add to startup sheets'">
+              <i class="pi" [ngClass]="favoriteReports.has(rep.id) ? 'pi-star-fill' : 'pi-star'"></i>
+            </button>
+
+            <div class="box-icon-wrap report-icon-bg">
+              <i class="pi" [ngClass]="rep.icon || 'pi-chart-bar'"></i>
+            </div>
+            <div class="box-info">
+              <span class="box-name-eng-main">{{ rep.display_name || rep.title || rep.table || rep.id }}</span>
+            </div>
+            <span *ngIf="isReportOpen(rep.id)" class="box-dot" title="Sheet open"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIBBON TAB 4: SETTINGS (Contextual to Active Open Sheet) -->
+      <div *ngIf="activeTopTab === 'settings'" class="ribbon-content-row">
+        <!-- Active Sheet Context Badge -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items" style="align-items: center; padding: 2px 6px;">
+            <div class="active-sheet-badge-pill" [title]="'Active Sheet: ' + currentActiveSheetTitle">
+              <i class="pi" [ngClass]="isCurrentSheetRough ? 'pi-file' : (isCurrentSheetReport ? 'pi-chart-bar' : 'pi-table')"></i>
+              <span class="sheet-title-text">{{ currentActiveSheetTitle }}</span>
+            </div>
+          </div>
+          <span class="ribbon-group-name">ACTIVE SHEET</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Table & Column Configuration -->
+        <div class="ribbon-group" *ngIf="isCurrentSheetTable">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    (click)="colConfigOp.toggle($event)"
+                    title="Configure visible columns, display order, labels and formats">
+              <i class="pi pi-sliders-h" style="color: #6366f1;"></i>
+              <span class="ribbon-tool-lbl">Columns</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">DISPLAY</span>
+        </div>
+
+        <div class="ribbon-v-sep" *ngIf="isCurrentSheetTable"></div>
+
+        <!-- Section: Triggers (UI & DB) -->
+        <div class="ribbon-group" *ngIf="isCurrentSheetTable">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    [disabled]="!isAdmin"
+                    [class.btn-disabled-role]="!isAdmin"
+                    (click)="isAdmin ? openUiSutrasModal() : null"
+                    [title]="isAdmin ? 'UI Trigger: Reactive cell formulas & custom client logic' : 'UI Triggers require Admin role'">
+              <i class="pi pi-desktop" [style.color]="isAdmin ? '#06b6d4' : '#94a3b8'"></i>
+              <span class="ribbon-tool-lbl">UI {{ !isAdmin ? '🔒' : '' }}</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    [disabled]="!isAdmin"
+                    [class.btn-disabled-role]="!isAdmin"
+                    (click)="isAdmin ? openBackendSutrasModal() : null"
+                    [title]="isAdmin ? 'DB Trigger: Server triggers, Raw SQL & database cascades' : 'DB Triggers require Admin role'">
+              <i class="pi pi-database" [style.color]="isAdmin ? '#f59e0b' : '#94a3b8'"></i>
+              <span class="ribbon-tool-lbl">DB {{ !isAdmin ? '🔒' : '' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">TRIGGERS</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Boolean Display Style (Only Checkbox and Badge) -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    [class.active]="booleanDisplayStyle === 'checkbox'"
+                    (click)="setBooleanStyle('checkbox')"
+                    title="Excel style clickable checkbox">
+              <i class="pi pi-check-square" style="color: #10b981;"></i>
+              <span class="ribbon-tool-lbl">Checkbox</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    [class.active]="booleanDisplayStyle === 'badge'"
+                    (click)="setBooleanStyle('badge')"
+                    title="Status pill badge (Yes / No)">
+              <i class="pi pi-tag" style="color: #3b82f6;"></i>
+              <span class="ribbon-tool-lbl">Badge</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">BOOLEAN</span>
+        </div>
+
+        <div class="ribbon-v-sep"></div>
+
+        <!-- Section: Users & Access Management -->
+        <div class="ribbon-group">
+          <div class="ribbon-group-items">
+            <button class="ribbon-tool-btn"
+                    (click)="openUserManagementModal()"
+                    title="User Management: Manage users, roles (Admin / Author) and rights">
+              <i class="pi pi-users" style="color: #ec4899;"></i>
+              <span class="ribbon-tool-lbl">Users</span>
+            </button>
+            <button class="ribbon-tool-btn"
+                    (click)="toggleRole()"
+                    [title]="'Current Role: ' + currentUser.role + ' (Click to toggle role)'">
+              <i class="pi" [ngClass]="isAdmin ? 'pi-shield' : 'pi-user'" [style.color]="isAdmin ? '#a855f7' : '#10b981'"></i>
+              <span class="ribbon-tool-lbl">{{ isAdmin ? 'Admin' : 'Author' }}</span>
+            </button>
+          </div>
+          <span class="ribbon-group-name">USERS & ACCESS</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- 2. FORMULA BAR ROW (ALWAYS VISIBLE) -->
+  <div class="formula-bar-row">
+    <div class="coord-box">{{ activeCoord }}</div>
+    <span class="active-col-chip">{{ activeColChip }}</span>
+
+    <span style="font-weight: 700; font-style: italic; color: var(--text-muted); margin: 0 4px;">fx</span>
+    <input type="text"
+           class="formula-input"
+           [ngModel]="formulaValue"
+           (ngModelChange)="onFormulaChange($event)"
+           placeholder="Select a cell or type value here...">
+
+    <!-- Direct DB Search & Record Counter (Shifted to Right Area of Formula Bar) -->
+    <div class="formula-bar-right-area">
+      <div class="formula-search-field">
+        <i class="pi pi-search search-ico"></i>
+        <input type="text"
+               class="formula-search-inp"
+               placeholder="Direct DB Search..."
+               [ngModel]="state.dbSearchQuery()"
+               (ngModelChange)="onDbSearchInput($event)">
+        <button *ngIf="state.dbSearchQuery()" class="clear-btn-inline" (click)="clearDbSearch()" title="Clear search">✕</button>
+        <span *ngIf="state.isLoadingDb()" class="spin-inline"><i class="pi pi-spin pi-spinner"></i></span>
+      </div>
+      <div *ngIf="!isCurrentSheetRough" class="formula-record-pill" title="Total database records">
+        <i class="pi pi-database"></i>
+        <span>{{ state.rows().length }} / {{ state.totalDbRecords() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column Config Popover (Replicating Legacy Studio) -->
+  <!-- Column Config Popover (Unified 2-Section Double-Width Panel) -->
+  <p-overlayPanel #colConfigOp [dismissable]="true" styleClass="sutram-col-config-popover shadow-lg">
+    <ng-template pTemplate="content">
+      <div class="col-dd-split-container">
+        
+        <!-- ── LEFT PANE: COLUMN VISIBILITY & GROUPS ── -->
+        <div class="col-dd-left-pane">
+          <!-- Header: Search Bar & Actions -->
+          <div class="col-dd-header">
+            <div class="col-dd-search-wrap">
+              <i class="pi pi-search col-dd-search-icon"></i>
+              <input type="text"
+                     class="col-dd-search-input"
+                     placeholder="Search columns / FK / fx..."
+                     [(ngModel)]="colSearchQuery" />
+              <button *ngIf="colSearchQuery"
+                      type="button"
+                      class="btn-clear-search-inline"
+                      (click)="colSearchQuery = ''">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+
+            <div class="col-dd-actions">
+              <div class="col-dd-actions-left">
+                <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(true)">All</button>
+                <button type="button" class="col-dd-act-btn" (click)="selectAllColumns(false)">None</button>
+                <button type="button" class="col-dd-act-btn" (click)="resetDefaultColumns()">Reset</button>
+              </div>
+              <span class="col-dd-count">{{ selectedColumnKeys.size }} of {{ allConfigColumns.length }} visible</span>
+            </div>
+          </div>
+
+          <!-- Body: Standard Columns, Computed UI Formulas, FK Groups -->
+          <div class="col-dd-body">
+            
+            <!-- 1. Standard Direct Columns -->
+            <ng-container *ngIf="filteredDirectCols.length > 0">
+              <div class="col-dd-section-title">
+                <i class="pi pi-list" style="font-size: 10px; margin-right: 4px;"></i> Standard Columns
+              </div>
+              <div *ngFor="let col of filteredDirectCols; trackBy: trackByColKey"
+                   class="col-dd-item"
+                   (click)="toggleColumnCheckbox(col.key)">
+                <div class="col-dd-item-left">
+                  <input type="checkbox"
+                         class="custom-check"
+                         [checked]="isColumnSelected(col.key)"
+                         style="pointer-events: none;" />
+                  <span class="col-dd-item-name" [title]="col.name">
+                    {{ col.name }}<span *ngIf="col.not_null" style="color: #ef4444; margin-left: 2px;">*</span>
+                  </span>
+                </div>
+                <span class="type-badge">{{ col.type || 'string' }}</span>
+              </div>
+            </ng-container>
+
+            <!-- 2. UI Formulas & Computed Temp Columns (fx) -->
+            <ng-container *ngIf="filteredComputedCols.length > 0">
+              <div class="col-dd-section-title fx-section-title">
+                <i class="pi pi-bolt" style="color: #8b5cf6; font-size: 10px; margin-right: 4px;"></i> UI Formulas & Temp (fx)
+              </div>
+              <div *ngFor="let col of filteredComputedCols; trackBy: trackByColKey"
+                   class="col-dd-item fx-item"
+                   (click)="toggleColumnCheckbox(col.key)">
+                <div class="col-dd-item-left">
+                  <input type="checkbox"
+                         class="custom-check"
+                         [checked]="isColumnSelected(col.key)"
+                         style="pointer-events: none;" />
+                  <span class="badge-fx-mini">fx</span>
+                  <span class="col-dd-item-name" [title]="col.short_name || col.name">
+                    <strong>{{ col.short_name || col.name }}</strong>
+                    <span *ngIf="col.short_name && col.short_name !== col.key" style="font-size: 10px; color: var(--text-muted); margin-left: 4px;">({{ col.key }})</span>
+                  </span>
+                </div>
+                <span class="type-badge badge-fx-type">formula</span>
+              </div>
+            </ng-container>
+
+            <!-- 3. Foreign Key Reference Groups -->
+            <ng-container *ngIf="filteredFkGroups.length > 0">
+              <div class="col-dd-section-title" style="margin-top: 8px;">
+                <i class="pi pi-link" style="color: var(--primary, #4f46e5); font-size: 10px; margin-right: 4px;"></i> FK Reference Groups
+              </div>
+              <div *ngFor="let grp of filteredFkGroups; trackBy: trackByGroupName"
+                   class="col-dd-group"
+                   [class.fk-active-group]="grp.selectedCount > 0">
+                <!-- Group Accordion Header -->
+                <div class="col-dd-group-header">
+                  <div class="col-dd-group-left"
+                       (click)="toggleFkGroupExpand(grp.name)"
+                       style="cursor: pointer; flex-grow: 1;">
+                    <i class="pi pi-chevron-right fk-expand-toggle"
+                       [class.rotated]="isFkGroupExpanded(grp.name)"></i>
+                    <span class="col-dd-item-name">
+                      <strong style="text-transform: capitalize;">{{ grp.name }}</strong>
+                      <span style="font-size: 10px; color: var(--text-muted); font-weight: 400; margin-left: 3px;">({{ grp.refTable }})</span>
+                    </span>
+                  </div>
+                  <div class="col-dd-group-right"
+                       (click)="toggleFkGroupAll(grp.name)"
+                       style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <input type="checkbox"
+                           class="custom-check"
+                           [checked]="grp.isAllChecked"
+                           style="pointer-events: none;" />
+                    <span class="fk-group-pill"
+                          [style.background]="grp.selectedCount > 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(125, 125, 125, 0.1)'"
+                          [style.color]="grp.selectedCount > 0 ? '#059669' : 'var(--text-muted)'">
+                      {{ grp.selectedCount }}/{{ grp.totalCount }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Group Sub-items (when expanded) -->
+                <div *ngIf="isFkGroupExpanded(grp.name)" class="col-dd-group-items">
+                  <div *ngFor="let col of grp.columns; trackBy: trackByColKey"
+                       class="col-dd-item"
+                       (click)="toggleColumnCheckbox(col.key)">
+                    <div class="col-dd-item-left">
+                      <input type="checkbox"
+                             class="custom-check"
+                             [checked]="isColumnSelected(col.key)"
+                             style="pointer-events: none;" />
+                      <span class="col-dd-item-name"
+                            [style.font-weight]="col.is_fk_main ? '600' : 'normal'"
+                            [title]="col.name">
+                        {{ col.short_name || col.name }}
+                      </span>
+                    </div>
+                    <span class="type-badge">{{ col.is_fk_main ? 'display' : (col.is_fk_raw ? 'id' : (col.type || 'string')) }}</span>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Empty State -->
+            <div *ngIf="filteredDirectCols.length === 0 && filteredComputedCols.length === 0 && filteredFkGroups.length === 0" class="col-dd-empty">
+              <i class="pi pi-search me-1"></i> No matching columns found
+            </div>
+          </div>
+        </div>
+
+        <!-- ── RIGHT PANE: SELECTED COLUMNS ORDER & FORMATTING ── -->
+        <div class="col-dd-right-pane">
+          <!-- Right Header -->
+          <div class="col-dd-right-header">
+            <div class="col-dd-right-title-wrap">
+              <span class="col-dd-right-title">
+                <i class="pi pi-sliders-v text-primary me-1"></i> Selected Columns (क्रम एवं प्रारूप)
+              </span>
+              <span class="col-dd-right-badge">{{ selectedOrderedColumns.length }} Visible</span>
+            </div>
+            <div class="col-dd-right-sub">
+              Use <strong style="color: var(--primary, #4f46e5);">▲ / ▼</strong> to reorder, edit labels, or select formats
+            </div>
+          </div>
+
+          <!-- Right Body: Scrollable Cards -->
+          <div class="col-dd-right-body">
+            <div *ngIf="selectedOrderedColumns.length === 0" class="col-dd-empty">
+              <i class="pi pi-info-circle me-1"></i> No columns currently visible. Select columns on the left.
+            </div>
+
+            <div *ngFor="let col of selectedOrderedColumns; let i = index; trackBy: trackByColKey"
+                 class="col-selected-card">
+              
+              <!-- 1. Left: Order Index & Move Up / Down -->
+              <div class="col-card-order-controls">
+                <span class="col-card-letter-badge" [title]="'Column ' + getColLetter(i)">
+                  {{ getColLetter(i) }}
+                </span>
+                <div class="col-card-arrows">
+                  <button type="button"
+                          class="btn-arrow"
+                          [disabled]="i === 0"
+                          (click)="moveSelectedColUp(col.key)"
+                          title="Move Left / Earlier">
+                    <i class="pi pi-chevron-up"></i>
+                  </button>
+                  <button type="button"
+                          class="btn-arrow"
+                          [disabled]="i === selectedOrderedColumns.length - 1"
+                          (click)="moveSelectedColDown(col.key)"
+                          title="Move Right / Later">
+                    <i class="pi pi-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Middle: Column Identity & Editable Label -->
+              <div class="col-card-meta">
+                <div class="col-card-meta-top">
+                  <span class="col-card-key-txt" [title]="col.key">{{ col.col_name || col.key }}</span>
+                  <span *ngIf="col.is_temp" class="badge-fx-mini" title="Computed Temp Column">⚡ fx</span>
+                  <span *ngIf="col.is_fk_main" class="badge-fk-pill" [title]="'FK Display: ' + col.ref_table">🔗 {{ col.ref_table }}</span>
+                  <span *ngIf="col.is_fk_subcol" class="badge-sub-pill" [title]="'FK Subcol: ' + col.ref_table">↳ {{ col.sub_col_name }}</span>
+                  <span *ngIf="col.is_fk_raw" class="badge-raw-pill" title="Raw foreign key ID"># id</span>
+                  <span *ngIf="!col.is_temp && !col.is_fk_main && !col.is_fk_subcol && !col.is_fk_raw" class="badge-std-pill">{{ col.type || 'text' }}</span>
+                </div>
+                <div class="col-card-label-wrap">
+                  <input type="text"
+                         class="col-card-label-inp"
+                         [(ngModel)]="col.label"
+                         (ngModelChange)="onColumnLabelChange(col)"
+                         [placeholder]="col.short_name || col.name || col.key"
+                         title="Edit header label" />
+                </div>
+              </div>
+
+              <!-- 3. Right: Formatting Controls & Hide Button -->
+              <div class="col-card-format-ctrls">
+                <!-- Date Format Select -->
+                <div *ngIf="isDateCol(col)" class="col-card-select-wrap">
+                  <select class="col-card-select"
+                          [(ngModel)]="col.display_format"
+                          (ngModelChange)="onColumnFormatChange(col)"
+                          title="Choose date display format">
+                    <option [ngValue]="null">Default Date</option>
+                    <option *ngFor="let opt of dateFormatOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+
+                <!-- Number Format Select -->
+                <div *ngIf="isNumberCol(col)" class="col-card-select-wrap">
+                  <select class="col-card-select"
+                          [(ngModel)]="col.display_format"
+                          (ngModelChange)="onColumnFormatChange(col)"
+                          title="Choose number decimal format">
+                    <option [ngValue]="null">Raw Number</option>
+                    <option *ngFor="let opt of numberDecimalOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+
+                <!-- Static Indicator for Text / Fx -->
+                <div *ngIf="!isDateCol(col) && !isNumberCol(col)" class="col-card-plain-type">
+                  <span *ngIf="col.is_temp" class="text-purple-xs">Formula (fx)</span>
+                  <span *ngIf="!col.is_temp" class="text-muted-xs">{{ col.type || 'Text' }}</span>
+                </div>
+
+                <!-- Hide / Remove Column Button -->
+                <button type="button"
+                        class="btn-col-hide"
+                        (click)="toggleColumnCheckbox(col.key)"
+                        title="Hide this column from sheet">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer: Auto-save status hint + Done button -->
+      <div class="col-dd-footer">
+        <span class="small text-muted" style="font-size: 10.5px;">
+          <i class="pi pi-check-circle text-success me-1"></i> Live updates active & saved to table
+        </span>
+        <button type="button"
+                class="btn btn-sm btn-primary py-1 px-3"
+                style="font-size: 11.5px; font-weight: 600;"
+                (click)="colConfigOp.hide()">
+          Done
+        </button>
+      </div>
+    </ng-template>
+  </p-overlayPanel>
+
+  <!-- 3. STATUS & BATCH FIX SUGGESTION STRIP (ALWAYS VISIBLE) -->
+  <div class="status-strip" [ngClass]="statusStripClass">
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <i class="pi" [ngClass]="statusStripIcon"></i>
+      <span>{{ statusStripMessage }}</span>
+    </div>
+    <div *ngIf="!isCurrentSheetReport && state.unresolvedCorrectionsCount() > 0">
+      <button class="cmd-btn cmd-btn-warning" style="padding: 2px 8px;" (click)="showSidebar = true">
+        <i class="pi pi-bolt"></i> गलतियाँ ({{ state.unresolvedCorrectionsCount() }})
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. SPREADSHEET CANVAS (ALWAYS VISIBLE! 100% REMAINING HEIGHT) -->
+  <main class="spreadsheet-canvas flex-grow-1" [style.zoom]="zoomLevel">
+    <sutram-grid #grid
+                 [headers]="visibleHeaders"
+                 [rows]="state.rows()"
+                 [filterOnlyErrors]="state.filterOnlyErrors()"
+                 [enableDelete]="enableDelete"
+                 [isBold]="isBoldActive"
+                 [textAlign]="textAlign"
+                 [booleanStyle]="booleanDisplayStyle"
+                 (loadMore)="onLoadMore()"
+                 (filterChanged)="onGridFilterChanged()"
+                 (sortChanged)="onGridSortChanged()"
+                 (cellChanged)="onGridCellChanged($event)"
+                 (solveAllTriggered)="onGridSolveAll($event)"
+                 (openConfig)="colConfigOp.toggle($event)">
+    </sutram-grid>
+  </main>
+
+  <!-- 5. BOTTOM MULTI-SHEET TAB BAR & STATUS BAR -->
+  <footer class="studio-footer">
+    <!-- Sub-row A: Sheet Tabs Strip -->
+    <div class="sheet-tabs-bar">
+      <div *ngFor="let tab of sheetTabs"
+           class="tab-pill"
+           [class.active-tab]="activeSheetId === tab.id"
+           (click)="switchSheet(tab.id)"
+           (dblclick)="startRenameTab(tab, $event)"
+           (contextmenu)="openTabContextMenu($event, tab)">
+        <i class="pi" [ngClass]="tab.icon" style="font-size: 11px;"></i>
+
+        <!-- Regular Sheet Tab Title -->
+        <span *ngIf="renamingTabId !== tab.id"
+              class="tab-title-text"
+              title="डबल-क्लिक या राइट-क्लिक करके नाम बदलें (Double-click or right-click to rename)">
+          {{ tab.title }}
+        </span>
+
+        <!-- Inline Sheet Rename Input -->
+        <input *ngIf="renamingTabId === tab.id"
+               [id]="'tab-rename-input-' + tab.id"
+               type="text"
+               class="tab-inline-rename-input"
+               [(ngModel)]="renamingTabTitle"
+               (keyup.enter)="saveTabRename(tab)"
+               (keyup.escape)="cancelTabRename()"
+               (blur)="saveTabRename(tab)"
+               (click)="$event.stopPropagation()">
+
+        <!-- Record Count Badge -->
+        <span *ngIf="tab.isLoaded && (tab.recordCount || 0) > 0" class="sheet-tab-badge">
+          {{ tab.recordCount }}
+        </span>
+
+        <!-- Inline Rename Button for Rough Sheets -->
+        <button *ngIf="renamingTabId !== tab.id && (tab.type === 'rough' || tab.id.startsWith('rough_') || tab.id.startsWith('sheet_'))"
+                type="button"
+                class="tab-edit-btn"
+                (click)="startRenameTab(tab, $event)"
+                title="शीट का नाम बदलें (Rename sheet)">
+          <i class="pi pi-pencil" style="font-size: 8.5px;"></i>
+        </button>
+
+        <!-- Close Sheet Button -->
+        <button *ngIf="sheetTabs.length > 1"
+                type="button"
+                class="tab-close-btn"
+                (click)="closeSheet(tab.id, $event)"
+                title="Close sheet">✕</button>
+      </div>
+
+      <button class="add-tab-btn" (click)="addNewBlankSheet()" title="Add Blank Sheet">
+        <i class="pi pi-plus" style="font-size: 10px;"></i>
+      </button>
+    </div>
+
+    <!-- Tab Context Menu (Right Click on Sheet Tab) -->
+    <div *ngIf="tabContextMenu.visible"
+         class="tab-context-menu"
+         [style.left.px]="tabContextMenu.x"
+         [style.top.px]="tabContextMenu.y"
+         (click)="$event.stopPropagation()">
+      <div class="tab-context-menu-item"
+           (click)="startRenameTab(tabContextMenu.tab!, $event)">
+        <i class="pi pi-pencil text-primary"></i>
+        <span>नाम बदलें (Rename Sheet)</span>
+      </div>
+      <div *ngIf="tabContextMenu.tab"
+           class="tab-context-menu-item text-danger"
+           (click)="deleteSheet(tabContextMenu.tab, $event)">
+        <i class="pi pi-trash"></i>
+        <span>शीट हटाएं / डिलीट करें (Delete Sheet)</span>
+      </div>
+    </div>
+
+    <!-- Sub-row B: Status Bar with Scale / Zoom Controls -->
+    <div class="bottom-status-subrow">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>Sheet: {{ activeSheetId }}</span>
+        <span>Rows: {{ state.rows().length }}{{ state.totalDbRecords() > state.rows().length ? ' / ' + state.totalDbRecords() : '' }}</span>
+        <span *ngIf="state.isLoadingDb()" class="text-primary small fw-semibold">
+          <i class="pi pi-spin pi-spinner me-1"></i>Loading more...
+        </span>
+        <span *ngIf="state.deletedRowIds().length > 0" class="badge bg-soft-warning text-warning small fw-semibold">
+          <i class="pi pi-trash me-1"></i>{{ state.deletedRowIds().length }} Deleted
+        </span>
+        <span *ngIf="state.stats().errorRows === 0" style="color: #10b981; font-weight: 600;">✓ 100% In Sync</span>
+        <span *ngIf="state.stats().errorRows > 0" style="color: #ef4444; font-weight: 600;">{{ state.stats().errorRows }} त्रुटियाँ</span>
+
+        <!-- Last Sync Status of the active sheet -->
+        <span *ngIf="lastSyncPerSheet[activeSheetId]"
+              class="last-sync-badge"
+              [class.sync-error]="lastSyncPerSheet[activeSheetId].hasError">
+          <i class="pi pi-history me-1"></i>अंतिम सिंक ({{ lastSyncPerSheet[activeSheetId].time }}): {{ lastSyncPerSheet[activeSheetId].summary }}
+        </span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 10.5px; opacity: 0.8;">Ctrl+S to Sync | Enter next row | Tab next col | Click # to select row</span>
+
+        <!-- Scale / Zoom Controls -->
+        <div class="zoom-controls">
+          <button class="zoom-btn" (click)="zoomOut()" title="Zoom Out (-10%)"><i class="pi pi-minus"></i></button>
+          <span class="zoom-display" (click)="resetZoom()" title="Reset to 100%">{{ (zoomLevel * 100).toFixed(0) }}%</span>
+          <button class="zoom-btn" (click)="zoomIn()" title="Zoom In (+10%)"><i class="pi pi-plus"></i></button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 6. Floating Sync Toast HUD (Live Progress & Completion) -->
+  <div *ngIf="syncToast.visible" class="sync-toast-hud shadow-lg">
+    <div class="sync-toast-header">
+      <div class="sync-toast-title">
+        <i class="pi"
+           [ngClass]="syncToast.inProgress ? 'pi-spin pi-sync text-primary' : (syncToast.hasError ? 'pi-exclamation-circle text-warning' : 'pi-check-circle text-success')"></i>
+        <span>{{ syncToast.title }}</span>
+      </div>
+      <button class="sync-toast-close" (click)="dismissSyncToast()">✕</button>
+    </div>
+
+    <!-- Live Progress Bar when Sync is running -->
+    <div *ngIf="syncToast.inProgress" class="sync-progress-wrap px-3 pt-2">
+      <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 11px; color: var(--text-muted, #64748b);">
+        <span>{{ syncToast.percentage }}% पूर्ण</span>
+        <span>{{ state.importProgress().current }} / {{ state.importProgress().total }}</span>
+      </div>
+      <div class="sync-progress-track">
+        <div class="sync-progress-bar" [style.width.%]="syncToast.percentage"></div>
+      </div>
+    </div>
+
+    <div class="sync-toast-body">
+      <div class="sync-toast-stats">
+        <span *ngIf="syncToast.inserted > 0" class="sync-badge-chip chip-success">
+          <i class="pi pi-plus"></i> {{ syncToast.inserted }} Inserted
+        </span>
+        <span *ngIf="syncToast.updated > 0" class="sync-badge-chip chip-info">
+          <i class="pi pi-refresh"></i> {{ syncToast.updated }} Updated
+        </span>
+        <span *ngIf="syncToast.deleted > 0" class="sync-badge-chip chip-warning">
+          <i class="pi pi-trash"></i> {{ syncToast.deleted }} Deleted
+        </span>
+        <span *ngIf="syncToast.failed > 0" class="sync-badge-chip chip-danger">
+          <i class="pi pi-times"></i> {{ syncToast.failed }} Failed
+        </span>
+      </div>
+      <div *ngIf="syncToast.errors.length > 0" class="sync-toast-errors">
+        <div *ngFor="let err of syncToast.errors">• {{ err }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Header Scanner & Dual-Mode Open File Modal -->
+  <sutram-header-scanner [(visible)]="showScannerModal"
+                         [fileName]="uploadedFileName"
+                         [sheetNames]="uploadedSheetNames"
+                         [currentSheetName]="selectedUploadedSheet"
+                         [sheetHeaders]="uploadedSheetHeaders"
+                         [sampleRows]="uploadedSampleRows"
+                         [totalRows]="uploadedTotalRows"
+                         [tablesList]="tablesList"
+                         [selectedTable]="scannerTargetTable"
+                         [report]="scanReport"
+                         [availableHeaders]="scannerAvailableHeaders"
+                         [isTableConfigLoading]="isScannerConfigLoading"
+                         [savedSheets]="savedSheetsList"
+                         (sheetChange)="onUploadedSheetChange($event)"
+                         (targetTableChange)="onScannerTargetTableChange($event)"
+                         (openDirectNormal)="onDirectOpenAsNormalSheet($event)"
+                         (openMappedToTable)="onScannerConfirmedMapped($event)"
+                         (openSavedSheet)="onOpenSavedSheet($event)"
+                         (deleteSavedSheet)="onDeleteSavedSheet($event)"
+                         (triggerFileInput)="triggerBrowseFile()">
+  </sutram-header-scanner>
+
+  <!-- Batch Correction Sidebar -->
+  <sutram-correction-sidebar [(visible)]="showSidebar"
+                             [groups]="state.correctionGroups()">
+  </sutram-correction-sidebar>
+
+
+  <!-- ── 2. UI Sutras (Client-side Reactive Formulas) Dialog ───── -->
+  <p-dialog [(visible)]="showUiSutrasModal"
+            [modal]="true"
+            [dismissableMask]="true"
+            [draggable]="false"
+            [resizable]="false"
+            [style]="{ width: '94vw', maxWidth: '980px' }"
+            styleClass="sutram-studio-dialog"
+            header="🧮 UI सूत्र विन्यास (Live Reactive Formulas): {{ currentActiveSheetTitle }}">
+    <div class="dialog-body-wrap">
+      <div class="dialog-info-banner info">
+        <i class="pi pi-info-circle banner-icon"></i>
+        <span>जब उपयोगकर्ता ग्रिड में डेटा टाइप करता है, तब यह सूत्र तत्काल गणना करके संबंधित कॉलम को स्वतः अपडेट करते हैं।</span>
+      </div>
+
+      <div *ngIf="!isAdmin" class="dialog-info-banner warning mb-2">
+        <i class="pi pi-lock banner-icon"></i>
+        <span><strong>Author Mode (View Only):</strong> केवल Admin को UI सूत्र जोड़ने, बदलने या हटाने का अधिकार है। (Only Admin can create/edit/delete triggers)</span>
+      </div>
+
+      <!-- Add New Formula Card -->
+      <div class="dialog-subcard" *ngIf="isAdmin">
+        <div class="subcard-title mb-2">Add UI Reactive Trigger (नया UI सूत्र जोड़ें)</div>
+
+        <div class="subcard-grid d-flex align-items-end gap-2">
+          <!-- Target Column Dropdown (1st option is Temp Column) -->
+          <div [style.flex]="newUiSutra.is_temp ? '0 0 260px' : '0 0 300px'">
+            <label class="dialog-label">Target Column (लक्ष्य कॉलम):</label>
+            <p-dropdown [options]="targetColDropdownOptions"
+                        [(ngModel)]="selectedTargetColValue"
+                        (onChange)="onTargetColChange($event)"
+                        (ngModelChange)="onTargetColChange($event)"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="-- Select Target Column --"
+                        styleClass="dialog-ctrl-dropdown"
+                        [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+
+          <!-- When Temp Column is selected: Display Name input shows up immediately! -->
+          <div *ngIf="newUiSutra.is_temp" style="flex: 0 0 220px;">
+            <label class="dialog-label text-primary">Display Name (कॉलम शीर्षक):</label>
+            <input type="text"
+                   pInputText
+                   class="dialog-ctrl-input font-bold"
+                   [(ngModel)]="newUiSutra.display_name"
+                   placeholder="e.g. Age, Full Name, Days Left" />
+          </div>
+
+          <!-- Formula / Expression / Code input -->
+          <div style="flex: 1 1 auto; min-width: 220px;">
+            <label class="dialog-label">Formula / Expression / Code (e.g. [colB], [qty] * [rate], AGE([dob])):</label>
+            <input type="text"
+                   pInputText
+                   class="dialog-ctrl-input font-mono"
+                   [(ngModel)]="newUiSutra.formula"
+                   placeholder="e.g. [colB] or [qty] * [rate] or AGE([dob])" />
+          </div>
+
+          <!-- Add Button -->
+          <div style="flex: 0 0 75px;">
+            <button pButton type="button"
+                    icon="pi pi-plus"
+                    label="Add"
+                    class="p-button-sm p-button-success dialog-btn-add w-100"
+                    [disabled]="!selectedTargetColValue || (newUiSutra.is_temp ? !newUiSutra.display_name?.trim() : !newUiSutra.target_col) || !newUiSutra.formula?.trim()"
+                    (click)="addUiSutra()">
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Column Insert Chips: Current Table Columns -->
+        <div class="chips-row">
+          <span class="chips-label">Table Columns:</span>
+          <span *ngFor="let col of currentTableColumns"
+                class="quick-chip"
+                (click)="insertColIntoFormula(col.name || col.col_name)"
+                title="वर्तमान तालिका का कॉलम">
+            + [{{ col.name || col.col_name }}]
+          </span>
+        </div>
+
+        <!-- Quick Reference Columns Chips: Available for Formula calculations -->
+        <div class="chips-row mt-1" *ngIf="referenceColumns.length > 0">
+          <span class="chips-label">Ref Columns (सूत्र हेतु):</span>
+          <span *ngFor="let rc of referenceColumns"
+                class="quick-chip chip-orange"
+                (click)="insertColIntoFormula(rc.name || rc.key)"
+                title="रेफरेंस तालिका का कॉलम (केवल सूत्र/फॉर्मूला में डेटा उपयोग के लिए)">
+            + [{{ rc.name || rc.key }}]
+          </span>
+        </div>
+
+        <!-- Quick Helpers Insert Chips -->
+        <div class="chips-row mt-1">
+          <span class="chips-label">Helpers:</span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('AGE([dob])')" title="Calculate age from Date of Birth">
+            + AGE([dob])
+          </span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('DAYS([end_date], [start_date])')" title="Difference in days">
+            + DAYS(d1, d2)
+          </span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('IF([condition], true_val, false_val)')" title="Conditional logic">
+            + IF(cond, a, b)
+          </span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('ROUND([val], 2)')" title="Round number">
+            + ROUND(n, 2)
+          </span>
+          <span class="quick-chip chip-blue" (click)="insertFnIntoFormula('UPPER([text])')" title="Uppercase text">
+            + UPPER(str)
+          </span>
+        </div>
+      </div>
+
+      <!-- Existing Formulas List -->
+      <div class="subcard-title mb-1">सक्रिय सूत्र (Active UI Formulas):</div>
+      <div *ngIf="uiSutrasList.length === 0" class="dialog-empty-box">
+        अभी इस तालिका में कोई UI सूत्र नहीं है। ऊपर दिए गए फॉर्म से नया सूत्र जोड़ें।
+      </div>
+
+      <div *ngIf="uiSutrasList.length > 0" class="dialog-table-card">
+        <table class="dialog-data-table">
+          <thead>
+            <tr>
+              <th style="width: 38px;" class="text-center">#</th>
+              <th style="width: 100px;">प्रकार (Type)</th>
+              <th style="width: 140px;">कॉलम नाम</th>
+              <th>समीकरण (Formula)</th>
+              <th style="width: 50px;" class="text-center">हटाएं</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of uiSutrasList; let i = index">
+              <td class="text-center text-muted font-mono col-idx">{{ i + 1 }}</td>
+              <td>
+                <span *ngIf="s.is_temp" class="quick-chip chip-blue font-bold">
+                  <i class="pi pi-eye me-1"></i>Temp (fx)
+                </span>
+                <span *ngIf="!s.is_temp" class="quick-chip chip-green font-bold">
+                  <i class="pi pi-database me-1"></i>DB Column
+                </span>
+              </td>
+              <td class="font-mono">
+                <strong>{{ s.display_name || s.target_col }}</strong>
+                <span *ngIf="s.is_temp && s.target_col" class="text-muted-xs font-mono ms-1">({{ s.target_col }})</span>
+              </td>
+              <td class="font-mono text-primary formula-cell">{{ s.formula }}</td>
+              <td class="text-center">
+                <button *ngIf="isAdmin" type="button" class="mini-del-btn" (click)="removeUiSutra(i)" title="हटाएं">
+                  <i class="pi pi-trash"></i>
+                </button>
+                <span *ngIf="!isAdmin" class="text-muted-xs">🔒 View</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <button pButton type="button" label="रद्द करें (Cancel)" class="p-button-text p-button-sm dialog-btn-cancel" (click)="showUiSutrasModal = false"></button>
+        <button *ngIf="isAdmin" pButton type="button" label="सेव करें (Save Formulas)" icon="pi pi-check" class="p-button-sm p-button-primary dialog-btn-save" [loading]="isSavingUiSutras" (click)="saveUiSutras()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- ── 3. Backend Sutras (Server Database Triggers) Dialog ───── -->
+  <p-dialog [(visible)]="showBackendSutrasModal"
+            [modal]="true"
+            [dismissableMask]="true"
+            [draggable]="false"
+            [resizable]="false"
+            [style]="{ width: '94vw', maxWidth: '980px' }"
+            styleClass="sutram-studio-dialog"
+            header="⚡ बैकएंड सूत्र विन्यास (Server Database Triggers): {{ currentActiveSheetTitle }}">
+    <div class="dialog-body-wrap">
+      <div class="dialog-info-banner warning">
+        <i class="pi pi-bolt banner-icon"></i>
+        <span>सर्वर-साइड डेटाबेस ट्रिगर — इस तालिका में डेटा इन्सर्ट, अपडेट या डिलीट होने पर स्वतः कस्टम SQL क्वेरी या क्रॉस-तालिका सिंक चलाएं।</span>
+      </div>
+
+      <div *ngIf="!isAdmin" class="dialog-info-banner warning mb-2">
+        <i class="pi pi-lock banner-icon"></i>
+        <span><strong>Author Mode (View Only):</strong> केवल Admin को बैकएंड ट्रिगर जोड़ने या हटाने का अधिकार है। (Only Admin can create/delete database triggers)</span>
+      </div>
+
+      <!-- Add Trigger Card -->
+      <div class="dialog-subcard" *ngIf="isAdmin">
+        <div class="subcard-title">नया सर्वर ट्रिगर बनाएं (Create Database Trigger)</div>
+        
+        <!-- Row 1: Name, Event, Action Type -->
+        <div class="subcard-grid mb-2">
+          <div class="subcard-col-4">
+            <label class="dialog-label">ट्रिगर का नाम (Identifier):</label>
+            <input type="text"
+                   pInputText
+                   class="dialog-ctrl-input font-mono"
+                   [(ngModel)]="newTriggerDef.trigger_name"
+                   placeholder="e.g. trg_stock_update" />
+          </div>
+          <div class="subcard-col-3">
+            <label class="dialog-label">इवेंट (Event):</label>
+            <p-dropdown [options]="[{label:'INSERT (नई पंक्ति)', value:'INSERT'},{label:'UPDATE (संशोधन)', value:'UPDATE'},{label:'DELETE (विलोपन)', value:'DELETE'}]"
+                        [(ngModel)]="newTriggerDef.event"
+                        styleClass="dialog-ctrl-dropdown"
+                        [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+          <div class="subcard-col-5">
+            <label class="dialog-label">कार्रवाई प्रकार (Action Type):</label>
+            <p-dropdown [options]="[{label:'⚡ Raw SQL (कस्टम SQL क्वेरी — अनुशंसित)', value:'raw_sql'},{label:'🔄 Update Row (अन्य तालिका अपडेट)', value:'update_row'},{label:'➕ Insert Row (अन्य तालिका में इन्सर्ट)', value:'insert_row'},{label:'❌ Delete Row (अन्य तालिका से विलोपन)', value:'delete_row'}]"
+                        [(ngModel)]="newTriggerDef.action_type"
+                        styleClass="dialog-ctrl-dropdown"
+                        [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+        </div>
+
+        <!-- Row 2A: Raw SQL Query Editor (Default & Primary Feature) -->
+        <div *ngIf="newTriggerDef.action_type === 'raw_sql'" class="mt-2">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <label class="dialog-label mb-0">SQL क्वेरी (Raw SQL Query):</label>
+            <span class="text-muted-xs font-mono">नया मान: <code>:new.col</code> | पुराना मान: <code>:old.col</code></span>
+          </div>
+          <textarea rows="3"
+                    class="dialog-ctrl-textarea font-mono"
+                    [(ngModel)]="newTriggerDef.raw_sql"
+                    placeholder="UPDATE target_table SET col = col + :new.qty WHERE id = :new.target_id;"></textarea>
+          
+          <!-- Quick Column Tags for SQL -->
+          <div class="chips-row mt-1">
+            <span class="chips-label">Columns:</span>
+            <span *ngFor="let h of visibleHeaders"
+                  class="quick-chip chip-green"
+                  (click)="insertColIntoTriggerSql(h.name, ':new.')">
+              +:new.{{ h.name }}
+            </span>
+            <ng-container *ngIf="newTriggerDef.event !== 'INSERT'">
+              <span *ngFor="let h of visibleHeaders"
+                    class="quick-chip chip-orange"
+                    (click)="insertColIntoTriggerSql(h.name, ':old.')">
+                +:old.{{ h.name }}
+              </span>
+            </ng-container>
+          </div>
+
+          <!-- Quick Target Table Chips -->
+          <div class="chips-row mt-1" *ngIf="tablesList.length > 0">
+            <span class="chips-label">Tables:</span>
+            <span *ngFor="let t of tablesList"
+                  class="quick-chip chip-blue"
+                  (click)="insertTextIntoTriggerSql(t.table)">
+              {{ t.table }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Row 2B: OR Target Table & Field Map for update_row/insert_row -->
+        <div *ngIf="newTriggerDef.action_type !== 'raw_sql'" class="subcard-grid mt-2">
+          <div class="subcard-col-5">
+            <label class="dialog-label">Target Table (लक्ष्य तालिका):</label>
+            <p-dropdown [options]="tablesList"
+                        [(ngModel)]="newTriggerDef.target_table"
+                        optionLabel="display_name"
+                        optionValue="table"
+                        [filter]="true"
+                        filterBy="display_name,table"
+                        placeholder="-- Select Target Table --"
+                        styleClass="dialog-ctrl-dropdown"
+                        [appendTo]="'body'">
+              <ng-template let-item pTemplate="item">
+                <div class="d-flex align-items-center justify-content-between" style="width: 100%;">
+                  <span>{{ item.display_name }}</span>
+                  <span class="text-muted-xs font-mono ms-2">{{ item.table }}</span>
+                </div>
+              </ng-template>
+              <ng-template let-item pTemplate="selectedItem">
+                <span class="font-semibold">{{ item.display_name }}</span>
+                <span class="text-muted-xs font-mono ms-1">({{ item.table }})</span>
+              </ng-template>
+            </p-dropdown>
+          </div>
+          <div class="subcard-col-7">
+            <label class="dialog-label">Field Mapping JSON (फील्ड मैप):</label>
+            <input type="text"
+                   pInputText
+                   class="dialog-ctrl-input font-mono"
+                   [(ngModel)]="newTriggerDef.field_map_str"
+                   placeholder='{"stock_qty": ":new.qty"}' />
+          </div>
+        </div>
+
+        <!-- Submit Row -->
+        <div class="d-flex justify-content-end mt-2 pt-1">
+          <button pButton type="button"
+                  icon="pi pi-bolt"
+                  label="ट्रिगर बनाएं (Create Trigger)"
+                  class="p-button-sm p-button-warning dialog-btn-add"
+                  [disabled]="!newTriggerDef.trigger_name || (newTriggerDef.action_type === 'raw_sql' && !newTriggerDef.raw_sql)"
+                  (click)="createBackendTrigger()">
+          </button>
+        </div>
+      </div>
+
+      <!-- Existing Triggers List -->
+      <div class="subcard-title mb-1">सक्रिय बैकएंड ट्रिगर्स (Active Triggers):</div>
+      <div *ngIf="backendTriggersList.length === 0" class="dialog-empty-box">
+        अभी इस तालिका में कोई बैकएंड ट्रिगर सक्रिय नहीं है। ऊपर दिए गए फॉर्म से नया ट्रिगर बनाएं।
+      </div>
+
+      <div *ngIf="backendTriggersList.length > 0" class="dialog-table-card">
+        <table class="dialog-data-table">
+          <thead>
+            <tr>
+              <th style="width: 38px;" class="text-center">#</th>
+              <th style="width: 140px;">ट्रिगर नाम</th>
+              <th style="width: 75px;" class="text-center">इवेंट</th>
+              <th style="width: 85px;" class="text-center">प्रकार</th>
+              <th>कार्रवाई / SQL क्वेरी</th>
+              <th style="width: 50px;" class="text-center">हटाएं</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of backendTriggersList; let i = index">
+              <td class="text-center text-muted font-mono col-idx">{{ i + 1 }}</td>
+              <td class="font-mono">
+                <strong>{{ t.trigger_name }}</strong>
+              </td>
+              <td class="text-center">
+                <span class="event-pill" [ngClass]="t.event === 'INSERT' ? 'event-pill-insert' : (t.event === 'UPDATE' ? 'event-pill-update' : 'event-pill-delete')">
+                  {{ t.event }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="type-pill">{{ (t.actions && t.actions[0]?.action_type) || t.action_type || 'raw_sql' }}</span>
+              </td>
+              <td class="font-mono text-muted-xs">
+                <code *ngIf="t.actions && t.actions[0]?.raw_sql" class="trigger-code-snippet">{{ t.actions[0]?.raw_sql }}</code>
+                <span *ngIf="!t.actions || !t.actions[0]?.raw_sql">{{ t.target_table || (t.actions && t.actions[0]?.target_table) || 'Standard Action' }}</span>
+              </td>
+              <td class="text-center">
+                <button *ngIf="isAdmin" type="button" class="mini-del-btn" (click)="deleteBackendTrigger(t._id)" title="हटाएं">
+                  <i class="pi pi-trash"></i>
+                </button>
+                <span *ngIf="!isAdmin" class="text-muted-xs">🔒 View</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <button pButton type="button" label="बंद करें (Close)" class="p-button-text p-button-sm dialog-btn-cancel" (click)="showBackendSutrasModal = false"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- ── 4. User & Role Management Dialog ──────────────────────── -->
+  <p-dialog [(visible)]="showUserManagementModal"
+            [modal]="true"
+            [dismissableMask]="true"
+            [draggable]="false"
+            [resizable]="false"
+            [style]="{ width: '94vw', maxWidth: '860px' }"
+            styleClass="sutram-studio-dialog"
+            header="👥 उपयोगकर्ता एवं अधिकार प्रबंधन (User & Rights Management)">
+    <div class="dialog-body-wrap">
+      <!-- Info / Quick Role Switch Banner -->
+      <div class="dialog-info-banner info d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <i class="pi pi-shield banner-icon"></i>
+          <span>
+            सक्रिय खाता: <strong>{{ currentUser.username }}</strong>
+            ({{ isAdmin ? '👑 Admin (पूर्ण अधिकार)' : '👤 Author (सीमित अधिकार)' }})
+          </span>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <button type="button"
+                  class="btn-role-switch"
+                  [class.active-role]="isAdmin"
+                  (click)="switchRole('admin')">
+            👑 Admin
+          </button>
+          <button type="button"
+                  class="btn-role-switch"
+                  [class.active-role]="isAuthor"
+                  (click)="switchRole('author')">
+            👤 Author
+          </button>
+        </div>
+      </div>
+
+      <div class="dialog-subtext">
+        Admin: पूर्ण अधिकार (Triggers, Schema, Rules, User Management).<br>
+        Author: ऑपरेशनल अधिकार (डेटा उपयोग, कॉलम दृश्यता Show/Hide, डिस्प्ले फॉर्मेटिंग).
+      </div>
+
+      <!-- Add / Edit User Form Card -->
+      <div class="subcard-config mb-2">
+        <div class="subcard-header d-flex justify-content-between align-items-center">
+          <span class="subcard-title">
+            {{ editingUserId ? '✏️ उपयोगकर्ता संपादित करें (Edit User #' + editingUserId + ')' : '➕ नया उपयोगकर्ता जोड़ें (Add New User)' }}
+          </span>
+          <button *ngIf="editingUserId" type="button" class="btn-link-mini text-muted" (click)="cancelUserEdit()">
+            Cancel Edit
+          </button>
+        </div>
+
+        <div class="subcard-grid d-flex flex-wrap gap-2 align-items-end mt-2">
+          <div style="flex: 1; min-width: 140px;">
+            <label class="field-lbl">यूजरनेम (Username)*</label>
+            <input type="text"
+                   pInputText
+                   [(ngModel)]="userFormData.username"
+                   placeholder="e.g. rohit"
+                   [disabled]="!!editingUserId"
+                   class="w-100 formula-input" />
+          </div>
+
+          <div style="flex: 1; min-width: 140px;">
+            <label class="field-lbl">{{ editingUserId ? 'नया पासवर्ड (Password)' : 'पासवर्ड (Password)*' }}</label>
+            <input type="password"
+                   pInputText
+                   [(ngModel)]="userFormData.password"
+                   [placeholder]="editingUserId ? 'खाली छोड़ें यदि नहीं बदलना' : 'e.g. pass123'"
+                   class="w-100 formula-input" />
+          </div>
+
+          <div style="flex: 1.2; min-width: 160px;">
+            <label class="field-lbl">प्रदर्शित नाम (Display Name)</label>
+            <input type="text"
+                   pInputText
+                   [(ngModel)]="userFormData.display_name"
+                   placeholder="e.g. Rohit Sharma"
+                   class="w-100 formula-input" />
+          </div>
+
+          <div style="flex: 1.2; min-width: 160px;">
+            <label class="field-lbl">भूमिका (Role)*</label>
+            <p-dropdown [options]="roleDropdownOptions"
+                        [(ngModel)]="userFormData.role"
+                        styleClass="w-100"
+                        [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 6px;">
+            <p-checkbox [binary]="true"
+                        label="सक्रिय"
+                        [(ngModel)]="userFormData.active">
+            </p-checkbox>
+            <button pButton
+                    type="button"
+                    [label]="editingUserId ? 'अपडेट' : 'जोड़ें'"
+                    icon="pi pi-check"
+                    class="p-button-sm p-button-primary"
+                    [loading]="isSavingUser"
+                    (click)="saveUser()">
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users List Table -->
+      <div class="dialog-table-card">
+        <table class="dialog-data-table">
+          <thead>
+            <tr>
+              <th style="width: 35px;" class="text-center">#</th>
+              <th>यूजरनेम</th>
+              <th>प्रदर्शित नाम</th>
+              <th style="width: 110px;">भूमिका (Role)</th>
+              <th style="width: 80px;" class="text-center">स्थिति</th>
+              <th style="width: 140px;">बनाया गया</th>
+              <th style="width: 130px;" class="text-center">कार्रवाई</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usersList; let i = index">
+              <td class="text-center text-muted font-mono col-idx">{{ i + 1 }}</td>
+              <td>
+                <strong class="font-mono">{{ u.username }}</strong>
+                <span *ngIf="currentUser.username === u.username" class="badge-current-user ms-1">Active</span>
+              </td>
+              <td>{{ u.display_name || '—' }}</td>
+              <td>
+                <span class="role-pill-tag" [class.admin-tag]="u.role === 'admin'" [class.author-tag]="u.role === 'author'">
+                  {{ u.role === 'admin' ? '👑 Admin' : '👤 Author' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="status-pill" [class.active-pill]="u.active" [class.inactive-pill]="!u.active">
+                  {{ u.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="text-muted-xs font-mono">{{ u.created_at || '—' }}</td>
+              <td class="text-center">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <i class="pi pi-pencil i-outline-primary cursor-pointer"
+                     (click)="editUser(u)"
+                     title="Edit User">
+                  </i>
+                  <i *ngIf="u.username !== 'admin'"
+                     class="pi pi-trash i-outline-danger cursor-pointer"
+                     (click)="deleteUser(u)"
+                     title="Delete User">
+                  </i>
+                  <button type="button"
+                          class="btn-use-account"
+                          [class.btn-use-account-active]="currentUser.username === u.username"
+                          (click)="setCurrentActiveUser(u)"
+                          title="Use this account">
+                    {{ currentUser.username === u.username ? '✓ Active' : 'Switch' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="usersList.length === 0">
+              <td colspan="7" class="text-center text-muted py-3">
+                <span *ngIf="isLoadingUsers"><i class="pi pi-spin pi-spinner me-1"></i> लोड हो रहा है...</span>
+                <span *ngIf="!isLoadingUsers">कोई उपयोगकर्ता नहीं मिला (No users found)</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <button pButton type="button" label="बंद करें (Close)" class="p-button-text p-button-sm dialog-btn-cancel" (click)="showUserManagementModal = false"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+</div>
+

@@ -21,6 +21,7 @@ import { ContextMenuModule } from 'primeng/contextmenu';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CheckboxModule } from 'primeng/checkbox';
+import { MultiSelectModule } from 'primeng/multiselect';
 // Sutram Excel Components
 import { SutramExcelStudioComponent } from './components/sutram-excel-studio/sutram-excel-studio.component';
 import { SutramGridComponent } from './components/sutram-grid/sutram-grid.component';
@@ -67,7 +68,8 @@ export class SutramExcelModule {
             ContextMenuModule,
             AutoCompleteModule,
             OverlayPanelModule,
-            CheckboxModule] });
+            CheckboxModule,
+            MultiSelectModule] });
 }
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(SutramExcelModule, [{
         type: NgModule,
@@ -87,7 +89,8 @@ export class SutramExcelModule {
                     ContextMenuModule,
                     AutoCompleteModule,
                     OverlayPanelModule,
-                    CheckboxModule
+                    CheckboxModule,
+                    MultiSelectModule
                 ],
                 providers: [
                     SutramExcelApiService,
@@ -118,7 +121,8 @@ export class SutramExcelModule {
         ContextMenuModule,
         AutoCompleteModule,
         OverlayPanelModule,
-        CheckboxModule], exports: [SutramExcelStudioComponent,
+        CheckboxModule,
+        MultiSelectModule], exports: [SutramExcelStudioComponent,
         SutramGridComponent,
         SutramHeaderScannerComponent,
         SutramCorrectionSidebarComponent,

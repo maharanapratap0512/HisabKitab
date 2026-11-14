@@ -6,7 +6,7 @@
  * ─────────────────────────────────────────────────────────────
  */
 import { Injectable, Inject, Optional } from '@angular/core';
-import { map } from 'rxjs';
+import { map, of, catchError } from 'rxjs';
 import * as i0 from "@angular/core";
 import * as i1 from "@angular/common/http";
 export const SUTRAM_EXCEL_API_BASE = 'SUTRAM_EXCEL_API_BASE';
@@ -32,6 +32,12 @@ export class SutramExcelApiService {
      */
     getRegisteredTables() {
         return this.http.get(`${this.baseUri}/tables`).pipe(map(res => res.result || []));
+    }
+    /**
+     * GET /reports - Fetch list of dynamic reports and views
+     */
+    getReports() {
+        return this.http.get(`${this.baseUri}/reports`).pipe(map(res => res.result || []));
     }
     /**
      * GET /config/:table - Fetch derived schema and column config
@@ -152,6 +158,86 @@ export class SutramExcelApiService {
             }
             return res.result || { status: 'deleted', count: ids.length, ids };
         }));
+    }
+    /**
+     * GET table UI configuration (columns, labels, formats, sort order, selected_keys)
+     * Reads from ${this.baseUri}/table-ui-config/:table first, fallback to /api/_sutram/schema/table-config/:table
+     */
+    getTableUiConfig(tableName) {
+        return this.http.get(`${this.baseUri}/table-ui-config/${encodeURIComponent(tableName)}`).pipe(map(res => res.result || null), catchError(() => {
+            return this.http.get(`/api/_sutram/schema/table-config/${encodeURIComponent(tableName)}`).pipe(map(res => res.result || null), catchError(() => of(null)));
+        }));
+    }
+    /**
+     * POST table UI configuration
+     * Saves to ${this.baseUri}/table-ui-config/:table first, fallback to /api/_sutram/schema/table-config/:table
+     */
+    saveTableUiConfig(tableName, data) {
+        return this.http.post(`${this.baseUri}/table-ui-config/${encodeURIComponent(tableName)}`, data).pipe(catchError(() => {
+            return this.http.post(`/api/_sutram/schema/table-config/${encodeURIComponent(tableName)}`, data);
+        }));
+    }
+    /**
+     * GET backend triggers for a table
+     */
+    getTableTriggers(tableName) {
+        return this.http.get(`${this.baseUri}/triggers/${encodeURIComponent(tableName)}`).pipe(map(res => res.result || []), catchError(() => {
+            return this.http.get(`/api/_sutram/schema/triggers/${encodeURIComponent(tableName)}`).pipe(map(res => res.result || []), catchError(() => of([])));
+        }));
+    }
+    /**
+     * POST backend trigger
+     */
+    createTrigger(def) {
+        return this.http.post(`${this.baseUri}/triggers`, def).pipe(catchError(() => this.http.post('/api/_sutram/schema/triggers', def)));
+    }
+    /**
+     * DELETE backend trigger
+     */
+    deleteTrigger(id) {
+        return this.http.delete(`${this.baseUri}/triggers/${encodeURIComponent(id)}`).pipe(catchError(() => this.http.delete(`/api/_sutram/schema/triggers/${encodeURIComponent(id)}`)));
+    }
+    /**
+     * GET UI sutras / formulas for a table
+     */
+    getUiSutras(tableName) {
+        return this.http.get(`${this.baseUri}/ui-sutras/${encodeURIComponent(tableName)}`).pipe(map(res => res.result || []), catchError(() => {
+            return this.http.get(`/api/_sutram/schema/ui-sutras/${encodeURIComponent(tableName)}`).pipe(map(res => res.result || []), catchError(() => of([])));
+        }));
+    }
+    /**
+     * POST UI sutras / formulas for a table
+     */
+    saveUiSutras(tableName, formulas) {
+        return this.http.post(`${this.baseUri}/ui-sutras/${encodeURIComponent(tableName)}`, { formulas }).pipe(catchError(() => {
+            return this.http.post(`/api/_sutram/schema/ui-sutras/${encodeURIComponent(tableName)}`, { formulas });
+        }));
+    }
+    /**
+     * GET users list
+     */
+    getUsers() {
+        return this.http.get(`${this.baseUri}/users`).pipe(map(res => res.result || []), catchError(() => {
+            return this.http.get('/api/_sutram/schema/users').pipe(map(res => res.result || []), catchError(() => of([])));
+        }));
+    }
+    /**
+     * POST create user
+     */
+    createUser(user) {
+        return this.http.post(`${this.baseUri}/users`, user).pipe(catchError(() => this.http.post('/api/_sutram/schema/users', user)));
+    }
+    /**
+     * PUT update user
+     */
+    updateUser(id, user) {
+        return this.http.put(`${this.baseUri}/users/${encodeURIComponent(id)}`, user).pipe(catchError(() => this.http.put(`/api/_sutram/schema/users/${encodeURIComponent(id)}`, user)));
+    }
+    /**
+     * DELETE user
+     */
+    deleteUser(id) {
+        return this.http.delete(`${this.baseUri}/users/${encodeURIComponent(id)}`).pipe(catchError(() => this.http.delete(`/api/_sutram/schema/users/${encodeURIComponent(id)}`)));
     }
     static ɵfac = function SutramExcelApiService_Factory(t) { return new (t || SutramExcelApiService)(i0.ɵɵinject(i1.HttpClient), i0.ɵɵinject(SUTRAM_EXCEL_API_BASE, 8)); };
     static ɵprov = /*@__PURE__*/ i0.ɵɵdefineInjectable({ token: SutramExcelApiService, factory: SutramExcelApiService.ɵfac, providedIn: 'root' });

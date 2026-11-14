@@ -416,6 +416,32 @@ class DBContex {
                     const exDBModal = new this.dbModal.dbModal(exFilePath);
                     let exportDB = exDBModal.db;
 
+                    // Helper to adapt "select * from mainDB.<table>" queries to matching common columns
+                    const adaptQueryWithCommonColumns = (query) => {
+                        const selectStarRegex = /^(\s*insert(?:\s+or\s+ignore)?\s+into\s+([a-zA-Z0-9_]+))(?:\s*\([^)]*\))?\s+select\s+\*\s+from\s+mainDB\.([a-zA-Z0-9_]+)(.*)$/is;
+                        const match = query.match(selectStarRegex);
+                        if (!match) return query;
+
+                        const insertPrefix = match[1];
+                        const targetTable = match[2];
+                        const sourceTable = match[3];
+                        const rest = match[4] || '';
+
+                        try {
+                            const targetCols = exportDB.pragma(`table_info("${targetTable}")`).map(c => c.name);
+                            const sourceCols = exportDB.pragma(`mainDB.table_info("${sourceTable}")`).map(c => c.name);
+                            const commonCols = targetCols.filter(c => sourceCols.includes(c));
+
+                            if (commonCols.length > 0) {
+                                const colList = commonCols.map(c => `"${c}"`).join(', ');
+                                return `${insertPrefix} (${colList}) select ${colList} from mainDB."${sourceTable}"${rest}`;
+                            }
+                        } catch (e) {
+                            // Fall back to original query if pragma check fails
+                        }
+                        return query;
+                    };
+
                     // 
                     let exporting = exportDB.transaction(() => {
                         exportDB.prepare(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`).run();
@@ -426,7 +452,8 @@ class DBContex {
                                 const queries = queriesObj[tableName];
                                 for (let query of queries) {
                                     try {
-                                        exportDB.prepare(query).run({ dept_id: dept_id });
+                                        const finalQuery = adaptQueryWithCommonColumns(query);
+                                        exportDB.prepare(finalQuery).run({ dept_id: dept_id });
                                     } catch (qErr) {
                                         console.error(`Error generating table ${tableName}:`, qErr.message);
                                         console.error(`Query:`, query);
@@ -437,7 +464,8 @@ class DBContex {
                         } else {
                             // old backward compatible behavior
                             for (let key of Object.keys(this.query.genDeptDB || {})) {
-                                exportDB.prepare(this.query.genDeptDB[key]).run({ dept_id: dept_id });
+                                const finalQuery = adaptQueryWithCommonColumns(this.query.genDeptDB[key]);
+                                exportDB.prepare(finalQuery).run({ dept_id: dept_id });
                             }
                         }
                     });

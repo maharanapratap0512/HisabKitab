@@ -24,8 +24,12 @@ import {
   ElementRef,
   AfterViewInit,
   OnDestroy,
-  HostListener
+  HostListener,
+  ViewChild,
+  ViewChildren,
+  QueryList
 } from '@angular/core';
+import { Table, FrozenColumn } from 'primeng/table';
 import { OverlayPanel } from 'primeng/overlaypanel';
 import { SutramExcelStateService } from '../../services/sutram-excel-state.service';
 import { SutramHeaderConfig, SutramRow, SutramCell } from '../../models/sutram-excel.model';
@@ -48,12 +52,13 @@ interface InlinePromptState {
 
 export interface ContextMenuState {
   visible: boolean;
-  type: 'row' | 'cell';
+  type: 'row' | 'cell' | 'column';
   x: number;
   y: number;
   rowIdx: number;
   colKey: string | null;
   row: SutramRow | null;
+  col?: any;
 }
 
 @Component({
@@ -70,6 +75,13 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
   @Input() isBold: boolean = false;
   @Input() textAlign: 'left' | 'center' | 'right' = 'left';
   @Input() booleanStyle: 'checkbox' | 'badge' = 'checkbox';
+  @Input() unmaskedColumnsSet: Set<string> = new Set<string>();
+  @Input() unmaskedCellsSet: Set<string> = new Set<string>();
+  @Input() frozenColKeys: string[] = [];
+  @Input() isHeaderFrozen: boolean = true;
+
+  @ViewChild('pTable') pTable!: Table;
+  @ViewChildren(FrozenColumn) frozenColumnDirectives!: QueryList<FrozenColumn>;
 
   @Output() cellChanged = new EventEmitter<{ rowIdx: number; colKey: string; value: any }>();
   @Output() solveAllTriggered = new EventEmitter<{
@@ -83,6 +95,36 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
   @Output() filterChanged = new EventEmitter<any>();
   @Output() sortChanged = new EventEmitter<any>();
   @Output() openConfig = new EventEmitter<MouseEvent>();
+  @Output() columnSelected = new EventEmitter<string | null>();
+  @Output() requestUnmask = new EventEmitter<{ col: any; colKey: string; rowIdx?: number; targetType?: 'column' | 'cell' }>();
+  @Output() requestMask = new EventEmitter<string>();
+  @Output() requestUnmaskCell = new EventEmitter<{ rowIdx: number; colKey: string; col: any }>();
+  @Output() requestMaskCell = new EventEmitter<{ rowIdx: number; colKey: string }>();
+  @Output() hideColumn = new EventEmitter<string>();
+  @Output() cycleFormat = new EventEmitter<{ col: any; type: 'text' | 'number' }>();
+  @Output() columnFreezeChange = new EventEmitter<{ colKey: string; action: 'freeze' | 'unfreeze' | 'unfreeze_all' | 'freeze_to_here' }>();
+  @Output() headerFreezeChange = new EventEmitter<boolean>();
+  @Output() columnFormatSelected = new EventEmitter<{ col: any; colKey: string; format: string }>();
+
+  // ── Supporting Date & Number Format Definitions ──────────────
+  public dateFormatOptions = [
+    { label: 'DD/MM/YYYY (26/11/2026)', value: 'DD/MM/YYYY', preview: '26/11/2026' },
+    { label: 'YYYY-MM-DD (2026-11-26)', value: 'YYYY-MM-DD', preview: '2026-11-26' },
+    { label: 'DD-MMM-YYYY (26-Nov-2026)', value: 'DD-MMM-YYYY', preview: '26-Nov-2026' },
+    { label: 'MM/DD/YYYY (11/26/2026)', value: 'MM/DD/YYYY', preview: '11/26/2026' },
+    { label: 'डिफ़ॉल्ट दिनांक (Default Date)', value: '', preview: 'Raw Date' }
+  ];
+
+  public numberFormatOptions = [
+    { label: '0 Decimals (पूर्णांक / 1,235)', value: '0', preview: '1,235' },
+    { label: '2 Decimals (दशमलव / 1,234.50)', value: '2', preview: '1,234.50' },
+    { label: '4 Decimals (विस्तृत / 1,234.5000)', value: '4', preview: '1,234.5000' },
+    { label: 'मुद्रा प्रारूप (₹ Indian Rupee)', value: 'currency', preview: '₹ 1,234.50' },
+    { label: 'डिफ़ॉल्ट संख्या (Default Number)', value: '', preview: 'Raw Number' }
+  ];
+
+  public activeSubmenu: 'format' | null = null;
+  public submenuFlipLeft: boolean = false;
 
   // ── Inline Cell Editing State ────────────────────────────────
   public editingCell: { rowIdx: number; colKey: string } | null = null;
@@ -96,8 +138,9 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
   public highlightedIdx: number = -1;
   public dropdownPos = { top: 0, left: 0, minWidth: 270 };
 
-  // ── Row Selection State ─────────────────────────────────────
+  // ── Selection State (Row or Column) ──────────────────────────
   public selectedRowIdx: number | null = null;
+  public selectedColumnKey: string | null = null;
 
   // ── Sleek Custom Context Menu State ──────────────────────────
   public contextMenuState: ContextMenuState = {
@@ -131,13 +174,26 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
   };
 
   private scrollCleanups: Array<() => void> = [];
+  private tbodyObserver?: MutationObserver;
+  public frozenColLefts: number[] = [];
   private lastLoadMoreEmitTime = 0;
   private lastKnownScrollTop = 0;
   private isRestoringScroll = false;
   private isResetting = false;
 
+  // High-Performance Memoized Visible Rows Cache (prevents virtual scroller blanking out on scroll)
+  private _cachedVisibleRows: SutramRow[] = [];
+  private _lastRowsRef: SutramRow[] | null = null;
+  private _lastFilterErrors: boolean | null = null;
+  private _lastColFiltersKey: string = '';
+  private _lastSortKey: string = '';
+
   public trackByRowNum = (index: number, row: SutramRow): any => {
     return row.rowNum ?? (row as any)._id ?? (row as any).id ?? index;
+  };
+
+  public trackByColKey = (index: number, col: any): string => {
+    return col?.key || col?.name || col?.col_name || String(index);
   };
 
   public isRowPopulated(row: SutramRow): boolean {
@@ -169,6 +225,13 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
         .map(h => h.ref_table!)
         .filter(Boolean);
       this.refCache.preloadTables(refTables);
+      this.recalculateFrozenColumns();
+      this.cdr.markForCheck();
+    }
+
+    if (changes['frozenColKeys'] || changes['isHeaderFrozen']) {
+      this.recalculateFrozenColumns();
+      this.cdr.markForCheck();
     }
 
     if (changes['rows']) {
@@ -186,6 +249,7 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
           }
         });
       }
+      this.recalculateFrozenColumns();
     }
   }
 
@@ -203,9 +267,14 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
 
   public ngAfterViewInit(): void {
     this.setupInfiniteScroll();
+    this.setupTbodyObserver();
+    this.recalculateFrozenColumns();
   }
 
   public ngOnDestroy(): void {
+    if (this.tbodyObserver) {
+      this.tbodyObserver.disconnect();
+    }
     this.scrollCleanups.forEach(fn => fn());
     this.scrollCleanups = [];
   }
@@ -225,8 +294,8 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
     const scrollTop = el.scrollTop;
     const clientHeight = el.clientHeight;
 
-    // 500px prefetch threshold ensures smooth loading ahead of time during fast scrolling
-    const threshold = 500;
+    // 800px prefetch threshold ensures smooth loading ahead of time during fast scrolling
+    const threshold = 800;
     const isNearBottom = (scrollTop + clientHeight >= scrollHeight - threshold);
 
     if (isNearBottom) {
@@ -250,26 +319,7 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       const target = e.target as HTMLElement;
       if (target && target.scrollHeight > target.clientHeight) {
         if (this.isRestoringScroll) return;
-
-        // Glitch Jump Guard: If target.scrollTop dropped to 0 while user was scrolled down (> 120px)
-        if (target.scrollTop === 0 && this.lastKnownScrollTop > 120 && !this.isResetting) {
-          const restoreVal = this.lastKnownScrollTop;
-          this.isRestoringScroll = true;
-          target.scrollTop = restoreVal;
-          requestAnimationFrame(() => {
-            if (target.scrollTop === 0) {
-              target.scrollTop = restoreVal;
-            }
-            setTimeout(() => {
-              this.isRestoringScroll = false;
-            }, 60);
-          });
-          return;
-        }
-
-        if (target.scrollTop > 0) {
-          this.lastKnownScrollTop = target.scrollTop;
-        }
+        this.lastKnownScrollTop = target.scrollTop;
         this.checkAndEmitLoadMore(target);
       } else {
         this.checkAndEmitLoadMore();
@@ -306,14 +356,39 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
   }
 
   public get visibleRows(): SutramRow[] {
-    let result = this.rows;
+    const currentRows = this.rows || [];
+    const currentFilterErrors = this.filterOnlyErrors;
+    const colFilters = this.state.columnFilters();
+    const sort = this.state.activeSort();
 
-    if (this.filterOnlyErrors) {
-      result = result.filter(r => r.hasError);
+    // Fast signature calculation for cache check
+    const filterKeys = Object.keys(colFilters);
+    let filterKey = '';
+    if (this.state.filtersEnabled() && filterKeys.length > 0) {
+      filterKey = filterKeys.map(k => `${k}:${Array.from(colFilters[k] || []).join(',')}`).join('|');
+    }
+    const sortKey = (this.state.sortingEnabled() && sort?.colKey) ? `${sort.colKey}_${sort.order}` : '';
+
+    if (
+      this._lastRowsRef === currentRows &&
+      this._lastFilterErrors === currentFilterErrors &&
+      this._lastColFiltersKey === filterKey &&
+      this._lastSortKey === sortKey &&
+      this._cachedVisibleRows.length > 0
+    ) {
+      return this._cachedVisibleRows;
     }
 
-    const colFilters = this.state.columnFilters();
-    const filterKeys = Object.keys(colFilters);
+    this._lastRowsRef = currentRows;
+    this._lastFilterErrors = currentFilterErrors;
+    this._lastColFiltersKey = filterKey;
+    this._lastSortKey = sortKey;
+
+    let result = currentRows;
+
+    if (currentFilterErrors) {
+      result = result.filter(r => r.hasError);
+    }
 
     if (this.state.filtersEnabled() && filterKeys.length > 0) {
       result = result.filter(r => {
@@ -337,7 +412,6 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       });
     }
 
-    const sort = this.state.activeSort();
     if (this.state.sortingEnabled() && sort && sort.colKey) {
       const { colKey, order } = sort;
       const colDef = this.headers.find(h => h.name === colKey);
@@ -364,7 +438,8 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       });
     }
 
-    return result;
+    this._cachedVisibleRows = result;
+    return this._cachedVisibleRows;
   }
 
   // ── Cell Selection & Inline Editing ──────────────────────────
@@ -472,12 +547,18 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       this.commitCellEdit();
     }
 
-    this.state.setSelectedCell({ rowIdx, colKey });
-    const colDef = this.headers.find(h => h.name === colKey) || null;
+    const colDef = this.headers.find(h => h.name === colKey || (h as any).key === colKey) || null;
+    if (colDef && ((colDef as any).is_temp || (colDef as any).is_virtual || (colDef as any).readonly)) {
+      return;
+    }
     this.editingColDef = colDef;
     const curVal = row.cells[colKey]?.value;
     this.originalEditingValue = curVal !== undefined && curVal !== null ? String(curVal) : '';
-    this.editingValue = initialChar !== undefined ? initialChar : this.originalEditingValue;
+    if (this.isDateColumn(colDef)) {
+      this.editingValue = this.normalizeToIsoDate(curVal);
+    } else {
+      this.editingValue = initialChar !== undefined ? initialChar : this.originalEditingValue;
+    }
     this.editingCell = { rowIdx, colKey };
 
     // Auto-focus input
@@ -540,6 +621,13 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
 
   public updateFkOptions(col: SutramHeaderConfig, query: string, row?: SutramRow): void {
     if (!col.ref_table) return;
+    const refCols = col.ref_select || (col.ref_data ? [col.ref_data] : []);
+    if (refCols.length > 0) {
+      this.refCache.registerTableConfig(col.ref_table, {
+        ref_select: refCols,
+        ref_data: col.ref_data
+      });
+    }
     let parentId: any = undefined;
     if (col.ref_table.toLowerCase() === 'subitem' && row) {
       const itemHeader = this.headers.find(h => h.ref_table === 'item' || h.name.includes('item'));
@@ -603,10 +691,22 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
         row.isModified = row.isNew || Object.values(row.cells).some((c: any) => c && c.isModified);
       }
 
+      // Also synchronize the raw FK column if present
+      if (col.col_name && col.col_name !== colKey && row.cells[col.col_name]) {
+        row.cells[col.col_name].value = opt.id;
+        row.cells[col.col_name].refId = opt.id;
+        row.cells[col.col_name].isValid = true;
+        row.cells[col.col_name].errorMessage = undefined;
+        row.cells[col.col_name].isModified = cell ? cell.isModified : true;
+      }
+
       this.audit.validateCell(cell, col, row, this.headers);
       this.audit.validateRow(row, this.headers);
       this.cellChanged.emit({ rowIdx, colKey, value: opt.display });
       this.state.updateCellValue(rowIdx, colKey, opt.display, opt.id);
+      if (col.col_name && col.col_name !== colKey) {
+        this.state.updateCellValue(rowIdx, col.col_name, opt.id, opt.id);
+      }
 
       if (rowIdx === this.visibleRows.length - 1 && this.isRowPopulated(row)) {
         this.state.addNewBlankRow();
@@ -691,7 +791,7 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
     if (!this.editingCell) return;
     const { rowIdx, colKey } = this.editingCell;
     const row = this.visibleRows[rowIdx];
-    const col = this.headers.find(h => h.name === colKey);
+    const col = this.headers.find(h => h.name === colKey || (h as any).key === colKey || h.col_name === colKey);
     const newVal = (this.editingValue ?? '').trim();
 
     this.editingCell = null;
@@ -768,6 +868,14 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
               }
             }
           }
+        } else {
+          cell.refId = newVal;
+        }
+
+        if (col.col_name && col.col_name !== colKey && row.cells[col.col_name]) {
+          row.cells[col.col_name].value = cell.value;
+          row.cells[col.col_name].refId = cell.refId;
+          row.cells[col.col_name].isModified = cell.isModified;
         }
 
         row.isModified = row.isNew || Object.values(row.cells).some((c: any) => c && c.isModified);
@@ -776,6 +884,9 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
         this.audit.validateRow(row, this.headers);
         this.cellChanged.emit({ rowIdx, colKey, value: cell.value });
         this.state.updateCellValue(rowIdx, colKey, cell.value, cell.refId);
+        if (col.col_name && col.col_name !== colKey) {
+          this.state.updateCellValue(rowIdx, col.col_name, cell.value, cell.refId);
+        }
 
         if (rowIdx === this.visibleRows.length - 1 && this.isRowPopulated(row)) {
           this.state.addNewBlankRow();
@@ -813,6 +924,13 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
     const colKey = colExists ? targetColKey : (this.headers[0]?.name || '');
     this.state.setSelectedCell({ rowIdx, colKey });
     this.cdr.markForCheck();
+
+    requestAnimationFrame(() => {
+      const activeCellEl = this.el.nativeElement.querySelector('.cell-box.cell-active') as HTMLElement;
+      if (activeCellEl) {
+        activeCellEl.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }
+    });
   }
 
   private getNextColKey(curColKey: string): string {
@@ -924,6 +1042,7 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       this.navigateCell(rowIdx, this.getNextColKey(colKey));
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
+      this.navigateCell(rowIdx, this.getPrevColKey(colKey));
     } else if (event.key === ' ') {
       // Spacebar toggles boolean cell!
       const colDef = this.headers.find((c: any) => (c.key || c.name) === colKey);
@@ -1035,12 +1154,13 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
     this.positionContextMenu(event, 'row', rowIdx, null, row);
   }
 
-  public openCellContextMenu(event: MouseEvent, rowIdx: number, colKey: string, row: SutramRow): void {
+  public openCellContextMenu(event: MouseEvent, rowIdx: number, colKey: string, row: SutramRow, col?: any): void {
     event.preventDefault();
     event.stopPropagation();
     this.selectedRowIdx = null;
     this.state.setSelectedCell({ rowIdx, colKey });
-    this.positionContextMenu(event, 'cell', rowIdx, colKey, row);
+    const colDef = col || this.headers.find(h => (h as any).key === colKey || h.name === colKey);
+    this.positionContextMenu(event, 'cell', rowIdx, colKey, row, colDef);
   }
 
   private positionContextMenu(
@@ -1048,7 +1168,8 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
     type: 'row' | 'cell',
     rowIdx: number,
     colKey: string | null,
-    row: SutramRow
+    row: SutramRow,
+    col?: any
   ): void {
     const menuWidth = 220;
     const menuHeight = type === 'cell' ? 240 : 160;
@@ -1069,7 +1190,8 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       y,
       rowIdx,
       colKey,
-      row
+      row,
+      col
     };
     this.cdr.markForCheck();
   }
@@ -1077,6 +1199,7 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
   public closeContextMenu(): void {
     if (this.contextMenuState.visible) {
       this.contextMenuState.visible = false;
+      this.activeSubmenu = null;
       this.cdr.markForCheck();
     }
   }
@@ -1115,6 +1238,90 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
         }
       });
     }
+  }
+
+  public isRowHighlighted(row: any): boolean {
+    if (!row) return false;
+    return !!(
+      row.isHighlighted ||
+      row.hl === 1 ||
+      row.hl === true ||
+      row.cells?.['hl']?.value === 1 ||
+      row.cells?.['hl']?.value === true ||
+      row.cells?.['hl']?.value === '1' ||
+      row._rawOriginal?.hl === 1 ||
+      row._rawOriginal?.hl === true ||
+      row._rawOriginal?.hl === '1'
+    );
+  }
+
+  public getReminderSeverity(row: any): 'critical' | 'warning' | 'info' | null {
+    if (!row) return null;
+    const sev = (
+      row.cells?.['severity']?.value ??
+      row._rawOriginal?.severity ??
+      row.severity ??
+      ''
+    ).toString().toLowerCase();
+
+    const isPerm = (
+      row.cells?.['is_permanent']?.value ??
+      row._rawOriginal?.is_permanent ??
+      row.is_permanent
+    );
+
+    if (sev === 'critical' || isPerm === 1 || isPerm === '1' || isPerm === true) {
+      return 'critical';
+    }
+    if (sev === 'warning' || sev === 'warn') {
+      return 'warning';
+    }
+    if (sev === 'info' || sev === 'low' || sev === 'normal') {
+      return 'info';
+    }
+
+    const status = (
+      row.cells?.['status']?.value ??
+      row._rawOriginal?.status ??
+      row.status ??
+      ''
+    ).toString().toLowerCase();
+    if (status === 'active' || status === 'triggered') return 'critical';
+    if (status === 'snoozed') return 'warning';
+
+    return null;
+  }
+
+  public toggleRowHighlight(): void {
+    const row = this.contextMenuState.row || (this.contextMenuState.rowIdx >= 0 ? this.rows[this.contextMenuState.rowIdx] : null);
+    const rowIdx = this.contextMenuState.rowIdx;
+    this.closeContextMenu();
+    if (!row) return;
+
+    const currentlyHl = this.isRowHighlighted(row);
+    const newHl = currentlyHl ? 0 : 1;
+    row.isHighlighted = newHl === 1;
+    row.hl = newHl;
+
+    if (!row.cells) row.cells = {};
+    if (row.cells['hl']) {
+      row.cells['hl'].value = newHl;
+      row.cells['hl'].isModified = true;
+    } else {
+      row.cells['hl'] = {
+        value: newHl,
+        isValid: true,
+        isModified: true
+      };
+    }
+    if (row._rawOriginal) {
+      row._rawOriginal.hl = newHl;
+    }
+    row.isModified = true;
+
+    this.state.updateCellValue(rowIdx, 'hl', newHl);
+    this.cellChanged.emit({ rowIdx, colKey: 'hl', value: newHl });
+    this.cdr.markForCheck();
   }
 
   public copySelectedRow(): void {
@@ -1252,6 +1459,7 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
 
   public openColumnFilter(event: MouseEvent, col: SutramHeaderConfig, op: any): void {
     event.stopPropagation();
+    if (this.isPasswordColumn(col)) return; // Sorting and filtering not allowed on password columns
     this.activeFilterCol = col;
     this.filterChecklistSearch = '';
     this.selectedChecklistValues.clear();
@@ -1445,8 +1653,22 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
     op.hide();
   }
 
-  public onHeaderClick(col: SutramHeaderConfig): void {
-    if (!this.state.sortingEnabled() || !col?.name) return;
+  public onColumnHeaderClick(col: SutramHeaderConfig, event: MouseEvent): void {
+    event.stopPropagation();
+    const colKey = (col as any).key || col.name;
+    if (this.selectedColumnKey === colKey) {
+      this.selectedColumnKey = null;
+    } else {
+      this.selectedColumnKey = colKey;
+      this.selectedRowIdx = null;
+    }
+    this.columnSelected.emit(this.selectedColumnKey);
+    this.cdr.markForCheck();
+  }
+
+  public onSortIconClick(col: SutramHeaderConfig, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!this.state.sortingEnabled() || !col?.name || this.isPasswordColumn(col)) return;
 
     const currentSort = this.state.activeSort();
     if (currentSort?.colKey === col.name) {
@@ -1459,6 +1681,355 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       this.state.setSort(col.name, 'ASC');
     }
     this.sortChanged.emit(this.state.activeSort());
+  }
+
+  public openColumnContextMenu(event: MouseEvent, col: any): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const colKey = col.key || col.name;
+    this.selectedColumnKey = colKey;
+    this.selectedRowIdx = null;
+    this.columnSelected.emit(colKey);
+
+    const menuWidth = 230;
+    const menuHeight = 220;
+    let x = event.clientX;
+    let y = event.clientY;
+
+    if (x + menuWidth > window.innerWidth) {
+      x = Math.max(10, window.innerWidth - menuWidth - 10);
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = Math.max(10, window.innerHeight - menuHeight - 10);
+    }
+
+    this.contextMenuState = {
+      visible: true,
+      type: 'column',
+      x,
+      y,
+      rowIdx: -1,
+      colKey,
+      row: null,
+      col
+    };
+    this.cdr.markForCheck();
+  }
+
+  public copySelectedColumn(): void {
+    const colKey = this.contextMenuState.colKey || this.selectedColumnKey;
+    this.closeContextMenu();
+    if (!colKey) return;
+    const colValues = this.rows.map(r => r.cells[colKey]?.value ?? '').join('\n');
+    navigator.clipboard.writeText(colValues);
+  }
+
+  public cutSelectedColumn(): void {
+    this.copySelectedColumn();
+    const colKey = this.contextMenuState.colKey || this.selectedColumnKey;
+    if (!colKey) return;
+    const colDef = this.headers.find(h => h.name === colKey || (h as any).key === colKey);
+    if (colDef && ((colDef as any).readonly || (colDef as any).is_fk_subcol)) return;
+    this.rows.forEach((r, idx) => {
+      this.state.updateCellValue(idx, colKey, '', null);
+    });
+  }
+
+  public async pasteToSelectedColumn(): Promise<void> {
+    const colKey = this.contextMenuState.colKey || this.selectedColumnKey;
+    this.closeContextMenu();
+    if (!colKey) return;
+    const colDef = this.headers.find(h => h.name === colKey || (h as any).key === colKey);
+    if (colDef && ((colDef as any).readonly || (colDef as any).is_fk_subcol)) return;
+
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text) return;
+      const lines = text.split(/\r?\n/);
+      lines.forEach((val, i) => {
+        if (i < this.rows.length) {
+          this.state.updateCellValue(i, colKey, val, val);
+        }
+      });
+    } catch {}
+  }
+
+  public hideSelectedColumn(): void {
+    const colKey = this.contextMenuState.colKey || this.selectedColumnKey;
+    this.closeContextMenu();
+    if (colKey) {
+      this.hideColumn.emit(colKey);
+    }
+  }
+
+  public toggleMaskSelectedColumn(): void {
+    const colKey = this.contextMenuState.colKey || this.selectedColumnKey;
+    const col = this.contextMenuState.col || (colKey ? this.headers.find(h => (h as any).key === colKey || h.name === colKey) : null);
+    this.closeContextMenu();
+    if (!colKey) return;
+
+    if (this.unmaskedColumnsSet.has(colKey)) {
+      this.unmaskedColumnsSet.delete(colKey);
+      this.requestMask.emit(colKey);
+    } else {
+      this.requestUnmask.emit({ col, colKey, targetType: 'column' });
+    }
+    this.cdr.markForCheck();
+  }
+
+  public toggleMaskActiveCell(): void {
+    const { rowIdx, colKey, col } = this.contextMenuState;
+    this.closeContextMenu();
+    if (rowIdx === undefined || rowIdx < 0 || !colKey) return;
+    const cellKey = `${rowIdx}_${colKey}`;
+    const colDef = col || this.headers.find(h => (h as any).key === colKey || h.name === colKey);
+
+    if (this.unmaskedCellsSet.has(cellKey)) {
+      this.unmaskedCellsSet.delete(cellKey);
+      this.requestMaskCell.emit({ rowIdx, colKey });
+    } else {
+      this.requestUnmaskCell.emit({ rowIdx, colKey, col: colDef });
+    }
+    this.cdr.markForCheck();
+  }
+
+  public cycleColumnFormat(type: 'text' | 'number'): void {
+    const col = this.contextMenuState.col;
+    this.closeContextMenu();
+    if (col) {
+      this.cycleFormat.emit({ col, type });
+    }
+  }
+
+  public isPasswordColumn(col: any): boolean {
+    if (!col) return false;
+    const t = (col.type || col.field_type || col.col_type || '').toLowerCase();
+    const k = (col.key || col.name || col.col_name || '').toLowerCase();
+    return t === 'password' ||
+           k === 'password' ||
+           k.endsWith('_password') ||
+           k.includes('password') ||
+           k === 'pwd' ||
+           k.endsWith('_pwd') ||
+           k === 'pin' ||
+           k.endsWith('_pin') ||
+           k === 'secret' ||
+           k === 'secret_hash';
+  }
+
+  public isColumnUnmasked(colKey: string | null | undefined): boolean {
+    if (!colKey) return false;
+    return this.unmaskedColumnsSet.has(colKey);
+  }
+
+  public isCellUnmasked(rowIdx: number, colKey: string | null | undefined): boolean {
+    if (!colKey) return false;
+    if (this.isColumnUnmasked(colKey)) return true;
+    return this.unmaskedCellsSet.has(`${rowIdx}_${colKey}`);
+  }
+
+  public isNumberColumn(col: any): boolean {
+    if (!col) return false;
+    const t = (col.type || col.field_type || col.col_type || '').toLowerCase();
+    const k = (col.key || col.name || col.col_name || '').toLowerCase();
+    return t === 'number' || t === 'integer' || t === 'float' || t === 'decimal' ||
+           k === 'price' || k === 'amount' || k === 'total' || k === 'rate' || k === 'qty' || k === 'quantity';
+  }
+
+  // ── Column & Header Freeze Methods ────────────────────────────
+  public isColumnFrozen(col: any, colIdx?: number): boolean {
+    if (!col || !this.frozenColKeys || this.frozenColKeys.length === 0) return false;
+    const k = col.key || col.name || col.col_name;
+    return this.frozenColKeys.includes(k);
+  }
+
+  public isLastFrozenColumn(col: any, colIdx?: number): boolean {
+    if (!this.isColumnFrozen(col, colIdx)) return false;
+    let lastFrozenIdx = -1;
+    for (let i = 0; i < this.headers.length; i++) {
+      if (this.isColumnFrozen(this.headers[i], i)) {
+        lastFrozenIdx = i;
+      }
+    }
+    return colIdx === lastFrozenIdx;
+  }
+
+  public getFrozenLeftOffset(col: any, colIdx: number): number {
+    if (this.frozenColLefts[colIdx] !== undefined) {
+      return this.frozenColLefts[colIdx];
+    }
+    let left = 34; // Width of corner / row-number column
+    for (let i = 0; i < colIdx; i++) {
+      const prevCol = this.headers[i];
+      if (this.isColumnFrozen(prevCol, i)) {
+        left += prevCol.width || this.getColumnWidth(prevCol);
+      }
+    }
+    return left;
+  }
+
+  public onColumnResize(event: any): void {
+    if (event && event.element) {
+      const thIndex = Array.from(event.element.parentElement?.children || []).indexOf(event.element);
+      if (thIndex > 0 && this.headers[thIndex - 1]) {
+        this.headers[thIndex - 1].width = event.element.offsetWidth;
+      }
+    }
+    this.recalculateFrozenColumns();
+  }
+
+  private setupTbodyObserver(): void {
+    if (this.tbodyObserver) {
+      this.tbodyObserver.disconnect();
+    }
+    const tbody = this.el.nativeElement.querySelector('.p-datatable-tbody');
+    if (tbody && typeof MutationObserver !== 'undefined') {
+      this.tbodyObserver = new MutationObserver(() => {
+        this.recalculateFrozenColumns();
+      });
+      this.tbodyObserver.observe(tbody, { childList: true });
+    }
+  }
+
+  public recalculateFrozenColumns(): void {
+    requestAnimationFrame(() => {
+      if (!this.pTable) return;
+      const tableEl = this.pTable.el?.nativeElement || this.el.nativeElement;
+      if (!tableEl) return;
+
+      const thead = tableEl.querySelector('.p-datatable-thead');
+      const headerThs = thead ? (Array.from(thead.querySelectorAll('tr > th')) as HTMLElement[]) : [];
+      const colStickyLeftMap = new Map<number, { left: number; isFrozen: boolean }>();
+
+      this.frozenColLefts = [];
+      let currentLeft = 0;
+      headerThs.forEach((th, idx) => {
+        // idx 0 is corner-th, idx 1+ are schema columns
+        const isFrozen = idx === 0 || (idx > 0 && this.isColumnFrozen(this.headers[idx - 1], idx - 1));
+        if (isFrozen) {
+          th.style.position = 'sticky';
+          th.style.left = `${currentLeft}px`;
+          th.style.zIndex = idx === 0 ? '40' : '28';
+          colStickyLeftMap.set(idx, { left: currentLeft, isFrozen: true });
+          if (idx > 0) {
+            this.frozenColLefts[idx - 1] = currentLeft;
+          }
+          currentLeft += th.offsetWidth;
+        } else {
+          th.style.position = '';
+          th.style.left = '';
+          th.style.zIndex = '';
+          colStickyLeftMap.set(idx, { left: 0, isFrozen: false });
+        }
+      });
+
+      const tbody = tableEl.querySelector('.p-datatable-tbody');
+      if (tbody) {
+        const bodyRows = tbody.querySelectorAll('tr');
+        bodyRows.forEach(tr => {
+          const tds = Array.from(tr.children) as HTMLElement[];
+          tds.forEach((td, idx) => {
+            const pos = colStickyLeftMap.get(idx);
+            if (pos && pos.isFrozen) {
+              td.style.position = 'sticky';
+              td.style.left = `${pos.left}px`;
+              td.style.zIndex = idx === 0 ? '30' : '15';
+            } else {
+              td.style.position = '';
+              td.style.left = '';
+              td.style.zIndex = '';
+            }
+          });
+        });
+      }
+
+      if (this.frozenColumnDirectives && this.frozenColumnDirectives.length > 0) {
+        this.frozenColumnDirectives.forEach(fc => {
+          if (fc.frozen) {
+            fc.updateStickyPosition();
+          } else {
+            const el = (fc as any).el?.nativeElement as HTMLElement | undefined;
+            if (el) {
+              el.style.left = '';
+              el.style.position = '';
+            }
+          }
+        });
+      }
+
+      this.cdr.markForCheck();
+    });
+  }
+
+  public onFreezeColumnClick(): void {
+    const colKey = this.contextMenuState.colKey || this.selectedColumnKey;
+    this.closeContextMenu();
+    if (!colKey) return;
+    this.columnFreezeChange.emit({ colKey, action: 'freeze' });
+  }
+
+  public onUnfreezeColumnClick(): void {
+    const colKey = this.contextMenuState.colKey || this.selectedColumnKey;
+    this.closeContextMenu();
+    if (!colKey) return;
+    this.columnFreezeChange.emit({ colKey, action: 'unfreeze' });
+  }
+
+  public onUnfreezeAllColumnsClick(): void {
+    this.closeContextMenu();
+    this.columnFreezeChange.emit({ colKey: '', action: 'unfreeze_all' });
+  }
+
+  public onFreezeToHereClick(): void {
+    const colKey = this.contextMenuState.colKey || this.selectedColumnKey;
+    this.closeContextMenu();
+    if (!colKey) return;
+    this.columnFreezeChange.emit({ colKey, action: 'freeze_to_here' });
+  }
+
+  public toggleHeaderFreeze(): void {
+    this.isHeaderFrozen = !this.isHeaderFrozen;
+    this.headerFreezeChange.emit(this.isHeaderFrozen);
+    this.closeContextMenu();
+    this.cdr.markForCheck();
+  }
+
+  // ── Submenu & Format Selection Methods ────────────────────────
+  public openSubmenu(name: 'format', event?: MouseEvent): void {
+    this.activeSubmenu = name;
+    if (event) {
+      this.submenuFlipLeft = (event.clientX + 480 > window.innerWidth);
+    }
+    this.cdr.markForCheck();
+  }
+
+  public closeSubmenu(): void {
+    this.activeSubmenu = null;
+    this.cdr.markForCheck();
+  }
+
+  public selectColumnFormat(col: any, formatValue: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.closeContextMenu();
+    const colKey = col?.key || col?.name || col?.col_name || this.contextMenuState.colKey;
+    if (!colKey) return;
+    if (col) {
+      col.display_format = formatValue;
+    }
+    this.columnFormatSelected.emit({ col, colKey, format: formatValue });
+    this.cdr.markForCheck();
+  }
+
+  public setTextAlignForColumn(align: 'left' | 'center' | 'right', event: MouseEvent): void {
+    event.stopPropagation();
+    this.closeContextMenu();
+    this.textAlign = align;
+    this.cdr.markForCheck();
+  }
+
+  public onHeaderClick(col: SutramHeaderConfig): void {
+    // Kept for backward compatibility if called
+    this.onSortIconClick(col, new MouseEvent('click'));
   }
 
   // ── Batch Fix Prompt Methods ─────────────────────────────────
@@ -1513,5 +2084,61 @@ export class SutramGridComponent implements OnChanges, AfterViewInit, OnDestroy 
       return Math.max(160, Math.min(260, (col.short_name || col.name || '').length * 11 + 55));
     }
     return Math.max(130, Math.min(220, (col.short_name || col.name || '').length * 10 + 35));
+  }
+
+  // ── Date & Cell Formatting Helpers ───────────────────────────
+
+  public isDateColumn(col: any): boolean {
+    if (!col) return false;
+    const t = (col.type || col.col_type || col.sql_type || '').toLowerCase();
+    const key = (col.key || col.name || col.col_name || '').toLowerCase();
+    return t === 'date' || t === 'datetime' || key.endsWith('_date') || key === 'date';
+  }
+
+  public normalizeToIsoDate(val: any): string {
+    if (!val) return '';
+    const str = String(val).trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+    const dmy = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (dmy) {
+      const [, d, m, y] = dmy;
+      return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    }
+    return str;
+  }
+
+  public formatCellValue(col: any, value: any): string {
+    if (value === null || value === undefined || value === '') return '';
+    if (this.isDateColumn(col)) {
+      const fmt = col?.display_format || col?.format || 'DD/MM/YYYY';
+      return this.formatDateValue(value, fmt);
+    }
+    if (col?.display_format && !isNaN(Number(value))) {
+      const fmt = col.display_format;
+      const num = Number(value);
+      if (fmt === '0') return num.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+      if (fmt === '2') return num.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+      if (fmt === '4') return num.toLocaleString('en-IN', { maximumFractionDigits: 4, minimumFractionDigits: 4 });
+      if (fmt === 'currency') return '₹ ' + num.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+    }
+    return String(value);
+  }
+
+  public formatDateValue(val: any, fmt: string): string {
+    if (!val) return '';
+    const str = String(val).trim();
+    const parts = str.split('T')[0].split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      const [y, m, d] = parts;
+      if (fmt === 'DD/MM/YYYY') return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+      if (fmt === 'DD-MMM-YYYY') {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const mIdx = parseInt(m, 10) - 1;
+        return `${d.padStart(2, '0')}-${months[mIdx] || m}-${y}`;
+      }
+      if (fmt === 'MM/DD/YYYY') return `${m.padStart(2, '0')}/${d.padStart(2, '0')}/${y}`;
+      return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    }
+    return str;
   }
 }

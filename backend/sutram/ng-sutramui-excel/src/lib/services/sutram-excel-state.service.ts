@@ -205,9 +205,10 @@ export class SutramExcelStateService {
     this.rows.update(current => {
       const copy = [...current];
       const targetRow = copy[rowIdx];
-      if (!targetRow || !targetRow.cells[colKey]) return current;
+      if (!targetRow) return current;
+      if (!targetRow.cells) targetRow.cells = {};
 
-      const cell = { ...targetRow.cells[colKey] };
+      const cell = targetRow.cells[colKey] ? { ...targetRow.cells[colKey] } : { value: undefined, isValid: true };
       if (cell.originalValue === undefined) {
         cell.originalValue = cell.value;
       }
@@ -217,7 +218,11 @@ export class SutramExcelStateService {
       const actuallyChanged = strNew !== strOrig;
 
       cell.value = newValue;
-      if (refId !== undefined) cell.refId = refId;
+      if (refId !== undefined) {
+        cell.refId = refId;
+      } else {
+        cell.refId = newValue;
+      }
 
       if (actuallyChanged) {
         cell.isModified = true;
@@ -242,12 +247,16 @@ export class SutramExcelStateService {
     const cells: Record<string, SutramCell> = {};
 
     headers.forEach(h => {
-      cells[h.name] = {
+      const cellObj: SutramCell = {
         value: '',
         isValid: true,
         isModified: false,
         isNew: true
       };
+      cells[h.name] = cellObj;
+      if (h.col_name && h.col_name !== h.name) {
+        cells[h.col_name] = cellObj;
+      }
     });
 
     const newRow: SutramRow = {

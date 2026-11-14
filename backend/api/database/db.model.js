@@ -2789,6 +2789,46 @@ class dbModal {
       );`,
       create_idx_staging_session: `CREATE INDEX IF NOT EXISTS idx_staging_session ON excel_import_staging(session_id);`,
       create_idx_staging_dept: `CREATE INDEX IF NOT EXISTS idx_staging_dept ON excel_import_staging(dept_id);`
+    },
+    // Version 41
+    // Recreate mm table with clean canonical 18-column schema and drop obsolete subitems view
+    {
+      drop_subitems_view: `DROP VIEW IF EXISTS subitems;`,
+      drop_mm_backup_prev: `DROP TABLE IF EXISTS mm_backup;`,
+      rename_mm_to_backup: `ALTER TABLE mm RENAME TO mm_backup;`,
+      create_clean_mm: `CREATE TABLE mm(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        mm_hin varchar(100) not null,
+        mm_eng varchar(100) null, 
+        mm_roman varchar(100) null, 
+        mm_code varchar(50) unique null, 
+        mm_type varchar(100) null,
+        dept_id integer null references department(_id),
+        state_id integer not null references state(_id),
+        parent_mm_id integer null REFERENCES mm(_id),
+        opening_date date null,
+        mm_closed date null,
+        nimitt_id integer REFERENCES nimitt(_id),
+        verify tinyint default 0,
+        active tinyint default 0,  
+        restrict_month integer null,
+        restrict_year integer null,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime')),
+        unique(mm_eng, dept_id),
+        unique(mm_hin, dept_id)
+      );`,
+      copy_data_to_mm: `INSERT INTO mm (
+          _id, mm_hin, mm_eng, mm_roman, mm_code, mm_type, dept_id, state_id, parent_mm_id, 
+          opening_date, mm_closed, nimitt_id, verify, active, restrict_month, restrict_year, 
+          created_at, updated_at
+        ) 
+        SELECT 
+          _id, mm_hin, mm_eng, mm_roman, mm_code, mm_type, dept_id, state_id, parent_mm_id, 
+          opening_date, mm_closed, nimitt_id, verify, active, restrict_month, restrict_year, 
+          created_at, updated_at 
+        FROM mm_backup;`,
+      drop_mm_backup: `DROP TABLE IF EXISTS mm_backup;`
     }
   ];
 

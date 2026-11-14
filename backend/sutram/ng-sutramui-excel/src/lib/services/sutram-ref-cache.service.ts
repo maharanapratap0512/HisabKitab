@@ -29,11 +29,34 @@ export class SutramRefCacheService {
   private cache = new Map<string, any[]>();
   private formattedCache = new Map<string, SutramRefOption[]>();
   private inFlight = new Map<string, Observable<any[]>>();
+  private tableConfigs = new Map<string, { ref_select?: string[]; ref_data?: string }>();
 
   /** Emits the table name whenever a reference dataset finishes loading and caching */
   public tableLoaded$ = new Subject<string>();
 
   constructor(private api: SutramExcelApiService) {}
+
+  /**
+   * Registers custom display configuration (e.g. ref_select multi-columns, ref_data)
+   * for a reference table and immediately re-evaluates cached formatted options.
+   */
+  public registerTableConfig(table: string, config: { ref_select?: string[]; ref_data?: string }): void {
+    if (!table) return;
+    const cleanTable = table.toLowerCase().trim();
+    const existing = this.tableConfigs.get(cleanTable);
+    const newSelect = config.ref_select || (config.ref_data ? [config.ref_data] : []);
+    const oldSelect = existing?.ref_select || (existing?.ref_data ? [existing.ref_data] : []);
+    const changed = JSON.stringify(newSelect) !== JSON.stringify(oldSelect);
+
+    this.tableConfigs.set(cleanTable, {
+      ref_select: newSelect,
+      ref_data: config.ref_data
+    });
+
+    if (this.cache.has(cleanTable) && (changed || !this.formattedCache.has(cleanTable))) {
+      this.buildFormattedCache(cleanTable, this.cache.get(cleanTable)!);
+    }
+  }
 
   /**
    * Checks whether reference data for a given table is currently cached in memory.
@@ -91,10 +114,12 @@ export class SutramRefCacheService {
   }
 
   /**
-   * Formats a record following AGENTS.md Rule 8:
-   * {{ item.hin }} : {{ item.eng }}{{ item.code ? ' : ' + item.code : '' }}
+   * Formats a record following AGENTS.md Rule 8 & universal display configuration:
+   * 1. Uses explicit ref_select display columns if configured.
+   * 2. Uses bilingual {{ item.hin }} : {{ item.eng }} with code badge.
+   * 3. Fallbacks to dynamic heuristic inspection without domain hardcoding.
    */
-  public formatOption(table: string, item: any): SutramRefOption {
+  public formatOption(table: string, item: any, overrideSelect?: string[]): SutramRefOption {
     if (!item) {
       return { id: null, display: '', raw: null };
     }
@@ -104,6 +129,41 @@ export class SutramRefCacheService {
     let eng = '';
     let code = '';
     let id = item[`${tbl}_id`] ?? item.id ?? item._id ?? item.item_id ?? item.code;
+
+    // Check registered or provided display columns configuration
+    const tableCfg = this.tableConfigs.get(tbl);
+    const selectCols = (overrideSelect && overrideSelect.length > 0)
+      ? overrideSelect
+      : (tableCfg?.ref_select && tableCfg.ref_select.length > 0)
+        ? tableCfg.ref_select
+        : (tableCfg?.ref_data ? [tableCfg.ref_data] : null);
+
+    // If explicit display columns are configured, use them directly!
+    if (selectCols && selectCols.length > 0) {
+      const extractedVals = selectCols
+        .map(c => item[c])
+        .filter(v => v !== undefined && v !== null && String(v).trim() !== '');
+
+      if (extractedVals.length > 0) {
+        // Detect if any column in item looks like a code / sku for the badge
+        const candidateCodeKey = Object.keys(item).find(k =>
+          /code|sku|roll/i.test(k) && !/_id$/i.test(k) && k !== 'id'
+        );
+        if (candidateCodeKey && item[candidateCodeKey]) {
+          code = String(item[candidateCodeKey]).trim();
+        }
+
+        const displayStr = extractedVals.map(v => String(v).trim()).join(' : ');
+
+        return {
+          id: id,
+          display: displayStr,
+          code: code || undefined,
+          raw: item,
+          parentId: item.parent_id ?? item.item_id ?? item.parent_item_id
+        };
+      }
+    }
 
     // Detect field names based on schema conventions
     switch (tbl) {
@@ -198,8 +258,25 @@ export class SutramRefCacheService {
       default:
         hin = item[`${tbl}_hin`] || item.name_hin || item.title_hin || item.label_hin || '';
         eng = item[`${tbl}_eng`] || item.name_eng || item.title_eng || item.name || item.title || '';
-        code = item[`${tbl}_code`] || item.code || '';
+        code = item[`${tbl}_code`] || item.code || item.sku || '';
         id = item._id ?? item[`${tbl}_id`] ?? item.id;
+
+        // Dynamic inspection if standard names not found (Zero Domain Hardcoding)
+        if (!hin && !eng) {
+          const keys = Object.keys(item);
+          const nameKey = keys.find(k =>
+            /name|title|label|desc|item|party/i.test(k) && !/_id$/i.test(k) && k !== 'id'
+          );
+          if (nameKey && item[nameKey]) {
+            eng = String(item[nameKey]);
+          }
+          const codeKey = keys.find(k =>
+            /code|sku|roll|num/i.test(k) && !/_id$/i.test(k) && k !== 'id'
+          );
+          if (codeKey && item[codeKey]) {
+            code = String(item[codeKey]);
+          }
+        }
         break;
     }
 

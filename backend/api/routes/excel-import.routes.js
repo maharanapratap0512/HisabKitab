@@ -328,10 +328,19 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 }
             }
         }
+        const seenKeys = new Set();
+        const distinctCorrectionList = [];
+        for (const item of (fn.correctionList || [])) {
+            const key = fn._getCorrectionKey ? fn._getCorrectionKey(item.type, item.name) : `${item.type}:${JSON.stringify(item.name)}`;
+            if (!seenKeys.has(key)) {
+                seenKeys.add(key);
+                distinctCorrectionList.push(item);
+            }
+        }
         res.json({
             success: true,
             excelData: req.body.excelData,
-            correctionList: fn.correctionList
+            correctionList: distinctCorrectionList
         });
 
     } catch (err) { console.log(err); next(err) };
