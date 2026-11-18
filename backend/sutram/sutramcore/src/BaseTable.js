@@ -440,12 +440,15 @@ class BaseTable {
             if (!def.hasMany) continue;
 
             const childTable = def.table;
+            if (!childTable || !this.schema[childTable]) continue;
+
             const childAlias = `_sub_${joinKey}`;
             const outKey = def.as ?? joinKey;
             const childMeta = this.schema[childTable];
 
             // base columns of child
             const baseCols = this._resolveSelect(def.select ?? '*', childTable);
+            if (baseCols.length === 0) continue;
             let jsonArgParts = baseCols.map(c => `'${c}', ${childAlias}.${c}`);
 
             // nested hasOne inside child — one level deep
@@ -454,8 +457,10 @@ class BaseTable {
                 for (const [cCol, cDef] of Object.entries(childMeta.columns)) {
                     if (!cDef.ref) continue;
                     const [gRefTable, gRefCol] = cDef.ref.split('.');
+                    if (!gRefTable || !this.schema[gRefTable]) continue;
                     const gAlias = `${childAlias}_${cDef.as ?? gRefTable}`;
                     const gCols = this._resolveSelect(cDef.select ?? '*', gRefTable);
+                    if (gCols.length === 0) continue;
                     const gJson = gCols.map(gc => `'${gc}', ${gAlias}.${gc}`).join(', ');
 
                     childJoinParts.push(
@@ -505,13 +510,29 @@ class BaseTable {
         };
     }
 
-    // Resolve select: '*' → all column keys from schema for that table
+    // Resolve select: '*' or ['*'] → all column keys from schema for that table
     // Explicit array → pass through unchanged
     _resolveSelect(select, refTable) {
-        if (select !== '*') return select;
         const meta = this.schema[refTable];
-        if (!meta) throw new Error(`[sutramcore] Cannot resolve "*" for "${refTable}" — not in schema`);
-        return Object.keys(meta.columns);
+        const allCols = meta ? Object.keys(meta.columns) : [];
+        if (!meta) {
+            return (typeof select === 'string' && select !== '*')
+                ? [select]
+                : (Array.isArray(select) ? select.filter(x => x !== '*') : []);
+        }
+        if (!select || select === '*') {
+            return allCols;
+        }
+        if (Array.isArray(select)) {
+            if (select.length === 0 || select.includes('*')) {
+                return allCols;
+            }
+            return select;
+        }
+        if (typeof select === 'string') {
+            return [select];
+        }
+        return allCols;
     }
 
     // ─────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ const ReportManager = require('./src/ReportManager');
 const { col, ColBuilder } = require('./src/col');
 const { defineTable } = require('./src/defineTable');
 const { defineView } = require('./src/defineView');
+const SQLiteIntrospector = require('./src/SQLiteIntrospector');
 
 // ─────────────────────────────────────────────────────────────
 // ── Sutram — instance-based ORM ──────────────────────────────
@@ -166,4 +167,4 @@ class Sutram {
     prepare(sql) { return this.db.prepare(sql); }
 }
 
-module.exports = { Sutram, col, ColBuilder, defineTable, defineView };
+module.exports = { Sutram, col, ColBuilder, defineTable, defineView, SQLiteIntrospector };
