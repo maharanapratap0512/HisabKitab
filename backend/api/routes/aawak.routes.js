@@ -856,7 +856,8 @@ router.delete('/voucher/:ids', async (req, res, next) => {
     if (req.params.ids) {
         try {
             await Fn.begin();
-            let ids = JSON.parse(req.params.ids);
+            let ids = typeof req.params.ids === 'string' ? JSON.parse(decodeURIComponent(req.params.ids)) : req.params.ids;
+            if (!Array.isArray(ids)) ids = [ids];
             for (let aawakId of ids) {
                 await DB.getList('jawak', { conditionString: ` jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${aawakId})` }).then(async (jwkdata) => {
                     if (jwkdata.data) {

@@ -377,6 +377,7 @@ export class AawakNewComponent implements OnInit, OnDestroy {
 
   getAawakPage(page: any = null) {
     if (page) {
+      this.page = page;
       this.pageNo = page;
       this.getFilteredData();
     }
@@ -397,10 +398,14 @@ export class AawakNewComponent implements OnInit, OnDestroy {
   }
 
   getFilteredData(pageNo: any = null) {
+    if (pageNo) {
+      this.page = pageNo;
+      this.pageNo = pageNo;
+    }
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
     this.updateFilterItemSubitem(this.selectedItemmix);
-    this.filterBody.pageNo = this.pageNo;
+    this.filterBody.pageNo = this.pageNo || 1;
     // AUTO select all mm if mm not selected and state selected for mm.
     if (!this.filterBody.mm_id.length && this.filterBody.mm_states) {
       this.filterBody.mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
@@ -410,7 +415,7 @@ export class AawakNewComponent implements OnInit, OnDestroy {
       this.filterBody.aj_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.awk_mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
     }
     this.http.put(this.api.getUrl('AAWAK') + 'voucher/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
-      if (data['result'] && data['success']) {
+      if (data && data['result'] && data['success']) {
         this.aawakAll = data['result'];
         for (let i in this.aawakAll) {
           for (let j in this.aawakAll[i].aawaks) {
@@ -438,7 +443,11 @@ export class AawakNewComponent implements OnInit, OnDestroy {
         this.aawakData = this.aawakAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
+      } else {
+        this.isLoader = false;
       }
+    }, (err: any) => {
+      this.toastr.error('Failed to load Aawak data.');
       this.isLoader = false;
     });
   }
@@ -1157,16 +1166,27 @@ export class AawakNewComponent implements OnInit, OnDestroy {
 
         if (ids && ids.length > 0) {
           this.http.delete(this.api.getUrl('AAWAK') + '/voucher/' + JSON.stringify(ids)).subscribe((data: any) => {
-            if (data['success']) {
+            if (data && data['success']) {
               this.isLoader = false;
               this.aawakData.splice(i, 1);
-              this.total_count -= 1;
+              this.total_count = Math.max(0, this.total_count - 1);
+              if (this.aawakData.length === 0 && this.total_count > 0) {
+                const maxPage = Math.max(1, Math.ceil(this.total_count / this.itemsPerPage));
+                if (this.page > maxPage) {
+                  this.page = maxPage;
+                  this.pageNo = maxPage;
+                }
+                this.getFilteredData();
+              }
               this.toastr.success('Deleted Successfully');
             }
             else {
-              this.toastr.error(data['message']);
+              this.toastr.error(data?.message || 'Error deleting voucher.');
               this.isLoader = false;
             }
+          }, (err) => {
+            this.toastr.error('Error deleting voucher.');
+            this.isLoader = false;
           });
         } else {
           this.toastr.error('Something went wrong.');
@@ -1198,7 +1218,17 @@ export class AawakNewComponent implements OnInit, OnDestroy {
         }
         let msg = s_count + " Deleted Successfully out of " + selectedIds.length;
         this.selectionService.clear('aawak-new');
-        this.toastr.success(msg);
+        if (s_count > 0) {
+          this.toastr.success(msg);
+          const maxPage = Math.max(1, Math.ceil(this.total_count / this.itemsPerPage));
+          if (this.page > maxPage) {
+            this.page = maxPage;
+            this.pageNo = maxPage;
+          }
+          this.getFilteredData();
+        } else {
+          this.toastr.error(msg);
+        }
       }
     });
   }
@@ -1213,24 +1243,27 @@ export class AawakNewComponent implements OnInit, OnDestroy {
   }
 
   async fnDelete(temp_id: any) {
-    return new Promise(async (resolve, reject) => {
-      let index = this.aawakData.findIndex((x: any) => x.temp_id === temp_id);
-      if (index === -1) return reject(false);
+    return new Promise(async (resolve) => {
+      let index = this.aawakData.findIndex((x: any) => String(x.temp_id) === String(temp_id));
+      if (index === -1) return resolve(false);
 
-      let ids = await this.aawakData[index].aawaks.map((a: { _id: any; }) => a._id);
+      let ids = this.aawakData[index].aawaks ? this.aawakData[index].aawaks.map((a: { _id: any; }) => a._id) : [];
       if (ids && ids.length > 0) {
         this.http.delete(this.api.getUrl('AAWAK') + '/voucher/' + JSON.stringify(ids)).subscribe((data: any) => {
-          if (data['success']) {
+          if (data && data['success']) {
             this.aawakData.splice(index, 1);
-            this.total_count -= 1;
+            this.total_count = Math.max(0, this.total_count - 1);
             return resolve(true);
           } else {
-            this.toastr.error(data['message']);
-            return reject(false);
+            this.toastr.error(data?.message || 'Error deleting voucher.');
+            return resolve(false);
           }
-        }, (err) => reject(false));
+        }, (err) => {
+          this.toastr.error('Error deleting voucher.');
+          return resolve(false);
+        });
       } else {
-        return reject(false);
+        return resolve(false);
       }
     });
   }
@@ -1248,17 +1281,31 @@ export class AawakNewComponent implements OnInit, OnDestroy {
       if (result.isConfirmed) {
 
         this.http.delete(this.api.getUrl('AAWAK') + '/' + id).subscribe((data: any) => {
-          if (data['success']) {
+          if (data && data['success']) {
             this.isLoader = false;
             this.aawakData[i].aawaks.splice(j, 1);
+            if (this.aawakData[i].aawaks.length === 0) {
+              this.aawakData.splice(i, 1);
+              this.total_count = Math.max(0, this.total_count - 1);
+              if (this.aawakData.length === 0 && this.total_count > 0) {
+                const maxPage = Math.max(1, Math.ceil(this.total_count / this.itemsPerPage));
+                if (this.page > maxPage) {
+                  this.page = maxPage;
+                  this.pageNo = maxPage;
+                }
+                this.getFilteredData();
+              }
+            }
             this.toastr.success('Deleted Successfully');
           }
           else {
-            this.toastr.error(data['message']);
+            this.toastr.error(data?.message || 'Error deleting item.');
             this.isLoader = false;
           }
+        }, (err) => {
+          this.toastr.error('Error deleting item.');
+          this.isLoader = false;
         });
-
       }
     })
   }

@@ -32,8 +32,9 @@ export class SelectionService {
      */
     toggle(context: string, id: any) {
         const set = this.getOrCreateSet(context);
-        if (set.has(id)) {
-            set.delete(id);
+        const existing = this.findKey(set, id);
+        if (existing !== undefined) {
+            set.delete(existing);
         } else {
             set.add(id);
         }
@@ -45,7 +46,10 @@ export class SelectionService {
      */
     select(context: string, id: any) {
         const set = this.getOrCreateSet(context);
-        set.add(id);
+        const existing = this.findKey(set, id);
+        if (existing === undefined) {
+            set.add(id);
+        }
         this.notify(context);
     }
 
@@ -54,7 +58,10 @@ export class SelectionService {
      */
     deselect(context: string, id: any) {
         const set = this.getOrCreateSet(context);
-        set.delete(id);
+        const existing = this.findKey(set, id);
+        if (existing !== undefined) {
+            set.delete(existing);
+        }
         this.notify(context);
     }
 
@@ -63,7 +70,10 @@ export class SelectionService {
      */
     selectMany(context: string, ids: any[]) {
         const set = this.getOrCreateSet(context);
-        ids.forEach(id => set.add(id));
+        ids.forEach(id => {
+            const existing = this.findKey(set, id);
+            if (existing === undefined) set.add(id);
+        });
         this.notify(context);
     }
 
@@ -72,7 +82,10 @@ export class SelectionService {
      */
     deselectMany(context: string, ids: any[]) {
         const set = this.getOrCreateSet(context);
-        ids.forEach(id => set.delete(id));
+        ids.forEach(id => {
+            const existing = this.findKey(set, id);
+            if (existing !== undefined) set.delete(existing);
+        });
         this.notify(context);
     }
 
@@ -88,7 +101,15 @@ export class SelectionService {
      * Check if an ID is selected in a context
      */
     isSelected(context: string, id: any): boolean {
-        return this.getOrCreateSet(context).has(id);
+        return this.findKey(this.getOrCreateSet(context), id) !== undefined;
+    }
+
+    private findKey(set: Set<any>, id: any): any {
+        if (id === null || id === undefined) return undefined;
+        if (set.has(id)) return id;
+        if (typeof id === 'string' && id.trim() !== '' && !isNaN(Number(id)) && set.has(Number(id))) return Number(id);
+        if (typeof id === 'number' && set.has(String(id))) return String(id);
+        return undefined;
     }
 
     /**

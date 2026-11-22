@@ -405,14 +405,14 @@
                      <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year"
                         (yearChanged)="yearClick($event)"></app-popover-year>
                   </div>
-                  <div class="col-8" *ngIf="aawakData.length">
+                  <div class="col-8" *ngIf="aawakData.length || total_count > 0">
                      <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)"
                         [autoHide]="true">
                      </pagination-controls>
                   </div>
                </div>
                <div class="table-container table-freeze-container" style="min-height: 450px;" appTableFreeze appHorizontalScrollWithArrows
-                  [appTableSmartCheckbox]="'aawak'" [selectionData]="aawakData" [showCheckboxes]="true"
+                  [appTableSmartCheckbox]="'aawak'" [idField]="'_id'" [selectionData]="aawakData" [showCheckboxes]="true"
                   [rowSelector]="'tbody > tr.main-row'">
                   <table id="datatable-buttons" class="table table-hover dt-responsive table-sticky-header" #TABLE>
                      <thead>
@@ -711,7 +711,7 @@
                            *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
                               [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl, 'hl':data.hl, 'var-qty':data.is_variable_qty}" aria-expanded="true"
-                              [attr.aria-controls]="'collapseExample-'+i" class="main-row">
+                              [attr.aria-controls]="'collapseExample-'+i" class="main-row" [attr.data-id]="data._id">
                               <td freezeCol="1">
                                  {{itemsPerPage * (page-1) + i+1}}
                                  <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}" data-switch="none"
@@ -925,7 +925,7 @@
                </div>
             </div>
             <pagination-controls class="pagi text-center" (pageChange)="getaawakData(page = $event)" [autoHide]="true"
-               *ngIf="aawakData && aawakData.length">
+               *ngIf="(aawakData && aawakData.length) || total_count > 0">
             </pagination-controls>
          </div>
       </div>

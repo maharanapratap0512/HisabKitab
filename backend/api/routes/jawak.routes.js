@@ -568,13 +568,12 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
-
-            await Fn.deleteAJ(req.params.id, 'jawak').then((resolve) => {
-                res.json({
-                    success: true,
-                    result: resolve
-                })
-            })
+            const id = Number(req.params.id);
+            const resolve = await Fn.deleteAJ(id, 'jawak');
+            res.json({
+                success: true,
+                result: resolve
+            });
         }
         else {
             return next(new Error('Id not found.'))
@@ -583,29 +582,41 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 
-// aawak voucher delete
+// jawak voucher delete
 router.delete('/voucher/:ids', async (req, res, next) => {
     if (req.params.ids) {
+        let inTx = false;
         try {
+            let parsed = req.params.ids;
+            if (typeof parsed === 'string') {
+                try {
+                    parsed = JSON.parse(decodeURIComponent(parsed));
+                } catch (e) {
+                    parsed = JSON.parse(parsed);
+                }
+            }
+            let ids = Array.isArray(parsed) ? parsed : [parsed];
             await Fn.begin();
-            let ids = JSON.parse(req.params.ids);
+            inTx = true;
+            let deletedCount = 0;
             for (let id of ids) {
-                await Fn.deleteAJ(id, 'jawak');
+                let del = await Fn.deleteAJ(Number(id), 'jawak');
+                if (del) deletedCount++;
             }
             Fn.commit();
+            inTx = false;
             res.json({
                 success: true,
-            })
-
+                deletedCount
+            });
         } catch (ex) {
-            await Fn.rollback();
+            if (inTx) await Fn.rollback();
             return next(ex);
         }
     }
     else {
         return next(new Error('Id not found.'))
     }
-
 });
 
 

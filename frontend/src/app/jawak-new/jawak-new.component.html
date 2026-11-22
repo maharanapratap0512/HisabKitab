@@ -48,14 +48,14 @@
                                                     <div class="pl-2 form-check form-radio-info mb-1">
                                                         <input type="radio" [value]="'individual'"
                                                             [(ngModel)]="settings.jawak.viewMode"
-                                                            class="form-check-input" (change)="UISettingsChanged()"
+                                                            class="form-check-input" (change)="changeView('individual')"
                                                             name="viewMode" id="entryInPage">
                                                         <label class="form-check-label" for="entryInPage">Single</label>
                                                     </div>
                                                     <div class="pl-2 form-check form-radio-info mb-1">
                                                         <input type="radio" [value]="'voucher'"
                                                             [(ngModel)]="settings.jawak.viewMode"
-                                                            class="form-check-input" (change)="UISettingsChanged()"
+                                                            class="form-check-input" (change)="changeView('voucher')"
                                                             name="viewMode" id="entryInModal">
                                                         <label class="form-check-label" for="entryInModal">Voucher Wise
                                                         </label>
@@ -299,7 +299,7 @@
                                 ({{selectionService.getSelected(settings.jawak.viewMode === 'voucher' ?
                                 'jawak-new-voucher' : 'jawak-new-individual').length}})</span>
                         </div>
-                        <div class="col-5 d-flex justify-content-end align-items-center" *ngIf="jawakData.length">
+                        <div class="col-5 d-flex justify-content-end align-items-center" *ngIf="jawakData.length || total_count > 0">
                             <pagination-controls class="pagi text-end" (pageChange)="getJawakPage(page = $event)"
                                 [autoHide]="true">
                             </pagination-controls>
@@ -501,15 +501,15 @@
                                 <ng-container
                                     *ngFor="let row of jawakData | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index">
                                     <tr class="voucher-row" [class.expanded]="row.expanded" (click)="toggleExpand(row)"
-                                        style="cursor: pointer;" [attr.data-id]="row.voucher_no">
-                                        <td freezeCol="1">{{row.sr_no}}</td>
+                                        style="cursor: pointer;" [attr.data-id]="row.temp_id">
+                                        <td freezeCol="1">{{itemsPerPage * (page - 1) + i + 1}}</td>
                                         <td freezeCol="2">
                                             <button class="btn btn-sm btn-primary me-1" title="Edit"
                                                 (click)="editJawak(i, row); $event.stopPropagation()">
                                                 <i class="uil uil-pen"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger" title="Delete"
-                                                (click)="deleteJawak(i, row.sr_no); $event.stopPropagation()">
+                                                (click)="deleteJawak(row, i); $event.stopPropagation()">
                                                 <i class="uil uil-trash"></i>
                                             </button>
                                         </td>
@@ -713,8 +713,8 @@
 
                     <!-- Individual Combined View Table -->
                     <div class="table-container table-freeze-container" *ngIf="settings.jawak.viewMode === 'individual'" appTableFreeze
-                        appHorizontalScrollWithArrows [appTableSmartCheckbox]="'jawak-new-individual'"
-                        [selectionData]="flatJawakItems" [showCheckboxes]="true" [rowSelector]="'tbody > tr'">
+                        appHorizontalScrollWithArrows [appTableSmartCheckbox]="'jawak-new-individual'" [idField]="'_id'"
+                        [selectionData]="jawakData" [showCheckboxes]="true" [rowSelector]="'tbody > tr.individual-row'">
                         <table class="table table-striped table-hover table-sticky-header jawak-data-table">
                             <thead class="table-dark">
                                 <tr>
@@ -1044,145 +1044,143 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <ng-container
-                                    *ngFor="let row of jawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index">
-                                    <tr *ngFor="let item of getFilteredJawaks(row.jawaks); let j = index"
-                                        [attr.data-id]="item._id">
-                                        <td class="w-50" freezeCol="1">{{i + 1}}.{{j + 1}}</td>
-                                        <td class="w-80" freezeCol="2">
-                                            <button class="btn btn-xs btn-primary" title="Edit Item"
-                                                (click)="editJawak(i, row)">
-                                                <i class="uil uil-pen"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-danger mx-1" title="Delete Item"
-                                                (click)="deleteOne(i, j, item._id)">
-                                                <i class="uil uil-trash"></i>
-                                            </button>
-                                        </td>
-                                        <td class="w-80">
-                                            <div class="form-check form-switch">
-                                                <input type="checkbox" class="form-check-input"
-                                                    [checked]="item.is_recieved" (change)="toggleReceived(item)"
-                                                    style="cursor: pointer;">
-                                            </div>
-                                        </td>
-                                        <td class="w-50">
-                                            <app-aawak-ref [mmId]="row.mm_id" [maxDate]="row.date"
-                                                [deptId]="auth.webUser.dept_id" [filterObj]="{
-                                                    item_id: item.item_id,
-                                                    subitem_id: item.subitem_id,
-                                                    condition_id: item.condition_id,
-                                                    aawak_source_id: item.aawak_source_id
-                                                }" [(ngModel)]="item.aawak_ref_id"
-                                                [selectedSplitsData]="item.aawak_splits" [totalSplitQty]="item.qty"
-                                                [autoSave]="true" [jawakId]="item._id"
-                                                (saved)="onAawakRefSaved($event, item)" mode="tiny" size="sm">
-                                            </app-aawak-ref>
-                                        </td>
-                                        <td class="w-100"><strong>#{{row.voucher_no}}</strong></td>
-                                        <td class="w-100">
-                                            <div class="date-info">
-                                                <strong>{{row.date | date:'dd/MM/yyyy'}}</strong>
-                                            </div>
-                                        </td>
-                                        <td class="w-100">
-                                            <small>{{row.pkt_num || '-'}}</small>
-                                        </td>
-                                        <td class="w-120">
-                                            <small>{{row.reg_pg_no || '-'}}</small>
-                                        </td>
-                                        <!-- <td class="w-200">
-                                                <div class="location-info">
-                                                    <small class="text-muted">{{row.mm_eng}}</small><br>
-                                                    <span class="hindi-text">{{row.mm_hin}}</span>
-                                                </div>
-                                            </td> -->
-                                        <td class="w-200">
+                                <tr class="individual-row"
+                                    *ngFor="let item of jawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index"
+                                    [attr.data-id]="item._id">
+                                    <td class="w-50" freezeCol="1">{{itemsPerPage * (page - 1) + i + 1}}</td>
+                                    <td class="w-80" freezeCol="2">
+                                        <button class="btn btn-xs btn-primary" title="Edit Item"
+                                            (click)="editJawak(i, item)">
+                                            <i class="uil uil-pen"></i>
+                                        </button>
+                                        <button class="btn btn-xs btn-danger mx-1" title="Delete Item"
+                                            (click)="deleteOne(i, item._id)">
+                                            <i class="uil uil-trash"></i>
+                                        </button>
+                                    </td>
+                                    <td class="w-80">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input"
+                                                [checked]="item.is_recieved" (change)="toggleReceived(item)"
+                                                style="cursor: pointer;">
+                                        </div>
+                                    </td>
+                                    <td class="w-50">
+                                        <app-aawak-ref [mmId]="item.mm_id" [maxDate]="item.date"
+                                            [deptId]="auth.webUser.dept_id" [filterObj]="{
+                                                item_id: item.item_id,
+                                                subitem_id: item.subitem_id,
+                                                condition_id: item.condition_id,
+                                                aawak_source_id: item.aawak_source_id
+                                            }" [(ngModel)]="item.aawak_ref_id"
+                                            [selectedSplitsData]="item.aawak_splits" [totalSplitQty]="item.qty"
+                                            [autoSave]="true" [jawakId]="item._id"
+                                            (saved)="onAawakRefSaved($event, item)" mode="tiny" size="sm">
+                                        </app-aawak-ref>
+                                    </td>
+                                    <td class="w-100"><strong>#{{item.voucher_no}}</strong></td>
+                                    <td class="w-100">
+                                        <div class="date-info">
+                                            <strong>{{item.date | date:'dd/MM/yyyy'}}</strong>
+                                        </div>
+                                    </td>
+                                    <td class="w-100">
+                                        <small>{{item.pkt_num || '-'}}</small>
+                                    </td>
+                                    <td class="w-120">
+                                        <small>{{item.reg_pg_no || '-'}}</small>
+                                    </td>
+                                    <!-- <td class="w-200">
                                             <div class="location-info">
-                                                <span>{{row.jawak_mm_hin}} - {{row.jawak_mm_code}}</span> <br />
-                                                <small class="text-muted">{{row.jawak_mm_eng}}</small>
+                                                <small class="text-muted">{{item.mm_eng}}</small><br>
+                                                <span class="hindi-text">{{item.mm_hin}}</span>
                                             </div>
-                                        </td>
-                                        <td class="w-250">
-                                            <div *ngIf="row.pbk_hin" class="pbk-info">
-                                                <span>{{row.pbk_hin}}</span> <br />
-                                                <small class="text-muted">{{row.roll_no || ''}}</small>
+                                        </td> -->
+                                    <td class="w-200">
+                                        <div class="location-info">
+                                            <span>{{item.jawak_mm_hin}} - {{item.jawak_mm_code}}</span> <br />
+                                            <small class="text-muted">{{item.jawak_mm_eng}}</small>
+                                        </div>
+                                    </td>
+                                    <td class="w-250">
+                                        <div *ngIf="item.pbk_hin" class="pbk-info">
+                                            <span>{{item.pbk_hin}}</span> <br />
+                                            <small class="text-muted">{{item.roll_no || ''}}</small>
+                                        </div>
+                                    </td>
+                                    <td class="w-100">
+                                        <ng-container
+                                            *ngIf="(item.scategories?.length > 0 ? item.scategories : item.icategories) as activeCats">
+                                            <div *ngIf="activeCats?.length > 0; else noCat">
+                                                <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                                <br />
+                                                <small class="text-muted">{{ activeCats | joinObj:'category_eng'}}
+                                                </small>
                                             </div>
-                                        </td>
-                                        <td class="w-100">
-                                            <ng-container
-                                                *ngIf="(item.scategories?.length > 0 ? item.scategories : item.icategories) as activeCats">
-                                                <div *ngIf="activeCats?.length > 0; else noCat">
-                                                    <span>{{ activeCats | joinObj:'category_hin' }}</span>
-                                                    <br />
-                                                    <small class="text-muted">{{ activeCats | joinObj:'category_eng'}}
-                                                    </small>
-                                                </div>
-                                                <ng-template #noCat>-</ng-template>
-                                            </ng-container>
-                                        </td>
-                                        <td class="w-400">
-                                            <div class="item-info">
-                                                <span>{{item.item_hin}}</span>
-                                                <span *ngIf="item.subitem_hin"> - {{item.subitem_hin}}</span>
-                                                <i *ngIf="item.document?.images?.length"
-                                                    class="uil uil-image text-primary ms-1 cursor-pointer"
-                                                    (click)="showImages(item)"></i>
-                                                <br>
-                                                <small class="text-muted">{{item.item_eng}}</small>
-                                                <small class="text-muted" *ngIf="item.subitem_eng"> -
-                                                    {{item.subitem_eng}}</small>
-                                            </div>
-                                        </td>
-                                        <td class="w-100">{{item.lot_no || '-'}}</td>
-                                        <td class="w-120"><strong>{{item.qty}} {{item.unit_short}}</strong></td>
-                                        <td class="w-150">
-                                            <span *ngIf="item.rate">@{{item.rate}} = {{item.actual_amt}}</span>
-                                            <span *ngIf="!item.rate">-</span>
-                                        </td>
+                                            <ng-template #noCat>-</ng-template>
+                                        </ng-container>
+                                    </td>
+                                    <td class="w-400">
+                                        <div class="item-info">
+                                            <span>{{item.item_hin}}</span>
+                                            <span *ngIf="item.subitem_hin"> - {{item.subitem_hin}}</span>
+                                            <i *ngIf="item.document?.images?.length"
+                                                class="uil uil-image text-primary ms-1 cursor-pointer"
+                                                (click)="showImages(item)"></i>
+                                            <br>
+                                            <small class="text-muted">{{item.item_eng}}</small>
+                                            <small class="text-muted" *ngIf="item.subitem_eng"> -
+                                                {{item.subitem_eng}}</small>
+                                        </div>
+                                    </td>
+                                    <td class="w-100">{{item.lot_no || '-'}}</td>
+                                    <td class="w-120"><strong>{{item.qty}} {{item.unit_short}}</strong></td>
+                                    <td class="w-150">
+                                        <span *ngIf="item.rate">@{{item.rate}} = {{item.actual_amt}}</span>
+                                        <span *ngIf="!item.rate">-</span>
+                                    </td>
 
-                                        <td class="w-120">{{item.product_code || '-'}}</td>
-                                        <td class="w-120">
-                                            <span class="badge" [class.badge-warning]="item.condition_eng === 'Old'"
-                                                [class.badge-success]="item.condition_eng === 'New'">
-                                                {{item.condition_eng}}
-                                            </span>
-                                        </td>
-                                        <td class="w-150">{{item.company_name || '-'}}</td>
-                                        <td class="w-180">
-                                            <div class="source-info">
-                                                <span>{{item.aawak_source_hin}}</span> <br />
-                                                <small class="text-muted">{{item.aawak_source_eng}}</small>
+                                    <td class="w-120">{{item.product_code || '-'}}</td>
+                                    <td class="w-120">
+                                        <span class="badge" [class.badge-warning]="item.condition_eng === 'Old'"
+                                            [class.badge-success]="item.condition_eng === 'New'">
+                                            {{item.condition_eng}}
+                                        </span>
+                                    </td>
+                                    <td class="w-150">{{item.company_name || '-'}}</td>
+                                    <td class="w-180">
+                                        <div class="source-info">
+                                            <span>{{item.aawak_source_hin}}</span> <br />
+                                            <small class="text-muted">{{item.aawak_source_eng}}</small>
+                                        </div>
+                                    </td>
+                                    <td class="w-180">
+                                        <div class="jawak-type-info">
+                                            <span>{{item.jawak_type_hin}}</span> <br />
+                                            <small class="text-muted">{{item.jawak_type_eng}}</small>
+                                        </div>
+                                    </td>
+                                    <td class="w-180">
+                                        <div class="usage-info">
+                                            <small class="text-muted">{{item.usage_list_eng}}</small><br>
+                                            <span class="hindi-text">{{item.usage_list_hin}}</span>
+                                        </div>
+                                    </td>
+                                    <td class="w-400">
+                                        <div *ngIf="item.usage_report?.date" class="usage-report-detailed">
+                                            <div class="rating-reporter-line">
+                                                <span class="star" *ngFor="let star of [1,2,3,4,5]"
+                                                    [class.filled]="star <= item.usage_report.rating">★</span>
+                                                <span class="reporter">{{item.usage_report.reporter}}</span>
                                             </div>
-                                        </td>
-                                        <td class="w-180">
-                                            <div class="jawak-type-info">
-                                                <span>{{item.jawak_type_hin}}</span> <br />
-                                                <small class="text-muted">{{item.jawak_type_eng}}</small>
-                                            </div>
-                                        </td>
-                                        <td class="w-180">
-                                            <div class="usage-info">
-                                                <small class="text-muted">{{item.usage_list_eng}}</small><br>
-                                                <span class="hindi-text">{{item.usage_list_hin}}</span>
-                                            </div>
-                                        </td>
-                                        <td class="w-400">
-                                            <div *ngIf="item.usage_report?.date" class="usage-report-detailed">
-                                                <div class="rating-reporter-line">
-                                                    <span class="star" *ngFor="let star of [1,2,3,4,5]"
-                                                        [class.filled]="star <= item.usage_report.rating">★</span>
-                                                    <span class="reporter">{{item.usage_report.reporter}}</span>
-                                                </div>
-                                                <div *ngIf="item.usage_report.fayda" class="text-success small">
-                                                    😊 {{item.usage_report.fayda}}</div>
-                                            </div>
-                                            <span *ngIf="!item.usage_report?.date">-</span>
-                                        </td>
-                                    </tr>
-                                </ng-container>
+                                            <div *ngIf="item.usage_report.fayda" class="text-success small">
+                                                😊 {{item.usage_report.fayda}}</div>
+                                        </div>
+                                        <span *ngIf="!item.usage_report?.date">-</span>
+                                    </td>
+                                </tr>
                             </tbody>
-                            <tbody *ngIf="!flatJawakItems || !flatJawakItems.length">
+                            <tbody *ngIf="!jawakData || !jawakData.length">
                                 <tr>
                                     <td colspan="100%" class="text-center text-muted py-4">
                                         <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data

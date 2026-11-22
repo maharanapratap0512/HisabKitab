@@ -26,7 +26,7 @@ export class JawakNewComponent implements OnInit, OnDestroy {
 
   // Pagination and UI
   page = 1;
-  pageNo = 0;
+  pageNo = 1;
   itemsPerPage = 100;
   totalItems: any;
 
@@ -107,7 +107,10 @@ export class JawakNewComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.spinner.show();
     this.settings = this.auth.webUser.settings;
-    this.settings.jawak.view_mode = this.settings.jawak.view_mode || 'voucher';
+    if (!this.settings.jawak) this.settings.jawak = {};
+    this.settings.jawak.viewMode = this.settings.jawak.viewMode || this.settings.jawak.view_mode || 'voucher';
+    this.settings.jawak.view_mode = this.settings.jawak.viewMode;
+    this.viewMode = this.settings.jawak.viewMode;
     this.gs.observeList().pipe(takeUntil(this.destroy$)).subscribe((result: any) => {
       this.mms = result.mm || [];
       this.items = result.itemmix || [];
@@ -224,8 +227,16 @@ export class JawakNewComponent implements OnInit, OnDestroy {
 
   changeView(mode: 'voucher' | 'individual') {
     this.viewMode = mode;
-    this.auth.webUser.settings.jawak.view_mode = mode;
-    this.auth.updateSettings()
+    if (!this.settings.jawak) this.settings.jawak = {};
+    this.settings.jawak.viewMode = mode;
+    this.settings.jawak.view_mode = mode;
+    this.auth.webUser.settings.jawak = this.settings.jawak;
+    this.auth.updateSettings();
+    this.page = 1;
+    this.pageNo = 1;
+    this.selectionService.clear('jawak-new-voucher');
+    this.selectionService.clear('jawak-new-individual');
+    this.getFilteredData();
   }
 
   UISettingsChanged() {
@@ -295,6 +306,7 @@ export class JawakNewComponent implements OnInit, OnDestroy {
 
   getJawakPage(page: any = null) {
     if (page) {
+      this.page = page;
       this.pageNo = page;
       this.getFilteredData();
     }
@@ -379,9 +391,13 @@ export class JawakNewComponent implements OnInit, OnDestroy {
   }
 
   getFilteredData(pageNo: any = null) {
+    if (pageNo) {
+      this.page = pageNo;
+      this.pageNo = pageNo;
+    }
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
-    this.filterBody.pageNo = this.pageNo;
+    this.filterBody.pageNo = this.pageNo || 1;
     // AUTO select all mm if mm not selected and state selected for mm.
     if (!this.filterBody.mm_id?.length && this.filterBody.mm_states) {
       this.filterBody.mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
@@ -390,47 +406,107 @@ export class JawakNewComponent implements OnInit, OnDestroy {
     if (!this.filterBody.aj_mm_id?.length && this.filterBody.jwk_mm_states) {
       this.filterBody.aj_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.jwk_mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
     }
-    this.http.put(this.api.getUrl('JAWAK') + 'voucher/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
-      if (data['result'] && data['success']) {
-        this.jawakAll = data['result'];
-        for (let i in this.jawakAll) {
-          this.jawakAll[i].sr_no = i;
-          for (let j in this.jawakAll[i].jawaks) {
-            this.jawakAll[i].jawaks[j].categories_hin = '';
-            this.jawakAll[i].jawaks[j].categories_eng = '';
-            const scats = this.jawakAll[i].jawaks[j].scategories || [];
-            const icats = this.jawakAll[i].jawaks[j].icategories || [];
+
+    const mode = this.settings.jawak?.viewMode || this.settings.jawak?.view_mode || 'voucher';
+    const endpoint = mode === 'voucher' ? 'voucher/' : 'filter/';
+
+    this.http.put(this.api.getUrl('JAWAK') + endpoint + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      if (data && data.success && data.result) {
+        if (mode === 'voucher') {
+          this.jawakAll = data['result'];
+          for (let i in this.jawakAll) {
+            this.jawakAll[i].sr_no = i;
+            for (let j in this.jawakAll[i].jawaks) {
+              this.jawakAll[i].jawaks[j].categories_hin = '';
+              this.jawakAll[i].jawaks[j].categories_eng = '';
+              const scats = this.jawakAll[i].jawaks[j].scategories || [];
+              const icats = this.jawakAll[i].jawaks[j].icategories || [];
+              const scatIds = scats.map((c: any) => c._id);
+              const icatIds = icats.map((c: any) => c._id);
+
+              if (scats.length > 0) {
+                for (let k in this.categories) {
+                  if (scatIds.includes(this.categories[k]._id)) {
+                    this.jawakAll[i].jawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                    this.jawakAll[i].jawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                  }
+                }
+              } else {
+                for (let k in this.categories) {
+                  if (icatIds.includes(this.categories[k]._id)) {
+                    this.jawakAll[i].jawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                    this.jawakAll[i].jawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                  }
+                }
+              }
+            }
+            this.jawakAll[i].temp_id = this.jawakAll[i].voucher_no || 'temp_' + i;
+            this.jawakAll[i].expanded = this.expandAll;
+          }
+          this.jawakData = this.jawakAll;
+          this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
+        } else {
+          // Individual mode: each row is an individual jawak item (100 rows per page)
+          this.jawakAll = data['result'];
+          for (let i in this.jawakAll) {
+            this.jawakAll[i].sr_no = i;
+            this.jawakAll[i].categories_hin = '';
+            this.jawakAll[i].categories_eng = '';
+            const scats = this.jawakAll[i].scategories || [];
+            const icats = this.jawakAll[i].icategories || [];
             const scatIds = scats.map((c: any) => c._id);
             const icatIds = icats.map((c: any) => c._id);
 
             if (scats.length > 0) {
               for (let k in this.categories) {
                 if (scatIds.includes(this.categories[k]._id)) {
-                  this.jawakAll[i].jawaks[j].categories_hin += this.categories[k].category_hin + ', ';
-                  this.jawakAll[i].jawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                  this.jawakAll[i].categories_hin += this.categories[k].category_hin + ', ';
+                  this.jawakAll[i].categories_eng += this.categories[k].category_eng + ', ';
                 }
               }
             } else {
               for (let k in this.categories) {
                 if (icatIds.includes(this.categories[k]._id)) {
-                  this.jawakAll[i].jawaks[j].categories_hin += this.categories[k].category_hin + ', ';
-                  this.jawakAll[i].jawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                  this.jawakAll[i].categories_hin += this.categories[k].category_hin + ', ';
+                  this.jawakAll[i].categories_eng += this.categories[k].category_eng + ', ';
                 }
               }
             }
           }
-          this.jawakAll[i].temp_id = this.jawakAll[i].voucher_no || 'temp_' + i;
+          this.jawakData = this.jawakAll;
+          this.flatJawakItems = this.jawakData;
         }
-        this.jawakData = this.jawakAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
+      } else {
+        this.isLoader = false;
       }
+    }, (err: any) => {
+      this.toastr.error('Failed to load Jawak data.');
       this.isLoader = false;
     });
   }
 
   editJawak(i: any, data: any): void {
-    this.editData = JSON.parse(JSON.stringify(data));
+    const copy = JSON.parse(JSON.stringify(data));
+    const mode = this.settings.jawak.viewMode || this.settings.jawak.view_mode || 'voucher';
+    if (mode === 'individual' || !copy.jawaks) {
+      this.editData = {
+        _id: copy._id,
+        voucher_no: copy.voucher_no,
+        date: copy.date,
+        pkt_num: copy.pkt_num,
+        reg_pg_no: copy.reg_pg_no,
+        mm_id: copy.mm_id,
+        jawak_mm_id: copy.jawak_mm_id,
+        pbk_id: copy.pbk_id,
+        dept_id: copy.dept_id,
+        lot_no: copy.lot_no,
+        jawaks: [copy]
+      };
+    } else {
+      this.editData = copy;
+    }
     this.editIndex = i;
     this.openModal('Edit Jawak');
   }
@@ -466,7 +542,12 @@ export class JawakNewComponent implements OnInit, OnDestroy {
   editJawakResponse(ev: any): void {
     this.isLoader = true;
     if (ev && ev.length) {
-      this.jawakData.splice(this.editIndex, 1, ev[0]);
+      const mode = this.settings.jawak.viewMode || this.settings.jawak.view_mode || 'voucher';
+      if (mode === 'voucher') {
+        this.jawakData.splice(this.editIndex, 1, ev[0]);
+      } else {
+        this.getFilteredData();
+      }
       this.editIndex = null;
       this.closeModal();
       this.isLoader = false;
@@ -490,7 +571,7 @@ export class JawakNewComponent implements OnInit, OnDestroy {
 
 
   deleteMultiple() {
-    let mode = this.settings.jawak.viewMode;
+    let mode = this.settings.jawak.viewMode || this.settings.jawak.view_mode || 'voucher';
     let context = mode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual';
     let selectedIds = this.selectionService.getSelected(context);
 
@@ -516,13 +597,23 @@ export class JawakNewComponent implements OnInit, OnDestroy {
         }
         let msg = `${s_count} Deleted Successfully out of ${selectedIds.length}`;
         this.selectionService.clear(context);
-        this.toastr.success(msg);
+        if (s_count > 0) {
+          this.toastr.success(msg);
+          const maxPage = Math.max(1, Math.ceil(this.total_count / this.itemsPerPage));
+          if (this.page > maxPage) {
+            this.page = maxPage;
+            this.pageNo = maxPage;
+          }
+          this.getFilteredData();
+        } else {
+          this.toastr.error(msg);
+        }
       }
     });
   }
 
   bulkEditMultiple() {
-    let mode = this.settings.jawak.viewMode;
+    let mode = this.settings.jawak.viewMode || this.settings.jawak.view_mode || 'voucher';
     let context = mode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual';
     let selectedIds = this.selectionService.getSelected(context);
     if (selectedIds.length === 0) {
@@ -540,51 +631,71 @@ export class JawakNewComponent implements OnInit, OnDestroy {
   }
 
   async fnDeleteVoucher(voucherNo: any) {
-    return new Promise((resolve, reject) => {
-      let index = this.jawakData.findIndex((x: any) => x.temp_id === voucherNo);
+    return new Promise((resolve) => {
+      let index = this.jawakData.findIndex((x: any) => String(x.temp_id) === String(voucherNo));
       if (index === -1) return resolve(false);
       let ids: any = JSON.stringify(this.jawakData[index].jawaks.map((j: { _id: any; }) => j._id));
       this.http.delete(this.api.getUrl('JAWAK') + 'voucher/' + ids).subscribe((data: any) => {
-        if (data.success) {
+        if (data && data.success) {
           this.jawakData.splice(index, 1);
+          this.total_count = Math.max(0, this.total_count - 1);
           this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
           return resolve(true);
         } else {
-          this.toastr.error(data.message || 'Error deleting.');
+          this.toastr.error(data?.message || 'Error deleting voucher.');
           return resolve(false);
         }
-      }, err => resolve(false));
+      }, err => {
+        this.toastr.error('Error deleting voucher.');
+        return resolve(false);
+      });
     });
   }
 
   async fnDeleteIndividual(id: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.http.delete(this.api.getUrl('JAWAK') + id).subscribe((data: any) => {
-        if (data.success) {
-          for (let i = 0; i < this.jawakData.length; i++) {
-            let j = this.jawakData[i].jawaks.findIndex((x: any) => x._id === id);
-            if (j !== -1) {
-              this.jawakData[i].jawaks.splice(j, 1);
-              if (this.jawakData[i].jawaks.length === 0) {
-                this.jawakData.splice(i, 1);
-              }
-              break;
+        if (data && data.success) {
+          const currentMode = this.settings.jawak.viewMode || this.settings.jawak.view_mode || 'voucher';
+          if (currentMode === 'individual') {
+            const idx = this.jawakData.findIndex((x: any) => String(x._id) === String(id));
+            if (idx !== -1) {
+              this.jawakData.splice(idx, 1);
             }
+            this.total_count = Math.max(0, this.total_count - 1);
+            this.flatJawakItems = this.jawakData;
+          } else {
+            for (let i = 0; i < this.jawakData.length; i++) {
+              if (this.jawakData[i].jawaks) {
+                let j = this.jawakData[i].jawaks.findIndex((x: any) => String(x._id) === String(id));
+                if (j !== -1) {
+                  this.jawakData[i].jawaks.splice(j, 1);
+                  if (this.jawakData[i].jawaks.length === 0) {
+                    this.jawakData.splice(i, 1);
+                  }
+                  break;
+                }
+              }
+            }
+            this.total_count = Math.max(0, this.total_count - 1);
+            this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
           }
-          this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
           return resolve(true);
         } else {
-          this.toastr.error(data.message || 'Error deleting record.');
+          this.toastr.error(data?.message || 'Error deleting record.');
           return resolve(false);
         }
-      }, err => resolve(false));
+      }, err => {
+        this.toastr.error('Error deleting record.');
+        return resolve(false);
+      });
     });
   }
 
-  deleteJawak(i: number, srNo: number): void {
+  deleteJawak(row: any, i?: number): void {
     Swal.fire({
       title: 'Are you sure?',
-      text: 'All jawaks in Bunch will be deleted. You won’t be able to revert this!',
+      text: 'All jawaks in Voucher will be deleted. You won’t be able to revert this!',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -592,23 +703,44 @@ export class JawakNewComponent implements OnInit, OnDestroy {
       confirmButtonText: 'Yes, delete it!'
     }).then(async (result) => {
       if (result.isConfirmed) {
-        let ids: any = JSON.stringify(this.jawakData[srNo].jawaks.map((j: { _id: any; }) => j._id));
+        if (!row || !row.jawaks || !row.jawaks.length) {
+          this.toastr.warning('No items found in this voucher.');
+          return;
+        }
+        let ids: any = JSON.stringify(row.jawaks.map((j: { _id: any; }) => j._id));
 
         this.http.delete(this.api.getUrl('JAWAK') + 'voucher/' + ids)
           .subscribe((data: any) => {
-            if (data.success) {
-              this.jawakData.splice(i, 1);
-              this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
+            if (data && data.success) {
+              const idx = this.jawakData.indexOf(row);
+              if (idx !== -1) {
+                this.jawakData.splice(idx, 1);
+              } else if (i !== undefined && i >= 0 && i < this.jawakData.length) {
+                this.jawakData.splice(i, 1);
+              }
+              this.total_count = Math.max(0, this.total_count - 1);
+              this.flatJawakItems = this.jawakData.reduce((acc: any[], r: any) => acc.concat(this.getFilteredJawaks(r.jawaks)), []);
+              if (this.jawakData.length === 0 && this.total_count > 0) {
+                const maxPage = Math.max(1, Math.ceil(this.total_count / this.itemsPerPage));
+                if (this.page > maxPage) {
+                  this.page = maxPage;
+                  this.pageNo = maxPage;
+                }
+                this.getFilteredData();
+              }
               this.toastr.success('Deleted Successfully');
             } else {
-              this.toastr.error(data.message || 'Error deleting.');
+              this.toastr.error(data?.message || 'Error deleting voucher.');
             }
+          }, err => {
+            this.toastr.error('Error deleting voucher.');
           });
       }
     });
   }
 
-  deleteOne(i: number, j: number, id: number): void {
+  deleteOne(i: number, idOrJ: any, possibleId?: any): void {
+    const id = possibleId !== undefined ? possibleId : idOrJ;
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -621,13 +753,47 @@ export class JawakNewComponent implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.http.delete(this.api.getUrl('JAWAK') + id)
           .subscribe((data: any) => {
-            if (data.success) {
-              this.jawakData[i].jawaks.splice(j, 1);
-              this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
+            if (data && data.success) {
+              const currentMode = this.settings.jawak.viewMode || this.settings.jawak.view_mode || 'voucher';
+              if (currentMode === 'individual') {
+                const idx = this.jawakData.findIndex((x: any) => String(x._id) === String(id));
+                if (idx !== -1) {
+                  this.jawakData.splice(idx, 1);
+                } else if (i >= 0 && i < this.jawakData.length) {
+                  this.jawakData.splice(i, 1);
+                }
+                this.total_count = Math.max(0, this.total_count - 1);
+                this.flatJawakItems = this.jawakData;
+              } else {
+                for (let r = 0; r < this.jawakData.length; r++) {
+                  if (this.jawakData[r].jawaks) {
+                    const itemIdx = this.jawakData[r].jawaks.findIndex((x: any) => String(x._id) === String(id));
+                    if (itemIdx !== -1) {
+                      this.jawakData[r].jawaks.splice(itemIdx, 1);
+                      if (this.jawakData[r].jawaks.length === 0) {
+                        this.jawakData.splice(r, 1);
+                        this.total_count = Math.max(0, this.total_count - 1);
+                      }
+                      break;
+                    }
+                  }
+                }
+                this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
+              }
+              if (this.jawakData.length === 0 && this.total_count > 0) {
+                const maxPage = Math.max(1, Math.ceil(this.total_count / this.itemsPerPage));
+                if (this.page > maxPage) {
+                  this.page = maxPage;
+                  this.pageNo = maxPage;
+                }
+                this.getFilteredData();
+              }
               this.toastr.success('Deleted Successfully');
             } else {
-              this.toastr.error(data.message || 'Error deleting record.');
+              this.toastr.error(data?.message || 'Error deleting record.');
             }
+          }, err => {
+            this.toastr.error('Error deleting record.');
           });
       }
     });
