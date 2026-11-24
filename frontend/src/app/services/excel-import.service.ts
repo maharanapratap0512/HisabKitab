@@ -19,7 +19,12 @@ export class ExcelImportService {
     { name: 'product', autoUpdate: true },
     { name: 'support_list', autoUpdate: true, note: 'list_type should be aawak_type, jawak_type, gender, relation, condition. MUST BE same spelling, lower case.' },
     { name: 'category', autoUpdate: true },
+    { name: 'country', autoUpdate: true },
+    { name: 'zone', autoUpdate: true },
+    { name: 'state', autoUpdate: true },
     { name: 'district', autoUpdate: true },
+    { name: 'city', autoUpdate: true },
+    { name: 'unit', autoUpdate: true },
     { name: 'attribute', autoUpdate: true },
     { name: 'attributes_value', autoUpdate: true },
     { name: 'mm', autoUpdate: true },
@@ -160,10 +165,34 @@ export class ExcelImportService {
       { col_name: 'category_hin', name: 'category_hin', alt_names: ['category hin', 'category (eng)'], not_null: true },
       { col_name: 'category_roman', name: 'category_roman', alt_names: ['category roman', 'category (roman)'], not_null: false },
     ],
+    country: [
+      { col_name: 'country_hin', name: 'country_hin', alt_names: ["country hin", "country hindi", "देश"], not_null: true },
+      { col_name: 'country_eng', name: 'country_eng', alt_names: ["country eng", "country english", "country"] },
+    ],
+    zone: [
+      { col_name: 'zone_hin', name: 'zone_hin', alt_names: ["zone hin", "zone hindi", "जोन"], not_null: true },
+      { col_name: 'zone_eng', name: 'zone_eng', alt_names: ["zone eng", "zone english", "zone"] },
+      { col_name: 'country', name: 'country', alt_names: ["देश", "country"], not_null: true, ref_table: 'country', ref_field: 'country_id', ref_data: 'country_hin' },
+    ],
+    state: [
+      { col_name: 'state_hin', name: 'state_hin', alt_names: ["state hin", "state hindi", "राज्य", "स्टेट"], not_null: true },
+      { col_name: 'state_eng', name: 'state_eng', alt_names: ["state eng", "state english", "state"] },
+      { col_name: 'country', name: 'country', alt_names: ["देश", "country"], not_null: true, ref_table: 'country', ref_field: 'country_id', ref_data: 'country_hin' },
+      { col_name: 'zone', name: 'zone', alt_names: ["जोन", "zone"], ref_table: 'zone', ref_field: 'zone_id', ref_data: 'zone_hin' },
+    ],
     district: [
       { col_name: 'district_hin', name: 'district_hin', alt_names: ["district hin", "namehin"], not_null: true, },
       { col_name: 'district_eng', name: 'district_eng', alt_names: ["district eng", "nameeng"], not_null: true, },
       { col_name: 'state', name: 'state', alt_names: ["स्टेट", "राज्य"], not_null: true, ref_table: 'state', ref_field: 'state_id', ref_data: 'state_hin' },
+    ],
+    city: [
+      { col_name: 'city_hin', name: 'city_hin', alt_names: ["city hin", "city hindi", "शहर", "सिटी"], not_null: true },
+      { col_name: 'city_eng', name: 'city_eng', alt_names: ["city eng", "city english", "city"] },
+      { col_name: 'state', name: 'state', alt_names: ["राज्य", "स्टेट", "state"], not_null: true, ref_table: 'state', ref_field: 'state_id', ref_data: 'state_hin' },
+    ],
+    unit: [
+      { col_name: 'unit_short', name: 'unit_short', alt_names: ["unit", "unit short", "इकाई", "यूनिट", "मात्रक"], not_null: true },
+      { col_name: 'unit_full', name: 'unit_full', alt_names: ["unit full", "full name", "पूरा नाम"] },
     ],
     subitem_list: [
       { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitem hin", "subitemhin", "namehin", "सबआइटम"], not_null: true },

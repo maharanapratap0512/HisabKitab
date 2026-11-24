@@ -1,10 +1,68 @@
 [
     {
+        "version": "41.1",
+        "date": "24-11-2026",
+        "summary": "Master Lists Excel Import, Quick Reference Creation & Multi-PC Studio Access",
+        "summary_hin": "मास्टर सूचियों का एक्सेल इम्पोर्ट, त्वरित रेफरेंस प्रविष्टि एवं मल्टी-पीसी स्टूडियो एक्सेस",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "एक्सेल इम्पोर्ट",
+                "title": "Complete Excel Import for Master Lists",
+                "title_hin": "राज्य, शहर, देश एवं इकाई सूचियों हेतु संपूर्ण एक्सेल इम्पोर्ट",
+                "desc": "State, City, Country, Zone, and Unit lists can now be imported directly from Excel sheets with automatic bilingual column detection.",
+                "desc_hin": "अब राज्य, शहर, देश, जोन तथा इकाई (यूनिट) सूचियों को भी सीधे एक्सेल फाइल से आसानी से इम्पोर्ट किया जा सकता है। हिंदी व अंग्रेजी दोनों कॉलम अपने आप पहचाने जाते हैं।"
+            },
+            {
+                "type": "improved",
+                "module": "एक्सेल इम्पोर्ट",
+                "title": "Add Missing Entries Directly in Correction Tab",
+                "title_hin": "सुधार तालिका से ही नया नाम तुरंत जोड़ने की सुविधा",
+                "desc": "If a state, country, or other reference is missing during Excel correction, you can add it immediately without interrupting your import.",
+                "desc_hin": "एक्सेल सुधार करते समय यदि कोई राज्य, देश या संदर्भ सूची में नहीं मिलता, तो अब इम्पोर्ट रोके बिना वहीं से नया नाम तुरंत दर्ज किया जा सकता है।"
+            }
+        ]
+    },
+    {
+        "version": "41.0",
+        "date": "14-11-2026 - 22-11-2026",
+        "summary": "Current Page Selection, Instant Batch Delete, 100-Rows Jawak View & MM Directory Upgrade",
+        "summary_hin": "पेज अनुसार सुरक्षित चयन, तत्काल बल्क डिलीट, तेज़ 100-रो जावक व्यू व मि.म. डायरेक्टरी सुधार",
+        "isNew": false,
+        "items": [
+            {
+                "type": "improved",
+                "module": "आवक व जावक",
+                "title": "Current Page Selection & Instant Batch Delete",
+                "title_hin": "पेज अनुसार सुरक्षित चयन एवं तत्काल बल्क डिलीट",
+                "desc": "In Aawak and Jawak, Select All now selects current page rows safely. Deleting multiple entries updates numbers instantly without refreshing.",
+                "desc_hin": "आवक और जावक में सिलेक्ट ऑल अब केवल वर्तमान पेज की पंक्तियों को चुनता है। चुनी हुई पंक्तियों को हटाने पर गिनती तुरंत अपडेट होती है और पेज अपने आप व्यवस्थित हो जाता है।"
+            },
+            {
+                "type": "improved",
+                "module": "जावक व्यू",
+                "title": "High-Performance 100-Rows View for Large Vouchers",
+                "title_hin": "बड़े वाउचर्स में तेज़ डिस्प्ले एवं हैंग-फ्री व्यू",
+                "desc": "Jawak single mode now displays 100 item rows smoothly instead of loading huge vouchers all at once, keeping the software fast and responsive.",
+                "desc_hin": "जावक के सिंगल मोड में अब 100 वाउचर्स की जगह 100 आइटम्स प्रदर्शित होते हैं, जिससे 200 से अधिक आइटम्स वाले बड़े वाउचर्स भी बिना किसी रुकावट या हैंग हुए तुरंत लोड होते हैं।"
+            },
+            {
+                "type": "improved",
+                "module": "मि.म. डायरेक्टरी",
+                "title": "Department-Wise MM Directory & Data Protection",
+                "title_hin": "विभाग अनुसार मि.म. डायरेक्टरी एवं सुरक्षा सुधार",
+                "desc": "Enhanced Mini Madhuban directory with clean department separation, accurate code tracking, and improved data reliability.",
+                "desc_hin": "मिनी मधुबन डायरेक्टरी में प्रत्येक विभाग के अनुसार रिकॉर्ड्स की सुरक्षा सुनिश्चित की गई है तथा कोड और प्रकार की प्रविष्टि को अधिक सुगम बनाया गया है।"
+            }
+        ]
+    },
+    {
         "version": "40",
         "date": "08-11-2026",
         "summary": "Resumable Excel Import with Auto-Save and Session Recovery",
         "summary_hin": "एक्सेल इम्पोर्ट में स्वचालित प्रगति संरक्षण एवं सत्र पुनः प्रारंभ सुविधा",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

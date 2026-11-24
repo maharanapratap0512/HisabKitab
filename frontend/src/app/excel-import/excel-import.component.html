@@ -580,6 +580,34 @@
                                              {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                                        </ng-select>
 
+                                       <!-- country dropdown -->
+                                       <ng-select *ngIf="data.type == 'country'" class="custom custom-import"
+                                          placeholder="Select Country" [virtualScroll]="true" [(ngModel)]="data.id"
+                                          [ngModelOptions]="{standalone: true}" (open)="onDropdownOpen()"
+                                          (close)="onDropdownClose()"
+                                          (change)="handleAddOption($event, data, 'Add Country')" appendTo="body">
+                                          <ng-option selected="selected" disabled value="">-- Select Country
+                                             --</ng-option>
+                                          <ng-option value="+add" class="text-primary fw-bold">+ Add Country</ng-option>
+                                          <ng-option *ngFor="let item of countries" [value]="item._id">
+                                             {{item.country_hin}}:{{item.country_eng}}
+                                          </ng-option>
+                                       </ng-select>
+
+                                       <!-- zone dropdown -->
+                                       <ng-select *ngIf="data.type == 'zone'" class="custom custom-import"
+                                          placeholder="Select Zone" [virtualScroll]="true" [(ngModel)]="data.id"
+                                          [ngModelOptions]="{standalone: true}" (open)="onDropdownOpen()"
+                                          (close)="onDropdownClose()"
+                                          (change)="handleAddOption($event, data, 'Add Zone')" appendTo="body">
+                                          <ng-option selected="selected" disabled value="">-- Select Zone
+                                             --</ng-option>
+                                          <ng-option value="+add" class="text-primary fw-bold">+ Add Zone</ng-option>
+                                          <ng-option *ngFor="let item of zones" [value]="item._id">
+                                             {{item.zone_hin}}:{{item.zone_eng}}
+                                          </ng-option>
+                                       </ng-select>
+
                                        <!-- state dropdown -->
                                        <ng-select *ngIf="data.type == 'state'" class="custom custom-import"
                                           placeholder="Select State" [virtualScroll]="true" [(ngModel)]="data.id"
@@ -861,6 +889,10 @@
                            (response)="onAddResponse($event)"></app-category-entry>
                         <app-unit-entry *ngIf="showAddModal == 'Add Unit'"
                            (response)="onAddResponse($event)"></app-unit-entry>
+                        <app-country-entry *ngIf="showAddModal == 'Add Country'"
+                           (response)="onAddResponse($event)"></app-country-entry>
+                        <app-zone-entry *ngIf="showAddModal == 'Add Zone'"
+                           (response)="onAddResponse($event)"></app-zone-entry>
                         <app-state-entry *ngIf="showAddModal == 'Add State'"
                            (response)="onAddResponse($event)"></app-state-entry>
                         <app-district-entry *ngIf="showAddModal == 'Add District'"

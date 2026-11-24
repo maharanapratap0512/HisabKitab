@@ -68,9 +68,26 @@ export class ExcelImportComponent implements OnInit, OnChanges {
 
   onAddResponse(res: any) {
     if (res) {
-      const newId = res._id || (res.data && res.data._id) || res;
-      if (this.activeCorrectionRow && typeof newId === 'string') {
+      const newId = res._id || (res.data && res.data._id) || (typeof res === 'object' ? (res._id || res.id) : res);
+      if (this.activeCorrectionRow && (typeof newId === 'string' || typeof newId === 'number')) {
         this.activeCorrectionRow.id = newId;
+        if (typeof res === 'object' && (res._id || res.id)) {
+          const rowType = this.activeCorrectionRow.type;
+          const itemObj = res.data || res;
+          if (rowType === 'country' && this.countries && !this.countries.some((c: any) => c._id == itemObj._id)) {
+            this.countries = [itemObj, ...this.countries];
+          } else if (rowType === 'zone' && this.zones && !this.zones.some((z: any) => z._id == itemObj._id)) {
+            this.zones = [itemObj, ...this.zones];
+          } else if (rowType === 'state' && this.states && !this.states.some((s: any) => s._id == itemObj._id)) {
+            this.states = [itemObj, ...this.states];
+          } else if (rowType === 'district' && this.districts && !this.districts.some((d: any) => d._id == itemObj._id)) {
+            this.districts = [itemObj, ...this.districts];
+          } else if (rowType === 'city' && this.cities && !this.cities.some((c: any) => c._id == itemObj._id)) {
+            this.cities = [itemObj, ...this.cities];
+          } else if (rowType === 'unit' && this.units && !this.units.some((u: any) => u._id == itemObj._id)) {
+            this.units = [itemObj, ...this.units];
+          }
+        }
       }
       if (this.showAddModal === 'Add Attribute') {
         this.loadAttributes();
@@ -108,6 +125,8 @@ export class ExcelImportComponent implements OnInit, OnChanges {
   subitems: any = [];
   subitem_lists: any = [];
   units: any = [];
+  countries: any = [];
+  zones: any = [];
   states: any = [];
   districts: any = [];
   cities: any = [];
@@ -156,6 +175,8 @@ export class ExcelImportComponent implements OnInit, OnChanges {
       this.categories = result.category ? result.category : [];
       this.subitem_lists = result.subitem_list ? result.subitem_list : [];
       this.units = result.unit ? result.unit : [];
+      this.countries = result.country ? result.country : [];
+      this.zones = result.zone ? result.zone : [];
       this.states = result.state ? result.state : [];
       this.districts = result.district ? result.district : [];
       this.cities = result.city ? result.city : [];
@@ -186,11 +207,23 @@ export class ExcelImportComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.loadAttributes();
     if (this.importType) {
-      for (let i in this.EIService.importList) {
-        if (this.EIService.importList[i].name == this.importType) {
-          this.importType = this.EIService.importList[i];
-          this.importTypeChanged(this.EIService.importList[i]);
-          break;
+      if (typeof this.importType === 'string') {
+        const found = this.EIService.importList.find((i: any) => i.name === this.importType);
+        if (found) {
+          this.importType = found;
+          this.importTypeChanged(found);
+        } else if (this.EIService.config[this.importType]) {
+          const customType = { name: this.importType, autoUpdate: true };
+          this.importType = customType;
+          this.importTypeChanged(customType);
+        }
+      } else {
+        for (let i in this.EIService.importList) {
+          if (this.EIService.importList[i].name == this.importType.name) {
+            this.importType = this.EIService.importList[i];
+            this.importTypeChanged(this.EIService.importList[i]);
+            break;
+          }
         }
       }
     }
@@ -400,6 +433,19 @@ export class ExcelImportComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes.importType && changes.importType.currentValue) {
+      const val = changes.importType.currentValue;
+      const typeName = typeof val === 'string' ? val : val.name;
+      const found = this.EIService.importList.find((i: any) => i.name === typeName);
+      if (found) {
+        this.importType = found;
+        this.importTypeChanged(found);
+      } else if (this.EIService.config[typeName]) {
+        const customType = { name: typeName, autoUpdate: true };
+        this.importType = customType;
+        this.importTypeChanged(customType);
+      }
+    }
     if (changes.excelFile && changes.excelFile.currentValue) {
       this.excelImport(changes.excelFile.currentValue);
     }

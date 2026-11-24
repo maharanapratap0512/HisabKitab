@@ -22,7 +22,7 @@
   <!-- Loading indicator -->
   <div *ngIf="isLoading" class="text-center py-4">
     <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
-    <span class="text-muted" style="font-size: 13px;">Connecting to Sutram Studio backend (port 3200)...</span>
+    <span class="text-muted" style="font-size: 13px;">Connecting to Sutram Studio backend (port {{backendPort}})...</span>
   </div>
 
   <!-- Sandboxed Studio Frame -->

@@ -234,6 +234,36 @@ class ExcelFunctions {
       district_hin: null,
       state_id: null
    }
+   state_form = {
+      state_hin: null,
+      state_eng: null,
+      country_id: null,
+      zone_id: null
+   }
+   city_form = {
+      city_hin: null,
+      city_eng: null,
+      state_id: null
+   }
+   country_form = {
+      country_hin: null,
+      country_eng: null
+   }
+   zone_form = {
+      zone_hin: null,
+      zone_eng: null,
+      country_id: null
+   }
+   unit_form = {
+      unit_short: null,
+      unit_full: null
+   }
+   subitem_list_form = {
+      subitem_hin: null,
+      subitem_eng: null,
+      subitem_roman: null,
+      extra_note: null
+   }
    constructor(list, dept_id = null) {
       // this.DBContex = require('./DBContex');
       // this.DB = new this.DBContex(); 
