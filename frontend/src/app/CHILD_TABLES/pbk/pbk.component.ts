@@ -170,32 +170,58 @@ export class PbkComponent implements OnInit {
   }
 
   export() {
-    let rows: any = [];
-    for (let i in this.pbkData) {
-      rows.push({
-        "roll no": this.pbkData[i].roll_no,
-        "pbk hin": this.pbkData[i].pbk_hin,
-        "pbk eng": this.pbkData[i].pbk_eng,
-        "relation": this.pbkData[i].relation,
-        "relative name": this.pbkData[i].relative_name,
-        "gender": this.pbkData[i].gender,
-        "birth_date": this.pbkData[i].birth_date,
-        "age": this.pbkData[i].age,
-        "status": this.pbkData[i].status,
-        "address": this.pbkData[i].address,
-        "townarea": this.pbkData[i].townarea,
-        "district": this.pbkData[i].district_hin,
-        "state": this.pbkData[i].state_hin,
-        "country": this.pbkData[i].country_hin,
-        "city": this.pbkData[i].city_hin,
-        "mobile no": this.pbkData[i].mo_no,
-        "alt mobile no": this.pbkData[i].alt_mo_no,
-        "daily class mm": this.pbkData[i].mm_hin,
-        "भट्ठी कब किया?": this.pbkData[i].bhatti_date,
-      })
-    }
-
-    this.excelExportService.exportAsExcelFile(rows, 'PBKs');
+    this.isLoader = true;
+    const body = { ...this.filterBody, export: true };
+    this.http.put(this.api.getUrl('PBK') + this.auth.webUser.dept_id, body).subscribe({
+      next: (data: any) => {
+        this.isLoader = false;
+        if (data && data.success && Array.isArray(data.result)) {
+          const allPbks = data.result;
+          if (allPbks.length === 0) {
+            this.toastr.info('No PBK records to export.');
+            return;
+          }
+          let rows: any = [];
+          for (let i in allPbks) {
+            let age = allPbks[i].age;
+            if (!age && allPbks[i].birth_date) {
+              const bdate = new Date(allPbks[i].birth_date);
+              const timeDiff = Math.abs(Date.now() - bdate.getTime());
+              age = Math.floor((timeDiff / (1000 * 3600 * 24)) / 365);
+            }
+            rows.push({
+              "roll no": allPbks[i].roll_no,
+              "pbk hin": allPbks[i].pbk_hin,
+              "pbk eng": allPbks[i].pbk_eng,
+              "relation": allPbks[i].relation,
+              "relative name": allPbks[i].relative_name,
+              "gender": allPbks[i].gender,
+              "birth_date": allPbks[i].birth_date,
+              "age": age,
+              "status": allPbks[i].status,
+              "address": allPbks[i].address,
+              "townarea": allPbks[i].townarea,
+              "district": allPbks[i].district_hin,
+              "state": allPbks[i].state_hin,
+              "country": allPbks[i].country_hin,
+              "city": allPbks[i].city_hin,
+              "mobile no": allPbks[i].mo_no,
+              "alt mobile no": Array.isArray(allPbks[i].alt_mo_no) ? allPbks[i].alt_mo_no.join(', ') : allPbks[i].alt_mo_no,
+              "daily class mm": allPbks[i].mm_hin,
+              "भट्ठी कब किया?": allPbks[i].bhatti_date,
+            });
+          }
+          this.excelExportService.exportStyledExcel(rows, 'PBKs', 'PBK Directory List');
+          this.toastr.success(`Successfully exported ${rows.length} PBKs.`);
+        } else {
+          this.toastr.error(data?.message || 'Failed to export PBKs.');
+        }
+      },
+      error: (err: any) => {
+        this.isLoader = false;
+        this.toastr.error(err?.error || err?.message || 'Error exporting PBK records.');
+      }
+    });
   }
 
   addPbkResponse(ev: any) {

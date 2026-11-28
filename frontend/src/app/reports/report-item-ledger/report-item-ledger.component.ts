@@ -471,10 +471,10 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
         i + 1,
         '',
         g.reports.length,
-        catPast.toFixed(2),
-        catAwk.toFixed(2),
-        catJwk.toFixed(2),
-        catBcht.toFixed(2)
+        Math.round(catPast * 100) / 100,
+        Math.round(catAwk * 100) / 100,
+        Math.round(catJwk * 100) / 100,
+        Math.round(catBcht * 100) / 100
       ];
 
       let catCell = masterIndexSheet.getCell(`B${masterRowIdx}`);
@@ -484,6 +484,9 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
       row.eachCell((c, cIdx) => {
         c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
         c.alignment = { vertical: 'middle', horizontal: cIdx <= 2 ? (cIdx === 1 ? 'center' : 'left') : 'right' };
+        if (cIdx >= 4) {
+          c.numFmt = '#,##0.00';
+        }
       });
       masterRowIdx++;
     }
@@ -493,16 +496,19 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
       '*',
       'Grand Summary Total',
       grandTotals.items,
-      grandTotals.past.toFixed(2),
-      grandTotals.aawak.toFixed(2),
-      grandTotals.jawak.toFixed(2),
-      grandTotals.bachat.toFixed(2)
+      Math.round(grandTotals.past * 100) / 100,
+      Math.round(grandTotals.aawak * 100) / 100,
+      Math.round(grandTotals.jawak * 100) / 100,
+      Math.round(grandTotals.bachat * 100) / 100
     ];
     masterIndexSheet.getRow(masterRowIdx).font = { bold: true };
     masterIndexSheet.getRow(masterRowIdx).eachCell((c, cIdx) => {
       c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
       c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
       c.alignment = { vertical: 'middle', horizontal: cIdx <= 2 ? (cIdx === 1 ? 'center' : 'left') : 'right' };
+      if (cIdx >= 4) {
+        c.numFmt = '#,##0.00';
+      }
     });
 
     masterIndexSheet.columns.forEach((col, idx) => {
@@ -516,7 +522,7 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
       let finalCatSheetName = itemMap.catSheetName;
 
       const catIndexSheet = workbook.addWorksheet(finalCatSheetName);
-      catIndexSheet.mergeCells('A1:E1');
+      catIndexSheet.mergeCells('A1:F1');
       let catTitleCell = catIndexSheet.getCell('A1');
       catTitleCell.value = `${periodStr} तक, ${mmName} के ${catName} का सार`;
       catTitleCell.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
@@ -524,12 +530,12 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
       catTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
       catIndexSheet.getRow(1).height = 30;
 
-      catIndexSheet.getCell('F1').value = { text: '⬅️ Master Index', hyperlink: "#'Master Category Saar'!A1" };
-      catIndexSheet.getCell('F1').font = { bold: true, color: { argb: 'FFFFFFFF' }, underline: true };
-      catIndexSheet.getCell('F1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
-      catIndexSheet.getCell('F1').alignment = { horizontal: 'center', vertical: 'middle' };
+      catIndexSheet.getCell('G1').value = { text: '⬅️ Master Index', hyperlink: "#'Master Category Saar'!A1" };
+      catIndexSheet.getCell('G1').font = { bold: true, color: { argb: 'FFFFFFFF' }, underline: true };
+      catIndexSheet.getCell('G1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF34495E' } };
+      catIndexSheet.getCell('G1').alignment = { horizontal: 'center', vertical: 'middle' };
 
-      const catHeaders = ['No.', 'Item Name (वस्तु)', 'Past Bachat (पिछला)', 'Total Aawak (आवक)', 'Total Jawak (जावक)', 'Current Bachat (वर्तमान)'];
+      const catHeaders = ['No.', 'Item Name (वस्तु)', 'Unit (इकाई)', 'Past Bachat (पिछला)', 'Total Aawak (आवक)', 'Total Jawak (जावक)', 'Current Bachat (वर्तमान)'];
       catIndexSheet.getRow(3).values = catHeaders;
       catIndexSheet.getRow(3).font = { bold: true, color: { argb: 'FFFFFFFF' } };
       catIndexSheet.getRow(3).eachCell(c => {
@@ -554,10 +560,10 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
         usedSheetNames.add(finalItemSheetName);
         itemSheetNames.push(finalItemSheetName);
 
-        let pVal = Number(r.overview.past_bachat || 0);
-        let aVal = Number(r.overview.total_aawak || 0);
-        let jVal = Number(r.overview.total_jawak || 0);
-        let bVal = Number(r.overview.current_bachat || 0);
+        let pVal = Math.round(Number(r.overview.past_bachat || 0) * 100) / 100;
+        let aVal = Math.round(Number(r.overview.total_aawak || 0) * 100) / 100;
+        let jVal = Math.round(Number(r.overview.total_jawak || 0) * 100) / 100;
+        let bVal = Math.round(Number(r.overview.current_bachat || 0) * 100) / 100;
 
         catPastTotal += pVal;
         catAwkTotal += aVal;
@@ -568,17 +574,24 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
         row.values = [
           i + 1,
           '',
-          `${pVal.toFixed(2)} ${r.unit_short}`,
-          `${aVal.toFixed(2)} ${r.unit_short}`,
-          `${jVal.toFixed(2)} ${r.unit_short}`,
-          `${bVal.toFixed(2)} ${r.unit_short}`
+          r.unit_short || '',
+          pVal,
+          aVal,
+          jVal,
+          bVal
         ];
 
         let itemCell = catIndexSheet.getCell(`B${cRow}`);
         itemCell.value = { text: itemName, hyperlink: `#'${finalItemSheetName}'!A1` };
         itemCell.font = { color: { argb: 'FF2980B9' }, underline: true, bold: true };
 
-        row.eachCell(c => c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } });
+        row.eachCell((c, cIdx) => {
+          c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+          c.alignment = { vertical: 'middle', horizontal: cIdx <= 3 ? (cIdx === 1 || cIdx === 3 ? 'center' : 'left') : 'right' };
+          if (cIdx >= 4) {
+            c.numFmt = '#,##0.00';
+          }
+        });
         cRow++;
       }
 
@@ -586,20 +599,24 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
       catIndexSheet.getRow(cRow).values = [
         '*',
         `${catName} Total`,
-        catPastTotal.toFixed(2),
-        catAwkTotal.toFixed(2),
-        catJwkTotal.toFixed(2),
-        catBchtTotal.toFixed(2)
+        '',
+        Math.round(catPastTotal * 100) / 100,
+        Math.round(catAwkTotal * 100) / 100,
+        Math.round(catJwkTotal * 100) / 100,
+        Math.round(catBchtTotal * 100) / 100
       ];
       catIndexSheet.getRow(cRow).font = { bold: true };
       catIndexSheet.getRow(cRow).eachCell((c, cIdx) => {
         c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
         c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
-        c.alignment = { vertical: 'middle', horizontal: cIdx <= 2 ? (cIdx === 1 ? 'center' : 'left') : 'right' };
+        c.alignment = { vertical: 'middle', horizontal: cIdx <= 3 ? (cIdx === 1 || cIdx === 3 ? 'center' : 'left') : 'right' };
+        if (cIdx >= 4) {
+          c.numFmt = '#,##0.00';
+        }
       });
 
       catIndexSheet.columns.forEach((col, i) => {
-        col.width = i === 0 ? 8 : (i === 1 ? 35 : 20);
+        col.width = i === 0 ? 8 : (i === 1 ? 35 : (i === 2 ? 14 : 18));
       });
 
       // Save itemSheetNames on itemMap so item sheets can be generated after all category index sheets
@@ -746,7 +763,7 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
 
     // Create Index Sheet
     const indexSheet = workbook.addWorksheet('Index');
-    indexSheet.mergeCells('A1:F1');
+    indexSheet.mergeCells('A1:G1');
     let indexTitleCell = indexSheet.getCell('A1');
     indexTitleCell.value = `${this.filterBody.from.name_hin} से ${this.filterBody.to.name_hin} तक, ${mmName} के ${catName} का सार`;
     indexTitleCell.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
@@ -754,7 +771,7 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
     indexTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
     indexSheet.getRow(1).height = 30;
 
-    const indexHeaders = ['No.', 'Item Name', 'Past Bachat', 'Total Aawak', 'Total Jawak', 'Current Bachat'];
+    const indexHeaders = ['No.', 'Item Name (वस्तु)', 'Unit (इकाई)', 'Past Bachat (पिछला)', 'Total Aawak (आवक)', 'Total Jawak (जावक)', 'Current Bachat (वर्तमान)'];
     indexSheet.getRow(3).values = indexHeaders;
     indexSheet.getRow(3).font = { bold: true };
     indexSheet.getRow(3).eachCell(c => {
@@ -766,20 +783,28 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
     for (let i = 0; i < reportsToExport.length; i++) {
       let report = reportsToExport[i];
       let itemName = report.item_hin + (report.subitem_hin ? ' (' + report.subitem_hin + ')' : '');
-      indexSheet.getRow(indexRow).values = [
+      let row = indexSheet.getRow(indexRow);
+      row.values = [
         i + 1,
         itemName,
-        `${Number(report.overview.past_bachat || 0).toFixed(2).replace(/\\.00$/, '')} ${report.unit_short}`,
-        `${Number(report.overview.total_aawak || 0).toFixed(2).replace(/\\.00$/, '')} ${report.unit_short}`,
-        `${Number(report.overview.total_jawak || 0).toFixed(2).replace(/\\.00$/, '')} ${report.unit_short}`,
-        `${Number(report.overview.current_bachat || 0).toFixed(2).replace(/\\.00$/, '')} ${report.unit_short}`
+        report.unit_short || '',
+        Math.round(Number(report.overview.past_bachat || 0) * 100) / 100,
+        Math.round(Number(report.overview.total_aawak || 0) * 100) / 100,
+        Math.round(Number(report.overview.total_jawak || 0) * 100) / 100,
+        Math.round(Number(report.overview.current_bachat || 0) * 100) / 100
       ];
-      indexSheet.getRow(indexRow).eachCell(c => c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } });
+      row.eachCell((c, cIdx) => {
+        c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        c.alignment = { vertical: 'middle', horizontal: cIdx <= 3 ? (cIdx === 1 || cIdx === 3 ? 'center' : 'left') : 'right' };
+        if (cIdx >= 4) {
+          c.numFmt = '#,##0.00';
+        }
+      });
       indexRow++;
     }
 
     indexSheet.columns.forEach((col, i) => {
-      col.width = i === 0 ? 8 : (i === 1 ? 40 : 20);
+      col.width = i === 0 ? 8 : (i === 1 ? 40 : (i === 2 ? 14 : 18));
     });
 
     // Process each item to create a separate sheet
@@ -919,9 +944,9 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
 
       // Helper to sanitize numeric values and round to 2 decimal places
       const getNumericValue = (val: any) => {
-        if (val === undefined || val === null || val === '') return '-';
+        if (val === undefined || val === null || val === '') return null;
         const num = Number(val);
-        return isNaN(num) ? '-' : Number(num.toFixed(2));
+        return isNaN(num) ? null : Math.round(num * 100) / 100;
       };
 
       // Aawak Table
@@ -938,10 +963,17 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
 
       if (report.aawaks && report.aawaks.length > 0) {
         for (let a of report.aawaks) {
-          worksheet.getRow(currentRow).values = [
+          let row = worksheet.getRow(currentRow);
+          row.values = [
             formatDate(a.date), a.lot_no, a.aawak_mm_hin, (a.roll_no ? a.roll_no + ' ' : '') + (a.pbk_hin ? a.pbk_hin : ''),
             a.condition_hin, getNumericValue(a.qty), a.unit_short, getNumericValue(a.rate), getNumericValue(a.actual_amt), a.aawak_type_hin, a.description
           ];
+          row.eachCell((c, cIdx) => {
+            if (cIdx === 6 || cIdx === 8 || cIdx === 9) {
+              c.numFmt = '#,##0.00';
+              c.alignment = { horizontal: 'right', vertical: 'middle' };
+            }
+          });
           currentRow++;
         }
       } else {
@@ -964,10 +996,17 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
 
       if (report.jawaks && report.jawaks.length > 0) {
         for (let j of report.jawaks) {
-          worksheet.getRow(currentRow).values = [
+          let row = worksheet.getRow(currentRow);
+          row.values = [
             formatDate(j.date), j.lot_no, j.jawak_mm_hin, (j.roll_no ? j.roll_no + ' ' : '') + (j.pbk_hin ? j.pbk_hin : ''),
             j.condition_hin, getNumericValue(j.qty), j.unit_short, getNumericValue(j.rate), getNumericValue(j.actual_amt), j.jawak_type_hin, j.description
           ];
+          row.eachCell((c, cIdx) => {
+            if (cIdx === 6 || cIdx === 8 || cIdx === 9) {
+              c.numFmt = '#,##0.00';
+              c.alignment = { horizontal: 'right', vertical: 'middle' };
+            }
+          });
           currentRow++;
         }
       } else {
@@ -1328,14 +1367,17 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
             catStr,
             itemStr,
             item.unit_short || '',
-            Number(item.past_bachat || 0).toFixed(2),
-            Number(item.total_aawak || 0).toFixed(2),
-            Number(item.total_jawak || 0).toFixed(2),
-            Number(item.current_bachat || 0).toFixed(2)
+            Math.round(Number(item.past_bachat || 0) * 100) / 100,
+            Math.round(Number(item.total_aawak || 0) * 100) / 100,
+            Math.round(Number(item.total_jawak || 0) * 100) / 100,
+            Math.round(Number(item.current_bachat || 0) * 100) / 100
           ];
           row.eachCell((c, colIdx) => {
             c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
             c.alignment = { vertical: 'middle', horizontal: colIdx <= 4 ? (colIdx === 1 || colIdx === 4 ? 'center' : 'left') : 'right' };
+            if (colIdx >= 5) {
+              c.numFmt = '#,##0.00';
+            }
           });
           currentRow++;
         }
@@ -1347,16 +1389,19 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
             'Total Summary',
             '',
             '',
-            Number(report.overview.past_bachat || 0).toFixed(2),
-            Number(report.overview.total_aawak || 0).toFixed(2),
-            Number(report.overview.total_jawak || 0).toFixed(2),
-            Number(report.overview.current_bachat || 0).toFixed(2)
+            Math.round(Number(report.overview.past_bachat || 0) * 100) / 100,
+            Math.round(Number(report.overview.total_aawak || 0) * 100) / 100,
+            Math.round(Number(report.overview.total_jawak || 0) * 100) / 100,
+            Math.round(Number(report.overview.current_bachat || 0) * 100) / 100
           ];
           totalRow.font = { bold: true };
           totalRow.eachCell((c, colIdx) => {
             c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
             c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
             c.alignment = { vertical: 'middle', horizontal: colIdx <= 4 ? (colIdx === 1 || colIdx === 4 ? 'center' : 'left') : 'right' };
+            if (colIdx >= 5) {
+              c.numFmt = '#,##0.00';
+            }
           });
           currentRow++;
         }
@@ -1555,10 +1600,10 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
           '',
           report.mm_code || '',
           stateName,
-          pastVal.toFixed(2),
-          awkVal.toFixed(2),
-          jwkVal.toFixed(2),
-          bchtVal.toFixed(2)
+          Math.round(pastVal * 100) / 100,
+          Math.round(awkVal * 100) / 100,
+          Math.round(jwkVal * 100) / 100,
+          Math.round(bchtVal * 100) / 100
         ];
 
         let mmCell = masterIndexSheet.getCell(`B${masterRowIdx}`);
@@ -1568,6 +1613,9 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
         row.eachCell((c, cIdx) => {
           c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
           c.alignment = { vertical: 'middle', horizontal: cIdx <= 4 ? (cIdx === 1 || cIdx === 3 ? 'center' : 'left') : 'right' };
+          if (cIdx >= 5) {
+            c.numFmt = '#,##0.00';
+          }
         });
         masterRowIdx++;
       }
@@ -1579,16 +1627,19 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
       'Grand Summary Total',
       '',
       `${grandTotals.mms} MMs`,
-      grandTotals.past.toFixed(2),
-      grandTotals.aawak.toFixed(2),
-      grandTotals.jawak.toFixed(2),
-      grandTotals.bachat.toFixed(2)
+      Math.round(grandTotals.past * 100) / 100,
+      Math.round(grandTotals.aawak * 100) / 100,
+      Math.round(grandTotals.jawak * 100) / 100,
+      Math.round(grandTotals.bachat * 100) / 100
     ];
     masterIndexSheet.getRow(masterRowIdx).font = { bold: true };
     masterIndexSheet.getRow(masterRowIdx).eachCell((c, cIdx) => {
       c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
       c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
       c.alignment = { vertical: 'middle', horizontal: cIdx <= 4 ? (cIdx === 1 || cIdx === 3 ? 'center' : 'left') : 'right' };
+      if (cIdx >= 5) {
+        c.numFmt = '#,##0.00';
+      }
     });
 
     masterIndexSheet.columns.forEach((col, idx) => {
@@ -1653,14 +1704,17 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
             catStr,
             itemStr,
             item.unit_short || '',
-            Number(item.past_bachat || 0).toFixed(2),
-            Number(item.total_aawak || 0).toFixed(2),
-            Number(item.total_jawak || 0).toFixed(2),
-            Number(item.current_bachat || 0).toFixed(2)
+            Math.round(Number(item.past_bachat || 0) * 100) / 100,
+            Math.round(Number(item.total_aawak || 0) * 100) / 100,
+            Math.round(Number(item.total_jawak || 0) * 100) / 100,
+            Math.round(Number(item.current_bachat || 0) * 100) / 100
           ];
           row.eachCell((c, colIdx) => {
             c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
             c.alignment = { vertical: 'middle', horizontal: colIdx <= 4 ? (colIdx === 1 || colIdx === 4 ? 'center' : 'left') : 'right' };
+            if (colIdx >= 5) {
+              c.numFmt = '#,##0.00';
+            }
           });
           currentRow++;
         }
@@ -1672,16 +1726,19 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
             'Total Summary',
             '',
             '',
-            Number(report.overview.past_bachat || 0).toFixed(2),
-            Number(report.overview.total_aawak || 0).toFixed(2),
-            Number(report.overview.total_jawak || 0).toFixed(2),
-            Number(report.overview.current_bachat || 0).toFixed(2)
+            Math.round(Number(report.overview.past_bachat || 0) * 100) / 100,
+            Math.round(Number(report.overview.total_aawak || 0) * 100) / 100,
+            Math.round(Number(report.overview.total_jawak || 0) * 100) / 100,
+            Math.round(Number(report.overview.current_bachat || 0) * 100) / 100
           ];
           totalRow.font = { bold: true };
           totalRow.eachCell((c, colIdx) => {
             c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
             c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
             c.alignment = { vertical: 'middle', horizontal: colIdx <= 4 ? (colIdx === 1 || colIdx === 4 ? 'center' : 'left') : 'right' };
+            if (colIdx >= 5) {
+              c.numFmt = '#,##0.00';
+            }
           });
           currentRow++;
         }
@@ -2056,14 +2113,17 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
             catStr,
             itemStr,
             item.unit_short || '',
-            Number(item.past_bachat || 0).toFixed(2),
-            Number(item.total_aawak || 0).toFixed(2),
-            Number(item.total_jawak || 0).toFixed(2),
-            Number(item.current_bachat || 0).toFixed(2)
+            Math.round(Number(item.past_bachat || 0) * 100) / 100,
+            Math.round(Number(item.total_aawak || 0) * 100) / 100,
+            Math.round(Number(item.total_jawak || 0) * 100) / 100,
+            Math.round(Number(item.current_bachat || 0) * 100) / 100
           ];
           row.eachCell((c, colIdx) => {
             c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
             c.alignment = { vertical: 'middle', horizontal: colIdx <= 4 ? (colIdx === 1 || colIdx === 4 ? 'center' : 'left') : 'right' };
+            if (colIdx >= 5) {
+              c.numFmt = '#,##0.00';
+            }
           });
           currentRow++;
         }
@@ -2076,16 +2136,19 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
             'Total Summary',
             '',
             '',
-            Number(report.overview.past_bachat || 0).toFixed(2),
-            Number(report.overview.total_aawak || 0).toFixed(2),
-            Number(report.overview.total_jawak || 0).toFixed(2),
-            Number(report.overview.current_bachat || 0).toFixed(2)
+            Math.round(Number(report.overview.past_bachat || 0) * 100) / 100,
+            Math.round(Number(report.overview.total_aawak || 0) * 100) / 100,
+            Math.round(Number(report.overview.total_jawak || 0) * 100) / 100,
+            Math.round(Number(report.overview.current_bachat || 0) * 100) / 100
           ];
           totalRow.font = { bold: true };
           totalRow.eachCell((c, colIdx) => {
             c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
             c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
             c.alignment = { vertical: 'middle', horizontal: colIdx <= 4 ? (colIdx === 1 || colIdx === 4 ? 'center' : 'left') : 'right' };
+            if (colIdx >= 5) {
+              c.numFmt = '#,##0.00';
+            }
           });
           currentRow++;
         }
@@ -2289,10 +2352,10 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
         i + 1,
         '',
         g.reports.length,
-        stPast.toFixed(2),
-        stAwk.toFixed(2),
-        stJwk.toFixed(2),
-        stBcht.toFixed(2)
+        Math.round(stPast * 100) / 100,
+        Math.round(stAwk * 100) / 100,
+        Math.round(stJwk * 100) / 100,
+        Math.round(stBcht * 100) / 100
       ];
 
       let stCell = masterIndexSheet.getCell(`B${masterRowIdx}`);
@@ -2302,6 +2365,9 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
       row.eachCell((c, cIdx) => {
         c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
         c.alignment = { vertical: 'middle', horizontal: cIdx <= 2 ? (cIdx === 1 ? 'center' : 'left') : 'right' };
+        if (cIdx >= 4) {
+          c.numFmt = '#,##0.00';
+        }
       });
       masterRowIdx++;
     }
@@ -2310,16 +2376,19 @@ export class ReportItemLedgerComponent implements OnInit, OnDestroy {
       '*',
       'Grand Summary Total',
       grandTotals.pbks,
-      grandTotals.past.toFixed(2),
-      grandTotals.aawak.toFixed(2),
-      grandTotals.jawak.toFixed(2),
-      grandTotals.bachat.toFixed(2)
+      Math.round(grandTotals.past * 100) / 100,
+      Math.round(grandTotals.aawak * 100) / 100,
+      Math.round(grandTotals.jawak * 100) / 100,
+      Math.round(grandTotals.bachat * 100) / 100
     ];
     masterIndexSheet.getRow(masterRowIdx).font = { bold: true };
     masterIndexSheet.getRow(masterRowIdx).eachCell((c, cIdx) => {
       c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } };
       c.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
       c.alignment = { vertical: 'middle', horizontal: cIdx <= 2 ? (cIdx === 1 ? 'center' : 'left') : 'right' };
+      if (cIdx >= 4) {
+        c.numFmt = '#,##0.00';
+      }
     });
 
     masterIndexSheet.columns.forEach((col, idx) => {

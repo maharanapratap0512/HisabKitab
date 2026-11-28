@@ -108,7 +108,10 @@ router.put('/:dept_id', async (req, res, next) => {
         if (conditions.length === 0) {
             orderBy = "pbk._id desc";
         }
-        if (req.body.pageNo && req.body.pageNo > 0) {
+        if (req.body.export || req.body.all || req.body.pageNo === 'all' || req.body.limit === -1 || req.body.limit === 0) {
+            limit = -1;
+            offset = null;
+        } else if (req.body.pageNo && req.body.pageNo > 0) {
             offset = (req.body.pageNo - 1) * limit;
             page = req.body.pageNo;
         }

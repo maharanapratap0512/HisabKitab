@@ -1,10 +1,43 @@
 [
     {
+        "version": "41.2",
+        "date": "28-11-2026",
+        "summary": "Full Filtered PBK Excel Export, Item Ledger Formula Support & Nimitt Column Fix",
+        "summary_hin": "पीबीके संपूर्ण एक्सेल एक्सपोर्ट, आइटम लेजर में फ़ॉर्मूला समर्थन व निमित्त सुधार",
+        "isNew": true,
+        "items": [
+            {
+                "type": "improved",
+                "module": "पीबीके डायरेक्टरी",
+                "title": "Full Filtered PBK Excel Export",
+                "title_hin": "संपूर्ण फ़िल्टर किए गए पीबीके रिकॉर्ड्स का एक्सेल एक्सपोर्ट",
+                "desc": "PBK Excel export now exports all matching records according to your active filters instead of only exporting the 100 entries of the current page.",
+                "desc_hin": "पीबीके एक्सेल एक्सपोर्ट अब केवल वर्तमान पेज के 100 रिकॉर्ड्स तक सीमित रहने के बजाय आपके चुने हुए फ़िल्टर के अनुसार सभी रिकॉर्ड्स एक साथ एक्सपोर्ट करता है।"
+            },
+            {
+                "type": "improved",
+                "module": "आइटम लेजर रिपोर्ट",
+                "title": "Item Ledger Excel Export Formula & Calculation Support",
+                "title_hin": "आइटम लेजर एक्सेल एक्सपोर्ट में गणना व फ़ॉर्मूला का पूर्ण समर्थन",
+                "desc": "Quantities, rates, amounts, and balances in the Item Ledger Excel export are now stored as standard numbers, allowing you to easily apply Excel formulas (like SUM or AVERAGE) without manual text-to-number conversion.",
+                "desc_hin": "आइटम लेजर एक्सेल रिपोर्ट में सभी मात्रा, दर, राशि एवं बचत को मानक संख्यात्मक रूप में सुरक्षित किया गया है, जिससे आप बिना किसी अतिरिक्त बदलाव के सीधे एक्सेल जोड़ व गुणा (SUM आदि) फ़ॉर्मूला लगा सकते हैं।"
+            },
+            {
+                "type": "fix",
+                "module": "निमित्त",
+                "title": "Nimitt Export & Import Column Heading Fix",
+                "title_hin": "निमित्त एक्सेल इम्पोर्ट एवं एक्सपोर्ट कॉलम नाम सुधार",
+                "desc": "Fixed English name column heading mismatch between Nimitt export and import, allowing automatic column recognition during import.",
+                "desc_hin": "निमित्त एक्सपोर्ट और इम्पोर्ट के बीच अंग्रेजी नाम कॉलम हेडिंग के अंतर का समाधान, जिससे इम्पोर्ट के समय कॉलम अपने आप पहचाना जा सके।"
+            }
+        ]
+    },
+    {
         "version": "41.1",
-        "date": "24-11-2026",
+        "date": "24-11-2026 - 28-11-2026",
         "summary": "Master Lists Excel Import, Quick Reference Creation & Multi-PC Studio Access",
         "summary_hin": "मास्टर सूचियों का एक्सेल इम्पोर्ट, त्वरित रेफरेंस प्रविष्टि एवं मल्टी-पीसी स्टूडियो एक्सेस",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",
@@ -21,6 +54,14 @@
                 "title_hin": "सुधार तालिका से ही नया नाम तुरंत जोड़ने की सुविधा",
                 "desc": "If a state, country, or other reference is missing during Excel correction, you can add it immediately without interrupting your import.",
                 "desc_hin": "एक्सेल सुधार करते समय यदि कोई राज्य, देश या संदर्भ सूची में नहीं मिलता, तो अब इम्पोर्ट रोके बिना वहीं से नया नाम तुरंत दर्ज किया जा सकता है।"
+            },
+            {
+                "type": "improved",
+                "module": "सूत्रम स्टूडियो",
+                "title": "Universal Multi-Computer Studio Access",
+                "title_hin": "लोकल नेटवर्क के सभी कंप्यूटरों पर सुगम स्टूडियो एक्सेस",
+                "desc": "Sutram Excel Studio now loads smoothly across all client PCs on the local network with automatic connection handling.",
+                "desc_hin": "सूत्रम एक्सेल स्टूडियो अब लोकल नेटवर्क के सभी क्लाइंट कंप्यूटरों पर बिना किसी रुकावट के सरलता से खुलता और काम करता है।"
             }
         ]
     },
